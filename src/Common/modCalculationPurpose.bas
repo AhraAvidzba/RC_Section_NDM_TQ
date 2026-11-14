@@ -44,8 +44,15 @@ Public Enum ESectionStateType
 End Enum
 
 Public Enum EVisualizationQuantity
-    vqStress = 1          ' Для схемы/AutoCAD показываются напряжения.
-    vqStrain = 2          ' Для схемы/AutoCAD показываются деформации.
+    vqStress = 1          ' Продольное нормальное напряжение.
+    vqStrain = 2          ' Продольная нормальная деформация.
+    vqTauXZ = 3           ' Касательное напряжение на продольной площадке вдоль X.
+    vqTauYZ = 4           ' Касательное напряжение на продольной площадке вдоль Y.
+    vqTau = 5             ' Модуль касательного напряжения на продольной площадке.
+    vqGammaXZ = 6         ' Инженерная сдвиговая деформация в плоскости XZ.
+    vqGammaYZ = 7         ' Инженерная сдвиговая деформация в плоскости YZ.
+    vqGamma = 8           ' Модуль двух продольных инженерных сдвиговых деформаций.
+    vqWarping = 9         ' Продольное перемещение от депланации.
 End Enum
 
 ' Читает назначение модели материалов из пользовательского текста или сохранённых результатов.
@@ -289,7 +296,7 @@ Public Function MaterialRoleFromStateType(ByVal stateType As ESectionStateType) 
     End Select
 End Function
 
-' Разбирает выбор напряжений либо деформаций для схемы и AutoCAD.
+' Разбирает выбор продольной или пространственной величины для схемы и AutoCAD.
 ' Неизвестная величина запрещена, чтобы подпись и масштаб не расходились с данными.
 Public Function VisualizationQuantityFromText(ByVal valueText As String) As EVisualizationQuantity
     Select Case LCase$(Trim$(valueText))
@@ -297,9 +304,23 @@ Public Function VisualizationQuantityFromText(ByVal valueText As String) As EVis
             VisualizationQuantityFromText = vqStress
         Case "strain", "деформации"
             VisualizationQuantityFromText = vqStrain
+        Case "tauxz"
+            VisualizationQuantityFromText = vqTauXZ
+        Case "tauyz"
+            VisualizationQuantityFromText = vqTauYZ
+        Case "tau"
+            VisualizationQuantityFromText = vqTau
+        Case "gammaxz"
+            VisualizationQuantityFromText = vqGammaXZ
+        Case "gammayz"
+            VisualizationQuantityFromText = vqGammaYZ
+        Case "gamma"
+            VisualizationQuantityFromText = vqGamma
+        Case "warping"
+            VisualizationQuantityFromText = vqWarping
         Case Else
             Err.Raise vbObjectError + 3322, "modCalculationPurpose", _
-                "В Visualization.Quantity выберите Stress для отображения напряжений или Strain для отображения деформаций."
+                "Неизвестное значение Visualization.Quantity. Выберите отображаемую величину из списка профиля."
     End Select
 End Function
 
@@ -311,9 +332,36 @@ Public Function VisualizationQuantityToText(ByVal quantity As EVisualizationQuan
             VisualizationQuantityToText = "Stress"
         Case vqStrain
             VisualizationQuantityToText = "Strain"
+        Case vqTauXZ
+            VisualizationQuantityToText = "TauXZ"
+        Case vqTauYZ
+            VisualizationQuantityToText = "TauYZ"
+        Case vqTau
+            VisualizationQuantityToText = "Tau"
+        Case vqGammaXZ
+            VisualizationQuantityToText = "GammaXZ"
+        Case vqGammaYZ
+            VisualizationQuantityToText = "GammaYZ"
+        Case vqGamma
+            VisualizationQuantityToText = "Gamma"
+        Case vqWarping
+            VisualizationQuantityToText = "Warping"
         Case Else
             Err.Raise vbObjectError + 3323, "modCalculationPurpose", _
-                "Не распознана отображаемая величина Visualization.Quantity: допустимы Stress (напряжения) и Strain (деформации)."
+                "Не распознан внутренний код отображаемой величины Visualization.Quantity."
+    End Select
+End Function
+
+' Определяет выбор величины, которая требует пространственного поля сохранённого расчёта.
+Public Function VisualizationQuantityRequiresCoupledField(ByVal quantity As EVisualizationQuantity) As Boolean
+    VisualizationQuantityRequiresCoupledField = (quantity >= vqTauXZ And quantity <= vqWarping)
+End Function
+
+' Определяет, для каких величин применяется настройка точности напряжений.
+Public Function VisualizationQuantityIsStress(ByVal quantity As EVisualizationQuantity) As Boolean
+    Select Case quantity
+        Case vqStress, vqTauXZ, vqTauYZ, vqTau
+            VisualizationQuantityIsStress = True
     End Select
 End Function
 

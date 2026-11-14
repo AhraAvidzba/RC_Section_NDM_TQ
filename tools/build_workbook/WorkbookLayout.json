@@ -58,6 +58,14 @@
       "Columns": 7
     },
     {
+      "Name": "rngNDMCoupledFields",
+      "RefersTo": "=Results!$DW$156",
+      "Sheet": "Results",
+      "Address": "$DW$156",
+      "Rows": 1,
+      "Columns": 1
+    },
+    {
       "Name": "rngNDMElementGeometry",
       "RefersTo": "=Results!$BR$156",
       "Sheet": "Results",

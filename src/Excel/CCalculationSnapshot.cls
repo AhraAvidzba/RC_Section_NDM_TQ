@@ -288,6 +288,11 @@ Public Sub Validate()
     If HasTable("rngNDMElementGeometry") Then
         values = Table("rngNDMElementGeometry"): ValidateTableShape "rngNDMElementGeometry", values
     End If
+    If HasTable(COUPLED_FIELD_TABLE) Then
+        values = Table(COUPLED_FIELD_TABLE)
+        ValidateTableShape COUPLED_FIELD_TABLE, values
+        ValidateSnapshotRunID values, COUPLED_FIELD_TABLE, mRunID
+    End If
     For Each key In BaseKeys()
         If CStr(key) = "rngNDMElementResults" Then
             ValidateRunID mElements, CStr(key)

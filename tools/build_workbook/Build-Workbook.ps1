@@ -588,6 +588,7 @@ try {
     Add-WorkbookName $workbook "rngNDMSectionProperties" $results '$S$156'
     Add-WorkbookName $workbook "rngNDMMaterialDiagrams" $results '$AA$156'
     Add-WorkbookName $workbook "rngNDMSectionAnnotations" $results '$CL$156'
+    Add-WorkbookName $workbook "rngNDMCoupledFields" $results '$DW$156'
     Add-WorkbookName $workbook "rngNDMElementGeometry" $results '$BR$156'
     Add-IndexedResultsTable $workbook $script:WorkbookLayout
     $contourHeaders = @('RunID', 'LoopID', 'SegmentID', 'Sequence', 'LoopRole', 'SegmentType', 'StartX', 'StartY', 'EndX', 'EndY', 'CenterX', 'CenterY', 'Radius', 'SweepAngle, rad', 'SourceID', 'Comment', 'LengthUnit (SectionXY)')

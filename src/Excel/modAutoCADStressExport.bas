@@ -280,7 +280,7 @@ Private Sub ReadResultsExportState(ByVal workbook As Object, ByVal settings As C
     resultByID.CompareMode = vbTextCompare
     Set physicalStateByID = CreateObject("Scripting.Dictionary")
     physicalStateByID.CompareMode = vbTextCompare
-    ReadElementResultsForCombination workbook, quantity, combinationID, stateType, resultByID, physicalStateByID
+    ReadElementResultsForCombination workbook, quantity, combinationID, stateType, resultByID, physicalStateByID, profileId
     ReadSectionPropertiesForCombination workbook, units, combinationID, stateType, principalAxesMode, epsilon0, kappaX, kappaY, _
         loadReferenceX, loadReferenceY, centroidX, centroidY, principalAngle, extensionUsed, stateWarningText
     EndSectionSnapshotRead
@@ -359,7 +359,7 @@ End Function
 ' результат другого сочетания не подставляется.
 Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal resultType As String, _
         ByRef combinationID As String, ByVal stateType As String, _
-        ByVal resultByID As Object, ByVal physicalStateByID As Object)
+        ByVal resultByID As Object, ByVal physicalStateByID As Object, ByVal profileID As String)
     Dim anchor As Object
     Set anchor = workbook.Names.Item("rngNDMElementResults").RefersToRange
 
@@ -372,16 +372,14 @@ Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal res
     Dim colStateType As Long: colStateType = ResultColumn(data, "StateType")
     Dim colID As Long: colID = ResultColumn(data, "ElementID")
     Dim colState As Long: colState = ResultColumn(data, "PhysicalState")
-    Dim colValue As Long
-    Select Case LCase$(Trim$(resultType))
-        Case "stress"
-            colValue = ResultColumn(data, "Stress")
-        Case "strain"
-            colValue = ResultColumn(data, "Strain")
-        Case Else
-            Err.Raise vbObjectError + 4359, "ReadElementResultsForCombination", _
-                "Visualization.Quantity профиля должен быть Stress или Strain."
-    End Select
+    Dim colValue As Long, quantity As EVisualizationQuantity, coupled As Object
+    quantity = VisualizationQuantityFromText(resultType)
+    If VisualizationQuantityRequiresCoupledField(quantity) Then
+        Dim runColumn As Long: runColumn = ResultColumn(data, "RunID")
+        Set coupled = ReadCoupledFieldValues(workbook, quantity, CDbl(data(2, runColumn)), combinationID, profileID, stateType)
+    Else
+        colValue = ResultColumn(data, resultType)
+    End If
 
     If Len(combinationID) = 0 Then Err.Raise vbObjectError + 4353, "ReadElementResultsForCombination", _
         "В Results нет рассчитанных сочетаний для экспорта."
@@ -392,8 +390,13 @@ Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal res
         If StrComp(Trim$(SafeText(data(rowIndex, colCombination))), combinationID, vbTextCompare) = 0 And _
                 StrComp(Trim$(SafeText(data(rowIndex, colStateType))), stateType, vbTextCompare) = 0 Then
             found = True
-            resultByID(CStr(data(rowIndex, colID))) = ReadExportSnapshotNumber(data, anchor, rowIndex, colValue)
-            physicalStateByID(CStr(data(rowIndex, colID))) = CStr(data(rowIndex, colState))
+            Dim elementID As String: elementID = CStr(data(rowIndex, colID))
+            If coupled Is Nothing Then
+                resultByID(elementID) = ReadExportSnapshotNumber(data, anchor, rowIndex, colValue)
+            Else
+                resultByID(elementID) = CoupledFieldValue(coupled, elementID)
+            End If
+            physicalStateByID(elementID) = CStr(data(rowIndex, colState))
         End If
     Next rowIndex
 
@@ -605,7 +608,8 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     Dim temporarySources As Collection: Set temporarySources = New Collection
     Dim solidOutputs As Collection, elementRegions As Collection
     Dim maxStrain As Double, maxHeight As Double, legendX As Double, legendY As Double, legendHeight As Double
-    If StrComp(quantity, "Strain", vbTextCompare) = 0 Then
+    Dim fieldQuantity As EVisualizationQuantity: fieldQuantity = VisualizationQuantityFromText(quantity)
+    If fieldQuantity = vqStrain Or fieldQuantity = vqWarping Then
         PrepareStrainDiagram section, resultByID, maxStrain, maxHeight, legendX, legendY, legendHeight
         Set solidOutputs = New Collection
     End If
@@ -683,9 +687,20 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
 
     DeleteAcadTemporarySources doc, temporarySources
     If Not solidOutputs Is Nothing Then
-        AddAcadText ms, "e_z: max |e_z| = " & Format$(maxStrain, "0.000E+00") & _
-            "; max |Z| = " & Format$(maxHeight, "0.###") & " mm; +Z: tension", _
+        Dim legend As String
+        If fieldQuantity = vqWarping Then
+            legend = "Warping: max |w| = " & Format$(maxStrain, "0.000E+00") & " mm"
+        Else
+            legend = "Strain: max |e_z| = " & Format$(maxStrain, "0.000E+00") & "; +Z: tension"
+        End If
+        AddAcadText ms, legend & "; max |Z| = " & Format$(maxHeight, "0.###") & " mm", _
             legendX, legendY, legendHeight, STRAIN_3D_CONCRETE_LAYER, 7
+    ElseIf VisualizationQuantityRequiresCoupledField(fieldQuantity) Then
+        Dim maxX As Double, minY As Double, maxY As Double
+        GetSectionBounds section, legendX, maxX, minY, maxY
+        legendHeight = MaxDouble(0.5, 0.025 * MaxDouble(maxX - legendX, maxY - minY))
+        AddAcadText ms, quantity & " [" & CoupledFieldUnit(fieldQuantity) & "]", _
+            legendX, maxY + 2# * legendHeight, legendHeight, EXTENSION_WARNING_LAYER, 7
     End If
     If exportSettings.ContourEnabled Then ' Контур выводим после бетонных и арматурных объектов, чтобы он не оказался закрыт AutoCAD Region, созданными для волокон расчетной сетки.
         contourExportCount = DrawSavedContourRows(ThisWorkbook, ms, exportSettings.ContourLayer, arcSweeps, , "CONTOUR_", exportSettings.OpeningContourLayer, exportSettings.ContourFormat)

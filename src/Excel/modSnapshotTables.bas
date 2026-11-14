@@ -13,6 +13,7 @@ Public Sub ValidateSnapshotTableShape(ByVal key As String, ByRef values As Varia
     Dim columns As Long, rows As Long
     Select Case key
         Case "rngNDMElementResults": columns = 9
+        Case COUPLED_FIELD_TABLE: columns = COUPLED_FIELD_COLUMNS
         Case "rngNDMSectionGeometry": columns = 16
         Case "rngNDMSectionContours": columns = 17
         Case "rngNDMElementGeometry": columns = 18

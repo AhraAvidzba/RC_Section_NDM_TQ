@@ -8264,7 +8264,7 @@ Private Function TestExpectedConfigDropdownOptions(ByVal key As String) As Strin
             TestExpectedConfigDropdownOptions = "TwoLine|ThreeLine"
         Case "MaterialModel.Strength.ConcreteTension": TestExpectedConfigDropdownOptions = "Ignore|UseDiagram"
         Case "Visualization.State": TestExpectedConfigDropdownOptions = "StrengthState|CapacityState|PreCrackState|PostCrackState|CrackedState"
-        Case "Visualization.Quantity": TestExpectedConfigDropdownOptions = "Stress|Strain"
+        Case "Visualization.Quantity": TestExpectedConfigDropdownOptions = "Stress|Strain|TauXZ|TauYZ|Tau|GammaXZ|GammaYZ|Gamma|Warping"
         Case "Placement": TestExpectedConfigDropdownOptions = "Outside|Inside"
         Case "TextUnits": TestExpectedConfigDropdownOptions = "mm|pt"
         Case "ArrowType": TestExpectedConfigDropdownOptions = "Triangle|Stealth|Diamond|Oval|Open"

@@ -63,6 +63,8 @@ Public Function OutputColumnCount(ByVal rangeName As String) As Long
             OutputColumnCount = 9
         Case "rngndmsectionannotations"
             OutputColumnCount = ANNOTATION_COLUMNS
+        Case LCase$(COUPLED_FIELD_TABLE)
+            OutputColumnCount = COUPLED_FIELD_COLUMNS
         Case Else
             Err.Raise vbObjectError + 4460, "CNDMResultsWriter.OutputColumnCount", _
                 "Неизвестный блок Results: " & rangeName
@@ -270,6 +272,29 @@ Private Sub ClearSnapshotData(ByVal workbook As Object)
     ClearNamedRegion workbook, "rngNDMSectionProperties"
     ClearNamedRegion workbook, "rngNDMSectionAnnotations"
     ClearNamedRegion workbook, "rngNDMMaterialDiagrams"
+    Dim coupledAnchor As Object: Set coupledAnchor = NamedCoupledFieldAnchor(workbook)
+    If Not coupledAnchor Is Nothing Then ClearNamedRegion workbook, COUPLED_FIELD_TABLE
+End Sub
+
+' Записывает подготовленную таблицу связанного НДС блоком в Results.
+' В File сохраняет данные снимка и оставляет на листе шапку для просмотра.
+Friend Sub WriteCoupledFields(ByVal workbook As Object, ByRef data As Variant, _
+        Optional ByVal snapshot As CCalculationSnapshot = Nothing)
+    ValidateSnapshotTableShape COUPLED_FIELD_TABLE, data
+    Dim target As Object: Set target = NamedCoupledFieldAnchor(workbook)
+    If target Is Nothing Then Err.Raise 5, "CNDMResultsWriter.WriteCoupledFields", _
+        "В книге отсутствует именованный диапазон " & COUPLED_FIELD_TABLE & "."
+    ClearNamedRegion workbook, COUPLED_FIELD_TABLE
+    Dim displayData As Variant
+    If snapshot Is Nothing Then
+        displayData = data
+    Else
+        ValidateSnapshotRunID data, COUPLED_FIELD_TABLE, snapshot.RunID
+        snapshot.AddTable COUPLED_FIELD_TABLE, data
+        displayData = NewCoupledFieldTable(0)
+    End If
+    target.Resize(UBound(displayData, 1), COUPLED_FIELD_COLUMNS).Value2 = displayData
+    FormatResultsBlock target, UBound(displayData, 1), COUPLED_FIELD_COLUMNS, "Пространственные компоненты связанного НДС", displayData
 End Sub
 
 ' Очищает прямоугольник одной таблицы результатов. Ширину берёт из её структуры,
@@ -2170,5 +2195,18 @@ Private Sub RestoreBaseTables(ByVal workbook As Object, ByVal snapshot As Object
         FormatResultsBlock target, UBound(data, 1), UBound(data, 2), title, data
 NextBaseTable:
     Next key
+    Dim coupledAnchor As Object: Set coupledAnchor = NamedCoupledFieldAnchor(workbook)
+    If Not coupledAnchor Is Nothing Then
+        If snapshot.HasTable(COUPLED_FIELD_TABLE) Then
+            If includeElements Then
+                data = snapshot.Table(COUPLED_FIELD_TABLE)
+            Else
+                data = NewCoupledFieldTable(0)
+            End If
+            WriteCoupledFields workbook, data
+        Else
+            ClearNamedRegion workbook, COUPLED_FIELD_TABLE
+        End If
+    End If
     WriteSnapshotTitle workbook
 End Sub

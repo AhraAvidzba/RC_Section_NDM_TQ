@@ -149,6 +149,15 @@ Private Sub ValidateRestoredSnapshotLayout(ByVal workbook As Object, ByVal snaps
             Err.Raise 5, "ValidateRestoredSnapshotLayout", reason
         End If
     Next key
+    If snapshot.HasTable(COUPLED_FIELD_TABLE) Then
+        Set anchor = NamedCoupledFieldAnchor(workbook)
+        If anchor Is Nothing Then Err.Raise 5, "ValidateRestoredSnapshotLayout", _
+            "В книге отсутствует именованный диапазон " & COUPLED_FIELD_TABLE & "."
+        rowCount = 1
+        If includeElements Then rowCount = snapshot.TableRowCount(COUPLED_FIELD_TABLE)
+        If Not ResultRowsFitSheet(anchor.Row, rowCount, anchor.Worksheet.Rows.Count) Then Err.Raise 5, _
+            "ValidateRestoredSnapshotLayout", ResultRowLimitDescription(COUPLED_FIELD_TABLE, anchor.Row, rowCount, anchor.Worksheet.Rows.Count)
+    End If
     If snapshot.IsGeometryPreview Then Exit Sub
     Dim names As Variant, keys As Variant, nextNames As Variant, headers As Variant, i As Long
     names = Array("rngBatchSummary", "rngStrengthSummaryAnchor", "rngCrackSummaryAnchor", "rngStabilitySummaryAnchor")

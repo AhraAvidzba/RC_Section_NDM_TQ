@@ -32,7 +32,7 @@ Private mStrengthSpec As CMaterialModelSpec ' Материальная моде�
 Private mCrackInitiationSpec As CMaterialModelSpec ' Материальная модель проверки образования нормальной трещины.
 Private mCrackedStateSpec As CMaterialModelSpec ' Материальная модель НДС с раскрытой трещиной.
 Private mVisualizationState As ESectionStateType ' Какой StateType показывать на схеме и в AutoCAD.
-Private mVisualizationQuantity As EVisualizationQuantity ' Stress или Strain для визуализации.
+Private mVisualizationQuantity As EVisualizationQuantity ' Поле для схемы и экспорта в AutoCAD.
 Private mHasVisualizationState As Boolean ' Визуальная настройка задана в профиле.
 Private mHasVisualizationQuantity As Boolean ' Визуальная величина задана в профиле.
 Private mVisualizationStressPrecision As Long ' Знаки после запятой для подписей Stress.
@@ -330,10 +330,10 @@ End Property
 
 ' Возвращает точность числовых подписей для выбранной визуализируемой величины.
 Public Function VisualizationPrecisionForQuantity(ByVal quantity As EVisualizationQuantity) As Long
-    If quantity = vqStrain Then
-        VisualizationPrecisionForQuantity = VisualizationStrainPrecision
-    Else
+    If VisualizationQuantityIsStress(quantity) Then
         VisualizationPrecisionForQuantity = VisualizationStressPrecision
+    Else
+        VisualizationPrecisionForQuantity = VisualizationStrainPrecision
     End If
 End Function
 

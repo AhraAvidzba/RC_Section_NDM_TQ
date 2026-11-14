@@ -1,4 +1,4 @@
-# скрипт описывает каталог настроек Config и строит таблицы настроек, единиц, геометрии и валидации.
+﻿# скрипт описывает каталог настроек Config и строит таблицы настроек, единиц, геометрии и валидации.
 
 . (Join-Path $PSScriptRoot 'WorkbookLayout.ps1')
 . (Join-Path $PSScriptRoot 'NormativeFormulaImages.ps1')
@@ -254,7 +254,7 @@ function Get-CalculationProfilesCatalog {
 
         @{ Caption = "[Настройки визуализации]"; Key = ""; PR1 = ""; PR2 = ""; PR3 = ""; PR4 = ""; Comment = "" },
         @{ Caption = "Выводимое состояние"; Key = "Visualization.State"; PR1 = "StrengthState"; PR2 = "CrackedState"; PR3 = "StrengthState"; PR4 = "StrengthState"; Comment = "Какое расчетное состояние показывать на схеме и в AutoCAD." },
-        @{ Caption = "Выводимая величина"; Key = "Visualization.Quantity"; PR1 = "Stress"; PR2 = "Stress"; PR3 = "Stress"; PR4 = "Strain"; Comment = "Что показывать: напряжения Stress или деформации Strain." },
+        @{ Caption = "Выводимая величина"; Key = "Visualization.Quantity"; PR1 = "Stress"; PR2 = "Stress"; PR3 = "Stress"; PR4 = "Strain"; Comment = "Продольное поле: Stress или Strain. Связанный расчёт: TauXZ, TauYZ, Tau, GammaXZ, GammaYZ, Gamma, Warping." },
         @{ Caption = "Точность Stress"; Key = "Visualization.StressPrecision"; PR1 = "1"; PR2 = "1"; PR3 = "1"; PR4 = "1"; Comment = "Знаки после запятой для подписей напряжений на схеме и в AutoCAD; влияет только на текст, не на Results." },
         @{ Caption = "Точность Strain"; Key = "Visualization.StrainPrecision"; PR1 = "6"; PR2 = "6"; PR3 = "6"; PR4 = "6"; Comment = "Знаки после запятой для подписей деформаций на схеме и в AutoCAD; удобно оставлять больше знаков, чем для Stress." }
     )
@@ -2227,7 +2227,7 @@ function Add-ResultsSheetGuide {
     $row = Add-GuideParagraph $Sheet $row "В режиме Excel в таблице rngNDMElementResults сохраняются деформации и напряжения каждого элемента для полученных расчетных состояний. StrengthState — текущее НДС по прочности, CapacityState — предельное состояние, PreCrackState — состояние перед образованием трещины, PostCrackState — сразу после ее образования, CrackedState — текущее НДС с отключенным растянутым бетоном." -RowCount 2
     $row = Add-GuideParagraph $Sheet $row "В Excel подробная таблица Results остаётся читаемой. Справа от аннотаций находится rngNDMElementResultIndex: небольшой служебный каталог относительных строк. Схема читает только выбранные участки. Технические ячейки помечены как блокируемые, но защита листа включается только пользователем по желанию. Не сортируйте и не удаляйте части таблицы вручную: для изменения результатов выполните расчёт заново. При чтении книги без индекса он строится один раз по ключевым столбцам; сохраните книгу. Кнопка «Обновить схему и результаты» обновляет только схему. В режиме File снимок с именем Results.SnapshotName хранится рядом с книгой. Та же кнопка читает его для схемы и обновляет справочные таблицы без нового расчёта; полные состояния и границы элементов остаются в файле, на листе — их шапки." -RowCount 6
     $row = Add-GuideParagraph $Sheet $row "Новые файлы NDMSNP06 содержат каталог независимых блоков. Просмотр проверяет каталог и только прочитанные блоки; повреждение другого состояния обнаружится при его чтении, полном восстановлении либо VerifyFile. Форматы NDMSNP04/05 и расширение .ndms читаются без конвертации; для них требуется полное чтение. Файловая привязка и обновление времени не выполняют скрытый полный SHA-проход по NDMSNP06." -RowCount 3
-    $row = Add-GuideParagraph $Sheet $row "Сохраняются только фактически полученные состояния. Для схемы и AutoCAD выберите на Config в профиле Visualization.State и Visualization.Quantity: Stress - напряжение, Strain - деформация. Если выбранного состояния нет, программа сообщит причину и не подменит его другим."
+    $row = Add-GuideParagraph $Sheet $row "Сохраняются только фактически полученные состояния. Для схемы и AutoCAD выберите на Config в профиле Visualization.State и Visualization.Quantity. Stress и Strain показывают продольное напряжение и деформацию. TauXZ, TauYZ и Tau показывают касательные напряжения, GammaXZ, GammaYZ и Gamma — сдвиговые деформации. Warping показывает продольное перемещение при депланации. Пространственные поля доступны для сохранённого связанного состояния."
     $row++
     $row = Add-GuideTitle $Sheet $row "Индекс сохранённых состояний элементов" 13
     $row = Add-GuideParagraph $Sheet $row "В Excel большая таблица результатов разделена на блоки одного сочетания, профиля и состояния. Таблица rngNDMElementResultIndex показывает, где начинается каждый блок и сколько строк он занимает. Поэтому при смене сочетания или состояния читается нужный блок, а не весь расчёт. В File адресный каталог хранится в самом снимке."
@@ -3859,7 +3859,7 @@ function Add-CalculationProfilesValidation {
         "MaterialModel.CrackInitiation.SteelDiagram" = @("TwoLine", "ThreeLine")
         "MaterialModel.CrackedState.SteelDiagram" = @("TwoLine", "ThreeLine")
         "Visualization.State" = @("StrengthState", "CapacityState", "PreCrackState", "PostCrackState", "CrackedState")
-        "Visualization.Quantity" = @("Stress", "Strain")
+        "Visualization.Quantity" = @("Stress", "Strain", "TauXZ", "TauYZ", "Tau", "GammaXZ", "GammaYZ", "Gamma", "Warping")
     }
 
     try {

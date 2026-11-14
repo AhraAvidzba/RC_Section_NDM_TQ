@@ -18,7 +18,7 @@ Option Explicit
 ' напряжения и деформации сохраняют записанные значения.
 ' Расчёт не запускается, текущие параметры геометрии Config не перечитываются.
 
-Private mVisualizationQuantity As String ' Что сейчас визуализируется по профилю: Stress или Strain.
+Private mVisualizationQuantity As String ' Отображаемая величина выбранного профиля.
 Private mLoadCase As String ' LC, выбранный для схемы после обработки Worst/конкретного ID.
 Private mLoadCaseComment As String ' Комментарий LC для заголовка схемы.
 Private mProfileId As String ' Имя профиля выбранного сочетания, сохранённое вместе с результатами.
@@ -399,12 +399,14 @@ Private Function ReadSectionProperties(ByVal workbook As Object) As Object
     mLengthUnit = "mm"
     mAreaUnit = "mm2"
     mCurvatureUnit = "1/mm"
-    If StrComp(mVisualizationQuantity, "Strain", vbTextCompare) = 0 Then
+    Dim quantity As EVisualizationQuantity: quantity = VisualizationQuantityFromText(mVisualizationQuantity)
+    mResultCaption = mVisualizationQuantity
+    If VisualizationQuantityRequiresCoupledField(quantity) Then
+        mResultUnit = CoupledFieldUnit(quantity)
+    ElseIf quantity = vqStrain Then
         mResultUnit = "-"
-        mResultCaption = "Strain"
     Else
         mResultUnit = mStressUnit
-        mResultCaption = "Stress"
     End If
     Set ReadSectionProperties = stateFields
 End Function
@@ -514,6 +516,12 @@ Private Sub ReadGeometryAndResults(ByVal workbook As Object, ByVal stateFields A
     Dim colStrain As Long: colStrain = ResultColumn(results, "Strain")
     Dim colStress As Long: colStress = ResultColumn(results, "Stress")
     Dim colState As Long: colState = ResultColumn(results, "PhysicalState")
+    Dim quantity As EVisualizationQuantity, coupled As Object
+    quantity = VisualizationQuantityFromText(mVisualizationQuantity)
+    If Not missingSelectedState And VisualizationQuantityRequiresCoupledField(quantity) Then
+        Dim runColumn As Long: runColumn = ResultColumn(results, "RunID")
+        Set coupled = ReadCoupledFieldValues(workbook, quantity, CDbl(results(2, runColumn)), mLoadCase, mProfileId, mStateType)
+    End If
 
     Dim caseStates As Object: Set caseStates = CreateObject("Scripting.Dictionary"): caseStates.CompareMode = vbTextCompare
     Dim colResProfile As Long: colResProfile = ResultColumn(results, "ProfileId")
@@ -525,6 +533,13 @@ Private Sub ReadGeometryAndResults(ByVal workbook As Object, ByVal stateFields A
                 ReadSnapshotNumber(results(rowIndex, colStrain), resultAnchor, rowIndex, colStrain, CStr(results(1, colStrain))), _
                 ReadSnapshotNumber(results(rowIndex, colStress), resultAnchor, rowIndex, colStress, CStr(results(1, colStress))), _
                 CStr(results(rowIndex, colState)))
+            If Not coupled Is Nothing Then
+                Dim resultID As String, savedStrain As Variant
+                resultID = CStr(results(rowIndex, colResID))
+                savedStrain = resultMap(resultID)
+                savedStrain(1) = CoupledFieldValue(coupled, resultID) ' Пространственное поле заменяет отображаемый канал, а не исходное НДС.
+                resultMap(resultID) = savedStrain
+            End If
         End If
         If StrComp(Trim$(SafeText(results(rowIndex, colResLC))), mLoadCase, vbTextCompare) = 0 Then
             If StrComp(Trim$(SafeText(results(rowIndex, colResProfile))), mProfileId, vbTextCompare) <> 0 Then Err.Raise vbObjectError + 4703, _

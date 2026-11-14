@@ -1409,3 +1409,86 @@ Restore:
     TestLogLine stats, "TOTAL_AUTOCAD_STRAIN_3D: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
     RunTestAutoCADStrain3D = stats.Report
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет семь величин из заданных независимо значений и точные ключи состояния.
+' Схема Excel и путь чтения AutoCAD проверяются на одном снимке без нового решения.
+Public Function RunTestCoupledFieldProfiles() As String
+    Dim stats As TCadStats, system As Object, profiles As Object, saved As Variant, profileSaved As Variant
+    Dim data As Variant, base As Variant, idColumn As Long, row As Long, column As Long, runID As Double
+    Dim reader As CSectionPlotDataReader, values As Object, field As Variant, i As Long, expected As Variant
+    Dim fields As Variant, units As Variant, reportLines As Variant, firstResult As Variant
+    On Error GoTo Failed
+    Set system = ThisWorkbook.Names.Item("rngSystemSettings").RefersToRange
+    Set profiles = ThisWorkbook.Names.Item("rngCalculationProfiles").RefersToRange
+    saved = system.Formula: profileSaved = profiles.Formula
+    TestConfigureFixture system
+    TestSetValue system, "Results.SnapshotStorage", "Excel"
+    TestPrepareResults stats, system, profiles
+    TestSetValue system, "Output.CombinationMode", "User"
+    TestSetValue system, "Output.CombinationID", "CAD_CFG"
+    base = ReadElementResultTable(ThisWorkbook, "CAD_CFG", "StrengthState")
+    idColumn = ResultColumn(base, "ElementID"): runID = CDbl(base(2, ResultColumn(base, "RunID")))
+    data = NewCoupledFieldTable(UBound(base, 1))
+    For row = 2 To UBound(base, 1)
+        For column = 1 To 4
+            data(row, column) = base(row, column)
+        Next column
+        data(row, 5) = base(row, idColumn)
+        data(row, 6) = -3#: data(row, 7) = 4#
+        data(row, 8) = 0.0005: data(row, 9) = -0.0012
+        data(row, 10) = -0.125
+    Next row
+    row = UBound(data, 1)
+    For column = 1 To COUPLED_FIELD_COLUMNS
+        data(row, column) = data(2, column)
+    Next column
+    data(row, 2) = "CAD_CFG_2": data(row, 6) = 999#
+    Dim writer As New CNDMResultsWriter: writer.WriteCoupledFields ThisWorkbook, data
+
+    fields = Array("TauXZ", "TauYZ", "Tau", "GammaXZ", "GammaYZ", "Gamma", "Warping")
+    expected = Array(-3#, 4#, 5#, 0.0005, -0.0012, 0.0013, -0.125)
+    units = Array("MPa", "MPa", "MPa", "-", "-", "-", "mm")
+    For i = LBound(fields) To UBound(fields)
+        field = fields(i)
+        Set values = ReadCoupledFieldValues(ThisWorkbook, VisualizationQuantityFromText(CStr(field)), _
+            runID, "CAD_CFG", "PR1", "StrengthState")
+        TestCheckClose stats, field & ".reader", values.Item(CStr(base(2, idColumn))), expected(i)
+        TestSetProfile profiles, "Visualization.Quantity", field
+        Set reader = New CSectionPlotDataReader
+        reader.LoadFromWorkbook ThisWorkbook, TestReader()
+        TestCheckClose stats, field & ".plot", reader.ResultValue(1), expected(i)
+        TestCheck stats, field & ".unit", reader.ResultUnit = units(i)
+        reportLines = Split(Audit02ReadExportSnapshotForTests(ThisWorkbook), vbCrLf)
+        firstResult = Split(reportLines(1), "|")
+        TestCheckClose stats, field & ".cad", CDbl(firstResult(1)), expected(i)
+    Next i
+    Dim fieldAnchor As Object: Set fieldAnchor = NamedCoupledFieldAnchor(ThisWorkbook)
+    Dim firstFieldCell As String: firstFieldCell = fieldAnchor.Offset(1, 0).Address(False, False)
+    Dim invalidRun As Boolean, absent As Boolean, failureText As String, failureNumber As Long
+    On Error Resume Next
+    Set values = ReadCoupledFieldValues(ThisWorkbook, vqTauXZ, runID + 1#, "CAD_CFG", "PR1", "StrengthState")
+    failureNumber = Err.Number: failureText = Err.Description
+    Err.Clear
+    invalidRun = failureNumber = vbObjectError + 4389 And InStr(failureText, firstFieldCell) > 0
+    TestLogLine stats, "COUPLED_FIELD_REJECT_RUN: " & CStr(failureNumber) & " " & failureText
+    Set values = ReadCoupledFieldValues(ThisWorkbook, vqWarping, runID, "CAD_CFG", "PR1", "CapacityState")
+    failureNumber = Err.Number: failureText = Err.Description
+    Err.Clear
+    absent = failureNumber = vbObjectError + 4388 And InStr(failureText, "CapacityState") > 0
+    On Error GoTo Failed
+    TestCheck stats, "coupledField.rejectStaleRun", invalidRun
+    TestCheck stats, "coupledField.rejectMissingState", absent
+    GoTo Restore
+Failed:
+    stats.Failed = stats.Failed + 1
+    TestLogLine stats, "FAIL: coupledField.runtime " & Err.Source & " " & Err.Description
+Restore:
+    On Error Resume Next
+    If Not IsEmpty(saved) Then system.Formula = saved
+    If Not IsEmpty(profileSaved) Then profiles.Formula = profileSaved
+    On Error GoTo 0
+    TestLogLine stats, "TOTAL_COUPLED_FIELD_PROFILES: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunTestCoupledFieldProfiles = stats.Report
+End Function
