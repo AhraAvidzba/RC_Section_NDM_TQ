@@ -1,0 +1,86 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledConcreteTensor.xlsm
+SOURCE_SHA256: B4D336B22D9B9D4D4C101782AB26F16403FC1C4F65E7450515A749F7BF1B1AE3
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cd91fa877d95430082de20d8f3a57717\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=31968; startTicks=639302873111839630
+===== modTestCoupledElasticState.RunTestCoupledConcreteTensor =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-15T00:08:37
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182669312; privateBytes=126623744; cpu=34.9375
+EXCEL_AFTER_SUITE: pid=31968; workingSet=143609856; privateBytes=114565120; cpu=6.359375
+OK: isotropic normal stiffness actual=33333.3333333333 expected=33333.3333333333
+OK: isotropic Poisson stiffness actual=8333.33333333333 expected=8333.33333333333
+OK: engineering shear stiffness actual=12500 expected=12500
+OK: hydrostatic values exact
+OK: physical shear contribution to invariant actual=15.5884572681199 expected=15.5884572681199
+OK: pure shear has opposite principal stresses
+OK: rotated principal directions preserve spectrum
+OK: uniaxial compression at specified cohesion
+OK: uniaxial tension at specified cohesion
+OK: potential derivative 1
+OK: potential derivative 2
+OK: potential derivative 3
+OK: potential derivative 4
+OK: potential derivative 5
+OK: potential derivative 6
+TOTAL_COUPLED_CONCRETE_TENSOR: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cd91fa877d95430082de20d8f3a57717\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-15T00:08:38
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-15T00:08:39
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182669312; privateBytes=126623744; cpu=34.9375
+EXCEL_AFTER_SUITE: pid=31968; workingSet=149434368; privateBytes=120111104; cpu=11.328125
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+OK: reinforced axial equilibrium
+OK: reinforced net axial area actual=1.44392869302254E-05 expected=1.44392868615935E-05
+OK: transverse replacement moment actual=3.91357632710054E-10 expected=3.90148757810609E-10
+TOTAL_COUPLED_ELASTIC: passed=21; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cd91fa877d95430082de20d8f3a57717\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-15T00:08:43
+===== modTestCoupledElasticState.RunTestCoupledReinforcedResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledReinforcedResponse; 2026-11-15T00:08:43
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182669312; privateBytes=126623744; cpu=34.9375
+EXCEL_AFTER_SUITE: pid=31968; workingSet=146276352; privateBytes=116568064; cpu=13.328125
+OK: distinct material classes follow geometry
+OK: concrete integrated once actual=760 expected=760
+OK: longitudinal steel minus concrete actual=-357 expected=-357
+OK: longitudinal steel adds no transverse shear stiffness actual=-15 expected=-15
+OK: tangent of replacement actual=-508500 expected=-508500
+OK: transverse projected strain and separate steel actual=153.6 expected=153.6
+OK: transverse bar replaces concrete without axial steel actual=-760 expected=-760
+OK: maximum steel trial utilization actual=0.16 expected=0.16
+OK: trial leaves accepted utilization untouched
+OK: accepted utilization actual=0.16 expected=0.16
+OK: unloading remembers accepted plastic history
+OK: rejecting reverse trial preserves accepted steel actual=-230.75 expected=-230.75
+OK: new combination resets steel plastic history actual=160 expected=160
+OK: point evaluations converged
+TOTAL_COUPLED_REINFORCED_RESPONSE: passed=14; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cd91fa877d95430082de20d8f3a57717\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledReinforcedResponse; 2026-11-15T00:08:44
+SOURCE_UNCHANGED: True

@@ -56,7 +56,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     Set mQuadrature = New CCoupledSectionQuadrature
     mQuadrature.Initialize section, spansX, spansY
     mLength = mQuadrature.Frame.LengthScale
-    SetElasticTensor modulus, poisson
+    CoupledElasticTensor modulus, poisson, mElastic
     Dim indices() As Long, dx() As Double, dy() As Double
     mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
@@ -122,20 +122,6 @@ End Sub
 Friend Property Get ResultMeta() As CResultMeta
     Set ResultMeta = mMeta.Clone
 End Property
-
-' Вычисляет матрицу закона Гука для инженерных угловых деформаций.
-Private Sub SetElasticTensor(ByVal modulus As Double, ByVal poisson As Double)
-    Dim shear As Double, lame As Double, i As Long, j As Long
-    shear = modulus / (2# * (1# + poisson))
-    lame = 2# * shear * poisson / (1# - 2# * poisson)
-    For i = 1 To 3
-        For j = 1 To 3
-            mElastic(i, j) = lame
-        Next j
-        mElastic(i, i) = lame + 2# * shear
-        mElastic(i + 3, i + 3) = shear
-    Next i
-End Sub
 
 ' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.

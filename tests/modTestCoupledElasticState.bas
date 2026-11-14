@@ -584,3 +584,58 @@ Done:
 Failed:
     RunTestCoupledReinforcedResponse = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет главные напряжения, границу текучести и градиент потенциала.
+' Поворот, невырожденное смешанное состояние и гидростатика заданы независимо.
+Public Function RunTestCoupledConcreteTensor() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const E As Double = 30000#
+    Const NU As Double = 0.2
+    Dim tensor(1 To 6, 1 To 6) As Double, stress(1 To 6) As Double, flow(1 To 6) As Double
+    Dim trace As Double, q As Double, high As Double, mid As Double, low As Double
+    CoupledElasticTensor E, NU, tensor
+    TestExpectNear tensor(1, 1), 33333.3333333333, 1E-12, "isotropic normal stiffness", passed, failed, report
+    TestExpectNear tensor(1, 2), 8333.33333333333, 1E-12, "isotropic Poisson stiffness", passed, failed, report
+    TestExpectNear tensor(6, 6), 12500#, 1E-12, "engineering shear stiffness", passed, failed, report
+    stress(1) = -20#: stress(2) = -20#: stress(3) = -20#
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    TestRecord trace = -60# And q = 0# And high = -20# And mid = -20# And low = -20#, _
+        "hydrostatic values exact", passed, failed, report
+    stress(1) = 0#: stress(2) = 0#: stress(3) = 0#: stress(6) = 9#
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    TestExpectNear q, Sqr(3#) * 9#, 1E-12, "physical shear contribution to invariant", passed, failed, report
+    TestRecord Abs(high - 9#) < 1E-12 And Abs(mid) < 1E-12 And Abs(low + 9#) < 1E-12, _
+        "pure shear has opposite principal stresses", passed, failed, report
+    stress(1) = -4#: stress(2) = -4#: stress(3) = -2#: stress(4) = 6#: stress(6) = 0#
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    TestRecord Abs(high - 2#) < 1E-12 And Abs(mid + 2#) < 1E-12 And Abs(low + 10#) < 1E-12, _
+        "rotated principal directions preserve spectrum", passed, failed, report
+    TestRecord Abs(CoupledBarcelonaYield(-30#, 30#, 0#, 30#, 3#, 0.12, 3#)) < 1E-12, _
+        "uniaxial compression at specified cohesion", passed, failed, report
+    TestRecord Abs(CoupledBarcelonaYield(3#, 3#, 3#, 30#, 3#, 0.12, 3#)) < 1E-12, _
+        "uniaxial tension at specified cohesion", passed, failed, report
+
+    Const DELTA As Double = 0.00001
+    Dim otherFlow(1 To 6) As Double, original As Double, plus As Double, minus As Double, value As Double, i As Long
+    stress(5) = 2.5: stress(6) = -1.25
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    value = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, flow)
+    For i = 1 To 6
+        original = stress(i)
+        stress(i) = original + DELTA
+        CoupledStressInvariants stress, trace, q, high, mid, low
+        plus = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, otherFlow)
+        stress(i) = original - DELTA
+        CoupledStressInvariants stress, trace, q, high, mid, low
+        minus = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, otherFlow)
+        stress(i) = original
+        TestRecord Abs(flow(i) - (plus - minus) / (2# * DELTA)) < 1E-8, _
+            "potential derivative " & CStr(i), passed, failed, report
+    Next i
+    RunTestCoupledConcreteTensor = report & "TOTAL_COUPLED_CONCRETE_TENSOR: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConcreteTensor = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
