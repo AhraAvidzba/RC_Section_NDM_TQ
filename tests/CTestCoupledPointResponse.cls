@@ -20,11 +20,19 @@ Implements ICoupledPointResponse
 Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
+Private mCubic As Double
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
 Friend Sub TestInitialize(ByVal pointCount As Long)
     mCount = pointCount
+    mCubic = 1E+10#
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт аналитическую ветвь с пиком при осевой деформации 0,001.
+Friend Sub TestUseDescendingAxialLaw()
+    mCubic = -1E+10#
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -55,9 +63,9 @@ End Property
 ' Считает диагональный отклик с нелинейным упрочнением в направлении z.
 ' Отрицательные параметры для провокации отказа в закон не вводятся.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
-        ByRef stress() As Double, ByRef tangent() As Double) As ESolverFailureCode
+        ByRef stress() As Double, ByRef tangent() As Double, _
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
     Const MODULUS As Double = 30000#
-    Const CUBIC As Double = 1E+10
     Dim j As Long, k As Long, e As Double
     For j = 1 To 6
         For k = 1 To 6: tangent(j, k) = 0#: Next k
@@ -66,8 +74,8 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         stress(j) = tangent(j, j) * strain(j)
     Next j
     e = strain(3)
-    stress(3) = stress(3) + CUBIC * e ^ 3
-    tangent(3, 3) = tangent(3, 3) + 3# * CUBIC * e ^ 2
+    stress(3) = stress(3) + mCubic * e ^ 3
+    tangent(3, 3) = tangent(3, 3) + 3# * mCubic * e ^ 2
     mTrialPeak(point) = mAcceptedPeak(point)
     If Abs(e) > mTrialPeak(point) Then mTrialPeak(point) = Abs(e)
     If mFail And point = 2 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure

@@ -104,12 +104,13 @@ End Property
 ' Обновляет независимую материальную точку. В поправке замещения площадь
 ' берётся у геометрических операторов и здесь не учитывается повторно.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
-        ByRef stress() As Double, ByRef tangent() As Double) As ESolverFailureCode
+        ByRef stress() As Double, ByRef tangent() As Double, _
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
     If point = 1 Then
         mTrialSteelUtilization = 0#: mTrialSteelPoint = 0
         mTrialTransverseUtilization = 0#: mTrialTransversePoint = 0
     End If
-    ICoupledPointResponse_EvaluatePoint = mConcrete.EvaluatePoint(point, strain, stress, tangent)
+    ICoupledPointResponse_EvaluatePoint = mConcrete.EvaluatePoint(point, strain, stress, tangent, tangentMode)
     If ICoupledPointResponse_EvaluatePoint <> sfcNone Or point < mFirstSteel Then Exit Function
     Dim j As Long, k As Long, axialStrain As Double, axialStress As Double, axialTangent As Double
     Dim utilization As Double
@@ -130,9 +131,12 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     End If
     For j = 1 To COMPONENT_COUNT
         stress(j) = axialStress * mDirection(j, point) - stress(j)
-        For k = 1 To COMPONENT_COUNT
-            tangent(j, k) = axialTangent * mDirection(j, point) * mDirection(k, point) - tangent(j, k)
-        Next k
+        If tangentMode <> ctmStressOnly Then
+            For k = 1 To COMPONENT_COUNT
+                If tangentMode = ctmFull Or k = 3 Or k >= 5 Then _
+                    tangent(j, k) = axialTangent * mDirection(j, point) * mDirection(k, point) - tangent(j, k)
+            Next k
+        End If
     Next j
 End Function
 

@@ -371,6 +371,43 @@ Friend Sub LoadEquations(ByVal force As Double, ByVal mx As Double, ByVal my As 
     external(mGradientBase + 3) = qx / mArea
 End Sub
 
+' Проверяет, нужны ли касательные столбцы для продольного градиента напряжений.
+Friend Function HasAxialGradient(ByRef field() As Double) As Boolean
+    Dim i As Long
+    For i = mGradientBase + 1 To mGaugeBase
+        If field(i) <> 0# Then
+            HasAxialGradient = True
+            Exit Function
+        End If
+    Next i
+End Function
+
+' Возвращает Bp·d для данной точки в безразмерных координатах модели.
+' Из кинематики продольная производная ненулевая только в zz, xz и yz.
+Friend Sub AxialGradientAtPoint(ByVal point As Long, ByRef field() As Double, ByRef gradient() As Double)
+    gradient(3) = field(mGradientBase + 1) + _
+        mY(point) * field(mGradientBase + 2) + mX(point) * field(mGradientBase + 3)
+    gradient(5) = -mY(point) * field(mGradientBase + 4)
+    gradient(6) = mX(point) * field(mGradientBase + 4)
+End Sub
+
+' Готовит линейные меры средних инженерных сдвигов по площади бетона.
+' Вес бетона относится к полной области, включая места расположения стержней.
+Friend Sub MeanShearProjections(ByRef alongX() As Double, ByRef alongY() As Double)
+    ReDim alongX(1 To mDof), alongY(1 To mDof)
+    Dim point As Long, localIndex As Long, degree As Long, weight As Double
+    For point = 1 To mConcreteCount
+        weight = mWeight(point)
+        For localIndex = 1 To UBound(mSectionDof, 1)
+            degree = mSectionDof(localIndex, point)
+            If degree > 0 Then
+                alongX(degree) = alongX(degree) + weight * mOperators(5, localIndex, point)
+                alongY(degree) = alongY(degree) + weight * mOperators(6, localIndex, point)
+            End If
+        Next localIndex
+    Next point
+End Sub
+
 ' Деформации материальной точки от общих деформаций и внутренних полей.
 ' Порядок εxx, εyy, εzz, γxy, γxz, γyz. Вызывающий переиспользует массив.
 Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strain() As Double)
@@ -476,24 +513,19 @@ End Sub
 ' пробы вызывающий пересобирает невязку по фактическим напряжениям и D.
 Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, ByRef residual() As Double, _
-        ByRef linearized() As Double, ByVal assembleMatrix As Boolean, ByRef resultants() As Double)
+        ByRef linearized() As Double, ByVal assembleMatrix As Boolean, ByRef resultants() As Double, _
+        Optional ByVal useAxialGradient As Boolean = True)
     Dim axialGradient(1 To STRESS_COMPONENTS) As Double
     Dim weightedGradient(1 To STRESS_COMPONENTS) As Double
     Dim weightedStress(1 To STRESS_COMPONENTS) As Double
-    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long
+    Dim a As Long, j As Long, row As Long
     Dim weight As Double, value As Double, traction As Long, shapeValue As Double
     weight = mWeight(point)
-    For b = 1 To PLANE_DOF
-        For j = 1 To STRESS_COMPONENTS
-            axialGradient(j) = axialGradient(j) + mOperators(j, b, point) * field(mGradientBase + b)
-        Next j
-    Next b
+    If useAxialGradient Then AxialGradientAtPoint point, field, axialGradient
     For j = 1 To STRESS_COMPONENTS
         weightedStress(j) = stress(j) * weight
-        For k = 1 To STRESS_COMPONENTS
-            weightedGradient(j) = weightedGradient(j) + tangent(j, k) * axialGradient(k)
-        Next k
-        weightedGradient(j) = weight * weightedGradient(j)
+        If useAxialGradient Then _
+            weightedGradient(j) = weight * (tangent(j, 3) * axialGradient(3) + tangent(j, 5) * axialGradient(5) + tangent(j, 6) * axialGradient(6))
     Next j
 
     Dim count As Long
@@ -522,8 +554,55 @@ Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
     If assembleMatrix Then AddPointTangent point, tangent, linearized
 End Sub
 
+' Добавляет зависимость D Bp d от текущей деформации B q.
+' Столбец первичной матрицы относится к q, а строки содержат обе проекции
+' градиента напряжений, включая слабое равновесие внутренних перемещений.
+Friend Sub AddPointGradientTangent(ByVal point As Long, ByRef stressGradientDerivative() As Double, _
+        ByRef linearized() As Double)
+    Dim weighted(1 To STRESS_COMPONENTS, 1 To PLANE_DOF + 3 * SHAPE_COUNT) As Double
+    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long, count As Long
+    Dim value As Double, shapeValue As Double, traction As Long, weight As Double
+    weight = mWeight(point): count = UBound(mSectionDof, 1)
+    For b = 1 To count
+        If mSectionDof(b, point) > 0 Then
+            For j = 1 To STRESS_COMPONENTS
+                value = 0#
+                For k = 1 To STRESS_COMPONENTS
+                    value = value + stressGradientDerivative(j, k) * mOperators(k, b, point)
+                Next k
+                weighted(j, b) = weight * value
+            Next j
+        End If
+    Next b
+    For a = 1 To count
+        row = mSectionDof(a, point)
+        If row > 0 Then
+            If a <= PLANE_DOF Then
+                row = mGradientBase + a
+                For b = 1 To count
+                    col = mSectionDof(b, point)
+                    If col > 0 Then
+                        value = 0#
+                        For j = 1 To STRESS_COMPONENTS
+                            value = value + mOperators(j, a, point) * weighted(j, b)
+                        Next j
+                        linearized(col, row) = linearized(col, row) + value
+                    End If
+                Next b
+            Else
+                traction = TractionComponent(a)
+                shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
+                For b = 1 To count
+                    col = mSectionDof(b, point)
+                    If col > 0 Then linearized(col, row) = linearized(col, row) - shapeValue * weighted(traction, b)
+                Next b
+            End If
+        End If
+    Next a
+End Sub
+
 ' Добавляет блоки Bᵀ D B и производные правой части по градиенту деформации.
-' Производные D по деформации учитываются обновлением пробной невязки.
+' Производные D по деформации при необходимости добавляет AddPointGradientTangent.
 Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRef linearized() As Double)
     Dim count As Long, weighted() As Double
     count = UBound(mSectionDof, 1)

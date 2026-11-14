@@ -79,37 +79,44 @@ End Sub
 ' Вычисляет одну пробу и её касательную. Возмущения вычисляются от
 ' того же принятого состояния, без изменения пробной истории.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
-        ByRef stress() As Double, ByRef tangent() As Double) As ESolverFailureCode
+        ByRef stress() As Double, ByRef tangent() As Double, _
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
     Dim updated As TConcreteHistory, scratch As TConcreteHistory, virginElastic As Boolean
     If Not UpdatePoint(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
+    If tangentMode = ctmStressOnly Then GoTo StoreTrial
     Dim i As Long, j As Long
     If virginElastic Then
         For j = 1 To N_COMPONENTS
-            For i = 1 To N_COMPONENTS: tangent(i, j) = mElastic(i, j): Next i
+            If tangentMode = ctmFull Or j = 3 Or j >= 5 Then
+                For i = 1 To N_COMPONENTS: tangent(i, j) = mElastic(i, j): Next i
+            End If
         Next j
     Else
         Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
         Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean
         For i = 1 To N_COMPONENTS: perturbed(i) = strain(i): Next i
         For j = 1 To N_COMPONENTS
-            delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
-            perturbed(j) = strain(j) + delta
-            plusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, plus, unused)
-            perturbed(j) = strain(j) - delta
-            minusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, minus, unused)
-            perturbed(j) = strain(j)
-            If Not plusOk And Not minusOk Then GoTo Failure
-            For i = 1 To N_COMPONENTS
-                If plusOk And minusOk Then
-                    tangent(i, j) = (plus(i) - minus(i)) / (2# * delta)
-                ElseIf plusOk Then
-                    tangent(i, j) = (plus(i) - stress(i)) / delta
-                Else
-                    tangent(i, j) = (stress(i) - minus(i)) / delta
-                End If
-            Next i
+            If tangentMode = ctmFull Or j = 3 Or j >= 5 Then ' Продольный градиент деформаций имеет только компоненты zz, xz, yz.
+                delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
+                perturbed(j) = strain(j) + delta
+                plusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, plus, unused)
+                perturbed(j) = strain(j) - delta
+                minusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, minus, unused)
+                perturbed(j) = strain(j)
+                If Not plusOk And Not minusOk Then GoTo Failure
+                For i = 1 To N_COMPONENTS
+                    If plusOk And minusOk Then
+                        tangent(i, j) = (plus(i) - minus(i)) / (2# * delta)
+                    ElseIf plusOk Then
+                        tangent(i, j) = (plus(i) - stress(i)) / delta
+                    Else
+                        tangent(i, j) = (stress(i) - minus(i)) / delta
+                    End If
+                Next i
+            End If
         Next j
     End If
+StoreTrial:
     mHistory(point, mTrial) = updated
     Exit Function
 Failure:

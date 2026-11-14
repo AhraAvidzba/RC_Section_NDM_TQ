@@ -8,6 +8,12 @@ Option Explicit
 ' физические касательные компоненты, деформации — инженерные сдвиги.
 ' Растяжение положительно. Используются инварианты физических напряжений.
 
+Public Enum ECoupledTangentMode
+    ctmFull = 0            ' Все шесть столбцов для решения системы поправок.
+    ctmAxialGradient = 1   ' Только zz, xz, yz для продольного градиента напряжений.
+    ctmStressOnly = 2      ' Проба без матрицы и с нулевым продольным градиентом.
+End Enum
+
 ' Готовит тензор изотропной упругости в инженерных компонентах.
 ' Вызывающий проверяет диапазон E и коэффициента Пуассона.
 Public Sub CoupledElasticTensor(ByVal modulus As Double, ByVal poisson As Double, ByRef tensor() As Double)

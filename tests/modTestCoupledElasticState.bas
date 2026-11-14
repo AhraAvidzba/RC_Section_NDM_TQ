@@ -589,6 +589,111 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает полную производную собранной невязки с независимыми
+' разностями. Кубический тестовый закон имеет гладкую неупругую касательную.
+Public Function RunTestCoupledGradientLinearization() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    solver.Initialize operators, material, 30000#
+
+    Dim field() As Double, residual() As Double, frozen() As Double, corrected() As Double
+    Dim plus() As Double, minus() As Double, scratch() As Double, column As Long, row As Long, dof As Long
+    Dim frozenError As Double, correctedError As Double, saved As Double, expected As Double
+    Const STEP_SIZE As Double = 0.00000008
+    dof = operators.DegreeCount
+    ReDim field(1 To dof)
+    field(1) = 0.0004: field(2) = 0.00015: field(3) = 0.0001: field(4) = 0.0002
+    field(dof - 7) = 0.001: field(dof - 6) = 0.002: field(dof - 5) = -0.001
+    field(dof - 4) = 0.00025  ' Последние четыре степени свободы задают только условия однозначности.
+    If Not solver.TestEquilibriumLinearization(field, True, False, residual, frozen) Then Err.Raise 5, , "Frozen assembly failed."
+    If Not solver.TestEquilibriumLinearization(field, True, True, residual, corrected) Then Err.Raise 5, , "Corrected assembly failed."
+    For column = 1 To dof
+        saved = field(column)
+        field(column) = saved + STEP_SIZE
+        If Not solver.TestEquilibriumLinearization(field, False, False, plus, scratch) Then Err.Raise 5, , "Positive field perturbation failed."
+        field(column) = saved - STEP_SIZE
+        If Not solver.TestEquilibriumLinearization(field, False, False, minus, scratch) Then Err.Raise 5, , "Negative field perturbation failed."
+        field(column) = saved
+        For row = 1 To dof
+            expected = (plus(row) - minus(row)) / (2# * STEP_SIZE)
+            If Abs(frozen(column, row) - expected) > frozenError Then frozenError = Abs(frozen(column, row) - expected)
+            If Abs(corrected(column, row) - expected) > correctedError Then correctedError = Abs(corrected(column, row) - expected)
+        Next row
+    Next column
+    TestRecord frozenError > 1#, "frozen tangent omits a measured coupling " & CStr(frozenError), passed, failed, report
+    TestRecord correctedError < 0.001, "corrected assembly agrees with full residual differences " & CStr(correctedError), passed, failed, report
+    For column = dof - 7 To dof - 4: field(column) = 0#: Next column
+    If Not solver.TestEquilibriumLinearization(field, True, False, residual, frozen) Then Err.Raise 5, , "Zero-gradient assembly failed."
+    If Not solver.TestEquilibriumLinearization(field, True, True, residual, corrected) Then Err.Raise 5, , "Zero-gradient corrected assembly failed."
+    correctedError = 0#
+    For column = 1 To dof
+        For row = 1 To dof
+            correctedError = correctedError + Abs(corrected(column, row) - frozen(column, row))
+        Next row
+    Next column
+    TestRecord correctedError = 0#, "zero gradient requires no correction", passed, failed, report
+    RunTestCoupledGradientLinearization = report & "TOTAL_COUPLED_GRADIENT_LINEARIZATION: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledGradientLinearization = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет деформационный контроль на ветви с известным максимумом
+' N = A*(E*eps - c*eps^3). Момент кручения масштабируется с N.
+Public Function RunTestCoupledDeformationControl() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    material.TestUseDescendingAxialLaw
+    solver.Initialize operators, material, 30000#
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    baseLoad(1) = 4# * AREA: baseLoad(4) = 30000#
+    direction(1) = 20# * AREA: direction(4) = 200000#
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    If Not solver.TryStep(baseLoad(1), 0#, 0#, baseLoad(4), 0#, 0#, 1E-8, 1E-8, 30) Then _
+        Err.Raise 5, , "Independent preload failed."
+    solver.AcceptStep
+
+    Dim field() As Double, resultants() As Double, strain As Variant, lambda As Double
+    Dim previousLambda As Double, expected As Double, eps As Double
+    Dim history As New Collection
+    solver.CopyAccepted field: history.Add field
+    For Each strain In Array(0.0002, 0.0006, 0.00095, 0.00105, 0.0012, 0.0015)
+        eps = CDbl(strain)
+        If Not solver.TryDeformationStep(baseLoad, direction, control, eps, previousLambda, lambda, 1E-8, 1E-8, 30) Then _
+            Err.Raise 5, , "Deformation step " & CStr(eps) & " failed. " & solver.ResultMeta.ResultComment & " " & solver.ResultMeta.DiagnosticDetails
+        solver.CopyTrial field, resultants
+        expected = (AREA * (30000# * eps - 1E+10# * eps ^ 3) - baseLoad(1)) / direction(1)
+        TestExpectNear lambda, expected, 0.00000001, "strain-controlled multiplier at " & CStr(eps), passed, failed, report
+        TestExpectNear field(1), eps, 0.00000001, "strain control equation", passed, failed, report
+        TestExpectNear resultants(4), baseLoad(4) + lambda * direction(4), 0.000001, _
+            "scaled torque in the same solution", passed, failed, report
+        If eps >= 0.00105 Then TestRecord lambda < previousLambda, "branch descends after peak", passed, failed, report
+        previousLambda = lambda
+        solver.AcceptStep
+        history.Add field
+    Next strain
+    TestRecord solver.ReplayAcceptedFields(history, 3), "replay restores the prepeak material history", passed, failed, report
+    solver.CopyAccepted field
+    TestExpectNear field(1), 0.0006, 0.00000001, "restored field before peak", passed, failed, report
+    TestExpectNear material.TestAcceptedPeak, 0.0006, 0.00000001, "replay restores history instead of retaining accepted postpeak strain", passed, failed, report
+    RunTestCoupledDeformationControl = report & "TOTAL_COUPLED_DEFORMATION_CONTROL: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledDeformationControl = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет направленное замещение бетона, выбор разных классов и откат стали.
 ' Бетон здесь аналитический, чтобы независимо вычислить поправки.
 Public Function RunTestCoupledReinforcedResponse() As String
@@ -858,6 +963,21 @@ Public Function RunTestCoupledConcreteResponse() As String
     For i = 1 To 6: base(i) = stress(i): Next i
     derivative = tangent(6, 6)
     TestRecord base(6) > 0# And base(6) < 0.0009 * 12500#, "shear affected by multi-axial damage", passed, failed, report
+    Dim trialTangent(1 To 6, 1 To 6) As Double, maxDifference As Double, iColumn As Variant
+    trialTangent(1, 1) = 123#
+    status = response.EvaluatePoint(1, strain, stress, trialTangent, ctmAxialGradient)
+    For Each iColumn In Array(3, 5, 6)
+        For i = 1 To 6
+            If Abs(trialTangent(i, iColumn) - tangent(i, iColumn)) > maxDifference Then _
+                maxDifference = Abs(trialTangent(i, iColumn) - tangent(i, iColumn))
+        Next i
+    Next iColumn
+    TestRecord status = sfcNone And maxDifference = 0# And trialTangent(1, 1) = 123# And stress(6) = base(6), _
+        "gradient probe computes the same required tangent columns and stress", passed, failed, report
+    trialTangent(6, 6) = 456#
+    status = response.EvaluatePoint(1, strain, stress, trialTangent, ctmStressOnly)
+    TestRecord status = sfcNone And trialTangent(6, 6) = 456# And stress(6) = base(6), _
+        "stress-only probe has identical stress with no tangent calculation", passed, failed, report
 
     Const DELTA As Double = 0.00000006
     strain(6) = 0.0009 + DELTA
@@ -912,25 +1032,12 @@ End Function
 Public Function RunTestCoupledConcreteSection() As String
     Dim passed As Long, failed As Long, report As String
     On Error GoTo Failed
-    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
-    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
-    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
-    Dim layout As New CTransverseRebarLayout
-    layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A240"
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse
-    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
-    concrete.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
-    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
-    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1000#, 0.025, 0.018
-    hoop.Initialize 200000#, 240#, 240#, 2000#, 0#, 0.02, 0.02
-    Set models = CreateObject("Scripting.Dictionary")
-    models.Add "A400", longitudinal: models.Add "A240", hoop
-    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
-    material.Initialize operators, concrete, models
-    solver.Initialize operators, material, 30000#
+    Dim solver As New CCoupledNewtonSolver
+    TestPrepareCoupledConcreteSection operators, concrete, solver
     Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
     path.Initialize 0#, 26320#, 0#, 479400#, 0#, 169200#, 0#, 1410000#, 0#, 15980#, 0#, -6674#
-    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005
+    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005, True
     Dim ok As Boolean, startTime As Double
     startTime = Timer
     ok = branch.Advance(1#)
@@ -951,6 +1058,8 @@ Public Function RunTestCoupledConcreteSection() As String
     TestRecord maximum > 0#, "concrete damage develops at integration point " & CStr(criticalPoint), passed, failed, report
     If criticalPoint = 0 Then GoTo Done
     concrete.AcceptedPointDamage criticalPoint, et, ec
+    Dim tensionAtTarget As Double, compressionAtTarget As Double
+    tensionAtTarget = et: compressionAtTarget = ec
     ok = solver.TryStep(0.95 * target(1), 0.95 * target(2), 0.95 * target(3), 0.95 * target(4), _
         0.95 * target(5), 0.95 * target(6), 0.0000005, 0.0000005, 30)
     TestRecord ok, "six-action unloading gives equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
@@ -959,12 +1068,130 @@ Public Function RunTestCoupledConcreteSection() As String
         concrete.AcceptedPointDamage criticalPoint, et, ec
         TestRecord et >= maximum, "concrete point cannot heal during unloading", passed, failed, report
     End If
+    Dim history As New Collection, savedField() As Double
+    For i = 1 To branch.SavedFieldCount
+        branch.CopySavedField i, savedField
+        history.Add savedField
+    Next i
+    TestRecord solver.ReplayAcceptedFields(history, history.Count), "replayed accepted concrete and steel fields", passed, failed, report
+    concrete.AcceptedPointDamage criticalPoint, et, ec
+    TestRecord et = tensionAtTarget And ec = compressionAtTarget, "replay reproduces the exact accepted concrete damage", passed, failed, report
 Done:
     RunTestCoupledConcreteSection = report & "TOTAL_COUPLED_CONCRETE_SECTION: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledConcreteSection = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Снимает восстановленный сложный режим с увеличенной на 6,4% нагрузкой.
+' При численном отказе проверяет сохранение реально достигнутой точки.
+Public Function RunTestCoupledHardShear() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, solver As New CCoupledNewtonSolver
+    TestPrepareCoupledConcreteSection operators, concrete, solver
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize 0#, 28000#, 0#, 510000#, 0#, 180000#, 0#, 1500000#, 0#, 17000#, 0#, -7100#
+    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005
+    Dim started As Double: started = Timer
+    Dim solved As Boolean: solved = branch.Advance(1#)
+    report = report & "HARD_SHEAR_SOLVED: " & CStr(solved) & " | " & branch.ResultMeta.ResultComment & " | " & _
+        branch.ResultMeta.DiagnosticDetails & vbCrLf & "HARD_SHEAR_SECONDS: " & CStr(Timer - started) & vbCrLf
+    TestRecord (solved And branch.AcceptedLambda = 1#) Or _
+        (Not solved And branch.AcceptedLambda >= 0.94 And branch.ResultMeta.InternalStatus = rsNumericalFailure), _
+        "resolved target or documented numerical limit without physical FAIL", passed, failed, report
+    Dim field() As Double, actual() As Double, expected() As Double, i As Long
+    branch.CopyAccepted field, actual
+    path.TargetSix branch.AcceptedLambda, expected
+    For i = 1 To 6
+        TestExpectNear actual(i), expected(i), 0.00005, "accepted harder case component " & CStr(i), passed, failed, report
+    Next i
+    RunTestCoupledHardShear = report & "TOTAL_COUPLED_HARD_SHEAR: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledHardShear = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет, как выбранная по физическим деформациям мера продолжает
+' реальную бетонную ветвь после трудного силового участка.
+Public Function RunTestCoupledConcreteControlledPath() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, solver As New CCoupledNewtonSolver
+    TestPrepareCoupledConcreteSection operators, concrete, solver
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize 0#, 28000#, 0#, 510000#, 0#, 180000#, 0#, 1500000#, 0#, 17000#, 0#, -7100#
+    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005
+    Dim field() As Double, previous() As Double, actual() As Double, expected() As Double
+    If Not branch.Advance(0.94) Then Err.Raise 5, , "Known first equilibrium failed. " & branch.ResultMeta.DiagnosticDetails
+    branch.CopyAccepted previous, actual
+    If Not branch.Advance(0.97) Then
+        report = report & "FORCE_CONTROL_STOP: " & branch.ResultMeta.DiagnosticDetails & vbCrLf
+        If branch.AcceptedLambda <= 0.94 Or branch.ResultMeta.InternalStatus <> rsNumericalFailure Then _
+            Err.Raise 5, , "No confirmed second point for the deformation-controlled probe."
+    End If
+    branch.CopyAccepted field, actual
+    Dim projection() As Double, control As Double, increment As Double, name As String
+    If Not solver.SelectDeformationControl(previous, field, projection, control, increment, name) Then _
+        Err.Raise 5, , "Could not select a physical deformation coordinate."
+    report = report & "CONTROL: " & name & " | EPS=" & CStr(control) & " | DELTA=" & CStr(increment) & vbCrLf
+    Dim base() As Double, direction() As Double, lambda As Double, lastLambda As Double
+    Dim targetControl As Double, checkControl As Double, i As Long, stepIndex As Long
+    Dim peak As Double, descending As Long, acceptedSteps As Long
+    path.Components base, direction
+    lastLambda = branch.AcceptedLambda: peak = lastLambda
+    For stepIndex = 1 To 14
+        targetControl = control + increment * stepIndex * 0.4
+        If Not solver.TryDeformationStep(base, direction, projection, targetControl, lastLambda, lambda, _
+                0.0000005, 0.0000005, 20) Then
+            report = report & "CONTROL_STOP: " & solver.ResultMeta.ResultComment & " " & solver.ResultMeta.DiagnosticDetails & vbCrLf
+            Exit For
+        End If
+        solver.CopyTrial field, actual
+        path.TargetSix lambda, expected
+        checkControl = 0#
+        For i = 1 To UBound(field): checkControl = checkControl + field(i) * projection(i): Next i
+        TestExpectNear checkControl, targetControl, 0.0000003, "controlled strain at step " & CStr(stepIndex), passed, failed, report
+        For i = 1 To 6
+            TestExpectNear actual(i), expected(i), 0.00005, "controlled section resultant " & CStr(i), passed, failed, report
+        Next i
+        If lambda <= lastLambda - 0.0001 Then descending = descending + 1 Else descending = 0
+        If lambda > peak Then peak = lambda
+        lastLambda = lambda: acceptedSteps = acceptedSteps + 1
+        solver.AcceptStep
+        report = report & "CONTROL_POINT: coordinate=" & CStr(checkControl) & " | lambda=" & CStr(lambda) & vbCrLf
+        If descending >= 2 Then Exit For
+    Next stepIndex
+    TestRecord acceptedSteps > 0, "physical control advanced the nonlinear section", passed, failed, report
+    report = report & "CONTROL_MAX_LAMBDA: " & CStr(peak) & " | DESCENDING: " & CStr(descending) & vbCrLf
+    RunTestCoupledConcreteControlledPath = report & "TOTAL_COUPLED_CONCRETE_CONTROLLED_PATH: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConcreteControlledPath = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Готовит одинаковую геометрию, материалы и решатель для двух уровней нагрузки.
+Private Sub TestPrepareCoupledConcreteSection(ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal solver As CCoupledNewtonSolver)
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout
+    layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A240"
+    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
+    concrete.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
+    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1000#, 0.025, 0.018
+    hoop.Initialize 200000#, 240#, 240#, 2000#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", longitudinal: models.Add "A240", hoop
+    Dim material As New CCoupledReinforcedResponse
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Запускает штатный пакет с пространственным и плоским сочетаниями.
