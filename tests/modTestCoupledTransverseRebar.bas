@@ -126,3 +126,77 @@ Private Sub TestExpect(ByVal condition As Boolean, ByVal name As String, _
         report = report & "FAIL: " & name & vbCrLf
     End If
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает четвёртый блок тем же ключевым читателем, что используют рецепты.
+' Ячейки с ошибками в неприменимых полях специально не читаются.
+Public Function RunCoupledTransverseInputTests() As String
+    On Error GoTo Failed
+    Dim values(1 To 8, 1 To 11) As Variant, headers As Variant, i As Long
+    Dim section As CSectionModel, geometry As CGeometryRegion, mesh As New CFiberMeshBuilder
+    Set geometry = TestFixtureDisk(200#)
+    mesh.BuildMesh geometry, 20#, 20#, cellGeometry:="Contour"
+    Dim builder As New CSectionModelBuilder
+    Set section = builder.BuildFromGenerated(mesh, Nothing)
+    geometry.BuildContours section.Contours
+    values(1, 1) = "General": values(3, 1) = "key": values(3, 2) = "val"
+    values(4, 1) = "Transverse"
+    headers = Array("key", "kind", "d", "spacing", "cover", "steel", "loop", "path", "", "", "note")
+    For i = 0 To UBound(headers)
+        values(6, i + 1) = headers(i)
+    Next i
+    values(7, 1) = "Group1": values(8, 1) = "Group2"
+    values(7, 3) = CVErr(2015): values(8, 8) = CVErr(2015)
+
+    Dim passed As Long, failed As Long, report As String, result As CTransverseRebarLayout
+    Set result = TestReadTransverse(values, section)
+    TestExpect Not result.IsSpecified, "unfilled fourth block remains unknown", passed, failed, report
+    values(7, 2) = "Нет"
+    Set result = TestReadTransverse(values, section)
+    TestExpect result.IsSpecified And result.Count = 0, "explicit no steel ignores unused numeric fields", passed, failed, report
+    values(7, 2) = "Контур": values(7, 3) = 8#: values(7, 4) = 100#: values(7, 5) = 15#
+    values(7, 8) = CVErr(2015)
+    Set result = TestReadTransverse(values, section)
+    TestExpect result.Count = 1 And result.Path(1).IsClosed And result.SteelClass(1) = "A400", _
+        "typical contour uses configured default steel", passed, failed, report
+    values(8, 2) = "Ветвь": values(8, 3) = 10#: values(8, 4) = 140#: values(8, 5) = CVErr(2015)
+    values(8, 8) = "-80;25;50;25"
+    Set result = TestReadTransverse(values, section)
+    TestExpect result.Count = 2 And Not result.Path(2).IsClosed And Abs(result.Path(2).Length - 130#) < 1E-9, _
+        "one extra branch and unused cover", passed, failed, report
+    values(8, 8) = "-80;25;text;25"
+    TestExpect InStr(TestReadFailure(values, section), "R8C8") > 0, _
+        "bad branch coordinate includes actual source", passed, failed, report
+    RunCoupledTransverseInputTests = report & "TOTAL_COUPLED_TRANSVERSE_INPUT: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunCoupledTransverseInputTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Передаёт снимок с явными адресами, которые можно проверить независимо от Excel.
+Private Function TestReadTransverse(ByRef values As Variant, ByVal section As CSectionModel) As CTransverseRebarLayout
+    Dim addresses(1 To 8, 1 To 11) As Variant, row As Long, col As Long
+    For row = 1 To 8
+        For col = 1 To 11
+            addresses(row, col) = "R" & row & "C" & col
+        Next col
+    Next row
+    Dim table As New CSectionInputTable, reader As New CSectionInputReader
+    table.Initialize "TestTransverse", values, addresses
+    Dim units As New CUnitSystem
+    units.InitializeDefaults
+    reader.Initialize table, units
+    Set TestReadTransverse = reader.ReadTransverseLayout(section, "A400")
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает причину неверного ввода для сверки адреса ячейки.
+Private Function TestReadFailure(ByRef values As Variant, ByVal section As CSectionModel) As String
+    On Error GoTo Failed
+    Dim result As CTransverseRebarLayout
+    Set result = TestReadTransverse(values, section)
+    Exit Function
+Failed:
+    TestReadFailure = Err.Description
+End Function

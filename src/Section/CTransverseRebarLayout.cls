@@ -30,8 +30,8 @@ Private Sub Class_Initialize()
 End Sub
 
 ' Подтверждает явное отсутствие поперечной арматуры в данном сечении.
-Public Sub DeclareNone()
-    If mCount <> 0 Then InputError vbNullString, "Уже заданы группы поперечной арматуры."
+Public Sub DeclareNone(Optional ByVal sourceReference As String = vbNullString)
+    If mCount <> 0 Then InputError sourceReference, "Уже заданы группы поперечной арматуры."
     mExplicitNone = True
 End Sub
 

@@ -19,10 +19,10 @@
     },
     {
       "Name": "rngCircleGeometry",
-      "RefersTo": "=Сечения!$A$3:$K$18",
+      "RefersTo": "=Сечения!$A$3:$K$26",
       "Sheet": "Сечения",
-      "Address": "$A$3:$K$18",
-      "Rows": 16,
+      "Address": "$A$3:$K$26",
+      "Rows": 24,
       "Columns": 11
     },
     {
@@ -43,10 +43,10 @@
     },
     {
       "Name": "rngHollowRectangleGeometry",
-      "RefersTo": "=Сечения!$A$94:$K$131",
+      "RefersTo": "=Сечения!$A$118:$K$163",
       "Sheet": "Сечения",
-      "Address": "$A$94:$K$131",
-      "Rows": 38,
+      "Address": "$A$118:$K$163",
+      "Rows": 46,
       "Columns": 11
     },
     {
@@ -123,18 +123,18 @@
     },
     {
       "Name": "rngPointedSectionGeometry",
-      "RefersTo": "=Сечения!$A$61:$K$90",
+      "RefersTo": "=Сечения!$A$77:$K$114",
       "Sheet": "Сечения",
-      "Address": "$A$61:$K$90",
-      "Rows": 30,
+      "Address": "$A$77:$K$114",
+      "Rows": 38,
       "Columns": 11
     },
     {
       "Name": "rngRectanglesGeometry",
-      "RefersTo": "=Сечения!$A$22:$K$57",
+      "RefersTo": "=Сечения!$A$30:$K$73",
       "Sheet": "Сечения",
-      "Address": "$A$22:$K$57",
-      "Rows": 36,
+      "Address": "$A$30:$K$73",
+      "Rows": 44,
       "Columns": 11
     },
     {
@@ -369,17 +369,17 @@
           "Hidden": false
         },
         {
-          "Row": 21,
+          "Row": 29,
           "Height": 21,
           "Hidden": false
         },
         {
-          "Row": 60,
+          "Row": 76,
           "Height": 21,
           "Hidden": false
         },
         {
-          "Row": 93,
+          "Row": 117,
           "Height": 21,
           "Hidden": false
         }
@@ -390,7 +390,7 @@
           "Type": 13,
           "ChartType": null,
           "Left": 1044.75,
-          "Top": 972.7500610351562,
+          "Top": 1212.7500610351562,
           "Width": 368.5039367675781,
           "Height": 367.7640075683594,
           "Placement": 2,
@@ -402,7 +402,7 @@
           "Type": 13,
           "ChartType": null,
           "Left": 1052.25,
-          "Top": 1481.2501220703125,
+          "Top": 1841.2501220703125,
           "Width": 368.5039367675781,
           "Height": 367.7640075683594,
           "Placement": 2,
@@ -426,7 +426,7 @@
           "Type": 13,
           "ChartType": null,
           "Left": 1044.75,
-          "Top": 419.25,
+          "Top": 539.25,
           "Width": 368.5039367675781,
           "Height": 368.5039367675781,
           "Placement": 2,

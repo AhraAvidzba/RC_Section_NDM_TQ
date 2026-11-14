@@ -27,7 +27,7 @@ SELECTOR = 'rngSectionIllustrationSelector'
 STORAGE_DEFAULTS = {'I13', 'B85', *(f'L{row}' for row in range(71, 101))}
 EXAMPLE_INPUTS = {
     'Config': ('I106', 'I108', 'I111', 'J111', 'I112', 'J113', 'I115', 'J118'),
-    'Сечения': tuple(f'{col}{row}' for rows, columns in ((range(37, 45), 'FG'), (range(50, 58), 'FJ'))
+    'Сечения': tuple(f'{col}{row}' for rows, columns in ((range(45, 53), 'FG'), (range(58, 66), 'FJ'))
                      for row in rows for col in columns),
 }
 SAME_SHEET_LINKS = {'I19', 'I20', 'I21', 'I30'}

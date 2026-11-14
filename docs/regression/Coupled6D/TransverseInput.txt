@@ -1,0 +1,57 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\SectionInputLayout.xlsm
+SOURCE_SHA256: EEBC3F39130FCD3E5EC5BA8DECE36F227EF4DF7E66A849CA8887EED9A1935020
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_4b97d54202184acf969e66ed60d2e054\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=28316; startTicks=639302844693702539
+===== modTestCoupledTransverseRebar.RunCoupledTransverseInputTests =====
+SUITE_STARTED: modTestCoupledTransverseRebar.RunCoupledTransverseInputTests; 2026-11-14T23:21:15
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=15276; workingSet=133689344; privateBytes=86585344; cpu=15.25
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182571008; privateBytes=126558208; cpu=34.359375
+EXCEL_AFTER_SUITE: pid=28316; workingSet=144211968; privateBytes=114716672; cpu=6.359375
+OK: unfilled fourth block remains unknown
+OK: explicit no steel ignores unused numeric fields
+OK: typical contour uses configured default steel
+OK: one extra branch and unused cover
+OK: bad branch coordinate includes actual source
+TOTAL_COUPLED_TRANSVERSE_INPUT: passed=5; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_4b97d54202184acf969e66ed60d2e054\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledTransverseRebar.RunCoupledTransverseInputTests; 2026-11-14T23:21:16
+===== modTestSectionInputReader.RunSectionInputReaderTests =====
+SUITE_STARTED: modTestSectionInputReader.RunSectionInputReaderTests; 2026-11-14T23:21:17
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=15276; workingSet=133689344; privateBytes=86585344; cpu=15.25
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182571008; privateBytes=126558208; cpu=34.359375
+EXCEL_AFTER_SUITE: pid=28316; workingSet=148791296; privateBytes=119607296; cpu=8.34375
+TOTAL_SECTION_INPUT_READER: passed=107; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_4b97d54202184acf969e66ed60d2e054\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestSectionInputReader.RunSectionInputReaderTests; 2026-11-14T23:21:18
+===== modTestCoupledTransverseRebar.RunCoupledTransverseRebarTests =====
+SUITE_STARTED: modTestCoupledTransverseRebar.RunCoupledTransverseRebarTests; 2026-11-14T23:21:19
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=15276; workingSet=133689344; privateBytes=86585344; cpu=15.25
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182571008; privateBytes=126558208; cpu=34.359375
+EXCEL_AFTER_SUITE: pid=28316; workingSet=153001984; privateBytes=123449344; cpu=10.265625
+OK: empty input remains unknown
+OK: unknown does not become absence
+OK: explicit absence
+OK: circle integrated directional weights
+OK: circle mixed term
+OK: branch equivalent volume per length
+OK: opening crossing fails with source row
+OK: bar diameter intersects hole although axis stays in concrete
+OK: concentric arc too close to hole
+OK: outer hoop follows concrete with cover plus radius
+OK: opening hoop offsets into the concrete
+OK: both automatic hoop paths admit their full diameter
+TOTAL_COUPLED_TRANSVERSE: passed=12; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_4b97d54202184acf969e66ed60d2e054\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledTransverseRebar.RunCoupledTransverseRebarTests; 2026-11-14T23:21:20
+SOURCE_UNCHANGED: True

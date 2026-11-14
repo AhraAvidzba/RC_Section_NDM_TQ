@@ -154,6 +154,7 @@ function Add-GeometryTableValidation {
                 $cell=$Range.Cells.Item($r,[int]$block.Columns[$key]);$options=@()
                 if($key -like 'bind*'){$options=@('EachBar','EverySecondBar')}
                 elseif($key -like 'pos*'){$options=@('Stacked','SideBySide')}
+                elseif($block.Key -eq 'Transverse' -and $key -eq 'kind'){$options=@('Нет','Контур','Ветвь')}
                 elseif($key -eq 'endMode' -and $rowKey -notlike 'Opening*'){$options=@('IncludeBoth','ExcludeBoth','IncludeStart','IncludeEnd')}
                 elseif($block.Key -eq 'General' -and $rowKey -eq 'CornerMode' -and $key -eq 'val'){$options=@('Скругление','Фаска')}
                 $cell.Validation.Delete()
@@ -164,10 +165,10 @@ function Add-GeometryTableValidation {
                     # Прочерк показывает, что количество определяется проекцией наружной арматуры.
                 }elseif($key -eq 'n'){
                     $cell.Validation.Add(1,1,7,'0');$cell.Validation.IgnoreBlank=$true
-                }elseif($key -in @('as','d','s0','s1','d2','a2','d3','a3')){
+                }elseif($key -in @('as','d','s0','s1','d2','a2','d3','a3','spacing','cover')){
                     $cell.Validation.Add(2,1,7,'0');$cell.Validation.IgnoreBlank=$true
                 }
-                if($options.Count -or ($key -eq 'n' -and $rowKey -notlike 'Opening*') -or $key -in @('as','d','s0','s1','d2','a2','d3','a3')){$cell.Validation.ShowError=$true}
+                if($options.Count -or ($key -eq 'n' -and $rowKey -notlike 'Opening*') -or $key -in @('as','d','s0','s1','d2','a2','d3','a3','spacing','cover')){$cell.Validation.ShowError=$true}
             }
         }
     }

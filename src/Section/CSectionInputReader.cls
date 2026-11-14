@@ -244,3 +244,62 @@ End Function
 Private Sub InvalidCell(ByVal row As Long, ByVal column As Long, ByVal reason As String)
     Err.Raise vbObjectError + 5525, "CSectionInputReader", mTable.SourceReference(row, column) & " (" & mTable.Name & "): " & reason
 End Sub
+
+' Читает необязательный блок схемы хомутов выбранного сечения.
+' Пустые строки пропускаются, поля неактивных схем не читаются.
+Friend Function ReadTransverseLayout(ByVal section As CSectionModel, ByVal defaultSteelClass As String) As CTransverseRebarLayout
+    Const BLOCK_KEY As String = "Transverse"
+    Dim result As New CTransverseRebarLayout
+    EnsureIndex
+    If Not mBlocks.Exists(BLOCK_KEY) Then
+        Set ReadTransverseLayout = result
+        Exit Function
+    End If
+
+    Dim group As Variant, mode As String, rowKey As String
+    Dim diameter As Double, spacing As Double, material As String, source As String
+    For Each group In RowKeys(BLOCK_KEY)
+        rowKey = CStr(group)
+        If Not mTable.IsBlank(RowIndex(BLOCK_KEY, rowKey), ColumnIndex(BLOCK_KEY, "kind")) Then
+            mode = Choice(BLOCK_KEY, rowKey, Array("Нет", "Контур", "Ветвь"), "kind")
+            source = SourceReference(BLOCK_KEY, rowKey, "kind")
+            If mode = "Нет" Then
+                result.DeclareNone source
+            Else
+                diameter = PositiveLength(BLOCK_KEY, rowKey, "d")
+                spacing = PositiveLength(BLOCK_KEY, rowKey, "spacing")
+                material = Text(BLOCK_KEY, rowKey, "steel", defaultSteelClass)
+                If Len(material) = 0 Then Require BLOCK_KEY, rowKey, "steel", False, "Укажите класс арматуры."
+                If mode = "Контур" Then
+                    result.AddContourGroup section, rowKey, Text(BLOCK_KEY, rowKey, "loop", ""), diameter, spacing, _
+                        NonNegativeLength(BLOCK_KEY, rowKey, "cover"), material, source
+                Else
+                    result.AddGroup TransverseBranch(rowKey), diameter, spacing, material, source
+                End If
+            End If
+        End If
+    Next group
+    Set ReadTransverseLayout = result
+End Function
+
+' Разбирает четыре координаты одной прямой ветви через общий строгий разбор чисел.
+' Координаты измеряются в осях сформированного сечения, единицы берутся из ввода.
+Private Function TransverseBranch(ByVal rowKey As String) As CGeometryPath
+    Const BLOCK_KEY As String = "Transverse"
+    Dim fields As Variant, values(0 To 3) As Double, i As Long, inputValue As String
+    inputValue = Text(BLOCK_KEY, rowKey, "path")
+    fields = Split(inputValue, ";")
+    If UBound(fields) <> 3 Then Require BLOCK_KEY, rowKey, "path", False, "Введите четыре координаты x1; y1; x2; y2."
+    For i = 0 To 3
+        If Not TryReadStrictDouble(CStr(fields(i)), values(i)) Then _
+            Require BLOCK_KEY, rowKey, "path", False, "Координата " & CStr(i + 1) & " должна быть числом."
+        If Not mUnits Is Nothing Then values(i) = mUnits.InputLengthToInternal(values(i))
+    Next i
+    If modGeometryPrimitives.SamePoint(values(0), values(1), values(2), values(3)) Then _
+        Require BLOCK_KEY, rowKey, "path", False, "Концы ветви должны различаться."
+    Dim path As New CGeometryPath
+    path.Initialize rowKey
+    path.AddLine "Segment1", values(0), values(1), values(2), values(3)
+    path.Seal
+    Set TransverseBranch = path
+End Function
