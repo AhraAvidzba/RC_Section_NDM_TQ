@@ -1,0 +1,23 @@
+{
+  "BaselineSHA256": "30A2169EC630DA343A4CD4D7B39C058748EED340A5DD160A5F78A8B88E3D81B7",
+  "CandidateSHA256": "DDCEA7351D1E9E777C4062E18162F83314E53088961816E94D4497DE5E22518D",
+  "Checks": 1714,
+  "BaselineFailures": 1280,
+  "CandidateFailures": 1279,
+  "Differences": [
+    {
+      "Name": "AllNames",
+      "Before": false,
+      "After": false,
+      "BeforeValue": "Расчет!_FilterDatabase|_xlfn.IFERROR|rngBatchSummary|rngCalculationProfiles|rngCircleGeometry|rngConcreteMaterialParameters|rngCrackSummaryAnchor|rngHollowRectangleGeometry|rngLoadCombinations|rngNDMCoupledFields|rngNDMElementGeometry|rngNDMElementResultIndex|rngNDMElementResults|rngNDMMaterialDiagrams|rngNDMSectionAnnotations|rngNDMSectionContours|rngNDMSectionGeometry|rngNDMSectionProperties|rngPlotAnnotationSettings|rngPlotRebarScale|rngPointedSectionGeometry|rngRectanglesGeometry|rngSectionIllustrationSelector|rngSignConventionSettings|rngSP35Table721|rngStabilityDurationLoads|rngStabilitySummaryAnchor|rngSteelMaterialParameters|rngStrengthSummaryAnchor|rngSystemSettings|rngUnitSettings",
+      "AfterValue": "Расчет!_FilterDatabase|_xlfn.IFERROR|rngBatchSummary|rngCalculationProfiles|rngCircleGeometry|rngConcreteMaterialParameters|rngCoupledMaterialSettings|rngCrackSummaryAnchor|rngHollowRectangleGeometry|rngLoadCombinations|rngNDMCoupledFields|rngNDMElementGeometry|rngNDMElementResultIndex|rngNDMElementResults|rngNDMMaterialDiagrams|rngNDMSectionAnnotations|rngNDMSectionContours|rngNDMSectionGeometry|rngNDMSectionProperties|rngPlotAnnotationSettings|rngPlotRebarScale|rngPointedSectionGeometry|rngRectanglesGeometry|rngSectionIllustrationSelector|rngSignConventionSettings|rngSP35Table721|rngStabilityDurationLoads|rngStabilitySummaryAnchor|rngSteelMaterialParameters|rngStrengthSummaryAnchor|rngSystemSettings|rngUnitSettings"
+    },
+    {
+      "Name": "Name.rngCoupledMaterialSettings",
+      "Before": false,
+      "After": true,
+      "BeforeValue": "!",
+      "AfterValue": "Config!$H$122:$M$129"
+    }
+  ]
+}
