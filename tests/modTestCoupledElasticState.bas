@@ -222,3 +222,39 @@ Private Sub TestRecord(ByVal ok As Boolean, ByVal name As String, _
         report = report & "FAIL: " & name & vbCrLf
     End If
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет две правые части одной неспряжённой системы с заданными решениями.
+' Нулевой главный диагональный член требует смены ведущей строки.
+Public Function RunCoupledFactorizationTests() As String
+    On Error GoTo Failed
+    Dim system As New CCoupledLinearSystem
+    Dim matrix(1 To 3, 1 To 3) As Double, rhs(1 To 3) As Double
+    Dim passed As Long, failed As Long, report As String, ok As Boolean
+    matrix(2, 1) = 2#: matrix(3, 1) = 1#
+    matrix(1, 2) = 1#: matrix(2, 2) = 1#
+    matrix(1, 3) = 3#: matrix(3, 3) = 1#
+    ok = system.Factor(matrix, 3)
+    TestRecord ok, "factor pivoted matrix", passed, failed, report
+    If ok Then
+        rhs(1) = 7#: rhs(2) = 3#: rhs(3) = 6#
+        ok = system.SolveFactored(rhs)
+        TestRecord ok And Abs(rhs(1) - 1#) + Abs(rhs(2) - 2#) + Abs(rhs(3) - 3#) < 1E-12, _
+            "factor solve first vector", passed, failed, report
+        rhs(1) = 2#: rhs(2) = 3#: rhs(3) = 6#
+        ok = system.SolveFactored(rhs)
+        TestRecord ok And Abs(rhs(1) - 2#) + Abs(rhs(2) - 1#) + Abs(rhs(3)) < 1E-12, _
+            "factor solve second vector", passed, failed, report
+        TestRecord matrix(1, 1) = 0# And matrix(2, 1) = 2# And matrix(3, 3) = 1#, _
+            "original system retained", passed, failed, report
+    End If
+    Erase matrix
+    ok = system.Factor(matrix, 3)
+    TestRecord Not ok And system.FailureCode = sfcSingularTangent, "singular result", passed, failed, report
+    ok = system.SolveFactored(rhs)
+    TestRecord Not ok, "failed refactorization discards previous factors", passed, failed, report
+    RunCoupledFactorizationTests = report & "TOTAL_COUPLED_FACTORIZATION: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunCoupledFactorizationTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

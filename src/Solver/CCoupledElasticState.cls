@@ -36,6 +36,7 @@ Private mOperators() As Double ' A(компонента, локальная ст
 Private mShape() As Double ' Значение функции перемещений для правой части межволоконного равновесия.
 Private mElastic(1 To 6, 1 To 6) As Double
 Private mMatrix() As Double
+Private mSystem As CCoupledLinearSystem
 Private mLength As Double, mArea As Double
 Private mMeta As CResultMeta
 
@@ -62,6 +63,11 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     PrepareReinforcement section, transverse, steelModulus, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
+    Set mSystem = New CCoupledLinearSystem
+    If Not mSystem.Factor(mMatrix, mDof) Then
+        mMeta.SetSolverFailure mSystem.FailureCode, rkDirectState, _
+            "Не удалось подготовить линейную систему связанного сечения.", True
+    End If
 End Sub
 
 ' Решает при заданных усилиях относительно численного начала.
@@ -72,8 +78,7 @@ Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double,
         ByRef pointStress() As Double) As Boolean
     mMeta.Clear
     Erase deformation: Erase recovered: Erase pointStress
-    Dim matrix() As Double, rhs() As Double, applied() As Double, i As Long
-    matrix = mMatrix
+    Dim rhs() As Double, applied() As Double, i As Long
     ReDim rhs(1 To mDof)
     rhs(1) = n / mArea
     rhs(2) = mx / mArea / mLength
@@ -82,9 +87,8 @@ Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double,
     rhs(mGradientBase + 2) = qy / mArea
     rhs(mGradientBase + 3) = qx / mArea
     applied = rhs
-    Dim system As New CCoupledLinearSystem
-    If Not system.Solve(matrix, rhs, mDof) Then
-        mMeta.SetSolverFailure system.FailureCode, rkDirectState, _
+    If Not mSystem.SolveFactored(rhs) Then
+        mMeta.SetSolverFailure mSystem.FailureCode, rkDirectState, _
             "Не удалось решить упругие уравнения связанного сечения. Проверьте разрешение базиса и геометрию.", True
         Exit Function
     End If

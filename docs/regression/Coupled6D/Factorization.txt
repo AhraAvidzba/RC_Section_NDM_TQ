@@ -1,0 +1,53 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\TransverseRebar.xlsm
+SOURCE_SHA256: 8CD0F1D871B125BA12823F68A9BD2B7D18217CD1F4032E7F5C53E8F6A611E38B
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_7135b7e4d92e49f197e088073300241f\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=28440; startTicks=639302829215164470
+===== modTestCoupledElasticState.RunCoupledFactorizationTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledFactorizationTests; 2026-11-14T22:55:27
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182165504; privateBytes=126124032; cpu=34.109375
+EXCEL_AFTER_SUITE: pid=28440; workingSet=144248832; privateBytes=95285248; cpu=6.5
+OK: factor pivoted matrix
+OK: factor solve first vector
+OK: factor solve second vector
+OK: original system retained
+OK: singular result
+OK: failed refactorization discards previous factors
+TOTAL_COUPLED_FACTORIZATION: passed=6; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_7135b7e4d92e49f197e088073300241f\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledFactorizationTests; 2026-11-14T22:55:28
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:55:29
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182165504; privateBytes=126124032; cpu=34.109375
+EXCEL_AFTER_SUITE: pid=28440; workingSet=149639168; privateBytes=100200448; cpu=11.09375
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+OK: reinforced axial equilibrium
+OK: reinforced net axial area actual=1.44392869302254E-05 expected=1.44392868615935E-05
+OK: transverse replacement moment actual=3.91357632710054E-10 expected=3.90148757810609E-10
+TOTAL_COUPLED_ELASTIC: passed=21; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_7135b7e4d92e49f197e088073300241f\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:55:33
+SOURCE_UNCHANGED: True

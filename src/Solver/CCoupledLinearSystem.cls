@@ -12,115 +12,165 @@ Option Explicit
 ' ==========================================================================
 ' Линейная система для связанной постановки сечения
 ' ==========================================================================
-' Метод LU с выбором ведущей строки допускает неспряжённую материальную
-' касательную и множители ограничений. Переданные матрица и правая часть
-' служат рабочими буферами. Столбец является первым индексом массива VBA.
+' LU с выбором ведущей строки допускает неспряжённую касательную.
+' Готовая факторизация обслуживает несколько правых частей без повторного
+' исключения. Столбец является первым индексом матриц VBA.
 
 Private Const MIN_SCALED_PIVOT As Double = 0.000000000001
+Private mLu() As Double
+Private mColumnScale() As Double
+Private mRowScale() As Double
+Private mPivot() As Long
+Private mCount As Long
 Private mFailureCode As ESolverFailureCode
 Private mMinimumPivot As Double
 
-' Решает матрицу размера count после уравновешивания строк и столбцов.
-' Не образует обратную матрицу. При отказе значения rightHandSide непригодны.
+' Решает новую систему, сразу выполняя факторизацию и обратную подстановку.
 Friend Function Solve(ByRef matrix() As Double, ByRef rightHandSide() As Double, ByVal count As Long) As Boolean
+    If Not Factor(matrix, count) Then Exit Function
+    Solve = SolveFactored(rightHandSide)
+End Function
+
+' Факторизует копию исходной матрицы после масштабирования её столбцов
+' и строк. Предыдущая факторизация теряет силу в начале нового вызова.
+Friend Function Factor(ByRef matrix() As Double, ByVal count As Long) As Boolean
     On Error GoTo ArithmeticFailure
+    mCount = 0
     mFailureCode = sfcNone
     mMinimumPivot = 1#
+    If count < 1 Then GoTo Singular
+
+    mLu = matrix
+    ReDim mColumnScale(1 To count): ReDim mRowScale(1 To count)
+    ReDim mPivot(1 To count)
     Dim row As Long, col As Long, k As Long, pivotRow As Long
-    Dim rowMagnitude As Double, candidate As Double, pivot As Double, factor As Double
-    Dim columnScale() As Double
-    ReDim columnScale(1 To count)
+    Dim magnitude As Double, candidate As Double, pivot As Double, multiplier As Double
 
     For col = 1 To count
-        rowMagnitude = 0#
+        magnitude = 0#
         For row = 1 To count
-            candidate = Abs(matrix(col, row))
-            If candidate > rowMagnitude Then rowMagnitude = candidate
+            candidate = Abs(mLu(col, row))
+            If candidate > magnitude Then magnitude = candidate
         Next row
-        If rowMagnitude = 0# Then GoTo Singular
-        columnScale(col) = rowMagnitude
+        If magnitude = 0# Then GoTo Singular
+        mColumnScale(col) = magnitude
         For row = 1 To count
-            matrix(col, row) = matrix(col, row) / rowMagnitude
+            mLu(col, row) = mLu(col, row) / magnitude
         Next row
     Next col
     For row = 1 To count
-        rowMagnitude = 0#
+        magnitude = 0#
         For col = 1 To count
-            candidate = Abs(matrix(col, row))
-            If candidate > rowMagnitude Then rowMagnitude = candidate
+            candidate = Abs(mLu(col, row))
+            If candidate > magnitude Then magnitude = candidate
         Next col
-        If rowMagnitude = 0# Then GoTo Singular
+        If magnitude = 0# Then GoTo Singular
+        mRowScale(row) = magnitude
         For col = 1 To count
-            matrix(col, row) = matrix(col, row) / rowMagnitude
+            mLu(col, row) = mLu(col, row) / magnitude
         Next col
-        rightHandSide(row) = rightHandSide(row) / rowMagnitude
     Next row
 
     For k = 1 To count
         pivotRow = k
-        rowMagnitude = Abs(matrix(k, k))
+        magnitude = Abs(mLu(k, k))
         For row = k + 1 To count
-            candidate = Abs(matrix(k, row))
-            If candidate > rowMagnitude Then
-                rowMagnitude = candidate
+            candidate = Abs(mLu(k, row))
+            If candidate > magnitude Then
+                magnitude = candidate
                 pivotRow = row
             End If
         Next row
-        If rowMagnitude < mMinimumPivot Then mMinimumPivot = rowMagnitude
-        If rowMagnitude <= MIN_SCALED_PIVOT Then GoTo Singular
+        If magnitude < mMinimumPivot Then mMinimumPivot = magnitude
+        If magnitude <= MIN_SCALED_PIVOT Then GoTo Singular
+
+        mPivot(k) = pivotRow
         If pivotRow <> k Then
-            For col = k To count
-                candidate = matrix(col, k)
-                matrix(col, k) = matrix(col, pivotRow)
-                matrix(col, pivotRow) = candidate
+            For col = 1 To count
+                candidate = mLu(col, k)
+                mLu(col, k) = mLu(col, pivotRow)
+                mLu(col, pivotRow) = candidate
             Next col
-            candidate = rightHandSide(k)
-            rightHandSide(k) = rightHandSide(pivotRow)
-            rightHandSide(pivotRow) = candidate
         End If
-        pivot = matrix(k, k)
+        pivot = mLu(k, k)
         For row = k + 1 To count
-            If matrix(k, row) <> 0# Then
-                factor = matrix(k, row) / pivot
+            If mLu(k, row) <> 0# Then
+                multiplier = mLu(k, row) / pivot
+                mLu(k, row) = multiplier ' Строго нижняя часть хранит множители прямой подстановки.
                 For col = k + 1 To count
-                    matrix(col, row) = matrix(col, row) - factor * matrix(col, k)
+                    mLu(col, row) = mLu(col, row) - multiplier * mLu(col, k)
                 Next col
-                rightHandSide(row) = rightHandSide(row) - factor * rightHandSide(k)
             End If
         Next row
     Next k
-
-    For row = count To 1 Step -1
-        candidate = rightHandSide(row)
-        For col = row + 1 To count
-            candidate = candidate - matrix(col, row) * rightHandSide(col)
-        Next col
-        rightHandSide(row) = candidate / matrix(row, row)
-    Next row
-    For col = 1 To count
-        rightHandSide(col) = rightHandSide(col) / columnScale(col)
-    Next col
-    Solve = True
+    mCount = count
+    Factor = True
     Exit Function
 
 Singular:
     mFailureCode = sfcSingularTangent
     Exit Function
 ArithmeticFailure:
-    If Err.Number = 6 Or Err.Number = 11 Then
+    RecordArithmeticFailure Err.Number
+End Function
+
+' Решает одну правую часть подготовленной системы и восстанавливает
+' физический масштаб неизвестных. При отказе массив результата непригоден.
+Friend Function SolveFactored(ByRef rightHandSide() As Double) As Boolean
+    If mCount = 0 Then Exit Function
+    On Error GoTo ArithmeticFailure
+    mFailureCode = sfcNone
+    Dim row As Long, col As Long, pivot As Long, candidate As Double
+    For row = 1 To mCount
+        rightHandSide(row) = rightHandSide(row) / mRowScale(row)
+    Next row
+    For row = 1 To mCount
+        pivot = mPivot(row)
+        If pivot <> row Then
+            candidate = rightHandSide(row)
+            rightHandSide(row) = rightHandSide(pivot)
+            rightHandSide(pivot) = candidate
+        End If
+    Next row
+    For row = 2 To mCount
+        candidate = rightHandSide(row)
+        For col = 1 To row - 1
+            candidate = candidate - mLu(col, row) * rightHandSide(col)
+        Next col
+        rightHandSide(row) = candidate
+    Next row
+    For row = mCount To 1 Step -1
+        candidate = rightHandSide(row)
+        For col = row + 1 To mCount
+            candidate = candidate - mLu(col, row) * rightHandSide(col)
+        Next col
+        rightHandSide(row) = candidate / mLu(row, row)
+    Next row
+    For col = 1 To mCount
+        rightHandSide(col) = rightHandSide(col) / mColumnScale(col)
+    Next col
+    SolveFactored = True
+    Exit Function
+
+ArithmeticFailure:
+    RecordArithmeticFailure Err.Number
+End Function
+
+' Сохраняет машинную причину численной или внутренней ошибки арифметики.
+Private Sub RecordArithmeticFailure(ByVal errorNumber As Long)
+    If errorNumber = 6 Or errorNumber = 11 Then
         mFailureCode = sfcNumericalFailure
     Else
         mFailureCode = sfcInternalError
     End If
-    Err.Clear
-End Function
+End Sub
 
-' Возвращает код отказа последней факторизации или sfcNone после решения.
+' Возвращает код отказа вычисления или sfcNone после решения.
 Friend Property Get FailureCode() As ESolverFailureCode
     FailureCode = mFailureCode
 End Property
 
-' Возвращает диагностический минимум модулей масштабированных ведущих элементов.
+' Возвращает минимум модулей масштабированных ведущих элементов.
 Friend Property Get MinimumPivot() As Double
     MinimumPivot = mMinimumPivot
 End Property
