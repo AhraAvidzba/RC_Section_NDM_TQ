@@ -119,6 +119,26 @@ Friend Sub EvaluateShape(ByVal x As Double, ByVal y As Double, ByRef indices() A
     Next iy
 End Sub
 
+' Возвращает отсортированные параметры деления аналитического сегмента
+' линиями внутренних узлов обеих осей квадратуры.
+Friend Sub PathCuts(ByRef edge As TRegionEdge, ByRef cuts() As Double, ByRef count As Long)
+    Erase cuts: count = 0
+    modGeometryPrimitives.AddScalar cuts, count, 0#
+    modGeometryPrimitives.AddScalar cuts, count, 1#
+    Dim i As Long, spans As Long, minimum As Double, stepValue As Double
+    spans = mSplineX.Count - 3
+    minimum = mGeometry.MinX: stepValue = mGeometry.Width / spans
+    For i = 1 To spans - 1
+        modGeometryPrimitives.HalfPlaneCuts edge, 1#, 0#, minimum + stepValue * i, cuts, count
+    Next i
+    spans = mSplineY.Count - 3
+    minimum = mGeometry.MinY: stepValue = mGeometry.Height / spans
+    For i = 1 To spans - 1
+        modGeometryPrimitives.HalfPlaneCuts edge, 0#, 1#, minimum + stepValue * i, cuts, count
+    Next i
+    modGeometryPrimitives.SortScalars cuts, count
+End Sub
+
 ' Возвращает число функций до исключения неактивной опоры вне бетона.
 Friend Property Get BasisCount() As Long
     BasisCount = mSplineX.Count * mSplineY.Count

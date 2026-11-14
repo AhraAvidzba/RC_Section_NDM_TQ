@@ -1,0 +1,34 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\TransverseRebar.xlsm
+SOURCE_SHA256: EA2080BA1DE689DAF199928C3C8361FE22D8F7BA120DA8083999BF2D117F7549
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_3615a4c154404895b6f75dea3eadaece\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=29052; startTicks=639302820150895819
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:40:21
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182210560; privateBytes=126205952; cpu=34
+EXCEL_AFTER_SUITE: pid=29052; workingSet=145453056; privateBytes=96518144; cpu=8.78125
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+TOTAL_COUPLED_ELASTIC: passed=18; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_3615a4c154404895b6f75dea3eadaece\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:40:24
+SOURCE_UNCHANGED: True

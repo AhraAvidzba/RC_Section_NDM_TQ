@@ -722,7 +722,7 @@ Public Function ClipHalfPlane(ByVal region As CConcreteRegion, ByVal nx As Doubl
         Erase cuts: cutCount = 0
         modGeometryPrimitives.AddScalar cuts, cutCount, 0#: modGeometryPrimitives.AddScalar cuts, cutCount, 1#
         modGeometryPrimitives.HalfPlaneCuts raw(i), nx, ny, bound, cuts, cutCount
-        SortScalars cuts, cutCount
+        modGeometryPrimitives.SortScalars cuts, cutCount
         For j = 1 To cutCount
             modGeometryPrimitives.EdgePoint raw(i), cuts(j), x, y
             If Abs(nx * x + ny * y - bound) <= QUERY_TOLERANCE Then _
@@ -740,7 +740,7 @@ Public Function ClipHalfPlane(ByVal region As CConcreteRegion, ByVal nx As Doubl
         Next j
     Next i
 
-    SortScalars lineCuts, lineCount ' Между соседними пересечениями принадлежность постоянна. Проверяем саму середину: фиксированное смещение может перескочить узкий сегмент.
+    modGeometryPrimitives.SortScalars lineCuts, lineCount ' Между соседними пересечениями принадлежность постоянна. Проверяем саму середину: фиксированное смещение может перескочить узкий сегмент.
     Dim s1 As Double, s2 As Double, mid As Double
     For i = 1 To lineCount - 1
         s1 = lineCuts(i): s2 = lineCuts(i + 1): mid = 0.5 * (s1 + s2)
@@ -805,7 +805,7 @@ Public Function MaterialRegionThroughPlane(ByVal region As CConcreteRegion, ByVa
             modGeometryPrimitives.AddScalar transverseCuts, transverseCount, -ny * x + nx * y
         Next j
     Next i
-    SortScalars transverseCuts, transverseCount
+    modGeometryPrimitives.SortScalars transverseCuts, transverseCount
     Dim piece As TRegionEdge, tangentX As Double, tangentY As Double, length As Double
     Dim leftInside As Boolean, rightInside As Boolean, seen As Object
     Set seen = CreateObject("Scripting.Dictionary")
@@ -815,7 +815,7 @@ Public Function MaterialRegionThroughPlane(ByVal region As CConcreteRegion, ByVa
         For j = 1 To transverseCount
             modGeometryPrimitives.HalfPlaneCuts raw(i), -ny, nx, transverseCuts(j), cuts, cutCount
         Next j
-        SortScalars cuts, cutCount
+        modGeometryPrimitives.SortScalars cuts, cutCount
         For j = 1 To cutCount - 1
             modGeometryPrimitives.SubEdge raw(i), cuts(j), cuts(j + 1), piece
             If modGeometryPrimitives.EdgeLength(piece) > QUERY_TOLERANCE Then
@@ -853,7 +853,7 @@ Public Function MaterialRegionThroughPlane(ByVal region As CConcreteRegion, ByVa
                 Next j
             Next k
             modGeometryPrimitives.AddScalar nCuts, nCount, seedPlane
-            SortScalars nCuts, nCount
+            modGeometryPrimitives.SortScalars nCuts, nCount
             For j = 1 To nCount - 1
                 n1 = nCuts(j): n2 = nCuts(j + 1)
                 If n2 > n1 + QUERY_TOLERANCE Then
@@ -963,34 +963,41 @@ Friend Function LabelBoundaryDistance(ByVal region As CConcreteRegion, ByVal x A
     Next i
 End Function
 
+' Проверяет весь путь внутри бетона и зазор до наружных контуров и отверстий.
+' Минимальный зазор измеряется от оси стержня до точной границы.
+Friend Function PathWithinConcrete(ByVal region As CConcreteRegion, ByVal path As CGeometryPath, _
+        ByVal requiredClearance As Double, ByRef failedSegment As String) As Boolean
+    RequireRegion region
+    If path Is Nothing Then GeometryError "Не передан путь для проверки в бетонной области."
+    If Not path.IsSealed Then GeometryError "Путь для проверки должен быть завершён."
+    If requiredClearance <= QUERY_TOLERANCE Then GeometryError "Не задан положительный зазор от оси пути до границы бетона."
+    Dim boundary() As TRegionEdge, count As Long
+    region.CopyEdges boundary, count
+    Dim segment As TRegionEdge, i As Long, j As Long
+    Dim bound As Double
+    bound = requiredClearance - QUERY_TOLERANCE
+    For i = 1 To path.SegmentCount
+        path.CopySegment i, segment
+        failedSegment = path.SegmentID(i)
+        If Not ContainsRaw(boundary, count, segment.X1, segment.Y1, False) Then Exit Function
+        For j = 1 To count
+            If modGeometryPrimitives.EdgeMinimumDistance(segment, boundary(j)) < bound Then Exit Function
+        Next j
+    Next i
+    failedSegment = vbNullString
+    PathWithinConcrete = True
+End Function
+
 ' Минимальное расстояние до фактической границы из отрезков и дуг.
 ' Проверка полного диска стержня дополняет, но не заменяет ContainsPoint.
 Public Function BoundaryDistance(ByVal region As CConcreteRegion, ByVal x As Double, ByVal y As Double) As Double
     RequireRegion region
-    Dim edges() As TRegionEdge, count As Long, i As Long, dx As Double, dy As Double
-    Dim u As Double, px As Double, py As Double, norm As Double, radius As Double, distance As Double
+    Dim edges() As TRegionEdge, count As Long, i As Long
     region.CopyEdges edges, count
     If count = 0 Then GeometryError "У пустой области нет расстояния до границы."
     BoundaryDistance = 1E+100
     For i = 1 To count
-        distance = Sqr((x - edges(i).X1) ^ 2 + (y - edges(i).Y1) ^ 2)
-        distance = GeomMin(distance, Sqr((x - edges(i).X2) ^ 2 + (y - edges(i).Y2) ^ 2))
-        If edges(i).Sweep = 0# Then
-            dx = edges(i).X2 - edges(i).X1: dy = edges(i).Y2 - edges(i).Y1
-            u = ((x - edges(i).X1) * dx + (y - edges(i).Y1) * dy) / (dx * dx + dy * dy)
-            u = GeomMax(0#, GeomMin(1#, u))
-            modGeometryPrimitives.EdgePoint edges(i), u, px, py
-            distance = Sqr((x - px) ^ 2 + (y - py) ^ 2)
-        Else
-            dx = x - edges(i).CenterX: dy = y - edges(i).CenterY
-            norm = Sqr(dx * dx + dy * dy)
-            radius = Sqr((edges(i).X1 - edges(i).CenterX) ^ 2 + (edges(i).Y1 - edges(i).CenterY) ^ 2)
-            If norm > QUERY_TOLERANCE Then
-                px = edges(i).CenterX + radius * dx / norm: py = edges(i).CenterY + radius * dy / norm
-                If modGeometryPrimitives.PointParameter(edges(i), px, py, u) Then distance = GeomMin(distance, Abs(norm - radius))
-            End If
-        End If
-        BoundaryDistance = GeomMin(BoundaryDistance, distance)
+        BoundaryDistance = GeomMin(BoundaryDistance, modGeometryPrimitives.PointEdgeDistance(x, y, edges(i)))
     Next i
 End Function
 
@@ -1370,7 +1377,7 @@ Friend Function MeshBoundaryCrossesCell(ByRef edges() As TRegionEdge, ByVal coun
         modGeometryPrimitives.HalfPlaneCuts edges(i), 1#, 0#, maxX, cuts, cutCount
         modGeometryPrimitives.HalfPlaneCuts edges(i), 0#, 1#, minY, cuts, cutCount
         modGeometryPrimitives.HalfPlaneCuts edges(i), 0#, 1#, maxY, cuts, cutCount
-        SortScalars cuts, cutCount
+        modGeometryPrimitives.SortScalars cuts, cutCount
         For j = 1 To cutCount - 1
             modGeometryPrimitives.EdgePoint edges(i), (cuts(j) + cuts(j + 1)) / 2#, x, y
             If x > minX + QUERY_TOLERANCE And x < maxX - QUERY_TOLERANCE And _
@@ -1413,7 +1420,7 @@ Public Function LineIntervals(ByVal region As CConcreteRegion, ByVal pointX As D
         Next j
     Next i
     If cutCount < 2 Then Exit Function
-    SortScalars cuts, cutCount
+    modGeometryPrimitives.SortScalars cuts, cutCount
     Dim answer() As Double, answerCount As Long, lo As Double, hi As Double
     ReDim answer(1 To cutCount, 1 To 2)
     For i = 1 To cutCount - 1
@@ -1956,7 +1963,7 @@ Private Sub NormalizeBoundary(ByRef raw() As TRegionEdge, ByVal rawCount As Long
         For j = 1 To rawCount
             If i <> j Then modGeometryPrimitives.EdgeIntersectionCuts raw(i), raw(j), cuts, cutCount
         Next j
-        SortScalars cuts, cutCount
+        modGeometryPrimitives.SortScalars cuts, cutCount
         For k = 1 To cutCount - 1
             modGeometryPrimitives.SubEdge raw(i), cuts(k), cuts(k + 1), part
             If modGeometryPrimitives.EdgeLength(part) > QUERY_TOLERANCE Then
@@ -2222,20 +2229,6 @@ Private Sub CopyArray(ByRef source() As TRegionEdge, ByVal count As Long, ByRef 
     Dim i As Long
     For i = 1 To count
         LSet destination(i) = source(i)
-    Next i
-End Sub
-
-' Сортирует небольшой массив параметров точек пересечения без создания отдельного объекта на
-' точку.
-Private Sub SortScalars(ByRef values() As Double, ByVal count As Long)
-    Dim i As Long, j As Long, value As Double
-    For i = 2 To count
-        value = values(i): j = i - 1
-        Do While j >= 1
-            If values(j) <= value Then Exit Do
-            values(j + 1) = values(j): j = j - 1
-        Loop
-        values(j + 1) = value
     Next i
 End Sub
 

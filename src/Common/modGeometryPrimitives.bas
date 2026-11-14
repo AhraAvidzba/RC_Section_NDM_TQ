@@ -280,3 +280,91 @@ End Function
 Private Sub GeometryError(ByVal reason As String)
     Err.Raise vbObjectError + 5401, "modGeometryPrimitives", reason
 End Sub
+
+' Возвращает минимальное расстояние пары аналитических отрезков или дуг.
+' После проверки пересечения минимум достигается на конце одного сегмента
+' либо в стационарной паре с общими нормалями внутри обоих сегментов.
+Public Function EdgeMinimumDistance(ByRef first As TRegionEdge, ByRef second As TRegionEdge) As Double
+    Dim cuts() As Double, count As Long
+    EdgeIntersectionCuts first, second, cuts, count
+    If count > 0 Then Exit Function
+    Dim result As Double
+    result = PointEdgeDistance(first.X1, first.Y1, second)
+    result = GeomMin(result, PointEdgeDistance(first.X2, first.Y2, second))
+    result = GeomMin(result, PointEdgeDistance(second.X1, second.Y1, first))
+    result = GeomMin(result, PointEdgeDistance(second.X2, second.Y2, first))
+    If first.Sweep = 0# Then
+        If second.Sweep <> 0# Then AccumulateLineArcDistance first, second, result
+    ElseIf second.Sweep = 0# Then
+        AccumulateLineArcDistance second, first, result
+    Else
+        AccumulateArcPairDistance first, second, result
+    End If
+    EdgeMinimumDistance = result
+End Function
+
+' Возвращает расстояние точки до сегмента с учётом ограниченных концов дуги.
+Public Function PointEdgeDistance(ByVal x As Double, ByVal y As Double, ByRef edge As TRegionEdge) As Double
+    Dim dx As Double, dy As Double, u As Double, px As Double, py As Double
+    PointEdgeDistance = Sqr(GeomMin((x - edge.X1) ^ 2 + (y - edge.Y1) ^ 2, _
+        (x - edge.X2) ^ 2 + (y - edge.Y2) ^ 2))
+    If edge.Sweep = 0# Then
+        dx = edge.X2 - edge.X1: dy = edge.Y2 - edge.Y1
+        u = ((x - edge.X1) * dx + (y - edge.Y1) * dy) / (dx * dx + dy * dy)
+        If u > 0# And u < 1# Then
+            EdgePoint edge, u, px, py
+            PointEdgeDistance = Sqr((x - px) ^ 2 + (y - py) ^ 2)
+        End If
+    Else
+        dx = x - edge.CenterX: dy = y - edge.CenterY
+        Dim distance As Double, radius As Double
+        distance = Sqr(dx * dx + dy * dy)
+        If distance <= QUERY_TOLERANCE Then Exit Function
+        radius = EdgeLength(edge) / Abs(edge.Sweep)
+        px = edge.CenterX + radius * dx / distance: py = edge.CenterY + radius * dy / distance
+        If PointParameter(edge, px, py, u) Then PointEdgeDistance = GeomMin(PointEdgeDistance, Abs(distance - radius))
+    End If
+End Function
+
+' Внутренние кандидаты пары отрезок–дуга лежат на нормали к прямой через центр дуги.
+Private Sub AccumulateLineArcDistance(ByRef line As TRegionEdge, ByRef arc As TRegionEdge, ByRef result As Double)
+    Dim length As Double, radius As Double, nx As Double, ny As Double
+    length = EdgeLength(line)
+    radius = EdgeLength(arc) / Abs(arc.Sweep)
+    nx = -(line.Y2 - line.Y1) / length: ny = (line.X2 - line.X1) / length
+    Dim sign As Long, x As Double, y As Double, u As Double
+    For sign = -1 To 1 Step 2
+        x = arc.CenterX + sign * radius * nx: y = arc.CenterY + sign * radius * ny
+        If PointParameter(arc, x, y, u) Then result = GeomMin(result, PointEdgeDistance(x, y, line))
+    Next sign
+End Sub
+
+' Общие внутренние нормали двух окружностей проходят по линии их центров.
+' При совпавших центрах перекрытие углов учитывается проекциями концов.
+Private Sub AccumulateArcPairDistance(ByRef first As TRegionEdge, ByRef second As TRegionEdge, ByRef result As Double)
+    Dim dx As Double, dy As Double, distance As Double, radius As Double
+    dx = second.CenterX - first.CenterX: dy = second.CenterY - first.CenterY
+    distance = Sqr(dx * dx + dy * dy)
+    If distance <= QUERY_TOLERANCE Then Exit Sub
+    radius = EdgeLength(first) / Abs(first.Sweep)
+    Dim sign As Long, x As Double, y As Double, u As Double
+    For sign = -1 To 1 Step 2
+        x = first.CenterX + sign * radius * dx / distance
+        y = first.CenterY + sign * radius * dy / distance
+        If PointParameter(first, x, y, u) Then result = GeomMin(result, PointEdgeDistance(x, y, second))
+    Next sign
+End Sub
+
+' Сортирует небольшой массив параметров точек пересечения без создания отдельного объекта на
+' точку.
+Public Sub SortScalars(ByRef values() As Double, ByVal count As Long)
+    Dim i As Long, j As Long, value As Double
+    For i = 2 To count
+        value = values(i): j = i - 1
+        Do While j >= 1
+            If values(j) <= value Then Exit Do
+            values(j + 1) = values(j): j = j - 1
+        Loop
+        values(j + 1) = value
+    Next i
+End Sub

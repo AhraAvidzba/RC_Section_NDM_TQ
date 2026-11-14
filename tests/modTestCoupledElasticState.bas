@@ -75,11 +75,73 @@ Public Function RunCoupledElasticStateTests() As String
         TestExpectNear deformation(4), TORQUE_VALUE / (SHEAR_MODULUS * torsion), MAX_RELATIVE_ERROR, _
             "annulus twist", passed, failed, report
     End If
+    TestAsymmetricSixComponents passed, failed, report
     RunCoupledElasticStateTests = report & "TOTAL_COUPLED_ELASTIC: passed=" & CStr(passed) & "; failed=" & CStr(failed)
     Exit Function
 Failed:
+    TestAsymmetricSixComponents passed, failed, report
     RunCoupledElasticStateTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет совместную нагрузку на невыпуклом контуре с эксцентричным
+' отверстием. Независимые упругие N, Mx, My получены из точных A, I и Ixy.
+' Упругая суперпозиция дополнительно проверяется во всех материальных точках.
+Private Sub TestAsymmetricSixComponents(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const E_MODULUS As Double = 32000#
+    Dim query As New CSectionGeometryQuery, region As CConcreteRegion
+    Dim outline As CGeometryPath
+    Set outline = query.AdjacentRectangles("AsymmetricSix", Array( _
+        Array(-100#, -80#, 200#, 100#), Array(-100#, 20#, 135#, 80#)))
+    Set region = query.SubtractContainedRegion(query.RegionFromPath(outline), query.CircleRegion(-40#, -24#, 21#))
+    Dim geometry As New CGeometryRegion, section As CSectionModel
+    geometry.Initialize region
+    Set section = TestBuildSection(geometry)
+    Dim solver As New CCoupledElasticState
+    solver.PrepareModel section, E_MODULUS, 0#, 3, 3, 9
+
+    Dim combined() As Double, resultants() As Double, stress() As Double
+    Dim ok As Boolean, force As Double, mx As Double, my As Double, torque As Double, qx As Double, qy As Double
+    force = -52000#: mx = 3100000#: my = -1900000#: torque = 2200000#: qx = 4400#: qy = -3700#
+    ok = solver.Solve(force, mx, my, torque, qx, qy, combined, resultants, stress)
+    TestRecordSolve ok, "asymmetric perforated all six", solver, passed, failed, report
+    If Not ok Then Exit Sub
+    Dim properties As TGeometryProperties, originX As Double, originY As Double, meshArea As Double
+    query.RegionProperties region, properties
+    section.ConcreteMeshCentroid originX, originY, meshArea
+    Dim dx As Double, dy As Double, centralMx As Double, centralMy As Double
+    dx = properties.CentroidX - originX: dy = properties.CentroidY - originY
+    centralMx = mx - force * dy: centralMy = my - force * dx
+    Dim determinant As Double, kx As Double, ky As Double, eps0 As Double
+    determinant = properties.Ixc * properties.Iyc - properties.Ixyc ^ 2
+    kx = (centralMx * properties.Iyc - centralMy * properties.Ixyc) / (E_MODULUS * determinant)
+    ky = (centralMy * properties.Ixc - centralMx * properties.Ixyc) / (E_MODULUS * determinant)
+    eps0 = force / (E_MODULUS * properties.Area) - kx * dy - ky * dx
+    TestExpectNear combined(1), eps0, 0.015, "asymmetric axial strain", passed, failed, report
+    TestExpectNear combined(2), kx, 0.015, "asymmetric x curvature", passed, failed, report
+    TestExpectNear combined(3), ky, 0.015, "asymmetric y curvature", passed, failed, report
+
+    Dim torquePart() As Double, shearPart() As Double, normalPart() As Double
+    Dim plane() As Double
+    ok = solver.Solve(0#, 0#, 0#, torque, 0#, 0#, plane, resultants, torquePart)
+    TestRecordSolve ok, "asymmetric pure torque", solver, passed, failed, report
+    If Not ok Then Exit Sub
+    ok = solver.Solve(0#, 0#, 0#, 0#, qx, qy, plane, resultants, shearPart)
+    TestRecordSolve ok, "asymmetric biaxial shear", solver, passed, failed, report
+    If Not ok Then Exit Sub
+    ok = solver.Solve(force, mx, my, 0#, 0#, 0#, plane, resultants, normalPart)
+    TestRecordSolve ok, "asymmetric normal forces", solver, passed, failed, report
+    If Not ok Then Exit Sub
+    Dim k As Long, p As Long, fieldError As Double, maximumStress As Double
+    For p = 1 To UBound(stress, 2)
+        For k = 1 To UBound(stress, 1)
+            maximumStress = GeomMax(maximumStress, Abs(stress(k, p)))
+            fieldError = GeomMax(fieldError, Abs(stress(k, p) - torquePart(k, p) - shearPart(k, p) - normalPart(k, p)))
+        Next k
+    Next p
+    TestRecord fieldError <= 1E-10 * maximumStress, "asymmetric component superposition error=" & CStr(fieldError), _
+        passed, failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Передаёт достоверные границы диска и кольца через рабочую модель сечения.
