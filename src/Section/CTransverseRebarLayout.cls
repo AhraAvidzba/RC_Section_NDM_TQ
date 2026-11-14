@@ -58,6 +58,28 @@ Public Sub AddGroup(ByVal path As CGeometryPath, ByVal diameter As Double, _
     mSourceReference(mCount) = sourceReference
 End Sub
 
+' Готовит ось хомута по выбранной достоверной границе. Пустой ID допускается
+' для единственного наружного контура; слой задан до поверхности стержня.
+Public Sub AddContourGroup(ByVal section As CSectionModel, ByVal groupID As String, ByVal loopID As String, _
+        ByVal diameter As Double, ByVal spacing As Double, ByVal cover As Double, ByVal steelClass As String, _
+        Optional ByVal sourceReference As String = vbNullString)
+    If section Is Nothing Then InputError sourceReference, "Сначала сформируйте бетонное сечение."
+    If diameter <= 0# Then InputError sourceReference, "Диаметр поперечной арматуры должен быть положительным."
+    If cover < 0# Then InputError sourceReference, "Защитный слой поперечной арматуры должен быть неотрицательным."
+    Dim query As New CSectionGeometryQuery, selected As CGeometryPath, axis As CGeometryPath
+    On Error GoTo InvalidContour
+    Set selected = query.MaterialContourPath(section.Contours, loopID)
+    Set axis = query.OffsetPath(groupID, selected, cover + diameter / 2#)
+    Dim outline As CConcreteRegion
+    Set outline = query.RegionFromPath(axis)
+    query.ValidatePreparedBoundary outline
+    On Error GoTo 0
+    AddGroup axis, diameter, spacing, steelClass, sourceReference
+    Exit Sub
+InvalidContour:
+    InputError sourceReference, "Не удалось построить ось хомута " & groupID & ". " & Err.Description
+End Sub
+
 ' Готовит запас места для параметров групп без перестройки на каждой строке.
 Private Sub ReserveGroup()
     If mCapacity = 0 Then

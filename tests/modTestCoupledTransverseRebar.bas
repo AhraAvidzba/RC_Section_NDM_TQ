@@ -78,6 +78,25 @@ Public Function RunCoupledTransverseRebarTests() As String
     layout.AddGroup path, 8#, 125#, "A400"
     TestExpect Len(TestFailure(bars, layout, quadrature)) > 0, _
         "concentric arc too close to hole", passed, failed, report
+    Set layout = New CTransverseRebarLayout
+    layout.AddContourGroup section, "OuterCover", "", 8#, 85#, 12#, "A400"
+    Set path = layout.Path(1)
+    TestExpect path.IsClosed And Abs(path.Length - 592#) < 1E-8, _
+        "outer hoop follows concrete with cover plus radius", passed, failed, report
+    Dim openingID As String
+    For i = 1 To section.Contours.Count
+        If section.Contours.LoopRole(i) = "Opening" Then
+            openingID = section.Contours.LoopID(i)
+            Exit For
+        End If
+    Next i
+    layout.AddContourGroup section, "OpeningCover", openingID, 8#, 120#, 13#, "A400"
+    Set path = layout.Path(2)
+    TestExpect path.IsClosed And Abs(path.Length - 78# * GEOM_PI) < 1E-8, _
+        "opening hoop offsets into the concrete", passed, failed, report
+    bars.Prepare layout, quadrature
+    TestExpect bars.Count > 0, "both automatic hoop paths admit their full diameter", passed, failed, report
+
     RunCoupledTransverseRebarTests = report & "TOTAL_COUPLED_TRANSVERSE: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:

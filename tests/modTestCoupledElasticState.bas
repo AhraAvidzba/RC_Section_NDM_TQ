@@ -76,10 +76,12 @@ Public Function RunCoupledElasticStateTests() As String
             "annulus twist", passed, failed, report
     End If
     TestAsymmetricSixComponents passed, failed, report
+    TestReinforcedElasticReplacement passed, failed, report
     RunCoupledElasticStateTests = report & "TOTAL_COUPLED_ELASTIC: passed=" & CStr(passed) & "; failed=" & CStr(failed)
     Exit Function
 Failed:
     TestAsymmetricSixComponents passed, failed, report
+    TestReinforcedElasticReplacement passed, failed, report
     RunCoupledElasticStateTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
@@ -141,6 +143,45 @@ Private Sub TestAsymmetricSixComponents(ByRef passed As Long, ByRef failed As Lo
     Next p
     TestRecord fieldError <= 1E-10 * maximumStress, "asymmetric component superposition error=" & CStr(fieldError), _
         passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' При ν=0 связь осевого растяжения с поперечными деформациями отсутствует.
+' Продольный стержень замещает бетон своей площадью, поперечная ветвь
+' исключает свой объём бетона и не передаёт продольное усилие.
+Private Sub TestReinforcedElasticReplacement(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const E_CONCRETE As Double = 32000#
+    Const E_STEEL As Double = 200000#
+    Const force As Double = 15000#
+    Const barArea As Double = 100#
+    Dim geometry As CGeometryRegion, section As CSectionModel
+    Set geometry = TestFixtureBox(200#, 160#)
+    Set section = TestBuildSection(geometry)
+    section.AddRebarElement 0#, 0#, Sqr(4# * barArea / GEOM_PI), barArea, "A400"
+    Dim layout As New CTransverseRebarLayout
+    Dim geometryBuilder As New CSectionDefinitionBuilder
+    Dim branch As CGeometryPath
+    geometryBuilder.Initialize "TestElasticBranch"
+    Set branch = geometryBuilder.LinePath("TopBranch", -55#, 30#, 55#, 30#)
+    layout.AddGroup branch, 8#, 90#, "A400"
+
+    Dim solver As New CCoupledElasticState
+    solver.PrepareModel section, E_CONCRETE, 0#, 2, 2, 9, layout, E_STEEL
+    Dim deformation() As Double, resultants() As Double, stress() As Double
+    Dim ok As Boolean
+    ok = solver.Solve(force, 0#, 0#, 0#, 0#, 0#, deformation, resultants, stress)
+    TestRecordSolve ok, "reinforced axial equilibrium", solver, passed, failed, report
+    If Not ok Then Exit Sub
+    Dim removed As Double, centroidY As Double, axial As Double, bending As Double, cross As Double
+    removed = GEOM_PI * 16# * 110# / 90#
+    centroidY = 30#
+    axial = E_CONCRETE * (200# * 160# - removed) + (E_STEEL - E_CONCRETE) * barArea
+    bending = E_CONCRETE * (200# * 160# ^ 3 / 12# - removed * centroidY ^ 2)
+    cross = -E_CONCRETE * removed * centroidY
+    TestExpectNear deformation(1), force * bending / (axial * bending - cross ^ 2), 1E-6, _
+        "reinforced net axial area", passed, failed, report
+    TestExpectNear deformation(2), -force * cross / (axial * bending - cross ^ 2), 0.01, _
+        "transverse replacement moment", passed, failed, report
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

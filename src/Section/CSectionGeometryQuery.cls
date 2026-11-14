@@ -1188,6 +1188,70 @@ Public Function RegionFromPath(ByVal path As CGeometryPath) As CConcreteRegion
     Set RegionFromPath = BoundaryRegion(edges, path.SegmentCount)
 End Function
 
+' Возвращает достоверный замкнутый контур в направлении «бетон слева».
+' Один наружный контур можно выбрать без ID. Для нескольких нужен явный ID.
+Friend Function MaterialContourPath(ByVal contours As CSectionContours, ByVal loopID As String) As CGeometryPath
+    If contours Is Nothing Then GeometryError "В сечении нет достоверных контуров."
+    Dim i As Long, chosenID As String, kind As String, opening As Boolean
+    chosenID = Trim$(loopID)
+    If Len(chosenID) = 0 Then
+        For i = 1 To contours.Count
+            If StrComp(contours.LoopRole(i), "Outer", vbTextCompare) = 0 Then
+                If Len(chosenID) = 0 Then
+                    chosenID = contours.LoopID(i)
+                ElseIf StrComp(chosenID, contours.LoopID(i), vbTextCompare) <> 0 Then
+                    GeometryError "У сечения несколько наружных контуров. Выберите ID контура для хомута."
+                End If
+            End If
+        Next i
+        If Len(chosenID) = 0 Then GeometryError "У сечения нет достоверного наружного контура. Задайте фактический путь хомута."
+    End If
+
+    Dim selected As New CSectionContours
+    For i = 1 To contours.Count
+        If StrComp(contours.LoopID(i), chosenID, vbTextCompare) = 0 Then
+            kind = contours.SegmentType(i)
+            opening = (StrComp(contours.LoopRole(i), "Opening", vbTextCompare) = 0)
+            Select Case kind
+                Case "CONTOUR_LINE"
+                    selected.AddContourLine contours.ContourID(i), contours.StartX(i), contours.StartY(i), _
+                        contours.EndX(i), contours.EndY(i), loopID:=chosenID, loopRole:=contours.LoopRole(i)
+                Case "CONTOUR_ARC"
+                    selected.AddContourArc contours.ContourID(i), contours.StartX(i), contours.StartY(i), _
+                        contours.EndX(i), contours.EndY(i), contours.CenterX(i), contours.CenterY(i), _
+                        contours.Radius(i), contours.SweepAngle(i), loopID:=chosenID, loopRole:=contours.LoopRole(i)
+                Case "CONTOUR_CIRCLE"
+                    selected.AddContourCircle contours.ContourID(i), contours.StartX(i), contours.StartY(i), _
+                        contours.Radius(i), loopID:=chosenID, loopRole:=contours.LoopRole(i)
+            End Select
+        End If
+    Next i
+    If selected.Count = 0 Then GeometryError "Не найден достоверный контур " & chosenID & "."
+
+    Dim outer() As TRegionEdge, holes() As TRegionEdge, edges() As TRegionEdge
+    Dim outerCount As Long, holeCount As Long, edgeCount As Long, loops As Long
+    ReadMaterialContours selected, outer, outerCount, holes, holeCount
+    If outerCount > 0 And holeCount > 0 Then GeometryError "Один ID присвоен наружному контуру и отверстию."
+    If opening Then
+        edgeCount = holeCount
+        StitchLoops holes, holeCount, edges, loops, True
+    Else
+        edgeCount = outerCount
+        StitchLoops outer, outerCount, edges, loops, True
+    End If
+    If loops <> 1 Then GeometryError "Выбранный ID должен определять один замкнутый контур."
+    ValidateSimpleBoundary edges, edgeCount
+
+    Dim path As New CGeometryPath
+    path.Initialize chosenID
+    For i = 1 To edgeCount
+        path.Append chosenID & "." & CStr(i), edges(i)
+    Next i
+    path.Seal True
+    If (SignedLoopArea(edges, edgeCount, 1) > 0#) = opening Then Set path = path.Reversed
+    Set MaterialContourPath = path
+End Function
+
 ' Строит общую границу смежных прямоугольников без наложения их площадей.
 ' Фигуры с пересекающимися внутренними частями отклоняются; итог должен иметь
 ' одну наружную границу.

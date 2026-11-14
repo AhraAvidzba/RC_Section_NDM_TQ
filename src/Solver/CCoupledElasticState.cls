@@ -14,7 +14,8 @@ Option Explicit
 ' ==========================================================================
 ' Реализует слабое равновесие локальной модели Bairán для однородной
 ' изотропной среды. Используется для верификации кинематики и границ.
-' Прочность, армирование и история материала определяются отдельно.
+' Арматура даёт направленный вклад с вычитанием объёма замещённого бетона.
+' Прочность и история материала определяются отдельно.
 
 Private Const PLANE_DOF As Long = 4
 Private Const STRESS_COMPONENTS As Long = 6
@@ -26,6 +27,8 @@ Private mDof As Long
 Private mGradientBase As Long
 Private mGaugeBase As Long
 Private mPointCount As Long
+Private mConcreteCount As Long
+Private mSteelModulus() As Double, mSteelDirection() As Double
 Private mSupport() As Long
 Private mSectionDof() As Long
 Private mX() As Double, mY() As Double, mWeight() As Double
@@ -39,7 +42,9 @@ Private mMeta As CResultMeta
 ' Подготавливает упругую систему и её геометрические операторы один раз.
 ' Координаты, обобщённые перемещения и силы нормированы по длине и площади.
 Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double, ByVal poisson As Double, _
-        ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long)
+        ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
+        Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
+        Optional ByVal steelModulus As Double = 0#)
     Set mMeta = New CResultMeta
     mArea = 0#
     If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
@@ -52,7 +57,9 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     SetElasticTensor modulus, poisson
     Dim indices() As Long, dx() As Double, dy() As Double
     mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy
-    mPointCount = UBound(mWeight)
+    mConcreteCount = UBound(mWeight)
+    mPointCount = mConcreteCount
+    PrepareReinforcement section, transverse, steelModulus, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
 End Sub
@@ -102,7 +109,8 @@ Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double,
     Solve = True
 End Function
 
-' Возвращает координаты расчётной точки в исходных осях и её вес, мм².
+' Возвращает координаты точки в исходных осях и её вес, мм².
+' После бетонных точек идут поправки замещения бетона объёмом арматуры.
 Friend Sub Point(ByVal index As Long, ByRef x As Double, ByRef y As Double, ByRef area As Double)
     x = mX(index) * mLength + mQuadrature.Frame.OriginX
     y = mY(index) * mLength + mQuadrature.Frame.OriginY
@@ -128,13 +136,88 @@ Private Sub SetElasticTensor(ByVal modulus As Double, ByVal poisson As Double)
     Next i
 End Sub
 
+' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
+' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
+Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
+        ByVal steelModulus As Double, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
+    Erase mSteelModulus: Erase mSteelDirection
+    Dim bars As New CTransverseRebarQuadrature
+    If Not transverse Is Nothing Then bars.Prepare transverse, mQuadrature
+    Dim last As Long, i As Long, point As Long, k As Long
+    last = mConcreteCount + section.RebarCount + bars.Count
+    If last = mConcreteCount Then Exit Sub
+    If steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+        "Для упругой проверки армированного сечения задайте положительный модуль стали."
+    ReDim Preserve mX(1 To last): ReDim Preserve mY(1 To last): ReDim Preserve mWeight(1 To last)
+    ReDim Preserve indices(1 To SHAPE_COUNT, 1 To last): ReDim Preserve mShape(1 To SHAPE_COUNT, 1 To last)
+    ReDim Preserve dx(1 To SHAPE_COUNT, 1 To last): ReDim Preserve dy(1 To SHAPE_COUNT, 1 To last)
+    ReDim mSteelModulus(mConcreteCount + 1 To last)
+    ReDim mSteelDirection(1 To STRESS_COMPONENTS, mConcreteCount + 1 To last)
+
+    Dim frame As CSectionNumericalFrame, region As CConcreteRegion, query As New CSectionGeometryQuery
+    Set frame = mQuadrature.Frame
+    Set region = mQuadrature.Region
+    Dim x As Double, y As Double, area As Double, diameter As Double
+    Dim txx As Double, tyy As Double, txy As Double, group As Long
+    Dim localIndices(1 To SHAPE_COUNT) As Long, localValues(1 To SHAPE_COUNT) As Double
+    Dim localX(1 To SHAPE_COUNT) As Double, localY(1 To SHAPE_COUNT) As Double
+    For point = mConcreteCount + 1 To last
+        i = point - mConcreteCount
+        If i <= section.RebarCount Then
+            section.RebarElementForSolver i, x, y, area
+            diameter = section.RebarDiameter(i)
+            If Not query.ContainsPoint(region, x, y, False) Or _
+                    query.BoundaryDistance(region, x, y) < diameter / 2# - GEOM_BOUNDARY_TOLERANCE Then
+                Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+                    "Продольный стержень " & section.RebarID(i) & " не помещается в области бетона."
+            End If
+            x = x - frame.OriginX: y = y - frame.OriginY
+            mSteelDirection(3, point) = 1#
+        Else
+            bars.Point i - section.RebarCount, x, y, area, txx, tyy, txy, group
+            mSteelDirection(1, point) = txx
+            mSteelDirection(2, point) = tyy
+            mSteelDirection(4, point) = txy
+        End If
+        mX(point) = x: mY(point) = y: mWeight(point) = area
+        mSteelModulus(point) = steelModulus
+        mQuadrature.EvaluateShape x, y, localIndices, localValues, localX, localY
+        For k = 1 To SHAPE_COUNT
+            indices(k, point) = localIndices(k)
+            mShape(k, point) = localValues(k)
+            dx(k, point) = localX(k)
+            dy(k, point) = localY(k)
+        Next k
+    Next point
+    mPointCount = last
+End Sub
+
+' Подставляет в рабочую матрицу закон Гука либо приращение материала
+' от замены объёма бетона одноосной арматурой. Бетон учитывается один раз.
+Private Sub PointTangent(ByVal point As Long, ByRef tangent() As Double)
+    Dim j As Long, k As Long
+    If point <= mConcreteCount Then
+        For j = 1 To STRESS_COMPONENTS
+            For k = 1 To STRESS_COMPONENTS
+                tangent(j, k) = mElastic(j, k)
+            Next k
+        Next j
+    Else
+        For j = 1 To STRESS_COMPONENTS
+            For k = 1 To STRESS_COMPONENTS
+                tangent(j, k) = mSteelModulus(point) * mSteelDirection(j, point) * mSteelDirection(k, point) - mElastic(j, k)
+            Next k
+        Next j
+    End If
+End Sub
+
 ' Нумерует базис с ненулевой опорой и сохраняет его локальные производные.
 ' Физические градиенты переводятся к коэффициентам u/L, v/L и w/L.
 Private Sub PrepareOperators(ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
     ReDim mSupport(1 To mQuadrature.BasisCount)
     Dim i As Long, k As Long, globalIndex As Long, active As Long
     For i = 1 To mPointCount
-        mArea = mArea + mWeight(i)
+        If i <= mConcreteCount Then mArea = mArea + mWeight(i)
         For k = 1 To SHAPE_COUNT
             globalIndex = indices(k, i)
             If mSupport(globalIndex) = 0 Then
@@ -194,15 +277,17 @@ Private Sub Assemble()
     Dim i As Long, a As Long, b As Long, j As Long, k As Long
     Dim row As Long, col As Long, localCount As Long, component As Long
     Dim product As Double, weighted() As Double
+    Dim tangent(1 To STRESS_COMPONENTS, 1 To STRESS_COMPONENTS) As Double
     localCount = UBound(mSectionDof, 1)
     ReDim weighted(1 To STRESS_COMPONENTS, 1 To localCount)
     For i = 1 To mPointCount
+        PointTangent i, tangent
         For b = 1 To localCount
             If mSectionDof(b, i) > 0 Then
                 For j = 1 To STRESS_COMPONENTS
                     product = 0#
                     For k = 1 To STRESS_COMPONENTS
-                        product = product + mElastic(j, k) * mOperators(k, b, i)
+                        product = product + tangent(j, k) * mOperators(k, b, i)
                     Next k
                     weighted(j, b) = product * mWeight(i)
                 Next j
@@ -249,6 +334,7 @@ Private Sub AssembleTraction(ByVal point As Long, ByVal k As Long, ByVal compone
         mMatrix(mGradientBase + b, row) = mMatrix(mGradientBase + b, row) - _
             mShape(k, point) * weighted(stressIndex, b)
     Next b
+    If point > mConcreteCount Then Exit Sub ' Ограничение жёстких перемещений интегрируется по всей исходной области один раз.
     factor = mShape(k, point) * mWeight(point)
     AddGauge row, mGaugeBase + component, factor
     If component = 1 Then AddGauge row, mGaugeBase + 4, -mY(point) * factor
@@ -282,7 +368,9 @@ Private Sub RecoverFields(ByRef solution() As Double, ByRef recovered() As Doubl
     ReDim stress(1 To STRESS_COMPONENTS, 1 To mPointCount)
     Dim i As Long, j As Long, k As Long, a As Long, degree As Long
     Dim strain(1 To STRESS_COMPONENTS) As Double, contribution As Double, area As Double
+    Dim tangent(1 To STRESS_COMPONENTS, 1 To STRESS_COMPONENTS) As Double
     For i = 1 To mPointCount
+        PointTangent i, tangent
         For j = 1 To STRESS_COMPONENTS
             strain(j) = 0#
         Next j
@@ -297,7 +385,7 @@ Private Sub RecoverFields(ByRef solution() As Double, ByRef recovered() As Doubl
         Next a
         For j = 1 To STRESS_COMPONENTS
             For k = 1 To STRESS_COMPONENTS
-                stress(j, i) = stress(j, i) + mElastic(j, k) * strain(k)
+                stress(j, i) = stress(j, i) + tangent(j, k) * strain(k)
             Next k
         Next j
         area = mArea * mWeight(i)
