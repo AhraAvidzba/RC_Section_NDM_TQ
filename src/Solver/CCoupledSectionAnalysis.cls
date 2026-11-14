@@ -26,14 +26,16 @@ Private mProvider As CMaterialModelProvider, mOperators As CCoupledElasticState
 Private mRevision As Long, mProviderRevision As Long, mMaxIterations As Long
 Private mPoisson As Double, mGt As Double, mGc As Double, mLength As Double
 Private mYieldRatio As Double, mPeakStrain As Double, mSteelClass As String
-Private mEb As Double, mEs As Double, mCenterX As Double, mCenterY As Double
+Private mEb As Double, mCenterX As Double, mCenterY As Double
+Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели по набору характеристик, ссылки применённых классов.
+Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
 
 ' Принимает калибровку в мм, МПа и Н/мм, а размеры деформаций в долях единицы.
 ' Геометрия и диаграммы остаются неизменными между строками текущего пакета.
 Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
         ByVal provider As CMaterialModelProvider, ByVal poisson As Double, ByVal gt As Double, ByVal gc As Double, _
         ByVal localizationLength As Double, ByVal yieldRatio As Double, ByVal peakStrain As Double, _
-        ByVal steelClass As String, ByVal maxIterations As Long)
+        ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing)
     If section Is Nothing Or transverse Is Nothing Or provider Is Nothing Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Передайте сечение, поперечное армирование и параметры материалов."
     If Not transverse.IsSpecified Then _
@@ -41,14 +43,22 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     If poisson < 0# Or poisson >= 0.5 Or gt <= 0# Or gc <= 0# Or localizationLength <= 0# Or _
             yieldRatio <= 0# Or yieldRatio >= 1# Or peakStrain <= 0# Or maxIterations < 1 Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Проверьте коэффициент Пуассона, энергии, характерную длину и параметры пика бетона."
-    If Len(Trim$(steelClass)) = 0 And (section.RebarCount > 0 Or transverse.Count > 0) Then _
-        Err.Raise 5, "CCoupledSectionAnalysis", "Укажите класс стали, которому соответствуют сопротивления и деформации на Config."
-
     Set mSection = section: Set mTransverse = transverse: Set mProvider = provider
     mRevision = section.Revision: mProviderRevision = provider.Revision
     mPoisson = poisson: mGt = gt: mGc = gc: mLength = localizationLength
     mYieldRatio = yieldRatio: mPeakStrain = peakStrain
     mSteelClass = Trim$(steelClass): mMaxIterations = maxIterations
+    Set mSupplementarySteel = supplementarySteel
+    Set mSteelCache = CreateObject("Scripting.Dictionary")
+    Set mOperatorCache = CreateObject("Scripting.Dictionary")
+    Set mSteelReferences = CreateObject("Scripting.Dictionary"): mSteelReferences.CompareMode = vbTextCompare
+    Dim i As Long
+    For i = 1 To section.RebarCount
+        RegisterSteelClass section.RebarSteelClass(i), "rngNDMSectionGeometry, стержень " & section.RebarID(i)
+    Next i
+    For i = 1 To transverse.Count
+        RegisterSteelClass transverse.SteelClass(i), transverse.SourceReference(i)
+    Next i
     Set mOperators = Nothing
     Dim area As Double
     section.ConcreteMeshCentroid mCenterX, mCenterY, area
@@ -73,7 +83,8 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     End If
 
     On Error GoTo InvalidMaterialOrGeometry
-    PrepareOperators spec
+    Dim models As Object: Set models = SteelModels(spec)
+    PrepareOperators spec, models
     Set meta = mOperators.ResultMeta
     If meta.InternalStatus <> rsUnset Then Set SolveTarget = meta: Exit Function
     Dim concrete As New CCoupledConcreteResponse, fc As Double, ft As Double
@@ -81,7 +92,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
     concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
     Dim response As New CCoupledReinforcedResponse
-    response.Initialize mOperators, concrete, SteelModels(spec)
+    response.Initialize mOperators, concrete, models
     On Error GoTo 0
 
     Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation
@@ -113,32 +124,77 @@ InvalidMaterialOrGeometry:
     End If
 End Function
 
-' Подготавливает общий базис и интегрирование. Модули входят в ключ
-' операторов, поэтому смена набора профиля требует точного совпадения.
-Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec)
-    Dim eb As Double, es As Double
-    eb = mProvider.ConcreteElasticModulusFromSpec(spec)
-    es = mProvider.SteelElasticModulusFromSpec(spec)
-    If Not mOperators Is Nothing And eb = mEb And es = mEs Then Exit Sub
-    Dim prepared As New CCoupledElasticState
-    prepared.PrepareModel mSection, eb, mPoisson, 1, 1, 5, mTransverse, es
-    Set mOperators = prepared: mEb = eb: mEs = es
+' Готовит операторы с модулями фактически назначенных моделей. Профили
+' с одним набором материалов переиспользуют готовые операторы запуска.
+Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As Object)
+    Dim key As String: key = spec.ValueSetText
+    mEb = mProvider.ConcreteElasticModulusFromSpec(spec)
+    If mOperatorCache.Exists(key) Then
+        Set mOperators = mOperatorCache(key)
+    Else
+        Dim prepared As New CCoupledElasticState
+        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models
+        mOperatorCache.Add key, prepared
+        Set mOperators = prepared
+    End If
 End Sub
 
-' Сопоставляет единственной диаграмме Config только явно заданный класс стали.
-' Другие классы не получают сопротивления от этой диаграммы.
+' Запоминает место задания класса для сообщения при отсутствии его модели.
+Private Sub RegisterSteelClass(ByVal grade As String, ByVal inputLocation As String)
+    If Len(grade) = 0 Then Err.Raise vbObjectError + 1780, "CCoupledSectionAnalysis", _
+        "Укажите класс арматуры в геометрии сечения (" & inputLocation & ")."
+    If Not mSteelReferences.Exists(grade) Then mSteelReferences.Add grade, inputLocation
+End Sub
+
+' Возвращает только применённые классы для набора характеристик профиля.
+' Ошибка строки одного набора не мешает использованию другого набора.
 Private Function SteelModels(ByVal spec As CMaterialModelSpec) As Object
+    Dim key As String: key = spec.ValueSetText
+    If mSteelCache.Exists(key) Then Set SteelModels = mSteelCache(key): Exit Function
+
+    Dim available As Object
+    If Not mSupplementarySteel Is Nothing Then
+        If mSupplementarySteel.Exists(key) Then Set available = mSupplementarySteel(key)
+    End If
     Dim models As Object: Set models = CreateObject("Scripting.Dictionary")
     models.CompareMode = vbTextCompare
-    If mOperators.PointCount > mOperators.ConcretePointCount Then
-        Dim model As New CCoupledSteelModel, slope As Double
-        slope = mProvider.PlateauSlopeFactor * mEs
-        model.Initialize mEs, mProvider.SteelTensionResistanceFromSpec(spec), _
-            mProvider.SteelCompressionResistanceFromSpec(spec), slope, slope, _
-            mProvider.SteelTensionLimitFromSpec(spec), -mProvider.SteelCompressionLimitFromSpec(spec) ' Поставщик возвращает сжатие со знаком минус, закон стали принимает модуль деформации.
-        models.Add mSteelClass, model
-    End If
+    Dim grade As Variant, model As CCoupledSteelModel
+    For Each grade In mSteelReferences.Keys
+        If StrComp(CStr(grade), mSteelClass, vbTextCompare) = 0 Then
+            Set model = PrimarySteelModel(spec)
+        Else
+            Set model = SupplementarySteelModel(available, CStr(grade), key)
+        End If
+        models.Add grade, model
+    Next grade
+    mSteelCache.Add key, models
     Set SteelModels = models
+End Function
+
+' Использует штатную двухлинейную диаграмму для явно сопоставленного класса.
+Private Function PrimarySteelModel(ByVal spec As CMaterialModelSpec) As CCoupledSteelModel
+    Dim es As Double, slope As Double, model As New CCoupledSteelModel
+    es = mProvider.SteelElasticModulusFromSpec(spec)
+    If mProvider.SteelParameters.Esc <> es Then Err.Raise vbObjectError + 1780, "CCoupledSectionAnalysis", _
+        "Для связанного расчёта задайте одинаковый модуль Es при растяжении и сжатии (rngSteelMaterialParameters)."
+    slope = mProvider.PlateauSlopeFactor * es
+    model.Initialize es, mProvider.SteelTensionResistanceFromSpec(spec), _
+        mProvider.SteelCompressionResistanceFromSpec(spec), slope, slope, _
+        mProvider.SteelTensionLimitFromSpec(spec), -mProvider.SteelCompressionLimitFromSpec(spec) ' Поставщик возвращает знаковый предел сжатия.
+    Set PrimarySteelModel = model
+End Function
+
+' Объясняет отсутствие диаграммы с указанием класса, профиля и геометрии.
+Private Function SupplementarySteelModel(ByVal available As Object, ByVal grade As String, ByVal key As String) As CCoupledSteelModel
+    If Not available Is Nothing Then
+        If available.Exists(grade) Then
+            If Not IsObject(available(grade)) Then Err.Raise vbObjectError + 1780, "CCoupledSectionAnalysis", CStr(available(grade))
+            Set SupplementarySteelModel = available(grade)
+            Exit Function
+        End If
+    End If
+    Err.Raise vbObjectError + 1780, "CCoupledSectionAnalysis", _
+        "Для класса «" & grade & "» (" & mSteelReferences(grade) & ") заполните строку " & key & " в rngCoupledSteelClasses на Config."
 End Function
 
 ' Для Auto пропорционально наращивает шесть усилий. Явные траектории

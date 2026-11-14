@@ -42,6 +42,14 @@
       "Columns": 6
     },
     {
+      "Name": "rngCoupledSteelClasses",
+      "RefersTo": "=Config!$H$132:$N$140",
+      "Sheet": "Config",
+      "Address": "$H$132:$N$140",
+      "Rows": 9,
+      "Columns": 7
+    },
+    {
       "Name": "rngCrackSummaryAnchor",
       "RefersTo": "=Results!$A$85",
       "Sheet": "Results",

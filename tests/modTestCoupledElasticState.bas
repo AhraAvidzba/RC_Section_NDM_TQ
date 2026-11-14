@@ -965,6 +965,58 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает жёсткость при двух классах с независимым интегралом EA.
+' Симметричные пары исключают изгиб, коэффициент Пуассона бетона равен нулю.
+Public Function RunTestCoupledSteelClasses() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const EB As Double = 30000#, ES_PRIMARY As Double = 200000#, ES_SECONDARY As Double = 165000#
+    Const LOAD_N As Double = 30000#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim barArea As Double: barArea = GEOM_PI * 36#
+    section.AddRebarElement -30#, 0#, 12#, barArea, "A400"
+    section.AddRebarElement 30#, 0#, 12#, barArea, "A400"
+    section.AddRebarElement 0#, -30#, 12#, barArea, "A240"
+    section.AddRebarElement 0#, 30#, 12#, barArea, "A240"
+    Dim layout As New CTransverseRebarLayout: layout.DeclareNone "Test no hoops"
+
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    concrete.Initialize 30#, 3#, 30#, 3#, EB, EB, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, ES_PRIMARY, ES_PRIMARY
+    Dim provider As New CMaterialModelProvider: provider.TestInitializeFromParameters concrete, steel
+    Dim secondary As New CCoupledSteelModel
+    secondary.Initialize ES_SECONDARY, 240#, 220#, 0#, 0#, 0.021, 0.018
+    Dim steelByClass As Object: Set steelByClass = CreateObject("Scripting.Dictionary")
+    steelByClass.CompareMode = vbTextCompare
+    steelByClass.Add "a240", secondary
+    Dim extra As Object: Set extra = CreateObject("Scripting.Dictionary")
+    extra.Add "ULS(I)", steelByClass
+    Dim analysis As New CCoupledSectionAnalysis
+    analysis.Initialize section, layout, provider, 0#, 0.12, 80#, 125#, 0.6, 0.002, "A400", 30, extra
+
+    Dim spec As New CMaterialModelSpec, loads As New CSectionLoadState
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    loads.Initialize LOAD_N, 0#, 0#, 0#, 0#
+    Dim field() As Double, resultants() As Double, meta As CResultMeta
+    Set meta = analysis.SolveTarget(loads, "Auto", spec, field, resultants)
+    TestRecord meta.InternalStatus = rsSuccess, "mixed class equilibrium " & meta.ResultComment, passed, failed, report
+    If meta.InternalStatus = rsSuccess Then
+        Dim ea As Double
+        ea = EB * (180# * 120# - 4# * barArea) + 2# * barArea * (ES_PRIMARY + ES_SECONDARY) ' Сталь замещает тот же объём бетона.
+        TestExpectNear field(1) / (LOAD_N / ea), 1#, 0.0000001, "independent mixed-grade axial stiffness", passed, failed, report
+        TestExpectNear resultants(1), LOAD_N, 0.0000001, "mixed-grade resultant", passed, failed, report
+    End If
+    spec.Initialize "SLS(II)", "ThreeLine", "UseDiagram", "TwoLine"
+    Set meta = analysis.SolveTarget(loads, "Auto", spec, field, resultants)
+    TestRecord meta.InternalStatus = rsInvalidConfiguration And InStr(meta.ResultComment, "A240") > 0 And _
+        InStr(meta.ResultComment, "SLS(II)") > 0, "class is required for the actual material value set", passed, failed, report
+    RunTestCoupledSteelClasses = report & "TOTAL_COUPLED_STEEL_CLASSES: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledSteelClasses = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проходит обычные команды формирования и расчёта из изолированной книги.
 ' Проверяет адрес отсутствующей физики и сохранение шести усилий в Excel и File.
 Public Function RunTestCoupledWorkbookInput() As String
@@ -975,6 +1027,7 @@ Public Function RunTestCoupledWorkbookInput() As String
 
     Dim book As Object: Set book = ThisWorkbook
     Dim calibration As Object: Set calibration = book.Names.Item("rngCoupledMaterialSettings").RefersToRange
+    Dim grades As Object: Set grades = book.Names.Item("rngCoupledSteelClasses").RefersToRange
     Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
     Dim profiles As Object: Set profiles = book.Names.Item("rngCalculationProfiles").RefersToRange
     Dim loads As Object: Set loads = book.Names.Item("rngLoadCombinations").RefersToRange
@@ -982,6 +1035,9 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestRecord calibration.Cells(2, 2).Interior.Color = RGB(255, 242, 230), "calibration input fill", passed, failed, report
     TestRecord Not calibration.WrapText, "calibration text is not wrapped", passed, failed, report
     TestRecord calibration.Borders.Item(10).LineStyle <> -4142, "calibration has right border", passed, failed, report
+    TestRecord grades.Rows.Count = 9 And grades.Columns.Count = 7, "steel class catalog layout", passed, failed, report
+    TestRecord grades.Cells(2, 7).Interior.Color = RGB(255, 242, 230), "steel class input fill", passed, failed, report
+    TestRecord grades.Borders.Item(10).LineStyle <> -4142, "steel class catalog has right border", passed, failed, report
 
     TestInputCell(settings, "Geometry.Source").Value2 = "Generated"
     TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = 0#
@@ -996,6 +1052,7 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestInputCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "No"
     TestInputCell(profiles, "Calculation.Stability.Enabled", 2, pr4).Value2 = "No"
     TestInputCell(profiles, "Calculation.Crack.Width", 2, pr4).Value2 = "No"
+    TestInputCell(profiles, "MaterialModel.Strength.ValueSet", 2, pr4).Value2 = "ULS(I)"
     TestInputCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
     TestInputCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
 
@@ -1017,7 +1074,11 @@ Public Function RunTestCoupledWorkbookInput() As String
         units.InternalShearToOutput(units.InputShearToInternal(firstCase(1, 10))))
 
     Dim geometry As Object: Set geometry = book.Names.Item("rngRectanglesGeometry").RefersToRange
-    TestInputCell(geometry, "Group1").Value2 = "Нет"
+    Dim transverse As Object: Set transverse = TestInputCell(geometry, "Group1")
+    transverse.Value2 = "Ветвь"
+    transverse.Offset(0, 1).Value2 = 8# / units.InputLengthToInternal(1#)
+    transverse.Offset(0, 2).Value2 = 120# / units.InputLengthToInternal(1#)
+    transverse.Offset(0, 4).Value2 = "TestHoop"
     Dim mode As Variant, section As CSectionModel, ignored As String, gt As Object
     Set gt = TestInputCell(calibration, "Coupled.Gt")
     For Each mode In Array("Excel", "File")
@@ -1027,6 +1088,11 @@ Public Function RunTestCoupledWorkbookInput() As String
         Set section = ReadFormedSectionFromResults(book, includeMaterialDetails:=True)
         TestRecord section.RecipeType = "Rectangles", CStr(mode) & " stores recipe identity on formation", passed, failed, report
         TestRecord Len(section.RebarSteelClass(1)) > 0, CStr(mode) & " restores longitudinal steel class", passed, failed, report
+        Dim cx As Double, cy As Double, area As Double, lengthFactor As Double
+        section.ConcreteMeshCentroid cx, cy, area
+        lengthFactor = units.InputLengthToInternal(1#)
+        transverse.Offset(0, 6).Value2 = CStr((cx - 10#) / lengthFactor) & ";" & CStr(cy / lengthFactor) & ";" & _
+            CStr((cx + 10#) / lengthFactor) & ";" & CStr(cy / lengthFactor)
         TestInputCell(settings, "Geometry.Type").Value2 = "Circle" ' Изменение выбора следующей геометрии не меняет уже построенное сечение.
         gt.ClearContents
         ignored = RunSectionCalculationForWorkbook(book)
@@ -1040,6 +1106,18 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestInputCell(calibration, "Coupled.YieldRatio").Value2 = 0.6
         TestInputCell(calibration, "Coupled.PeakStrain").Value2 = 0.002
         TestInputCell(calibration, "Coupled.SteelClass").Value2 = section.RebarSteelClass(1)
+        grades.Cells(2, 1).Value2 = "TestHoop"
+        grades.Cells(2, 2).Value2 = "ULS(I)"
+        grades.Cells(2, 3).ClearContents
+        grades.Cells(2, 4).Value2 = 240#
+        grades.Cells(2, 5).Value2 = 220#
+        grades.Cells(2, 6).Value2 = 0.021
+        grades.Cells(2, 7).Value2 = 0.018
+        ignored = RunSectionCalculationForWorkbook(book)
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing hoop modulus is an input error", passed, failed, report
+        TestRecord InStr(1, ignored, grades.Worksheet.Name & "!" & grades.Cells(2, 3).Address(False, False), vbTextCompare) > 0, _
+            CStr(mode) & " invalid class value names its cell", passed, failed, report
+        grades.Cells(2, 3).Value2 = 180000#
         Dim started As Double: started = Timer
         ignored = RunSectionCalculationForWorkbook(book)
         Dim elapsed As Double: elapsed = Timer - started

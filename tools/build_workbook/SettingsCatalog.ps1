@@ -303,6 +303,7 @@ function Get-ConfigNamedRangeNames {
         "rngHollowRectangleGeometry",
         "rngConcreteMaterialParameters",
         "rngCoupledMaterialSettings",
+        "rngCoupledSteelClasses",
         "rngSteelMaterialParameters",
         "rngCalculationProfiles",
         "rngPlotAnnotationSettings",
@@ -455,6 +456,7 @@ function Apply-ConfigUserInputAlignment {
         @{ Name = "rngSteelMaterialParameters"; Columns = @(2, 3) },
         @{ Name = "rngConcreteMaterialParameters"; Columns = @(2, 3) },
         @{ Name = "rngCoupledMaterialSettings"; Columns = @(2) },
+        @{ Name = "rngCoupledSteelClasses"; Columns = @(1, 2, 3, 4, 5, 6, 7) },
         @{ Name = "rngCalculationProfiles"; Columns = @(3, 4, 5, 6) },
         @{ Name = "rngPlotAnnotationSettings"; Columns = @(2, 3) },
         @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); CommentColumns = @(7) },
@@ -3687,6 +3689,7 @@ function Apply-SystemSettingsLayout {
     Add-PlotAnnotationSettingsTable $Workbook $Sheet $rightRow $rightColumn
     $rightRow += (Get-PlotAnnotationSettingsCatalog).Count + 1 + $rightBlockGap
     Add-CoupledMaterialSettingsTable $Workbook $Sheet
+    Add-CoupledSteelClassesTable $Workbook $Sheet
 
     Add-SectionSettingsTables $Workbook $Sheet | Out-Null
 
@@ -4024,4 +4027,24 @@ function Add-CoupledMaterialSettingsTable {
     for ($r = 1; $r -le $table.Rows.Count; $r++) { $table.Cells.Item($r, 4).Resize(1, 3).Merge() }
     $table.WrapText = $false
     Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 129 13
+}
+
+# Добавляет характеристики дополнительных классов для связанного расчёта.
+# Одна строка задаёт один класс и набор ULS(I) или SLS(II). Невведённые строки пусты.
+function Add-CoupledSteelClassesTable {
+    param([object]$Workbook, [object]$Sheet)
+
+    $title = $Sheet.Range('H131:N131')
+    $title.Merge()
+    $title.Cells.Item(1, 1).Value2 = 'Дополнительные классы арматуры для связанного расчёта'
+    $title.Interior.Color = $script:ConfigGroupHeaderColor
+    $title.Font.Bold = $true
+
+    $table = $Sheet.Range('H132:N140')
+    $headers = @('Класс стали', 'Набор', 'Es, МПа', 'Rs, МПа', 'Rsc, МПа', 'εs2', 'εsc2')
+    for ($c = 0; $c -lt $headers.Count; $c++) { $table.Cells.Item(1, $c + 1).Value2 = $headers[$c] }
+    $table.Rows.Item(1).Font.Bold = $true
+    $table.Rows.Item(1).Interior.Color = $script:ConfigTableHeaderColor
+    $table.WrapText = $false
+    Set-WorkbookNameByBounds $Workbook 'rngCoupledSteelClasses' $Sheet 132 8 140 14
 }

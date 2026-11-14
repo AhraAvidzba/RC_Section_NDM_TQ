@@ -43,6 +43,12 @@ Friend Sub Initialize(ByVal elasticModulus As Double, ByVal tensionYield As Doub
     mTensionLimit = tensionLimit: mCompressionLimit = compressionLimit
 End Sub
 
+' Возвращает модуль материала для подготовки упругих операторов класса.
+' До инициализации модуль равен нулю.
+Friend Property Get ElasticModulus() As Double
+    ElasticModulus = mElasticModulus
+End Property
+
 ' Обновляет пробную точку заданной деформации. Подтверждённые пластическая
 ' деформация и обратное напряжение передаются по значению для rollback.
 Friend Sub EvaluateTrial(ByVal strain As Double, ByVal committedPlastic As Double, ByVal committedBackstress As Double, _

@@ -1,0 +1,140 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledSteelClassesProbe.xlsm
+SOURCE_SHA256: 4C484D01EB46A4DCA489710F984CF33AF329CF5107BECE6EEB8030DFEB8479B8
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_bf4aefc00870462d9ee7cdbc039f588c\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=33368; startTicks=639302910158952939
+===== RunTestCoupledSteelClasses =====
+SUITE_STARTED: RunTestCoupledSteelClasses; 2026-11-15T01:10:25
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=21240; workingSet=121008128; privateBytes=79491072; cpu=86.953125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183197696; privateBytes=127148032; cpu=35.625
+EXCEL_AFTER_SUITE: pid=33368; workingSet=149995520; privateBytes=98537472; cpu=8.6875
+OK: mixed class equilibrium Связанное равновесие подтверждено по шести усилиям.
+OK: independent mixed-grade axial stiffness actual=1 expected=1
+OK: mixed-grade resultant actual=30000 expected=30000
+OK: class is required for the actual material value set
+TOTAL_COUPLED_STEEL_CLASSES: passed=4; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_bf4aefc00870462d9ee7cdbc039f588c\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledSteelClasses; 2026-11-15T01:10:27
+===== RunTestCoupledBatchRoute =====
+SUITE_STARTED: RunTestCoupledBatchRoute; 2026-11-15T01:10:28
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=21240; workingSet=121225216; privateBytes=79892480; cpu=89.859375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183197696; privateBytes=127148032; cpu=35.625
+EXCEL_AFTER_SUITE: pid=33368; workingSet=151429120; privateBytes=99287040; cpu=12.46875
+OK: target equilibrium
+OK: planar route remains available
+OK: second independent target Несущая способность: Предельный множитель для связанного расчёта не определён.; Устойчивость: Профиль запрашивает устойчивость, для которой не подготовлена проверка при совместном действии шести усилий.
+OK: requested but unverified coupled limit is visible
+OK: requested but unverified coupled stability is visible
+OK: incomplete profile does not report overall success
+OK: both accepted vectors are available
+OK: batch equilibrium component 1 actual=13160 expected=13160
+OK: independent material history component 1
+OK: batch equilibrium component 2 actual=147580 expected=147580
+OK: independent material history component 2
+OK: batch equilibrium component 3 actual=229360 expected=229360
+OK: independent material history component 3
+OK: batch equilibrium component 4 actual=724223 expected=724223
+OK: independent material history component 4
+OK: batch equilibrium component 5 actual=7990 expected=7990
+OK: independent material history component 5
+OK: batch equilibrium component 6 actual=-3337 expected=-3337
+OK: independent material history component 6
+OK: planar result has no coupled vector
+TOTAL_COUPLED_BATCH_ROUTE: passed=20; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_bf4aefc00870462d9ee7cdbc039f588c\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledBatchRoute; 2026-11-15T01:10:31
+===== RunTestCoupledWorkbookInput =====
+SUITE_STARTED: RunTestCoupledWorkbookInput; 2026-11-15T01:10:32
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=21240; workingSet=121962496; privateBytes=79974400; cpu=106.234375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183197696; privateBytes=127148032; cpu=35.625
+EXCEL_AFTER_SUITE: pid=33368; workingSet=333283328; privateBytes=280506368; cpu=32.515625
+OK: named calibration layout
+OK: calibration input fill
+OK: calibration text is not wrapped
+OK: calibration has right border
+OK: steel class catalog layout
+OK: steel class input fill
+OK: steel class catalog has right border
+OK: Excel stores recipe identity on formation
+OK: Excel restores longitudinal steel class
+OK: Excel missing Gt is an input error
+OK: Excel missing Gt names its cell
+OK: Excel planar case unaffected by calibration
+OK: Excel missing hoop modulus is an input error
+OK: Excel invalid class value names its cell
+WORKBOOK_SECONDS Excel (two cases): 2.359375
+OK: Excel produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Предупреждение:
+Схема не обновлена. Расчётные результаты сохранены.
+
+В сохраненном снимке Results нет полного состояния или диагностических свойств сочетания Spatial (rngNDMSectionProperties, Results!S156).
+
+Повторите расчет.
+Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется.
+
+Время расчёта: 2.36 с.
+
+Данные сохранены на листе Results текущей книги.
+OK: Excel saves actual solver
+OK: Excel same saved recipe after repeated calculation
+OK: Excel saves internal N actual=-0.05 expected=-0.05
+OK: Excel saves internal Mx actual=0.001 expected=0.001
+OK: Excel saves internal My actual=-0.002 expected=-0.002
+OK: Excel saves internal T actual=0.001 expected=0.001
+OK: Excel saves internal Qx actual=0.002 expected=0.002
+OK: Excel saves internal Qy actual=-0.003 expected=-0.003
+OK: File stores recipe identity on formation
+OK: File restores longitudinal steel class
+OK: File missing Gt is an input error
+OK: File missing Gt names its cell
+OK: File planar case unaffected by calibration
+OK: File missing hoop modulus is an input error
+OK: File invalid class value names its cell
+WORKBOOK_SECONDS File (two cases): 2.4697265625
+OK: File produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена из файла «TestCoupledWorkbookInput.ndm».
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Предупреждение:
+Схема не обновлена. Расчётные результаты сохранены.
+
+В сохраненном снимке Results нет полного состояния или диагностических свойств сочетания Spatial (rngNDMSectionProperties, Results!S156).
+
+Повторите расчет.
+Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется.
+
+Время расчёта: 2.47 с.
+
+Данные сохранены в файле «TestCoupledWorkbookInput.ndm».
+OK: File saves actual solver
+OK: File same saved recipe after repeated calculation
+OK: File saves internal N actual=-0.05 expected=-0.05
+OK: File saves internal Mx actual=0.001 expected=0.001
+OK: File saves internal My actual=-0.002 expected=-0.002
+OK: File saves internal T actual=0.001 expected=0.001
+OK: File saves internal Qx actual=0.002 expected=0.002
+OK: File saves internal Qy actual=-0.003 expected=-0.003
+TOTAL_COUPLED_WORKBOOK_INPUT: passed=39; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_bf4aefc00870462d9ee7cdbc039f588c\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledWorkbookInput; 2026-11-15T01:10:50
+SOURCE_UNCHANGED: True

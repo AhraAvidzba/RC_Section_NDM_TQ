@@ -46,7 +46,7 @@ Private mMeta As CResultMeta
 Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double, ByVal poisson As Double, _
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
-        Optional ByVal steelModulus As Double = 0#)
+        Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing)
     Set mMeta = New CResultMeta
     mArea = 0#
     If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
@@ -61,7 +61,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
     mPointCount = mConcreteCount
-    PrepareReinforcement section, transverse, steelModulus, indices, dx, dy
+    PrepareReinforcement section, transverse, steelModulus, steelModels, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
     Set mSystem = New CCoupledLinearSystem
@@ -126,14 +126,14 @@ End Property
 ' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
-        ByVal steelModulus As Double, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
+        ByVal steelModulus As Double, ByVal steelModels As Object, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
     Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass
     Dim bars As New CTransverseRebarQuadrature
     If Not transverse Is Nothing Then bars.Prepare transverse, mQuadrature
     Dim last As Long, i As Long, point As Long, k As Long
     last = mConcreteCount + section.RebarCount + bars.Count
     If last = mConcreteCount Then Exit Sub
-    If steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+    If steelModels Is Nothing And steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
         "Для упругой проверки армированного сечения задайте положительный модуль стали."
     ReDim Preserve mX(1 To last): ReDim Preserve mY(1 To last): ReDim Preserve mWeight(1 To last)
     ReDim Preserve indices(1 To SHAPE_COUNT, 1 To last): ReDim Preserve mShape(1 To SHAPE_COUNT, 1 To last)
@@ -145,7 +145,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
     Dim frame As CSectionNumericalFrame, region As CConcreteRegion, query As New CSectionGeometryQuery
     Set frame = mQuadrature.Frame
     Set region = mQuadrature.Region
-    Dim x As Double, y As Double, area As Double, diameter As Double
+    Dim x As Double, y As Double, area As Double, diameter As Double, gradeModel As CCoupledSteelModel
     Dim txx As Double, tyy As Double, txy As Double, group As Long
     Dim localIndices(1 To SHAPE_COUNT) As Long, localValues(1 To SHAPE_COUNT) As Double
     Dim localX(1 To SHAPE_COUNT) As Double, localY(1 To SHAPE_COUNT) As Double
@@ -170,7 +170,16 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             mSteelClass(point) = transverse.SteelClass(group)
         End If
         mX(point) = x: mY(point) = y: mWeight(point) = area
-        mSteelModulus(point) = steelModulus
+        If steelModels Is Nothing Then
+            mSteelModulus(point) = steelModulus
+        Else
+            If Not steelModels.Exists(mSteelClass(point)) Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+                "Для класса «" & mSteelClass(point) & "» не назначена модель арматуры."
+            Set gradeModel = steelModels.Item(mSteelClass(point))
+            mSteelModulus(point) = gradeModel.ElasticModulus
+            If mSteelModulus(point) <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+                "Для класса «" & mSteelClass(point) & "» не задан положительный модуль Es."
+        End If
         mQuadrature.EvaluateShape x, y, localIndices, localValues, localX, localY
         For k = 1 To SHAPE_COUNT
             indices(k, point) = localIndices(k)

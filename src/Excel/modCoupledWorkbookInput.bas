@@ -26,15 +26,15 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
     If yieldRatio >= 1# Then CalibrationError settings, "Coupled.YieldRatio", "Введите отношение меньше 1."
     peak = PositiveCalibrationValue(settings, "Coupled.PeakStrain")
 
-    Dim steelClass As String, layout As CTransverseRebarLayout
-    If section.RebarCount > 0 Then steelClass = settings.GetRequiredString("Coupled.SteelClass")
+    Dim steelClass As String, layout As CTransverseRebarLayout, supplementary As Object
+    steelClass = settings.GetString("Coupled.SteelClass")
     Set layout = ReadSavedRecipeTransverse(workbook, section, units, steelClass)
-    If layout.Count > 0 And Len(steelClass) = 0 Then steelClass = settings.GetRequiredString("Coupled.SteelClass")
-    ValidateSavedMaterialClasses section, layout, steelClass, settings.InputLocation("Coupled.SteelClass")
+    ValidateConcreteMaterial section
+    Set supplementary = ReadSupplementarySteel(workbook, section, layout, steelClass, provider.PlateauSlopeFactor)
 
     Dim analysis As New CCoupledSectionAnalysis
     analysis.Initialize section, layout, provider, poisson, gt, gc, length, yieldRatio, peak, steelClass, _
-        settings.GetRequiredLong("Solver.MaxIterations")
+        settings.GetRequiredLong("Solver.MaxIterations"), supplementary
     batch.ConfigureCoupledAnalysis analysis
     Exit Sub
 Failed:
@@ -67,31 +67,118 @@ Private Function ReadSavedRecipeTransverse(ByVal workbook As Object, ByVal secti
         "В блоке Transverse на листе «Сечения» укажите поперечную арматуру или выберите «Нет» (" & Join(tables, ", ") & ")."
 End Function
 
-' Сверяет материалы сохранённой геометрии с фактическими калибровками.
-' Один блок Config задаёт один бетон и один класс двухлинейной стали.
-Private Sub ValidateSavedMaterialClasses(ByVal section As CSectionModel, ByVal layout As CTransverseRebarLayout, _
-        ByVal steelClass As String, ByVal classLocation As String)
-    Dim i As Long, firstConcrete As Long, material As String
+' Сверяет идентификаторы бетона, пока для всего сечения задана одна калибровка.
+Private Sub ValidateConcreteMaterial(ByVal section As CSectionModel)
+    Dim i As Long, firstConcrete As Long
     firstConcrete = section.ConcreteMaterialID(1)
     For i = 2 To section.ConcreteCount
         If section.ConcreteMaterialID(i) <> firstConcrete Then _
-            Err.Raise vbObjectError + 4194, "ValidateSavedMaterialClasses", _
+            Err.Raise vbObjectError + 4194, "ValidateConcreteMaterial", _
                 "Для связанного расчёта задана одна калибровка бетона, а в сохранённом сечении несколько ID материалов (rngNDMSectionGeometry, элемент " & section.ConcreteID(i) & ")."
     Next i
+End Sub
+
+' Читает дополнительные классы, фактически указанные в геометрии.
+' Строка хранится как готовая модель или адресная ошибка её набора ULS/SLS.
+Private Function ReadSupplementarySteel(ByVal workbook As Object, ByVal section As CSectionModel, _
+        ByVal layout As CTransverseRebarLayout, ByVal primaryClass As String, ByVal slopeFactor As Double) As Object
+    Dim needed As Object: Set needed = CreateObject("Scripting.Dictionary"): needed.CompareMode = vbTextCompare
+    Dim i As Long, grade As String
     For i = 1 To section.RebarCount
-        material = section.RebarSteelClass(i)
-        If StrComp(material, steelClass, vbTextCompare) <> 0 Then _
-            Err.Raise vbObjectError + 4194, "ValidateSavedMaterialClasses", _
-                "Класс продольного стержня «" & section.RebarID(i) & "» (rngNDMSectionGeometry) — «" & material & _
-                "». Для него нужны согласованные параметры стали (" & classLocation & ")."
+        grade = section.RebarSteelClass(i)
+        If StrComp(grade, primaryClass, vbTextCompare) <> 0 Then needed(grade) = True
     Next i
     For i = 1 To layout.Count
-        material = layout.SteelClass(i)
-        If StrComp(material, steelClass, vbTextCompare) <> 0 Then _
-            Err.Raise vbObjectError + 4194, "ValidateSavedMaterialClasses", _
-                "Для поперечной арматуры класса «" & material & "» (" & layout.SourceReference(i) & _
-                ") нужны согласованные параметры стали (" & classLocation & ")."
+        grade = layout.SteelClass(i)
+        If StrComp(grade, primaryClass, vbTextCompare) <> 0 Then needed(grade) = True
     Next i
+    If needed.Count = 0 Then Exit Function
+
+    Dim table As Object
+    On Error Resume Next
+    Set table = workbook.Names.Item("rngCoupledSteelClasses").RefersToRange
+    On Error GoTo 0
+    If table Is Nothing Then Err.Raise vbObjectError + 4194, "ReadSupplementarySteel", _
+        "На Config отсутствует таблица дополнительных классов арматуры rngCoupledSteelClasses."
+    If table.Areas.Count <> 1 Or table.Columns.Count <> 7 Or table.Rows.Count < 2 Then _
+        SteelInputError table, 1, 1, "Восстановите таблицу классов из семи столбцов."
+    Dim values As Variant: values = table.Value2
+    Dim epsilon As String: epsilon = ChrW$(&H3B5) ' Греческая буква отсутствует в штатной кодовой странице исходников VBA.
+    Dim headers As Variant: headers = Array("Класс стали", "Набор", "Es, МПа", "Rs, МПа", "Rsc, МПа", epsilon & "s2", epsilon & "sc2")
+    For i = 1 To 7
+        If IsError(values(1, i)) Then SteelInputError table, 1, i, "Исправьте заголовок столбца."
+        If CStr(values(1, i)) <> headers(i - 1) Then SteelInputError table, 1, i, "Требуется заголовок «" & headers(i - 1) & "»."
+    Next i
+
+    Dim result As Object: Set result = CreateObject("Scripting.Dictionary")
+    Dim row As Long, key As String, models As Object, classModel As CCoupledSteelModel, inputError As String
+    For row = 2 To UBound(values, 1)
+        If IsError(values(row, 1)) Then SteelInputError table, row, 1, "Исправьте обозначение класса."
+        grade = Trim$(CStr(values(row, 1)))
+        If needed.Exists(grade) And Len(grade) > 0 Then
+            key = ReadSteelValueSet(values(row, 2), table, row)
+            If Not result.Exists(key) Then
+                Set models = CreateObject("Scripting.Dictionary"): models.CompareMode = vbTextCompare
+                result.Add key, models
+            Else
+                Set models = result(key)
+            End If
+            If models.Exists(grade) Then
+                models(grade) = SteelInputMessage(table, row, 1, "Для класса «" & grade & "» и набора " & key & " задано несколько строк.")
+            Else
+                Set classModel = ReadSteelModel(values, table, row, slopeFactor, inputError)
+                If classModel Is Nothing Then
+                    models.Add grade, inputError
+                Else
+                    models.Add grade, classModel
+                End If
+            End If
+        End If
+    Next row
+    Set ReadSupplementarySteel = result
+End Function
+
+' Распознаёт обозначения наборов, используемые в существующих профилях.
+Private Function ReadSteelValueSet(ByVal value As Variant, ByVal table As Object, ByVal row As Long) As String
+    If Not IsError(value) Then
+        Select Case UCase$(Trim$(CStr(value)))
+            Case "ULS(I)": ReadSteelValueSet = "ULS(I)": Exit Function
+            Case "SLS(II)": ReadSteelValueSet = "SLS(II)": Exit Function
+        End Select
+    End If
+    SteelInputError table, row, 2, "Введите ULS(I) или SLS(II), как в расчётном профиле."
+End Function
+
+' Создаёт двухлинейный закон с модулем и сопротивлениями в МПа.
+' Числовая ошибка сохраняется только для набора, к которому относится строка.
+Private Function ReadSteelModel(ByRef data As Variant, ByVal table As Object, ByVal row As Long, _
+        ByVal slopeFactor As Double, ByRef inputError As String) As CCoupledSteelModel
+    Dim values(3 To 7) As Double, column As Long
+    On Error GoTo Failed
+    For column = 3 To 7
+        If Not TryReadStrictDouble(data(row, column), values(column)) Or values(column) <= 0# Then _
+            SteelInputError table, row, column, "Введите положительное число."
+    Next column
+    If values(6) <= values(4) / values(3) Then SteelInputError table, row, 6, "Предельная деформация растяжения должна превышать Rs/Es."
+    If values(7) <= values(5) / values(3) Then SteelInputError table, row, 7, "Предельная деформация сжатия должна превышать Rsc/Es."
+    Dim model As New CCoupledSteelModel, slope As Double
+    slope = slopeFactor * values(3)
+    model.Initialize values(3), values(4), values(5), slope, slope, values(6), values(7)
+    inputError = vbNullString
+    Set ReadSteelModel = model
+    Exit Function
+Failed:
+    inputError = Err.Description
+End Function
+
+' Возвращает адрес фактической ячейки строки класса для диагностики.
+Private Function SteelInputMessage(ByVal table As Object, ByVal row As Long, ByVal column As Long, ByVal reason As String) As String
+    SteelInputMessage = reason & " " & table.Worksheet.Name & "!" & table.Cells(row, column).Address(False, False) & " (rngCoupledSteelClasses)."
+End Function
+
+' Возвращает ошибку ключа, структуры или числового значения каталога.
+Private Sub SteelInputError(ByVal table As Object, ByVal row As Long, ByVal column As Long, ByVal reason As String)
+    Err.Raise vbObjectError + 4194, "ReadSupplementarySteel", SteelInputMessage(table, row, column, reason)
 End Sub
 
 ' Проверяет положительное значение с диагностикой по имени и адресу ячейки.
