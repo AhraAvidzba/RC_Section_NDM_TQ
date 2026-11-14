@@ -518,3 +518,69 @@ Done:
 Failed:
     RunTestCoupledContinuation = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет направленное замещение бетона, выбор разных классов и откат стали.
+' Бетон здесь аналитический, чтобы независимо вычислить поправки.
+Public Function RunTestCoupledReinforcedResponse() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, 12#, GEOM_PI * 36#, "A400"
+    Dim builder As New CSectionDefinitionBuilder, transverse As New CTransverseRebarLayout
+    builder.Initialize "TestCoupledReinforcedResponse"
+    transverse.AddGroup builder.LinePath("TestBranch", -40#, 25#, 50#, 25#), 8#, 80#, "A240"
+    Dim operators As New CCoupledElasticState
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 8, transverse, 200000#
+    Dim longSteel As New CCoupledSteelModel, transverseSteel As New CCoupledSteelModel, models As Object
+    longSteel.Initialize 200000#, 400#, 350#, 1500#, 1000#, 0.025, 0.018
+    transverseSteel.Initialize 200000#, 240#, 240#, 2000#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", longSteel: models.Add "A240", transverseSteel
+    Dim concrete As New CTestCoupledPointResponse
+    concrete.TestInitialize operators.PointCount
+    Dim material As New CCoupledReinforcedResponse, response As ICoupledPointResponse
+    material.Initialize operators, concrete, models
+    Set response = material
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    Dim firstRebar As Long, firstHoop As Long, point As Long, resultCode As ESolverFailureCode
+    firstRebar = operators.ConcretePointCount + 1: firstHoop = firstRebar + 1
+    TestRecord operators.SteelClassAt(firstRebar) = "A400" And operators.SteelClassAt(firstHoop) = "A240", _
+        "distinct material classes follow geometry", passed, failed, report
+
+    strain(1) = 0.003: strain(3) = 0.004: strain(5) = 0.001
+    For point = 1 To operators.PointCount
+        resultCode = response.EvaluatePoint(point, strain, stress, tangent)
+        If resultCode <> sfcNone Then GoTo Done
+        Select Case point
+            Case 1
+                TestExpectNear stress(3), 760#, 1E-10, "concrete integrated once", passed, failed, report
+            Case firstRebar
+                TestExpectNear stress(3), 403# - 760#, 1E-10, "longitudinal steel minus concrete", passed, failed, report
+                TestExpectNear stress(5), -15#, 1E-10, "longitudinal steel adds no transverse shear stiffness", passed, failed, report
+                TestExpectNear tangent(3, 3), 1500# - 510000#, 1E-10, "tangent of replacement", passed, failed, report
+            Case firstHoop
+                TestExpectNear stress(1), 243.6 - 90#, 1E-10, "transverse projected strain and separate steel", passed, failed, report
+                TestExpectNear stress(3), -760#, 1E-10, "transverse bar replaces concrete without axial steel", passed, failed, report
+        End Select
+    Next point
+    TestExpectNear material.TrialSteelUtilization, 0.004 / 0.025, 1E-10, "maximum steel trial utilization", passed, failed, report
+    TestRecord material.AcceptedSteelUtilization = 0#, "trial leaves accepted utilization untouched", passed, failed, report
+    response.AcceptTrial
+    TestExpectNear material.AcceptedSteelUtilization, 0.004 / 0.025, 1E-10, "accepted utilization", passed, failed, report
+
+    strain(3) = 0#: resultCode = response.EvaluatePoint(firstRebar, strain, stress, tangent)
+    TestRecord resultCode = sfcNone And Abs(stress(3)) > 300#, "unloading remembers accepted plastic history", passed, failed, report
+    strain(3) = 0.0035: resultCode = response.EvaluatePoint(firstRebar, strain, stress, tangent)
+    TestExpectNear stress(3), 303# - 533.75, 1E-10, "rejecting reverse trial preserves accepted steel", passed, failed, report
+    response.ClearHistory
+    strain(3) = 0.001: resultCode = response.EvaluatePoint(firstRebar, strain, stress, tangent)
+    TestExpectNear stress(3), 160#, 1E-10, "new combination resets steel plastic history", passed, failed, report
+Done:
+    TestRecord resultCode = sfcNone, "point evaluations converged", passed, failed, report
+    RunTestCoupledReinforcedResponse = report & "TOTAL_COUPLED_REINFORCED_RESPONSE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledReinforcedResponse = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

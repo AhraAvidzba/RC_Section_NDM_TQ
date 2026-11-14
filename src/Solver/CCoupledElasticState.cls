@@ -29,6 +29,7 @@ Private mGaugeBase As Long
 Private mPointCount As Long
 Private mConcreteCount As Long
 Private mSteelModulus() As Double, mSteelDirection() As Double
+Private mSteelClass() As String
 Private mSupport() As Long
 Private mSectionDof() As Long
 Private mX() As Double, mY() As Double, mWeight() As Double
@@ -140,7 +141,7 @@ End Sub
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
         ByVal steelModulus As Double, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
-    Erase mSteelModulus: Erase mSteelDirection
+    Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass
     Dim bars As New CTransverseRebarQuadrature
     If Not transverse Is Nothing Then bars.Prepare transverse, mQuadrature
     Dim last As Long, i As Long, point As Long, k As Long
@@ -152,6 +153,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
     ReDim Preserve indices(1 To SHAPE_COUNT, 1 To last): ReDim Preserve mShape(1 To SHAPE_COUNT, 1 To last)
     ReDim Preserve dx(1 To SHAPE_COUNT, 1 To last): ReDim Preserve dy(1 To SHAPE_COUNT, 1 To last)
     ReDim mSteelModulus(mConcreteCount + 1 To last)
+    ReDim mSteelClass(mConcreteCount + 1 To last)
     ReDim mSteelDirection(1 To STRESS_COMPONENTS, mConcreteCount + 1 To last)
 
     Dim frame As CSectionNumericalFrame, region As CConcreteRegion, query As New CSectionGeometryQuery
@@ -173,11 +175,13 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             End If
             x = x - frame.OriginX: y = y - frame.OriginY
             mSteelDirection(3, point) = 1#
+            mSteelClass(point) = section.RebarSteelClass(i)
         Else
             bars.Point i - section.RebarCount, x, y, area, txx, tyy, txy, group
             mSteelDirection(1, point) = txx
             mSteelDirection(2, point) = tyy
             mSteelDirection(4, point) = txy
+            mSteelClass(point) = transverse.SteelClass(group)
         End If
         mX(point) = x: mY(point) = y: mWeight(point) = area
         mSteelModulus(point) = steelModulus
@@ -395,6 +399,11 @@ Friend Function WarpingAt(ByVal x As Double, ByVal y As Double, ByRef field() As
     Next k
     WarpingAt = WarpingAt * mLength ' Коэффициенты внутренних перемещений нормированы по габариту.
 End Function
+
+' Возвращает класс материала конкретного продольного или поперечного стержня.
+Friend Property Get SteelClassAt(ByVal point As Long) As String
+    SteelClassAt = mSteelClass(point)
+End Property
 
 ' Возвращает проекцию деформации на ось стержня. Точка находится после бетона.
 Friend Sub SteelProjection(ByVal point As Long, ByRef direction() As Double)

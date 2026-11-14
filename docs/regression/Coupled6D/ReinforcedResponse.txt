@@ -1,0 +1,88 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledReinforcedResponse.xlsm
+SOURCE_SHA256: 7FB366E27AC6C27590A120F7242A0253B91B69020627F3B22C4037E8D6AEF8F3
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_ce0f54b30e9a43b58d8a151181073601\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=32180; startTicks=639302871741301921
+===== modTestCoupledElasticState.RunTestCoupledReinforcedResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledReinforcedResponse; 2026-11-15T00:06:20
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182595584; privateBytes=126513152; cpu=34.859375
+EXCEL_AFTER_SUITE: pid=32180; workingSet=143986688; privateBytes=96202752; cpu=6.578125
+OK: distinct material classes follow geometry
+OK: concrete integrated once actual=760 expected=760
+OK: longitudinal steel minus concrete actual=-357 expected=-357
+OK: longitudinal steel adds no transverse shear stiffness actual=-15 expected=-15
+OK: tangent of replacement actual=-508500 expected=-508500
+OK: transverse projected strain and separate steel actual=153.6 expected=153.6
+OK: transverse bar replaces concrete without axial steel actual=-760 expected=-760
+OK: maximum steel trial utilization actual=0.16 expected=0.16
+OK: trial leaves accepted utilization untouched
+OK: accepted utilization actual=0.16 expected=0.16
+OK: unloading remembers accepted plastic history
+OK: rejecting reverse trial preserves accepted steel actual=-230.75 expected=-230.75
+OK: new combination resets steel plastic history actual=160 expected=160
+OK: point evaluations converged
+TOTAL_COUPLED_REINFORCED_RESPONSE: passed=14; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_ce0f54b30e9a43b58d8a151181073601\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledReinforcedResponse; 2026-11-15T00:06:21
+===== modTestCoupledElasticState.RunTestCoupledContinuation =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledContinuation; 2026-11-15T00:06:22
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182636544; privateBytes=126595072; cpu=34.859375
+EXCEL_AFTER_SUITE: pid=32180; workingSet=147968000; privateBytes=99991552; cpu=13.578125
+OK: constant part reached Доля постоянной части: 1; lambda: 0; принято: 3; отклонено: 2; проб: 5
+OK: preload resultant actual=388800.001779631 expected=388800
+OK: preload reduced an unsafe increment and reached its exact target
+OK: direction reached Доля постоянной части: 1; lambda: 1; принято: 3; отклонено: 2; проб: 5
+OK: path component 1 actual=1000000 expected=1000000
+OK: path component 2 actual=199999.999999995 expected=200000
+OK: path component 3 actual=99999.999999996 expected=100000
+OK: path component 4 actual=300000 expected=300000
+OK: path component 5 actual=2000 expected=2000
+OK: path component 6 actual=-1000 expected=-1000
+OK: direction reduced an unsafe increment and reached exact lambda
+OK: minimum step failure stays numerical at last accepted lambda
+OK: failed increments leave accepted section and history unchanged
+OK: recovered path can continue
+OK: history cannot be reversed by moving lambda back
+OK: zero load returns a confirmed state
+OK: independent zero load starts with a virgin history
+TOTAL_COUPLED_CONTINUATION: passed=17; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_ce0f54b30e9a43b58d8a151181073601\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledContinuation; 2026-11-15T00:06:28
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-15T00:06:29
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182636544; privateBytes=126595072; cpu=34.859375
+EXCEL_AFTER_SUITE: pid=32180; workingSet=146714624; privateBytes=98131968; cpu=18.25
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+OK: reinforced axial equilibrium
+OK: reinforced net axial area actual=1.44392869302254E-05 expected=1.44392868615935E-05
+OK: transverse replacement moment actual=3.91357632710054E-10 expected=3.90148757810609E-10
+TOTAL_COUPLED_ELASTIC: passed=21; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_ce0f54b30e9a43b58d8a151181073601\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-15T00:06:33
+SOURCE_UNCHANGED: True
