@@ -939,7 +939,8 @@ Public Function RunTestCoupledBatchRoute() As String
     TestRecord plane.DirectStateMeta.InternalStatus = rsSuccess, "planar route remains available " & plane.OverallMeta.ResultComment, passed, failed, report
     TestRecord second.DirectStateMeta.InternalStatus = rsSuccess, "second independent target " & second.OverallMeta.ResultComment, passed, failed, report
     TestRecord second.CapacityMeta.InternalStatus = rsInvalidConfiguration, "requested but unverified coupled limit is visible", passed, failed, report
-    TestRecord second.StabilityMeta.InternalStatus = rsInvalidConfiguration, "requested but unverified coupled stability is visible", passed, failed, report
+    TestRecord second.StabilityMeta.InternalStatus = rsNotApplicable And InStr(second.StabilityMeta.ResultComment, "Mx") > 0, _
+        "tension preserves the standard stability status and scope", passed, failed, report
     TestRecord second.OverallMeta.InternalStatus = rsInvalidConfiguration, "incomplete profile does not report overall success", passed, failed, report
 
     Dim actual() As Double, repeated() As Double, target() As Double, i As Long
@@ -962,6 +963,64 @@ Public Function RunTestCoupledBatchRoute() As String
     Exit Function
 Failed:
     RunTestCoupledBatchRoute = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет действующие проверки СП в плоском и пространственном сочетаниях
+' при одинаковых N, Mx, My. В профиле отсутствует запрос связанного НДС.
+Public Function RunTestCoupledTraditionalChecks() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(300#, 400#))
+    Dim x As Variant, y As Variant
+    For Each x In Array(-85#, 85#)
+        For Each y In Array(-150#, 150#)
+            section.AddRebarElement CDbl(x), CDbl(y), 20#, GEOM_PI * 100#, "A400"
+        Next y
+    Next x
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    concrete.Initialize 18#, 1.3, 26#, 1.9, 32000#, 32000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    Dim provider As New CMaterialModelProvider: provider.TestInitializeFromParameters concrete, steel
+    Dim profiles As New CCalculationProfileCatalog
+    profiles.LoadFromWorkbook ThisWorkbook, False
+    Dim checkProfile As CCalculationProfile: Set checkProfile = profiles.ProfileById("PR4")
+    checkProfile.Initialize "PR4", "Test traditional checks", "", False, False, True, True
+    checkProfile.SetStabilityValueSet "ULS(I)"
+    Dim materialSpec As New CMaterialModelSpec
+    materialSpec.Initialize "SLS(II)", "ThreeLine", "UseDiagram", "TwoLine"
+    checkProfile.SetCrackInitiationSpec materialSpec
+    materialSpec.Initialize "SLS(II)", "TwoLine", "Ignore", "TwoLine"
+    checkProfile.SetCrackedStateSpec materialSpec
+
+    Dim batch As New CBatchSectionCalculator, settings As New CSystemSettingsReader, units As New CUnitSystem
+    settings.LoadFromWorkbook ThisWorkbook: units.LoadFromSettings settings
+    batch.Initialize section, provider
+    Set batch.ProfileCatalog = profiles
+    batch.ApplySettings settings, units
+    Dim sp35Error As String, sp35 As Variant
+    sp35 = ReadSP35Table721FromWorkbook(ThisWorkbook, sp35Error)
+    batch.SetSP35Table721 sp35, sp35Error
+    batch.AddCombination "PlanarChecks", -10000#, 55000000#, 0#, "PR4", ""
+    batch.AddCombination "SpatialChecks", -10000#, 55000000#, 0#, "PR4", "", torque:=1000000#, qx:=700#
+    batch.Execute
+
+    Dim planar As CCombinationResult, spatial As CCombinationResult
+    Set planar = batch.ResultAt(1): Set spatial = batch.ResultAt(2)
+    TestRecord planar.StabilityMeta.Calculated And planar.StabilityMeta.InternalStatus = rsSuccess, _
+        "reference standard stability " & planar.StabilityMeta.ResultComment, passed, failed, report
+    TestRecord spatial.StabilityMeta.InternalStatus = planar.StabilityMeta.InternalStatus And InStr(spatial.StabilityMeta.ResultComment, "Mx") > 0, _
+        "same stability result under its stated load scope", passed, failed, report
+    TestRecord spatial.StabilityResult.DesignMx = planar.StabilityResult.DesignMx, "same second-order bending input", passed, failed, report
+    TestRecord planar.CrackWidthMeta.Calculated And planar.CrackResult.Width.CrackWidth > 0#, _
+        "reference calculation produces a normal crack width " & planar.CrackSummaryMeta.ResultComment, passed, failed, report
+    TestRecord spatial.CrackWidthMeta.InternalStatus = planar.CrackWidthMeta.InternalStatus And _
+        spatial.CrackResult.Width.CrackWidth = planar.CrackResult.Width.CrackWidth, "identical normal crack width after projection", passed, failed, report
+    TestRecord InStr(spatial.CrackSummaryMeta.ResultComment, "наклонных") > 0, "summary discloses absent diagonal crack width", passed, failed, report
+    RunTestCoupledTraditionalChecks = report & "TOTAL_COUPLED_TRADITIONAL: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledTraditionalChecks = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

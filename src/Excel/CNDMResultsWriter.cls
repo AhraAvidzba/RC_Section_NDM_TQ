@@ -41,7 +41,7 @@ Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и прина
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 11 ' Пространственные входы, усилия и закручивание целевого состояния.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 13 ' Пространственные входы, усилия, закручивание и области традиционных проверок.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -850,6 +850,10 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     PutProperty data, row, runID, id, "Coupled.Input.T", torque, OutputMomentUnit(units), "Кручение в пользовательской точке приложения нагрузки."
     PutProperty data, row, runID, id, "Coupled.Input.Qx", qx, OutputForceUnit(units), "Поперечная сила вдоль X."
     PutProperty data, row, runID, id, "Coupled.Input.Qy", qy, OutputForceUnit(units), "Поперечная сила вдоль Y."
+    If batch.StabilityRequested(index) Then PutProperty data, row, runID, id, "Coupled.StabilityScope", _
+        batch.CoupledStabilityScope, "-", "Нагрузки, которые использует методика устойчивости."
+    If batch.CrackWidthRequested(index) Then PutProperty data, row, runID, id, "Coupled.CrackScope", _
+        batch.CoupledCrackScope, "-", "Нагрузки и виды трещин, к которым относится результат."
 
     Dim resultants() As Double, result As CCombinationResult
     Set result = batch.ResultAt(index)

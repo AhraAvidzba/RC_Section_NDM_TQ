@@ -22,6 +22,7 @@ Private mCurrentStateMeta As CResultMeta ' Статус обязательног
 Private mWidth As CCrackWidthResult ' Результат формульного расчета a_crc.
 Private mLongitudinal As CLongitudinalCrackResult ' Результат проверки продольных трещин.
 Private mPolicy As CResultStatusPolicy ' Общие правила выбора итогового статуса и его обозначения для пользователя.
+Private mScopeComment As String ' Применимость проверок для сочетания с пространственными компонентами.
 
 ' Создаёт пустые результаты проверок трещин, не подставляя НДС отсутствующего расчёта.
 Private Sub Class_Initialize()
@@ -34,6 +35,7 @@ Public Sub Initialize(ByVal formation As CCrackFormationResult, _
         ByVal currentStateMeta As CResultMeta, ByVal width As CCrackWidthResult, _
         ByVal longitudinal As CLongitudinalCrackResult)
     AssertWritable
+    mScopeComment = vbNullString
     Set mFormation = formation
     If mFormation Is Nothing Then Set mFormation = New CCrackFormationResult
     If currentStateMeta Is Nothing Then
@@ -46,6 +48,12 @@ Public Sub Initialize(ByVal formation As CCrackFormationResult, _
     If mWidth Is Nothing Then Set mWidth = New CCrackWidthResult
     Set mLongitudinal = longitudinal
     If mLongitudinal Is Nothing Then Set mLongitudinal = New CLongitudinalCrackResult
+End Sub
+
+' Уточняет область применения без изменения чисел и статусов расчёта трещин.
+Friend Sub SetScopeComment(ByVal text As String)
+    AssertWritable
+    mScopeComment = text
 End Sub
 
 ' Отмечает все проверки трещин как отключённые профилем со статусом NotRequested.
@@ -140,13 +148,14 @@ Public Property Get ResultMeta() As CResultMeta
     Set normal = NormalMeta
     If HasCommonInputFailure Then
         Set ResultMeta = normal
+        If Len(mScopeComment) > 0 Then ResultMeta.ResultComment = Trim$(mScopeComment & " " & normal.ResultComment)
         Exit Property
     End If
     Set longitudinal = mLongitudinal.ResultMeta
     normal.AppendCommentTo comment, True
     AppendDependentComment longitudinal, comment
     Set ResultMeta = mPolicy.WorstResultMeta(rkGeneric, normal, longitudinal)
-    ResultMeta.ResultComment = comment
+    ResultMeta.ResultComment = Trim$(mScopeComment & " " & comment)
 End Property
 
 ' Различает общую ошибку ввода до расчёта и отдельную неудачу поиска предела.

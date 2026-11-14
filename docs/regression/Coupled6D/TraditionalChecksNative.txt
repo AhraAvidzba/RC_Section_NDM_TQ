@@ -1,0 +1,159 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledTraditionalChecks.xlsm
+SOURCE_SHA256: 6800657F630C6102561D66DD519594EFDE8D45E7142219E419E1BC34DEB448EB
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_6c6184aa9445410e958902d861705f12\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=33564; startTicks=639302919769799787
+===== RunTestCoupledTraditionalChecks =====
+SUITE_STARTED: RunTestCoupledTraditionalChecks; 2026-11-15T01:26:25
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127139840; cpu=35.734375
+EXCEL_AFTER_SUITE: pid=33564; workingSet=148475904; privateBytes=96354304; cpu=7.65625
+OK: reference standard stability Проверка устойчивости по СП 35 выполнена.
+OK: same stability result under its stated load scope
+OK: same second-order bending input
+OK: reference calculation produces a normal crack width
+OK: identical normal crack width after projection
+OK: summary discloses absent diagonal crack width
+TOTAL_COUPLED_TRADITIONAL: passed=6; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_6c6184aa9445410e958902d861705f12\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledTraditionalChecks; 2026-11-15T01:26:26
+===== RunTestCoupledBatchRoute =====
+SUITE_STARTED: RunTestCoupledBatchRoute; 2026-11-15T01:26:27
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127139840; cpu=35.734375
+EXCEL_AFTER_SUITE: pid=33564; workingSet=151105536; privateBytes=98639872; cpu=10.8125
+OK: target equilibrium
+OK: planar route remains available
+OK: second independent target Несущая способность: Предельный множитель для связанного расчёта не определён.
+OK: requested but unverified coupled limit is visible
+OK: tension preserves the standard stability status and scope
+OK: incomplete profile does not report overall success
+OK: both accepted vectors are available
+OK: batch equilibrium component 1 actual=13160 expected=13160
+OK: independent material history component 1
+OK: batch equilibrium component 2 actual=147580 expected=147580
+OK: independent material history component 2
+OK: batch equilibrium component 3 actual=229360 expected=229360
+OK: independent material history component 3
+OK: batch equilibrium component 4 actual=724223 expected=724223
+OK: independent material history component 4
+OK: batch equilibrium component 5 actual=7990 expected=7990
+OK: independent material history component 5
+OK: batch equilibrium component 6 actual=-3337 expected=-3337
+OK: independent material history component 6
+OK: planar result has no coupled vector
+TOTAL_COUPLED_BATCH_ROUTE: passed=20; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_6c6184aa9445410e958902d861705f12\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledBatchRoute; 2026-11-15T01:26:29
+===== RunTestCoupledLoadInput =====
+SUITE_STARTED: RunTestCoupledLoadInput; 2026-11-15T01:26:30
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127139840; cpu=35.734375
+EXCEL_AFTER_SUITE: pid=33564; workingSet=158908416; privateBytes=106835968; cpu=13.1875
+OK: load6.count
+OK: load6.t; actual=-11767980.; expected=-11767980.
+OK: load6.qx; actual=-24516.625; expected=-24516.625
+OK: load6.qy; actual=29419.95; expected=29419.95
+OK: load6.n; actual=19613.3; expected=19613.3
+OK: load6.pureShear
+OK: load6.invalidRow
+OK: load6.noUnsafePlanarAccess
+OK: load6.actualCell
+OK: load6.transfer.mx; actual=4070.; expected=4070.
+OK: load6.transfer.my; actual=3050.; expected=3050.
+OK: load6.transfer.t; actual=240.; expected=240.
+OK: load6.transfer.forces
+TOTAL_COUPLED_LOAD_INPUT: passed=13; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_6c6184aa9445410e958902d861705f12\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledLoadInput; 2026-11-15T01:26:31
+===== RunTestCoupledWorkbookInput =====
+SUITE_STARTED: RunTestCoupledWorkbookInput; 2026-11-15T01:26:32
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127139840; cpu=35.734375
+EXCEL_AFTER_SUITE: pid=33564; workingSet=341860352; privateBytes=291672064; cpu=33.28125
+OK: named calibration layout
+OK: calibration input fill
+OK: calibration text is not wrapped
+OK: calibration has right border
+OK: steel class catalog layout
+OK: steel class input fill
+OK: steel class catalog has right border
+OK: Excel stores recipe identity on formation
+OK: Excel restores longitudinal steel class
+OK: Excel missing Gt is an input error
+OK: Excel missing Gt names its cell
+OK: Excel planar case unaffected by calibration
+OK: Excel missing hoop modulus is an input error
+OK: Excel invalid class value names its cell
+WORKBOOK_SECONDS Excel (two cases): 2.43017578125
+OK: Excel produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.43 с.
+
+Данные сохранены на листе Results текущей книги.
+OK: Excel saves actual solver
+OK: Excel same saved recipe after repeated calculation
+OK: Excel saves internal N actual=-0.05 expected=-0.05
+OK: Excel saves internal Mx actual=0.001 expected=0.001
+OK: Excel saves internal My actual=-0.002 expected=-0.002
+OK: Excel saves internal T actual=0.001 expected=0.001
+OK: Excel saves internal Qx actual=0.002 expected=0.002
+OK: Excel saves internal Qy actual=-0.003 expected=-0.003
+OK: Excel stores elements of actual coupled state
+OK: Excel stores twist
+OK: Excel keeps all spatial fields
+OK: Excel has physical shear and warping
+OK: Excel plot reads the actual shear field
+OK: Excel plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+OK: File stores recipe identity on formation
+OK: File restores longitudinal steel class
+OK: File missing Gt is an input error
+OK: File missing Gt names its cell
+OK: File planar case unaffected by calibration
+OK: File missing hoop modulus is an input error
+OK: File invalid class value names its cell
+WORKBOOK_SECONDS File (two cases): 2.623046875
+OK: File produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена из файла «TestCoupledWorkbookInput.ndm».
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.62 с.
+
+Данные сохранены в файле «TestCoupledWorkbookInput.ndm».
+OK: File saves actual solver
+OK: File same saved recipe after repeated calculation
+OK: File saves internal N actual=-0.05 expected=-0.05
+OK: File saves internal Mx actual=0.001 expected=0.001
+OK: File saves internal My actual=-0.002 expected=-0.002
+OK: File saves internal T actual=0.001 expected=0.001
+OK: File saves internal Qx actual=0.002 expected=0.002
+OK: File saves internal Qy actual=-0.003 expected=-0.003
+OK: File stores elements of actual coupled state
+OK: File stores twist
+OK: File keeps all spatial fields
+OK: File has physical shear and warping
+OK: File plot reads the actual shear field
+OK: File plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+TOTAL_COUPLED_WORKBOOK_INPUT: passed=51; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_6c6184aa9445410e958902d861705f12\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledWorkbookInput; 2026-11-15T01:26:50
+SOURCE_UNCHANGED: True

@@ -864,12 +864,6 @@ Private Sub RunCombination(ByVal index As Long)
     End If
 
     If HasSpatialLoads(index) Then
-        If mCoupledAnalysis Is Nothing Then
-            Dim coupledReason As String: coupledReason = mCoupledInputError
-            If Len(coupledReason) = 0 Then coupledReason = "Для ненулевых T, Qx или Qy заполните параметры связанного расчёта."
-            MarkInvalid index, coupledReason & " " & mInputs(index).SourceReference
-            Exit Sub
-        End If
         RunCoupledCombination index, profile
         GoTo FinalizeCombination
     End If
@@ -927,8 +921,26 @@ End Sub
 Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile)
     Dim combined As CCombinationResult: Set combined = mResults(index)
     Dim meta As CResultMeta, field() As Double, resultants() As Double
+    If profile.StabilityEnabled Then
+        ReportSection "Продольный изгиб и устойчивость по N, Mx и My"
+        RunStabilityFilter index, profile.StabilityValueSet
+        Set meta = combined.StabilityMeta
+        meta.ResultComment = Trim$(meta.ResultComment & " " & CoupledStabilityScope())
+        combined.SetStabilityMeta meta
+    Else
+        combined.SetStabilityMeta NotRequestedMeta(rkStability)
+    End If
+
     ReportSection "Связанное НДС по шести усилиям"
-    If profile.StrengthDirectStateEnabled Then
+    If mCoupledAnalysis Is Nothing And (profile.StrengthDirectStateEnabled Or profile.StrengthCapacityEnabled) Then
+        Dim reason As String: reason = mCoupledInputError
+        If Len(reason) = 0 Then reason = "Для ненулевых T, Qx или Qy заполните параметры связанного расчёта."
+        reason = reason & " " & mInputs(index).SourceReference
+        combined.SetWorkflowMeta InvalidInputMeta(rkGeneric, reason)
+        If profile.StrengthDirectStateEnabled Then combined.SetDirectStateMeta InvalidInputMeta(rkDirectState, reason)
+        If profile.StrengthCapacityEnabled Then StoreInvalidCapacity index, reason
+        ReportStep reason
+    ElseIf profile.StrengthDirectStateEnabled Then
         Dim acceptedState As CSectionStateResult
         Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants, True, acceptedState)
         combined.SetDirectStateMeta meta
@@ -940,25 +952,32 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
     End If
 
     If profile.StrengthCapacityEnabled Then
-        Dim capacity As New CCapacityResult
-        capacity.InitializeUnsupportedConfiguration "Предельный множитель для связанного расчёта не определён."
-        combined.StoreCapacityResult capacity
+        If Not mCoupledAnalysis Is Nothing Then
+            Dim capacity As New CCapacityResult
+            capacity.InitializeUnsupportedConfiguration "Предельный множитель для связанного расчёта не определён."
+            combined.StoreCapacityResult capacity
+        End If
     Else
         StoreNotCalculatedCapacity index
     End If
 
-    If profile.StabilityEnabled Then
-        Set meta = New CResultMeta
-        meta.SetResult rsInvalidConfiguration, rcInvalidConfiguration, rkStability, _
-            "Профиль запрашивает устойчивость, для которой не подготовлена проверка при совместном действии шести усилий."
-        combined.SetStabilityMeta meta, meta.ResultComment
-    Else
-        combined.SetStabilityMeta NotRequestedMeta(rkStability)
-    End If
     If profile.CrackWidthEnabled Then
-        combined.CrackResult.SetInputFailure "Профиль запрашивает проверку трещин при T или Q. Метод определения их ширины не подтверждён.", True
+        ReportSection "Проверки трещин по N, Mx и My"
+        ReportStep CoupledCrackScope()
+        RunCrackWidth index, profile
+        combined.CrackResult.SetScopeComment CoupledCrackScope()
     End If
 End Sub
+
+' Объясняет фактический набор усилий для проверки устойчивости.
+Friend Function CoupledStabilityScope() As String
+    CoupledStabilityScope = "Область проверки устойчивости по выбранному СП: продольная сила N и изгибающие моменты Mx, My."
+End Function
+
+' Объясняет набор усилий и область традиционного расчёта трещин.
+Friend Function CoupledCrackScope() As String
+    CoupledCrackScope = "Область проверки: нормальные и продольные трещины по N, Mx и My. Для наклонных трещин нет расчётной ширины."
+End Function
 
 ' Применяет продольный изгиб к нагрузкам сочетания. CStabilityCalculator
 ' возвращает скорректированные N/Mx/My и поясняющие величины;
