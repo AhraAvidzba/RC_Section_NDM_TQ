@@ -107,6 +107,10 @@ Public Property Get ResultMeta() As CResultMeta
         capacity.AppendCommentTo comment
     End If
     Set ResultMeta = mPolicy.WorstResultMeta(rkGeneric, direct, capacity)
+    If mCapacity.IsTransverseLimit And capacity.InternalStatus = rsCheckFailed And _
+            ResultMeta.InternalStatus = rsNumericalFailure Then
+        Set ResultMeta = capacity.Clone ' Подтверждённый отказ хомута определяет прочность при отдельной численной неудаче НДС.
+    End If
     ResultMeta.ResultComment = comment
 End Property
 

@@ -44,6 +44,7 @@ Public Enum EResultCode
     rcCrackNotFormed = 17            ' Нормальная трещина физически не образуется.
     rcStateOutsidePhysicalRange = 18 ' Равновесие найдено только за физическим диапазоном диаграммы.
     rcSolverDidNotReturnState = 19   ' Для обязательного расчётного состояния не получен объект решателя НДС.
+    rcCoupledConcreteLimitUnresolved = 20 ' Подтверждён арматурный предел; бетонный механизм связанной ветви ещё не определён.
 End Enum
 
 Public Enum EResultKind
@@ -116,6 +117,7 @@ Public Function ResultCodeToText(ByVal value As EResultCode) As String
         Case rcCrackNotFormed: ResultCodeToText = "CRACK_NOT_FORMED"
         Case rcStateOutsidePhysicalRange: ResultCodeToText = "STATE_OUTSIDE_PHYSICAL_RANGE"
         Case rcSolverDidNotReturnState: ResultCodeToText = "SOLVER_DID_NOT_RETURN_STATE"
+        Case rcCoupledConcreteLimitUnresolved: ResultCodeToText = "COUPLED_CONCRETE_LIMIT_UNRESOLVED"
         Case Else: ResultCodeToText = "INTERNAL_ERROR"
     End Select
 End Function

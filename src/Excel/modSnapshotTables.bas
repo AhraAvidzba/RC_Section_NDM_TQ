@@ -7,6 +7,8 @@ Option Explicit
 
 Public Const LEGACY_STABILITY_SNAPSHOT_COLUMNS As Long = 84 ' Сводка без инерций и модулей упругости.
 Public Const STABILITY_SNAPSHOT_COLUMNS As Long = 90 ' Сводка с шестью характеристиками сечения.
+Public Const LEGACY_STRENGTH_SNAPSHOT_COLUMNS As Long = 49 ' Таблица прочности без подраздела поперечной арматуры.
+Public Const STRENGTH_SNAPSHOT_COLUMNS As Long = 57 ' Таблица прочности с отдельным подразделом поперечной арматуры.
 
 ' Проверяет размеры готовой таблицы, не меняя её содержимого.
 Public Sub ValidateSnapshotTableShape(ByVal key As String, ByRef values As Variant)
@@ -23,8 +25,10 @@ Public Sub ValidateSnapshotTableShape(ByVal key As String, ByRef values As Varia
         Case "Summary"
             columns = 33
             If UBound(values, 2) = 26 Then columns = 26 ' Формат сводки из 26 колонок не содержит блока исходных нагрузок.
-        Case "Strength.Headers": columns = 49: rows = 4
-        Case "Strength.Data": columns = 49
+        Case "Strength.Headers", "Strength.Data"
+            columns = STRENGTH_SNAPSHOT_COLUMNS
+            If UBound(values, 2) = LEGACY_STRENGTH_SNAPSHOT_COLUMNS Then columns = LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+            If key = "Strength.Headers" Then rows = 4
         Case "Cracks.Headers": columns = 72: rows = 4
         Case "Cracks.Data": columns = 72
         Case "Stability.Labels", "Stability.Data"

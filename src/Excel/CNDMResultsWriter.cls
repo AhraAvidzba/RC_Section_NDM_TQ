@@ -41,7 +41,7 @@ Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и прина
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 13 ' Пространственные входы, усилия, закручивание и области традиционных проверок.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 26 ' Пространственное НДС, предельный вектор и сведения о поперечной арматуре.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -807,7 +807,9 @@ Private Sub WriteSectionProperties(ByVal workbook As Object, ByVal section As CS
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "CapacityStatus", batch.ResultAt(i).StrengthResult.Capacity.Status, "-", "Статус расчета несущей способности."
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "LoadPath", batch.ResultAt(i).CapacityPathDisplayName, "-", "Какие компоненты нагрузки масштабировались при поиске несущей способности."
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "CapacitySolutionMethod", batch.ResultAt(i).StrengthResult.Capacity.SolutionMethod, "-", "Фактический численный метод, которым найдена предельная несущая способность."
-        PutProperty data, rowIndex, runID, batch.CombinationID(i), "LambdaCapacity", batch.ResultAt(i).StrengthResult.Capacity.LambdaCapacity, "-", "Предельный множитель для выбранной lambda-траектории."
+        Dim reportedLambda As Variant: reportedLambda = batch.ResultAt(i).StrengthResult.Capacity.LambdaCapacity
+        If batch.HasSpatialLoads(i) And CDbl(reportedLambda) = 0# Then reportedLambda = vbNullString
+        PutProperty data, rowIndex, runID, batch.CombinationID(i), "LambdaCapacity", reportedLambda, "-", "Предельный множитель для выбранной lambda-траектории."
         If batch.ResultAt(i).StrengthResult.Capacity.ReserveFactor > 0# Then
             PutProperty data, rowIndex, runID, batch.CombinationID(i), "Nultimate", OutputForce(batch.ResultAt(i).StrengthResult.Capacity.NUltimate, units), OutputForceUnit(units), "Полная N при lambdaUltimate в точке приложения нагрузки."
             PutProperty data, rowIndex, runID, batch.CombinationID(i), "MxUltimate", OutputMx(batch.ResultAt(i).StrengthResult.Capacity.MxUltimate, units), OutputMomentUnit(units), "Полный Mx при lambdaUltimate в точке приложения нагрузки."
@@ -857,6 +859,8 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
 
     Dim resultants() As Double, result As CCombinationResult
     Set result = batch.ResultAt(index)
+    If batch.StrengthCapacityRequested(index) Then _
+        PutCoupledCapacityProperties data, row, runID, id, result.StrengthResult.Capacity, units
     If Not result.CopyCoupledResultants(resultants) Then Exit Sub
     If Not units Is Nothing Then
         resultants(4) = units.InternalTorqueToOutput(resultants(4))
@@ -870,7 +874,41 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     PutProperty data, row, runID, id, "Coupled.Internal.Qx", resultants(5), OutputForceUnit(units), "Подтверждённая сила вдоль X."
     PutProperty data, row, runID, id, "Coupled.Internal.Qy", resultants(6), OutputForceUnit(units), "Подтверждённая сила вдоль Y."
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
-    If Not state Is Nothing Then PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
+    If Not state Is Nothing Then
+        PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
+        Dim control As String, utilization As Double, steelStress As Double
+        If state.CopyCoupledTransverseControl(control, utilization, steelStress) Then
+            PutProperty data, row, runID, id, "Coupled.Transverse.Control", control, "-", "Точка максимального использования хомута или отдельной ветви."
+            PutProperty data, row, runID, id, "Coupled.Transverse.Utilization", utilization, "-", "Отношение деформации к пределу своего знака."
+            PutProperty data, row, runID, id, "Coupled.Transverse.Stress", OutputStress(steelStress, units), OutputStressUnit(units), "Напряжение вдоль стержня в контрольной точке."
+            PutProperty data, row, runID, id, "Coupled.Transverse.Status", state.CoupledTransverseStatus, "-", "Статус по достижению предельной деформации при заданных нагрузках."
+        End If
+    End If
+End Sub
+
+' Сохраняет механизм и подтверждённый вектор арматурного предела
+' в пользовательской точке даже при отсутствии НДС заданных нагрузок.
+Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal id As String, ByVal capacity As CCapacityResult, ByVal units As CUnitSystem)
+    Dim meta As CResultMeta: Set meta = capacity.ResultMeta
+    PutProperty data, row, runID, id, "Coupled.Capacity.ResultCode", ResultCodeToText(meta.ResultCode), "-", "Код результата поиска предела."
+    PutProperty data, row, runID, id, "Coupled.Capacity.LimitState", capacity.LimitState, "-", "Определяющий механизм или причина остановки поиска."
+    If capacity.HasConfirmedLowerBound Then _
+        PutProperty data, row, runID, id, "Coupled.Capacity.LowerLambda", capacity.ConfirmedLowerLambda, "-", "Последнее подтверждённое равновесие без превышения арматурного критерия."
+    If Not capacity.HasUltimatePoint Then Exit Sub
+    Dim torque As Double, qx As Double, qy As Double
+    torque = capacity.TUltimate: qx = capacity.QxUltimate: qy = capacity.QyUltimate
+    If Not units Is Nothing Then
+        torque = units.InternalTorqueToOutput(torque)
+        qx = units.InternalShearToOutput(qx): qy = units.InternalShearToOutput(qy)
+    End If
+    PutProperty data, row, runID, id, "Coupled.Capacity.SteelLambda", capacity.CoupledLimitLambda, "-", "Множитель достижения предельной деформации арматуры."
+    PutProperty data, row, runID, id, "Coupled.Capacity.NUltimate", OutputForce(capacity.NUltimate, units), OutputForceUnit(units), "Продольная сила при арматурном пределе."
+    PutProperty data, row, runID, id, "Coupled.Capacity.MxUltimate", OutputMx(capacity.MxUltimate, units), OutputMomentUnit(units), "Изгибающий момент Mx при арматурном пределе."
+    PutProperty data, row, runID, id, "Coupled.Capacity.MyUltimate", OutputMy(capacity.MyUltimate, units), OutputMomentUnit(units), "Изгибающий момент My при арматурном пределе."
+    PutProperty data, row, runID, id, "Coupled.Capacity.TUltimate", torque, OutputMomentUnit(units), "Крутящий момент при арматурном пределе."
+    PutProperty data, row, runID, id, "Coupled.Capacity.QxUltimate", qx, OutputForceUnit(units), "Поперечная сила X при арматурном пределе."
+    PutProperty data, row, runID, id, "Coupled.Capacity.QyUltimate", qy, OutputForceUnit(units), "Поперечная сила Y при арматурном пределе."
 End Sub
 
 ' Записывает логический признак одинаково в любой локали Excel:

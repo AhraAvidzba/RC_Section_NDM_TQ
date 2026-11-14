@@ -112,6 +112,10 @@ Public Property Get OverallMeta() As CResultMeta
     Set crack = mCrackResult.ResultMeta
     Set stability = mStabilityResult.Meta
     Set OverallMeta = Policy.WorstResultMeta(rkGeneric, mWorkflowMeta, strength, crack, stability)
+    If mStrengthResult.Capacity.IsTransverseLimit And strength.InternalStatus = rsCheckFailed And _
+            OverallMeta.InternalStatus = rsNumericalFailure Then
+        Set OverallMeta = strength.Clone ' Доказанный отказ хомута достаточен для FAIL; остальные причины остаются в комментарии.
+    End If
     If mWorkflowMeta.InternalStatus = rsInvalidInput Or mWorkflowMeta.InternalStatus = rsInvalidConfiguration Then
         If OverallMeta.InternalStatus = mWorkflowMeta.InternalStatus And OverallMeta.ResultCode = mWorkflowMeta.ResultCode Then
             OverallMeta.ResultComment = mWorkflowMeta.ResultComment ' Общую ошибку ввода показываем один раз; отдельный CalcErr сохраняется, если именно он определил общий статус.
@@ -217,6 +221,11 @@ End Property
 ' Сохранённый расчётный ключ PathResolved преобразуется в обозначение lambda*...
 ' общим CLoadPathDescriptor.
 Public Property Get CapacityPathDisplayName() As String
+    If mStrengthResult.Capacity.SolutionMethod = "CoupledContinuation" And _
+            mStrengthResult.Capacity.PathResolved = "Auto" Then
+        CapacityPathDisplayName = ChrW$(&H3BB) & "*(N, Mx, My, T, Qx, Qy)"
+        Exit Property
+    End If
     Dim loadPath As CLoadPathDescriptor
     Set loadPath = New CLoadPathDescriptor
     CapacityPathDisplayName = loadPath.DisplayNameForKey(mStrengthResult.Capacity.PathResolved)

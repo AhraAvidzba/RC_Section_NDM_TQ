@@ -78,31 +78,10 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
         Optional ByVal captureFields As Boolean = False, Optional ByRef acceptedState As CSectionStateResult = Nothing) As CResultMeta
     Erase field: Erase resultants
     Set acceptedState = Nothing
-    Dim meta As New CResultMeta
-    If mSection.Revision <> mRevision Or mProvider.Revision <> mProviderRevision Then _
-        Err.Raise 5, "CCoupledSectionAnalysis", "Повторно подготовьте связанный расчёт после изменения сечения или материалов."
-
-    If spec.ConcreteTension <> ctkUseDiagram Then
-        Set SolveTarget = ConfigurationError("Для связанного НДС выберите UseDiagram для растянутого бетона в модели прочности профиля.")
-        Exit Function
-    End If
-    If spec.SteelDiagram <> sdkTwoLine And (mSection.RebarCount > 0 Or mTransverse.Count > 0) Then
-        Set SolveTarget = ConfigurationError("Для связанного НДС выберите TwoLine для стали в модели прочности профиля.")
-        Exit Function
-    End If
-
-    On Error GoTo InvalidMaterialOrGeometry
-    Dim models As Object: Set models = SteelModels(spec)
-    PrepareOperators spec, models
-    Set meta = mOperators.ResultMeta
-    If meta.InternalStatus <> rsUnset Then Set SolveTarget = meta: Exit Function
     Dim concrete As New CCoupledConcreteResponse, fc As Double, ft As Double
-    fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
-    ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
-    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
-    Dim response As New CCoupledReinforcedResponse
-    response.Initialize mOperators, concrete, models
-    On Error GoTo 0
+    Dim meta As CResultMeta, response As New CCoupledReinforcedResponse, models As Object
+    Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
+    If meta.InternalStatus <> rsUnset Then Set SolveTarget = meta: Exit Function
 
     Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation
     solver.Initialize mOperators, response, mEb
@@ -113,23 +92,128 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
         Set meta = continuation.ResultMeta
         If response.AcceptedSteelUtilization > 1# Then
             meta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkDirectState, _
-                "Связанное равновесие найдено с превышением предельной деформации арматуры.", meta.DiagnosticDetails
+                SteelLimitComment(response.AcceptedSteelCriticalPoint) & " Использование по деформации " & _
+                    Format$(response.AcceptedSteelUtilization, "0.000") & ".", meta.DiagnosticDetails
         Else
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."
         End If
         If captureFields Then Set acceptedState = CaptureAcceptedState(loads, spec, continuation, response, field, resultants, fc, ft, meta)
-        If Not acceptedState Is Nothing Then acceptedState.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
+        If Not acceptedState Is Nothing Then
+            acceptedState.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
+            Dim transversePoint As Long: transversePoint = response.AcceptedTransverseCriticalPoint
+            If transversePoint > 0 Then acceptedState.SetCoupledTransverseControl _
+                SteelControlDescription(transversePoint), response.AcceptedTransverseSteelUtilization, _
+                response.AcceptedSteelStress(transversePoint)
+        End If
     Else
         Set meta = continuation.ResultMeta
     End If
     Set SolveTarget = meta
+End Function
+
+' Ищет пересечение с предельной деформацией арматуры на независимой
+' ветви. Вектор результата относится к пользовательской точке приложения.
+Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
+        ByVal spec As CMaterialModelSpec, ByVal initialLambda As Double, ByVal maximumLambda As Double, _
+        ByVal lambdaTolerance As Double, ByVal maxIterations As Long) As CCapacityResult
+    Dim capacity As New CCapacityResult, meta As CResultMeta, reason As String
+    Set SolveCapacity = capacity
+    If initialLambda <= 0# Then reason = "Capacity.InitialLambda"
+    If maximumLambda <= 0# Then reason = "Capacity.MaxLambda"
+    If lambdaTolerance <= 0# Then reason = "Capacity.ToleranceLambda"
+    If maxIterations < 1 Then reason = "Capacity.SolverMaxIterations"
+    If Len(reason) > 0 Then
+        capacity.InitializeUnsupportedConfiguration "На Config укажите положительное значение " & reason & "."
+        Exit Function
+    End If
+
+    Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
+    Dim models As Object, fc As Double, ft As Double
+    Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
+    If meta.InternalStatus <> rsUnset Then
+        capacity.InitializeCoupledUnresolved meta, loadPath
+        Exit Function
+    End If
+
+    Dim solver As New CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As CLoadPathVector
+    Set path = BuildPath(loads, loadPath)
+    solver.Initialize mOperators, response, mEb
+    branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE
+    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance
+    Set meta = branch.ResultMeta
+    Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
+    If branch.CopySteelLimit(low, high, onOffset, criticalPoint) Then
+        reason = SteelLimitComment(criticalPoint)
+        Dim transverseLimit As Boolean: transverseLimit = (mOperators.TransverseGroupAt(criticalPoint) > 0)
+        If onOffset Then
+            capacity.InitializeCoupledBaseFail reason, loadPath, meta.DiagnosticDetails, transverseLimit
+        Else
+            path.TargetSix low, ultimate
+            loads.MoveResultantsToLoadPoint mCenterX, mCenterY, ultimate
+            capacity.InitializeCoupledLimit low, ultimate, loadPath, reason, Nothing, meta.DiagnosticDetails, transverseLimit
+        End If
+    Else
+        low = -1#
+        If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
+        capacity.InitializeCoupledUnresolved meta, loadPath, low
+    End If
+End Function
+
+' Формулирует проверяемый механизм и привязывает его к точке арматуры.
+Private Function SteelLimitComment(ByVal point As Long) As String
+    SteelLimitComment = "Достигнута предельная деформация арматуры. " & SteelControlDescription(point)
+End Function
+
+' Показывает группу или стержень, класс всей ветви и координаты расчётной
+' точки в осях сечения относительно центра бетонной сетки, мм.
+Private Function SteelControlDescription(ByVal point As Long) As String
+    Dim group As Long, x As Double, y As Double, weight As Double, rebarIndex As Long
+    group = mOperators.TransverseGroupAt(point)
+    If group = 0 Then
+        rebarIndex = point - mOperators.ConcretePointCount
+        SteelControlDescription = "Продольный стержень " & mSection.RebarID(rebarIndex)
+    Else
+        Dim path As CGeometryPath: Set path = mTransverse.Path(group)
+        SteelControlDescription = "Поперечная арматура " & path.ID
+    End If
+    mOperators.Point point, x, y, weight
+    SteelControlDescription = SteelControlDescription & ", класс " & mOperators.SteelClassAt(point) & _
+        ", x = " & Format$(x - mCenterX, "0.00") & " мм, y = " & Format$(y - mCenterY, "0.00") & " мм"
+End Function
+
+' Готовит независимую историю расчёта и переиспользует неизменяемые
+' геометрические операторы и модели стали того же набора характеристик.
+Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concrete As CCoupledConcreteResponse, _
+        ByVal response As CCoupledReinforcedResponse, ByRef fc As Double, ByRef ft As Double, ByRef models As Object) As CResultMeta
+    If mSection.Revision <> mRevision Or mProvider.Revision <> mProviderRevision Then _
+        Err.Raise 5, "CCoupledSectionAnalysis", "Повторно подготовьте связанный расчёт после изменения сечения или материалов."
+    If spec.ConcreteTension <> ctkUseDiagram Then
+        Set PrepareResponse = ConfigurationError("Для связанного НДС выберите UseDiagram для растянутого бетона в модели прочности профиля.")
+        Exit Function
+    End If
+    If spec.SteelDiagram <> sdkTwoLine And (mSection.RebarCount > 0 Or mTransverse.Count > 0) Then
+        Set PrepareResponse = ConfigurationError("Для связанного НДС выберите TwoLine для стали в модели прочности профиля.")
+        Exit Function
+    End If
+
+    On Error GoTo InvalidMaterialOrGeometry
+    Dim meta As CResultMeta
+    Set models = SteelModels(spec)
+    PrepareOperators spec, models
+    Set meta = mOperators.ResultMeta
+    Set PrepareResponse = meta
+    If meta.InternalStatus <> rsUnset Then Exit Function
+    fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
+    ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
+    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    response.Initialize mOperators, concrete, models
     Exit Function
 
 InvalidMaterialOrGeometry:
     Dim number As Long, reason As String, source As String
     number = Err.Number: reason = Err.Description: source = Err.Source
     If number = 5 Or (number >= vbObjectError + 1776 And number <= vbObjectError + 1783) Then
-        Set SolveTarget = ConfigurationError(reason)
+        Set PrepareResponse = ConfigurationError(reason)
     Else
         Err.Raise number, source, reason
     End If

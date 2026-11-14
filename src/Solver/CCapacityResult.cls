@@ -33,12 +33,74 @@ Private mMyUltimate As Double ' Предельный My в точке прило
 Private mMomentUltimate As Double ' Модуль полного предельного момента в точке приложения нагрузки.
 Private mPureAxialForMethod As Boolean ' Признак выбора осевого численного расчёта после переноса нагрузки к центру приведённого сечения.
 Private mResultMeta As CResultMeta ' Статус, код причины и пояснение результата несущей способности.
+Private mCoupledSearch As Boolean, mIsTransverseLimit As Boolean
+Private mCoupledLimitLambda As Double, mConfirmedLowerLambda As Double, mHasConfirmedLowerBound As Boolean
+Private mTUltimate As Double, mQxUltimate As Double, mQyUltimate As Double
 
 ' Задаёт начальный статус неприменимой проверки, чтобы ранний выход
 ' не оставил незаполненную или ложноположительную причину.
 Private Sub Class_Initialize()
     Set mResultMeta = New CResultMeta
     mResultMeta.SetNotApplicable rkCapacity
+End Sub
+
+' Сохраняет подтверждённый арматурный предел. При lambda < 1 критерий
+' достаточен для FAIL. При lambda >= 1 полный запас требует проверки
+' бетонного механизма и число остаётся множителем арматурного предела.
+Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Double, _
+        ByVal pathKey As String, ByVal mechanism As String, ByVal state As CSectionStateResult, _
+        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
+    AssertWritable
+    If lambda <= 0# Or LBound(ultimate) <> 1 Or UBound(ultimate) <> 6 Then _
+        Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и положительный множитель арматурного предела."
+
+    ResetNumericSnapshot
+    mCoupledSearch = True: mIsTransverseLimit = transverseLimit
+    mCoupledLimitLambda = lambda
+    mPathResolved = pathKey
+    mSolutionMethod = "CoupledContinuation"
+    mLimitState = mechanism
+    mNUltimate = ultimate(1): mMxUltimate = ultimate(2): mMyUltimate = ultimate(3)
+    mTUltimate = ultimate(4): mQxUltimate = ultimate(5): mQyUltimate = ultimate(6)
+    mMomentUltimate = Sqr(mMxUltimate * mMxUltimate + mMyUltimate * mMyUltimate)
+    Set mStateResult = state
+    Set mResultMeta = New CResultMeta
+    If lambda < 1# Then
+        mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
+        mResultMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
+            mechanism & ". Предел достигнут при множителе " & Format$(lambda, "0.000000") & ".", details
+    Else
+        mResultMeta.SetResult rsNumericalFailure, rcCoupledConcreteLimitUnresolved, rkCapacity, _
+            mechanism & ". Определён арматурный предел. Для полного запаса требуется проверка предела бетонной ветви.", details
+    End If
+End Sub
+
+' Сохраняет подтверждённое превышение при нагружении постоянной части пути.
+Friend Sub InitializeCoupledBaseFail(ByVal mechanism As String, ByVal pathKey As String, _
+        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
+    InitializeBaseFail mechanism & ". Предел достигнут при нагружении постоянной части.", pathKey
+    mCoupledSearch = True: mIsTransverseLimit = transverseLimit
+    mSolutionMethod = "CoupledContinuation"
+    mResultMeta.DiagnosticDetails = details
+End Sub
+
+' Сохраняет причину без предельной точки. Последний принятый множитель
+' является нижней границей прослеженного участка по критерию арматуры.
+Friend Sub InitializeCoupledUnresolved(ByVal meta As CResultMeta, ByVal pathKey As String, _
+        Optional ByVal lowerLambda As Double = -1#)
+    AssertWritable
+    ResetNumericSnapshot
+    mCoupledSearch = meta.Calculated
+    mLimitState = meta.ResultComment
+    mPathResolved = pathKey
+    mSolutionMethod = "CoupledContinuation"
+    Set mResultMeta = New CResultMeta
+    mResultMeta.SetResult meta.InternalStatus, meta.ResultCode, rkCapacity, meta.ResultComment, _
+        meta.DiagnosticDetails, meta.Applies, meta.Calculated
+    mResultMeta.SourceKeys = meta.SourceKeys
+    If meta.InternalStatus = rsNumericalFailure And lowerLambda >= 0# Then
+        mHasConfirmedLowerBound = True: mConfirmedLowerLambda = lowerLambda
+    End If
 End Sub
 
 ' Сохраняет полный результат успешного или неуспешного поиска.
@@ -178,6 +240,9 @@ Private Sub ResetNumericSnapshot()
     mMyUltimate = 0#
     mMomentUltimate = 0#
     mPureAxialForMethod = False
+    mCoupledSearch = False: mIsTransverseLimit = False
+    mCoupledLimitLambda = 0#: mConfirmedLowerLambda = 0#: mHasConfirmedLowerBound = False
+    mTUltimate = 0#: mQxUltimate = 0#: mQyUltimate = 0#
 End Sub
 
 ' Переносит найденный полный предельный вектор в пользовательскую точку
@@ -244,12 +309,14 @@ End Property
 ' Для вывода не требуется читать внутренние рабочие поля CCapacitySolver.
 Public Property Get DiagnosticLog() As String
     If Not mSearchResult Is Nothing Then DiagnosticLog = mSearchResult.DiagnosticLog
+    If mCoupledSearch Then DiagnosticLog = mResultMeta.DiagnosticDetails
 End Property
 
 ' Показывает, действительно ли запускался численный поиск LimitSearch.
 ' Ранние N/A или InputErr являются заполненным результатом, но не означают
 ' выполненного поиска равновесия или предела.
 Public Property Get SearchExecuted() As Boolean
+    SearchExecuted = mCoupledSearch
     If Not mSearchResult Is Nothing Then SearchExecuted = mSearchResult.SearchExecuted
 End Property
 
@@ -337,6 +404,47 @@ End Property
 ' Найденный множитель lambda.
 Public Property Get LambdaCapacity() As Double
     LambdaCapacity = mLambdaCapacity
+End Property
+
+' Сообщает, что сохранены подтверждённые предельные усилия.
+Friend Property Get HasUltimatePoint() As Boolean
+    HasUltimatePoint = (mCoupledLimitLambda > 0#)
+    If Not mSearchResult Is Nothing Then HasUltimatePoint = mSearchResult.HasLimitPoint
+End Property
+
+' Возвращает множитель именно арматурного предела связанной модели.
+Friend Property Get CoupledLimitLambda() As Double
+    CoupledLimitLambda = mCoupledLimitLambda
+End Property
+
+' Отмечает, что арматурный предел определила поперечная арматура.
+Friend Property Get IsTransverseLimit() As Boolean
+    IsTransverseLimit = mIsTransverseLimit
+End Property
+
+' Сообщает о подтверждённой нижней границе пройденного участка.
+Friend Property Get HasConfirmedLowerBound() As Boolean
+    HasConfirmedLowerBound = mHasConfirmedLowerBound
+End Property
+
+' Возвращает нижнюю границу участка без превышения арматурного критерия.
+Friend Property Get ConfirmedLowerLambda() As Double
+    ConfirmedLowerLambda = mConfirmedLowerLambda
+End Property
+
+' Возвращает предельное кручение в пользовательской точке, Н·мм.
+Friend Property Get TUltimate() As Double
+    TUltimate = mTUltimate
+End Property
+
+' Возвращает предельную поперечную силу X, Н.
+Friend Property Get QxUltimate() As Double
+    QxUltimate = mQxUltimate
+End Property
+
+' Возвращает предельную поперечную силу Y, Н.
+Friend Property Get QyUltimate() As Double
+    QyUltimate = mQyUltimate
 End Property
 
 ' Использование несущей способности.

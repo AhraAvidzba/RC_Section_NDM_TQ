@@ -22,7 +22,7 @@ Private mCapturedSnapshot As CCalculationSnapshot ' Приёмник готов�
 Private mMinimalFormatting As Boolean ' Сохраняет готовое оформление; обновляет данные, шапки при изменении и цвета статусов.
 
 Private Const HEADER_ROWS As Long = 4 ' Строки шапки над первой строкой LC.
-Private Const TOTAL_COLUMNS As Long = 49 ' Полная ширина с двумя пустыми разделителями.
+Private Const TOTAL_COLUMNS As Long = STRENGTH_SNAPSHOT_COLUMNS
 
 Private Const COL_LEFT_FIRST As Long = 1 ' Столбец таблицы: первый столбец общих сведений о сочетании.
 Private Const COL_LEFT_LAST As Long = 9 ' Столбец таблицы: последний столбец общих сведений о сочетании.
@@ -82,6 +82,14 @@ Private Const COL_CAP_H As Long = 46 ' Столбец таблицы: преде
 Private Const COL_CAP_X As Long = 47 ' Столбец таблицы: предельное НДС: высота сжатой зоны.
 Private Const COL_CAP_RESERVE As Long = 48 ' Столбец таблицы: предельное НДС: коэффициент запаса.
 Private Const COL_CAP_STATUS As Long = 49 ' Столбец таблицы: предельное НДС: статус расчёта.
+Private Const COL_SEPARATOR3 As Long = 50 ' Пустой столбец перед поперечной арматурой.
+Private Const COL_TRANSVERSE_POINT As Long = 51 ' Контрольная точка поперечной арматуры при заданных усилиях.
+Private Const COL_TRANSVERSE_STRESS As Long = 52 ' Знаковое напряжение в той же точке.
+Private Const COL_TRANSVERSE_UTIL As Long = 53 ' Максимальное отношение деформации к пределу своего знака.
+Private Const COL_TRANSVERSE_STATUS As Long = 54 ' Статус критерия деформации поперечной арматуры.
+Private Const COL_TRANSVERSE_RESERVE As Long = 55 ' Коэффициент запаса, когда поперечная арматура определяет предел.
+Private Const COL_TRANSVERSE_LIMIT As Long = 56 ' Определяющая точка поперечной арматуры на пределе.
+Private Const COL_TRANSVERSE_LIMIT_STATUS As Long = 57 ' Статус хомута при определении предельного множителя.
 
 Private Const HEADER_COLOR As Long = &HD9D9D9 ' Серый фон шапки, как в остальных подробных блоках.
 Private Const SMALL_VALUE As Double = 0.000000001 ' Порог для определения отсутствующего численного поля при выводе таблицы.
@@ -260,6 +268,7 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(1, COL_LIM_EBC) = "Общие данные"
     headers(1, COL_STATE_EPS0) = "НДС от заданного сочетания нагрузок (по модели прочности)"
     headers(1, COL_CAP_EPS0) = "Расчет предельной несущей способности по выбранной " & ChrW$(&H3BB) & "-траектории (по модели прочности)"
+    headers(1, COL_TRANSVERSE_POINT) = "Поперечная арматура"
 
     headers(2, COL_STATE_EPS0) = "плоскость деформации"
     headers(2, COL_STATE_EBC) = "фактические макс. деформации"
@@ -270,9 +279,21 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(2, COL_CAP_LAMBDA) = "предельные компоненты"
     headers(2, COL_CAP_EBC) = "фактические макс. деформации"
     headers(2, COL_CAP_H) = "параметры сечения при " & ChrW$(&H3BB) & "ult и статус"
+    headers(2, COL_TRANSVERSE_POINT) = "при заданной нагрузке"
+    headers(2, COL_TRANSVERSE_RESERVE) = "предел на выбранной траектории"
 
     PutHeaderNotes headers
     PutColumnLabels headers, units
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_POINT) = "Группа и точка"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS) = ChrW$(&H3C3) & ", " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_UTIL) = "Использование"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = "Запас " & ChrW$(&H3BB)
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Причина и точка предела"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус запаса"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка максимального использования по абсолютной деформации стержня"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "Отношение к пределу своего знака"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_RESERVE) = "Запас по определяющей поперечной арматуре"
     If Not mCapturedSnapshot Is Nothing Then
         mCapturedSnapshot.AddTable "Strength.Headers", headers
         Exit Sub
@@ -413,6 +434,9 @@ Private Function HeaderMergeBlocks() As Collection
     blocks.Add Array(2, 2, COL_CAP_LAMBDA, COL_CAP_MY)
     blocks.Add Array(2, 2, COL_CAP_EBC, COL_CAP_EST)
     blocks.Add Array(2, 2, COL_CAP_H, COL_CAP_STATUS)
+    blocks.Add Array(1, 1, COL_TRANSVERSE_POINT, COL_TRANSVERSE_LIMIT_STATUS)
+    blocks.Add Array(2, 2, COL_TRANSVERSE_POINT, COL_TRANSVERSE_STATUS)
+    blocks.Add Array(2, 2, COL_TRANSVERSE_RESERVE, COL_TRANSVERSE_LIMIT_STATUS)
     Set HeaderMergeBlocks = blocks
 End Function
 
@@ -462,6 +486,28 @@ Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
     PutStrengthLimits data, rowIndex, batch, index, units
     PutStrengthState data, rowIndex, batch, index, units, section, policy
     PutCapacityState data, rowIndex, batch, index, units, section, policy
+    If batch.HasSpatialLoads(index) Then PutTransverseState data, rowIndex, batch.ResultAt(index), units
+End Sub
+
+' Отдельно показывает максимальное использование хомута при заданных усилиях
+' и предельный множитель сочетания, если предел определила поперечная арматура.
+Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
+        ByVal result As CCombinationResult, ByVal units As CUnitSystem)
+    Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
+    If Not state Is Nothing Then
+        Dim description As String, utilization As Double, stress As Double
+        If state.CopyCoupledTransverseControl(description, utilization, stress) Then
+            data(row, COL_TRANSVERSE_POINT) = description
+            data(row, COL_TRANSVERSE_STRESS) = OutputStress(stress, units)
+            data(row, COL_TRANSVERSE_UTIL) = utilization
+            data(row, COL_TRANSVERSE_STATUS) = state.CoupledTransverseStatus
+        End If
+    End If
+    Dim capacity As CCapacityResult: Set capacity = result.StrengthResult.Capacity
+    If Not capacity.IsTransverseLimit Then Exit Sub
+    If capacity.HasUltimatePoint Then data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
+    data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
+    data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.Status
 End Sub
 
 ' Возвращает позицию LC внутри data-части подробной таблицы.
@@ -544,9 +590,11 @@ Private Sub PutCapacityState(ByRef data() As Variant, ByVal rowIndex As Long, _
 
     Dim stateResult As CSectionStateResult
     Set stateResult = batch.ResultAt(index).StateRepository.FindState(sstCapacityState)
+    If Not stateResult Is Nothing Or (batch.ResultAt(index).StrengthResult.Capacity.HasUltimatePoint And _
+            batch.ResultAt(index).StrengthResult.Capacity.ReserveFactor > 0#) Then _
+        PutCapacityLoadPointComponents data, rowIndex, batch, index, units
     If Not stateResult Is Nothing Then
         PutStatePlane data, rowIndex, stateResult, units, COL_CAP_EPS0, COL_CAP_KX, COL_CAP_KY
-        PutCapacityLoadPointComponents data, rowIndex, batch, index, units
         PutStateExtremes data, rowIndex, stateResult, units, _
             COL_CAP_EBC, COL_CAP_EBT, COL_CAP_ESC, COL_CAP_EST, _
             0, 0, 0, 0
@@ -619,8 +667,10 @@ Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalc
     FormatBlock target, COL_LEFT_FIRST, COL_LEFT_LAST
     FormatBlock target, COL_STATE_FIRST, COL_STATE_LAST
     FormatBlock target, COL_CAPACITY_FIRST, COL_CAPACITY_LAST
+    FormatBlock target, COL_TRANSVERSE_POINT, COL_TRANSVERSE_LIMIT_STATUS
     target.Columns(COL_SEPARATOR1).Clear
     target.Columns(COL_SEPARATOR2).Clear
+    target.Columns(COL_SEPARATOR3).Clear
 
     target.Resize(HEADER_ROWS, TOTAL_COLUMNS).HorizontalAlignment = -4108
     target.Resize(HEADER_ROWS, TOTAL_COLUMNS).VerticalAlignment = -4108
@@ -642,6 +692,10 @@ Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalc
         target.Offset(HEADER_ROWS, COL_STATE_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_CAP_LIMIT_STATE - 1).Resize(dataRows, 3).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_CAP_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_TRANSVERSE_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_TRANSVERSE_POINT - 1).Resize(dataRows, 1).HorizontalAlignment = -4131
+        target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT - 1).Resize(dataRows, 1).HorizontalAlignment = -4131
         ApplyStrainNumberFormat target, dataRows
         ApplyStatusCells target, batch, dataRows, preparedValues
     End If
@@ -685,7 +739,8 @@ Private Sub ApplyStatusCells(ByVal target As Object, ByVal batch As CBatchSectio
     Next i
     End If
     ApplyTableStatusFills target, rows, Array( _
-        COL_STATUS, COL_STATE_STATUS, COL_CAP_STATUS), False, 0, preparedValues, HEADER_ROWS
+        COL_STATUS, COL_STATE_STATUS, COL_CAP_STATUS, COL_TRANSVERSE_STATUS, COL_TRANSVERSE_LIMIT_STATUS), _
+        False, 0, preparedValues, HEADER_ROWS
 End Sub
 
 
@@ -854,6 +909,12 @@ Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Obj
     Dim data As Variant: data = snapshot.Table("Strength.Data")
     Dim target As Object: Set target = TargetRange(workbook, UBound(data, 1))
     Dim headers As Variant: headers = snapshot.Table("Strength.Headers")
+    If UBound(headers, 2) <> UBound(data, 2) Then Err.Raise 5, "CStrengthSummaryWriter", _
+        "В снимке не совпадает число столбцов подписей и данных таблицы прочности."
+    If UBound(headers, 2) = LEGACY_STRENGTH_SNAPSHOT_COLUMNS Then
+        headers = AddBlankTransverseColumns(headers)
+        data = AddBlankTransverseColumns(data)
+    End If
     If mMinimalFormatting Then mMinimalFormatting = CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@" And ResultHeaderMatches(target, headers, merges:=HeaderMergeBlocks())
     PrepareTarget target
     If Not mMinimalFormatting Then
@@ -864,3 +925,16 @@ Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Obj
     target.Offset(HEADER_ROWS, 0).Resize(UBound(data, 1), TOTAL_COLUMNS).Value2 = data
     FormatTable target, Nothing, data
 End Sub
+
+' Расширяет сохранённую 49-колоночную таблицу пустым блоком поперечной
+' арматуры. У такого снимка нет данных для новых столбцов.
+Private Function AddBlankTransverseColumns(ByRef values As Variant) As Variant
+    Dim expanded() As Variant, row As Long, column As Long
+    ReDim expanded(1 To UBound(values, 1), 1 To TOTAL_COLUMNS)
+    For row = 1 To UBound(values, 1)
+        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+            expanded(row, column) = values(row, column)
+        Next column
+    Next row
+    AddBlankTransverseColumns = expanded
+End Function

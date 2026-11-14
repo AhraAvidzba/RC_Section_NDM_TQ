@@ -64,6 +64,16 @@ Friend Sub LoadAboutPoint(ByVal pointX As Double, ByVal pointY As Double, ByRef 
     components(6) = mQy
 End Sub
 
+' Возвращает шесть усилий равновесия из известной расчётной точки
+' в пользовательскую. Фильтр нулевого момента относится только к нагрузкам.
+Friend Sub MoveResultantsToLoadPoint(ByVal pointX As Double, ByVal pointY As Double, ByRef components() As Double)
+    Dim dx As Double, dy As Double
+    dx = mLoadReferenceX - pointX: dy = mLoadReferenceY - pointY
+    components(2) = components(2) - components(1) * dy
+    components(3) = components(3) - components(1) * dx
+    components(4) = components(4) - dx * components(6) + dy * components(5)
+End Sub
+
 ' Задаёт нагрузку по моментам относительно известной расчётной точки.
 ' Например, после устойчивости переводит моменты из центра приведённого сечения
 ' обратно в пользовательскую точку приложения нагрузки.

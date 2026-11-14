@@ -521,6 +521,74 @@ End Function
 
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сопоставляет предел деформации центрального стержня с явной формулой N.
+' Контрольное кручение не влияет на продольное равновесие этого материала.
+Public Function RunTestCoupledSteelLimit() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#
+    Const BAR_AREA As Double = 1000#
+    Const STEEL_LIMIT As Double = 0.001
+    Const LIMIT_FORCE As Double = (AREA - BAR_AREA) * (30000# * STEEL_LIMIT + 1E+10 * STEEL_LIMIT ^ 3) + _
+        BAR_AREA * (100# + 2000# * (STEEL_LIMIT - 100# / 200000#))
+    Dim section As CSectionModel, operators As New CCoupledElasticState
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, 12#, BAR_AREA, "TestGrade"
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModulus:=200000#
+    Dim material As New CTestCoupledPointResponse, steel As New CCoupledSteelModel, models As Object
+    material.TestInitialize operators.PointCount
+    steel.Initialize 200000#, 100#, 100#, 2000#, 2000#, STEEL_LIMIT, STEEL_LIMIT
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "TestGrade", steel
+    Dim response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    response.Initialize operators, material, models
+    solver.Initialize operators, response, 30000#
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    Dim low As Double, high As Double, onOffset As Boolean, expected As Double, steps As Variant
+    Dim trial As Variant
+    For Each trial In Array(0.98, 1.02)
+        expected = CDbl(trial)
+        path.Initialize 0#, LIMIT_FORCE / expected, 0#, 0#, 0#, 0#, 0#, 300000#, 0#, 0#, 0#, 0#
+        For Each steps In Array(1, 4, 16)
+            branch.Initialize solver, path, CLng(steps), 100, 25, 1E-8, 1E-8
+            branch.TraceSteelLimit response, 1#, 1.25, 0.003
+            TestRecord branch.CopySteelLimit(low, high, onOffset), _
+                "steel limit is bracketed, steps=" & CStr(steps) & " " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
+            TestRecord low <= expected And high >= expected And high - low <= 0.0001 And Not onOffset, _
+                "analytic limit lies within the refined near-one bracket", passed, failed, report
+            TestRecord branch.AcceptedLambda <= low And response.AcceptedSteelUtilization <= 1#, _
+                "over-limit probes did not modify accepted history", passed, failed, report
+        Next steps
+    Next trial
+
+    path.Initialize LIMIT_FORCE / 0.8, 1000#, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 4, 100, 25, 1E-8, 1E-8
+    branch.TraceSteelLimit response, 1#, 1.5, 0.0001
+    TestRecord branch.CopySteelLimit(low, high, onOffset) And onOffset And low <= 0.8 And high >= 0.8, _
+        "temporary fixed-load failure is classified by a confirmed steel limit", passed, failed, report
+    TestRecord Not branch.HasAcceptedVariableState, "incomplete preload cannot confirm a variable-load lower bound", passed, failed, report
+
+    path.Initialize 0#, LIMIT_FORCE, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 4, 100, 25, 1E-8, 1E-8
+    branch.TraceSteelLimit response, 1#, 0.9, 0.0001
+    TestRecord Not branch.CopySteelLimit(low, high, onOffset) And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
+        "search bound is not a material limit", passed, failed, report
+    TestRecord branch.HasAcceptedVariableState And branch.AcceptedLambda = 0.9, _
+        "search bound retains last admissible step", passed, failed, report
+
+    material.TestFail = True
+    path.Initialize LIMIT_FORCE / 4#, LIMIT_FORCE, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 4, 100, 25, 1E-8, 1E-8
+    branch.TraceSteelLimit response, 1#, 1.5, 0.0001
+    TestRecord Not branch.CopySteelLimit(low, high, onOffset) And Not branch.HasAcceptedVariableState And _
+        branch.ResultMeta.InternalStatus = rsNumericalFailure, "unresolved preload is never a physical failure", passed, failed, report
+    RunTestCoupledSteelLimit = report & "TOTAL_COUPLED_STEEL_LIMIT: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledSteelLimit = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет направленное замещение бетона, выбор разных классов и откат стали.
 ' Бетон здесь аналитический, чтобы независимо вычислить поправки.
 Public Function RunTestCoupledReinforcedResponse() As String
@@ -938,10 +1006,12 @@ Public Function RunTestCoupledBatchRoute() As String
     TestRecord first.DirectStateMeta.InternalStatus = rsSuccess, "target equilibrium " & first.OverallMeta.ResultComment, passed, failed, report
     TestRecord plane.DirectStateMeta.InternalStatus = rsSuccess, "planar route remains available " & plane.OverallMeta.ResultComment, passed, failed, report
     TestRecord second.DirectStateMeta.InternalStatus = rsSuccess, "second independent target " & second.OverallMeta.ResultComment, passed, failed, report
-    TestRecord second.CapacityMeta.InternalStatus = rsInvalidConfiguration, "requested but unverified coupled limit is visible", passed, failed, report
+    TestRecord second.CapacityMeta.InternalStatus = rsNumericalFailure And second.StrengthResult.Capacity.ReserveFactor = 0# And _
+        (second.StrengthResult.Capacity.HasConfirmedLowerBound Or second.StrengthResult.Capacity.HasUltimatePoint), _
+        "incomplete capacity retains the verified part of the path without reporting a full reserve", passed, failed, report
     TestRecord second.StabilityMeta.InternalStatus = rsNotApplicable And InStr(second.StabilityMeta.ResultComment, "Mx") > 0, _
         "tension preserves the standard stability status and scope", passed, failed, report
-    TestRecord second.OverallMeta.InternalStatus = rsInvalidConfiguration, "incomplete profile does not report overall success", passed, failed, report
+    TestRecord second.OverallMeta.InternalStatus = rsNumericalFailure, "incomplete profile does not report overall success", passed, failed, report
 
     Dim actual() As Double, repeated() As Double, target() As Double, i As Long
     Dim hasFirst As Boolean, hasSecond As Boolean
@@ -963,6 +1033,94 @@ Public Function RunTestCoupledBatchRoute() As String
     Exit Function
 Failed:
     RunTestCoupledBatchRoute = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет, что замкнутый хомут с заданным малым пределом деформации
+' определяет FAIL и запас раньше обычной продольной арматуры.
+Public Function RunTestCoupledHoopCapacity() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout
+    layout.AddContourGroup section, "TestWeakHoop", "", 8#, 100#, 10#, "TestHoopGrade"
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    concrete.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    Dim provider As New CMaterialModelProvider: provider.TestInitializeFromParameters concrete, steel
+    Dim hoop As New CCoupledSteelModel, grades As Object, supplementary As Object
+    hoop.Initialize 200000#, 6#, 6#, 500#, 500#, 0.00004, 0.00004
+    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "TestHoopGrade", hoop
+    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
+    Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+
+    Dim loads As New CSectionLoadState
+    loads.Initialize -216000#, 90000#, -40000#, 2#, -1#
+    loads.SetSpatialComponents 250000#, 120#, -80#
+    Dim meta As CResultMeta, state As CSectionStateResult, field() As Double, resultants() As Double
+    Set meta = analysis.SolveTarget(loads, "Auto", spec, field, resultants, True, state)
+    TestRecord meta.InternalStatus = rsCheckFailed And InStr(meta.ResultComment, "TestWeakHoop") > 0, _
+        "direct hoop failure " & meta.ResultComment, passed, failed, report
+    If Not state Is Nothing Then
+        Dim control As String, utilization As Double, stress As Double
+        TestRecord state.CopyCoupledTransverseControl(control, utilization, stress), _
+            "current hoop has a separate result", passed, failed, report
+        TestRecord InStr(control, "TestWeakHoop") > 0 And InStr(control, "TestHoopGrade") > 0 And _
+            utilization > 1# And stress > 6#, "governing hoop material, signed stress and strain utilization", passed, failed, report
+    Else
+        TestRecord False, "accepted hoop result is missing " & meta.DiagnosticDetails, passed, failed, report
+    End If
+
+    Dim capacity As CCapacityResult, lambda As Double
+    Set capacity = analysis.SolveCapacity(loads, "Auto", spec, 1#, 1.5, 0.0001, 30)
+    lambda = capacity.LambdaCapacity
+    TestRecord capacity.HasUltimatePoint And capacity.IsTransverseLimit And capacity.Status = "FAIL" And InStr(capacity.LimitState, "TestWeakHoop") > 0, _
+        "hoop governs capacity " & capacity.ResultMeta.ResultComment, passed, failed, report
+    TestRecord lambda > 0.35 And lambda < 0.85, _
+        "reserve near independent elastic Poisson estimate of 0.60, lambda=" & CStr(lambda), passed, failed, report
+    TestExpectNear capacity.NUltimate, lambda * -216000#, 1E-7, "ultimate N", passed, failed, report
+    TestExpectNear capacity.MxUltimate, lambda * 90000#, 1E-7, "ultimate Mx at load point", passed, failed, report
+    TestExpectNear capacity.MyUltimate, lambda * -40000#, 1E-7, "ultimate My at load point", passed, failed, report
+    TestExpectNear capacity.TUltimate, lambda * 250000#, 1E-7, "ultimate T at load point", passed, failed, report
+    TestExpectNear capacity.QxUltimate, lambda * 120#, 1E-7, "ultimate Qx", passed, failed, report
+    TestExpectNear capacity.QyUltimate, lambda * -80#, 1E-7, "ultimate Qy", passed, failed, report
+    Dim missingState As New CResultMeta, combined As New CCombinationResult
+    missingState.SetSolverFailure sfcNumericalFailure, rkDirectState, "Unresolved direct state", True
+    combined.SetDirectStateMeta missingState
+    combined.StoreCapacityResult capacity
+    TestRecord combined.Status = "FAIL" And combined.DirectStateMeta.InternalStatus = rsNumericalFailure And _
+        combined.StrengthMeta.InternalStatus = rsCheckFailed And combined.GoverningUtil > 1#, _
+        "confirmed hoop failure governs even if the requested direct state is unresolved", passed, failed, report
+    If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then
+        Dim catalog As New CCalculationProfileCatalog, profile As CCalculationProfile, batch As New CBatchSectionCalculator
+        catalog.LoadFromWorkbook ThisWorkbook, False
+        Set profile = catalog.ProfileById("PR4")
+        profile.Initialize "PR4", "Test hoop capacity", "", True, True, False, False
+        profile.SetStrengthSpec spec
+        batch.Initialize section, provider
+        Set batch.ProfileCatalog = catalog
+        batch.ConfigureCoupledAnalysis analysis
+        batch.AddCombination "Hoop", -216000#, 90000#, -40000#, "PR4", "", torque:=250000#, qx:=120#, qy:=-80#
+        batch.ApplyLoadReference 2#, -1#, 2#, -1#
+        batch.Execute
+        Dim writer As New CStrengthSummaryWriter, anchor As Object
+        writer.WriteSummary ThisWorkbook, batch, section:=section
+        Set anchor = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+        TestRecord anchor.Offset(-4, 50).Value2 = "Поперечная арматура", "separate Results heading", passed, failed, report
+        TestRecord anchor.Offset(0, 53).Value2 = "FAIL" And anchor.Offset(0, 56).Value2 = "FAIL", _
+            "separate current and reserve statuses are written", passed, failed, report
+        TestRecord InStr(anchor.Offset(0, 50).Value2, "TestWeakHoop") > 0 And InStr(anchor.Offset(0, 55).Value2, "TestWeakHoop") > 0, _
+            "Results names the governing hoop in each check", passed, failed, report
+        TestExpectNear CDbl(anchor.Offset(0, 54).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
+    End If
+    RunTestCoupledHoopCapacity = report & "TOTAL_COUPLED_HOOP_CAPACITY: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledHoopCapacity = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -1187,6 +1345,20 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK", CStr(mode) & " produces linked equilibrium " & ignored, passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "Coupled.StateSolver") = "SplineNewton", CStr(mode) & " saves actual solver", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "ALL", "Geometry.RecipeType") = "Rectangles", CStr(mode) & " same saved recipe after repeated calculation", passed, failed, report
+        Dim hoopAnchor As Object: Set hoopAnchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+        TestRecord hoopAnchor.Offset(-4, 50).Value2 = "Поперечная арматура", CStr(mode) & " has separate hoop heading", passed, failed, report
+        TestRecord hoopAnchor.Offset(0, 53).Value2 = "OK" And Len(hoopAnchor.Offset(1, 53).Value2) = 0, _
+            CStr(mode) & " writes hoop status only for spatial case", passed, failed, report
+        If CStr(mode) = "File" Then
+            Dim savedStrength As Variant, reader As CResultReadSource
+            Set reader = CurrentResultSource(book)
+            savedStrength = reader.Table("Strength.Data")
+            TestRecord UBound(savedStrength, 2) = STRENGTH_SNAPSHOT_COLUMNS And savedStrength(1, 54) = "OK", _
+                "File stores separate hoop status and schema", passed, failed, report
+            hoopAnchor.Offset(0, 53).ClearContents
+            UpdateSectionResultsForWorkbook book
+            TestRecord hoopAnchor.Offset(0, 53).Value2 = "OK", "File restores a removed hoop status", passed, failed, report
+        End If
         Dim components As Variant, i As Long, actual As String
         components = Array("N", "Mx", "My", "T", "Qx", "Qy")
         For i = LBound(components) To UBound(components)

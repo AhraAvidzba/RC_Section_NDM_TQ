@@ -958,19 +958,48 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
 
     If profile.StrengthCapacityEnabled Then
         If Not mCoupledAnalysis Is Nothing Then
-            Dim capacity As New CCapacityResult
-            capacity.InitializeUnsupportedConfiguration "Предельный множитель для связанного расчёта не определён."
+            ReportSection "Предельная нагрузка для связанного сечения"
+            Dim capacity As CCapacityResult
+            Set capacity = mCoupledAnalysis.SolveCapacity(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, _
+                mCapacityInitialLambda, mCapacityMaxLambda, mCapacityToleranceLambda, mCapacitySolverMaxIterations)
             combined.StoreCapacityResult capacity
+            Set meta = capacity.ResultMeta
+            ReportStep meta.ResultComment
+            If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
+            If capacity.HasUltimatePoint Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
         End If
     Else
         StoreNotCalculatedCapacity index
     End If
+
+    ReportCoupledTransverse acceptedState, capacity
 
     If profile.CrackWidthEnabled Then
         ReportSection "Проверки трещин по N, Mx и My"
         ReportStep CoupledCrackScope()
         RunCrackWidth index, profile
         combined.CrackResult.SetScopeComment CoupledCrackScope()
+    End If
+End Sub
+
+' Выводит отдельный раздел проверки поперечной арматуры. При поиске только
+' предела показывает достигнутый критерий и запас определяющего хомута.
+Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal capacity As CCapacityResult)
+    Dim control As String, utilization As Double, stress As Double, hasState As Boolean, hasLimit As Boolean
+    If Not state Is Nothing Then hasState = state.CopyCoupledTransverseControl(control, utilization, stress)
+    If Not capacity Is Nothing Then hasLimit = capacity.IsTransverseLimit
+    If Not hasState And Not hasLimit Then Exit Sub
+    ReportSection "Поперечная арматура"
+    If hasState Then
+        ReportValue "Статус по деформации при заданной нагрузке", state.CoupledTransverseStatus
+        ReportValue "Контрольная точка", control
+        ReportValue "Напряжение вдоль стержня, МПа", FormatNumberInvariant(stress)
+        ReportValue "Отношение деформации к пределу", FormatNumberInvariant(utilization)
+    End If
+    If hasLimit Then
+        ReportValue "Статус предела поперечной арматуры", capacity.Status
+        ReportStep capacity.LimitState
+        If capacity.HasUltimatePoint Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
     End If
 End Sub
 

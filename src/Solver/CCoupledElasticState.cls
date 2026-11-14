@@ -30,6 +30,7 @@ Private mPointCount As Long
 Private mConcreteCount As Long
 Private mSteelModulus() As Double, mSteelDirection() As Double
 Private mSteelClass() As String
+Private mTransverseGroup() As Long ' Номер группы в блоке Transverse, ноль у продольных стержней.
 Private mSupport() As Long
 Private mSectionDof() As Long
 Private mX() As Double, mY() As Double, mWeight() As Double
@@ -118,6 +119,11 @@ Friend Sub Point(ByVal index As Long, ByRef x As Double, ByRef y As Double, ByRe
     area = mWeight(index) * mArea
 End Sub
 
+' Возвращает исходную группу поперечной арматуры для материальной точки.
+Friend Property Get TransverseGroupAt(ByVal point As Long) As Long
+    TransverseGroupAt = mTransverseGroup(point)
+End Property
+
 ' Возвращает структурированную причину результата в общем формате проекта.
 Friend Property Get ResultMeta() As CResultMeta
     Set ResultMeta = mMeta.Clone
@@ -127,7 +133,7 @@ End Property
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
         ByVal steelModulus As Double, ByVal steelModels As Object, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
-    Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass
+    Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass: Erase mTransverseGroup
     Dim bars As New CTransverseRebarQuadrature
     If Not transverse Is Nothing Then bars.Prepare transverse, mQuadrature
     Dim last As Long, i As Long, point As Long, k As Long
@@ -140,6 +146,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
     ReDim Preserve dx(1 To SHAPE_COUNT, 1 To last): ReDim Preserve dy(1 To SHAPE_COUNT, 1 To last)
     ReDim mSteelModulus(mConcreteCount + 1 To last)
     ReDim mSteelClass(mConcreteCount + 1 To last)
+    ReDim mTransverseGroup(mConcreteCount + 1 To last)
     ReDim mSteelDirection(1 To STRESS_COMPONENTS, mConcreteCount + 1 To last)
 
     Dim frame As CSectionNumericalFrame, region As CConcreteRegion, query As New CSectionGeometryQuery
@@ -168,6 +175,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             mSteelDirection(2, point) = tyy
             mSteelDirection(4, point) = txy
             mSteelClass(point) = transverse.SteelClass(group)
+            mTransverseGroup(point) = group
         End If
         mX(point) = x: mY(point) = y: mWeight(point) = area
         If steelModels Is Nothing Then
