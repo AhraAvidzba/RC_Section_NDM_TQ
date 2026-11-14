@@ -211,6 +211,75 @@ Private Sub TestExpectNear(ByVal value As Double, ByVal reference As Double, ByV
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет невязку и поправку, собранные для текущего состояния, с прямым
+' линейным решением. Проверяет в том числе продольный градиент и все усилия.
+Public Function RunCoupledEquationAssemblyTests() As String
+    On Error GoTo Failed
+    Const E_MODULUS As Double = 32000#
+    Dim solver As New CCoupledElasticState
+    Dim section As CSectionModel
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    solver.PrepareModel section, E_MODULUS, 0#, 1, 1, 8
+
+    Dim external() As Double, state() As Double, residual() As Double, linearized() As Double
+    Dim i As Long, j As Long, point As Long, passed As Long, failed As Long, report As String
+    Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double, strain(1 To 6) As Double
+    Dim forces(1 To 6) As Double, trialForces(1 To 6) As Double
+    For i = 1 To 3
+        tangent(i, i) = E_MODULUS
+        tangent(i + 3, i + 3) = E_MODULUS / 2#
+    Next i
+    forces(1) = 30000#: forces(2) = 1900000#: forces(3) = -1100000#
+    forces(4) = 1400000#: forces(5) = 3200#: forces(6) = -1800#
+    solver.LoadEquations forces(1), forces(2), forces(3), forces(4), forces(5), forces(6), external
+    ReDim state(1 To solver.DegreeCount)
+    For i = 1 To solver.DegreeCount
+        state(i) = Sin(i) * 1E-7
+    Next i
+    solver.StartEquations state, external, residual, linearized, True
+    For point = 1 To solver.PointCount
+        solver.PointStrain point, state, strain
+        For j = 1 To 6
+            stress(j) = tangent(j, j) * strain(j)
+        Next j
+        solver.AddPointEquilibrium point, state, stress, tangent, residual, linearized, True, trialForces
+    Next point
+    Dim system As New CCoupledLinearSystem, ok As Boolean
+    For i = 1 To UBound(residual)
+        residual(i) = -residual(i)
+    Next i
+    ok = system.Solve(linearized, residual, solver.DegreeCount)
+    TestRecord ok, "linearization solves mixed equations", passed, failed, report
+    If Not ok Then GoTo ReportResult
+    For i = 1 To UBound(state)
+        state(i) = state(i) + residual(i)
+    Next i
+    solver.StartEquations state, external, residual, linearized, False
+    Erase trialForces
+    For point = 1 To solver.PointCount
+        solver.PointStrain point, state, strain
+        For j = 1 To 6
+            stress(j) = tangent(j, j) * strain(j)
+        Next j
+        solver.AddPointEquilibrium point, state, stress, tangent, residual, linearized, False, trialForces
+    Next point
+    Dim norm As Double
+    For i = 1 To UBound(residual)
+        norm = GeomMax(norm, Abs(residual(i)))
+    Next i
+    TestRecord norm < 1E-10, "internal residual after one correction=" & CStr(norm), passed, failed, report
+    For i = 1 To 6
+        TestExpectNear trialForces(i), forces(i), 1E-8, _
+            "assembled component " & CStr(i), passed, failed, report
+    Next i
+ReportResult:
+    RunCoupledEquationAssemblyTests = report & "TOTAL_COUPLED_EQUATIONS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunCoupledEquationAssemblyTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
 ' Сохраняет итог отдельного сравнения и увеличивает соответствующий счетчик.
 Private Sub TestRecord(ByVal ok As Boolean, ByVal name As String, _
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)

@@ -79,13 +79,7 @@ Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double,
     mMeta.Clear
     Erase deformation: Erase recovered: Erase pointStress
     Dim rhs() As Double, applied() As Double, i As Long
-    ReDim rhs(1 To mDof)
-    rhs(1) = n / mArea
-    rhs(2) = mx / mArea / mLength
-    rhs(3) = my / mArea / mLength
-    rhs(4) = torque / mArea / mLength
-    rhs(mGradientBase + 2) = qy / mArea
-    rhs(mGradientBase + 3) = qx / mArea
+    LoadEquations n, mx, my, torque, qx, qy, rhs
     applied = rhs
     If Not mSystem.SolveFactored(rhs) Then
         mMeta.SetSolverFailure mSystem.FailureCode, rkDirectState, _
@@ -278,71 +272,24 @@ End Sub
 ' ортогональности. Члены σ'zx, σ'zy, σ'zz берутся из D Bp d, где d = L dq/dz.
 Private Sub Assemble()
     ReDim mMatrix(1 To mDof, 1 To mDof)
-    Dim i As Long, a As Long, b As Long, j As Long, k As Long
-    Dim row As Long, col As Long, localCount As Long, component As Long
-    Dim product As Double, weighted() As Double
+    Dim point As Long, a As Long, degree As Long, axis As Long, shapeValue As Double
     Dim tangent(1 To STRESS_COMPONENTS, 1 To STRESS_COMPONENTS) As Double
-    localCount = UBound(mSectionDof, 1)
-    ReDim weighted(1 To STRESS_COMPONENTS, 1 To localCount)
-    For i = 1 To mPointCount
-        PointTangent i, tangent
-        For b = 1 To localCount
-            If mSectionDof(b, i) > 0 Then
-                For j = 1 To STRESS_COMPONENTS
-                    product = 0#
-                    For k = 1 To STRESS_COMPONENTS
-                        product = product + tangent(j, k) * mOperators(k, b, i)
-                    Next k
-                    weighted(j, b) = product * mWeight(i)
-                Next j
-            End If
-        Next b
-        For a = 1 To localCount
-            row = mSectionDof(a, i)
-            If row > 0 Then
-                For b = 1 To localCount
-                    col = mSectionDof(b, i)
-                    If col > 0 Then
-                        product = 0#
-                        For j = 1 To STRESS_COMPONENTS
-                            product = product + mOperators(j, a, i) * weighted(j, b)
-                        Next j
-                        mMatrix(col, row) = mMatrix(col, row) + product
-                        If a <= PLANE_DOF And b <= PLANE_DOF Then
-                            mMatrix(mGradientBase + b, mGradientBase + a) = _
-                                mMatrix(mGradientBase + b, mGradientBase + a) + product
-                        End If
-                    End If
-                Next b
-                If a > PLANE_DOF Then
-                    k = (a - PLANE_DOF - 1) \ 3 + 1
-                    component = (a - PLANE_DOF - 1) Mod 3 + 1
-                    AssembleTraction i, k, component, row, weighted
+    For point = 1 To mPointCount
+        PointTangent point, tangent
+        AddPointTangent point, tangent, mMatrix
+        If point <= mConcreteCount Then
+            For a = PLANE_DOF + 1 To UBound(mSectionDof, 1)
+                degree = mSectionDof(a, point)
+                If degree > 0 Then
+                    axis = (a - PLANE_DOF - 1) Mod 3 + 1
+                    shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point) * mWeight(point)
+                    AddGauge degree, mGaugeBase + axis, shapeValue
+                    If axis = 1 Then AddGauge degree, mGaugeBase + 4, -mY(point) * shapeValue
+                    If axis = 2 Then AddGauge degree, mGaugeBase + 4, mX(point) * shapeValue
                 End If
-            End If
-        Next a
-    Next i
-End Sub
-
-' Добавляет источник продольного градиента и условия отсутствия жёсткого
-' перемещения по трём осям и поворота вокруг продольной оси.
-Private Sub AssembleTraction(ByVal point As Long, ByVal k As Long, ByVal component As Long, _
-        ByVal row As Long, ByRef weighted() As Double)
-    Dim stressIndex As Long, b As Long, factor As Double
-    Select Case component
-        Case 1: stressIndex = 5
-        Case 2: stressIndex = 6
-        Case 3: stressIndex = 3
-    End Select
-    For b = 1 To PLANE_DOF
-        mMatrix(mGradientBase + b, row) = mMatrix(mGradientBase + b, row) - _
-            mShape(k, point) * weighted(stressIndex, b)
-    Next b
-    If point > mConcreteCount Then Exit Sub ' Ограничение жёстких перемещений интегрируется по всей исходной области один раз.
-    factor = mShape(k, point) * mWeight(point)
-    AddGauge row, mGaugeBase + component, factor
-    If component = 1 Then AddGauge row, mGaugeBase + 4, -mY(point) * factor
-    If component = 2 Then AddGauge row, mGaugeBase + 4, mX(point) * factor
+            Next a
+        End If
+    Next point
 End Sub
 
 ' Вводит множитель точного ограничения без штрафной жёсткости.
@@ -370,36 +317,221 @@ End Function
 Private Sub RecoverFields(ByRef solution() As Double, ByRef recovered() As Double, ByRef stress() As Double)
     ReDim recovered(1 To 6)
     ReDim stress(1 To STRESS_COMPONENTS, 1 To mPointCount)
-    Dim i As Long, j As Long, k As Long, a As Long, degree As Long
-    Dim strain(1 To STRESS_COMPONENTS) As Double, contribution As Double, area As Double
+    Dim point As Long, j As Long, k As Long
+    Dim strain(1 To STRESS_COMPONENTS) As Double, localStress(1 To STRESS_COMPONENTS) As Double
     Dim tangent(1 To STRESS_COMPONENTS, 1 To STRESS_COMPONENTS) As Double
-    For i = 1 To mPointCount
-        PointTangent i, tangent
+    For point = 1 To mPointCount
+        PointTangent point, tangent
+        PointStrain point, solution, strain
         For j = 1 To STRESS_COMPONENTS
-            strain(j) = 0#
-        Next j
-        For a = 1 To UBound(mSectionDof, 1)
-            degree = mSectionDof(a, i)
-            If degree > 0 Then
-                contribution = solution(degree)
-                For j = 1 To STRESS_COMPONENTS
-                    strain(j) = strain(j) + mOperators(j, a, i) * contribution
-                Next j
-            End If
-        Next a
-        For j = 1 To STRESS_COMPONENTS
+            localStress(j) = 0#
             For k = 1 To STRESS_COMPONENTS
-                stress(j, i) = stress(j, i) + tangent(j, k) * strain(k)
+                localStress(j) = localStress(j) + tangent(j, k) * strain(k)
             Next k
+            stress(j, point) = localStress(j)
         Next j
-        area = mArea * mWeight(i)
-        recovered(1) = recovered(1) + area * stress(3, i)
-        recovered(2) = recovered(2) + area * stress(3, i) * mY(i) * mLength
-        recovered(3) = recovered(3) + area * stress(3, i) * mX(i) * mLength
-        recovered(4) = recovered(4) + area * (mX(i) * stress(6, i) - mY(i) * stress(5, i)) * mLength
-        recovered(5) = recovered(5) + area * stress(5, i)
-        recovered(6) = recovered(6) + area * stress(6, i)
-    Next i
+        AccumulateResultants point, localStress, recovered
+    Next point
+End Sub
+
+' Возвращает полную размерность уравнений до конденсации.
+Friend Property Get DegreeCount() As Long
+    DegreeCount = mDof
+End Property
+
+' Возвращает число точек интегрирования бетона и поправок от стали.
+Friend Property Get PointCount() As Long
+    PointCount = mPointCount
+End Property
+
+' Возвращает число точек исходного бетона до поправок замещения.
+Friend Property Get ConcretePointCount() As Long
+    ConcretePointCount = mConcreteCount
+End Property
+
+' Готовит правые части равновесия в масштабе напряжений.
+' Моменты заданы относительно подготовленного численного начала.
+Friend Sub LoadEquations(ByVal force As Double, ByVal mx As Double, ByVal my As Double, _
+        ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, ByRef external() As Double)
+    ReDim external(1 To mDof)
+    external(1) = force / mArea
+    external(2) = mx / mArea / mLength
+    external(3) = my / mArea / mLength
+    external(4) = torque / mArea / mLength
+    external(mGradientBase + 2) = qy / mArea
+    external(mGradientBase + 3) = qx / mArea
+End Sub
+
+' Деформации материальной точки от общих деформаций и внутренних полей.
+' Порядок εxx, εyy, εzz, γxy, γxz, γyz. Вызывающий переиспользует массив.
+Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strain() As Double)
+    Dim localIndex As Long, degree As Long, j As Long, coefficient As Double
+    For j = 1 To STRESS_COMPONENTS
+        strain(j) = 0#
+    Next j
+    For localIndex = 1 To UBound(mSectionDof, 1)
+        degree = mSectionDof(localIndex, point)
+        If degree > 0 Then
+            coefficient = field(degree)
+            For j = 1 To STRESS_COMPONENTS
+                strain(j) = strain(j) + mOperators(j, localIndex, point) * coefficient
+            Next j
+        End If
+    Next localIndex
+End Sub
+
+' Возвращает проекцию деформации на ось стержня. Точка находится после бетона.
+Friend Sub SteelProjection(ByVal point As Long, ByRef direction() As Double)
+    Dim j As Long
+    For j = 1 To STRESS_COMPONENTS
+        direction(j) = mSteelDirection(j, point)
+    Next j
+End Sub
+
+' Готовит буфер нелинейных уравнений и добавляет четыре точных ограничения.
+' Материальные вклады накапливаются вызовами AddPointEquilibrium.
+Friend Sub StartEquations(ByRef field() As Double, ByRef external() As Double, ByRef residual() As Double, _
+        ByRef linearized() As Double, ByVal assembleMatrix As Boolean)
+    ReDim residual(1 To mDof)
+    If assembleMatrix Then ReDim linearized(1 To mDof, 1 To mDof)
+    Dim row As Long, gauge As Long, value As Double
+    For row = 1 To mDof
+        residual(row) = -external(row)
+    Next row
+    For gauge = mGaugeBase + 1 To mDof
+        For row = 1 To mGaugeBase
+            value = mMatrix(gauge, row)
+            If value <> 0# Then
+                residual(row) = residual(row) + value * field(gauge)
+                residual(gauge) = residual(gauge) + value * field(row)
+                If assembleMatrix Then
+                    linearized(gauge, row) = value
+                    linearized(row, gauge) = value
+                End If
+            End If
+        Next row
+    Next gauge
+End Sub
+
+' Добавляет слабое равновесие для напряжения и продольного градиента D Bp d.
+' D и история материала фиксируются на данной линеаризации. После каждой
+' пробы вызывающий пересобирает невязку по фактическим напряжениям и D.
+Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
+        ByRef stress() As Double, ByRef tangent() As Double, ByRef residual() As Double, _
+        ByRef linearized() As Double, ByVal assembleMatrix As Boolean, ByRef resultants() As Double)
+    Dim axialGradient(1 To STRESS_COMPONENTS) As Double
+    Dim weightedGradient(1 To STRESS_COMPONENTS) As Double
+    Dim weightedStress(1 To STRESS_COMPONENTS) As Double
+    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long
+    Dim weight As Double, value As Double, traction As Long, shapeValue As Double
+    weight = mWeight(point)
+    For b = 1 To PLANE_DOF
+        For j = 1 To STRESS_COMPONENTS
+            axialGradient(j) = axialGradient(j) + mOperators(j, b, point) * field(mGradientBase + b)
+        Next j
+    Next b
+    For j = 1 To STRESS_COMPONENTS
+        weightedStress(j) = stress(j) * weight
+        For k = 1 To STRESS_COMPONENTS
+            weightedGradient(j) = weightedGradient(j) + tangent(j, k) * axialGradient(k)
+        Next k
+        weightedGradient(j) = weight * weightedGradient(j)
+    Next j
+
+    Dim count As Long
+    count = UBound(mSectionDof, 1)
+    For a = 1 To count
+        row = mSectionDof(a, point)
+        If row > 0 Then
+            value = 0#
+            For j = 1 To STRESS_COMPONENTS
+                value = value + mOperators(j, a, point) * weightedStress(j)
+            Next j
+            If a <= PLANE_DOF Then
+                For j = 1 To STRESS_COMPONENTS
+                    residual(mGradientBase + a) = residual(mGradientBase + a) + _
+                        mOperators(j, a, point) * weightedGradient(j)
+                Next j
+            Else
+                traction = TractionComponent(a)
+                shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
+                value = value - shapeValue * weightedGradient(traction)
+            End If
+            residual(row) = residual(row) + value
+        End If
+    Next a
+    AccumulateResultants point, stress, resultants
+    If assembleMatrix Then AddPointTangent point, tangent, linearized
+End Sub
+
+' Добавляет блоки Bᵀ D B и производные правой части по градиенту деформации.
+' Производные D по деформации учитываются обновлением пробной невязки.
+Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRef linearized() As Double)
+    Dim count As Long, weighted() As Double
+    count = UBound(mSectionDof, 1)
+    ReDim weighted(1 To STRESS_COMPONENTS, 1 To count)
+    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long, traction As Long
+    Dim value As Double, shapeValue As Double
+    For b = 1 To count
+        If mSectionDof(b, point) > 0 Then
+            For j = 1 To STRESS_COMPONENTS
+                value = 0#
+                For k = 1 To STRESS_COMPONENTS
+                    value = value + tangent(j, k) * mOperators(k, b, point)
+                Next k
+                weighted(j, b) = value * mWeight(point)
+            Next j
+        End If
+    Next b
+    For a = 1 To count
+        row = mSectionDof(a, point)
+        If row > 0 Then
+            For b = 1 To count
+                col = mSectionDof(b, point)
+                If col > 0 Then
+                    value = 0#
+                    For j = 1 To STRESS_COMPONENTS
+                        value = value + mOperators(j, a, point) * weighted(j, b)
+                    Next j
+                    linearized(col, row) = linearized(col, row) + value
+                    If a <= PLANE_DOF And b <= PLANE_DOF Then
+                        linearized(mGradientBase + b, mGradientBase + a) = _
+                            linearized(mGradientBase + b, mGradientBase + a) + value
+                    End If
+                End If
+            Next b
+            If a > PLANE_DOF Then
+                traction = TractionComponent(a)
+                shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
+                For b = 1 To PLANE_DOF
+                    linearized(mGradientBase + b, row) = linearized(mGradientBase + b, row) - _
+                        shapeValue * weighted(traction, b)
+                Next b
+            End If
+        End If
+    Next a
+End Sub
+
+' Возвращает компоненту вектора напряжений на продольной площадке.
+Private Function TractionComponent(ByVal localDegree As Long) As Long
+    Select Case (localDegree - PLANE_DOF - 1) Mod 3
+        Case 0: TractionComponent = 5
+        Case 1: TractionComponent = 6
+        Case 2: TractionComponent = 3
+    End Select
+End Function
+
+' Суммирует шесть физических усилий относительно численного начала.
+Private Sub AccumulateResultants(ByVal point As Long, ByRef stress() As Double, ByRef resultants() As Double)
+    Dim area As Double, momentWeight As Double
+    area = mArea * mWeight(point)
+    momentWeight = area * mLength
+    resultants(1) = resultants(1) + area * stress(3)
+    resultants(2) = resultants(2) + momentWeight * stress(3) * mY(point)
+    resultants(3) = resultants(3) + momentWeight * stress(3) * mX(point)
+    resultants(4) = resultants(4) + momentWeight * (mX(point) * stress(6) - mY(point) * stress(5))
+    resultants(5) = resultants(5) + area * stress(5)
+    resultants(6) = resultants(6) + area * stress(6)
 End Sub
 
 ' Сверяет компоненты с общим приводимым масштабом сил и плечом mLength.

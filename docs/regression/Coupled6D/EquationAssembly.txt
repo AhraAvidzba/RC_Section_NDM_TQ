@@ -1,0 +1,55 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\TransverseRebar.xlsm
+SOURCE_SHA256: 920A509840BE7077B94FC6FE782DE1459620BA0D387E84DB37CD5EF696130D09
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_80ccbc0be2ea4e13b6532da7972fb282\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=32888; startTicks=639302834702248750
+===== modTestCoupledElasticState.RunCoupledEquationAssemblyTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledEquationAssemblyTests; 2026-11-14T23:04:36
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182218752; privateBytes=126214144; cpu=34.203125
+EXCEL_AFTER_SUITE: pid=32888; workingSet=144035840; privateBytes=94531584; cpu=6.546875
+OK: linearization solves mixed equations
+OK: internal residual after one correction=1.28716481917479E-15
+OK: assembled component 1 actual=30000 expected=30000
+OK: assembled component 2 actual=1900000 expected=1900000
+OK: assembled component 3 actual=-1100000 expected=-1100000
+OK: assembled component 4 actual=1400000 expected=1400000
+OK: assembled component 5 actual=3200.00000000001 expected=3200
+OK: assembled component 6 actual=-1800 expected=-1800
+TOTAL_COUPLED_EQUATIONS: passed=8; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_80ccbc0be2ea4e13b6532da7972fb282\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledEquationAssemblyTests; 2026-11-14T23:04:37
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T23:04:38
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182218752; privateBytes=126214144; cpu=34.203125
+EXCEL_AFTER_SUITE: pid=32888; workingSet=149766144; privateBytes=100581376; cpu=11.40625
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+OK: reinforced axial equilibrium
+OK: reinforced net axial area actual=1.44392869302254E-05 expected=1.44392868615935E-05
+OK: transverse replacement moment actual=3.91357632710054E-10 expected=3.90148757810609E-10
+TOTAL_COUPLED_ELASTIC: passed=21; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_80ccbc0be2ea4e13b6532da7972fb282\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T23:04:42
+SOURCE_UNCHANGED: True
