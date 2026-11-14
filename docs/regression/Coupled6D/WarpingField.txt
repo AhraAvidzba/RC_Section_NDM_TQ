@@ -1,0 +1,1574 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CadStrain3D.xlsm
+SOURCE_SHA256: E9AC1AC5AC8D377286C1102A6DF7964E0706C4897A455F9FAB54D905EBFDD461
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_51e057f7d2bd472685427ae17fd15633\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=13656; startTicks=639302851595584292
+===== modTestCoupledElasticState.RunCoupledWarpingTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledWarpingTests; 2026-11-14T23:32:46
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13656; workingSet=144551936; privateBytes=115499008; cpu=8.296875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182530048; privateBytes=126480384; cpu=34.46875
+OK: rectangle pure bending for warping
+OK: pure bending has no internal w, max mm=0
+OK: rectangle torsion for warping
+OK: rectangle off-axis warping mm=-3.55050938184996E-03
+OK: warping is odd across each axis
+OK: zero warping at center
+OK: circle torsion for warping
+OK: circle warping relative discrete error=1.40012926517958E-05
+TOTAL_COUPLED_WARPING: passed=8; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_51e057f7d2bd472685427ae17fd15633\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledWarpingTests; 2026-11-14T23:32:49
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T23:32:50
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13656; workingSet=148738048; privateBytes=119885824; cpu=13.25
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182530048; privateBytes=126480384; cpu=34.484375
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+OK: asymmetric perforated all six
+OK: asymmetric axial strain actual=-5.524475397186E-05 expected=-5.52447539718594E-05
+OK: asymmetric x curvature actual=1.13310713050444E-06 expected=1.13159435970712E-06
+OK: asymmetric y curvature actual=-3.92454842487485E-07 expected=-3.9223342645694E-07
+OK: asymmetric pure torque
+OK: asymmetric biaxial shear
+OK: asymmetric normal forces
+OK: asymmetric component superposition error=6.21724893790088E-15
+OK: reinforced axial equilibrium
+OK: reinforced net axial area actual=1.44392869302254E-05 expected=1.44392868615935E-05
+OK: transverse replacement moment actual=3.91357632710054E-10 expected=3.90148757810609E-10
+TOTAL_COUPLED_ELASTIC: passed=21; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_51e057f7d2bd472685427ae17fd15633\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T23:32:53
+===== modTestAutoCADConfig.RunAudit03AutoCADConfigTests =====
+SUITE_STARTED: modTestAutoCADConfig.RunAudit03AutoCADConfigTests; 2026-11-14T23:32:54
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13656; workingSet=153456640; privateBytes=122359808; cpu=35.546875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182530048; privateBytes=126480384; cpu=34.484375
+AUTOCAD_SNAPSHOT:
+AUTOCAD_SNAPSHOT:
+OK: autoCADConfig.snapshot.state1
+OK: autoCADConfig.snapshot.state2
+OK: autoCADConfig.presentation.0.Concrete.Tension.geometry
+OK: autoCADConfig.presentation.0.Concrete.Tension.color
+OK: autoCADConfig.presentation.0.Concrete.Tension.annotation
+OK: autoCADConfig.presentation.0.Concrete.Tension.label
+OK: autoCADConfig.presentation.0.Concrete.Compression.geometry
+OK: autoCADConfig.presentation.0.Concrete.Compression.color
+OK: autoCADConfig.presentation.0.Concrete.Compression.annotation
+OK: autoCADConfig.presentation.0.Concrete.Compression.label
+OK: autoCADConfig.presentation.0.Concrete.NearZero.geometry
+OK: autoCADConfig.presentation.0.Concrete.NearZero.color
+OK: autoCADConfig.presentation.0.Concrete.NearZero.annotation
+OK: autoCADConfig.presentation.0.Concrete.NearZero.label
+OK: autoCADConfig.presentation.0.Rebar.Tension.geometry
+OK: autoCADConfig.presentation.0.Rebar.Tension.color
+OK: autoCADConfig.presentation.0.Rebar.Tension.annotation
+OK: autoCADConfig.presentation.0.Rebar.Tension.label
+OK: autoCADConfig.presentation.0.Rebar.Compression.geometry
+OK: autoCADConfig.presentation.0.Rebar.Compression.color
+OK: autoCADConfig.presentation.0.Rebar.Compression.annotation
+OK: autoCADConfig.presentation.0.Rebar.Compression.label
+OK: autoCADConfig.presentation.0.Rebar.NearZero.geometry
+OK: autoCADConfig.presentation.0.Rebar.NearZero.color
+OK: autoCADConfig.presentation.0.Rebar.NearZero.annotation
+OK: autoCADConfig.presentation.0.Rebar.NearZero.label
+OK: autoCADConfig.label.values.0
+OK: autoCADConfig.axes.0.None
+OK: autoCADConfig.axes.0.Concrete
+OK: autoCADConfig.axes.0.Transformed
+OK: autoCADConfig.flag.0.NeutralLine.No
+OK: autoCADConfig.flag.0.NeutralLine.Yes
+OK: autoCADConfig.flag.0.LoadPoint.No
+OK: autoCADConfig.flag.0.LoadPoint.Yes
+OK: autoCADConfig.flag.0.Contour.No
+OK: autoCADConfig.flag.0.Contour.Yes
+OK: autoCADConfig.color.bound.0.1
+OK: autoCADConfig.color.bound.0.255
+OK: autoCADConfig.combination.explicit.0
+OK: autoCADConfig.combination.changed.0
+OK: autoCADConfig.combination.valuesChanged.0
+OK: autoCADConfig.combination.worst.0
+OK: autoCADConfig.presentation.noSolve.0
+OK: autoCADConfig.import.0.counts
+AUTOCAD_NUMBER: autoCADConfig.import.0.concreteMm|actual=20|expected=20|tolerance=0.00000001
+OK: autoCADConfig.import.0.concreteMm
+AUTOCAD_NUMBER: autoCADConfig.import.0.steelMm|actual=80|expected=80|tolerance=0.00000001
+OK: autoCADConfig.import.0.steelMm
+OK: autoCADConfig.import.0.existingEmptyLayers.meshKept
+OK: autoCADConfig.import.0.existingEmptyLayers.noInventedContour
+OK: autoCADConfig.import.0.existingEmptyLayers.comment
+AUTOCAD_NUMBER: autoCADConfig.import.0.changedConcrete|actual=120|expected=120|tolerance=0.00000001
+OK: autoCADConfig.import.0.changedConcrete
+AUTOCAD_NUMBER: autoCADConfig.import.0.concreteLayerKeepsSteel|actual=80|expected=80|tolerance=0.00000001
+OK: autoCADConfig.import.0.concreteLayerKeepsSteel
+OK: autoCADConfig.import.0.concreteSharedWithExport
+AUTOCAD_NUMBER: autoCADConfig.import.0.changedSteel|actual=180|expected=180|tolerance=0.00000001
+OK: autoCADConfig.import.0.changedSteel
+AUTOCAD_NUMBER: autoCADConfig.import.0.steelLayerKeepsConcrete|actual=20|expected=20|tolerance=0.00000001
+OK: autoCADConfig.import.0.steelLayerKeepsConcrete
+OK: autoCADConfig.import.0.rebarSharedWithExport
+OK: autoCADConfig.cleanup.region.0
+OK: autoCADConfig.cleanup.line.0
+OK: autoCADConfig.cleanup.foreign.0
+OK: autoCADConfig.cleanup.protected.0.1
+OK: autoCADConfig.cleanup.protected.0.2
+OK: autoCADConfig.cleanup.protected.0.3
+OK: autoCADConfig.cleanup.protected.0.4
+OK: autoCADConfig.cleanup.protected.0.5
+OK: autoCADConfig.cleanup.protected.0.6
+OK: autoCADConfig.cleanup.protected.0.7
+OK: autoCADConfig.cleanup.protected.0.8
+OK: autoCADConfig.cleanup.count.0
+OK: autoCADConfig.cleanup.sharedLayer.0
+OK: autoCADConfig.effect.0.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.effect.0.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.effect.0.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.effect.0.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.effect.0.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.effect.0.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.effect.0.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.effect.0.AutoCAD.Color.ConcreteTension.1
+OK: autoCADConfig.effect.0.AutoCAD.Color.ConcreteTension.255
+OK: autoCADConfig.effect.0.AutoCAD.Color.ConcreteCompression.1
+OK: autoCADConfig.effect.0.AutoCAD.Color.ConcreteCompression.255
+OK: autoCADConfig.effect.0.AutoCAD.Color.RebarTension.1
+OK: autoCADConfig.effect.0.AutoCAD.Color.RebarTension.255
+OK: autoCADConfig.effect.0.AutoCAD.Color.RebarCompression.1
+OK: autoCADConfig.effect.0.AutoCAD.Color.RebarCompression.255
+OK: autoCADConfig.effect.0.AutoCAD.Color.Neutral.1
+OK: autoCADConfig.effect.0.AutoCAD.Color.Neutral.255
+OK: autoCADConfig.invalid.0.Output.CombinationID.0.rejected
+OK: autoCADConfig.invalid.0.Output.CombinationID.0.key
+OK: autoCADConfig.invalid.0.Output.CombinationID.0.address
+OK: autoCADConfig.invalid.0.Output.CombinationID.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.Output.CombinationID.0|Настройка Output.CombinationID (лист Config, ячейка B19): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.Output.CombinationID.1.rejected
+OK: autoCADConfig.invalid.0.Output.CombinationID.1.key
+OK: autoCADConfig.invalid.0.Output.CombinationID.1.address
+OK: autoCADConfig.invalid.0.Output.CombinationID.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.Output.CombinationID.1|Настройка Output.CombinationID (лист Config, ячейка B19): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.Output.CombinationID.2.rejected
+OK: autoCADConfig.invalid.0.Output.CombinationID.2.key
+OK: autoCADConfig.invalid.0.Output.CombinationID.2.address
+OK: autoCADConfig.invalid.0.Output.CombinationID.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.Output.CombinationID.2|Настройка Output.CombinationID (лист Config, ячейка B19): В сохранённых результатах не найдено сочетание «abc» с расчётным профилем. Введённое значение: «abc». Выберите сохранённое сочетание. Для новых нагрузок выполните расчёт.
+OK: autoCADConfig.invalid.0.Output.CombinationID.3.rejected
+OK: autoCADConfig.invalid.0.Output.CombinationID.3.key
+OK: autoCADConfig.invalid.0.Output.CombinationID.3.address
+OK: autoCADConfig.invalid.0.Output.CombinationID.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.Output.CombinationID.3|Настройка Output.CombinationID (лист Config, ячейка B19) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.Output.CombinationID
+OK: autoCADConfig.recovery.0.Output.CombinationID
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.0|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка B114): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.1|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка B114): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.2|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка B114): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.NeutralLineEnabled.3|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка B114) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Export.NeutralLineEnabled
+OK: autoCADConfig.recovery.0.AutoCAD.Export.NeutralLineEnabled
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.0|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка B115): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.1|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка B115): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.2|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка B115): Вариант главных осей не распознан. Введённое значение: «abc». Выберите Transformed, Concrete или None.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.PrincipalAxesMode.3|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка B115) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Export.PrincipalAxesMode
+OK: autoCADConfig.recovery.0.AutoCAD.Export.PrincipalAxesMode
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.0|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка B116): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.1|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка B116): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.2|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка B116): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LoadPointEnabled.3|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка B116) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Export.LoadPointEnabled
+OK: autoCADConfig.recovery.0.AutoCAD.Export.LoadPointEnabled
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.0|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка B117): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.1|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка B117): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.2|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка B117): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.ContourEnabled.3|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка B117) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Export.ContourEnabled
+OK: autoCADConfig.recovery.0.AutoCAD.Export.ContourEnabled
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.0|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка B120): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.1|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка B120): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.2|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка B120): Недопустимый вариант: "abc". Введённое значение: «abc». Выберите из списка: ValuesOnly, NamesAndValues.
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Export.LabelMode.3|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка B120) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Export.LabelMode
+OK: autoCADConfig.recovery.0.AutoCAD.Export.LabelMode
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.0|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.1|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.2|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.3|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.4|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.5|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.ConcreteLayer.6|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка B109) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.recovery.0.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.0|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.1|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.2|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.3|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.4|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.5|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.RebarLayer.6|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка B110) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.recovery.0.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.0|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.1|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.2|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.3|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.4|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.5|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Common.SectionContourLayer.6|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка B111) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.recovery.0.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.0|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.1|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.2|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.3|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.4|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.5|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteTension.6|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка B122) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.recovery.0.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.0|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.1|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.2|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.3|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.4|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.5|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.ConcreteCompression.6|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка B123) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.recovery.0.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.0|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.1|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.2|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.3|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.4|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.5|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarTension.6|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка B124) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.recovery.0.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.0|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.1|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.2|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.3|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.4|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.5|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Layer.RebarCompression.6|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка B125) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.0.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.recovery.0.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.0|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.1|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.2|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.3|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.4|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.5|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.6|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.7.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.7.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.7.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.7|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.8.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.8.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.8.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteTension.8|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка B126): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.0.AutoCAD.Color.ConcreteTension
+OK: autoCADConfig.recovery.0.AutoCAD.Color.ConcreteTension
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.0|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.1|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.2|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.3|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.4|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.5|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.6|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.7.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.7.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.7.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.7|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.8.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.8.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.8.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.ConcreteCompression.8|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка B127): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.0.AutoCAD.Color.ConcreteCompression
+OK: autoCADConfig.recovery.0.AutoCAD.Color.ConcreteCompression
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.0|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.1|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.2|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.3|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.4|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.5|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.6|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.7.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.7.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.7.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.7|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.8.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.8.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.8.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarTension.8|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка B128): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.0.AutoCAD.Color.RebarTension
+OK: autoCADConfig.recovery.0.AutoCAD.Color.RebarTension
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.0|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.1|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.2|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.3|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.4|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.5|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.6|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.7.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.7.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.7.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.7|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.8.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.8.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.8.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.RebarCompression.8|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка B129): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.0.AutoCAD.Color.RebarCompression
+OK: autoCADConfig.recovery.0.AutoCAD.Color.RebarCompression
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.0.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.0.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.0.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.0|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.1.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.1.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.1.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.1|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.2.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.2.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.2.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.2|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.3.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.3.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.3.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.3|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.4.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.4.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.4.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.4|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.5.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.5.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.5.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.5|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.6.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.6.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.6.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.6|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.7.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.7.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.7.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.7|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.8.rejected
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.8.key
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.8.address
+OK: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.0.AutoCAD.Color.Neutral.8|Настройка AutoCAD.Color.Neutral (лист Config, ячейка B130): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.0.AutoCAD.Color.Neutral
+OK: autoCADConfig.recovery.0.AutoCAD.Color.Neutral
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.AUDIT_CT
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.AUDIT_CONTOUR
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.RC_NDM_Axes
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.RC_NDM_LoadPoint
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.RC_NDM_NeutralLine
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.ConcreteLayer.RC_NDM_Warnings
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.AUDIT_CT
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.AUDIT_CONTOUR
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.RC_NDM_Axes
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.RC_NDM_LoadPoint
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.RC_NDM_NeutralLine
+OK: autoCADConfig.layerCollision.0.AutoCAD.Common.RebarLayer.RC_NDM_Warnings
+OK: autoCADConfig.import.sameLayer.0
+OK: autoCADConfig.contour.inactive.0
+OK: autoCADConfig.cleanup.region.0
+OK: autoCADConfig.cleanup.line.0
+OK: autoCADConfig.cleanup.foreign.0
+OK: autoCADConfig.cleanup.protected.0.1
+OK: autoCADConfig.cleanup.protected.0.2
+OK: autoCADConfig.cleanup.protected.0.3
+OK: autoCADConfig.cleanup.protected.0.4
+OK: autoCADConfig.cleanup.protected.0.5
+OK: autoCADConfig.cleanup.protected.0.6
+OK: autoCADConfig.cleanup.protected.0.7
+OK: autoCADConfig.cleanup.protected.0.8
+OK: autoCADConfig.cleanup.count.0
+OK: autoCADConfig.cleanup.sharedLayer.0
+OK: autoCADConfig.layer.validBoundary.0.19
+OK: autoCADConfig.layer.validBoundary.0.255
+OK: autoCADConfig.presentation.1.Concrete.Tension.geometry
+OK: autoCADConfig.presentation.1.Concrete.Tension.color
+OK: autoCADConfig.presentation.1.Concrete.Tension.annotation
+OK: autoCADConfig.presentation.1.Concrete.Tension.label
+OK: autoCADConfig.presentation.1.Concrete.Compression.geometry
+OK: autoCADConfig.presentation.1.Concrete.Compression.color
+OK: autoCADConfig.presentation.1.Concrete.Compression.annotation
+OK: autoCADConfig.presentation.1.Concrete.Compression.label
+OK: autoCADConfig.presentation.1.Concrete.NearZero.geometry
+OK: autoCADConfig.presentation.1.Concrete.NearZero.color
+OK: autoCADConfig.presentation.1.Concrete.NearZero.annotation
+OK: autoCADConfig.presentation.1.Concrete.NearZero.label
+OK: autoCADConfig.presentation.1.Rebar.Tension.geometry
+OK: autoCADConfig.presentation.1.Rebar.Tension.color
+OK: autoCADConfig.presentation.1.Rebar.Tension.annotation
+OK: autoCADConfig.presentation.1.Rebar.Tension.label
+OK: autoCADConfig.presentation.1.Rebar.Compression.geometry
+OK: autoCADConfig.presentation.1.Rebar.Compression.color
+OK: autoCADConfig.presentation.1.Rebar.Compression.annotation
+OK: autoCADConfig.presentation.1.Rebar.Compression.label
+OK: autoCADConfig.presentation.1.Rebar.NearZero.geometry
+OK: autoCADConfig.presentation.1.Rebar.NearZero.color
+OK: autoCADConfig.presentation.1.Rebar.NearZero.annotation
+OK: autoCADConfig.presentation.1.Rebar.NearZero.label
+OK: autoCADConfig.label.values.1
+OK: autoCADConfig.axes.1.None
+OK: autoCADConfig.axes.1.Concrete
+OK: autoCADConfig.axes.1.Transformed
+OK: autoCADConfig.flag.1.NeutralLine.No
+OK: autoCADConfig.flag.1.NeutralLine.Yes
+OK: autoCADConfig.flag.1.LoadPoint.No
+OK: autoCADConfig.flag.1.LoadPoint.Yes
+OK: autoCADConfig.flag.1.Contour.No
+OK: autoCADConfig.flag.1.Contour.Yes
+OK: autoCADConfig.color.bound.1.1
+OK: autoCADConfig.color.bound.1.255
+OK: autoCADConfig.combination.explicit.1
+OK: autoCADConfig.combination.changed.1
+OK: autoCADConfig.combination.valuesChanged.1
+OK: autoCADConfig.combination.worst.1
+OK: autoCADConfig.presentation.noSolve.1
+OK: autoCADConfig.import.1.counts
+AUTOCAD_NUMBER: autoCADConfig.import.1.concreteMm|actual=20|expected=20|tolerance=0.00000001
+OK: autoCADConfig.import.1.concreteMm
+AUTOCAD_NUMBER: autoCADConfig.import.1.steelMm|actual=80|expected=80|tolerance=0.00000001
+OK: autoCADConfig.import.1.steelMm
+OK: autoCADConfig.import.1.existingEmptyLayers.meshKept
+OK: autoCADConfig.import.1.existingEmptyLayers.noInventedContour
+OK: autoCADConfig.import.1.existingEmptyLayers.comment
+AUTOCAD_NUMBER: autoCADConfig.import.1.changedConcrete|actual=120|expected=120|tolerance=0.00000001
+OK: autoCADConfig.import.1.changedConcrete
+AUTOCAD_NUMBER: autoCADConfig.import.1.concreteLayerKeepsSteel|actual=80|expected=80|tolerance=0.00000001
+OK: autoCADConfig.import.1.concreteLayerKeepsSteel
+OK: autoCADConfig.import.1.concreteSharedWithExport
+AUTOCAD_NUMBER: autoCADConfig.import.1.changedSteel|actual=180|expected=180|tolerance=0.00000001
+OK: autoCADConfig.import.1.changedSteel
+AUTOCAD_NUMBER: autoCADConfig.import.1.steelLayerKeepsConcrete|actual=20|expected=20|tolerance=0.00000001
+OK: autoCADConfig.import.1.steelLayerKeepsConcrete
+OK: autoCADConfig.import.1.rebarSharedWithExport
+OK: autoCADConfig.cleanup.region.1
+OK: autoCADConfig.cleanup.line.1
+OK: autoCADConfig.cleanup.foreign.1
+OK: autoCADConfig.cleanup.protected.1.1
+OK: autoCADConfig.cleanup.protected.1.2
+OK: autoCADConfig.cleanup.protected.1.3
+OK: autoCADConfig.cleanup.protected.1.4
+OK: autoCADConfig.cleanup.protected.1.5
+OK: autoCADConfig.cleanup.protected.1.6
+OK: autoCADConfig.cleanup.protected.1.7
+OK: autoCADConfig.cleanup.protected.1.8
+OK: autoCADConfig.cleanup.count.1
+OK: autoCADConfig.cleanup.sharedLayer.1
+OK: autoCADConfig.effect.1.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.effect.1.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.effect.1.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.effect.1.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.effect.1.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.effect.1.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.effect.1.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.effect.1.AutoCAD.Color.ConcreteTension.1
+OK: autoCADConfig.effect.1.AutoCAD.Color.ConcreteTension.255
+OK: autoCADConfig.effect.1.AutoCAD.Color.ConcreteCompression.1
+OK: autoCADConfig.effect.1.AutoCAD.Color.ConcreteCompression.255
+OK: autoCADConfig.effect.1.AutoCAD.Color.RebarTension.1
+OK: autoCADConfig.effect.1.AutoCAD.Color.RebarTension.255
+OK: autoCADConfig.effect.1.AutoCAD.Color.RebarCompression.1
+OK: autoCADConfig.effect.1.AutoCAD.Color.RebarCompression.255
+OK: autoCADConfig.effect.1.AutoCAD.Color.Neutral.1
+OK: autoCADConfig.effect.1.AutoCAD.Color.Neutral.255
+OK: autoCADConfig.invalid.1.Output.CombinationID.0.rejected
+OK: autoCADConfig.invalid.1.Output.CombinationID.0.key
+OK: autoCADConfig.invalid.1.Output.CombinationID.0.address
+OK: autoCADConfig.invalid.1.Output.CombinationID.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.Output.CombinationID.0|Настройка Output.CombinationID (лист Config, ячейка CS816): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.Output.CombinationID.1.rejected
+OK: autoCADConfig.invalid.1.Output.CombinationID.1.key
+OK: autoCADConfig.invalid.1.Output.CombinationID.1.address
+OK: autoCADConfig.invalid.1.Output.CombinationID.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.Output.CombinationID.1|Настройка Output.CombinationID (лист Config, ячейка CS816): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.Output.CombinationID.2.rejected
+OK: autoCADConfig.invalid.1.Output.CombinationID.2.key
+OK: autoCADConfig.invalid.1.Output.CombinationID.2.address
+OK: autoCADConfig.invalid.1.Output.CombinationID.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.Output.CombinationID.2|Настройка Output.CombinationID (лист Config, ячейка CS816): В сохранённых результатах не найдено сочетание «abc» с расчётным профилем. Введённое значение: «abc». Выберите сохранённое сочетание. Для новых нагрузок выполните расчёт.
+OK: autoCADConfig.invalid.1.Output.CombinationID.3.rejected
+OK: autoCADConfig.invalid.1.Output.CombinationID.3.key
+OK: autoCADConfig.invalid.1.Output.CombinationID.3.address
+OK: autoCADConfig.invalid.1.Output.CombinationID.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.Output.CombinationID.3|Настройка Output.CombinationID (лист Config, ячейка CS816) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.Output.CombinationID
+OK: autoCADConfig.recovery.1.Output.CombinationID
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.0|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка CS911): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.1|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка CS911): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.2|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка CS911): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.NeutralLineEnabled.3|Настройка AutoCAD.Export.NeutralLineEnabled (лист Config, ячейка CS911) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Export.NeutralLineEnabled
+OK: autoCADConfig.recovery.1.AutoCAD.Export.NeutralLineEnabled
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.0|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка CS912): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.1|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка CS912): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.2|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка CS912): Вариант главных осей не распознан. Введённое значение: «abc». Выберите Transformed, Concrete или None.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.PrincipalAxesMode.3|Настройка AutoCAD.Export.PrincipalAxesMode (лист Config, ячейка CS912) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Export.PrincipalAxesMode
+OK: autoCADConfig.recovery.1.AutoCAD.Export.PrincipalAxesMode
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.0|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка CS913): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.1|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка CS913): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.2|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка CS913): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LoadPointEnabled.3|Настройка AutoCAD.Export.LoadPointEnabled (лист Config, ячейка CS913) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Export.LoadPointEnabled
+OK: autoCADConfig.recovery.1.AutoCAD.Export.LoadPointEnabled
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.0|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка CS914): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.1|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка CS914): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.2|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка CS914): Значение переключателя не распознано. Введённое значение: «abc». Выберите Yes или No.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.ContourEnabled.3|Настройка AutoCAD.Export.ContourEnabled (лист Config, ячейка CS914) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Export.ContourEnabled
+OK: autoCADConfig.recovery.1.AutoCAD.Export.ContourEnabled
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.0|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка CS917): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.1|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка CS917): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.2|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка CS917): Недопустимый вариант: "abc". Введённое значение: «abc». Выберите из списка: ValuesOnly, NamesAndValues.
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Export.LabelMode.3|Настройка AutoCAD.Export.LabelMode (лист Config, ячейка CS917) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Export.LabelMode
+OK: autoCADConfig.recovery.1.AutoCAD.Export.LabelMode
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.0|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.1|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.2|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.3|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.4|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.5|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.ConcreteLayer.6|Настройка AutoCAD.Common.ConcreteLayer (лист Config, ячейка CS906) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.recovery.1.AutoCAD.Common.ConcreteLayer
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.0|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.1|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.2|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.3|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.4|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.5|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.RebarLayer.6|Настройка AutoCAD.Common.RebarLayer (лист Config, ячейка CS907) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.recovery.1.AutoCAD.Common.RebarLayer
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.0|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.1|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.2|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.3|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.4|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.5|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Common.SectionContourLayer.6|Настройка AutoCAD.Common.SectionContourLayer (лист Config, ячейка CS908) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.recovery.1.AutoCAD.Common.SectionContourLayer
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.0|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.1|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.2|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.3|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.4|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.5|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteTension.6|Настройка AutoCAD.Layer.ConcreteTension (лист Config, ячейка CS919) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.recovery.1.AutoCAD.Layer.ConcreteTension
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.0|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.1|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.2|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.3|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.4|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.5|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.ConcreteCompression.6|Настройка AutoCAD.Layer.ConcreteCompression (лист Config, ячейка CS920) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.recovery.1.AutoCAD.Layer.ConcreteCompression
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.0|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.1|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.2|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.3|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.4|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.5|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarTension.6|Настройка AutoCAD.Layer.RebarTension (лист Config, ячейка CS921) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.recovery.1.AutoCAD.Layer.RebarTension
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.0|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Обязательное значение не задано. Ячейка значения не заполнена. Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.1|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Обязательное значение не задано. Введённое значение: «TODO». Заполните значение или выберите допустимый вариант из списка; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.2|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Имя слоя AutoCAD недопустимо. Введённое значение: «bad/name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.3|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Имя слоя AutoCAD недопустимо. Введённое значение: «bad,name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.4|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Имя слоя AutoCAD недопустимо. Введённое значение: «aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.5|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922): Имя слоя AutoCAD недопустимо. Введённое значение: «bad
+name». Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\":;?,*|='.
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Layer.RebarCompression.6|Настройка AutoCAD.Layer.RebarCompression (лист Config, ячейка CS922) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.missing.1.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.recovery.1.AutoCAD.Layer.RebarCompression
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.0|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.1|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.2|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.3|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.4|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.5|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.6|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.7.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.7.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.7.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.7|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.8.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.8.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.8.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteTension.8|Настройка AutoCAD.Color.ConcreteTension (лист Config, ячейка CS923): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.1.AutoCAD.Color.ConcreteTension
+OK: autoCADConfig.recovery.1.AutoCAD.Color.ConcreteTension
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.0|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.1|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.2|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.3|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.4|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.5|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.6|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.7.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.7.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.7.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.7|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.8.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.8.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.8.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.ConcreteCompression.8|Настройка AutoCAD.Color.ConcreteCompression (лист Config, ячейка CS924): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.1.AutoCAD.Color.ConcreteCompression
+OK: autoCADConfig.recovery.1.AutoCAD.Color.ConcreteCompression
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.0|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.1|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.2|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.3|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.4|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.5|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.6|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.7.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.7.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.7.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.7|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.8.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.8.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.8.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarTension.8|Настройка AutoCAD.Color.RebarTension (лист Config, ячейка CS925): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.1.AutoCAD.Color.RebarTension
+OK: autoCADConfig.recovery.1.AutoCAD.Color.RebarTension
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.0|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.1|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.2|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.3|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.4|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.5|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.6|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.7.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.7.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.7.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.7|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.8.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.8.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.8.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.RebarCompression.8|Настройка AutoCAD.Color.RebarCompression (лист Config, ячейка CS926): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.1.AutoCAD.Color.RebarCompression
+OK: autoCADConfig.recovery.1.AutoCAD.Color.RebarCompression
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.0.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.0.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.0.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.0.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.0|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Обязательное числовое значение не задано. Ячейка значения не заполнена. Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.1.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.1.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.1.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.1.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.1|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Обязательное числовое значение не задано. Введённое значение: «TODO». Введите число или формулу, возвращающую число; пустое значение и TODO недопустимы.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.2.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.2.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.2.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.2.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.2|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Не удалось прочитать обязательное число: "abc". Введённое значение: «abc». Введите конечное число допустимого диапазона или исправьте формулу.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.3.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.3.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.3.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.3.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.3|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927) содержит ошибку Excel в колонке "значение". Введённое значение: «#VALUE!». Исправьте формулу или введите допустимое значение вместо ошибки Excel.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.4.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.4.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.4.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.4.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.4|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «-1». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.5.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.5.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.5.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.5.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.5|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «0». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.6.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.6.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.6.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.6.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.6|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Индекс цвета AutoCAD выходит за допустимый диапазон. Введённое значение: «256». Введите целый индекс ACI от 1 до 255; 0 (ByBlock) и 256 (ByLayer) здесь не допускаются.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.7.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.7.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.7.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.7.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.7|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Введено дробное значение вместо целого; автоматическое округление не выполняется. Введённое значение: «1.5». Введите целое число.
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.8.rejected
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.8.key
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.8.address
+OK: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.8.action
+AUTOCAD_INPUT: autoCADConfig.invalid.1.AutoCAD.Color.Neutral.8|Настройка AutoCAD.Color.Neutral (лист Config, ячейка CS927): Целое число выходит за допустимый диапазон Long. Введённое значение: «2147483648». Введите целое число от -2147483648 до 2147483647 с учетом допустимого диапазона этой настройки.
+OK: autoCADConfig.missing.1.AutoCAD.Color.Neutral
+OK: autoCADConfig.recovery.1.AutoCAD.Color.Neutral
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.AUDIT_CT
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.AUDIT_CONTOUR
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.RC_NDM_Axes
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.RC_NDM_LoadPoint
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.RC_NDM_NeutralLine
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.ConcreteLayer.RC_NDM_Warnings
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.AUDIT_CT
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.AUDIT_CONTOUR
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.RC_NDM_Axes
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.RC_NDM_LoadPoint
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.RC_NDM_NeutralLine
+OK: autoCADConfig.layerCollision.1.AutoCAD.Common.RebarLayer.RC_NDM_Warnings
+OK: autoCADConfig.import.sameLayer.1
+OK: autoCADConfig.contour.inactive.1
+OK: autoCADConfig.cleanup.region.1
+OK: autoCADConfig.cleanup.line.1
+OK: autoCADConfig.cleanup.foreign.1
+OK: autoCADConfig.cleanup.protected.1.1
+OK: autoCADConfig.cleanup.protected.1.2
+OK: autoCADConfig.cleanup.protected.1.3
+OK: autoCADConfig.cleanup.protected.1.4
+OK: autoCADConfig.cleanup.protected.1.5
+OK: autoCADConfig.cleanup.protected.1.6
+OK: autoCADConfig.cleanup.protected.1.7
+OK: autoCADConfig.cleanup.protected.1.8
+OK: autoCADConfig.cleanup.count.1
+OK: autoCADConfig.cleanup.sharedLayer.1
+OK: autoCADConfig.layer.validBoundary.1.19
+OK: autoCADConfig.layer.validBoundary.1.255
+OK: autoCADConfig.restore.name
+AUTOCAD_CONFIG_CASES: 396
+TOTAL_AUTOCAD_CONFIG: passed=1243; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_51e057f7d2bd472685427ae17fd15633\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestAutoCADConfig.RunAudit03AutoCADConfigTests; 2026-11-14T23:33:11
+SOURCE_UNCHANGED: True

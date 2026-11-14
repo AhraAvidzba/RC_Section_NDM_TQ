@@ -40,6 +40,10 @@ Private Const SECTION_CONTOUR_COLOR_INDEX As Long = 30 ' Наружная гра
 Private Const OPENING_CONTOUR_COLOR_INDEX As Long = 4 ' Контуры отверстий: голубой ACI 4.
 Private Const CRACK_REGION_COLOR_INDEX As Long = 31 ' Расчетная область взаимодействия: ACI 31.
 Private Const CONTOUR_POINT_TOLERANCE As Double = 0.000001 ' Допуск совпадения соседних вершин при экспорте, мм.
+Private Const STRAIN_3D_CONCRETE_LAYER As String = "RC_NDM_Strain3D_Concrete"
+Private Const STRAIN_3D_REBAR_LAYER As String = "RC_NDM_Strain3D_Rebar"
+Private Const STRAIN_3D_MAX_HEIGHT_RATIO As Double = 0.35 ' Наибольшая абсолютная высота относительно габарита сечения.
+Private Const STRAIN_3D_MIN_HEIGHT As Double = 0.000001 ' Ниже допуска геометрического ядра, мм, остаётся плоская область.
 Private Const TEMPORARY_SOURCE_BATCH_SIZE As Long = 1024 ' Ограничение числа живых исходных кривых одной партии.
 
 ' Выгружает сохранённое НДС либо только сформированную геометрию в активный DWG.
@@ -79,7 +83,7 @@ Public Sub ExportSectionStressToAutoCAD()
     destinationMessage = AutoCADExportDestinationMessage(exportDocument)
     DrawResultsStressExport section, resultByID, physicalStateByID, epsilon0, kappaX, kappaY, _
         loadReferenceX, loadReferenceY, centroidX, centroidY, principalAngle, resultPrecision, stateWarningText, exportSettings, _
-        contourExportCount, exportDocument, crackRows, crackSweeps
+        contourExportCount, exportDocument, crackRows, crackSweeps, quantity
     If informationEnabled Then
         Dim message As String
         message = "Экспорт в AutoCAD завершен." & vbCrLf & vbCrLf & SnapshotActionDataOrigin(ThisWorkbook, "Export") & vbCrLf & vbCrLf & _
@@ -186,6 +190,8 @@ Private Function AutoCADCleanupLayerSet(ByRef exportSettings As TAutoCADExportSe
     AddCleanupLayer layers, "RC_NDM_NeutralLine"
     AddCleanupLayer layers, exportSettings.CrackInteractionLayer
     AddCleanupLayer layers, EXTENSION_WARNING_LAYER
+    AddCleanupLayer layers, STRAIN_3D_CONCRETE_LAYER
+    AddCleanupLayer layers, STRAIN_3D_REBAR_LAYER
     If Len(exportSettings.ContourLayer) > 0 Then layers.Item(exportSettings.ContourLayer) = False ' Общие контурные слои защищаются целиком, включая созданные NDM объекты, даже при совпадении с другим слоем оформления.
     If Len(exportSettings.OpeningContourLayer) > 0 Then layers.Item(exportSettings.OpeningContourLayer) = False
 
@@ -582,7 +588,8 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
         ByVal centroidX As Double, ByVal centroidY As Double, ByVal principalAngle As Double, _
         ByVal resultPrecision As Long, ByVal stateWarningText As String, ByRef exportSettings As TAutoCADExportSettings, _
         ByRef contourExportCount As Long, Optional ByVal targetDocument As Object = Nothing, _
-        Optional ByVal crackRows As Object = Nothing, Optional ByVal crackSweeps As Object = Nothing)
+        Optional ByVal crackRows As Object = Nothing, Optional ByVal crackSweeps As Object = Nothing, _
+        Optional ByVal quantity As String = "Stress")
     Dim arcSweeps As Object
     If exportSettings.ContourEnabled Then Set arcSweeps = ReadSavedContourArcSweeps(ThisWorkbook) ' Проверяем все углы до подключения и добавления объектов в чертеж.
     Dim doc As Object
@@ -596,6 +603,12 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     Dim ms As Object
     Set ms = doc.ModelSpace
     Dim temporarySources As Collection: Set temporarySources = New Collection
+    Dim solidOutputs As Collection, elementRegions As Collection
+    Dim maxStrain As Double, maxHeight As Double, legendX As Double, legendY As Double, legendHeight As Double
+    If StrComp(quantity, "Strain", vbTextCompare) = 0 Then
+        PrepareStrainDiagram section, resultByID, maxStrain, maxHeight, legendX, legendY, legendHeight
+        Set solidOutputs = New Collection
+    End If
     On Error GoTo DrawingFailed
 
     EnsureAcadLayer doc, exportSettings.ConcreteLayer, 8
@@ -613,11 +626,15 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
         If crackRows.Count > 0 Then EnsureAcadLayer doc, exportSettings.CrackInteractionLayer, CRACK_REGION_COLOR_INDEX
     End If
     EnsureAcadLayer doc, EXTENSION_WARNING_LAYER, 1
+    If Not solidOutputs Is Nothing Then
+        EnsureAcadLayer doc, STRAIN_3D_CONCRETE_LAYER, 8
+        EnsureAcadLayer doc, STRAIN_3D_REBAR_LAYER, 1
+    End If
 
     Dim i As Long
     Dim resultValue As Double
     Dim physicalState As String
-    Dim textHeight As Double
+    Dim textHeight As Double, extrusion As Double, color As Long, region As Object
 
     For i = 1 To section.ConcreteCount
         Dim concreteWidth As Double
@@ -630,8 +647,16 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
         physicalState = ResultPhysicalState(physicalStateByID, section.ConcreteID(i))
         textHeight = 0.22 * MinDouble(concreteWidth, concreteHeight)
         If textHeight <= 0# Then textHeight = 1#
-        AddAcadConcreteElement ms, section, i, exportSettings.ConcreteLayer, _
-            ResultColorByPhysicalState("Concrete", physicalState, exportSettings), temporarySources
+        color = ResultColorByPhysicalState("Concrete", physicalState, exportSettings)
+        extrusion = StrainDiagramHeight(resultValue, maxStrain, maxHeight)
+        Set elementRegions = Nothing
+        If extrusion <> 0# Then Set elementRegions = New Collection
+        AddAcadConcreteElement ms, section, i, exportSettings.ConcreteLayer, color, temporarySources, elementRegions
+        If Not elementRegions Is Nothing Then
+            For Each region In elementRegions
+                AddStrainSolid ms, region, extrusion, STRAIN_3D_CONCRETE_LAYER, color, solidOutputs
+            Next region
+        End If
 
         AddAcadText ms, ResultLabelText(section.ConcreteID(i), resultValue, exportSettings.IncludeElementNames, resultPrecision), _
             labelX, labelY, textHeight, _
@@ -643,8 +668,11 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     For i = 1 To section.RebarCount
         resultValue = LookupResultValue(resultByID, section.RebarID(i))
         physicalState = ResultPhysicalState(physicalStateByID, section.RebarID(i))
-        AddAcadCircleRegion ms, section.RebarX(i), section.RebarY(i), section.RebarDiameter(i) / 2#, _
-            exportSettings.RebarLayer, ResultColorByPhysicalState("Rebar", physicalState, exportSettings), temporarySources
+        color = ResultColorByPhysicalState("Rebar", physicalState, exportSettings)
+        Set region = AddAcadCircleRegion(ms, section.RebarX(i), section.RebarY(i), section.RebarDiameter(i) / 2#, _
+            exportSettings.RebarLayer, color, temporarySources)
+        extrusion = StrainDiagramHeight(resultValue, maxStrain, maxHeight)
+        If extrusion <> 0# Then AddStrainSolid ms, region, extrusion, STRAIN_3D_REBAR_LAYER, color, solidOutputs
         AddAcadText ms, ResultLabelText(section.RebarID(i), resultValue, exportSettings.IncludeElementNames, resultPrecision), _
             section.RebarX(i) + section.RebarDiameter(i) / 2#, section.RebarY(i) + section.RebarDiameter(i) / 2#, _
             MaxDouble(2.5, section.RebarDiameter(i) * 0.18), _
@@ -654,6 +682,11 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     Next i
 
     DeleteAcadTemporarySources doc, temporarySources
+    If Not solidOutputs Is Nothing Then
+        AddAcadText ms, "e_z: max |e_z| = " & Format$(maxStrain, "0.000E+00") & _
+            "; max |Z| = " & Format$(maxHeight, "0.###") & " mm; +Z: tension", _
+            legendX, legendY, legendHeight, STRAIN_3D_CONCRETE_LAYER, 7
+    End If
     If exportSettings.ContourEnabled Then ' Контур выводим после бетонных и арматурных объектов, чтобы он не оказался закрыт AutoCAD Region, созданными для волокон расчетной сетки.
         contourExportCount = DrawSavedContourRows(ThisWorkbook, ms, exportSettings.ContourLayer, arcSweeps, , "CONTOUR_", exportSettings.OpeningContourLayer, exportSettings.ContourFormat)
     End If
@@ -678,9 +711,52 @@ DrawingFailed:
     Dim errorNumber As Long, errorSource As String, errorText As String
     errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
     On Error Resume Next
+    If Not solidOutputs Is Nothing Then
+        For Each region In solidOutputs: region.Delete: Next region
+    End If
     DeleteAcadTemporarySources doc, temporarySources
     On Error GoTo 0
     Err.Raise errorNumber, errorSource, errorText
+End Sub
+
+' До создания DWG-объектов проверяет наличие деформации всех материалов.
+' Одна шкала для бетона и стали, значения безразмерны; высота Z в мм.
+Private Sub PrepareStrainDiagram(ByVal section As CSectionModel, ByVal values As Object, _
+        ByRef maxStrain As Double, ByRef maxHeight As Double, ByRef legendX As Double, _
+        ByRef legendY As Double, ByRef legendHeight As Double)
+    Dim i As Long
+    For i = 1 To section.ConcreteCount
+        maxStrain = MaxDouble(maxStrain, Abs(LookupResultValue(values, section.ConcreteID(i))))
+    Next i
+    For i = 1 To section.RebarCount
+        maxStrain = MaxDouble(maxStrain, Abs(LookupResultValue(values, section.RebarID(i))))
+    Next i
+    Dim maxX As Double, minY As Double, maxY As Double, size As Double
+    GetSectionBounds section, legendX, maxX, minY, maxY
+    size = MaxDouble(maxX - legendX, maxY - minY)
+    If maxStrain > 0# Then maxHeight = STRAIN_3D_MAX_HEIGHT_RATIO * size
+    legendHeight = MaxDouble(0.5, 0.025 * size)
+    legendY = maxY + 2# * legendHeight
+End Sub
+
+' Возвращает знаковую высоту диаграммы, обнуляя вырожденное выдавливание.
+Private Function StrainDiagramHeight(ByVal strain As Double, ByVal maxStrain As Double, ByVal maxHeight As Double) As Double
+    If maxStrain = 0# Then Exit Function
+    Dim height As Double
+    height = (strain / maxStrain) * maxHeight ' Деление первым сохраняет масштаб при очень малой деформации.
+    If Abs(height) >= STRAIN_3D_MIN_HEIGHT Then StrainDiagramHeight = height
+End Function
+
+' Выдавливает готовую Region с отверстиями и оставляет её для импорта.
+' Высота приводится к оси Z мировой системы независимо от нормали Region.
+Private Sub AddStrainSolid(ByVal ms As Object, ByVal region As Object, ByVal worldHeight As Double, _
+        ByVal layerName As String, ByVal color As Long, ByVal created As Collection)
+    Dim normal As Variant: normal = region.Normal
+    Dim solid As Object
+    Set solid = ms.AddExtrudedSolid(region, worldHeight * Sgn(CDbl(normal(2))), 0#)
+    created.Add solid ' Сохраняем ссылку до назначения свойств для очистки при отказе CAD.
+    solid.Layer = layerName
+    solid.Color = color
 End Sub
 
 ' Передаёт только сохранённую геометрию без напряжений, подписей НДС и расчётных линий.
@@ -1788,27 +1864,31 @@ End Sub
 ' Прямоугольная специализация использует компактный WCS-путь; криволинейная
 ' область сохраняет дуги, отверстия и все несвязные части без изменения площади.
 Private Sub AddAcadConcreteElement(ByVal ms As Object, ByVal section As CSectionModel, ByVal index As Long, _
-        ByVal layerName As String, ByVal colorIndex As Long, ByVal temporarySources As Collection)
+        ByVal layerName As String, ByVal colorIndex As Long, ByVal temporarySources As Collection, _
+        Optional ByVal outputRegions As Collection = Nothing)
+    Dim rectangle As Object
     If Not section.ConcreteHasBoundary(index) Then
-        AddAcadRectangleRegion ms, section.ConcreteX(index), section.ConcreteY(index), ConcreteDrawWidth(section, index), _
-            ConcreteDrawHeight(section, index), ConcreteDrawRotation(section, index), layerName, colorIndex, temporarySources
-        Exit Sub
-    End If
-    Dim region As CConcreteRegion, query As CSectionGeometryQuery
-    Dim x As Double, y As Double, width As Double, height As Double, rotation As Double, ignored As Long
-    Set region = section.ConcreteGeometry(index): Set query = New CSectionGeometryQuery
-    If query.TryRectangle(region, x, y, width, height, rotation) Then
-        AddAcadRectangleRegion ms, x, y, width, height, rotation, layerName, colorIndex, temporarySources
+        Set rectangle = AddAcadRectangleRegion(ms, section.ConcreteX(index), section.ConcreteY(index), ConcreteDrawWidth(section, index), _
+            ConcreteDrawHeight(section, index), ConcreteDrawRotation(section, index), layerName, colorIndex, temporarySources)
     Else
-        ignored = AddAcadConcreteGeometry(ms, region, layerName, colorIndex, temporarySources)
+        Dim region As CConcreteRegion, query As New CSectionGeometryQuery
+        Dim x As Double, y As Double, width As Double, height As Double, rotation As Double
+        Set region = section.ConcreteGeometry(index)
+        If query.TryRectangle(region, x, y, width, height, rotation) Then
+            Set rectangle = AddAcadRectangleRegion(ms, x, y, width, height, rotation, layerName, colorIndex, temporarySources)
+        Else
+            AddAcadConcreteGeometry ms, region, layerName, colorIndex, temporarySources, outputRegions
+        End If
     End If
+    If Not rectangle Is Nothing And Not outputRegions Is Nothing Then outputRegions.Add rectangle
 End Sub
 
 ' Создаёт CAD Region для связных компонентов, подготовленных общим ядром.
 ' Принадлежность отверстий определяет ConnectedRegions; экспорт создаёт объекты,
 ' вычитает openings и проверяет площадь. При отказе удаляет только свои Region.
 Private Function AddAcadConcreteGeometry(ByVal ms As Object, ByVal geometry As CConcreteRegion, _
-        ByVal layerName As String, ByVal colorIndex As Long, ByVal temporarySources As Collection) As Long
+        ByVal layerName As String, ByVal colorIndex As Long, ByVal temporarySources As Collection, _
+        Optional ByVal outputRegions As Collection = Nothing) As Long
     Dim query As CSectionGeometryQuery: Set query = New CSectionGeometryQuery
     Dim components As Collection: Set components = query.ConnectedRegions(geometry)
     Dim component As CConcreteRegion, loopRegion As CConcreteRegion
@@ -1837,6 +1917,7 @@ Private Function AddAcadConcreteGeometry(ByVal ms As Object, ByVal geometry As C
         Next loopID
         actualArea = actualArea + CDbl(parent.Area)
         parent.Layer = layerName: parent.Color = colorIndex
+        If Not outputRegions Is Nothing Then outputRegions.Add parent
         AddAcadConcreteGeometry = AddAcadConcreteGeometry + 1
     Next component
     If Abs(actualArea - geometry.Area) > MaxDouble(0.0001, geometry.Area * 0.0000001) Then _
@@ -2304,7 +2385,7 @@ Public Function Audit03ExportAutoCADDocumentForTests(ByVal doc As Object, _
     Else
         options = ReadAutoCADExportSettings(settings)
         DrawResultsStressExport section, values, physicalStates, eps0, kx, ky, referenceX, referenceY, _
-            centroidX, centroidY, angle, precision, warning, options, contours, doc
+            centroidX, centroidY, angle, precision, warning, options, contours, doc, quantity:=quantity
     End If
     Audit03ExportAutoCADDocumentForTests = doc.ModelSpace.Count - before
 End Function

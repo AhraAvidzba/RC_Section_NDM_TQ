@@ -1,4 +1,4 @@
-﻿# скрипт описывает каталог настроек Config и строит таблицы настроек, единиц, геометрии и валидации.
+# скрипт описывает каталог настроек Config и строит таблицы настроек, единиц, геометрии и валидации.
 
 . (Join-Path $PSScriptRoot 'WorkbookLayout.ps1')
 . (Join-Path $PSScriptRoot 'NormativeFormulaImages.ps1')
@@ -2034,6 +2034,7 @@ function Add-AutoCADGeometryPreparationGuide {
 
     $row = Add-GuideTitle $Sheet $row "5. Экспорт сохраненных результатов" 13
     $row = Add-GuideParagraph $Sheet $row "Экспорт идёт в пространство «Модель» активного чертежа, даже если открыт лист. Источник задаёт Results.SnapshotStorage: Excel — лист Results, File — файл Results.SnapshotName рядом с книгой. После изменения нагрузок рассчитайте заново. Геометрия передаётся в мм независимо от OUTPUT. «Очистить подписи в AutoCAD» удаляет оформление, сохраняя бетон, арматуру и контуры; без слоёв оформления очистка сразу завершается." -Emphasis -RowCount 2
+    $row = Add-GuideParagraph $Sheet $row "Для объёмной диаграммы выберите Strain в Visualization.Quantity и выполните экспорт. В AutoCAD используйте 3DORBIT. Высоты на общей шкале пропорциональны деформации: растяжение вверх, сжатие вниз. Максимальная высота составляет 35 % большего габарита. Подпись указывает шкалу. Очистка оформления удаляет объёмную диаграмму, плоские области остаются доступны для импорта." -RowCount 2
     $row = Add-GuideParagraph $Sheet $row "На Config включите AutoCAD.Export.ContourEnabled = Yes и выберите настройку AutoCAD.Export.ContourFormat:"
     $row = Add-GuideParagraph $Sheet $row "Region (по умолчанию) - бетонная область со всеми отверстиями на AutoCAD.Common.SectionContourLayer. Отдельные бетонные части экспортируются отдельными Region."
     $row = Add-GuideParagraph $Sheet $row "Polyline - отдельные замкнутые полилинии: наружная граница на AutoCAD.Common.SectionContourLayer, отверстия на AutoCAD.Common.OpeningContourLayer. Прямые участки и дуги сохраняются."

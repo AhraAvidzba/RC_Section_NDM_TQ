@@ -327,3 +327,65 @@ Public Function RunCoupledFactorizationTests() As String
 Failed:
     RunCoupledFactorizationTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет депланацию при чистом изгибе и кручении однородных сечений.
+' Нормировка в кручении использует только угол закрутки и габарит.
+Public Function RunCoupledWarpingTests() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const E_MODULUS As Double = 32000#
+    Const TORQUE As Double = 2500000#
+    Dim solver As New CCoupledElasticState, section As CSectionModel
+    Dim deformation() As Double, resultants() As Double, stress() As Double, solutionField() As Double, solutionArray As Variant
+    Dim torsionScale As Double, w As Double, maximum As Double, x As Long, y As Long, ok As Boolean
+
+    Set section = TestBuildSection(TestFixtureBox(200#, 120#))
+    solver.PrepareModel section, E_MODULUS, 0#, 3, 3, 9
+    ok = solver.Solve(0#, 1800000#, 0#, 0#, 0#, 0#, deformation, resultants, stress, solutionArray)
+    TestRecordSolve ok, "rectangle pure bending for warping", solver, passed, failed, report
+    If ok Then
+        solutionField = solutionArray
+        For x = -80 To 80 Step 40
+            For y = -50 To 50 Step 25
+                w = Abs(solver.WarpingAt(x, y, solutionField))
+                If w > maximum Then maximum = w
+            Next y
+        Next x
+        TestRecord maximum < 1E-11, "pure bending has no internal w, max mm=" & CStr(maximum), passed, failed, report
+    End If
+
+    ok = solver.Solve(0#, 0#, 0#, TORQUE, 0#, 0#, deformation, resultants, stress, solutionArray)
+    TestRecordSolve ok, "rectangle torsion for warping", solver, passed, failed, report
+    If ok Then
+        solutionField = solutionArray
+        torsionScale = Abs(deformation(4)) * 100# ^ 2
+        w = solver.WarpingAt(75#, 45#, solutionField)
+        TestRecord Abs(w) > 0.05 * torsionScale, "rectangle off-axis warping mm=" & CStr(w), passed, failed, report
+        TestRecord Abs(solver.WarpingAt(-75#, 45#, solutionField) + w) < 1E-8 * torsionScale And _
+            Abs(solver.WarpingAt(75#, -45#, solutionField) + w) < 1E-8 * torsionScale, "warping is odd across each axis", passed, failed, report
+        TestRecord Abs(solver.WarpingAt(0#, 0#, solutionField)) < 1E-8 * torsionScale, "zero warping at center", passed, failed, report
+    End If
+
+    Set section = TestBuildSection(TestFixtureDisk(200#))
+    solver.PrepareModel section, E_MODULUS, 0#, 3, 3, 9
+    ok = solver.Solve(0#, 0#, 0#, TORQUE, 0#, 0#, deformation, resultants, stress, solutionArray)
+    TestRecordSolve ok, "circle torsion for warping", solver, passed, failed, report
+    If ok Then
+        solutionField = solutionArray
+        torsionScale = Abs(deformation(4)) * 100# ^ 2
+        maximum = 0#
+        For x = -60 To 60 Step 30
+            For y = -60 To 60 Step 30
+                w = Abs(solver.WarpingAt(x, y, solutionField))
+                If w > maximum Then maximum = w
+            Next y
+        Next x
+        TestRecord maximum < 0.015 * torsionScale, "circle warping relative discrete error=" & CStr(maximum / torsionScale), passed, failed, report
+    End If
+    RunCoupledWarpingTests = report & "TOTAL_COUPLED_WARPING: passed=" & CStr(passed) & "; failed=" & CStr(failed)
+    Exit Function
+Failed:
+    RunCoupledWarpingTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

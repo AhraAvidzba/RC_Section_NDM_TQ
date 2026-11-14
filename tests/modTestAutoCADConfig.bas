@@ -89,7 +89,8 @@ End Sub
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сохраняет два рассчитанных НДС с разными номерами сочетаний и напряжениями.
 ' Проверка выбора сочетания читает эти данные без нового расчёта.
-Private Sub TestPrepareResults(ByRef stats As TCadStats, ByVal system As Object, ByVal profiles As Object)
+Private Sub TestPrepareResults(ByRef stats As TCadStats, ByVal system As Object, ByVal profiles As Object, _
+        Optional ByVal pureBending As Boolean = False)
     Dim settings As CSystemSettingsReader, units As CUnitSystem, section As CSectionModel
     Dim provider As CMaterialModelProvider, batch As CBatchSectionCalculator, writer As CNDMResultsWriter
     Dim summaryWriter As CBatchResultWriter
@@ -120,7 +121,9 @@ Private Sub TestPrepareResults(ByRef stats As TCadStats, ByVal system As Object,
     Dim catalog As CCalculationProfileCatalog
     Set catalog = New CCalculationProfileCatalog: catalog.LoadFromWorkbook ThisWorkbook
     Set batch.ProfileCatalog = catalog: batch.ApplySettings settings, units
-    batch.AddCombination "CAD_CFG", 0#, 100000#, 50000#, "PR1", "AutoCAD Config fixture", "Auto"
+    Dim lateralMoment As Double
+    If Not pureBending Then lateralMoment = 50000#
+    batch.AddCombination "CAD_CFG", 0#, 100000#, lateralMoment, "PR1", "AutoCAD Config fixture", "Auto"
     batch.AddCombination "CAD_CFG_2", 0#, 200000#, 100000#, "PR1", "AutoCAD Config fixture", "Auto"
     batch.Execute
     TestLogLine stats, "AUTOCAD_SNAPSHOT: " & batch.ResultAt(1).OverallMeta.ResultComment
@@ -1325,3 +1328,84 @@ Private Sub TestCheckNativeColors(ByRef stats As TCadStats, ByVal doc As Object,
         End If
     Next entity
 End Sub
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Выгружает расчёт чистого изгиба в отдельный DWG и сверяет габариты тел с ε_z.
+' Переданный документ принадлежит тесту. Рабочие чертежи не читаются и не меняются.
+Public Function RunTestAutoCADStrain3D(ByVal doc As Object, ByVal drawingPath As String) As String
+    Dim stats As TCadStats, system As Object, profiles As Object, saved As Variant, profileSaved As Variant
+    On Error GoTo Failed
+    If doc.ModelSpace.Count <> 0 Or Len(Dir$(drawingPath)) <> 0 Then _
+        Err.Raise vbObjectError + 4499, "RunTestAutoCADStrain3D", "Для проверки требуется пустой тестовый чертёж и новый путь."
+    Set system = ThisWorkbook.Names.Item("rngSystemSettings").RefersToRange
+    Set profiles = ThisWorkbook.Names.Item("rngCalculationProfiles").RefersToRange
+    saved = system.Formula: profileSaved = profiles.Formula
+    TestConfigureFixture system
+    TestPrepareResults stats, system, profiles, True
+    TestSetProfile profiles, "Visualization.Quantity", "Strain"
+    TestSetValue system, "AutoCAD.Export.ContourEnabled", "No"
+    Dim before As Long, added As Long: before = SectionEquilibriumSolveCount()
+    added = Audit03ExportAutoCADDocumentForTests(doc)
+    TestCheck stats, "strain3d.noSolve", SectionEquilibriumSolveCount() = before
+    TestCheck stats, "strain3d.planarConcrete", TestCountEntities(doc, "AcDbRegion", "AUDIT_C") = 4
+    TestCheck stats, "strain3d.planarRebar", TestCountEntities(doc, "AcDbRegion", "AUDIT_R") = 4
+    TestCheck stats, "strain3d.concreteSolids", TestCountEntities(doc, "AcDb3dSolid", "RC_NDM_Strain3D_Concrete") = 4
+    TestCheck stats, "strain3d.rebarSolids", TestCountEntities(doc, "AcDb3dSolid", "RC_NDM_Strain3D_Rebar") = 4
+
+    Dim snapshot As String, rows As Variant, fields As Variant
+    Dim values As Object: Set values = CreateObject("Scripting.Dictionary")
+    Dim i As Long, strain As Double, strainMax As Double
+    Dim model As CSectionModel: Set model = ReadSectionGeometryFromResults(ThisWorkbook, "Results")
+    snapshot = Audit02ReadExportSnapshotForTests(ThisWorkbook)
+    rows = Split(snapshot, vbCrLf)
+    For i = 1 To UBound(rows)
+        fields = Split(rows(i), "|")
+        values.Add CStr(fields(0)), CDbl(fields(1))
+        If Abs(CDbl(fields(1))) > strainMax Then strainMax = Abs(CDbl(fields(1)))
+    Next i
+
+    Dim item As Object
+    Dim first As Variant, last As Variant, key As String, centerX As Double, centerY As Double
+    Dim isConcrete As Boolean, height As Double, area As Double, solidCount As Long, index As Long
+    For Each item In doc.ModelSpace
+        If item.ObjectName = "AcDb3dSolid" Then
+            item.GetBoundingBox first, last
+            isConcrete = StrComp(item.Layer, "RC_NDM_Strain3D_Concrete", vbBinaryCompare) = 0
+            centerX = (first(0) + last(0)) * 0.5: centerY = (first(1) + last(1)) * 0.5
+            index = 1
+            If centerY > 0# Then index = index + 1
+            If centerX > 0# Then index = index + 2
+            If isConcrete Then
+                key = model.ConcreteID(index)
+                area = 10000#
+            Else
+                key = model.RebarID(index)
+                area = GEOM_PI * 64#
+            End If
+            strain = CDbl(values.Item(key))
+            height = 70# * strain / strainMax
+            TestCheckClose stats, key & ".minZ", first(2), IIf(height < 0#, height, 0#)
+            TestCheckClose stats, key & ".maxZ", last(2), IIf(height > 0#, height, 0#)
+            TestCheckClose stats, key & ".volume", item.Volume, area * Abs(height)
+            solidCount = solidCount + 1
+        End If
+    Next item
+    TestCheck stats, "strain3d.eachSignedSolidChecked", solidCount = 8
+    doc.SaveAs drawingPath
+    TestCheck stats, "strain3d.dwgSaved", Len(Dir$(drawingPath)) > 0
+    Dim deleted As Long: deleted = Audit03CleanupAutoCADModelSpaceForTests(doc.ModelSpace, TestReader())
+    TestCheck stats, "strain3d.cleanup", deleted >= solidCount And TestCountEntities(doc, "AcDb3dSolid") = 0
+    TestCheck stats, "strain3d.cleanup.keepsPlanar", TestCountEntities(doc, "AcDbRegion") = 8
+    GoTo Restore
+Failed:
+    stats.Failed = stats.Failed + 1
+    TestLogLine stats, "FAIL: strain3d.runtime " & Err.Source & " " & Err.Description
+Restore:
+    On Error Resume Next
+    If Not IsEmpty(saved) Then system.Formula = saved
+    If Not IsEmpty(profileSaved) Then profiles.Formula = profileSaved
+    On Error GoTo 0
+    TestLogLine stats, "TOTAL_AUTOCAD_STRAIN_3D: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunTestAutoCADStrain3D = stats.Report
+End Function

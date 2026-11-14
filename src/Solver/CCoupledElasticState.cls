@@ -75,9 +75,10 @@ End Sub
 Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double, _
         ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, _
         ByRef deformation() As Double, ByRef recovered() As Double, _
-        ByRef pointStress() As Double) As Boolean
+        ByRef pointStress() As Double, Optional ByRef solvedField As Variant) As Boolean
     mMeta.Clear
     Erase deformation: Erase recovered: Erase pointStress
+    If Not IsMissing(solvedField) Then solvedField = Empty
     Dim rhs() As Double, applied() As Double, i As Long
     LoadEquations n, mx, my, torque, qx, qy, rhs
     applied = rhs
@@ -103,6 +104,7 @@ Public Function Solve(ByVal n As Double, ByVal mx As Double, ByVal my As Double,
     For i = 2 To 4
         deformation(i) = rhs(i) / mLength
     Next i
+    If Not IsMissing(solvedField) Then solvedField = rhs ' Передаётся только подтверждённое поле того же сечения.
     mMeta.SetResult rsSuccess, rcNone, rkDirectState
     Solve = True
 End Function
@@ -379,6 +381,20 @@ Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strai
         End If
     Next localIndex
 End Sub
+
+' Снимает продольное перемещение w в мм в исходных координатах сечения.
+' В поле передаются общие, внутренние и служебные степени свободы этой сетки.
+Friend Function WarpingAt(ByVal x As Double, ByVal y As Double, ByRef field() As Double) As Double
+    Dim indices(1 To SHAPE_COUNT) As Long, values(1 To SHAPE_COUNT) As Double
+    Dim dx(1 To SHAPE_COUNT) As Double, dy(1 To SHAPE_COUNT) As Double
+    mQuadrature.EvaluateShape x - mQuadrature.Frame.OriginX, y - mQuadrature.Frame.OriginY, indices, values, dx, dy
+    Dim k As Long, active As Long
+    For k = 1 To SHAPE_COUNT
+        active = mSupport(indices(k))
+        If active > 0 Then WarpingAt = WarpingAt + values(k) * field(PLANE_DOF + 3 * active)
+    Next k
+    WarpingAt = WarpingAt * mLength ' Коэффициенты внутренних перемещений нормированы по габариту.
+End Function
 
 ' Возвращает проекцию деформации на ось стержня. Точка находится после бетона.
 Friend Sub SteelProjection(ByVal point As Long, ByRef direction() As Double)
