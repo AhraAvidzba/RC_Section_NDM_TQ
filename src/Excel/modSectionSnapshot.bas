@@ -35,9 +35,10 @@ End Type
 ' Восстанавливает расчётную модель из обязательных координат, площадей,
 ' инерций и контуров единого источника: выбранного файла либо Results, в мм, мм2 и мм4. При includeOptionalData=True
 ' дополнительно читает JSON происхождения и RecipeTrace; для расчёта они не требуются.
+' includeMaterialDetails читает класс и идентификатор материала для связанного НДС.
 ' Восстановлением аннотаций управляет вызывающий ReadFormedSectionFromResults.
 Public Function ReadSectionGeometryFromResults(ByVal workbook As Object, Optional ByVal sourceType As String = "Results", _
-        Optional ByVal includeOptionalData As Boolean = False) As CSectionModel
+        Optional ByVal includeOptionalData As Boolean = False, Optional ByVal includeMaterialDetails As Boolean = False) As CSectionModel
     Dim anchor As Object: Set anchor = workbook.Names.Item("rngNDMSectionGeometry").RefersToRange
     Dim data As Variant: data = ReadAnchoredResultTable(workbook, "rngNDMSectionGeometry")
     If Not HasResultTableRows(data) Then Err.Raise vbObjectError + 4350, "ReadSectionGeometryFromResults", _
@@ -66,11 +67,12 @@ Public Function ReadSectionGeometryFromResults(ByVal workbook As Object, Optiona
     Dim exactRegion As CConcreteRegion
     Dim model As CSectionModel: Set model = New CSectionModel
     model.SourceType = sourceType
+    model.RecipeType = ReadLoadCasePropertyText(workbook, "ALL", "Geometry.RecipeType")
     model.ConcreteMeshSource = ReadLoadCasePropertyText(workbook, "ALL", "Geometry.ConcreteMeshSource")
     Dim row As Long, kind As String, id As String, info As Object, sourceName As String, handle As String
     Dim comment As String, steelClass As String, materialID As Long, extraColumn As Long
+    If includeOptionalData Or includeMaterialDetails Then extraColumn = ResultColumn(data, "ExtraData", False)
     If includeOptionalData Then
-        extraColumn = ResultColumn(data, "ExtraData", False)
         colComment = ResultColumn(data, "Comment", False)
         Set info = ReadSectionOptionalJson(vbNullString)
     End If
@@ -87,6 +89,10 @@ Public Function ReadSectionGeometryFromResults(ByVal workbook As Object, Optiona
                 steelClass = SectionOptionalText(info, "SteelClass")
                 If info.Exists("MaterialID") Then materialID = ReadSnapshotMaterialID(SectionOptionalText(info, "MaterialID"), anchor, row, extraColumn)
                 If colComment > 0 Then comment = ReadSavedAnnotationText(data, anchor, row, colComment)
+            ElseIf includeMaterialDetails And extraColumn > 0 Then
+                Set info = ReadSnapshotOptionalRecord(data, anchor, row, extraColumn)
+                If StrComp(kind, "Rebar", vbTextCompare) = 0 Then steelClass = SectionOptionalText(info, "SteelClass")
+                If info.Exists("MaterialID") Then materialID = ReadSnapshotMaterialID(SectionOptionalText(info, "MaterialID"), anchor, row, extraColumn)
             End If
             If StrComp(kind, "Concrete", vbTextCompare) = 0 Then
                 Dim localIx As Double, localIy As Double, localIxy As Double
@@ -1156,14 +1162,14 @@ End Sub
 ' Читает обязательную геометрию для расчёта. Необязательные сведения и
 ' аннотации добавляются только по запросу; генератор и AutoCAD не вызываются.
 Public Function ReadFormedSectionFromResults(ByVal workbook As Object, Optional ByVal includeOptionalData As Boolean = False, _
-        Optional ByVal preservedWriter As CNDMResultsWriter = Nothing) As CSectionModel
+        Optional ByVal preservedWriter As CNDMResultsWriter = Nothing, Optional ByVal includeMaterialDetails As Boolean = False) As CSectionModel
     On Error GoTo Failed
     BeginSectionSnapshotRead workbook, True ' Модель использует только общую геометрию, без загрузки массивов расчётных состояний.
     Dim savedSnapshot As CResultReadSource: Set savedSnapshot = CurrentResultSource(workbook) ' Проверяем файл до опционального чтения подписи источника: его ошибку нельзя выдать за пустой Results.
     Dim source As String: source = ResultsGeometrySource(workbook)
     If Len(source) = 0 Then Err.Raise vbObjectError + 4380, "ReadFormedSectionFromResults", _
         "В Results нет сформированного сечения. Сначала нажмите «Сформировать сечение»."
-    Dim model As CSectionModel: Set model = ReadSectionGeometryFromResults(workbook, source, includeOptionalData)
+    Dim model As CSectionModel: Set model = ReadSectionGeometryFromResults(workbook, source, includeOptionalData, includeMaterialDetails)
     If includeOptionalData Then
         model.GeometryDiagnosticsText = ReadLoadCasePropertyText(workbook, "ALL", "Geometry.RecipeDiagnostics")
         RestoreModelAnnotations workbook, model

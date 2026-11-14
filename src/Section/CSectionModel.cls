@@ -19,6 +19,7 @@ Option Explicit
 ' хранятся отдельно и не определяют расчётную геометрию.
 
 Private mSourceType As String ' Диагностическая метка источника модели: Generated, AutoCADImport и т.п.
+Private mRecipeType As String ' Идентификатор рецепта сформированного сечения; пуст для импорта и снимков без этой метки.
 Private mConcreteMeshSource As String ' Способ получения бетонных элементов, отдельно от источника арматуры/контуров.
 
 Private mConcreteElements() As CConcreteElement ' Канонические неизменяемые сущности; расчётные массивы ниже являются только числовой проекцией.
@@ -75,7 +76,7 @@ Public Sub Clear()
     mRevision = mRevision + 1
     mConcreteCenterValid = False
     mElementRadiusValid = False
-    mSourceType = vbNullString
+    mSourceType = vbNullString: mRecipeType = vbNullString
     mConcreteMeshSource = vbNullString
 
     Erase mConcreteElements
@@ -141,6 +142,16 @@ End Property
 ' Диагностическая метка источника модели: Generated, AutoCADImport и т.п.
 Public Property Get SourceType() As String
     SourceType = mSourceType
+End Property
+
+' Сохраняет TypeID фактически построенного параметрического сечения.
+Friend Property Let RecipeType(ByVal value As String)
+    mRecipeType = Trim$(value)
+End Property
+
+' Возвращает сохранённый идентификатор для выбора блока поперечной арматуры.
+Friend Property Get RecipeType() As String
+    RecipeType = mRecipeType
 End Property
 
 ' Сведения об источнике сетки для Results; на решение равновесия они не влияют.

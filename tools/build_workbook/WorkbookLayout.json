@@ -34,6 +34,14 @@
       "Columns": 6
     },
     {
+      "Name": "rngCoupledMaterialSettings",
+      "RefersTo": "=Config!$H$122:$M$129",
+      "Sheet": "Config",
+      "Address": "$H$122:$M$129",
+      "Rows": 8,
+      "Columns": 6
+    },
+    {
       "Name": "rngCrackSummaryAnchor",
       "RefersTo": "=Results!$A$85",
       "Sheet": "Results",

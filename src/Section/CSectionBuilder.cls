@@ -46,6 +46,7 @@ Public Function Build(ByVal definition As CSectionDefinition, ByRef meshOptions 
     Set mesh = New CFiberMeshBuilder
     mesh.BuildMesh geometry, meshOptions.StepX, meshOptions.StepY, meshOptions.MaterialID, meshOptions.BoundarySubdivisions, meshOptions.SourceReference, meshOptions.AutoStepFactor, meshOptions.CellGeometry, meshOptions.MinArea
     Set modelBuilder = New CSectionModelBuilder: Set model = modelBuilder.BuildFromGenerated(mesh, rebars)
+    model.RecipeType = definition.TypeID
     model.GeometryDiagnosticsText = rules.DiagnosticsText
     model.SetGeometryWarnings rules.HasGeometryWarnings, rules.GeometryWarningText
     Dim i As Long

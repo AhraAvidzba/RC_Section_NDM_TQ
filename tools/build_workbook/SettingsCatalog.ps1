@@ -302,6 +302,7 @@ function Get-ConfigNamedRangeNames {
         "rngPointedSectionGeometry",
         "rngHollowRectangleGeometry",
         "rngConcreteMaterialParameters",
+        "rngCoupledMaterialSettings",
         "rngSteelMaterialParameters",
         "rngCalculationProfiles",
         "rngPlotAnnotationSettings",
@@ -453,6 +454,7 @@ function Apply-ConfigUserInputAlignment {
         @{ Name = "rngSignConventionSettings"; Columns = @(2) },
         @{ Name = "rngSteelMaterialParameters"; Columns = @(2, 3) },
         @{ Name = "rngConcreteMaterialParameters"; Columns = @(2, 3) },
+        @{ Name = "rngCoupledMaterialSettings"; Columns = @(2) },
         @{ Name = "rngCalculationProfiles"; Columns = @(3, 4, 5, 6) },
         @{ Name = "rngPlotAnnotationSettings"; Columns = @(2, 3) },
         @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); CommentColumns = @(7) },
@@ -3684,6 +3686,7 @@ function Apply-SystemSettingsLayout {
 
     Add-PlotAnnotationSettingsTable $Workbook $Sheet $rightRow $rightColumn
     $rightRow += (Get-PlotAnnotationSettingsCatalog).Count + 1 + $rightBlockGap
+    Add-CoupledMaterialSettingsTable $Workbook $Sheet
 
     Add-SectionSettingsTables $Workbook $Sheet | Out-Null
 
@@ -3985,4 +3988,40 @@ function Add-SystemSettings {
     param([object]$Sheet)
     $result = Apply-SystemSettingsLayout $Sheet.Parent $Sheet
     $result
+}
+
+# Создаёт отдельный блок для калибровки по шести усилиям. Пустые значения
+# требуют исходных данных пользователя, а не подстановки контрольного примера.
+function Add-CoupledMaterialSettingsTable {
+    param([object]$Workbook, [object]$Sheet)
+
+    $title = $Sheet.Range('H121:M121')
+    $title.Merge()
+    $title.Cells.Item(1, 1).Value2 = 'Калибровка связанного расчёта'
+    $title.Interior.Color = $script:ConfigGroupHeaderColor
+    $title.Font.Bold = $true
+
+    $table = $Sheet.Range('H122:M129')
+    $rows = @(
+        @('Параметр', 'Значение', 'Ед.', 'Комментарий'),
+        @('Coupled.Poisson', 0.2, '-', 'Начальный коэффициент Пуассона бетона.'),
+        @('Coupled.Gt', '', 'Н/мм', 'Энергия разрушения бетона при растяжении.'),
+        @('Coupled.Gc', '', 'Н/мм', 'Энергия разрушения бетона при сжатии.'),
+        @('Coupled.Localization', '', 'мм', 'Характерная длина зоны локализации.'),
+        @('Coupled.YieldRatio', '', '-', 'Отношение начала пластичности к пику сжатия.'),
+        @('Coupled.PeakStrain', '', '-', 'Модуль полной деформации у пика сжатия.'),
+        @('Coupled.SteelClass', '', '-', 'Класс стали, для которого заданы параметры Config.')
+    )
+    for ($r = 0; $r -lt $rows.Count; $r++) {
+        for ($col = 0; $col -lt 4; $col++) {
+            $cell = $table.Cells.Item($r + 1, $col + 1)
+            if ($rows[$r][$col] -is [double]) { Set-ConfigNumericValue $cell $rows[$r][$col] }
+            else { $cell.Value2 = [string]$rows[$r][$col] }
+        }
+    }
+    $table.Rows.Item(1).Font.Bold = $true
+    $table.Rows.Item(1).Interior.Color = $script:ConfigTableHeaderColor
+    for ($r = 1; $r -le $table.Rows.Count; $r++) { $table.Cells.Item($r, 4).Resize(1, 3).Merge() }
+    $table.WrapText = $false
+    Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 129 13
 }

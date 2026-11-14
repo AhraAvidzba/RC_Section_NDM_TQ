@@ -44,6 +44,12 @@ Public Sub LoadFromWorkbook(ByVal workbook As Object)
     ValidateDiagramExtensionSetting True
 End Sub
 
+' Дополняет текущий снимок только при наличии сочетаний со сдвигом или кручением.
+' Повреждённая таблица не влияет на расчёт сочетаний с N, Mx и My.
+Friend Sub LoadCoupledSettings(ByVal workbook As Object)
+    AppendRequiredNamedSettingsRange workbook, "rngCoupledMaterialSettings", "Калибровка связанного расчёта"
+End Sub
+
 ' Различает поврежденное имя обязательной таблицы и ошибку ее значения.
 ' При утрате имени дает действие для восстановления книги вместо COM-ошибки 1004.
 Private Sub AppendRequiredNamedSettingsRange(ByVal workbook As Object, ByVal rangeName As String, ByVal caption As String)
@@ -180,6 +186,10 @@ Private Sub AppendSettingsRange(ByVal settingsRange As Object, Optional ByVal ra
             RequireSettingsHeaders data, "Параметры арматуры", Array("Параметр", "Сжатие", "Растяжение"), 4
             AppendSteelMaterialParameters data
             Exit Sub
+        Case "rngcoupledmaterialsettings"
+            RequireSettingsHeaders data, "Калибровка связанного расчёта", Array("Параметр", "Значение", "Ед.", "Комментарий"), 4
+            AppendCoupledMaterialSettings data
+            Exit Sub
     End Select
 
     If StrComp(rangeName, "rngPlotAnnotationSettings", vbTextCompare) = 0 Then ' Тип именованной таблицы сохраняется даже при удалении строки параметра. Например, отсутствие Placement не должно превратить остальные поля таблицы оформления в обычную таблицу пар ключ/значение.
@@ -232,6 +242,21 @@ Private Sub AppendSettingsRange(ByVal settingsRange As Object, Optional ByVal ra
             End If
         End If
     Next rowIndex
+End Sub
+
+' Читает ключи отдельного блока без переопределения остальных настроек.
+' Ошибки в ячейках значений сохраняет до запроса применимого поля.
+Private Sub AppendCoupledMaterialSettings(ByRef data As Variant)
+    Dim row As Long, key As String
+    For row = 2 To UBound(data, 1)
+        key = ConfigCellText(data(row, 1), "ключ связанного расчёта", row, vbNullString, False, 1)
+        If Len(key) > 0 Then
+            If StrComp(Left$(key, 8), "Coupled.", vbTextCompare) <> 0 Or HasKey(key) Then _
+                Err.Raise vbObjectError + 4316, "CSystemSettingsReader", _
+                    "Проверьте ключ " & key & " в таблице rngCoupledMaterialSettings (" & InputCellLocation(row, 1) & "). Требуется уникальный ключ Coupled.*."
+            AppendDeferredInputValue data, key, row, 2, vbNullString
+        End If
+    Next row
 End Sub
 
 ' Проверяет столбцы данных в известных именованных таблицах.
@@ -625,6 +650,7 @@ Private Function InputSettingsSection(ByVal key As String) As String
     Select Case True
         Case Left$(key, 9) = "Concrete.": sectionName = "параметры бетона"
         Case Left$(key, 6) = "Steel.": sectionName = "параметры арматуры"
+        Case Left$(key, 8) = "Coupled.": sectionName = "калибровка связанного расчёта (rngCoupledMaterialSettings)"
         Case Left$(key, 6) = "Units.": sectionName = "единицы измерения, столбцы INPUT/OUTPUT"
         Case Left$(key, 5) = "Sign.": sectionName = "система знаков, столбец USER"
         Case Left$(key, 10) = "SLS.Crack.": sectionName = "настройки расчета трещин"

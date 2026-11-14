@@ -963,3 +963,118 @@ Public Function RunTestCoupledBatchRoute() As String
 Failed:
     RunTestCoupledBatchRoute = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проходит обычные команды формирования и расчёта из изолированной книги.
+' Проверяет адрес отсутствующей физики и сохранение шести усилий в Excel и File.
+Public Function RunTestCoupledWorkbookInput() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) = 0 Then _
+        Err.Raise 5, "RunTestCoupledWorkbookInput", "Тест меняет входы и Results. Запустите его из изолированной копии книги."
+
+    Dim book As Object: Set book = ThisWorkbook
+    Dim calibration As Object: Set calibration = book.Names.Item("rngCoupledMaterialSettings").RefersToRange
+    Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
+    Dim profiles As Object: Set profiles = book.Names.Item("rngCalculationProfiles").RefersToRange
+    Dim loads As Object: Set loads = book.Names.Item("rngLoadCombinations").RefersToRange
+    TestRecord calibration.Columns.Count = 6 And calibration.Rows.Count = 8, "named calibration layout", passed, failed, report
+    TestRecord calibration.Cells(2, 2).Interior.Color = RGB(255, 242, 230), "calibration input fill", passed, failed, report
+    TestRecord Not calibration.WrapText, "calibration text is not wrapped", passed, failed, report
+    TestRecord calibration.Borders.Item(10).LineStyle <> -4142, "calibration has right border", passed, failed, report
+
+    TestInputCell(settings, "Geometry.Source").Value2 = "Generated"
+    TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = 0#
+    TestInputCell(settings, "Load.ReferenceOffsetY").Value2 = 0#
+    TestInputCell(settings, "Output.CombinationMode").Value2 = "Worst"
+    TestInputCell(settings, "Results.SnapshotName").Value2 = "TestCoupledWorkbookInput"
+    Dim pr4 As Long
+    For pr4 = 3 To profiles.Columns.Count
+        If CStr(profiles.Cells(2, pr4).Value2) = "PR4" Then Exit For
+    Next pr4
+    TestInputCell(profiles, "Calculation.Strength.DirectState", 2, pr4).Value2 = "Yes"
+    TestInputCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "No"
+    TestInputCell(profiles, "Calculation.Stability.Enabled", 2, pr4).Value2 = "No"
+    TestInputCell(profiles, "Calculation.Crack.Width", 2, pr4).Value2 = "No"
+    TestInputCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
+    TestInputCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
+
+    Dim firstCase(1 To 2, 1 To 10) As Variant
+    firstCase(1, 1) = "Spatial": firstCase(1, 2) = -0.05: firstCase(1, 3) = 0.001: firstCase(1, 4) = -0.002
+    firstCase(1, 5) = "PR4": firstCase(1, 8) = 0.001: firstCase(1, 9) = 0.002: firstCase(1, 10) = -0.003
+    firstCase(2, 1) = "Plane": firstCase(2, 2) = 0.05: firstCase(2, 5) = "PR4"
+    loads.Offset(1, 0).Resize(loads.Rows.Count - 1, loads.Columns.Count).ClearContents
+    loads.Cells(2, 1).Resize(2, 10).Value2 = firstCase
+
+    Dim unitSettings As New CSystemSettingsReader, units As New CUnitSystem
+    unitSettings.LoadFromWorkbook book: units.LoadFromSettings unitSettings
+    Dim expected As Variant
+    expected = Array(units.InternalForceToOutput(units.InputForceToInternal(firstCase(1, 2))), _
+        units.InternalMomentMxToOutput(units.InputMomentMxToInternal(firstCase(1, 3))), _
+        units.InternalMomentMyToOutput(units.InputMomentMyToInternal(firstCase(1, 4))), _
+        units.InternalTorqueToOutput(units.InputTorqueToInternal(firstCase(1, 8))), _
+        units.InternalShearToOutput(units.InputShearToInternal(firstCase(1, 9))), _
+        units.InternalShearToOutput(units.InputShearToInternal(firstCase(1, 10))))
+
+    Dim geometry As Object: Set geometry = book.Names.Item("rngRectanglesGeometry").RefersToRange
+    TestInputCell(geometry, "Group1").Value2 = "Нет"
+    Dim mode As Variant, section As CSectionModel, ignored As String, gt As Object
+    Set gt = TestInputCell(calibration, "Coupled.Gt")
+    For Each mode In Array("Excel", "File")
+        TestInputCell(settings, "Geometry.Type").Value2 = "Rectangles"
+        TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
+        ignored = FormSectionForWorkbook(book)
+        Set section = ReadFormedSectionFromResults(book, includeMaterialDetails:=True)
+        TestRecord section.RecipeType = "Rectangles", CStr(mode) & " stores recipe identity on formation", passed, failed, report
+        TestRecord Len(section.RebarSteelClass(1)) > 0, CStr(mode) & " restores longitudinal steel class", passed, failed, report
+        TestInputCell(settings, "Geometry.Type").Value2 = "Circle" ' Изменение выбора следующей геометрии не меняет уже построенное сечение.
+        gt.ClearContents
+        ignored = RunSectionCalculationForWorkbook(book)
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing Gt is an input error", passed, failed, report
+        TestRecord InStr(1, ignored, gt.Worksheet.Name & "!" & gt.Address(False, False), vbTextCompare) > 0, CStr(mode) & " missing Gt names its cell", passed, failed, report
+        TestRecord ReadLoadCasePropertyText(book, "Plane", "DirectStateStatus") = "OK", CStr(mode) & " planar case unaffected by calibration", passed, failed, report
+
+        gt.Value2 = 0.12
+        TestInputCell(calibration, "Coupled.Gc").Value2 = 80#
+        TestInputCell(calibration, "Coupled.Localization").Value2 = 125#
+        TestInputCell(calibration, "Coupled.YieldRatio").Value2 = 0.6
+        TestInputCell(calibration, "Coupled.PeakStrain").Value2 = 0.002
+        TestInputCell(calibration, "Coupled.SteelClass").Value2 = section.RebarSteelClass(1)
+        Dim started As Double: started = Timer
+        ignored = RunSectionCalculationForWorkbook(book)
+        Dim elapsed As Double: elapsed = Timer - started
+        If elapsed < 0# Then elapsed = elapsed + 86400#
+        report = report & "WORKBOOK_SECONDS " & CStr(mode) & " (two cases): " & CStr(elapsed) & vbCrLf
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK", CStr(mode) & " produces linked equilibrium " & ignored, passed, failed, report
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "Coupled.StateSolver") = "SplineNewton", CStr(mode) & " saves actual solver", passed, failed, report
+        TestRecord ReadLoadCasePropertyText(book, "ALL", "Geometry.RecipeType") = "Rectangles", CStr(mode) & " same saved recipe after repeated calculation", passed, failed, report
+        Dim components As Variant, i As Long, actual As String
+        components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+        For i = LBound(components) To UBound(components)
+            actual = ReadLoadCasePropertyText(book, "Spatial", "Coupled.Internal." & components(i))
+            If IsNumeric(actual) Then
+                TestExpectNear CDbl(actual), CDbl(expected(i)), 0.00002, CStr(mode) & " saves internal " & components(i), passed, failed, report
+            Else
+                TestRecord False, CStr(mode) & " has no numerical value for " & components(i), passed, failed, report
+            End If
+        Next i
+    Next mode
+    RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Находит тестовую ячейку по ключу строки и ожидаемому столбцу значения.
+Private Function TestInputCell(ByVal table As Object, ByVal key As String, _
+        Optional ByVal keyColumn As Long = 1, Optional ByVal valueColumn As Long = 2) As Object
+    Dim row As Long
+    For row = 1 To table.Rows.Count
+        If StrComp(CStr(table.Cells(row, keyColumn).Value2), key, vbTextCompare) = 0 Then
+            Set TestInputCell = table.Cells(row, valueColumn)
+            Exit Function
+        End If
+    Next row
+    Err.Raise 5, "TestInputCell", "Ключ не найден: " & key
+End Function

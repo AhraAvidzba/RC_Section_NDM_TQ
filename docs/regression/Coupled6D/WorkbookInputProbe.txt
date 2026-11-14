@@ -1,0 +1,114 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledInputCompileProbe.xlsm
+SOURCE_SHA256: B2B913966CF57C52F204999E6EF9581C5F862C8E8907988197E383C353692F07
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d7c9b5fcd031499290d678713b247d96\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=25408; startTicks=639302902058275414
+===== RunTestCoupledWorkbookInput =====
+SUITE_STARTED: RunTestCoupledWorkbookInput; 2026-11-15T00:56:53
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25408; workingSet=271929344; privateBytes=218681344; cpu=20.875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183205888; privateBytes=127164416; cpu=35.546875
+EXCEL_AFTER_SUITE: pid=31416; workingSet=115408896; privateBytes=70230016; cpu=64.640625
+EXCEL_AFTER_SUITE: pid=32564; workingSet=138809344; privateBytes=87302144; cpu=25.375
+OK: named calibration layout
+OK: calibration input fill
+OK: calibration text is not wrapped
+OK: calibration has right border
+OK: Excel stores recipe identity on formation
+OK: Excel restores longitudinal steel class
+OK: Excel missing Gt is an input error
+OK: Excel missing Gt names its cell
+OK: Excel planar case unaffected by calibration
+WORKBOOK_SECONDS Excel (two cases): 2.2080078125
+OK: Excel produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Предупреждение:
+Схема не обновлена. Расчётные результаты сохранены.
+
+В сохраненном снимке Results нет полного состояния или диагностических свойств сочетания Spatial (rngNDMSectionProperties, Results!S156).
+
+Повторите расчет.
+Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется.
+
+Время расчёта: 2.21 с.
+
+Данные сохранены на листе Results текущей книги.
+OK: Excel saves actual solver
+OK: Excel same saved recipe after repeated calculation
+OK: Excel saves internal N actual=-0.05 expected=-0.05
+OK: Excel saves internal Mx actual=9.99999999999998E-04 expected=0.001
+OK: Excel saves internal My actual=-0.002 expected=-0.002
+OK: Excel saves internal T actual=9.99999999999999E-04 expected=0.001
+OK: Excel saves internal Qx actual=0.002 expected=0.002
+OK: Excel saves internal Qy actual=-0.003 expected=-0.003
+OK: File stores recipe identity on formation
+OK: File restores longitudinal steel class
+OK: File missing Gt is an input error
+OK: File missing Gt names its cell
+OK: File planar case unaffected by calibration
+WORKBOOK_SECONDS File (two cases): 2.6201171875
+OK: File produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена из файла «TestCoupledWorkbookInput.ndm».
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Предупреждение:
+Схема не обновлена. Расчётные результаты сохранены.
+
+В сохраненном снимке Results нет полного состояния или диагностических свойств сочетания Spatial (rngNDMSectionProperties, Results!S156).
+
+Повторите расчет.
+Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется.
+
+Время расчёта: 2.62 с.
+
+Данные сохранены в файле «TestCoupledWorkbookInput.ndm».
+OK: File saves actual solver
+OK: File same saved recipe after repeated calculation
+OK: File saves internal N actual=-0.05 expected=-0.05
+OK: File saves internal Mx actual=9.99999999999998E-04 expected=0.001
+OK: File saves internal My actual=-0.002 expected=-0.002
+OK: File saves internal T actual=9.99999999999999E-04 expected=0.001
+OK: File saves internal Qx actual=0.002 expected=0.002
+OK: File saves internal Qy actual=-0.003 expected=-0.003
+TOTAL_COUPLED_WORKBOOK_INPUT: passed=32; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d7c9b5fcd031499290d678713b247d96\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledWorkbookInput; 2026-11-15T00:57:08
+===== RunTestCoupledLoadInput =====
+SUITE_STARTED: RunTestCoupledLoadInput; 2026-11-15T00:57:09
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25408; workingSet=188379136; privateBytes=133853184; cpu=24.046875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183205888; privateBytes=127164416; cpu=35.546875
+EXCEL_AFTER_SUITE: pid=31416; workingSet=115494912; privateBytes=70230016; cpu=67.390625
+EXCEL_AFTER_SUITE: pid=32564; workingSet=138809344; privateBytes=87302144; cpu=25.375
+OK: load6.count
+OK: load6.t; actual=-11767980.; expected=-11767980.
+OK: load6.qx; actual=-24516.625; expected=-24516.625
+OK: load6.qy; actual=29419.95; expected=29419.95
+OK: load6.n; actual=19613.3; expected=19613.3
+OK: load6.pureShear
+OK: load6.invalidRow
+OK: load6.noUnsafePlanarAccess
+OK: load6.actualCell
+OK: load6.transfer.mx; actual=4070.; expected=4070.
+OK: load6.transfer.my; actual=3050.; expected=3050.
+OK: load6.transfer.t; actual=240.; expected=240.
+OK: load6.transfer.forces
+TOTAL_COUPLED_LOAD_INPUT: passed=13; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d7c9b5fcd031499290d678713b247d96\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledLoadInput; 2026-11-15T00:57:11
+SOURCE_UNCHANGED: True

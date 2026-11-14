@@ -214,7 +214,7 @@ Private Sub Class_Initialize()
     mStabilitySP35NOverNcrLimit = 0.7
 End Sub
 
-' Принимает готовую модель и материалы до добавления и расчёта сочетаний.
+' Принимает готовую модель и материалы до выполнения расчёта сочетаний.
 ' Все сочетания используют одну CSectionModel без повторного построения геометрии.
 Public Sub Initialize(ByVal section As CSectionModel, ByVal materialProvider As CMaterialModelProvider)
     If section Is Nothing Then Err.Raise vbObjectError + 3900, "CBatchSectionCalculator", "Модель сечения не передана."
@@ -236,6 +236,15 @@ End Sub
 Friend Sub ConfigureCoupledAnalysis(ByVal analysis As CCoupledSectionAnalysis, Optional ByVal inputError As String = vbNullString)
     Set mCoupledAnalysis = analysis: mCoupledInputError = inputError
 End Sub
+
+' Возвращает True, когда хотя бы одна пригодная входная строка требует
+' параметров связанного расчёта и сведений о материалах сохранённой геометрии.
+Friend Function HasAnySpatialLoads() As Boolean
+    Dim i As Long
+    For i = 1 To mCount
+        If mInputs(i).InputValid And HasSpatialLoads(i) Then HasAnySpatialLoads = True: Exit Function
+    Next i
+End Function
 
 ' Подключает профили, прочитанные из rngCalculationProfiles.
 ' Для каждой строки сочетаний выбирает профиль по её ProfileId.

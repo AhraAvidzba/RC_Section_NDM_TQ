@@ -39,8 +39,9 @@ Private Const ELEMENT_GEOMETRY_COLUMNS As Long = 18 ' Собственные г�
 Private Const SECTION_PROPERTY_COLUMNS As Long = 6 ' Общие свойства сечения и LC-свойства уровня всего сечения.
 Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и принадлежность готовой области трещин; поля 1..13 имеют единый совместимый порядок.
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
-Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 72 ' Строки общих свойств сечения до LC-зависимых блоков.
+Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 10 ' Пространственные входы и подтверждённые усилия целевого состояния.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -93,7 +94,7 @@ Public Function EstimatedSectionPropertyRows(ByVal combinationCount As Long, ByV
     If combinationCount < 0 Then combinationCount = 0
     If namedStateCount < 0 Then namedStateCount = 0
     EstimatedSectionPropertyRows = 1 + COMMON_SECTION_PROPERTY_ROWS + _
-        combinationCount * LC_SECTION_PROPERTY_ROWS + namedStateCount * STATE_SECTION_PROPERTY_ROWS
+        combinationCount * (LC_SECTION_PROPERTY_ROWS + COUPLED_SECTION_PROPERTY_ROWS) + namedStateCount * STATE_SECTION_PROPERTY_ROWS
 End Function
 
 ' ------------------------------
@@ -717,6 +718,7 @@ Private Sub WriteSectionProperties(ByVal workbook As Object, ByVal section As CS
     PutProperty data, rowIndex, runID, "ALL", "Bounds.MinY", OutputLength(minY, units), OutputLengthUnit(units), "Минимальный Y бетонной расчетной модели в координатах модели."
     PutProperty data, rowIndex, runID, "ALL", "Bounds.MaxY", OutputLength(maxY, units), OutputLengthUnit(units), "Максимальный Y бетонной расчетной модели в координатах модели."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Source", section.SourceType, "-", "Источник геометрии расчетной модели."
+    If Len(section.RecipeType) > 0 Then PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeType", section.RecipeType, "-", "Тип рецепта сформированного сечения."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.ConcreteMeshSource", section.ConcreteMeshSource, "-", "Источник бетонной сетки: Generated, AutoCADRegions или AutoCADContours."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Revision", section.Revision, "-", "Версия геометрии, к которой относятся состояния и расчетные области этого снимка."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeDiagnostics", previousDiagnostics & section.GeometryDiagnosticsText, "-", "Запрошенные/созданные позиции, совпадения, пропуски и конфликты. StationStep и CenterStep в мм; для связанного ряда StationStep относится к исходному пути."
@@ -771,6 +773,7 @@ Private Sub WriteSectionProperties(ByVal workbook As Object, ByVal section As CS
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "LongitudinalCrack.Utilization", batch.ResultAt(i).CrackResult.Longitudinal.Utilization, "-", "Использование по продольным трещинам: sigma_c,max / Rb,mc2."
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "ExtensionUsed", BooleanText(batch.ResultAt(i).ExtensionUsed), "-", "True, если расчетное состояние вышло за физические пределы диаграммы в numerical extension."
         PutProperty data, rowIndex, runID, batch.CombinationID(i), "General.DiagramExtension", BooleanText(batch.ResultAt(i).DiagramExtensionEnabled), "-", "Сохраненное значение настройки General.DiagramExtension на момент расчета."
+        If batch.HasSpatialLoads(i) Then PutCoupledSectionProperties data, rowIndex, runID, batch, i, units
         PutNamedStateProperties data, rowIndex, runID, batch, i, units
     Next i
 
@@ -780,6 +783,37 @@ Private Sub WriteSectionProperties(ByVal workbook As Object, ByVal section As CS
     End If
     target.Resize(rowCount, SECTION_PROPERTY_COLUMNS).Value2 = data
     FormatResultsBlock target, rowCount, SECTION_PROPERTY_COLUMNS, "Свойства всего сечения (единицы — в Unit)"
+End Sub
+
+' Записывает пространственную нагрузку и подтверждённое равновесие отдельно
+' от одномерных НДС. Внутренние моменты относятся к центру бетонной сетки.
+Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem)
+    Dim id As String: id = batch.CombinationID(index)
+    Dim torque As Double, qx As Double, qy As Double
+    batch.OriginalSpatialLoads index, torque, qx, qy
+    If Not units Is Nothing Then
+        torque = units.InternalTorqueToOutput(torque)
+        qx = units.InternalShearToOutput(qx): qy = units.InternalShearToOutput(qy)
+    End If
+    PutProperty data, row, runID, id, "Coupled.Input.T", torque, OutputMomentUnit(units), "Кручение в пользовательской точке приложения нагрузки."
+    PutProperty data, row, runID, id, "Coupled.Input.Qx", qx, OutputForceUnit(units), "Поперечная сила вдоль X."
+    PutProperty data, row, runID, id, "Coupled.Input.Qy", qy, OutputForceUnit(units), "Поперечная сила вдоль Y."
+
+    Dim resultants() As Double, result As CCombinationResult
+    Set result = batch.ResultAt(index)
+    If Not result.CopyCoupledResultants(resultants) Then Exit Sub
+    If Not units Is Nothing Then
+        resultants(4) = units.InternalTorqueToOutput(resultants(4))
+        resultants(5) = units.InternalShearToOutput(resultants(5)): resultants(6) = units.InternalShearToOutput(resultants(6))
+    End If
+    PutProperty data, row, runID, id, "Coupled.StateSolver", "SplineNewton", "-", "Связанное пространственное равновесие, сплайн-поля и упругопластический бетон с повреждением."
+    PutProperty data, row, runID, id, "Coupled.Internal.N", OutputForce(resultants(1), units), OutputForceUnit(units), "Подтверждённая продольная сила."
+    PutProperty data, row, runID, id, "Coupled.Internal.Mx", OutputMx(resultants(2), units), OutputMomentUnit(units), "Подтверждённый Mx относительно центра бетонной сетки."
+    PutProperty data, row, runID, id, "Coupled.Internal.My", OutputMy(resultants(3), units), OutputMomentUnit(units), "Подтверждённый My относительно центра бетонной сетки."
+    PutProperty data, row, runID, id, "Coupled.Internal.T", resultants(4), OutputMomentUnit(units), "Подтверждённый T относительно центра бетонной сетки."
+    PutProperty data, row, runID, id, "Coupled.Internal.Qx", resultants(5), OutputForceUnit(units), "Подтверждённая сила вдоль X."
+    PutProperty data, row, runID, id, "Coupled.Internal.Qy", resultants(6), OutputForceUnit(units), "Подтверждённая сила вдоль Y."
 End Sub
 
 ' Записывает логический признак одинаково в любой локали Excel:
@@ -1232,6 +1266,7 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
 
     Dim combinationIndex As Long
     For combinationIndex = 1 To batch.Count
+        If batch.HasSpatialLoads(combinationIndex) Then rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
         rowCount = rowCount + batch.ResultAt(combinationIndex).StateRepository.StateCount * STATE_SECTION_PROPERTY_ROWS
     Next combinationIndex
 
@@ -1268,7 +1303,7 @@ Private Sub WriteSectionPropertiesPreview(ByVal workbook As Object, ByVal sectio
     Set target = workbook.Names.Item("rngNDMSectionProperties").RefersToRange
 
     Dim data() As Variant
-    ReDim data(1 To 46, 1 To SECTION_PROPERTY_COLUMNS)
+    ReDim data(1 To 47, 1 To SECTION_PROPERTY_COLUMNS)
     PutSectionPropertyHeaders data
 
     Dim rowIndex As Long
@@ -1283,6 +1318,7 @@ Private Sub WriteSectionPropertiesPreview(ByVal workbook As Object, ByVal sectio
     PutProperty data, rowIndex, runID, "ALL", "Bounds.MinY", OutputLength(minY, units), OutputLengthUnit(units), "Минимальный Y бетонной расчетной модели в координатах модели."
     PutProperty data, rowIndex, runID, "ALL", "Bounds.MaxY", OutputLength(maxY, units), OutputLengthUnit(units), "Максимальный Y бетонной расчетной модели в координатах модели."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Source", section.SourceType, "-", "Источник геометрии расчетной модели."
+    If Len(section.RecipeType) > 0 Then PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeType", section.RecipeType, "-", "Тип рецепта сформированного сечения."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.ConcreteMeshSource", section.ConcreteMeshSource, "-", "Источник бетонной сетки: Generated, AutoCADRegions или AutoCADContours."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Revision", section.Revision, "-", "Версия геометрии сохраненного снимка."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeDiagnostics", section.GeometryDiagnosticsText, "-", "Фактическая диагностика сохраненной сборки. StationStep и CenterStep в мм; для связанного ряда StationStep относится к исходному пути."

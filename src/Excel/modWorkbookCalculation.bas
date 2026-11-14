@@ -416,13 +416,19 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
         units.OutputStressUnit & "; " & units.OutputCurvatureUnit
     report.AddValue "Знаки OUTPUT N/Mx/My", units.OutputSignN & "; " & units.OutputSignMx & "; " & units.OutputSignMy
 
+    Dim batch As CBatchSectionCalculator: Set batch = New CBatchSectionCalculator
+    report.AddSection "Сочетания нагрузок"
+    report.AddStep "Начато чтение rngLoadCombinations."
+    reader.LoadFromWorkbook workbook, batch, units
+    Dim hasCoupled As Boolean: hasCoupled = batch.HasAnySpatialLoads
+
     Dim section As CSectionModel
     report.AddSection "Геометрия и материалы"
     report.AddStep "Начато чтение сохранённого сечения."
     Dim snapshotStore As CCalculationSnapshotStore: Set snapshotStore = New CCalculationSnapshotStore
     Dim dataOrigin As String: dataOrigin = SnapshotActionDataOrigin(workbook, "Calculation") ' Имя фиксируется до чтения: новый расчёт может сохранить прежний .ndms уже как .ndm.
     Dim ndmWriter As CNDMResultsWriter: Set ndmWriter = New CNDMResultsWriter
-    Set section = ReadFormedSectionFromResults(workbook, False, ndmWriter)
+    Set section = ReadFormedSectionFromResults(workbook, False, ndmWriter, hasCoupled)
     report.AddStep "CSectionModel прочитан из единого сохранённого снимка без генерации и импорта."
     report.AddValue "Источник сохранённого сечения", section.SourceType
     report.AddValue "Происхождение бетонной сетки", section.ConcreteMeshSource
@@ -441,9 +447,6 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     report.AddStep "Загружен каталог расчетных профилей."
     report.AddValue "Профилей в rngCalculationProfiles", CStr(profiles.Count)
 
-    Dim batch As CBatchSectionCalculator
-    Set batch = New CBatchSectionCalculator
-    report.AddStep "Создан CBatchSectionCalculator."
     batch.Initialize section, materialProvider
     Set batch.ProfileCatalog = profiles
     report.AddStep "Batch инициализирован моделью сечения и материалами."
@@ -451,9 +454,6 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     report.AddStep "Настройки solver/capacity/crack применены к batch."
     Set batch.ExecutionReport = report
 
-    report.AddSection "Сочетания нагрузок"
-    report.AddStep "Начато чтение rngLoadCombinations."
-    reader.LoadFromWorkbook workbook, batch, units
     If batch.Count = 0 Then
         CalculateSectionCore = "Расчёт не запускался: нет сочетаний с заполненным CombinationID и ненулевыми нагрузками. Прежние результаты сохранены."
         report.AddStep CalculateSectionCore
@@ -461,6 +461,7 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
         excelGuard.Restore True
         Exit Function
     End If
+    If hasCoupled Then ConfigureWorkbookCoupledAnalysis workbook, section, settings, units, materialProvider, batch
     report.AddValue "Прочитано сочетаний", CStr(batch.Count)
     report.AddBlock "Список сочетаний", CombinationListForReport(batch, units)
     LoadStabilityDurationLoadsFromWorkbook workbook, batch, units
