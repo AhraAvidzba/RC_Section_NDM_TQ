@@ -90,9 +90,13 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     If continuation.Advance(1#) Then
         continuation.CopyAccepted field, resultants
         Set meta = continuation.ResultMeta
-        If response.AcceptedSteelUtilization > 1# Then
+        If response.AcceptedTransverseSteelUtilization > 1# Then
+            meta.SetResult rsCheckFailed, rcTransverseStrainExceeded, rkDirectState, _
+                SteelLimitComment(response.AcceptedTransverseCriticalPoint) & ". Использование по деформации " & _
+                    Format$(response.AcceptedTransverseSteelUtilization, "0.000") & ".", meta.DiagnosticDetails
+        ElseIf response.AcceptedSteelUtilization > 1# Then
             meta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkDirectState, _
-                SteelLimitComment(response.AcceptedSteelCriticalPoint) & " Использование по деформации " & _
+                SteelLimitComment(response.AcceptedSteelCriticalPoint) & ". Использование по деформации " & _
                     Format$(response.AcceptedSteelUtilization, "0.000") & ".", meta.DiagnosticDetails
         Else
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."

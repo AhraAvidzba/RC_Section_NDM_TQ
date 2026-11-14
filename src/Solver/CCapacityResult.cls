@@ -422,6 +422,15 @@ Friend Property Get IsTransverseLimit() As Boolean
     IsTransverseLimit = mIsTransverseLimit
 End Property
 
+' Статус только арматурного предела. Бетонный механизм оценивается в общем результате.
+Friend Property Get TransverseLimitStatus() As String
+    If Not mIsTransverseLimit Then Exit Property
+    Dim meta As CResultMeta: Set meta = ResultMeta
+    If mCoupledLimitLambda >= 1# Then meta.SetResult rsSuccess, rcCheckPassed, rkCapacity
+    Dim policy As New CResultStatusPolicy
+    TransverseLimitStatus = policy.ExternalStatus(meta)
+End Property
+
 ' Сообщает о подтверждённой нижней границе пройденного участка.
 Friend Property Get HasConfirmedLowerBound() As Boolean
     HasConfirmedLowerBound = mHasConfirmedLowerBound

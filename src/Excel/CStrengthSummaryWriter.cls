@@ -507,7 +507,7 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
     If Not capacity.IsTransverseLimit Then Exit Sub
     If capacity.HasUltimatePoint Then data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
     data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
-    data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.Status
+    data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.TransverseLimitStatus
 End Sub
 
 ' Возвращает позицию LC внутри data-части подробной таблицы.

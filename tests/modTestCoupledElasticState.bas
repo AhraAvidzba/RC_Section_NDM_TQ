@@ -405,7 +405,7 @@ Public Function RunCoupledNewtonTests() As String
     solver.Initialize operators, material, 30000#
     Const AREA As Double = 21600#
     Const STRAIN As Double = 0.001
-    Const FORCE As Double = AREA * (30000# * STRAIN + 1E+10 * STRAIN ^ 3)
+    Const FORCE As Double = AREA * (30000# * STRAIN + 1E+10# * STRAIN ^ 3)
     Dim field() As Double, resultants() As Double, acceptedField() As Double, ok As Boolean
     ok = solver.TryStep(FORCE, 0#, 0#, 0#, 0#, 0#, 1E-10, 1E-9, 12)
     TestRecord ok, "nonlinear axial equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
@@ -529,7 +529,7 @@ Public Function RunTestCoupledSteelLimit() As String
     Const AREA As Double = 21600#
     Const BAR_AREA As Double = 1000#
     Const STEEL_LIMIT As Double = 0.001
-    Const LIMIT_FORCE As Double = (AREA - BAR_AREA) * (30000# * STEEL_LIMIT + 1E+10 * STEEL_LIMIT ^ 3) + _
+    Const LIMIT_FORCE As Double = (AREA - BAR_AREA) * (30000# * STEEL_LIMIT + 1E+10# * STEEL_LIMIT ^ 3) + _
         BAR_AREA * (100# + 2000# * (STEEL_LIMIT - 100# / 200000#))
     Dim section As CSectionModel, operators As New CCoupledElasticState
     Set section = TestBuildSection(TestFixtureBox(180#, 120#))
@@ -1063,7 +1063,8 @@ Public Function RunTestCoupledHoopCapacity() As String
     loads.SetSpatialComponents 250000#, 120#, -80#
     Dim meta As CResultMeta, state As CSectionStateResult, field() As Double, resultants() As Double
     Set meta = analysis.SolveTarget(loads, "Auto", spec, field, resultants, True, state)
-    TestRecord meta.InternalStatus = rsCheckFailed And InStr(meta.ResultComment, "TestWeakHoop") > 0, _
+    TestRecord meta.InternalStatus = rsCheckFailed And meta.ResultCode = rcTransverseStrainExceeded And _
+        InStr(meta.ResultComment, "TestWeakHoop") > 0, _
         "direct hoop failure " & meta.ResultComment, passed, failed, report
     If Not state Is Nothing Then
         Dim control As String, utilization As Double, stress As Double
@@ -1095,6 +1096,16 @@ Public Function RunTestCoupledHoopCapacity() As String
     TestRecord combined.Status = "FAIL" And combined.DirectStateMeta.InternalStatus = rsNumericalFailure And _
         combined.StrengthMeta.InternalStatus = rsCheckFailed And combined.GoverningUtil > 1#, _
         "confirmed hoop failure governs even if the requested direct state is unresolved", passed, failed, report
+    Dim partialCapacity As New CCapacityResult, partialVector(1 To 6) As Double
+    partialCapacity.InitializeCoupledLimit 1.02, partialVector, "Auto", "Test hoop", Nothing, transverseLimit:=True
+    TestRecord partialCapacity.Status = "NumFail" And partialCapacity.ReserveFactor = 0# And _
+        partialCapacity.TransverseLimitStatus = "OK" And partialCapacity.CoupledLimitLambda = 1.02, _
+        "passed hoop limit is distinct from unresolved concrete reserve", passed, failed, report
+    combined.Clear "Auto"
+    combined.SetDirectStateMeta meta
+    combined.StoreCapacityResult partialCapacity
+    TestRecord combined.Status = "FAIL" And combined.CapacityMeta.InternalStatus = rsNumericalFailure, _
+        "confirmed direct hoop failure governs even if overall capacity is unresolved", passed, failed, report
     If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then
         Dim catalog As New CCalculationProfileCatalog, profile As CCalculationProfile, batch As New CBatchSectionCalculator
         catalog.LoadFromWorkbook ThisWorkbook, False
@@ -1358,6 +1369,7 @@ Public Function RunTestCoupledWorkbookInput() As String
             hoopAnchor.Offset(0, 53).ClearContents
             UpdateSectionResultsForWorkbook book
             TestRecord hoopAnchor.Offset(0, 53).Value2 = "OK", "File restores a removed hoop status", passed, failed, report
+            TestStrengthSnapshotWidths book, reader, hoopAnchor, passed, failed, report
         End If
         Dim components As Variant, i As Long, actual As String
         components = Array("N", "Mx", "My", "T", "Qx", "Qy")
@@ -1376,6 +1388,55 @@ Public Function RunTestCoupledWorkbookInput() As String
     Exit Function
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Восстанавливает совместимую старую таблицу и проверяет отказ до очистки
+' Results, если шапка и данные относятся к разным форматам.
+Private Sub TestStrengthSnapshotWidths(ByVal book As Object, ByVal source As CResultReadSource, _
+        ByVal anchor As Object, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim current As CCalculationSnapshot: Set current = source.LoadAll
+    Dim legacy As New CCalculationSnapshot, damaged As New CCalculationSnapshot, key As Variant, values As Variant, cropped As Variant
+    legacy.RunID = current.RunID: damaged.RunID = current.RunID
+    For Each key In current.Keys
+        values = current.Table(CStr(key))
+        If key = "Strength.Headers" Or key = "Strength.Data" Then
+            cropped = TestCropStrengthTable(values)
+            legacy.AddTable CStr(key), cropped
+            If key = "Strength.Headers" Then
+                damaged.AddTable CStr(key), cropped
+            Else
+                damaged.AddTable CStr(key), values
+            End If
+        Else
+            legacy.AddTable CStr(key), values: damaged.AddTable CStr(key), values
+        End If
+    Next key
+    Dim errText As String
+    On Error Resume Next
+    UpdateSectionResultsForWorkbook book, damaged
+    errText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    TestRecord InStr(errText, "число столбцов") > 0 And anchor.Offset(0, 53).Value2 = "OK", _
+        "mismatched snapshot widths are rejected before Results changes", passed, failed, report
+    UpdateSectionResultsForWorkbook book, legacy
+    TestRecord anchor.Value2 = "Spatial" And Len(anchor.Offset(0, 53).Value2) = 0, _
+        "49-column strength snapshot restores existing cells and leaves the hoop subsection empty", passed, failed, report
+    UpdateSectionResultsForWorkbook book
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Копирует сохранённую таблицу в допустимую структуру из 49 столбцов.
+Private Function TestCropStrengthTable(ByRef values As Variant) As Variant
+    Dim result() As Variant, row As Long, column As Long
+    ReDim result(1 To UBound(values, 1), 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS)
+    For row = 1 To UBound(values, 1)
+        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+            result(row, column) = values(row, column)
+        Next column
+    Next row
+    TestCropStrengthTable = result
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

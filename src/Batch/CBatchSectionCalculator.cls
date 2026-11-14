@@ -997,7 +997,7 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
         ReportValue "Отношение деформации к пределу", FormatNumberInvariant(utilization)
     End If
     If hasLimit Then
-        ReportValue "Статус предела поперечной арматуры", capacity.Status
+        ReportValue "Статус предела поперечной арматуры", capacity.TransverseLimitStatus
         ReportStep capacity.LimitState
         If capacity.HasUltimatePoint Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
     End If

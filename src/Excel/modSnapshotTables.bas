@@ -43,6 +43,16 @@ Public Sub ValidateSnapshotTableShape(ByVal key As String, ByRef values As Varia
     If rows > 0 Then If UBound(values, 1) <> rows Then Err.Raise 5, "CCalculationSnapshot", "Неверная шапка таблицы снимка: " & key
 End Sub
 
+' Проверяет согласованность ширины шапки и данных прочности до записи листа.
+Public Sub ValidateStrengthSnapshotColumns(ByVal key As String, ByRef values As Variant, ByRef headerColumns As Long)
+    If key = "Strength.Headers" Then
+        headerColumns = UBound(values, 2)
+    ElseIf key = "Strength.Data" Then
+        If UBound(values, 2) <> headerColumns Then Err.Raise 5, "modSnapshotTables", _
+            "В снимке не совпадает число столбцов подписей и данных таблицы прочности."
+    End If
+End Sub
+
 ' Проверяет, что подписи и значения устойчивости относятся к одному формату столбцов.
 Public Sub ValidateStabilitySnapshotColumns(ByVal key As String, ByRef values As Variant, ByRef labelColumns As Long)
     If key = "Stability.Labels" Then

@@ -112,9 +112,9 @@ Public Property Get OverallMeta() As CResultMeta
     Set crack = mCrackResult.ResultMeta
     Set stability = mStabilityResult.Meta
     Set OverallMeta = Policy.WorstResultMeta(rkGeneric, mWorkflowMeta, strength, crack, stability)
-    If mStrengthResult.Capacity.IsTransverseLimit And strength.InternalStatus = rsCheckFailed And _
-            OverallMeta.InternalStatus = rsNumericalFailure Then
-        Set OverallMeta = strength.Clone ' Доказанный отказ хомута достаточен для FAIL; остальные причины остаются в комментарии.
+    If strength.InternalStatus = rsCheckFailed And OverallMeta.InternalStatus = rsNumericalFailure Then
+        Dim transverseFailure As CResultMeta: Set transverseFailure = mStrengthResult.ConfirmedTransverseFailure
+        If Not transverseFailure Is Nothing Then Set OverallMeta = transverseFailure
     End If
     If mWorkflowMeta.InternalStatus = rsInvalidInput Or mWorkflowMeta.InternalStatus = rsInvalidConfiguration Then
         If OverallMeta.InternalStatus = mWorkflowMeta.InternalStatus And OverallMeta.ResultCode = mWorkflowMeta.ResultCode Then

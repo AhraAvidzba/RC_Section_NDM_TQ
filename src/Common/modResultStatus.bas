@@ -45,6 +45,7 @@ Public Enum EResultCode
     rcStateOutsidePhysicalRange = 18 ' Равновесие найдено только за физическим диапазоном диаграммы.
     rcSolverDidNotReturnState = 19   ' Для обязательного расчётного состояния не получен объект решателя НДС.
     rcCoupledConcreteLimitUnresolved = 20 ' Подтверждён арматурный предел; бетонный механизм связанной ветви ещё не определён.
+    rcTransverseStrainExceeded = 21   ' В связанном НДС превышен предел деформации поперечной арматуры.
 End Enum
 
 Public Enum EResultKind
@@ -118,6 +119,7 @@ Public Function ResultCodeToText(ByVal value As EResultCode) As String
         Case rcStateOutsidePhysicalRange: ResultCodeToText = "STATE_OUTSIDE_PHYSICAL_RANGE"
         Case rcSolverDidNotReturnState: ResultCodeToText = "SOLVER_DID_NOT_RETURN_STATE"
         Case rcCoupledConcreteLimitUnresolved: ResultCodeToText = "COUPLED_CONCRETE_LIMIT_UNRESOLVED"
+        Case rcTransverseStrainExceeded: ResultCodeToText = "TRANSVERSE_STRAIN_EXCEEDED"
         Case Else: ResultCodeToText = "INTERNAL_ERROR"
     End Select
 End Function

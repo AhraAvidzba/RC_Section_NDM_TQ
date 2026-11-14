@@ -107,12 +107,27 @@ Public Property Get ResultMeta() As CResultMeta
         capacity.AppendCommentTo comment
     End If
     Set ResultMeta = mPolicy.WorstResultMeta(rkGeneric, direct, capacity)
-    If mCapacity.IsTransverseLimit And capacity.InternalStatus = rsCheckFailed And _
-            ResultMeta.InternalStatus = rsNumericalFailure Then
-        Set ResultMeta = capacity.Clone ' Подтверждённый отказ хомута определяет прочность при отдельной численной неудаче НДС.
+    If ResultMeta.InternalStatus = rsNumericalFailure Then
+        Dim transverseFailure As CResultMeta: Set transverseFailure = ConfirmedTransverseFailure
+        If Not transverseFailure Is Nothing Then Set ResultMeta = transverseFailure
     End If
     ResultMeta.ResultComment = comment
 End Property
+
+' Выбирает подтверждённое превышение хомута при заданной нагрузке либо
+' на пройденной ветви. Численные отказы других этапов сохраняются отдельно.
+Friend Function ConfirmedTransverseFailure() As CResultMeta
+    Dim meta As CResultMeta: Set meta = CapacityMeta
+    If meta.InternalStatus = rsCheckFailed Then
+        If mCapacity.IsTransverseLimit Then
+            Set ConfirmedTransverseFailure = meta
+            Exit Function
+        End If
+    End If
+    Set meta = DirectMeta
+    If meta.InternalStatus = rsCheckFailed And meta.ResultCode = rcTransverseStrainExceeded Then _
+        Set ConfirmedTransverseFailure = meta
+End Function
 
 ' Объединяет причины завершения последовательных решений НДС в одном запуске.
 ' Сохраняет пояснение выбранной причины, не заменяя его пустым текстом.

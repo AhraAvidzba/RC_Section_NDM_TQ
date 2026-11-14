@@ -52,7 +52,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     mArea = 0#
     If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
         Err.Raise vbObjectError + 1776, "CCoupledElasticState", _
-            "Для упругого расчёта требуется E > 0 и −1 < ν < 0,5."
+            "Для упругого расчёта задайте E больше нуля и коэффициент Пуассона между -1 и 0,5."
     End If
     Set mQuadrature = New CCoupledSectionQuadrature
     mQuadrature.Initialize section, spansX, spansY
