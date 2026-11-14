@@ -1,0 +1,218 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledMaterialCurves.xlsm
+SOURCE_SHA256: 24E81EA1B77569866C137618F43BF648828209BC80D39F8F28EF7CA576FA0C61
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=22992; startTicks=639302924178873552
+===== RunTestCoupledEnvelope =====
+SUITE_STARTED: RunTestCoupledEnvelope; 2026-11-15T01:33:45
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=22992; workingSet=148660224; privateBytes=97267712; cpu=7.5625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.796875
+OK: compression yield and virgin modulus
+OK: calibrated compression peak actual=30 expected=30
+OK: calibrated cohesion degradation actual=0.27 expected=0.27
+OK: compression effective strength identity actual=30 expected=30
+OK: analytic prepeak dissipated energy actual=0.03796875 expected=0.03796875
+OK: half compression descending strength actual=15 expected=15
+OK: half tensile stress actual=1.5 expected=1.5
+OK: half tensile stress damage actual=0.5 expected=0.5
+OK: tensile effective cohesion from calibrated damage actual=3 expected=3
+OK: half tensile fracture work actual=0.5 expected=0.5
+OK: independent fracture work integration actual=0.120000146495717 expected=0.12
+OK: incompatible prepeak work and energy rejected
+TOTAL_COUPLED_ENVELOPE: passed=12; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledEnvelope; 2026-11-15T01:33:46
+===== RunTestCoupledSteelClasses =====
+SUITE_STARTED: RunTestCoupledSteelClasses; 2026-11-15T01:33:47
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=22992; workingSet=149012480; privateBytes=96755712; cpu=9.8125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.796875
+OK: mixed class equilibrium Связанное равновесие подтверждено по шести усилиям.
+OK: independent mixed-grade axial stiffness actual=1 expected=1
+OK: mixed-grade resultant actual=30000 expected=30000
+OK: class is required for the actual material value set
+TOTAL_COUPLED_STEEL_CLASSES: passed=4; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledSteelClasses; 2026-11-15T01:33:48
+===== RunTestCoupledTraditionalChecks =====
+SUITE_STARTED: RunTestCoupledTraditionalChecks; 2026-11-15T01:33:49
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=22992; workingSet=158838784; privateBytes=106528768; cpu=11.953125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.796875
+OK: reference standard stability Проверка устойчивости по СП 35 выполнена.
+OK: same stability result under its stated load scope
+OK: same second-order bending input
+OK: reference calculation produces a normal crack width
+OK: identical normal crack width after projection
+OK: summary discloses absent diagonal crack width
+TOTAL_COUPLED_TRADITIONAL: passed=6; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledTraditionalChecks; 2026-11-15T01:33:50
+===== RunTestCoupledWorkbookInput =====
+SUITE_STARTED: RunTestCoupledWorkbookInput; 2026-11-15T01:33:51
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=22992; workingSet=338784256; privateBytes=289288192; cpu=33.5
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183164928; privateBytes=127082496; cpu=35.796875
+OK: named calibration layout
+OK: calibration input fill
+OK: calibration text is not wrapped
+OK: calibration has right border
+OK: steel class catalog layout
+OK: steel class input fill
+OK: steel class catalog has right border
+OK: Excel stores recipe identity on formation
+OK: Excel restores longitudinal steel class
+OK: Excel missing Gt is an input error
+OK: Excel missing Gt names its cell
+OK: Excel planar case unaffected by calibration
+OK: Excel missing hoop modulus is an input error
+OK: Excel invalid class value names its cell
+WORKBOOK_SECONDS Excel (two cases): 2.67431640625
+OK: Excel produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.67 с.
+
+Данные сохранены на листе Results текущей книги.
+OK: Excel saves actual solver
+OK: Excel same saved recipe after repeated calculation
+OK: Excel saves internal N actual=-0.05 expected=-0.05
+OK: Excel saves internal Mx actual=0.001 expected=0.001
+OK: Excel saves internal My actual=-0.002 expected=-0.002
+OK: Excel saves internal T actual=0.001 expected=0.001
+OK: Excel saves internal Qx actual=0.002 expected=0.002
+OK: Excel saves internal Qy actual=-0.003 expected=-0.003
+OK: Excel stores elements of actual coupled state
+OK: Excel stores twist
+OK: Excel keeps all spatial fields
+OK: Excel has physical shear and warping
+OK: Excel plot reads the actual shear field
+OK: Excel plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+OK: Excel identifies concrete and both distinct steel curves
+OK: Excel concrete compression peak stress actual=-17.5 expected=-17.5
+OK: Excel concrete compression peak strain actual=-0.002 expected=-0.002
+OK: Excel preserves tested material laws and legacy curves
+OK: Excel saved curves survive a change to Config
+OK: File stores recipe identity on formation
+OK: File restores longitudinal steel class
+OK: File missing Gt is an input error
+OK: File missing Gt names its cell
+OK: File planar case unaffected by calibration
+OK: File missing hoop modulus is an input error
+OK: File invalid class value names its cell
+WORKBOOK_SECONDS File (two cases): 2.6708984375
+OK: File produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена из файла «TestCoupledWorkbookInput.ndm».
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.67 с.
+
+Данные сохранены в файле «TestCoupledWorkbookInput.ndm».
+OK: File saves actual solver
+OK: File same saved recipe after repeated calculation
+OK: File saves internal N actual=-0.05 expected=-0.05
+OK: File saves internal Mx actual=0.001 expected=0.001
+OK: File saves internal My actual=-0.002 expected=-0.002
+OK: File saves internal T actual=0.001 expected=0.001
+OK: File saves internal Qx actual=0.002 expected=0.002
+OK: File saves internal Qy actual=-0.003 expected=-0.003
+OK: File stores elements of actual coupled state
+OK: File stores twist
+OK: File keeps all spatial fields
+OK: File has physical shear and warping
+OK: File plot reads the actual shear field
+OK: File plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+OK: File identifies concrete and both distinct steel curves
+OK: File concrete compression peak stress actual=-17.5 expected=-17.5
+OK: File concrete compression peak strain actual=-0.002 expected=-0.002
+OK: File preserves tested material laws and legacy curves
+OK: File saved curves survive a change to Config
+TOTAL_COUPLED_WORKBOOK_INPUT: passed=61; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledWorkbookInput; 2026-11-15T01:34:10
+===== RunTestCoupledFieldProfiles =====
+SUITE_STARTED: RunTestCoupledFieldProfiles; 2026-11-15T01:34:11
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=22992; workingSet=193122304; privateBytes=138375168; cpu=41.171875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183164928; privateBytes=127082496; cpu=35.8125
+AUTOCAD_SNAPSHOT:
+AUTOCAD_SNAPSHOT:
+OK: autoCADConfig.snapshot.state1
+OK: autoCADConfig.snapshot.state2
+AUTOCAD_NUMBER: TauXZ.reader|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.reader
+AUTOCAD_NUMBER: TauXZ.plot|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.plot
+OK: TauXZ.unit
+AUTOCAD_NUMBER: TauXZ.cad|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.cad
+AUTOCAD_NUMBER: TauYZ.reader|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.reader
+AUTOCAD_NUMBER: TauYZ.plot|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.plot
+OK: TauYZ.unit
+AUTOCAD_NUMBER: TauYZ.cad|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.cad
+AUTOCAD_NUMBER: Tau.reader|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.reader
+AUTOCAD_NUMBER: Tau.plot|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.plot
+OK: Tau.unit
+AUTOCAD_NUMBER: Tau.cad|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.cad
+AUTOCAD_NUMBER: GammaXZ.reader|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.reader
+AUTOCAD_NUMBER: GammaXZ.plot|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.plot
+OK: GammaXZ.unit
+AUTOCAD_NUMBER: GammaXZ.cad|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.cad
+AUTOCAD_NUMBER: GammaYZ.reader|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.reader
+AUTOCAD_NUMBER: GammaYZ.plot|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.plot
+OK: GammaYZ.unit
+AUTOCAD_NUMBER: GammaYZ.cad|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.cad
+AUTOCAD_NUMBER: Gamma.reader|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.reader
+AUTOCAD_NUMBER: Gamma.plot|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.plot
+OK: Gamma.unit
+AUTOCAD_NUMBER: Gamma.cad|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.cad
+AUTOCAD_NUMBER: Warping.reader|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.reader
+AUTOCAD_NUMBER: Warping.plot|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.plot
+OK: Warping.unit
+AUTOCAD_NUMBER: Warping.cad|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.cad
+COUPLED_FIELD_REJECT_RUN: -2147217115 Results!DW157 (rngNDMCoupledFields). Поле относится к другому запуску расчёта.
+OK: coupledField.rejectStaleRun
+OK: coupledField.rejectMissingState
+TOTAL_COUPLED_FIELD_PROFILES: passed=32; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_75a90814dd27431998d9efd15ac3a6b6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledFieldProfiles; 2026-11-15T01:34:16
+SOURCE_UNCHANGED: True

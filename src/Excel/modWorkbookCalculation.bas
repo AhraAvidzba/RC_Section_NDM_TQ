@@ -668,10 +668,15 @@ Private Sub ValidateResultsOutputLayout(ByVal workbook As Object, ByVal section 
         AddRowsGapIssue issues, "rngNDMElementResults и расположенных ниже таблиц Results", stabilityBottomRow, snapshotTitleRow, snapshotTitleRow
     End If
 
-    Dim estimatedStateCount As Long
+    Dim estimatedStateCount As Long, coupledStates As Long, index As Long
     Dim elementCount As Long
     estimatedStateCount = EstimatedNamedStateCountForOutput(batch, profiles)
     elementCount = section.ConcreteCount + section.RebarCount
+    For index = 1 To batch.Count
+        If batch.HasSpatialLoads(index) And batch.StrengthDirectStateRequested(index) Then coupledStates = coupledStates + 1
+    Next index
+    Dim coupledDiagramRows As Double: coupledDiagramRows = CDbl(coupledStates) * (24# + 5# * batch.CoupledSteelClassCount) ' Максимум точек калибровки бетона и пять узлов на класс стали.
+    Dim coupledPropertyRows As Double: coupledPropertyRows = CDbl(coupledStates) * MaxLong(0, batch.CoupledSteelClassCount - 1)
     Dim elementGeometryRows As Double: elementGeometryRows = ndmWriter.EstimatedElementGeometryRows(section) ' Сегменты обходятся один раз для предупреждения и проверки раскладки.
     Dim mandatoryRows As Variant
     If WorkbookNameHasRange(workbook, "rngNDMSectionGeometry") And WorkbookNameHasRange(workbook, "rngNDMSectionContours") And _
@@ -685,14 +690,15 @@ Private Sub ValidateResultsOutputLayout(ByVal workbook As Object, ByVal section 
             Array("rngNDMSectionGeometry", 1# + elementCount, workbook.Names.Item("rngNDMSectionGeometry").RefersToRange.Row), _
             Array("rngNDMSectionContours", 1# + section.Contours.Count, workbook.Names.Item("rngNDMSectionContours").RefersToRange.Row), _
             Array("rngNDMSectionProperties", CDbl(ndmWriter.EstimatedSectionPropertyRows(0, 0)), workbook.Names.Item("rngNDMSectionProperties").RefersToRange.Row), _
-            Array("rngNDMMaterialDiagrams", 1# + MaxLong(1, estimatedStateCount) * 14#, workbook.Names.Item("rngNDMMaterialDiagrams").RefersToRange.Row), _
+            Array("rngNDMMaterialDiagrams", 1# + MaxLong(1, estimatedStateCount) * 14# + coupledDiagramRows, workbook.Names.Item("rngNDMMaterialDiagrams").RefersToRange.Row), _
             Array("rngNDMSectionAnnotations", 1# + MaxLong(2, section.AnnotationCount), workbook.Names.Item("rngNDMSectionAnnotations").RefersToRange.Row), _
             Array("rngNDMElementGeometry", 1#, workbook.Names.Item("rngNDMElementGeometry").RefersToRange.Row))
         OfferExternalCalculationSnapshot workbook, CDbl(elementCount) * estimatedStateCount, interactive, mandatoryRows, elementGeometryRows
     End If ' Отсутствующий якорь ниже диагностирует общий проверяющий код, без чтения несуществующего Range ради предупреждения.
     ValidateSnapshotOutputLayout issues, workbook, ws, ndmWriter, elementCount, _
         estimatedStateCount, batch.Count, section.AnnotationCount, section.Contours.Count, SNAPSHOT_GAP_COLUMNS, elementGeometryRows, _
-        CalculationSnapshotOutputPolicy("File", 0#, mandatoryRows, ws.Rows.Count) <> "RowLimit"
+        CalculationSnapshotOutputPolicy("File", 0#, mandatoryRows, ws.Rows.Count) <> "RowLimit", _
+        coupledStates, coupledDiagramRows, coupledPropertyRows
 
     If issues.Count > 0 Then
         Err.Raise vbObjectError + 4163, "ValidateResultsOutputLayout", _
@@ -758,10 +764,11 @@ Private Sub ValidateSnapshotOutputLayout(ByVal issues As Collection, ByVal workb
         ByVal ws As Object, ByVal ndmWriter As CNDMResultsWriter, ByVal elementCount As Long, _
         ByVal estimatedStateCount As Long, ByVal combinationCount As Long, _
         ByVal annotationCount As Long, ByVal contourCount As Long, ByVal requiredGapColumns As Long, ByVal elementGeometryRows As Double, _
-        Optional ByVal mandatoryOutputRowsFit As Boolean = True)
-    Dim names(1 To 7) As String
-    Dim rows(1 To 7) As Double
-    Dim cols(1 To 7) As Long
+        Optional ByVal mandatoryOutputRowsFit As Boolean = True, Optional ByVal coupledStates As Long = 0, _
+        Optional ByVal coupledDiagramRows As Double = 0#, Optional ByVal coupledPropertyRows As Double = 0#)
+    Dim names(1 To 8) As String
+    Dim rows(1 To 8) As Double
+    Dim cols(1 To 8) As Long
     names(1) = "rngNDMElementResults"
     names(2) = "rngNDMSectionGeometry"
     names(3) = "rngNDMSectionContours"
@@ -769,6 +776,7 @@ Private Sub ValidateSnapshotOutputLayout(ByVal issues As Collection, ByVal workb
     names(5) = "rngNDMMaterialDiagrams"
     names(6) = "rngNDMSectionAnnotations"
     names(7) = "rngNDMElementGeometry"
+    names(8) = COUPLED_FIELD_TABLE
 
     rows(1) = ndmWriter.EstimatedElementResultRows(elementCount, estimatedStateCount)
     Dim store As CCalculationSnapshotStore: Set store = New CCalculationSnapshotStore
@@ -776,17 +784,21 @@ Private Sub ValidateSnapshotOutputLayout(ByVal issues As Collection, ByVal workb
     If fileMode Then rows(1) = 1 ' Полные состояния и собственные границы сохраняются только в файле; общие таблицы остаются на листе.
     rows(2) = 1 + elementCount
     rows(3) = 1 + contourCount
-    rows(4) = ndmWriter.EstimatedSectionPropertyRows(combinationCount, estimatedStateCount)
+    rows(4) = ndmWriter.EstimatedSectionPropertyRows(combinationCount, estimatedStateCount) + coupledPropertyRows
     If fileMode Then rows(4) = ndmWriter.EstimatedSectionPropertyRows(0, 0) ' LC-свойства находятся в файле; общие свойства сечения остаются на Results.
-    rows(5) = 1 + MaxLong(1, estimatedStateCount) * 14
+    rows(5) = 1 + MaxLong(1, estimatedStateCount) * 14 + coupledDiagramRows
     rows(6) = 1 + MaxLong(2, annotationCount)
     rows(7) = elementGeometryRows
     If fileMode Then rows(7) = 1
+    rows(8) = 1# + CDbl(coupledStates) * elementCount
+    If fileMode Then rows(8) = 1
 
     Dim index As Long, stateRowsOverflow As Boolean, mandatoryRowsFit As Boolean
     mandatoryRowsFit = True
-    Dim anchors(1 To 7) As Object
-    For index = 1 To 7
+    Dim anchors(1 To 8) As Object, tableCount As Long
+    tableCount = 7
+    If coupledStates > 0 Then tableCount = 8
+    For index = 1 To tableCount
         cols(index) = ndmWriter.OutputColumnCount(names(index))
 
         Dim anchor As Object
@@ -799,7 +811,7 @@ Private Sub ValidateSnapshotOutputLayout(ByVal issues As Collection, ByVal workb
         End If
         CheckFootprintWithinSheet issues, ws, names(index), anchor.Row, anchor.Column, rows(index), cols(index)
         If Not ResultRowsFitSheet(anchor.Row, rows(index), ws.Rows.Count) Then
-            If index = 1 Or index = 7 Then stateRowsOverflow = True Else mandatoryRowsFit = False
+            If index = 1 Or index = 7 Or index = 8 Then stateRowsOverflow = True Else mandatoryRowsFit = False
         End If
 
         Set anchors(index) = anchor

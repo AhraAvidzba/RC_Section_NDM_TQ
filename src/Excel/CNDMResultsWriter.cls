@@ -945,10 +945,53 @@ Private Sub PutCombinationMaterialDiagrams(ByRef data() As Variant, ByRef rowInd
                     stateResult, "Rebar", _
                     stateResult.SteelDiagramSnapshot, _
                     units, written, strainRanges
+            ElseIf Not stateResult.CoupledMaterialCurves Is Nothing Then
+                PutCoupledMaterialCurves data, rowIndex, runID, batch.ResultAt(combinationIndex).ProfileId, stateResult, units, written
             End If
         End If
     Next stateIndex
 End Sub
+
+' Записывает фактическую одноосную калибровку бетона и ветвь каждого
+' класса стали в действующую таблицу диаграмм с её единицами вывода.
+Private Sub PutCoupledMaterialCurves(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal profile As String, ByVal state As CSectionStateResult, ByVal units As CUnitSystem, ByVal written As Object)
+    Dim curves As CCoupledMaterialSnapshot: Set curves = state.CoupledMaterialCurves
+    Dim series As Long, point As Long, id As String, grade As String, material As String, mode As String
+    Dim strain() As Double, stress() As Double
+    For series = 1 To curves.SeriesCount
+        grade = curves.SteelClass(series)
+        id = CoupledMaterialDiagramId(profile, state, grade)
+        If Not written.Exists(id) Then
+            written.Add id, True
+            If Len(grade) = 0 Then
+                material = "Concrete": mode = "UniaxialCalibration"
+            Else
+                material = "Rebar " & grade: mode = "MonotonicCalibration"
+            End If
+            curves.CopyCurve series, strain, stress
+            For point = 1 To UBound(strain)
+                data(row, 1) = runID: data(row, 2) = id: data(row, 3) = profile
+                data(row, 4) = state.StateTypeText: data(row, 5) = state.MaterialModelRoleText
+                data(row, 6) = CoupledMaterialSpecKey(state): data(row, 7) = mode
+                data(row, 8) = material: data(row, 9) = point: data(row, 10) = strain(point)
+                data(row, 11) = OutputStress(stress(point), units)
+                row = row + 1
+            Next point
+        End If
+    Next series
+End Sub
+
+' Возвращает спецификацию фактического закона, сохранённую в обеих таблицах.
+Private Function CoupledMaterialSpecKey(ByVal state As CSectionStateResult) As String
+    CoupledMaterialSpecKey = state.MaterialSpec.ValueSetText & "|CoupledPlasticDamage|UseDiagram|CoupledSteel"
+End Function
+
+' Идентифицирует кривые одного неизменяемого набора по профилю, состоянию и классу.
+' Пустой класс относится к бетону, поэтому запись не совпадает со старым НДС.
+Private Function CoupledMaterialDiagramId(ByVal profile As String, ByVal state As CSectionStateResult, ByVal grade As String) As String
+    CoupledMaterialDiagramId = profile & "|" & state.StateTypeText & "|" & CoupledMaterialSpecKey(state) & "|" & grade
+End Function
 
 ' Строит ID диаграммы по её фактическим параметрам. Номер сочетания в ключ
 ' не входит: одинаковые профиль и модель материалов могут использоваться
@@ -1233,8 +1276,9 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
                     "-", "Ссылка на диаграмму арматуры в rngNDMMaterialDiagrams."
             Else
                 PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "MaterialModelSpec", _
-                    stateResult.MaterialSpec.ValueSetText & "|CoupledPlasticDamage|UseDiagram|CoupledSteel", "-", _
+                    CoupledMaterialSpecKey(stateResult), "-", _
                     "Фактические модели бетона с повреждением и двухлинейной стали по классам."
+                PutCoupledMaterialLinks data, rowIndex, runID, batch, combinationIndex, stateResult, prefix
             End If
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Epsilon0", _
                 stateResult.Epsilon0, "-", "Деформация в исходной точке X=0, Y=0 модели (для импорта AutoCAD - начало МСК/WCS). Численный перенос к центру сечения эту точку вывода не меняет."
@@ -1258,6 +1302,24 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
                 stateResult.StopReason, "-", "Служебная причина остановки solver-а для диагностики."
         End If
     Next stateIndex
+End Sub
+
+' Связывает именованное НДС с бетоном и каждым фактически применённым классом.
+Private Sub PutCoupledMaterialLinks(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal state As CSectionStateResult, ByVal prefix As String)
+    Dim curves As CCoupledMaterialSnapshot: Set curves = state.CoupledMaterialCurves
+    If curves Is Nothing Then Exit Sub
+    Dim series As Long, grade As String, key As String, note As String, lc As String, profile As String
+    lc = batch.CombinationID(index): profile = batch.ResultAt(index).ProfileId
+    For series = 1 To curves.SeriesCount
+        grade = curves.SteelClass(series)
+        If Len(grade) = 0 Then
+            key = "ConcreteDiagramId": note = "Одноосная калибровка пространственного бетона."
+        Else
+            key = "Rebar." & CStr(series - 1) & ".RebarDiagramId": note = "Кривая арматуры класса «" & grade & "»."
+        End If
+        PutProperty data, row, runID, lc, prefix & key, CoupledMaterialDiagramId(profile, state, grade), "-", note
+    Next series
 End Sub
 
 ' Возвращает угол нейтральной линии для поля eps = eps0 + kx*y + ky*x.
@@ -1328,9 +1390,17 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
     rowCount = 1 + COMMON_SECTION_PROPERTY_ROWS + batch.Count * LC_SECTION_PROPERTY_ROWS
 
     Dim combinationIndex As Long
+    Dim state As CSectionStateResult: Dim curves As CCoupledMaterialSnapshot
     For combinationIndex = 1 To batch.Count
         If batch.HasSpatialLoads(combinationIndex) Then rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
         rowCount = rowCount + batch.ResultAt(combinationIndex).StateRepository.StateCount * STATE_SECTION_PROPERTY_ROWS
+        Set state = batch.ResultAt(combinationIndex).StateRepository.FindState(sstStrengthState)
+        If Not state Is Nothing Then
+            Set curves = state.CoupledMaterialCurves
+            If Not curves Is Nothing Then
+                If curves.SeriesCount > 2 Then rowCount = rowCount + curves.SeriesCount - 2
+            End If
+        End If
     Next combinationIndex
 
     SectionPropertyRowCount = rowCount
@@ -1351,6 +1421,7 @@ Private Function MaterialDiagramRowCount(ByVal batch As CBatchSectionCalculator)
             If Not stateResult Is Nothing Then
                 If stateResult.HasMaterialSnapshot Then rowCount = rowCount + _
                     stateResult.ConcreteDiagramSnapshot.PointCount + stateResult.SteelDiagramSnapshot.PointCount
+                If Not stateResult.CoupledMaterialCurves Is Nothing Then rowCount = rowCount + stateResult.CoupledMaterialCurves.PointCount
             End If
         Next stateIndex
     Next combinationIndex

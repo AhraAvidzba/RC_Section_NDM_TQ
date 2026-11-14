@@ -71,6 +71,42 @@ Friend Property Get HalfStrengthPlasticStrain() As Double
     HalfStrengthPlasticStrain = mPlasticPeak + Log(2#) / mSoftening
 End Property
 
+' Снимает точки от начала до нисходящей ветви. Полная деформация включает
+' пластическое смещение и упругую долю от эффективного напряжения.
+Friend Sub CopyCalibrationPoints(ByVal elasticModulus As Double, ByVal direction As Double, _
+        ByRef strain() As Double, ByRef stress() As Double)
+    If mPeak <= 0# Or elasticModulus <= 0# Or Abs(direction) <> 1# Then InvalidEnvelope "Недопустимые параметры вывода калибровки."
+    Dim hardeningSteps As Long
+    If mPlasticPeak > 0# Then hardeningSteps = 4
+    Dim ratios As Variant: ratios = Array(0.9, 0.75, 0.5, 0.25, 0.1, 0.03, 0.01)
+    Dim total As Long: total = 2 + hardeningSteps + UBound(ratios) + 1
+    ReDim strain(1 To total): ReDim stress(1 To total)
+
+    Dim point As Long, i As Long, plastic As Double
+    point = 2
+    PutCalibrationPoint point, 0#, elasticModulus, direction, strain, stress
+    For i = 1 To hardeningSteps
+        point = point + 1
+        PutCalibrationPoint point, mPlasticPeak * i / hardeningSteps, elasticModulus, direction, strain, stress
+    Next i
+    For i = LBound(ratios) To UBound(ratios)
+        plastic = mPlasticPeak - Log(CDbl(ratios(i))) / mSoftening
+        If mDegradation * plastic + Log(CDbl(ratios(i))) > 700# Then Exit For ' Дальше полная деформация графика может выйти за диапазон Double.
+        point = point + 1
+        PutCalibrationPoint point, plastic, elasticModulus, direction, strain, stress
+    Next i
+    If point < total Then ReDim Preserve strain(1 To point): ReDim Preserve stress(1 To point)
+End Sub
+
+' Координата полной деформации использует эффективное напряжение напрямую.
+Private Sub PutCalibrationPoint(ByVal point As Long, ByVal plastic As Double, ByVal modulus As Double, _
+        ByVal direction As Double, ByRef strain() As Double, ByRef stress() As Double)
+    Dim nominal As Double, effective As Double, degraded As Double, energy As Double
+    Evaluate plastic, nominal, effective, degraded, energy
+    strain(point) = direction * (plastic + effective / modulus)
+    stress(point) = direction * nominal
+End Sub
+
 ' Выдаёт проблему физической калибровки с источником закона.
 Private Sub InvalidEnvelope(ByVal reason As String)
     Err.Raise vbObjectError + 1782, "CCoupledConcreteEnvelope", reason

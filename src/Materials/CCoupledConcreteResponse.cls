@@ -141,6 +141,17 @@ Private Sub ICoupledPointResponse_ClearHistory()
     mCommitted = 1: mTrial = 2
 End Sub
 
+' Снимает одноосную огибающую из фактического закона данного бетона.
+' Отрицательная ветвь передаётся от начала к хвосту сжатия.
+Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal modulus As Double, _
+        ByRef strain() As Double, ByRef stress() As Double)
+    If compression Then
+        mCompression.CopyCalibrationPoints modulus, -1#, strain, stress
+    Else
+        mTension.CopyCalibrationPoints modulus, 1#, strain, stress
+    End If
+End Sub
+
 ' Возвращает физические меры повреждения принятой точки для диагностики.
 Friend Sub AcceptedPointDamage(ByVal point As Long, ByRef tensionEnergy As Double, ByRef compressionEnergy As Double)
     Dim unusedStress As Double, unusedCohesion As Double, unusedDamage As Double

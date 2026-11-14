@@ -1198,6 +1198,7 @@ Public Function RunTestCoupledWorkbookInput() As String
             End If
         Next i
         TestSavedCoupledFields book, CStr(mode), section.ConcreteCount + section.RebarCount, passed, failed, report
+        TestSavedCoupledMaterialCurves book, CStr(mode), grades.Cells(2, 3), units, passed, failed, report
     Next mode
     RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -1238,6 +1239,56 @@ Private Sub TestSavedCoupledFields(ByVal book As Object, ByVal mode As String, B
     TestRecord plot.Count = elementCount And plot.ResultUnit = "MPa", mode & " plot reads the actual shear field", passed, failed, report
     TestExpectNear plot.ResultValue(1), CDbl(tau(plot.ElementID(1))), 0.0000001, mode & " plot matches saved shear", passed, failed, report
     TestInputCell(system, "Output.CombinationMode").Value2 = "Worst"
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет узлы фактических кривых, сохранённые ссылки и независимость
+' опубликованных диаграмм от последующих изменений Config.
+Private Sub TestSavedCoupledMaterialCurves(ByVal book As Object, ByVal mode As String, ByVal hoopModulusCell As Object, _
+        ByVal units As CUnitSystem, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim data As Variant: data = ReadAnchoredResultTable(book, "rngNDMMaterialDiagrams")
+    Dim concreteId As String, mainId As String, hoopId As String
+    concreteId = ReadLoadCasePropertyText(book, "Spatial", "State.StrengthState.ConcreteDiagramId")
+    mainId = ReadLoadCasePropertyText(book, "Spatial", "State.StrengthState.Rebar.1.RebarDiagramId")
+    hoopId = ReadLoadCasePropertyText(book, "Spatial", "State.StrengthState.Rebar.2.RebarDiagramId")
+    TestRecord Len(concreteId) > 0 And Len(mainId) > 0 And Len(hoopId) > 0 And mainId <> hoopId, _
+        mode & " identifies concrete and both distinct steel curves", passed, failed, report
+    Dim settings As New CSystemSettingsReader, provider As New CMaterialModelProvider
+    settings.LoadFromWorkbook book: provider.Initialize settings, units
+    Dim fc As Double, ft As Double, eb As Double, peakStress As Double, peakStrain As Double
+    Dim hasTensionPeak As Boolean, hasHoopYield As Boolean, hasMain As Boolean, hasPlanar As Boolean
+    fc = units.InternalStressToOutput(provider.ConcreteCompressionResistanceFromValueSet(mvsULS))
+    ft = units.InternalStressToOutput(provider.ConcreteTensionResistanceFromValueSet(mvsULS))
+    eb = provider.ConcreteElasticModulusFromValueSet(mvsULS)
+    Dim row As Long, sigma As Double, strain As Double
+    For row = 2 To UBound(data, 1)
+        If CStr(data(row, 2)) = concreteId And CStr(data(row, 7)) = "UniaxialCalibration" Then
+            sigma = CDbl(data(row, 11)): strain = CDbl(data(row, 10))
+            If sigma < peakStress Then peakStress = sigma: peakStrain = strain
+            If Abs(sigma - ft) < 0.00000001 And Abs(strain - provider.ConcreteTensionResistanceFromValueSet(mvsULS) / eb) < 0.000000001 Then hasTensionPeak = True
+        ElseIf CStr(data(row, 2)) = hoopId And CStr(data(row, 8)) = "Rebar TestHoop" Then
+            If Abs(CDbl(data(row, 11)) - units.InternalStressToOutput(240#)) < 0.00000001 And _
+                    Abs(CDbl(data(row, 10)) - 240# / 180000#) < 0.000000001 Then hasHoopYield = True
+        ElseIf CStr(data(row, 2)) = mainId And CStr(data(row, 7)) = "MonotonicCalibration" Then
+            hasMain = True
+        ElseIf CStr(data(row, 7)) = "Physical" Or CStr(data(row, 7)) = "StateExtension" Then
+            hasPlanar = True
+        End If
+    Next row
+    TestExpectNear peakStress, -fc, 0.0000001, mode & " concrete compression peak stress", passed, failed, report
+    TestExpectNear peakStrain, -0.002, 0.0000001, mode & " concrete compression peak strain", passed, failed, report
+    TestRecord hasTensionPeak And hasHoopYield And hasMain And hasPlanar, mode & " preserves tested material laws and legacy curves", passed, failed, report
+    hoopModulusCell.Value2 = 160000#
+    Dim stored As Variant: stored = ReadAnchoredResultTable(book, "rngNDMMaterialDiagrams")
+    Dim identical As Boolean: identical = (UBound(stored, 1) = UBound(data, 1))
+    If identical Then
+        For row = 2 To UBound(data, 1)
+            If CStr(stored(row, 2)) <> CStr(data(row, 2)) Or CStr(stored(row, 10)) <> CStr(data(row, 10)) Or _
+                    CStr(stored(row, 11)) <> CStr(data(row, 11)) Then identical = False: Exit For
+        Next row
+    End If
+    TestRecord identical, mode & " saved curves survive a change to Config", passed, failed, report
+    hoopModulusCell.Value2 = 180000#
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

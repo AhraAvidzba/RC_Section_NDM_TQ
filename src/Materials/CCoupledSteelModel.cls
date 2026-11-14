@@ -49,6 +49,19 @@ Friend Property Get ElasticModulus() As Double
     ElasticModulus = mElasticModulus
 End Property
 
+' Возвращает пределы и узлы текучести монотонных ветвей для фактического
+' закона стали. Пробные значения вычисляются при нулевой исходной истории.
+Friend Sub CopyCalibrationPoints(ByRef strain() As Double, ByRef stress() As Double)
+    If mElasticModulus = 0# Then InputError "Модель арматуры не подготовлена."
+    ReDim strain(1 To 5): ReDim stress(1 To 5)
+    strain(1) = -mCompressionLimit: strain(2) = -mCompressionYield / mElasticModulus
+    strain(4) = mTensionYield / mElasticModulus: strain(5) = mTensionLimit
+    Dim point As Long, tangent As Double, plastic As Double, backstress As Double
+    For point = 1 To 5
+        EvaluateTrial strain(point), 0#, 0#, stress(point), tangent, plastic, backstress
+    Next point
+End Sub
+
 ' Обновляет пробную точку заданной деформации. Подтверждённые пластическая
 ' деформация и обратное напряжение передаются по значению для rollback.
 Friend Sub EvaluateTrial(ByVal strain As Double, ByVal committedPlastic As Double, ByVal committedBackstress As Double, _

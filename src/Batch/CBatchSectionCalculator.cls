@@ -237,6 +237,11 @@ Friend Sub ConfigureCoupledAnalysis(ByVal analysis As CCoupledSectionAnalysis, O
     Set mCoupledAnalysis = analysis: mCoupledInputError = inputError
 End Sub
 
+' Число различных классов для предварительной проверки строк диаграмм.
+Friend Property Get CoupledSteelClassCount() As Long
+    If Not mCoupledAnalysis Is Nothing Then CoupledSteelClassCount = mCoupledAnalysis.SteelClassCount
+End Property
+
 ' Возвращает True, когда хотя бы одна пригодная входная строка требует
 ' параметров связанного расчёта и сведений о материалах сохранённой геометрии.
 Friend Function HasAnySpatialLoads() As Boolean

@@ -62,6 +62,7 @@ Private mSnapshotRevision As Long ' Ревизия геометрии при ф�
 Private mSnapshotConcrete As CMaterialDiagram ' Неизменяемая фактическая диаграмма бетона.
 Private mSnapshotSteel As CMaterialDiagram ' Неизменяемая фактическая диаграмма арматуры.
 Private mCoupledFields As CCoupledFieldSnapshot ' Напряжения по принятой пространственной истории и поле деформаций.
+Private mCoupledMaterialCurves As CCoupledMaterialSnapshot ' Одноосные точки фактически применённых законов.
 Private mTwist As Double ' Закручивание на единицу длины, рад/мм.
 Private Const ELEMENT_ZERO_TOLERANCE As Double = 0.000000001 ' Порог деформации для определения физического состояния элемента при выводе результатов.
 
@@ -161,6 +162,18 @@ Friend Property Get CoupledFields() As CCoupledFieldSnapshot
     Set CoupledFields = mCoupledFields
 End Property
 
+' Привязывает неизменяемые диаграммы к уже вычисленному связанному состоянию.
+Friend Sub SetCoupledMaterialCurves(ByVal curves As CCoupledMaterialSnapshot)
+    AssertWritable
+    If mCoupledFields Is Nothing Or curves Is Nothing Then Err.Raise 5, "CSectionStateResult", "Связанное состояние и его диаграммы должны быть готовы."
+    Set mCoupledMaterialCurves = curves
+End Sub
+
+' Возвращает отдельный снимок кривых связанной модели для сохранения.
+Friend Property Get CoupledMaterialCurves() As CCoupledMaterialSnapshot
+    Set CoupledMaterialCurves = mCoupledMaterialCurves
+End Property
+
 ' Возвращает закручивание принятого связанного состояния, рад/мм.
 Friend Property Get Twist() As Double
     Twist = mTwist
@@ -189,7 +202,7 @@ Private Sub ClearSnapshot()
     Set mSnapshotSection = Nothing
     Set mSnapshotConcrete = Nothing
     Set mSnapshotSteel = Nothing
-    Set mCoupledFields = Nothing: mTwist = 0#
+    Set mCoupledFields = Nothing: Set mCoupledMaterialCurves = Nothing: mTwist = 0#
     mSnapshotRevision = 0
     Set mMaterialSpec = Nothing
     Set mResultMeta = Nothing

@@ -29,6 +29,7 @@ Private mYieldRatio As Double, mPeakStrain As Double, mSteelClass As String
 Private mEb As Double, mCenterX As Double, mCenterY As Double
 Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели по набору характеристик, ссылки применённых классов.
 Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
+Private mDiagramCache As Object ' Точки фактических диаграмм для публикации одного набора характеристик.
 
 ' Принимает калибровку в мм, МПа и Н/мм, а размеры деформаций в долях единицы.
 ' Геометрия и диаграммы остаются неизменными между строками текущего пакета.
@@ -51,6 +52,7 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     Set mSupplementarySteel = supplementarySteel
     Set mSteelCache = CreateObject("Scripting.Dictionary")
     Set mOperatorCache = CreateObject("Scripting.Dictionary")
+    Set mDiagramCache = CreateObject("Scripting.Dictionary")
     Set mSteelReferences = CreateObject("Scripting.Dictionary"): mSteelReferences.CompareMode = vbTextCompare
     Dim i As Long
     For i = 1 To section.RebarCount
@@ -63,6 +65,11 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     Dim area As Double
     section.ConcreteMeshCentroid mCenterX, mCenterY, area
 End Sub
+
+' Число различных применённых классов для предварительной проверки таблиц.
+Friend Property Get SteelClassCount() As Long
+    SteelClassCount = mSteelReferences.Count
+End Property
 
 ' Решает в выбранной точке траектории и возвращает только подтверждённое
 ' состояние заданных усилий. Численный отказ не публикует итоги промежуточной ступени.
@@ -111,6 +118,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."
         End If
         If captureFields Then Set acceptedState = CaptureAcceptedState(loads, spec, continuation, response, field, resultants, fc, ft, meta)
+        If Not acceptedState Is Nothing Then acceptedState.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
     Else
         Set meta = continuation.ResultMeta
     End If
@@ -124,6 +132,20 @@ InvalidMaterialOrGeometry:
         Set SolveTarget = ConfigurationError(reason)
     Else
         Err.Raise number, source, reason
+    End If
+End Function
+
+' Копирует точки фактических моделей один раз для всех сочетаний этого набора.
+Private Function CalibrationCurves(ByVal spec As CMaterialModelSpec, ByVal concrete As CCoupledConcreteResponse, _
+        ByVal steel As Object) As CCoupledMaterialSnapshot
+    Dim key As String: key = spec.ValueSetText
+    If mDiagramCache.Exists(key) Then
+        Set CalibrationCurves = mDiagramCache(key)
+    Else
+        Dim snapshot As New CCoupledMaterialSnapshot
+        snapshot.Initialize concrete, mEb, steel
+        mDiagramCache.Add key, snapshot
+        Set CalibrationCurves = snapshot
     End If
 End Function
 
