@@ -1,0 +1,51 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledNewton.xlsm
+SOURCE_SHA256: B081173C6E9B239060EEB754422A837512B788FD424CD4FC717C4CE06889B631
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_8b67afab18f44edcae9d0345b827f590\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=32492; startTicks=639302866353666868
+===== modTestCoupledElasticState.RunCoupledNewtonTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledNewtonTests; 2026-11-14T23:57:21
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182595584; privateBytes=126517248; cpu=34.734375
+EXCEL_AFTER_SUITE: pid=32492; workingSet=142983168; privateBytes=93663232; cpu=7.515625
+OK: nonlinear axial equilibrium
+OK: nonlinear axial strain actual=1.00000000000024E-03 expected=0.001
+OK: nonlinear axial resultant actual=864000.000000308 expected=864000
+OK: successful trial is uncommitted
+OK: successful step publishes material history once
+OK: local update failure has a numerical status
+OK: point failure includes point index
+OK: material failure leaves accepted field and history
+OK: six component nonlinear equilibrium
+OK: recovered component 1 actual=691200 expected=691200
+OK: recovered component 2 actual=199999.999999993 expected=200000
+OK: recovered component 3 actual=100000.000000001 expected=100000
+OK: recovered component 4 actual=300000 expected=300000
+OK: recovered component 5 actual=2000 expected=2000
+OK: recovered component 6 actual=-999.999999999999 expected=-1000
+OK: discard leaves history
+OK: independent combination starts without history
+TOTAL_COUPLED_NEWTON: passed=17; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_8b67afab18f44edcae9d0345b827f590\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledNewtonTests; 2026-11-14T23:57:24
+===== modTestCoupledElasticState.RunCoupledEquationAssemblyTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledEquationAssemblyTests; 2026-11-14T23:57:24
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182595584; privateBytes=126517248; cpu=34.734375
+EXCEL_AFTER_SUITE: pid=32492; workingSet=147857408; privateBytes=98918400; cpu=9.59375
+OK: linearization solves mixed equations
+OK: internal residual after one correction=1.28716481917479E-15
+OK: assembled component 1 actual=30000 expected=30000
+OK: assembled component 2 actual=1900000 expected=1900000
+OK: assembled component 3 actual=-1100000 expected=-1100000
+OK: assembled component 4 actual=1400000 expected=1400000
+OK: assembled component 5 actual=3200.00000000001 expected=3200
+OK: assembled component 6 actual=-1800 expected=-1800
+TOTAL_COUPLED_EQUATIONS: passed=8; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_8b67afab18f44edcae9d0345b827f590\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledEquationAssemblyTests; 2026-11-14T23:57:25
+SOURCE_UNCHANGED: True

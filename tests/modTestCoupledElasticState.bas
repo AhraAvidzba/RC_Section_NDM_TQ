@@ -389,3 +389,65 @@ Public Function RunCoupledWarpingTests() As String
 Failed:
     RunCoupledWarpingTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает нелинейное продольное равновесие с заданным кубическим законом.
+' Моменты и сдвиги сверяет по шести независимым интегралам напряжений.
+Public Function RunCoupledNewtonTests() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel, operators As New CCoupledElasticState
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 8
+    Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    material.TestInitialize operators.PointCount
+    solver.Initialize operators, material, 30000#
+    Const AREA As Double = 21600#
+    Const STRAIN As Double = 0.001
+    Const FORCE As Double = AREA * (30000# * STRAIN + 1E+10 * STRAIN ^ 3)
+    Dim field() As Double, resultants() As Double, acceptedField() As Double, ok As Boolean
+    ok = solver.TryStep(FORCE, 0#, 0#, 0#, 0#, 0#, 1E-10, 1E-9, 12)
+    TestRecord ok, "nonlinear axial equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
+    If ok Then
+        solver.CopyTrial field, resultants
+        TestExpectNear field(1), STRAIN, 1E-9, "nonlinear axial strain", passed, failed, report
+        TestExpectNear resultants(1), FORCE, 1E-9, "nonlinear axial resultant", passed, failed, report
+        TestRecord material.TestAcceptedPeak = 0#, "successful trial is uncommitted", passed, failed, report
+        solver.AcceptStep
+        TestRecord Abs(material.TestAcceptedPeak - STRAIN) < 1E-12 And material.TestAcceptedSteps = 1, _
+            "successful step publishes material history once", passed, failed, report
+    End If
+
+    material.TestFail = True
+    ok = solver.TryStep(1.1 * FORCE, 0#, 0#, 0#, 0#, 0#, 1E-10, 1E-9, 12)
+    TestRecord Not ok And solver.ResultMeta.InternalStatus = rsNumericalFailure, _
+        "local update failure has a numerical status", passed, failed, report
+    TestRecord InStr(solver.ResultMeta.DiagnosticDetails, " 2") > 0, _
+        "point failure includes point index", passed, failed, report
+    solver.CopyAccepted acceptedField
+    TestRecord Abs(acceptedField(1) - STRAIN) < 1E-12 And material.TestAcceptedSteps = 1, _
+        "material failure leaves accepted field and history", passed, failed, report
+    material.TestFail = False
+    ok = solver.TryStep(0.8 * FORCE, 200000#, 100000#, 300000#, 2000#, -1000#, 1E-9, 1E-8, 25)
+    TestRecord ok, "six component nonlinear equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
+    If ok Then
+        solver.CopyTrial field, resultants
+        Dim expected(1 To 6) As Double, i As Long
+        expected(1) = 0.8 * FORCE: expected(2) = 200000#: expected(3) = 100000#
+        expected(4) = 300000#: expected(5) = 2000#: expected(6) = -1000#
+        For i = 1 To 6
+            TestExpectNear resultants(i), expected(i), 0.00001, "recovered component " & CStr(i), passed, failed, report
+        Next i
+        solver.DiscardStep
+    End If
+    TestRecord material.TestAcceptedSteps = 1, "discard leaves history", passed, failed, report
+    solver.ResetHistory
+    solver.CopyAccepted acceptedField
+    TestRecord acceptedField(1) = 0# And material.TestAcceptedPeak = 0#, _
+        "independent combination starts without history", passed, failed, report
+    RunCoupledNewtonTests = report & "TOTAL_COUPLED_NEWTON: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunCoupledNewtonTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

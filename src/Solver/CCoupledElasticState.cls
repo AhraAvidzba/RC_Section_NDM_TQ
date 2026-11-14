@@ -561,3 +561,14 @@ Private Function ResultantsVerified(ByRef recovered() As Double, ByVal n As Doub
         Abs(recovered(3) - my) <= momentScale And Abs(recovered(4) - torque) <= momentScale And _
         Abs(recovered(5) - qx) <= forceScale And Abs(recovered(6) - qy) <= forceScale
 End Function
+
+' Проверяет независимые интегралы всех шести напряжений в масштабе МПа.
+' Моменты делятся на характерное плечо, все компоненты на бетонную площадь.
+Friend Function ResultantResidualNorm(ByRef actual() As Double, ByRef expected() As Double) As Double
+    Dim i As Long, difference As Double
+    For i = 1 To 6
+        difference = Abs(actual(i) - expected(i)) / mArea
+        If i >= 2 And i <= 4 Then difference = difference / mLength
+        If difference > ResultantResidualNorm Then ResultantResidualNorm = difference
+    Next i
+End Function
