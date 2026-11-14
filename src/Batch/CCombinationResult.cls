@@ -26,6 +26,8 @@ Private mResultPolicy As CResultStatusPolicy ' Общие правила пре�
 Private mStrengthResult As CStrengthResult ' Результаты НДС при заданной нагрузке и предельной несущей способности.
 Private mCrackResult As CCrackResult ' Результаты образования и раскрытия трещин, текущего НДС и проверки продольных трещин.
 Private mStabilityResult As CStabilityResult ' Проверка устойчивости.
+Private mCoupledResultants() As Double ' Усилия подтверждённого связанного равновесия в численном центре, Н и Н·мм.
+Private mHasCoupledResultants As Boolean ' Целевая точка траектории подтверждена.
 Private mWorkflowMeta As CResultMeta ' Ошибка общей проверки исходных данных или остановка выполнения сочетания до получения инженерного результата.
 
 ' Создаёт пустые результаты отдельных проверок. Несуществующее НДС при этом не подставляется.
@@ -42,10 +44,29 @@ Public Sub Clear(ByVal defaultCapacityPath As String)
     Set mCrackResult = New CCrackResult
     Set mStabilityResult = New CStabilityResult
     Set mWorkflowMeta = New CResultMeta
+    Erase mCoupledResultants
+    mHasCoupledResultants = False
     mWorkflowMeta.SetNotRequested rkGeneric
     mProfileId = vbNullString
     mDiagramExtensionEnabled = False
 End Sub
+
+' Сохраняет полный вектор внутренних усилий связанного состояния.
+' Вектор относится к заданной нагрузке, а не к промежуточной ступени.
+Friend Sub StoreCoupledResultants(ByRef resultants() As Double)
+    AssertWritable
+    mCoupledResultants = resultants
+    mHasCoupledResultants = True
+End Sub
+
+' Копирует подтверждённые усилия N, Mx, My, T, Qx, Qy в численном центре.
+' Возвращает False для плоского расчёта и недостигнутой целевой нагрузки.
+Friend Function CopyCoupledResultants(ByRef resultants() As Double) As Boolean
+    Erase resultants
+    If Not mHasCoupledResultants Then Exit Function
+    resultants = mCoupledResultants
+    CopyCoupledResultants = True
+End Function
 
 ' Возвращает внешний статус сочетания по сохранённым статусам отдельных проверок.
 Public Property Get Status() As String

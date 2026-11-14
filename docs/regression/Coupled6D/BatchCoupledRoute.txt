@@ -1,0 +1,57 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledBatchRun.xlsm
+SOURCE_SHA256: 9FD7B048DDCF34455AAED41C5C4D5D4F5CE85A71E7F0E248AAE7B3B4E5157634
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cb351dfcf87847d0a8cf2218c3ece86b\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=20540; startTicks=639302892875965598
+===== RunTestCoupledBatchRoute =====
+SUITE_STARTED: RunTestCoupledBatchRoute; 2026-11-15T00:41:35
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=20540; workingSet=149995520; privateBytes=97984512; cpu=8.625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127107072; cpu=35.359375
+OK: target equilibrium
+OK: planar route remains available
+OK: second independent target Несущая способность: Предельный множитель для связанного расчёта не определён.; Устойчивость: Профиль запрашивает устойчивость, для которой не подготовлена проверка при совместном действии шести усилий.
+OK: requested but unverified coupled limit is visible
+OK: requested but unverified coupled stability is visible
+OK: incomplete profile does not report overall success
+OK: both accepted vectors are available
+OK: batch equilibrium component 1 actual=13160 expected=13160
+OK: independent material history component 1
+OK: batch equilibrium component 2 actual=147580 expected=147580
+OK: independent material history component 2
+OK: batch equilibrium component 3 actual=229360 expected=229360
+OK: independent material history component 3
+OK: batch equilibrium component 4 actual=724223 expected=724223
+OK: independent material history component 4
+OK: batch equilibrium component 5 actual=7990 expected=7990
+OK: independent material history component 5
+OK: batch equilibrium component 6 actual=-3337 expected=-3337
+OK: independent material history component 6
+OK: planar result has no coupled vector
+TOTAL_COUPLED_BATCH_ROUTE: passed=20; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cb351dfcf87847d0a8cf2218c3ece86b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledBatchRoute; 2026-11-15T00:41:37
+===== RunTestCoupledConcreteSection =====
+SUITE_STARTED: RunTestCoupledConcreteSection; 2026-11-15T00:41:38
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=20540; workingSet=150188032; privateBytes=98189312; cpu=13.046875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127107072; cpu=35.359375
+OK: six-action concrete section  Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+SOLVE_SECONDS: 2.18408203125
+OK: concrete-integrated component 1 actual=26319.9999998685 expected=26320
+OK: concrete-integrated component 2 actual=479400.00000527 expected=479400
+OK: concrete-integrated component 3 actual=169199.999992953 expected=169200
+OK: concrete-integrated component 4 actual=1409999.99999594 expected=1410000
+OK: concrete-integrated component 5 actual=15979.9999999003 expected=15980
+OK: concrete-integrated component 6 actual=-6673.99999998269 expected=-6674
+OK: concrete damage develops at integration point 3
+OK: six-action unloading gives equilibrium
+OK: concrete point cannot heal during unloading
+TOTAL_COUPLED_CONCRETE_SECTION: passed=10; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_cb351dfcf87847d0a8cf2218c3ece86b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledConcreteSection; 2026-11-15T00:41:41
+SOURCE_UNCHANGED: True

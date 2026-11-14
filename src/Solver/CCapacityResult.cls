@@ -109,6 +109,13 @@ Public Sub InitializeCalcError(ByVal reason As String, _
     InitializeEarlyResult rsInternalError, rcInternalError, reason, pathKey
 End Sub
 
+' Отмечает запрошенный профиль, которому недоступен выбранный вид предела.
+' Траектория поиска и числовой запас остаются пустыми.
+Friend Sub InitializeUnsupportedConfiguration(ByVal reason As String)
+    AssertWritable
+    InitializeEarlyResult rsInvalidConfiguration, rcInvalidConfiguration, reason, vbNullString
+End Sub
+
 ' Отмечает проверку, выключенную профилем, без найденной точки и без solve.
 ' Это отличается от физической неприменимости нулевой lambda-траектории.
 Public Sub InitializeNotRequested(ByVal reason As String, _

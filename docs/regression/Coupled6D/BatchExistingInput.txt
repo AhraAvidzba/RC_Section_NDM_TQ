@@ -1,0 +1,30 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledBatchRun.xlsm
+SOURCE_SHA256: CC4E89E05E7A2A0D5D4A39B5B216F80BA7516D85F0D5CA7919A7E68BFEDAC78A
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_e2adac8fca174c1190f606adbfb65eb4\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=33460; startTicks=639302891104478311
+===== RunTestCoupledLoadInput =====
+SUITE_STARTED: RunTestCoupledLoadInput; 2026-11-15T00:38:38
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183185408; privateBytes=127143936; cpu=35.328125
+EXCEL_AFTER_SUITE: pid=33460; workingSet=152453120; privateBytes=115822592; cpu=8.03125
+OK: load6.count
+OK: load6.t; actual=-11767980.; expected=-11767980.
+OK: load6.qx; actual=-24516.625; expected=-24516.625
+OK: load6.qy; actual=29419.95; expected=29419.95
+OK: load6.n; actual=19613.3; expected=19613.3
+OK: load6.pureShear
+OK: load6.invalidRow
+OK: load6.noUnsafePlanarAccess
+OK: load6.actualCell
+OK: load6.transfer.mx; actual=4070.; expected=4070.
+OK: load6.transfer.my; actual=3050.; expected=3050.
+OK: load6.transfer.t; actual=240.; expected=240.
+OK: load6.transfer.forces
+TOTAL_COUPLED_LOAD_INPUT: passed=13; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_e2adac8fca174c1190f606adbfb65eb4\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledLoadInput; 2026-11-15T00:38:39
+SOURCE_UNCHANGED: True

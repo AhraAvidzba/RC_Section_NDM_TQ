@@ -65,10 +65,15 @@ End Sub
 ' Сохраняет общую ошибку ввода до начала проверок трещин. Проверка образования
 ' получает точную причину, а текущее НДС, ширина и продольные трещины
 ' отмечаются как недоступные без вымышленного численного запуска.
-Friend Sub SetInputFailure(ByVal reason As String)
+Friend Sub SetInputFailure(ByVal reason As String, Optional ByVal unsupportedConfiguration As Boolean = False)
     AssertWritable
     Dim meta As CResultMeta
-    Set meta = New CResultMeta: meta.SetResult rsInvalidInput, rcInvalidInput, rkCrackFormation, reason
+    Set meta = New CResultMeta
+    If unsupportedConfiguration Then
+        meta.SetResult rsInvalidConfiguration, rcInvalidConfiguration, rkCrackFormation, reason
+    Else
+        meta.SetResult rsInvalidInput, rcInvalidInput, rkCrackFormation, reason
+    End If
     Set mFormation = New CCrackFormationResult: mFormation.InitializeUncalculated meta
     Set mCurrentStateMeta = New CResultMeta
     mCurrentStateMeta.SetBlockedByDependency rkDirectState, "исходных данных сочетания", reason

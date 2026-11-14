@@ -897,3 +897,69 @@ Done:
 Failed:
     RunTestCoupledConcreteSection = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает штатный пакет с пространственным и плоским сочетаниями.
+' Сверяет результирующие усилия, изоляцию истории и статус профиля с пределом.
+Public Function RunTestCoupledBatchRoute() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout
+    layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A400"
+
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    concrete.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    Dim provider As New CMaterialModelProvider
+    provider.TestInitializeFromParameters concrete, steel
+    Dim analysis As New CCoupledSectionAnalysis
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+
+    Dim profiles As New CCalculationProfileCatalog, spec As New CMaterialModelSpec
+    profiles.LoadFromWorkbook ThisWorkbook, False
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    profiles.ProfileById("PR4").SetStrengthSpec spec
+    profiles.ProfileById("PR1").SetStrengthSpec spec
+    Dim batch As New CBatchSectionCalculator
+    batch.Initialize section, provider
+    Set batch.ProfileCatalog = profiles
+    batch.ConfigureCoupledAnalysis analysis
+    batch.AddCombination "Coupled1", 13160#, 239700#, 84600#, "PR4", "", torque:=705000#, qx:=7990#, qy:=-3337#
+    batch.AddCombination "Plane", -10000#, 0#, 0#, "PR4", ""
+    batch.AddCombination "Coupled2", 13160#, 239700#, 84600#, "PR1", "", torque:=705000#, qx:=7990#, qy:=-3337#
+    batch.ApplyLoadReference 11#, -7#, 11#, -7#
+    batch.Execute
+
+    Dim first As CCombinationResult, second As CCombinationResult, plane As CCombinationResult
+    Set first = batch.ResultAt(1): Set plane = batch.ResultAt(2): Set second = batch.ResultAt(3)
+    TestRecord first.DirectStateMeta.InternalStatus = rsSuccess, "target equilibrium " & first.OverallMeta.ResultComment, passed, failed, report
+    TestRecord plane.DirectStateMeta.InternalStatus = rsSuccess, "planar route remains available " & plane.OverallMeta.ResultComment, passed, failed, report
+    TestRecord second.DirectStateMeta.InternalStatus = rsSuccess, "second independent target " & second.OverallMeta.ResultComment, passed, failed, report
+    TestRecord second.CapacityMeta.InternalStatus = rsInvalidConfiguration, "requested but unverified coupled limit is visible", passed, failed, report
+    TestRecord second.StabilityMeta.InternalStatus = rsInvalidConfiguration, "requested but unverified coupled stability is visible", passed, failed, report
+    TestRecord second.OverallMeta.InternalStatus = rsInvalidConfiguration, "incomplete profile does not report overall success", passed, failed, report
+
+    Dim actual() As Double, repeated() As Double, target() As Double, i As Long
+    Dim hasFirst As Boolean, hasSecond As Boolean
+    hasFirst = first.CopyCoupledResultants(actual): hasSecond = second.CopyCoupledResultants(repeated)
+    TestRecord hasFirst And hasSecond, "both accepted vectors are available", passed, failed, report
+    If hasFirst And hasSecond Then
+        Dim loads As New CSectionLoadState, x As Double, y As Double, area As Double
+        section.ConcreteMeshCentroid x, y, area
+        loads.Initialize 13160#, 239700#, 84600#, 11#, -7#
+        loads.SetSpatialComponents 705000#, 7990#, -3337#
+        loads.LoadAboutPoint x, y, target
+        For i = 1 To 6
+            TestExpectNear actual(i), target(i), 0.00002, "batch equilibrium component " & CStr(i), passed, failed, report
+            TestRecord repeated(i) = actual(i), "independent material history component " & CStr(i), passed, failed, report
+        Next i
+    End If
+    TestRecord Not plane.CopyCoupledResultants(actual), "planar result has no coupled vector", passed, failed, report
+    RunTestCoupledBatchRoute = report & "TOTAL_COUPLED_BATCH_ROUTE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledBatchRoute = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

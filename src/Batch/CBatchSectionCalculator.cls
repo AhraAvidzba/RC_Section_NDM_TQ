@@ -45,6 +45,8 @@ End Type
 
 Private mSection As CSectionModel ' Одна расчётная модель сечения для всех сочетаний нагрузок.
 Private mMaterialProvider As CMaterialModelProvider ' Подготовка диаграмм материалов для прочности, образования трещины и НДС с трещинами.
+Private mCoupledAnalysis As CCoupledSectionAnalysis ' Общая численная подготовка для сочетаний с T или Q.
+Private mCoupledInputError As String ' Адресная ошибка калибровки относится только к связанным сочетаниям.
 Private mProfiles As CCalculationProfileCatalog ' Каталог расчетных профилей PR1/PR2/... из Config.
 Private mStatusPolicy As CResultStatusPolicy ' Единый словарь пользовательских статусов и правил их агрегирования.
 Private mCount As Long ' Сколько сочетаний реально добавлено в пакет.
@@ -220,12 +222,19 @@ Public Sub Initialize(ByVal section As CSectionModel, ByVal materialProvider As 
     If materialProvider Is Nothing Then Err.Raise vbObjectError + 3902, "CBatchSectionCalculator", "Поставщик материалов не передан."
     Set mSection = section
     Set mMaterialProvider = materialProvider
+    Set mCoupledAnalysis = Nothing: mCoupledInputError = vbNullString
     ClearTransformedReferenceCache
     mExecuting = False
     Set mCrackGeometryQuery = Nothing
     mCrackDomainBuildCount = 0
     mMechanicalPreparationBuildCount = 0
     ConfigureConcreteMomentDepths
+End Sub
+
+' Подключает связанный расчёт или поясняет отсутствующий ввод до решения.
+' Сочетания с нулевыми T, Qx, Qy не пользуются этой подготовкой.
+Friend Sub ConfigureCoupledAnalysis(ByVal analysis As CCoupledSectionAnalysis, Optional ByVal inputError As String = vbNullString)
+    Set mCoupledAnalysis = analysis: mCoupledInputError = inputError
 End Sub
 
 ' Подключает профили, прочитанные из rngCalculationProfiles.
@@ -846,8 +855,14 @@ Private Sub RunCombination(ByVal index As Long)
     End If
 
     If HasSpatialLoads(index) Then
-        MarkInvalid index, "Для ненулевых T, Qx или Qy требуется подключённая пространственная проверка профиля. " & mInputs(index).SourceReference
-        Exit Sub
+        If mCoupledAnalysis Is Nothing Then
+            Dim coupledReason As String: coupledReason = mCoupledInputError
+            If Len(coupledReason) = 0 Then coupledReason = "Для ненулевых T, Qx или Qy заполните параметры связанного расчёта."
+            MarkInvalid index, coupledReason & " " & mInputs(index).SourceReference
+            Exit Sub
+        End If
+        RunCoupledCombination index, profile
+        GoTo FinalizeCombination
     End If
 
     ReportSection "Продольный изгиб и устойчивость"
@@ -896,6 +911,42 @@ Failed:
         failureSource & "; error=" & CStr(failureNumber)
     mResults(index).SetWorkflowMeta failureMeta
     AppendDiagnostic index
+End Sub
+
+' Передаёт все шесть усилий в одну модель и отмечает доступность каждой
+' запрошенной проверки в штатных результатах профиля.
+Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile)
+    Dim combined As CCombinationResult: Set combined = mResults(index)
+    Dim meta As CResultMeta, field() As Double, resultants() As Double
+    ReportSection "Связанное НДС по шести усилиям"
+    If profile.StrengthDirectStateEnabled Then
+        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants)
+        combined.SetDirectStateMeta meta
+        If meta.InternalStatus = rsSuccess Or meta.InternalStatus = rsCheckFailed Then _
+            combined.StoreCoupledResultants resultants
+        ReportStep meta.ResultComment
+        If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
+    End If
+
+    If profile.StrengthCapacityEnabled Then
+        Dim capacity As New CCapacityResult
+        capacity.InitializeUnsupportedConfiguration "Предельный множитель для связанного расчёта не определён."
+        combined.StoreCapacityResult capacity
+    Else
+        StoreNotCalculatedCapacity index
+    End If
+
+    If profile.StabilityEnabled Then
+        Set meta = New CResultMeta
+        meta.SetResult rsInvalidConfiguration, rcInvalidConfiguration, rkStability, _
+            "Профиль запрашивает устойчивость, для которой не подготовлена проверка при совместном действии шести усилий."
+        combined.SetStabilityMeta meta, meta.ResultComment
+    Else
+        combined.SetStabilityMeta NotRequestedMeta(rkStability)
+    End If
+    If profile.CrackWidthEnabled Then
+        combined.CrackResult.SetInputFailure "Профиль запрашивает проверку трещин при T или Q. Метод определения их ширины не подтверждён.", True
+    End If
 End Sub
 
 ' Применяет продольный изгиб к нагрузкам сочетания. CStabilityCalculator
