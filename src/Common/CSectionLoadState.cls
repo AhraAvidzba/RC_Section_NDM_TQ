@@ -12,13 +12,14 @@ Option Explicit
 ' ==========================================================================
 ' Нагрузка сечения и перенос моментов между точками
 ' ==========================================================================
-' Хранит N + Mx + My и точку приложения продольной силы. Переносит моменты
+' Хранит N, Mx, My, T, Qx, Qy и общую точку приведения сил. Переносит моменты
 ' между пользовательской точкой, произвольным расчётным центром и началом
 ' координат модели. Если передан CMomentZeroFilter, одинаково учитывает
 ' практически нулевые моменты перед прочностью, несущей способностью,
 ' устойчивостью и расчётом трещин.
 
 Private mN As Double ' Продольная сила во внутренних единицах, Н.
+Private mTorque As Double, mQx As Double, mQy As Double ' В пользовательской системе осей, во внутренних единицах.
 Private mLoadPointMx As Double ' Mx относительно точки приложения нагрузки, Н*мм.
 Private mLoadPointMy As Double ' My относительно точки приложения нагрузки, Н*мм.
 Private mLoadReferenceX As Double ' X точки приложения продольной силы в координатах модели, мм.
@@ -33,6 +34,7 @@ Public Sub Initialize(ByVal nValue As Double, ByVal loadPointMx As Double, _
         ByVal loadReferenceY As Double, Optional ByVal momentFilter As CMomentZeroFilter = Nothing, _
         Optional ByVal concreteDepthForMx As Double = 0#, Optional ByVal concreteDepthForMy As Double = 0#)
     mN = nValue
+    SetSpatialComponents 0#, 0#, 0#
     mLoadReferenceX = loadReferenceX
     mLoadReferenceY = loadReferenceY
     Set mMomentFilter = momentFilter
@@ -40,6 +42,26 @@ Public Sub Initialize(ByVal nValue As Double, ByVal loadPointMx As Double, _
     mConcreteDepthForMy = concreteDepthForMy
     mLoadPointMx = NormalizeMx(loadPointMx)
     mLoadPointMy = NormalizeMy(loadPointMy)
+End Sub
+
+' Добавляет кручение и поперечные силы, заданные в той же точке, что N и M.
+Friend Sub SetSpatialComponents(ByVal torque As Double, ByVal qx As Double, ByVal qy As Double)
+    mTorque = torque: mQx = qx: mQy = qy
+End Sub
+
+' Возвращает полный винт относительно выбранного начала сечения.
+' Вектор от нового начала к точке исходной нагрузки задаёт добавку r×F.
+' Рабочий знак My противоположен физической компоненте момента вокруг Y.
+Friend Sub LoadAboutPoint(ByVal pointX As Double, ByVal pointY As Double, ByRef components() As Double)
+    Dim dx As Double, dy As Double
+    dx = mLoadReferenceX - pointX: dy = mLoadReferenceY - pointY
+    ReDim components(1 To 6)
+    components(1) = mN
+    components(2) = MxAboutPoint(pointY)
+    components(3) = MyAboutPoint(pointX)
+    components(4) = mTorque + dx * mQy - dy * mQx
+    components(5) = mQx
+    components(6) = mQy
 End Sub
 
 ' Задаёт нагрузку по моментам относительно известной расчётной точки.

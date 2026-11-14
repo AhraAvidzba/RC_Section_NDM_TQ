@@ -353,7 +353,7 @@ Private Function ErrorInputAddresses(ByVal workbook As Object, ByVal reason As S
     Next i
     text = Join(blocks, paragraph)
     ' Ошибки отдельных сочетаний содержат поле и ячейку в самой строке пояснения.
-    locations.Pattern = "(^|[;:][ \t]*|\r\n)((?:N|Mx|My|ProfileId|CombinationID|LoadPath|Комментарий)(?: \(rngLoadCombinations\))?, )('(?:[^']|'')+'|[^'!\[\]\r\n:;,()]+?)!(" & INPUT_CELL_A1 & ")(?=$|[ ;,.\r\n]|: )(?![ \t]*\u27F6)"
+    locations.Pattern = "(^|[;:][ \t]*|\r\n)((?:N|Mx|My|T|Qx|Qy|ProfileId|CombinationID|LoadPath|Комментарий)(?: \(rngLoadCombinations\))?, )('(?:[^']|'')+'|[^'!\[\]\r\n:;,()]+?)!(" & INPUT_CELL_A1 & ")(?=$|[ ;,.\r\n]|: )(?![ \t]*\u27F6)"
     text = ResolvedInputAddressBlock(workbook, text, locations, direct)
     locations.Pattern = "(^|[ \t\n])(Таблица 7\.21 СП 35, )('(?:[^']|'')+'|[^'!\[\]\r\n:;,()]+?)!(" & INPUT_CELL_A1 & ")(?=: )"
     text = ResolvedInputAddressBlock(workbook, text, locations, direct)

@@ -956,13 +956,20 @@ Private Function CombinationListForReport(ByVal batch As CBatchSectionCalculator
     Dim lines As Collection
     Set lines = New Collection
 
-    Dim i As Long
+    Dim i As Long, torque As Double, qx As Double, qy As Double, spatial As String
     For i = 1 To batch.Count
+        spatial = vbNullString
+        If batch.HasSpatialLoads(i) Then
+            batch.OriginalSpatialLoads i, torque, qx, qy
+            spatial = "; T=" & FormatReportNumber(units.InternalTorqueToOutput(torque)) & " " & units.OutputMomentUnit & _
+                "; Qx=" & FormatReportNumber(units.InternalShearToOutput(qx)) & " " & units.OutputForceUnit & _
+                "; Qy=" & FormatReportNumber(units.InternalShearToOutput(qy)) & " " & units.OutputForceUnit
+        End If
         lines.Add CStr(i) & ". " & batch.CombinationID(i) & _
             "; profile=" & batch.InputProfileId(i) & _
             "; N=" & ReportForceText(batch.N(i), units) & _
             "; Mx=" & ReportMxText(batch.Mx(i), units) & _
-            "; My=" & ReportMyText(batch.My(i), units) & _
+            "; My=" & ReportMyText(batch.My(i), units) & spatial & _
             "; comment=" & batch.CombinationName(i)
     Next i
 

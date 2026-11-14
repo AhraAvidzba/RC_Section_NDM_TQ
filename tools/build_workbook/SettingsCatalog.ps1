@@ -455,7 +455,7 @@ function Apply-ConfigUserInputAlignment {
         @{ Name = "rngConcreteMaterialParameters"; Columns = @(2, 3) },
         @{ Name = "rngCalculationProfiles"; Columns = @(3, 4, 5, 6) },
         @{ Name = "rngPlotAnnotationSettings"; Columns = @(2, 3) },
-        @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7); CommentColumns = @(7) },
+        @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); CommentColumns = @(7) },
         @{ Name = "rngStabilityDurationLoads"; Columns = @(1, 2, 3, 4) },
         @{ Name = "rngSP35Table721"; Columns = @(1, 2, 3, 4, 5, 6) }
     )
@@ -2565,11 +2565,11 @@ function Add-LoadCombinationsTable {
 
     $titleRow = $HeaderRow - 1
     $Sheet.Cells.Item($titleRow, $StartColumn).Value2 = "Сочетания нагрузок"
-    $Sheet.Range($Sheet.Cells.Item($titleRow, $StartColumn), $Sheet.Cells.Item($titleRow, $StartColumn + 6)).Merge() | Out-Null
+    $Sheet.Range($Sheet.Cells.Item($titleRow, $StartColumn), $Sheet.Cells.Item($titleRow, $StartColumn + 9)).Merge() | Out-Null
     $Sheet.Cells.Item($titleRow, $StartColumn).Font.Bold = $true
     $Sheet.Cells.Item($titleRow, $StartColumn).Interior.Color = 15921906
 
-    $loadHeaders = @("CombinationID", "N", "Mx", "My", "ProfileId", "LoadPath", "Comment")
+    $loadHeaders = @("CombinationID", "N", "Mx", "My", "ProfileId", "LoadPath", "Comment", "T", "Qx", "Qy")
     for ($i = 0; $i -lt $loadHeaders.Count; $i++) {
         $cell = $Sheet.Cells.Item($HeaderRow, $StartColumn + $i)
         $cell.Value2 = $loadHeaders[$i]
@@ -2580,7 +2580,22 @@ function Add-LoadCombinationsTable {
     $Sheet.Cells.Item($HeaderRow, $StartColumn + 2).Formula = "=`"Mx, `"&INDEX(rngUnitSettings,MATCH(`"Moment`",INDEX(rngUnitSettings,,1),0),2)"
     $Sheet.Cells.Item($HeaderRow, $StartColumn + 3).Formula = "=`"My, `"&INDEX(rngUnitSettings,MATCH(`"Moment`",INDEX(rngUnitSettings,,1),0),2)"
 
-    $loadRange = $Sheet.Range($Sheet.Cells.Item($HeaderRow, $StartColumn), $Sheet.Cells.Item($HeaderRow + 30, $StartColumn + 6))
+    for ($i = 7; $i -le 9; $i++) {
+        $unitKey = if ($i -eq 7) { "Moment" } else { "Force" }
+        $cell = $Sheet.Cells.Item($HeaderRow, $StartColumn + $i)
+        $cell.Formula = '="{0}, "&INDEX(rngUnitSettings,MATCH("{1}",INDEX(rngUnitSettings,,1),0),2)' -f $loadHeaders[$i], $unitKey
+        $hint = if ($i -eq 7) { "Положительный T вращает вокруг +Z по правилу правой руки." } else { "Положительное усилие направлено вдоль +" + $loadHeaders[$i].Substring(1).ToUpperInvariant() + "." }
+        $cell.AddComment($hint + " Точка задания усилий общая. Пусто означает 0.") | Out-Null
+    }
+
+    $loadRange = $Sheet.Range($Sheet.Cells.Item($HeaderRow, $StartColumn), $Sheet.Cells.Item($HeaderRow + 30, $StartColumn + 9))
+    $spatial = $loadRange.Cells.Item(2, 8).Resize(30, 3)
+    $spatial.NumberFormat = $loadRange.Cells.Item(2, 2).NumberFormat
+    $spatial.Validation.Delete()
+    $spatial.Validation.Add(2, 1, 1, '-1E+300', '1E+300')
+    $spatial.Validation.IgnoreBlank = $true
+    $spatial.Validation.ShowError = $true
+    $spatial.Validation.ErrorMessage = "Введите число или оставьте ячейку пустой."
     $loadRange.Borders.LineStyle = 1
     $loadRange.Borders.Weight = 2
     $loadRange.Borders.Color = 12632256
@@ -2599,7 +2614,7 @@ function Add-LoadCombinationsTable {
     $capacityLoadPathRange.Validation.InCellDropdown = $true
     $capacityLoadPathRange.Value2 = "Auto"
 
-    Set-WorkbookNameByBounds $Workbook "rngLoadCombinations" $Sheet $HeaderRow $StartColumn ($HeaderRow + 30) ($StartColumn + 6)
+    Set-WorkbookNameByBounds $Workbook "rngLoadCombinations" $Sheet $HeaderRow $StartColumn ($HeaderRow + 30) ($StartColumn + 9)
 }
 
 # Подключает выпадающий список профилей после создания rngCalculationProfiles.

@@ -217,6 +217,26 @@ Public Function InputMomentMyToInternal(ByVal value As Double) As Double
     InputMomentMyToInternal = value * MomentFactorToNmm(mInputMoment) * MySignFactor()
 End Function
 
+' Переводит крутящий момент из INPUT в Н*мм с положительным вращением вокруг +Z.
+Public Function InputTorqueToInternal(ByVal value As Double) As Double
+    InputTorqueToInternal = value * MomentFactorToNmm(mInputMoment)
+End Function
+
+' Переводит поперечную силу из INPUT в Н со знаком соответствующей оси.
+Public Function InputShearToInternal(ByVal value As Double) As Double
+    InputShearToInternal = value * ForceFactorToN(mInputForce)
+End Function
+
+' Переводит крутящий момент из Н*мм в единицы OUTPUT с сохранением направления.
+Public Function InternalTorqueToOutput(ByVal value As Double) As Double
+    InternalTorqueToOutput = value / MomentFactorToNmm(mOutputMoment)
+End Function
+
+' Переводит поперечную силу из Н в единицы OUTPUT со знаком её оси.
+Public Function InternalShearToOutput(ByVal value As Double) As Double
+    InternalShearToOutput = value / ForceFactorToN(mOutputForce)
+End Function
+
 ' Переводит пользовательскую настройку вида "момент на единицу длины" во
 ' внутренние Н*мм/мм. Знак момента здесь не применяется: это положительный
 ' инженерный порог, а не расчетное усилие.

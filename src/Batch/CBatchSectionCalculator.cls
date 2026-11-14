@@ -33,6 +33,9 @@ Private Type TCombinationInput
     N As Double ' Продольная сила во внутренних единицах, Н.
     Mx As Double ' Момент Mx во внутренних единицах, Н*мм.
     My As Double ' Момент My во внутренних единицах, Н*мм.
+    Torque As Double ' Крутящий момент в пользовательской точке, Н*мм.
+    Qx As Double ' Поперечная сила вдоль X, Н.
+    Qy As Double ' Поперечная сила вдоль Y, Н.
     ProfileId As String ' Имя профиля, задающего нужные проверки и материалы.
     LoadPath As String ' Способ изменения составляющих нагрузки при поиске предела.
     Comment As String ' Пользовательское пояснение сочетания.
@@ -495,9 +498,12 @@ End Sub
 Public Sub AddCombination(ByVal combinationID As String, ByVal nValue As Double, ByVal mxValue As Double, _
         ByVal myValue As Double, ByVal profileId As String, ByVal comment As String, _
         Optional ByVal loadPathText As String = vbNullString, Optional ByVal sourceDataOffset As Long = 0, _
-        Optional ByVal sourceReference As String = vbNullString, Optional ByVal profileReference As String = vbNullString)
+        Optional ByVal sourceReference As String = vbNullString, Optional ByVal profileReference As String = vbNullString, _
+        Optional ByVal torque As Double = 0#, Optional ByVal qx As Double = 0#, Optional ByVal qy As Double = 0#)
     AddCombinationInternal combinationID, nValue, mxValue, myValue, profileId, comment, True, vbNullString, loadPathText, sourceDataOffset, sourceReference
     mInputs(mCount).ProfileReference = profileReference
+    mInputs(mCount).Torque = torque: mInputs(mCount).Qx = qx: mInputs(mCount).Qy = qy
+    If HasSpatialLoads(mCount) Then NormalizeCombinationMoments mCount
 End Sub
 
 ' Сохраняет сочетание с ошибкой ввода для вывода причины в отчёте.
@@ -667,12 +673,13 @@ Private Sub NormalizeCombinationMoments(ByVal index As Long)
     If index < 1 Or index > mCount Then Exit Sub
     Dim loadState As CSectionLoadState
     Set loadState = New CSectionLoadState
-    If mSettingsValid And mInputs(index).InputValid Then
+    If mSettingsValid And mInputs(index).InputValid And Not HasSpatialLoads(index) Then
         loadState.Initialize mInputs(index).N, mInputs(index).Mx, mInputs(index).My, _
             mLoadReferenceX, mLoadReferenceY, mMomentZeroFilter, mConcreteDepthForMx, mConcreteDepthForMy
     Else
         loadState.Initialize mInputs(index).N, mInputs(index).Mx, mInputs(index).My, mLoadReferenceX, mLoadReferenceY
     End If
+    loadState.SetSpatialComponents mInputs(index).Torque, mInputs(index).Qx, mInputs(index).Qy
     Set mWorkingLoads(index) = loadState
     mWorkingPaths(index) = mInputs(index).LoadPath
 End Sub
@@ -835,6 +842,11 @@ Private Sub RunCombination(ByVal index As Long)
     If Not profile.ValidateForCalculation(profileError) Then
         ReportStep "Сочетание не рассчитано: " & profileError
         MarkInvalid index, profileError
+        Exit Sub
+    End If
+
+    If HasSpatialLoads(index) Then
+        MarkInvalid index, "Для ненулевых T, Qx или Qy требуется подключённая пространственная проверка профиля. " & mInputs(index).SourceReference
         Exit Sub
     End If
 
@@ -1006,6 +1018,7 @@ Private Sub ApplyStabilityDesignLoads(ByVal index As Long, ByVal stability As CS
         referenceX, referenceY, mLoadReferenceX, mLoadReferenceY, _
         mMomentZeroFilter, mConcreteDepthForMx, mConcreteDepthForMy
 
+    loadState.SetSpatialComponents mInputs(index).Torque, mInputs(index).Qx, mInputs(index).Qy
     Set mWorkingLoads(index) = loadState
     Dim finalDesignMx As Double
     Dim finalDesignMy As Double
@@ -1849,6 +1862,16 @@ End Property
 Public Property Get OriginalMy(ByVal index As Long) As Double
     OriginalMy = mInputs(index).My
 End Property
+
+' Определяет, требуется ли связанное решение для фактически заданных усилий.
+Public Function HasSpatialLoads(ByVal index As Long) As Boolean
+    HasSpatialLoads = (mInputs(index).Torque <> 0# Or mInputs(index).Qx <> 0# Or mInputs(index).Qy <> 0#)
+End Function
+
+' Возвращает три новые компоненты из исходной строки во внутренних единицах.
+Public Sub OriginalSpatialLoads(ByVal index As Long, ByRef torque As Double, ByRef qx As Double, ByRef qy As Double)
+    torque = mInputs(index).Torque: qx = mInputs(index).Qx: qy = mInputs(index).Qy
+End Sub
 
 ' Возвращает рабочий момент Mx относительно начала координат модели, Н*мм.
 Public Property Get Mx(ByVal index As Long) As Double

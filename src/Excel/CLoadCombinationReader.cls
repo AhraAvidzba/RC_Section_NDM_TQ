@@ -36,10 +36,14 @@ Public Sub LoadFromRange(ByVal source As Object, ByVal batch As CBatchSectionCal
     Dim data As Variant
     data = source.Value2
     RequireUniqueIDs data, source
+    Dim torqueColumn As Long, qxColumn As Long, qyColumn As Long
+    torqueColumn = SpatialLoadColumn(data, source, "T")
+    qxColumn = SpatialLoadColumn(data, source, "Qx")
+    qyColumn = SpatialLoadColumn(data, source, "Qy")
 
     Dim rowIndex As Long
     For rowIndex = 2 To UBound(data, 1) ' Пустой номер отключает строку, сохраняя введённые нагрузки и её исходное место.
-        If Not IsBlankCell(data(rowIndex, 1)) Then AddRow data, batch, rowIndex, units, source
+        If Not IsBlankCell(data(rowIndex, 1)) Then AddRow data, batch, rowIndex, units, source, torqueColumn, qxColumn, qyColumn
     Next rowIndex
 End Sub
 
@@ -93,7 +97,8 @@ End Sub
 ' Ошибки ввода не прерывают весь расчет: строка попадает в отчет как InvalidInput,
 ' остальные сочетания продолжают считаться.
 Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator, ByVal rowIndex As Long, _
-        ByVal units As CUnitSystem, ByVal source As Object)
+        ByVal units As CUnitSystem, ByVal source As Object, _
+        ByVal torqueColumn As Long, ByVal qxColumn As Long, ByVal qyColumn As Long)
     Dim combinationID As String
     Dim profileId As String
     Dim loadPathText As String
@@ -107,10 +112,14 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
     nValue = ReadOptionalLoadDouble(data(rowIndex, 2), CellLocation(source, rowIndex, 2, "N"), errorText, hasError)
     mxValue = ReadOptionalLoadDouble(data(rowIndex, 3), CellLocation(source, rowIndex, 3, "Mx"), errorText, hasError)
     myValue = ReadOptionalLoadDouble(data(rowIndex, 4), CellLocation(source, rowIndex, 4, "My"), errorText, hasError)
-    If Not hasError Then ' Точно нулевой LC не использует профиль, путь и комментарий; ненулевые малые нагрузки сохраняются.
+    Dim torque As Double, qx As Double, qy As Double
+    torque = ReadSpatialLoad(data, source, rowIndex, torqueColumn, "T", True, units, errorText, hasError)
+    qx = ReadSpatialLoad(data, source, rowIndex, qxColumn, "Qx", False, units, errorText, hasError)
+    qy = ReadSpatialLoad(data, source, rowIndex, qyColumn, "Qy", False, units, errorText, hasError)
+    If Not hasError Then ' Точно нулевой LC не использует профиль, путь и комментарий.
         ConvertLoadsToInternal units, nValue, mxValue, myValue, errorText, hasError, source, rowIndex
         If Not hasError Then
-            If nValue = 0# And mxValue = 0# And myValue = 0# Then Exit Sub
+            If nValue = 0# And mxValue = 0# And myValue = 0# And torque = 0# And qx = 0# And qy = 0# Then Exit Sub
         End If
     End If
     profileId = ReadCellText(data(rowIndex, 5), CellLocation(source, rowIndex, 5, "ProfileId"), errorText, hasError)
@@ -136,9 +145,42 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
         batch.AddInvalidCombination combinationID, profileId, comment, errorText, loadPathText, rowIndex - 1, RowLocation(source, rowIndex)
     Else
         batch.AddCombination combinationID, nValue, mxValue, myValue, profileId, comment, loadPathText, rowIndex - 1, _
-            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False)
+            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False), torque, qx, qy
     End If
 End Sub
+
+' Ищет заголовки пространственных компонент после семи колонок основной таблицы.
+' Отсутствующий столбец соответствует нулю, дубль делает схему неоднозначной.
+Private Function SpatialLoadColumn(ByRef data As Variant, ByVal source As Object, ByVal name As String) As Long
+    Dim column As Long
+    For column = 8 To UBound(data, 2)
+        If StrComp(ResultHeaderBase(SafeText(data(1, column))), name, vbTextCompare) = 0 Then
+            If SpatialLoadColumn <> 0 Then Err.Raise vbObjectError + 3958, "CLoadCombinationReader", _
+                "Повторный заголовок нагрузки " & CellLocation(source, 1, column, name & " (rngLoadCombinations)") & "."
+            SpatialLoadColumn = column
+        End If
+    Next column
+End Function
+
+' Читает одну пространственную компоненту и сохраняет адрес при отказе.
+' Знаки новых усилий соответствуют направлениям внутренних осей.
+Private Function ReadSpatialLoad(ByRef data As Variant, ByVal source As Object, ByVal row As Long, _
+        ByVal column As Long, ByVal name As String, ByVal moment As Boolean, ByVal units As CUnitSystem, _
+        ByRef errorText As String, ByRef hasError As Boolean) As Double
+    If column = 0 Then Exit Function
+    Dim value As Variant: value = data(row, column)
+    If IsBlankCell(value) Then Exit Function
+    Dim location As String: location = CellLocation(source, row, column, name)
+    Dim number As Double: number = ReadOptionalLoadDouble(value, location, errorText, hasError)
+    On Error GoTo ConversionFailed
+    If Not units Is Nothing Then
+        If moment Then number = units.InputTorqueToInternal(number) Else number = units.InputShearToInternal(number)
+    End If
+    ReadSpatialLoad = number
+    Exit Function
+ConversionFailed:
+    AppendError errorText, hasError, location & " не может быть переведено во внутренние единицы: числовой диапазон превышен"
+End Function
 
 ' Читает нагрузку, где пустая ячейка означает 0.
 ' Это позволяет задавать одноосный изгиб как N + Mx при пустом My.

@@ -9950,3 +9950,64 @@ Public Function RunFormationDisplayStateTests() As String
     TestFormationDisplayState stats
     RunFormationDisplayStateTests = stats.Report & "TOTAL_FORMATION_DISPLAY_STATE: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed) & vbCrLf
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает три новых колонки со знаками осей и проверяет защиту от
+' расчёта совместной нагрузки по одной плоской модели.
+Public Function RunTestCoupledLoadInput() As String
+    Dim stats As TUiTestStats, sheet As Object, previousAlerts As Boolean
+    previousAlerts = Application.DisplayAlerts
+    On Error GoTo Failed
+    Set sheet = ThisWorkbook.Worksheets.Add
+    sheet.Name = "__TestCoupledLoadInput"
+    Dim data(1 To 6, 1 To 10) As Variant, header As Variant, i As Long
+    header = Array("CombinationID", "N", "Mx", "My", "ProfileId", "LoadPath", "Comment", "T, tf*m", "Qx, tf", "Qy, tf")
+    For i = 1 To 10: data(1, i) = header(i - 1): Next i
+    data(2, 1) = "combined": data(2, 2) = 2#: data(2, 5) = "PR1"
+    data(2, 8) = -1.2: data(2, 9) = -2.5: data(2, 10) = 3#
+    data(3, 1) = "shear": data(3, 5) = "PR1": data(3, 10) = 0.5
+    data(4, 1) = "bad": data(4, 5) = "PR1": data(4, 8) = "x"
+    data(5, 1) = "zero": data(5, 5) = CVErr(2015)
+    data(6, 9) = CVErr(2015)
+    sheet.Range("B3").Resize(6, 10).Value2 = data
+    Dim units As New CUnitSystem, reader As New CLoadCombinationReader, batch As CBatchSectionCalculator
+    Dim settings As New CSystemSettingsReader
+    settings.LoadFromWorkbook ThisWorkbook
+    units.LoadFromSettings settings
+    Set batch = TestBuildUiBatch()
+    reader.LoadFromRange sheet.Range("B3").Resize(6, 10), batch, units
+    TestAssertTrue stats, "load6.count", batch.Count = 3
+    Dim torque As Double, qx As Double, qy As Double
+    batch.OriginalSpatialLoads 1, torque, qx, qy
+    TestAssertClose stats, "load6.t", torque, -1.2 * 9806650#, 0.0001
+    TestAssertClose stats, "load6.qx", qx, -2.5 * 9806.65, 0.0001
+    TestAssertClose stats, "load6.qy", qy, 3# * 9806.65, 0.0001
+    TestAssertClose stats, "load6.n", batch.OriginalN(1), units.InputForceToInternal(2#), 0.0001
+    batch.OriginalSpatialLoads 2, torque, qx, qy
+    TestAssertTrue stats, "load6.pureShear", batch.HasSpatialLoads(2) And torque = 0# And qx = 0# And qy > 0#
+    TestAssertTrue stats, "load6.invalidRow", Not batch.OriginalLoadsAvailable(3)
+    batch.Execute
+    TestAssertTrue stats, "load6.noUnsafePlanarAccess", batch.ResultAt(2).WorkflowMeta.InternalStatus = rsInvalidInput
+    TestAssertTrue stats, "load6.actualCell", InStr(batch.ResultAt(3).WorkflowMeta.ResultComment, sheet.Name & "!I6") > 0
+
+    Dim load As New CSectionLoadState, components() As Double
+    load.Initialize 100#, 70#, 50#, 32#, 41#
+    load.SetSpatialComponents 90#, 45#, 65#
+    load.LoadAboutPoint 2#, 1#, components
+    TestAssertClose stats, "load6.transfer.mx", components(2), 4070#, 0#
+    TestAssertClose stats, "load6.transfer.my", components(3), 3050#, 0#
+    TestAssertClose stats, "load6.transfer.t", components(4), 240#, 0#
+    TestAssertTrue stats, "load6.transfer.forces", components(1) = 100# And components(5) = 45# And components(6) = 65#
+    GoTo Cleanup
+Failed:
+    TestAssertTrue stats, "load6.runtime." & CStr(Err.Number) & "." & Err.Description, False
+Cleanup:
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    If Not sheet Is Nothing Then sheet.Delete
+    Application.DisplayAlerts = previousAlerts
+    On Error GoTo 0
+    TestAppendLine stats, "TOTAL_COUPLED_LOAD_INPUT: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunTestCoupledLoadInput = stats.Report
+End Function
