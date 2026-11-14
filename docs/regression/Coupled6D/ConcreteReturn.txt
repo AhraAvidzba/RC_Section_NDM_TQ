@@ -1,0 +1,60 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledConcreteReturn.xlsm
+SOURCE_SHA256: E7E033D3AB68BD194033450249C7A325C12486B8B834A3A6A7C757B89C7BFA3E
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_c5d82e7aa30847a9a3fbaac7db35ed34\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=15524; startTicks=639302874827814745
+===== modTestCoupledElasticState.RunTestCoupledConcreteReturn =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:11:29
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=15524; workingSet=144707584; privateBytes=95256576; cpu=6.21875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183304192; privateBytes=127348736; cpu=34.984375
+OK: elastic trial stays unchanged
+OK: return 1
+OK: yield consistency 1
+OK: backward Euler equations 1
+OK: return 2
+OK: yield consistency 2
+OK: backward Euler equations 2
+OK: return 3
+OK: yield consistency 3
+OK: backward Euler equations 3
+OK: pure shear analytical return actual=2.80491473560687 expected=2.80491473534864
+OK: return 4
+OK: yield consistency 4
+OK: backward Euler equations 4
+OK: hydrostatic analytical return actual=3.28358208955224 expected=3.28358208955224
+OK: return 5
+OK: yield consistency 5
+OK: backward Euler equations 5
+OK: hydrostatic tension without volumetric flow reports inability to return
+TOTAL_COUPLED_CONCRETE_RETURN: passed=19; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_c5d82e7aa30847a9a3fbaac7db35ed34\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:11:30
+===== modTestCoupledElasticState.RunTestCoupledConcreteTensor =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-15T00:11:31
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=15524; workingSet=147914752; privateBytes=98492416; cpu=8.09375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183304192; privateBytes=127348736; cpu=34.984375
+OK: isotropic normal stiffness actual=33333.3333333333 expected=33333.3333333333
+OK: isotropic Poisson stiffness actual=8333.33333333333 expected=8333.33333333333
+OK: engineering shear stiffness actual=12500 expected=12500
+OK: hydrostatic values exact
+OK: physical shear contribution to invariant actual=15.5884572681199 expected=15.5884572681199
+OK: pure shear has opposite principal stresses
+OK: rotated principal directions preserve spectrum
+OK: uniaxial compression at specified cohesion
+OK: uniaxial tension at specified cohesion
+OK: potential derivative 1
+OK: potential derivative 2
+OK: potential derivative 3
+OK: potential derivative 4
+OK: potential derivative 5
+OK: potential derivative 6
+TOTAL_COUPLED_CONCRETE_TENSOR: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_c5d82e7aa30847a9a3fbaac7db35ed34\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-15T00:11:31
+SOURCE_UNCHANGED: True

@@ -639,3 +639,72 @@ Public Function RunTestCoupledConcreteTensor() As String
 Failed:
     RunTestCoupledConcreteTensor = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Контролирует обратный Эйлер при фиксированных параметрах поверхности.
+' Чистый сдвиг и гидростатическая вершина имеют независимый явный ответ.
+Public Function RunTestCoupledConcreteReturn() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const E As Double = 30000#
+    Const NU As Double = 0.2
+    Const FC As Double = 30#
+    Const FT As Double = 3#
+    Const ALPHA As Double = 0.12
+    Const GAMMA As Double = 3#
+    Dim update As New CCoupledConcreteReturn
+    update.Initialize E, NU, ALPHA, GAMMA, 0.1
+    Dim elastic(1 To 6) As Double, corrected(1 To 6) As Double, increment(1 To 6) As Double
+    Dim tensor(1 To 6, 1 To 6) As Double, flow(1 To 6) As Double
+    Dim multiplier As Double, value As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim i As Long, j As Long, caseNo As Long, dilation As Double
+    Dim beta As Double: beta = FC / FT * (1# - ALPHA) - (1# + ALPHA)
+    Dim ok As Boolean
+    elastic(3) = 1#
+    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    TestRecord ok And corrected(3) = 1# And multiplier = 0# And increment(3) = 0#, _
+        "elastic trial stays unchanged", passed, failed, report
+    CoupledElasticTensor E, NU, tensor
+    For caseNo = 1 To 5
+        For i = 1 To 6: elastic(i) = 0#: Next i
+        dilation = 0.3
+        Select Case caseNo
+            Case 1: elastic(3) = -50#
+            Case 2: elastic(3) = 12#
+            Case 3: elastic(6) = 10#: dilation = 0#
+            Case 4: elastic(1) = 9#: elastic(2) = 9#: elastic(3) = 9#
+            Case 5: elastic(1) = -48#: elastic(2) = 5#: elastic(3) = -13#: elastic(4) = 8#: elastic(5) = -11#
+        End Select
+        ok = update.Correct(elastic, FC, FT, FT, dilation, corrected, increment, multiplier)
+        TestRecord ok And multiplier > 0#, "return " & CStr(caseNo), passed, failed, report
+        If ok Then
+            CoupledStressInvariants corrected, trace, q, high, mid, low
+            value = CoupledBarcelonaYield(trace, q, high, FC, FT, ALPHA, GAMMA)
+            TestRecord Abs(value) < 4E-9, "yield consistency " & CStr(caseNo), passed, failed, report
+            value = CoupledConcretePotential(corrected, trace, q, dilation, FT, 0.1, flow)
+            Dim residual As Double, maxBackward As Double, maxFlow As Double
+            maxBackward = 0#: maxFlow = 0#
+            For i = 1 To 6
+                residual = corrected(i) - elastic(i)
+                For j = 1 To 6: residual = residual + tensor(i, j) * increment(j): Next j
+                If Abs(residual) > maxBackward Then maxBackward = Abs(residual)
+                residual = Abs(increment(i) - multiplier * flow(i))
+                If residual > maxFlow Then maxFlow = residual
+            Next i
+            TestRecord maxBackward < 1E-10 And maxFlow < 1E-12, _
+                "backward Euler equations " & CStr(caseNo), passed, failed, report
+            If caseNo = 3 Then TestExpectNear corrected(6), FC * (1# - ALPHA) / (Sqr(3#) + beta), _
+                1E-9, "pure shear analytical return", passed, failed, report
+            If caseNo = 4 Then TestExpectNear corrected(1), FC * (1# - ALPHA) / (3# * ALPHA + beta), _
+                1E-9, "hydrostatic analytical return", passed, failed, report
+        End If
+    Next caseNo
+    For i = 1 To 3: elastic(i) = 9#: elastic(i + 3) = 0#: Next i
+    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    TestRecord Not ok, "hydrostatic tension without volumetric flow reports inability to return", passed, failed, report
+    RunTestCoupledConcreteReturn = report & "TOTAL_COUPLED_CONCRETE_RETURN: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConcreteReturn = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
