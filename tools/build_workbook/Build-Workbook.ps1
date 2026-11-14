@@ -1,0 +1,730 @@
+﻿# скрипт собирает рабочую книгу Excel из исходных VBA-модулей, настроек и шаблонной структуры листов.
+
+param(
+    [string]$OutputPath = "workbook/output/RC_Section_NDM.xlsm",
+    [string]$FormulaImageDirectory = "",
+    [string]$FormattedOutputPath = "",
+    [switch]$UseFormattedLayout
+)
+
+$ErrorActionPreference = "Stop"
+
+# Записывает Value2 в одну ячейку; по заданным параметрам включает полужирный шрифт, цвет текста и заливку. Возвращает COM-ячейку.
+function Set-Cell {
+    param(
+        [object]$Sheet,
+        [int]$Row,
+        [int]$Column,
+        [object]$Value,
+        [switch]$Bold,
+        [int]$Color = -1,
+        [int]$InteriorColor = -1
+    )
+
+    $cell = $Sheet.Cells.Item($Row, $Column)
+    $cell.Value2 = $Value
+    if ($Bold) { $cell.Font.Bold = $true }
+    if ($Color -ge 0) { $cell.Font.Color = $Color }
+    if ($InteriorColor -ge 0) { $cell.Interior.Color = $InteriorColor }
+    return $cell
+}
+
+# Обводит внешние и внутренние границы диапазона тонкими сплошными серыми линиями.
+function Set-Border {
+    param([object]$Range)
+
+    foreach ($idx in 7, 8, 9, 10, 11, 12) {
+        $Range.Borders.Item($idx).LineStyle = 1
+        $Range.Borders.Item($idx).Weight = 2
+        $Range.Borders.Item($idx).Color = 12632256
+    }
+}
+
+# Преобразует положительный номер столбца из системы с основанием 26 в буквенный адрес Excel: A, Z, AA.
+function ConvertTo-ExcelColumn {
+    param([int]$ColumnNumber)
+    $name = ""
+    while ($ColumnNumber -gt 0) {
+        $mod = ($ColumnNumber - 1) % 26
+        $name = [char](65 + $mod) + $name
+        $ColumnNumber = [math]::Floor(($ColumnNumber - $mod) / 26)
+    }
+    $name
+}
+
+# Создаёт или обновляет имя книги на абсолютную ссылку указанного листа; апострофы в имени листа экранируются.
+function Add-WorkbookName {
+    param(
+        [object]$Workbook,
+        [string]$Name,
+        [object]$Sheet,
+        [string]$Address
+    )
+
+    $sheetName = [string]$Sheet.Name
+    $sheetName = $sheetName.Replace("'", "''")
+    $address = "='" + $sheetName + "'!" + $Address
+    try { $Workbook.Names.Item($Name).RefersTo = $address }
+    catch { $Workbook.Names.Add($Name, $address) | Out-Null }
+}
+
+# Импортирует исходные VBA-модули в книгу, сохраняя воспроизводимость сборки.
+function Import-VbaSourceTree {
+    param(
+        [object]$Workbook,
+        [string]$RootPath
+    )
+
+    $sourceDirs = @(
+        (Join-Path $RootPath "src/Common"),
+        (Join-Path $RootPath "src/Interfaces"),
+        (Join-Path $RootPath "src/Geometry"),
+        (Join-Path $RootPath "src/Section"),
+        (Join-Path $RootPath "src/Materials"),
+        (Join-Path $RootPath "src/Solver"),
+        (Join-Path $RootPath "src/Crack"),
+        (Join-Path $RootPath "src/Stability"),
+        (Join-Path $RootPath "src/Batch"),
+        (Join-Path $RootPath "src/Excel"),
+        (Join-Path $RootPath "tests")
+    )
+
+    foreach ($dir in $sourceDirs) {
+        if (Test-Path -LiteralPath $dir) {
+            Get-ChildItem -LiteralPath $dir -Recurse -File |
+                Where-Object { $_.Extension -in @(".bas", ".cls", ".frm") } |
+                Sort-Object FullName |
+                ForEach-Object {
+                    $sourcePath = $_.FullName
+                    try {
+                        Add-VbaSourceFile $Workbook $sourcePath
+                    }
+                    catch {
+                        throw "Failed to import VBA source '$sourcePath': $($_.Exception.Message)"
+                    }
+                }
+        }
+    }
+}
+
+# Добавляет обработчики событий книги, которые нельзя импортировать как обычный стандартный модуль.
+function Add-WorkbookEventHandlers {
+    param([object]$Workbook)
+
+    $code = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'WorkbookHelpEvents.vba'),[Text.Encoding]::UTF8)
+
+    $componentName = [string]$Workbook.CodeName
+    if ([string]::IsNullOrWhiteSpace($componentName)) {
+        $componentName = "ThisWorkbook"
+    }
+    $component = $Workbook.VBProject.VBComponents.Item($componentName)
+    if ($component.CodeModule.CountOfLines -gt 0) {
+        $component.CodeModule.DeleteLines(1, $component.CodeModule.CountOfLines)
+    }
+    $component.CodeModule.AddFromString($code)
+    foreach ($document in $Workbook.VBProject.VBComponents) {
+        if ($document.Type -eq 100 -and $document.Name -ne $componentName -and $document.CodeModule.CountOfLines -eq 0) {
+            $document.CodeModule.AddFromString("Option Explicit`r`n`r`n' Лист книги: отображение пользовательских данных и результатов.")
+        }
+    }
+}
+
+# Импортирует один VBA-файл в книгу. Формы .frm Excel принимает через Import,
+# а классы и стандартные модули сначала создаются с правильным типом компонента
+# и затем заполняются текстом из исходников.
+function Add-VbaSourceFile {
+    param(
+        [object]$Workbook,
+        [string]$Path
+    )
+
+    $extension = [System.IO.Path]::GetExtension($Path).ToLowerInvariant()
+    if ($extension -eq ".frm") {
+        $Workbook.VBProject.VBComponents.Import($Path) | Out-Null
+        return
+    }
+
+    $source = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    $lines = $source -split "`r?`n"
+    $componentName = $null
+    foreach ($line in $lines) {
+        if ($line -match '^\uFEFF?Attribute\s+VB_Name\s*=\s*"([^"]+)"') {
+            $componentName = $Matches[1]
+            break
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($componentName)) {
+        throw "VBA source has no Attribute VB_Name: $Path"
+    }
+
+    $componentType = 1
+    if ($extension -eq ".cls") {
+        $componentType = 2
+    }
+
+    $component = $Workbook.VBProject.VBComponents.Add($componentType)
+    $component.Name = $componentName
+
+    $bodyLines = New-Object System.Collections.Generic.List[string]
+    $insideVbaHeaderBlock = $false
+    foreach ($line in $lines) {
+        if ($line -match '^\uFEFF?VERSION\s+') { continue }
+        if ($line -match '^\uFEFF?BEGIN\s*$') {
+            $insideVbaHeaderBlock = $true
+            continue
+        }
+        if ($insideVbaHeaderBlock) {
+            if ($line -match '^\uFEFF?END\s*$') {
+                $insideVbaHeaderBlock = $false
+            }
+            continue
+        }
+        if ($line -match '^\uFEFF?Attribute\s+VB_') { continue }
+        $bodyLines.Add($line)
+    }
+
+    $body = ($bodyLines -join "`r`n").Trim()
+    if ($body.Length -gt 0) {
+        $component.CodeModule.AddFromString($body)
+    }
+}
+
+# Объединяет первые две строки блока шириной 18 столбцов и оформляет его крупный центрированный заголовок.
+function Add-BlockHeader {
+    param(
+        [object]$Sheet,
+        [int]$StartColumn,
+        [string]$Title
+    )
+
+    $endColumn = $StartColumn + 17
+    $range = $Sheet.Range($Sheet.Cells.Item(1, $StartColumn), $Sheet.Cells.Item(2, $endColumn))
+    $range.Merge() | Out-Null
+    $range.Value2 = $Title
+    $range.Font.Bold = $true
+    $range.Font.Size = 16
+    $range.Font.Color = 16777215
+    $range.Interior.Color = 5383702
+    $range.HorizontalAlignment = -4108
+    $range.VerticalAlignment = -4108
+}
+
+# Объединяет заданные столбцы одной строки и оформляет заголовок раздела белым полужирным текстом на серой заливке.
+function Add-SectionTitle {
+    param(
+        [object]$Sheet,
+        [int]$Row,
+        [int]$StartColumn,
+        [int]$EndColumn,
+        [string]$Title
+    )
+
+    $range = $Sheet.Range($Sheet.Cells.Item($Row, $StartColumn), $Sheet.Cells.Item($Row, $EndColumn))
+    $range.Merge() | Out-Null
+    $range.Value2 = $Title
+    $range.Font.Bold = $true
+    $range.Font.Color = 16777215
+    $range.Interior.Color = 8355711
+    $range.HorizontalAlignment = -4131
+}
+
+# Выводит четыре поля каждой записи с шагом четыре столбца, обводит таблицу и выделяет первую группу полужирным.
+function Add-KeyValueRows {
+    param(
+        [object]$Sheet,
+        [int]$StartRow,
+        [int]$StartColumn,
+        [array]$Rows
+    )
+
+    $row = $StartRow
+    foreach ($item in $Rows) {
+        $Sheet.Cells.Item($row, $StartColumn).Value2 = $item[0]
+        $Sheet.Cells.Item($row, $StartColumn + 4).Value2 = $item[1]
+        $Sheet.Cells.Item($row, $StartColumn + 8).Value2 = $item[2]
+        $Sheet.Cells.Item($row, $StartColumn + 12).Value2 = $item[3]
+        $row++
+    }
+
+    $range = $Sheet.Range($Sheet.Cells.Item($StartRow, $StartColumn), $Sheet.Cells.Item($row - 1, $StartColumn + 16))
+    Set-Border $range
+    $Sheet.Range($Sheet.Cells.Item($StartRow, $StartColumn), $Sheet.Cells.Item($row - 1, $StartColumn + 3)).Font.Bold = $true
+}
+
+# Заменяет проверку данных одной ячейки списком допустимых значений, переданным вызывающим кодом.
+function Add-InputValidationList {
+    param(
+        [object]$Cell,
+        [string]$List
+    )
+
+    $Cell.Validation.Delete()
+    $Cell.Validation.Add(3, 1, 1, $List)
+}
+
+# Создаёт таблицу сочетаний с заголовками единиц и независимыми списками профилей и LoadPath; вспомогательные столбцы скрывает.
+function Add-MainInputBlock {
+    param([object]$Sheet)
+
+    Add-BlockHeader $Sheet 1 "Сочетания нагрузок"
+
+    Add-SectionTitle $Sheet 38 1 18 "Сочетания нагрузок"
+    $loadHeaders = @("CombinationID", "N", "Mx", "My", "ProfileId", "LoadPath", "Comment")
+    for ($i = 0; $i -lt $loadHeaders.Count; $i++) {
+        Set-Cell $Sheet 40 ($i + 1) $loadHeaders[$i] -Bold -InteriorColor 14277081 | Out-Null
+    }
+    $Sheet.Cells.Item(40, 2).Formula = "=`"N, `"&INDEX(rngUnitSettings,MATCH(`"Force`",INDEX(rngUnitSettings,,1),0),2)"
+    $Sheet.Cells.Item(40, 3).Formula = "=`"Mx, `"&INDEX(rngUnitSettings,MATCH(`"Moment`",INDEX(rngUnitSettings,,1),0),2)"
+    $Sheet.Cells.Item(40, 4).Formula = "=`"My, `"&INDEX(rngUnitSettings,MATCH(`"Moment`",INDEX(rngUnitSettings,,1),0),2)"
+    $loadRange = $Sheet.Range($Sheet.Cells.Item(40, 1), $Sheet.Cells.Item(70, 7))
+    Set-Border $loadRange
+
+    $profileListColumn = 52
+    $capacityLoadPathListColumn = 53
+    $profileOptions = @("PR1", "PR2", "PR3", "PR4")
+    for ($i = 0; $i -lt $profileOptions.Count; $i++) {
+        $Sheet.Cells.Item($i + 1, $profileListColumn).Value2 = $profileOptions[$i]
+    }
+    $profileListAddress = '=$AZ$1:$AZ$' + $profileOptions.Count
+    $profileRange = $Sheet.Range($Sheet.Cells.Item(41, 5), $Sheet.Cells.Item(70, 5))
+    $profileRange.Validation.Delete()
+    $profileRange.Validation.Add(3, 1, 1, $profileListAddress)
+    $profileRange.Validation.IgnoreBlank = $false
+    $profileRange.Validation.InCellDropdown = $true
+
+    $lambda = [char]0x03BB
+    $capacityLoadPathOptions = @("Auto", "$lambda*Mx", "$lambda*My", "$lambda*Mxy", "$lambda*N", "$lambda*NMxy")
+    for ($i = 0; $i -lt $capacityLoadPathOptions.Count; $i++) {
+        $Sheet.Cells.Item($i + 1, $capacityLoadPathListColumn).Value2 = $capacityLoadPathOptions[$i]
+    }
+    $capacityLoadPathListAddress = '=$BA$1:$BA$' + $capacityLoadPathOptions.Count
+    $capacityLoadPathRange = $Sheet.Range($Sheet.Cells.Item(41, 6), $Sheet.Cells.Item(70, 6))
+    $capacityLoadPathRange.Validation.Delete()
+    $capacityLoadPathRange.Validation.Add(3, 1, 1, $capacityLoadPathListAddress)
+    $capacityLoadPathRange.Validation.IgnoreBlank = $true
+    $capacityLoadPathRange.Validation.InCellDropdown = $true
+    $capacityLoadPathRange.Value2 = "Auto"
+    $Sheet.Columns.Item($profileListColumn).Hidden = $true
+    $Sheet.Columns.Item($capacityLoadPathListColumn).Hidden = $true
+}
+
+# Центрирует подпись внутри Shape-кнопки. Используем TextFrame для
+# совместимости с Excel VBA/COM и, если доступно, TextFrame2 для более
+# надежного вертикального якоря в новых версиях Office.
+function Center-ShapeButtonText {
+    param([object]$Button)
+
+    $Button.TextFrame.HorizontalAlignment = -4108
+    $Button.TextFrame.VerticalAlignment = -4108
+    $Button.TextFrame.MarginLeft = 0
+    $Button.TextFrame.MarginRight = 0
+    $Button.TextFrame.MarginTop = 0
+    $Button.TextFrame.MarginBottom = 0
+    try {
+        $Button.TextFrame2.TextRange.ParagraphFormat.Alignment = 2
+        $Button.TextFrame2.VerticalAnchor = 3
+        $Button.TextFrame2.MarginLeft = 0
+        $Button.TextFrame2.MarginRight = 0
+        $Button.TextFrame2.MarginTop = 0
+        $Button.TextFrame2.MarginBottom = 0
+    } catch {
+        # При недоступном TextFrame2 сохраняется центрирование через основной TextFrame.
+    }
+}
+
+# Создаёт пять кнопок Config с привязками к формированию, расчёту, обновлению схемы, экспорту и очистке подписей AutoCAD.
+function Add-CalculationButtons {
+    param([object]$Sheet)
+
+    $left = $Sheet.Cells.Item(4, 38).Left
+    $top = $Sheet.Cells.Item(4, 38).Top
+    $buttonWidth = 235
+    $buttonHeight = 32
+    $buttonStep = 40
+
+    $runButton = $Sheet.Shapes.AddShape(1, $left, $top + $buttonStep, $buttonWidth, $buttonHeight)
+    $runButton.Name = "btnRunSectionCalculation"
+    $runButton.TextFrame.Characters().Text = "Выполнить расчет"
+    $runButton.OnAction = "RunSectionCalculation"
+    $runButton.Fill.ForeColor.RGB = 5383702
+    $runButton.Line.ForeColor.RGB = 5383702
+    $runButton.TextFrame.Characters().Font.Color = 16777215
+    $runButton.TextFrame.Characters().Font.Bold = $true
+    $runButton.TextFrame.Characters().Font.Size = 9
+    Center-ShapeButtonText $runButton
+
+    $importButton = $Sheet.Shapes.AddShape(1, $left, $top, $buttonWidth, $buttonHeight)
+    $importButton.Name = "btnImportGeometryFromAutoCAD"
+    $importButton.TextFrame.Characters().Text = "Сформировать сечение"
+    $importButton.OnAction = "FormSection"
+    $importButton.Fill.ForeColor.RGB = 10053171
+    $importButton.Line.ForeColor.RGB = 10053171
+    $importButton.TextFrame.Characters().Font.Color = 16777215
+    $importButton.TextFrame.Characters().Font.Bold = $true
+    $importButton.TextFrame.Characters().Font.Size = 9
+    Center-ShapeButtonText $importButton
+
+    $clearButton = $Sheet.Shapes.AddShape(1, $left, $top + 4 * $buttonStep, $buttonWidth, $buttonHeight)
+    $clearButton.Name = "btnClearAutoCADDrawing"
+    $clearButton.TextFrame.Characters().Text = "Очистить подписи в AutoCAD"
+    $clearButton.OnAction = "ClearAutoCADDrawing"
+    $clearButton.Fill.ForeColor.RGB = 8355711
+    $clearButton.Line.ForeColor.RGB = 8355711
+    $clearButton.TextFrame.Characters().Font.Color = 16777215
+    $clearButton.TextFrame.Characters().Font.Bold = $true
+    $clearButton.TextFrame.Characters().Font.Size = 9
+    Center-ShapeButtonText $clearButton
+
+    $acadButton = $Sheet.Shapes.AddShape(1, $left, $top + 3 * $buttonStep, $buttonWidth, $buttonHeight)
+    $acadButton.Name = "btnExportStressToAutoCAD"
+    $acadButton.TextFrame.Characters().Text = "Экспорт в AutoCAD"
+    $acadButton.OnAction = "ExportSectionStressToAutoCAD"
+    $acadButton.Fill.ForeColor.RGB = 10053171
+    $acadButton.Line.ForeColor.RGB = 10053171
+    $acadButton.TextFrame.Characters().Font.Color = 16777215
+    $acadButton.TextFrame.Characters().Font.Bold = $true
+    $acadButton.TextFrame.Characters().Font.Size = 9
+    Center-ShapeButtonText $acadButton
+
+    $plotButton = $Sheet.Shapes.AddShape(1, $left, $top + 2 * $buttonStep, $buttonWidth, $buttonHeight)
+    $plotButton.Name = "btnUpdateSectionPlot"
+    $plotButton.TextFrame.Characters().Text = "Обновить схему и результаты"
+    $plotButton.OnAction = "UpdateSectionPlot"
+    $plotButton.Fill.ForeColor.RGB = 5287936
+    $plotButton.Line.ForeColor.RGB = 5287936
+    $plotButton.TextFrame.Characters().Font.Color = 16777215
+    $plotButton.TextFrame.Characters().Font.Bold = $true
+    $plotButton.TextFrame.Characters().Font.Size = 9
+    Center-ShapeButtonText $plotButton
+}
+
+$root = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "../..")
+. (Join-Path $PSScriptRoot "SettingsCatalog.ps1")
+. (Join-Path $PSScriptRoot "SectionIllustrations.ps1")
+. (Join-Path $PSScriptRoot "IndexedResultsTable.ps1")
+$script:WorkbookLayout = Read-WorkbookLayout
+. (Join-Path $PSScriptRoot "SectionRecipeGuide.ps1")
+if (-not [string]::IsNullOrWhiteSpace($FormulaImageDirectory)) {
+    $script:FormulaImageDir = [IO.Path]::GetFullPath((Join-Path $root $FormulaImageDirectory))
+    $workspace = [IO.Path]::GetFullPath([string]$root) + [IO.Path]::DirectorySeparatorChar
+    if (-not ($script:FormulaImageDir + [IO.Path]::DirectorySeparatorChar).StartsWith($workspace, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Formula image output must stay inside the workspace.'
+    }
+}
+$fullOutputPath = [IO.Path]::GetFullPath((Join-Path $root $OutputPath)) # Excel получает короткий абсолютный путь без сегментов «..».
+$outputDir = Split-Path -Parent $fullOutputPath
+New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+
+# Штатная сборка выпускает одну оформленную книгу. Для проверок можно запросить обычную книгу или оба варианта.
+$defaultOutputPath = [IO.Path]::GetFullPath((Join-Path $root 'workbook/output/RC_Section_NDM.xlsm'))
+if ($UseFormattedLayout -and $FormattedOutputPath) {
+    throw 'Для одной оформленной книги укажите -UseFormattedLayout без -FormattedOutputPath.'
+}
+$singleFormattedBook = $UseFormattedLayout -or (-not $FormattedOutputPath -and $fullOutputPath -eq $defaultOutputPath)
+$formattedPath = $null
+$presentationPython = $null
+if ($singleFormattedBook) {
+    $formattedPath = $fullOutputPath
+}
+elseif ($FormattedOutputPath) {
+    $formattedPath = [IO.Path]::GetFullPath((Join-Path $root $FormattedOutputPath))
+}
+if ($formattedPath) {
+    $workspacePrefix = [IO.Path]::GetFullPath([string]$root) + [IO.Path]::DirectorySeparatorChar
+    if ((-not $singleFormattedBook -and $formattedPath -eq $fullOutputPath) -or [IO.Path]::GetExtension($formattedPath) -ne '.xlsm' -or
+        -not $formattedPath.StartsWith($workspacePrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Для оформленной книги укажите путь .xlsm внутри проекта. При выпуске двух книг пути должны различаться.'
+    }
+    $presentationTemplate = Join-Path $PSScriptRoot 'CalculationPresentation.zip'
+    if (-not (Test-Path -LiteralPath $presentationTemplate -PathType Leaf)) {
+        throw 'Не найден шаблон листа «Расчет» CalculationPresentation.zip.'
+    }
+    $bundledPython = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+    if (Test-Path -LiteralPath $bundledPython -PathType Leaf) {
+        $presentationPython = $bundledPython
+    }
+    else {
+        $pythonCommand = Get-Command python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($pythonCommand) { $presentationPython = $pythonCommand.Source }
+    }
+    if (-not $presentationPython) { throw 'Для оформленной сборки требуется Python с пакетом lxml.' }
+    & $presentationPython -c 'from lxml import etree'
+    if ($LASTEXITCODE -ne 0) { throw 'Python для оформленной сборки не смог загрузить lxml.' }
+}
+
+# HWND связывается с PID до любых изменений Excel: COM не должен вернуть ранее открытый пользовательский процесс.
+if (-not ('NDMWorkbookBuildWindow' -as [type])) {
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public static class NDMWorkbookBuildWindow {
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+}
+"@
+}
+
+# Подтверждает ту же пару PID/время старта перед сохранением и закрытием собственного приложения.
+function Test-BuildExcelIdentity {
+    param([object]$Application, [int]$ExpectedProcessId, [long]$ExpectedStartTicks)
+    if ($null -eq $Application -or $ExpectedProcessId -le 0) { return $false }
+    try {
+        [uint32]$currentProcessId = 0
+        [void][NDMWorkbookBuildWindow]::GetWindowThreadProcessId([IntPtr]$Application.Hwnd, [ref]$currentProcessId)
+        $currentProcess = Get-Process -Id $currentProcessId -ErrorAction Stop
+        return ([int]$currentProcessId -eq $ExpectedProcessId -and
+            $currentProcess.StartTime.ToUniversalTime().Ticks -eq $ExpectedStartTicks)
+    }
+    catch { return $false }
+}
+
+$excel = $null
+$workbook = $null
+$ownedExcelProcessId = 0
+[long]$ownedExcelStartTicks = 0
+$nativeOutputPath = $fullOutputPath
+$nativeSaved = $false
+$stagingDirectory = $null
+
+# Удаляет только промежуточную книгу и её отдельный пустой каталог.
+function Remove-StagedBuild {
+    if ($stagingDirectory -and [IO.Directory]::Exists($stagingDirectory)) {
+        [IO.File]::Delete($nativeOutputPath)
+        [IO.Directory]::Delete($stagingDirectory)
+    }
+}
+
+try {
+    $preexistingExcelProcessIds = @([Diagnostics.Process]::GetProcessesByName('EXCEL') | ForEach-Object { $_.Id }) # Ошибка инвентаризации не подавляется: без полного снимка владение новым COM-процессом не доказано.
+    $excel = New-Object -ComObject Excel.Application
+    [uint32]$createdProcessId = 0
+    [void][NDMWorkbookBuildWindow]::GetWindowThreadProcessId([IntPtr]$excel.Hwnd, [ref]$createdProcessId)
+    if ($createdProcessId -le 0 -or $preexistingExcelProcessIds -contains [int]$createdProcessId) {
+        throw 'CreateObject did not provide a new Excel process; existing application was not changed or closed.'
+    }
+    $createdProcess = Get-Process -Id $createdProcessId -ErrorAction Stop
+    $ownedExcelProcessId = [int]$createdProcessId
+    $ownedExcelStartTicks = $createdProcess.StartTime.ToUniversalTime().Ticks
+    # Записываем точную собственную идентичность до COM-операций, которые могут ожидать ответа Excel.
+    [ordered]@{Status='BUILDING';PID=$ownedExcelProcessId;StartTicksUTC=[string]$ownedExcelStartTicks;OutputPath=$fullOutputPath;StartedUTC=[DateTimeOffset]::UtcNow.ToString('o')} |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputDir 'BuildOwnership.json') -Encoding UTF8
+    if (-not (Test-BuildExcelIdentity $excel $ownedExcelProcessId $ownedExcelStartTicks)) {
+        throw 'New Excel process identity could not be verified before workbook creation.'
+    }
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false # Обработчики готовой книги не вызываются во время создания списков и объектов.
+
+    $workbook = $excel.Workbooks.Add()
+
+    while ($workbook.Worksheets.Count -lt 4) {
+        $workbook.Worksheets.Add() | Out-Null
+    }
+    while ($workbook.Worksheets.Count -gt 4) {
+        $workbook.Worksheets.Item($workbook.Worksheets.Count).Delete()
+    }
+
+    $system = $workbook.Worksheets.Item(1)
+    $instructions = $workbook.Worksheets.Item(2)
+    $calc = $workbook.Worksheets.Item(3)
+    $results = $workbook.Worksheets.Item(4)
+    $system.Name = "Config"
+    $instructions.Name = "Справка"
+    $calc.Name = "Расчет"
+    $results.Name = "Results"
+
+    for ($col = 1; $col -le 36; $col++) {
+        $calc.Columns.Item($col).ColumnWidth = 3.7
+    }
+    for ($row = 1; $row -le 50; $row++) {
+        $calc.Rows.Item($row).RowHeight = 14
+    }
+    $calc.Rows.Item(1).RowHeight = 24
+    $calc.Rows.Item(2).RowHeight = 24
+    $calc.Range("A1:AJ60").Font.Name = "Arial"
+    $calc.Range("A1:AJ60").Font.Size = 9
+    $calc.Range("A1:AJ60").VerticalAlignment = -4108
+    $results.Rows.RowHeight = 15
+
+    $systemRanges = Add-SystemSettings $system
+    Add-SettingsInstructions $workbook $system $instructions
+    # Руководство по рецептам добавляется после остальных разделов и формульных изображений справки.
+    Update-SectionRecipeGuide $workbook ([string]$root) -Install | Out-Null
+    # Hyperlink-стиль Excel может сбросить рамку ячейки Подробнее.
+    # Финальную обводку делаем после добавления всех ссылок Config.
+    Apply-ConfigNamedRangeBorders $workbook
+    $system.Range("A1:U80").Font.Name = "Arial"
+    $system.Range("A1:U80").Font.Size = 9
+    # Размеры столбцов Config уже назначены Add-SystemSettings; повторно их не меняем.
+    $results.Range("A1:AE1").Font.Bold = $true
+    # Заливка относится только к построенному снимку, не ко всей строке листа.
+    $results.Cells.Item(154, 1).Value2 = "Расчетный снимок Results: элементы, геометрия, свойства сечения, диаграммы материалов и аннотации"
+    $results.Cells.Item(154, 1).Font.Name = "Arial"
+    $results.Cells.Item(154, 1).Font.Size = 12
+    $results.Cells.Item(154, 1).Font.Bold = $true
+    $results.Cells.Item(154, 1).Font.Color = 255
+    $results.Cells.Item(154, 1).HorizontalAlignment = -4131
+    $results.Cells.Item(154, 1).VerticalAlignment = -4108
+    $results.Range("A156:I156").Font.Bold = $true
+    $results.Range("L156:Z156").Font.Bold = $true
+    $results.Range("AC156:AS156").Font.Bold = $true
+    $results.Range("AV156:BA156").Font.Bold = $true
+    $results.Range("BD156:BN156").Font.Bold = $true
+    $results.Range("BQ156:CL156").Font.Bold = $true
+    # Явная ширина используемых колонок не пересчитывается Excel при смене
+    # шрифта ячеек, в отличие от общей default-ширины листа. Это только сборка.
+    $results.Range("A:CO").ColumnWidth = 10
+    $results.Columns.Item(1).ColumnWidth = 15
+    $results.Columns.Item(2).ColumnWidth = 18
+    $results.Columns.Item(3).ColumnWidth = 21
+
+    Add-WorkbookName $workbook "rngBatchSummary" $results '$A$1'
+    Add-WorkbookName $workbook "rngStrengthSummaryAnchor" $results '$A$49'
+    Add-WorkbookName $workbook "rngCrackSummaryAnchor" $results '$A$85'
+    Add-WorkbookName $workbook "rngStabilitySummaryAnchor" $results '$A$122'
+    Add-WorkbookName $workbook "rngNDMElementResults" $results '$BG$156'
+    Add-WorkbookName $workbook "rngNDMSectionGeometry" $results '$A$156'
+    Add-WorkbookName $workbook "rngNDMSectionContours" $results '$AN$156'
+    Add-WorkbookName $workbook "rngNDMSectionProperties" $results '$S$156'
+    Add-WorkbookName $workbook "rngNDMMaterialDiagrams" $results '$AA$156'
+    Add-WorkbookName $workbook "rngNDMSectionAnnotations" $results '$CL$156'
+    Add-WorkbookName $workbook "rngNDMElementGeometry" $results '$BR$156'
+    Add-IndexedResultsTable $workbook $script:WorkbookLayout
+    $contourHeaders = @('RunID', 'LoopID', 'SegmentID', 'Sequence', 'LoopRole', 'SegmentType', 'StartX', 'StartY', 'EndX', 'EndY', 'CenterX', 'CenterY', 'Radius', 'SweepAngle, rad', 'SourceID', 'Comment', 'LengthUnit (SectionXY)')
+    # Постоянные подписи создаются один раз при сборке шаблона.
+    # Поэлементная запись обходит ограничение COM-адаптера PowerShell для этой шапки.
+    for ($i = 0; $i -lt $contourHeaders.Count; $i++) {
+        $results.Cells.Item(156, 40 + $i).Value2 = [string]$contourHeaders[$i]
+    }
+    # Фактические границы элементов отделены от общих контуров сечения; ElementID связывает их с основной геометрией.
+    $elementGeometryHeaders = $contourHeaders + @('ElementID')
+    for ($i = 0; $i -lt $elementGeometryHeaders.Count; $i++) {
+        $results.Cells.Item(156, 70 + $i).Value2 = [string]$elementGeometryHeaders[$i]
+    }
+    $results.Range('AN155:BD155').Merge()
+    $results.Cells.Item(155, 40).Value2 = 'Достоверные контуры и отверстия сечения (координаты и радиусы — в LengthUnit)'
+    $results.Range('AN155:BD156').Font.Bold = $true
+    $results.Range('AN155:BD156').Font.Name = 'Arial'
+    $results.Range('AN155:BD156').Font.Size = 9
+    Set-Border $results.Range('AN156:BD156')
+    $results.Range('BR155:CI155').Merge()
+    $results.Cells.Item(155, 70).Value2 = 'Фактические границы бетонных элементов (координаты и радиусы — в LengthUnit)'
+    $results.Range('BR155:CI156').Font.Bold = $true
+    $results.Range('BR155:CI156').Font.Name = 'Arial'
+    $results.Range('BR155:CI156').Font.Size = 9
+    Set-Border $results.Range('BR156:CI156')
+
+    $calc.PageSetup.PaperSize = 9
+    $calc.PageSetup.Orientation = 1
+    $calc.PageSetup.Zoom = 80
+    $calc.PageSetup.PrintArea = '$A$1:$AJ$60'
+    $calc.PageSetup.LeftMargin = $excel.CentimetersToPoints(0.7)
+    $calc.PageSetup.RightMargin = $excel.CentimetersToPoints(0.7)
+    $calc.PageSetup.TopMargin = $excel.CentimetersToPoints(0.8)
+    $calc.PageSetup.BottomMargin = $excel.CentimetersToPoints(0.8)
+    $calc.PageSetup.CenterHorizontally = $true
+
+    $calc.ResetAllPageBreaks()
+    $calc.VPageBreaks.Add($calc.Cells.Item(1, 19)) | Out-Null
+    $calc.PageSetup.Zoom = 80
+    Add-CalculationButtons $calc
+
+    $system.PageSetup.PrintArea = ""
+
+    Import-VbaSourceTree $workbook $root
+    Add-WorkbookEventHandlers $workbook
+    # Начальная структура нового шаблона создаётся сборщиком, а не рабочим VBA.
+    $excel.Run("'" + $workbook.Name + "'!modSectionRecipeSetup.UpdateSectionRecipeTypes")
+
+    Add-SectionIllustrationPictures $workbook $script:WorkbookLayout
+    Initialize-SectionIllustrationSelectorName $workbook $script:WorkbookLayout
+    Apply-WorkbookLayout $workbook $script:WorkbookLayout
+    Set-ResultsSnapshotTitleBand $workbook
+    Set-SectionIllustrationSelector $workbook
+    $calc.Activate() # Начальный выбор и обычная справочная картинка сохраняются на целевом листе.
+    $excel.Run("'" + $workbook.Name + "'!modSectionIllustrations.SwitchSectionPicture")
+    Fit-SettingsInstructionRows $instructions
+    Set-HelpSectionOrderAndOutline $workbook -Expanded | Out-Null
+    if (-not (Test-BuildExcelIdentity $excel $ownedExcelProcessId $ownedExcelStartTicks)) {
+        throw 'Excel process identity changed before saving the new workbook.'
+    }
+    $excel.Calculation = -4105 # xlCalculationAutomatic: новый шаблон не должен сохранять случайный Manual служебного экземпляра; режим пользовательского Excel здесь не меняется.
+    # Явная компиляция проверяет также методы, которые не требовались для построения шаблона.
+    $excel.VBE.ActiveVBProject = $workbook.VBProject
+    $compileCommand = $excel.VBE.CommandBars.FindControl(1, 578)
+    if ($null -eq $compileCommand) { throw 'Недоступна команда компиляции проекта VBA.' }
+    if ($compileCommand.Enabled) { $compileCommand.Execute() }
+    if ($compileCommand.Enabled) { throw 'Проект VBA не скомпилирован; новая книга не сохранена.' }
+    if ($singleFormattedBook) {
+        # Итоговый файл заменяется только после успешного наложения оформления.
+        $stagingDirectory = Join-Path ([IO.Path]::GetTempPath()) ('NDM-build-' + [guid]::NewGuid().ToString('N'))
+        $nativeOutputPath = Join-Path $stagingDirectory ([IO.Path]::GetFileName($fullOutputPath))
+        [void][IO.Directory]::CreateDirectory($stagingDirectory)
+    }
+    $workbook.SaveAs($nativeOutputPath, 52)
+    $nativeSaved = $true
+    if (-not $singleFormattedBook) { Write-Output "Workbook built: $fullOutputPath" }
+}
+catch {
+    [ordered]@{Status='FAIL';Reason=$_.Exception.Message;ScriptStackTrace=$_.ScriptStackTrace} |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputDir ('BuildFailed_'+(Get-Date -Format 'yyyyMMdd_HHmmss')+'.json')) -Encoding UTF8
+    throw
+}
+finally {
+    $mayCloseOwnedExcel = Test-BuildExcelIdentity $excel $ownedExcelProcessId $ownedExcelStartTicks
+    if ($workbook -ne $null) {
+        if ($mayCloseOwnedExcel) { $workbook.Close($false) }
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
+    }
+    if ($excel -ne $null) {
+        if ($mayCloseOwnedExcel) { $excel.Quit() }
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+    }
+    [GC]::Collect()
+    [GC]::WaitForPendingFinalizers()
+    if (-not $nativeSaved) { Remove-StagedBuild }
+}
+
+try {
+    # Excel уже закрыл файл: закрепляем точные исходные PNG и отключаем их автосжатие.
+    Save-SectionIllustrationImageBytes $nativeOutputPath
+    # Сохраняем встроенный префикс областей печати после локализованного COM-save.
+    $printAreas = @(Get-WorkbookPrintAreas $nativeOutputPath)
+    Restore-WorkbookPrintAreas $nativeOutputPath $printAreas
+
+    # Оформление берётся из автономного шаблона и накладывается на скомпилированную книгу.
+    if ($formattedPath) {
+        $presentationBuilder = Join-Path $PSScriptRoot 'CalculationPresentation.py'
+        & $presentationPython -X utf8 $presentationBuilder make-portable $nativeOutputPath
+        if ($LASTEXITCODE -ne 0) { throw 'Не удалось отвязать шаблон от локального принтера.' }
+        & $presentationPython -X utf8 $presentationBuilder apply $nativeOutputPath $presentationTemplate $formattedPath
+        if ($LASTEXITCODE -ne 0) { throw 'Не удалось собрать оформленную книгу.' }
+    }
+}
+finally {
+    Remove-StagedBuild
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

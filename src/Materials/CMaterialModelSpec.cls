@@ -1,0 +1,106 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CMaterialModelSpec"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Выбранная модель материалов расчётного профиля
+' ==========================================================================
+' Хранит группу предельных состояний, TwoLine/ThreeLine, учёт растянутого
+' бетона и вид диаграммы арматуры для CMaterialModelProvider.
+' Сохраняется вместе с результатом, чтобы при выводе можно было восстановить
+' именно использованную модель независимо от настроек других профилей.
+
+Private mValueSet As EMaterialValueSet ' ULS(I) или SLS(II).
+Private mConcreteDiagram As EConcreteDiagramKind ' TwoLine или ThreeLine для бетона.
+Private mConcreteTension As EConcreteTensionKind ' Ignore или UseDiagram для растянутого бетона.
+Private mSteelDiagram As ESteelDiagramKind ' TwoLine или ThreeLine для арматуры.
+Private mComplete As Boolean ' True, если все четыре поля успешно заданы.
+
+' Заполняет спецификацию по текстам из rngCalculationProfiles. До успешного
+' разбора всех полей она недоступна provider-у, включая повторный ввод.
+Public Sub Initialize(ByVal valueSetText As String, ByVal concreteDiagramText As String, _
+        ByVal concreteTensionText As String, ByVal steelDiagramText As String)
+    mComplete = False
+    mValueSet = MaterialValueSetFromText(valueSetText)
+    mConcreteDiagram = ConcreteDiagramKindFromText(concreteDiagramText)
+    mConcreteTension = ConcreteTensionKindFromText(concreteTensionText)
+    mSteelDiagram = SteelDiagramKindFromText(steelDiagramText)
+    mComplete = True
+End Sub
+
+' Сбрасывает спецификацию. Такой объект нельзя передавать provider-у.
+Public Sub Clear()
+    mComplete = False
+End Sub
+
+' Возвращает независимую копию, чтобы CSectionStateResult не зависел от
+' дальнейших изменений исходного профиля.
+Public Function Clone() As CMaterialModelSpec
+    Dim copy As CMaterialModelSpec
+    Set copy = New CMaterialModelSpec
+    If mComplete Then
+        copy.Initialize ValueSetText, ConcreteDiagramText, ConcreteTensionText, SteelDiagramText
+    End If
+    Set Clone = copy
+End Function
+
+' Короткий ключ удобно писать в диагностику и сравнивать в тестах.
+Public Function SpecKey() As String
+    If Not mComplete Then
+        SpecKey = "<empty>"
+    Else
+        SpecKey = ValueSetText & "|" & ConcreteDiagramText & "|" & ConcreteTensionText & "|" & SteelDiagramText
+    End If
+End Function
+
+' True, если все четыре поля успешно заданы.
+Public Property Get IsComplete() As Boolean
+    IsComplete = mComplete
+End Property
+
+' ULS(I) или SLS(II).
+Public Property Get ValueSet() As EMaterialValueSet
+    ValueSet = mValueSet
+End Property
+
+' TwoLine или ThreeLine для бетона.
+Public Property Get ConcreteDiagram() As EConcreteDiagramKind
+    ConcreteDiagram = mConcreteDiagram
+End Property
+
+' Ignore или UseDiagram для растянутого бетона.
+Public Property Get ConcreteTension() As EConcreteTensionKind
+    ConcreteTension = mConcreteTension
+End Property
+
+' TwoLine или ThreeLine для арматуры.
+Public Property Get SteelDiagram() As ESteelDiagramKind
+    SteelDiagram = mSteelDiagram
+End Property
+
+' ULS(I) или SLS(II).
+Public Property Get ValueSetText() As String
+    ValueSetText = MaterialValueSetToText(mValueSet)
+End Property
+
+' TwoLine или ThreeLine для бетона.
+Public Property Get ConcreteDiagramText() As String
+    ConcreteDiagramText = ConcreteDiagramKindToText(mConcreteDiagram)
+End Property
+
+' Ignore или UseDiagram для растянутого бетона.
+Public Property Get ConcreteTensionText() As String
+    ConcreteTensionText = ConcreteTensionKindToText(mConcreteTension)
+End Property
+
+' TwoLine или ThreeLine для арматуры.
+Public Property Get SteelDiagramText() As String
+    SteelDiagramText = SteelDiagramKindToText(mSteelDiagram)
+End Property

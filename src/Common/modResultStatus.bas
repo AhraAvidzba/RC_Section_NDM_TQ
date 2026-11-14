@@ -1,0 +1,134 @@
+Attribute VB_Name = "modResultStatus"
+Option Explicit
+
+' ==========================================================================
+' Внутренние статусы и причины результатов
+' ==========================================================================
+' Задаёт коды InternalStatus и ResultCode, которые передают расчётные классы.
+' CResultStatusPolicy определяет по ним обозначение для пользователя,
+' а modStatusFormatting — цвет ячейки. Причина не определяется
+' разбором произвольного текста StopReason.
+
+Public Enum EResultInternalStatus
+    rsUnset = 0                  ' Результат еще не сформирован; в завершенном расчете это архитектурная ошибка.
+    rsNotRequested = 1           ' Расчет отключен профилем или настройкой пользователя.
+    rsNotApplicable = 2          ' Проверка физически или методически неприменима для данного LC.
+    rsBlockedByDependency = 3    ' Этап не запускался, потому что обязательный предыдущий результат отсутствует.
+    rsSuccess = 4                ' Расчет корректно завершен и проверка прошла либо дала допустимый физический результат.
+    rsCheckFailed = 5            ' Равновесие или данные получены, но инженерная проверка не проходит.
+    rsNumericalFailure = 6       ' Численная процедура не сошлась там, где действительно искалось равновесие или предел.
+    rsInvalidInput = 7           ' Некорректные пользовательские исходные данные конкретного расчета.
+    rsInvalidConfiguration = 8   ' Некорректная настройка Config или несовместимые параметры расчетного профиля.
+    rsSuccessWithWarning = 9     ' Результат получен дополнительным способом или с существенным предупреждением.
+    rsInternalError = 10         ' Непредусмотренная внутренняя ошибка программы.
+End Enum
+
+Public Enum EResultCode
+    rcNone = 0                       ' Нет уточняющего кода; применимо для простого OK.
+    rcNotRequested = 1               ' Расчет не был запрошен профилем.
+    rcNotApplicable = 2              ' Расчет неприменим к текущему состоянию.
+    rcBlockedByDependency = 3        ' Нет обязательного предыдущего результата.
+    rcCheckPassed = 4                ' Инженерная проверка пройдена.
+    rcCheckFailed = 5                ' Инженерная проверка не пройдена без численной ошибки.
+    rcPhysicalLimitExceeded = 6      ' НДС найдено, но вышло за физическую диаграмму материала.
+    rcInitialStateBeyondLimit = 7    ' Постоянная часть траектории уже не проходит выбранный физический критерий.
+    rcCriterionNotReached = 8        ' Подтверждено, что критерий не достигается при выбранном изменении нагрузки.
+    rcSearchBoundReached = 9         ' Достигнута техническая граница поиска без доказательства физического недостижения.
+    rcNumericalFailure = 10          ' Равновесие или предельная точка не найдены численным методом.
+    rcSingularTangent = 11           ' Вырожденная матрица/касательная в численном решении.
+    rcInvalidInput = 12              ' Ошибка пользовательских входных данных.
+    rcInvalidConfiguration = 13      ' Ошибка настроек Config или профиля.
+    rcInternalError = 14             ' Непредусмотренная внутренняя ошибка.
+    rcCrackWidthExceeded = 15        ' Ширина нормальной трещины больше допуска.
+    rcLongitudinalCrackExceeded = 16 ' Проверка продольных трещин не проходит.
+    rcCrackNotFormed = 17            ' Нормальная трещина физически не образуется.
+    rcStateOutsidePhysicalRange = 18 ' Равновесие найдено только за физическим диапазоном диаграммы.
+    rcSolverDidNotReturnState = 19   ' Для обязательного расчётного состояния не получен объект решателя НДС.
+End Enum
+
+Public Enum EResultKind
+    rkGeneric = 0                ' Общий результат без специальной инженерной трактовки.
+    rkDirectState = 1            ' Прямое НДС заданного сочетания.
+    rkCapacity = 2               ' Поиск предельной несущей способности.
+    rkCrackFormation = 3         ' Поиск образования нормальной трещины.
+    rkCrackWidth = 4             ' Формульный расчет ширины нормальной трещины.
+    rkLongitudinalCrack = 5      ' Проверка продольных трещин по сжатому бетону.
+    rkStability = 6              ' Проверка продольного изгиба и устойчивости.
+End Enum
+
+' Машинная причина неуспешного вызова CSectionSolver. Этот enum нужен
+' расчетным слоям, чтобы не выводить смысл ошибки из текста StopReason.
+Public Enum ESolverFailureCode
+    sfcNone = 0                 ' Ошибки решателя нет или равновесие уже найдено.
+    sfcNumericalFailure = 1     ' Обычная численная несходимость без более точной классификации.
+    sfcSingularTangent = 2      ' Не решилась касательная/секущая матрица равновесия.
+    sfcInvalidInput = 3         ' Некорректные исходные данные модели сечения.
+    sfcInvalidConfiguration = 4 ' Некорректны численный метод или его настройки; другое начальное приближение не исправит причину.
+    sfcInternalError = 5        ' Отсутствует обязательный программный объект или переданы несовместимые внутренние данные.
+End Enum
+
+' Исход приемки предельной точки: уточнение допуска отличается от отказа
+' самой точки, например при пределе в отрицательном направлении lambda.
+Public Enum EUltimateFinalization
+    ufNeedsRefinement = 0
+    ufAccepted = 1
+    ufRejectedPoint = 2
+End Enum
+
+' Возвращает принятое текстовое имя внутреннего статуса для диагностики и отчёта.
+Public Function ResultInternalStatusToText(ByVal value As EResultInternalStatus) As String
+    Select Case value
+        Case rsUnset: ResultInternalStatusToText = "rsUnset"
+        Case rsNotRequested: ResultInternalStatusToText = "rsNotRequested"
+        Case rsNotApplicable: ResultInternalStatusToText = "rsNotApplicable"
+        Case rsBlockedByDependency: ResultInternalStatusToText = "rsBlockedByDependency"
+        Case rsSuccess: ResultInternalStatusToText = "rsSuccess"
+        Case rsCheckFailed: ResultInternalStatusToText = "rsCheckFailed"
+        Case rsNumericalFailure: ResultInternalStatusToText = "rsNumericalFailure"
+        Case rsInvalidInput: ResultInternalStatusToText = "rsInvalidInput"
+        Case rsInvalidConfiguration: ResultInternalStatusToText = "rsInvalidConfiguration"
+        Case rsSuccessWithWarning: ResultInternalStatusToText = "rsSuccessWithWarning"
+        Case rsInternalError: ResultInternalStatusToText = "rsInternalError"
+        Case Else: ResultInternalStatusToText = "rsInternalError"
+    End Select
+End Function
+
+' Возвращает принятое текстовое имя кода причины результата.
+Public Function ResultCodeToText(ByVal value As EResultCode) As String
+    Select Case value
+        Case rcNone: ResultCodeToText = "NONE"
+        Case rcNotRequested: ResultCodeToText = "NOT_REQUESTED"
+        Case rcNotApplicable: ResultCodeToText = "NOT_APPLICABLE"
+        Case rcBlockedByDependency: ResultCodeToText = "BLOCKED_BY_DEPENDENCY"
+        Case rcCheckPassed: ResultCodeToText = "CHECK_PASSED"
+        Case rcCheckFailed: ResultCodeToText = "CHECK_FAILED"
+        Case rcPhysicalLimitExceeded: ResultCodeToText = "PHYSICAL_LIMIT_EXCEEDED"
+        Case rcInitialStateBeyondLimit: ResultCodeToText = "INITIAL_STATE_BEYOND_LIMIT"
+        Case rcCriterionNotReached: ResultCodeToText = "CRITERION_NOT_REACHED"
+        Case rcSearchBoundReached: ResultCodeToText = "SEARCH_BOUND_REACHED"
+        Case rcNumericalFailure: ResultCodeToText = "NUMERICAL_FAILURE"
+        Case rcSingularTangent: ResultCodeToText = "SINGULAR_TANGENT"
+        Case rcInvalidInput: ResultCodeToText = "INVALID_INPUT"
+        Case rcInvalidConfiguration: ResultCodeToText = "INVALID_CONFIGURATION"
+        Case rcInternalError: ResultCodeToText = "INTERNAL_ERROR"
+        Case rcCrackWidthExceeded: ResultCodeToText = "CRACK_WIDTH_EXCEEDED"
+        Case rcLongitudinalCrackExceeded: ResultCodeToText = "LONGITUDINAL_CRACK_EXCEEDED"
+        Case rcCrackNotFormed: ResultCodeToText = "CRACK_NOT_FORMED"
+        Case rcStateOutsidePhysicalRange: ResultCodeToText = "STATE_OUTSIDE_PHYSICAL_RANGE"
+        Case rcSolverDidNotReturnState: ResultCodeToText = "SOLVER_DID_NOT_RETURN_STATE"
+        Case Else: ResultCodeToText = "INTERNAL_ERROR"
+    End Select
+End Function
+
+' Возвращает принятое текстовое имя вида проверки для отчёта и отладки.
+Public Function ResultKindToText(ByVal value As EResultKind) As String
+    Select Case value
+        Case rkDirectState: ResultKindToText = "DirectState"
+        Case rkCapacity: ResultKindToText = "Capacity"
+        Case rkCrackFormation: ResultKindToText = "CrackFormation"
+        Case rkCrackWidth: ResultKindToText = "CrackWidth"
+        Case rkLongitudinalCrack: ResultKindToText = "LongitudinalCrack"
+        Case rkStability: ResultKindToText = "Stability"
+        Case Else: ResultKindToText = "Generic"
+    End Select
+End Function

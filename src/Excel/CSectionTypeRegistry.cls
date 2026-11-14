@@ -1,0 +1,78 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CSectionTypeRegistry"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Реестр параметрических типов сечения
+' ==========================================================================
+' Связывает имя типа с его классом-рецептом и именами входных таблиц.
+' Чтение значений, построение сетки, арматуры и аннотаций выполняются другими классами.
+
+Private mRecipes As Object, mRecipeTables As Object ' Рецепты по имени типа сечения и списки входных таблиц для каждого рецепта.
+
+' Регистрирует штатные рецепты и независимые именованные таблицы их ввода.
+Private Sub Class_Initialize()
+    Set mRecipes = CreateObject("Scripting.Dictionary"): mRecipes.CompareMode = vbTextCompare
+    Set mRecipeTables = CreateObject("Scripting.Dictionary"): mRecipeTables.CompareMode = vbTextCompare
+    RegisterRecipe "Circle", New CSectionRecipeCircle, Array("rngCircleGeometry")
+    RegisterRecipe "Rectangles", New CSectionRecipeRectangles, Array("rngRectanglesGeometry")
+    RegisterRecipe "PointedSection", New CSectionRecipePointedSection, Array("rngPointedSectionGeometry")
+    RegisterRecipe "HollowRectangle", New CSectionRecipeHollowRectangle, Array("rngHollowRectangleGeometry")
+End Sub
+
+' Регистрирует уникальный TypeID, его рецепт и список именованных входных таблиц.
+' Пустой массив таблиц допустим для программного рецепта без пользовательского ввода.
+Public Sub RegisterRecipe(ByVal typeID As String, ByVal recipe As ISectionRecipe, ByVal tableNames As Variant)
+    typeID = Trim$(typeID)
+    If Len(typeID) = 0 Or recipe Is Nothing Then SectionRecipeError "CSectionTypeRegistry", "Не заданы тип и рецепт."
+    If mRecipes.Exists(typeID) Then SectionRecipeError "CSectionTypeRegistry", "Повторная регистрация типа '" & typeID & "'."
+    If Not IsArray(tableNames) Then SectionRecipeError "CSectionTypeRegistry", "Имена таблиц должны быть массивом строк."
+    Dim name As Variant, seen As Object
+    Set seen = CreateObject("Scripting.Dictionary"): seen.CompareMode = vbTextCompare
+    For Each name In tableNames
+        If VarType(name) <> vbString Then SectionRecipeError "CSectionTypeRegistry", "Имя таблицы должно быть строкой."
+        If Len(Trim$(CStr(name))) = 0 Then SectionRecipeError "CSectionTypeRegistry", "Имя таблицы не может быть пустым."
+        If seen.Exists(CStr(name)) Then SectionRecipeError "CSectionTypeRegistry", "Повторная входная таблица '" & CStr(name) & "'."
+        seen.Add CStr(name), True
+    Next name
+    mRecipes.Add typeID, recipe: mRecipeTables.Add typeID, tableNames
+End Sub
+
+' Возвращает зарегистрированный объект по TypeID; неизвестный тип — ошибка.
+Public Function CreateRecipe(ByVal typeID As String) As ISectionRecipe
+    If Not mRecipes.Exists(typeID) Then SectionRecipeError "CSectionTypeRegistry", "Не зарегистрирован рецепт '" & typeID & "'."
+    Set CreateRecipe = mRecipes(typeID)
+End Function
+
+' Возвращает независимый массив имён ввода, пустой для программного рецепта.
+Public Function RecipeTableNames(ByVal typeID As String) As Variant
+    If Not mRecipeTables.Exists(typeID) Then SectionRecipeError "CSectionTypeRegistry", "Не зарегистрирован ввод типа '" & typeID & "'."
+    RecipeTableNames = mRecipeTables(typeID)
+End Function
+
+' Возвращает фактически зарегистрированные TypeID — источник штатного списка Config.
+Public Function RegisteredRecipeTypes() As Variant
+    RegisteredRecipeTypes = mRecipes.Keys
+End Function
+
+' Читает обязательный Geometry.Type через settings и проверяет его по реестру.
+Public Function SelectedRecipeType(ByVal settings As CSystemSettingsReader) As String
+    If settings Is Nothing Then SectionRecipeError "CSectionTypeRegistry", "Настройки Config не переданы."
+    SelectedRecipeType = settings.GetRequiredChoice("Geometry.Type", RegisteredRecipeTypes)
+End Function
+
+' Один раз вызывает выбранный рецепт. Готовое описание сечения не сохраняет входные таблицы или
+' объекты чтения Excel.
+Public Function CreateDefinition(ByVal typeID As String, ByVal context As CSectionRecipeContext) As CSectionDefinition
+    If context Is Nothing Then SectionRecipeError "CSectionTypeRegistry", "Снимок входных таблиц не передан."
+    Dim recipe As ISectionRecipe
+    Set recipe = CreateRecipe(typeID)
+    Set CreateDefinition = recipe.CreateDefinition(context)
+End Function

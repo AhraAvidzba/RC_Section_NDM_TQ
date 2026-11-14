@@ -1,0 +1,667 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CSP35CrackData"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Группы арматуры и области взаимодействия для расчёта трещин по СП 35
+' ==========================================================================
+' По готовому полю деформаций выделяет связные группы растянутой арматуры
+' и готовит данные для проверки каждой группы. Здесь задаются нормативные границы,
+' а пересечения и площади с учётом отверстий вычисляет CSectionGeometryQuery.
+' CCrackWidthCalculator применяет формулы к готовым данным и выбирает максимум.
+' В группах сохраняются реальные стержни всех рядов, включая их диаметры и количество.
+
+Private Const LENGTH_TOL As Double = 0.000001 ' Только геометрическая погрешность, мм; не RowTolerance.
+Private Const STRAIN_TOL As Double = 0.000000000001 ' Внутренний численный ноль деформации.
+Private Const STRESS_TOL As Double = 0.000000001 ' Нулевая растягивающая арматура, МПа.
+Private mSection As CSectionModel ' Исходная модель сечения с бетонными элементами и арматурой.
+Private mQuery As CSectionGeometryQuery ' Общий расчёт пересечений, границ и площадей бетонных областей.
+Private mDomain As CConcreteRegion ' Полная бетонная область с учётом заданных отверстий.
+Private mGroupCount As Long ' Число неделимых связанных групп растянутой арматуры.
+Private mBarGroup() As Long ' 0 - стержень не растянут; иначе неделимая связная группа.
+Private mBarStress() As Double ' Фактические напряжения заданного НДС, МПа.
+Private mBarStrain() As Double, mBarDiameter() As Double, mBarArea() As Double ' Деформация, диаметр в мм и площадь в мм2 каждого стержня.
+Private mBarID() As String ' Собственные копии для результата, не чтение измененной модели позже.
+Private mGroupX() As Double, mGroupY() As Double ' Координаты центра арматурной группы X, Y, мм; усредняются по площадям стержней.
+Private mGroupN() As Double, mGroupT() As Double ' Координаты центра группы по нормали к нейтральной линии и вдоль неё, мм.
+Private mGroupArea() As Double, mGroupBars() As Long ' Суммарная площадь арматуры в мм2 и число стержней в каждой группе.
+Private mGroupBeta() As Double ' Сохраненный коэффициент группы для формулы и пассивного вывода.
+Private mGroupRow() As Long ' Номер ряда исходной группы арматуры; боковые границы рассчитываются отдельно.
+Private mCandidateCount As Long ' Число проверяемых областей взаимодействия бетона с арматурой.
+Private mZones() As CConcreteRegion ' Снимки той же геометрии, площадь которой пойдет в формулу.
+Private mRows() As Variant ' Для каждой проверяемой области храним номера включённых арматурных групп и их рядов.
+Private mAnchorGroup() As Long, mStressBar() As Long ' Группа, задающая область, и стержень, задающий расчётное напряжение.
+Private mBetaDiameterSum() As Double ' Сумма beta*d по стержням, включённым в проверяемую область, мм.
+Private mSideDiameter() As Double, mRowDiameter() As Double ' Диаметры для определения боковых границ и радиуса ряда, мм.
+Private mSideRadius() As Double, mNormalRadius() As Double ' Радиусы взаимодействия вдоль нейтральной линии и по нормали к ней, мм.
+Private mLeftDistance() As Double, mRightDistance() As Double ' Расстояния от центра определяющей группы до левой и правой границ области, мм, до отсечения по бетону.
+Private mReferenceRow() As Long, mRowCount() As Long ' Номер определяющего ряда и число рядов арматуры в каждой области.
+Private mNx As Double, mNy As Double, mNeutralN As Double ' Единичная нормаль Nx, Ny без размерности и координата нейтральной линии вдоль неё, мм.
+Private mGapTolerance As Double, mRowTolerance As Double ' Допуск объединения стержней в группу и допуск разделения рядов, мм.
+Private mNeighborRatioLimit As Double ' Порог проекции t / полного расстояния L ближайшего соседа.
+Private mDiameterMode As String, mRadiusMode As String ' Способы выбора диаметра группы и радиуса взаимодействия.
+Private mCentralTension As Boolean ' Признак центрального растяжения, при котором нет нейтральной линии.
+Private mFrozen As Boolean ' После выдачи готового результата повторная подготовка или изменение данных запрещены.
+Private mSectionRevision As Long ' Версия исходной геометрии, зафиксированная при подготовке.
+Private mCandidateRadius() As Double, mCandidatePsi() As Double, mCandidateWidth() As Double ' Радиус армирования Rr в мм, параметр psi в см и ширина трещины в мм для каждой области.
+
+' Формирует полный неизменяемый снимок подготовки одного сочетания. Плоскость
+' и диаграмма уже получены владельцем НДС; метод не ищет равновесие. При чистом
+' центральном растяжении создается одна общая область без искусственной Н.О.
+Public Sub Prepare(ByVal section As CSectionModel, ByVal epsilon0 As Double, ByVal kappaX As Double, ByVal kappaY As Double, _
+        ByVal steelMaterial As Object, ByVal groupGapTolerance As Double, ByVal rowTolerance As Double, _
+        ByVal diameterMode As String, ByVal radiusMode As String, ByVal centralTension As Boolean, _
+        Optional ByVal neighborRatioLimit As Double = 0.2, _
+        Optional ByVal geometryQuery As CSectionGeometryQuery = Nothing)
+    AssertWritable
+    ResetData
+    If section Is Nothing Then InvalidData "Не передана модель сечения для СП 35."
+    If steelMaterial Is Nothing Then InvalidData "Не передана диаграмма арматуры текущего НДС."
+    If groupGapTolerance < 0# Or rowTolerance < 0# Then InvalidData "Допуски групп и рядов СП 35 должны быть неотрицательными."
+    If neighborRatioLimit < 0# Or neighborRatioLimit > 1# Then InvalidData "Порог отношения t/L для СП 35 должен быть от 0 до 1."
+    Select Case diameterMode
+        Case "Max", "Min", "Average"
+        Case Else: InvalidData "RadiusDiameterMode СП 35 должен быть Max, Min или Average."
+    End Select
+    Dim multiplier As Double
+    multiplier = SP35InteractionMultiplierFromData(radiusMode)
+    Set mSection = section: mSectionRevision = section.Revision
+    If geometryQuery Is Nothing Then
+        Set mQuery = New CSectionGeometryQuery: mQuery.Initialize section
+    Else
+        Set mQuery = geometryQuery: mQuery.EnsureSection section
+    End If
+    Set mDomain = mQuery.ConcreteDomain
+    mGapTolerance = groupGapTolerance: mRowTolerance = rowTolerance
+    mNeighborRatioLimit = neighborRatioLimit
+    mDiameterMode = diameterMode: mRadiusMode = radiusMode: mCentralTension = centralTension
+    If section.RebarCount = 0 Then Exit Sub
+    Dim gradient As Double
+    gradient = Sqr(kappaX * kappaX + kappaY * kappaY)
+    If Not centralTension Then
+        If gradient <= STRAIN_TOL Then Exit Sub
+        mNx = kappaY / gradient: mNy = kappaX / gradient: mNeutralN = -epsilon0 / gradient
+    Else
+        Dim centerX As Double, centerY As Double, concreteArea As Double
+        section.ConcreteMeshCentroid centerX, centerY, concreteArea ' Центр уже кэширован оценкой НДС; дополнительного обхода элементов нет.
+        If epsilon0 + kappaX * centerY + kappaY * centerX <= STRAIN_TOL Then _
+            InvalidData "Для центрального растяжения СП 35 должна быть положительная деформация текущего НДС в центре бетонного сечения."
+    End If
+    BuildGroups epsilon0, kappaX, kappaY, steelMaterial
+    If mGroupCount = 0 Then Exit Sub
+    Dim included() As Boolean, rows() As Long, rowCount As Long, i As Long
+    ReDim included(1 To mGroupCount): ReDim mGroupRow(1 To mGroupCount)
+    ReDim mGroupBeta(1 To mGroupCount)
+    For i = 1 To mGroupCount
+        included(i) = True: mGroupBeta(i) = SP35GroupBetaFromData(mGroupBars(i))
+    Next i
+    AssignRows included, rows, rowCount
+    For i = 1 To mGroupCount: mGroupRow(i) = rows(i): Next i
+    mCandidateCount = mGroupCount
+    If centralTension Then mCandidateCount = 1
+    ReDim mZones(1 To mCandidateCount): ReDim mRows(1 To mCandidateCount)
+    ReDim mAnchorGroup(1 To mCandidateCount): ReDim mStressBar(1 To mCandidateCount)
+    ReDim mBetaDiameterSum(1 To mCandidateCount)
+    ReDim mSideDiameter(1 To mCandidateCount): ReDim mRowDiameter(1 To mCandidateCount)
+    ReDim mSideRadius(1 To mCandidateCount): ReDim mNormalRadius(1 To mCandidateCount)
+    ReDim mLeftDistance(1 To mCandidateCount): ReDim mRightDistance(1 To mCandidateCount)
+    ReDim mReferenceRow(1 To mCandidateCount): ReDim mRowCount(1 To mCandidateCount)
+    ReDim mCandidateRadius(1 To mCandidateCount): ReDim mCandidatePsi(1 To mCandidateCount): ReDim mCandidateWidth(1 To mCandidateCount)
+    If centralTension Then
+        Set mZones(1) = mDomain.Clone
+        mStressBar(1) = MaximumStressBar(0): mAnchorGroup(1) = mBarGroup(mStressBar(1))
+        StoreIncludedGroups 1, included, rows, rowCount
+    Else
+        For i = 1 To mCandidateCount: PrepareAnchor i, multiplier: Next i ' [NDM] Проверяем область взаимодействия для каждой группы растянутых стержней. Так общий расчёт не требует отдельного поиска наружного ряда для каждой формы сечения.
+    End If
+End Sub
+
+' Сбрасывает сохранённое сочетание до валидации следующего, чтобы ошибочный запрос
+' не мог выдать область или стержни прошлого расчета как актуальный результат.
+Private Sub ResetData()
+    Set mSection = Nothing: Set mQuery = Nothing: Set mDomain = Nothing
+    mGroupCount = 0: mCandidateCount = 0
+    mSectionRevision = 0
+    Erase mCandidateRadius: Erase mCandidatePsi: Erase mCandidateWidth
+    Erase mGroupBeta
+    Erase mBarGroup: Erase mBarStress: Erase mBarStrain: Erase mBarDiameter: Erase mBarArea: Erase mBarID
+    Erase mGroupX: Erase mGroupY
+    Erase mGroupN: Erase mGroupT: Erase mGroupArea: Erase mGroupBars: Erase mGroupRow
+    Erase mZones: Erase mRows: Erase mAnchorGroup: Erase mStressBar: Erase mBetaDiameterSum
+    Erase mSideDiameter: Erase mRowDiameter: Erase mSideRadius: Erase mNormalRadius
+    Erase mLeftDistance: Erase mRightDistance
+    Erase mReferenceRow: Erase mRowCount
+    mNx = 0#: mNy = 0#: mNeutralN = 0#: mCentralTension = False
+End Sub
+
+' Строит связные компоненты по чистому зазору, включая транзитивную A-B-C
+' связь. Сжатые/нулевые стержни не соединяют растянутые группы. Идентичность
+' группы определяется стабильным порядком элементов модели, а не CAD handle.
+Private Sub BuildGroups(ByVal epsilon0 As Double, ByVal kappaX As Double, ByVal kappaY As Double, ByVal steelMaterial As Object)
+    Dim count As Long, parent() As Long, i As Long, j As Long, root As Long, otherRoot As Long
+    Dim strain As Double, gap As Double, groups As Object, group As Long
+    count = mSection.RebarCount
+    ReDim parent(1 To count): ReDim mBarGroup(1 To count): ReDim mBarStress(1 To count) ' parent хранит дерево связности: 0 исключает стержень, положительный индекс указывает представителя группы.
+    ReDim mBarStrain(1 To count): ReDim mBarDiameter(1 To count): ReDim mBarArea(1 To count): ReDim mBarID(1 To count)
+    For i = 1 To count
+        mBarID(i) = mSection.RebarID(i): mBarDiameter(i) = mSection.RebarDiameter(i): mBarArea(i) = mSection.RebarArea(i)
+        strain = epsilon0 + kappaX * mSection.RebarY(i) + kappaY * mSection.RebarX(i)
+        mBarStrain(i) = strain
+        If strain > STRAIN_TOL Then mBarStress(i) = steelMaterial.GetStress(strain)
+        If mBarStress(i) > STRESS_TOL Then
+            If Not mQuery.ContainsPoint(mDomain, mSection.RebarX(i), mSection.RebarY(i)) Then _
+                InvalidData "Растянутый стержень " & mSection.RebarID(i) & " находится вне бетонной области или в проеме."
+            parent(i) = i
+        End If
+    Next i
+    For i = 1 To count
+        If parent(i) > 0 Then
+            For j = i + 1 To count
+                If parent(j) > 0 Then
+                    gap = Sqr((mSection.RebarX(i) - mSection.RebarX(j)) ^ 2 + (mSection.RebarY(i) - mSection.RebarY(j)) ^ 2) - _
+                        (mSection.RebarDiameter(i) + mSection.RebarDiameter(j)) / 2#
+                    If gap <= mGapTolerance + LENGTH_TOL Then
+                        root = GroupRoot(parent, i): otherRoot = GroupRoot(parent, j)
+                        If root < otherRoot Then parent(otherRoot) = root Else parent(root) = otherRoot ' Объединяем связные группы со стабильным представителем — меньшим индексом элемента модели.
+                    End If
+                End If
+            Next j
+        End If
+    Next i
+    Set groups = CreateObject("Scripting.Dictionary")
+    For i = 1 To count
+        If parent(i) > 0 Then
+            root = GroupRoot(parent, i)
+            If Not groups.Exists(CStr(root)) Then groups.Add CStr(root), groups.Count + 1
+            mBarGroup(i) = CLng(groups(CStr(root)))
+        End If
+    Next i
+    mGroupCount = groups.Count
+    If mGroupCount = 0 Then Exit Sub
+    ReDim mGroupX(1 To mGroupCount): ReDim mGroupY(1 To mGroupCount)
+    ReDim mGroupN(1 To mGroupCount): ReDim mGroupT(1 To mGroupCount)
+    ReDim mGroupArea(1 To mGroupCount): ReDim mGroupBars(1 To mGroupCount)
+    For i = 1 To count
+        group = mBarGroup(i)
+        If group > 0 Then
+            mGroupArea(group) = mGroupArea(group) + mSection.RebarArea(i)
+            mGroupBars(group) = mGroupBars(group) + 1
+            mGroupX(group) = mGroupX(group) + mSection.RebarArea(i) * mSection.RebarX(i)
+            mGroupY(group) = mGroupY(group) + mSection.RebarArea(i) * mSection.RebarY(i)
+        End If
+    Next i
+    For group = 1 To mGroupCount
+        mGroupX(group) = mGroupX(group) / mGroupArea(group): mGroupY(group) = mGroupY(group) / mGroupArea(group)
+        mGroupN(group) = mNx * mGroupX(group) + mNy * mGroupY(group)
+        mGroupT(group) = -mNy * mGroupX(group) + mNx * mGroupY(group)
+        If Not mQuery.ContainsPoint(mDomain, mGroupX(group), mGroupY(group)) Then _
+            InvalidData "Центр растянутой группы G" & CStr(group) & " попал в проем или вне бетона. Проверьте геометрию и GroupGapTolerance СП 35."
+    Next group
+End Sub
+
+' Находит общую группу связанных стержней и сокращает цепочку ссылок для следующих обращений.
+' Эта операция относится к группировке арматуры, а не к повторным решениям НДС.
+Private Function GroupRoot(ByRef parent() As Long, ByVal index As Long) As Long
+    Dim root As Long, nextIndex As Long
+    root = index
+    Do While parent(root) <> root: root = parent(root): Loop
+    Do While parent(index) <> index
+        nextIndex = parent(index): parent(index) = root: index = nextIndex
+    Loop
+    GroupRoot = root
+End Function
+
+' Разбивает на ряды по n/t/ID и полному размаху RowTolerance,
+' без цепочного слияния далеких рядов. Нумерует готовые ряды от растянутой
+' бетонной границы к Н.О.: наружный ряд 1, ближайший к Н.О. - последний.
+' При центральном растяжении Н.О. нет: один общий ряд.
+Private Sub AssignRows(ByRef included() As Boolean, ByRef rows() As Long, ByRef rowCount As Long)
+    Dim order() As Long, count As Long, i As Long, j As Long, group As Long, firstN As Double
+    ReDim rows(1 To mGroupCount): ReDim order(1 To mGroupCount): rowCount = 0
+    For i = 1 To mGroupCount
+        If included(i) Then
+            count = count + 1: order(count) = i
+            For j = count To 2 Step -1
+                If Not GroupBefore(order(j), order(j - 1)) Then Exit For
+                group = order(j - 1): order(j - 1) = order(j): order(j) = group
+            Next j
+        End If
+    Next i
+    For i = 1 To count
+        group = order(i)
+        If rowCount = 0 Then
+            rowCount = 1: firstN = mGroupN(group)
+        ElseIf Not mCentralTension And mGroupN(group) - firstN > mRowTolerance + LENGTH_TOL Then
+            rowCount = rowCount + 1: firstN = mGroupN(group) ' Новый ряд отсчитывается от первой группы, чтобы цепочка близких соседей не объединила удалённые ряды.
+        End If
+        rows(group) = rowCount
+    Next i
+    For i = 1 To mGroupCount ' Меняем только номера, не состав рядов и не выбор физического опорного ряда.
+        If included(i) Then rows(i) = rowCount + 1 - rows(i)
+    Next i
+End Sub
+
+' Сравнивает центры для воспроизводимого порядка рядов и групп одного ряда.
+Private Function GroupBefore(ByVal first As Long, ByVal second As Long) As Boolean
+    If Abs(mGroupN(first) - mGroupN(second)) > LENGTH_TOL Then
+        GroupBefore = (mGroupN(first) < mGroupN(second))
+    ElseIf Abs(mGroupT(first) - mGroupT(second)) > LENGTH_TOL Then
+        GroupBefore = (mGroupT(first) < mGroupT(second))
+    Else
+        GroupBefore = (first < second)
+    End If
+End Function
+
+' Задаёт границы области взаимодействия для проверяемой группы арматуры.
+' Боковые границы определяет по ближайшим группам и отношению t/L независимо
+' от рядов и граней бетона. Затем выбирает связанную с группой бетонную стенку,
+' определяющий ряд по площади арматуры и внутреннюю границу по радиусу или нейтральной линии.
+Private Sub PrepareAnchor(ByVal anchor As Long, ByVal multiplier As Double)
+    Dim wall As CConcreteRegion, region As CConcreteRegion, i As Long, left As Double, right As Double
+    Dim included() As Boolean, rows() As Long, rowCount As Long, rowAreas() As Double, rowN() As Double
+    Dim referenceRow As Long, referenceGroup As Long, incomplete As Boolean, lowerN As Double, minN As Double, maxN As Double
+    mAnchorGroup(anchor) = anchor: mStressBar(anchor) = MaximumStressBar(anchor)
+    mSideDiameter(anchor) = ReferenceDiameterForGroup(anchor)
+    mSideRadius(anchor) = multiplier * mSideDiameter(anchor)
+    SideDistances anchor, mSideRadius(anchor), left, right
+    mLeftDistance(anchor) = left: mRightDistance(anchor) = right
+    Set wall = mQuery.ConnectedRegionAtPoint(mDomain, mGroupX(anchor), mGroupY(anchor))
+    mQuery.ProjectionBounds wall, mNx, mNy, minN, maxN ' Сначала задаем боковые границы. Отверстия вычитаются только на своих местах; другую стенку исключаем лишь при разрыве материала в полосе.
+    Set wall = mQuery.ClipWindow(wall, mNx, mNy, minN, maxN, mGroupT(anchor) - left, mGroupT(anchor) + right)
+    Set wall = mQuery.ConnectedRegionAtPoint(wall, mGroupX(anchor), mGroupY(anchor))
+    ReDim included(1 To mGroupCount)
+    For i = 1 To mGroupCount
+        included(i) = (mGroupT(i) >= mGroupT(anchor) - left - LENGTH_TOL And _
+            mGroupT(i) <= mGroupT(anchor) + right + LENGTH_TOL And _
+            mQuery.ContainsPoint(wall, mGroupX(i), mGroupY(i)))
+    Next i
+    AssignRows included, rows, rowCount
+    ReDim rowAreas(1 To rowCount): ReDim rowN(1 To rowCount) ' Площадь ряда включает полный состав принятых по центру групп, без beta. Это предварительные ряды боковой полосы до внутреннего отсечения.
+    For i = 1 To mGroupCount
+        If included(i) Then
+            rowAreas(rows(i)) = rowAreas(rows(i)) + mGroupArea(i)
+            rowN(rows(i)) = rowN(rows(i)) + mGroupArea(i) * mGroupN(i)
+        End If
+    Next i
+    For i = 1 To rowCount: rowN(i) = rowN(i) / rowAreas(i): Next i
+    referenceRow = rowCount: incomplete = (rowCount > 1)
+    For i = 1 To rowCount - 1
+        If rowAreas(rowCount) >= 0.5 * rowAreas(i) Then incomplete = False
+    Next i
+    If incomplete Then referenceRow = rowCount - 1
+    For i = 1 To mGroupCount
+        If included(i) And rows(i) = referenceRow Then referenceGroup = i: Exit For
+    Next i
+    mRowDiameter(anchor) = ReferenceDiameterForRow(included, rows, referenceRow)
+    mNormalRadius(anchor) = multiplier * mRowDiameter(anchor)
+    lowerN = rowN(referenceRow) - mNormalRadius(anchor)
+    If lowerN < mNeutralN Then lowerN = mNeutralN
+    Set region = mQuery.ClipWindow(wall, mNx, mNy, lowerN, maxN, mGroupT(anchor) - left, mGroupT(anchor) + right)
+    Set region = mQuery.ConnectedRegionAtPoint(region, mGroupX(anchor), mGroupY(anchor))
+    For i = 1 To mGroupCount ' Группа неделима: центр внутри/на границе принимает весь исходный состав. Положение отдельных осей относительно границы участка его не изменяет.
+        If included(i) Then included(i) = mQuery.ContainsPoint(region, mGroupX(i), mGroupY(i))
+    Next i
+    If Not included(anchor) Or region.Area <= LENGTH_TOL Then Exit Sub ' Группа вне своей окончательной области не проверяется формулой; это не ошибка физического НДС других групп.
+    AssignRows included, rows, rowCount ' Ряд за окончательной внутренней границей больше не участвует ни в знаменателе, ни в нумерации расшифровки сохраненного результата.
+    mReferenceRow(anchor) = rows(referenceGroup)
+    ' Пять базовых пар P/Q сохраняются для проверки происхождения границ.
+    ' Между ними область уже обрезана по всем настоящим граням и дугам:
+    ' небольшое отверстие между пробами не исчезает и не меняет площадь.
+    region.SetBoundaryProbes mQuery.SampleMaterialIntervals(region, mNx, mNy, mGroupN(anchor), _
+        mGroupT(anchor) - left, mGroupT(anchor) + right, 5)
+    Set mZones(anchor) = region
+    StoreIncludedGroups anchor, included, rows, rowCount
+End Sub
+
+' На каждой стороне выбирает ближайшую группу по полному расстоянию L.
+' При t/L ниже порога остается весь радиус r; иначе граница не дальше t/2.
+' Совпадающие проекции не являются левым/правым соседом. RowTolerance,
+' контуры и отверстия не участвуют в выборе и не сдвигают готовые границы.
+Private Sub SideDistances(ByVal anchor As Long, ByVal radius As Double, ByRef left As Double, ByRef right As Double)
+    Dim i As Long, spacing As Double, distanceSquared As Double, leftSquared As Double, rightSquared As Double
+    Dim leftSpacing As Double, rightSpacing As Double
+    left = radius: right = radius: leftSquared = 1E+100: rightSquared = 1E+100
+    For i = 1 To mGroupCount
+        If i <> anchor Then
+            spacing = mGroupT(i) - mGroupT(anchor)
+            distanceSquared = (mGroupX(i) - mGroupX(anchor)) ^ 2 + (mGroupY(i) - mGroupY(anchor)) ^ 2
+            If spacing < -LENGTH_TOL And distanceSquared < leftSquared Then
+                leftSquared = distanceSquared: leftSpacing = -spacing
+            ElseIf spacing > LENGTH_TOL And distanceSquared < rightSquared Then
+                rightSquared = distanceSquared: rightSpacing = spacing
+            End If
+        End If
+    Next i
+    If leftSpacing > 0# Then ' Равенство порогу относится к ограниченной ветке, без допуска, подменяющего пользовательский коэффициент или геометрический шаг.
+        If leftSpacing / Sqr(leftSquared) >= mNeighborRatioLimit Then left = MinValue(radius, leftSpacing / 2#)
+    End If
+    If rightSpacing > 0# Then
+        If rightSpacing / Sqr(rightSquared) >= mNeighborRatioLimit Then right = MinValue(radius, rightSpacing / 2#)
+    End If
+End Sub
+
+' Сохраняет разреженную таблицу групп/рядов конкретной конечной области.
+' beta применяется к реальной сумме диаметров; один d_ref ее не заменяет.
+Private Sub StoreIncludedGroups(ByVal candidate As Long, ByRef included() As Boolean, ByRef rows() As Long, _
+        ByVal rowCount As Long)
+    Dim count As Long, i As Long, j As Long, group As Long, data() As Variant
+    For i = 1 To mGroupCount: If included(i) Then count = count + 1
+    Next i
+    ReDim data(1 To count, 1 To 2): count = 0
+    For i = 1 To mGroupCount
+        If included(i) Then
+            count = count + 1: data(count, 1) = i: data(count, 2) = rows(i)
+        End If
+    Next i
+    For i = 1 To mSection.RebarCount
+        group = mBarGroup(i)
+        If group > 0 Then
+            If included(group) Then mBetaDiameterSum(candidate) = mBetaDiameterSum(candidate) + _
+                mGroupBeta(group) * mSection.RebarDiameter(i)
+        End If
+    Next i
+    mRows(candidate) = data: mRowCount(candidate) = rowCount
+End Sub
+
+' [SP35] Табл. 7.26: beta для одиночных, сдвоенных и строенных стержней.
+' [NDM] Для связной группы из четырех и более сохраняется согласованное
+' beta=0.75. Подготовка использует полный неделимый состав группы.
+Public Function SP35GroupBetaFromData(ByVal barCount As Long) As Double
+    Select Case barCount
+        Case 1: SP35GroupBetaFromData = 1#
+        Case 2: SP35GroupBetaFromData = 0.85
+        Case Is >= 3: SP35GroupBetaFromData = 0.75
+        Case Else
+            Err.Raise vbObjectError + 3784, "CSP35CrackData", "Группа армирования СП 35 должна содержать хотя бы один стержень."
+    End Select
+End Function
+
+' [SP35] Принимает нормативный множитель радиуса подготовки области.
+' Формулы Rr, psi и раскрытия сюда не входят и остаются у Width.
+Public Function SP35InteractionMultiplierFromData(ByVal radiusMode As String) As Double
+    Select Case LCase$(Trim$(radiusMode))
+        Case "3d": SP35InteractionMultiplierFromData = 3#
+        Case "5d": SP35InteractionMultiplierFromData = 5#
+        Case "6d": SP35InteractionMultiplierFromData = 6#
+        Case Else
+            Err.Raise vbObjectError + 3785, "CSP35CrackData", "Радиус взаимодействия СП 35 должен быть 3d, 5d или 6d."
+    End Select
+End Function
+
+' Выбирает d_ref только для построения радиуса отдельной группы.
+Private Function ReferenceDiameterForGroup(ByVal group As Long) As Double
+    Dim i As Long, count As Long, total As Double, minimum As Double, maximum As Double, diameter As Double
+    minimum = 1E+100
+    For i = 1 To mSection.RebarCount
+        If mBarGroup(i) = group Then
+            diameter = mSection.RebarDiameter(i): count = count + 1: total = total + diameter
+            minimum = MinValue(minimum, diameter): If diameter > maximum Then maximum = diameter
+        End If
+    Next i
+    ReferenceDiameterForGroup = SelectedDiameter(minimum, maximum, total, count)
+End Function
+
+' Выбирает расчётный диаметр из стержней определяющего ряда.
+' Для него и бокового радиуса проверяемой группы применяется один режим: Max, Min или Average.
+Private Function ReferenceDiameterForRow(ByRef included() As Boolean, ByRef rows() As Long, ByVal row As Long) As Double
+    Dim i As Long, group As Long, count As Long, total As Double, minimum As Double, maximum As Double, diameter As Double
+    minimum = 1E+100
+    For i = 1 To mSection.RebarCount
+        group = mBarGroup(i)
+        If group > 0 Then
+            If included(group) And rows(group) = row Then
+                diameter = mSection.RebarDiameter(i): count = count + 1: total = total + diameter
+                minimum = MinValue(minimum, diameter): If diameter > maximum Then maximum = diameter
+            End If
+        End If
+    Next i
+    ReferenceDiameterForRow = SelectedDiameter(minimum, maximum, total, count)
+End Function
+
+' Применяет согласованное программное правило выбора d_ref; только Average
+' усредняет диаметры арифметически, не по площади и не через эквивалентный d.
+Private Function SelectedDiameter(ByVal minimum As Double, ByVal maximum As Double, ByVal total As Double, ByVal count As Long) As Double
+    If count = 0 Then InvalidData "В опорном ряду СП 35 отсутствует арматура."
+    Select Case mDiameterMode
+        Case "Min": SelectedDiameter = minimum
+        Case "Max": SelectedDiameter = maximum
+        Case "Average": SelectedDiameter = total / count
+    End Select
+End Function
+
+' Возвращает стержень с наибольшим растягивающим напряжением в заданной группе.
+' group = 0 означает все стержни сечения при центральном растяжении.
+Private Function MaximumStressBar(ByVal group As Long) As Long
+    Dim i As Long, maximum As Double
+    For i = 1 To mSection.RebarCount
+        If mBarGroup(i) > 0 And (group = 0 Or mBarGroup(i) = group) Then
+            If mBarStress(i) > maximum Then maximum = mBarStress(i): MaximumStressBar = i
+        End If
+    Next i
+End Function
+
+' Простые read-only свойства возвращают подготовленные данные без расчетов.
+Public Property Get CandidateCount() As Long
+    CandidateCount = mCandidateCount
+End Property
+' Число подготовленных неделимых арматурных групп СП35.
+Public Property Get GroupCount() As Long
+    GroupCount = mGroupCount
+End Property
+' Снимки той же геометрии, площадь которой пойдет в формулу.
+Public Property Get CandidateRegion(ByVal index As Long) As CConcreteRegion
+    CheckCandidate index
+    If Not mZones(index) Is Nothing Then Set CandidateRegion = mZones(index).Clone
+End Property
+' Снимки той же геометрии, площадь которой пойдет в формулу.
+Public Property Get CandidateAvailable(ByVal index As Long) As Boolean
+    CheckCandidate index: CandidateAvailable = Not mZones(index) Is Nothing
+End Property
+' Возвращает номера включённых арматурных групп и номер ряда каждой
+' для области взаимодействия, построенной по выбранной группе.
+Public Property Get CandidateRows(ByVal index As Long) As Variant
+    CheckCandidate index: CandidateRows = mRows(index)
+End Property
+' Индекс опорной группы рассматриваемой области трещин СП35.
+Public Property Get CandidateAnchorGroup(ByVal index As Long) As Long
+    CheckCandidate index: CandidateAnchorGroup = mAnchorGroup(index)
+End Property
+' Возвращает номер стержня, по которому принято напряжение в выбранной области СП 35.
+Public Property Get CandidateStressBar(ByVal index As Long) As Long
+    CheckCandidate index: CandidateStressBar = mStressBar(index)
+End Property
+' Фактические напряжения заданного НДС, МПа.
+Public Property Get CandidateSigmaS(ByVal index As Long) As Double
+    CheckCandidate index: CandidateSigmaS = mBarStress(mStressBar(index))
+End Property
+' Возвращает сумму beta*d для стержней выбранной области взаимодействия СП 35.
+Public Property Get CandidateBetaDiameterSum(ByVal index As Long) As Double
+    CheckCandidate index: CandidateBetaDiameterSum = mBetaDiameterSum(index)
+End Property
+' Возвращает диаметр группы, определяющей боковую границу выбранной области, мм.
+Public Property Get CandidateSideDiameter(ByVal index As Long) As Double
+    CheckCandidate index: CandidateSideDiameter = mSideDiameter(index)
+End Property
+' Возвращает диаметр арматуры указанного ряда в выбранной области, мм.
+Public Property Get CandidateRowDiameter(ByVal index As Long) As Double
+    CheckCandidate index: CandidateRowDiameter = mRowDiameter(index)
+End Property
+' Возвращает радиус взаимодействия у боковой границы выбранной области, мм.
+Public Property Get CandidateSideRadius(ByVal index As Long) As Double
+    CheckCandidate index: CandidateSideRadius = mSideRadius(index)
+End Property
+' Возвращают заданные боковые расстояния до пересечения с бетоном. Они не
+' подменяются расстоянием до ближайшей грани готовой области или отверстия.
+Public Property Get CandidateLeftDistance(ByVal index As Long) As Double
+    CheckCandidate index: CandidateLeftDistance = mLeftDistance(index)
+End Property
+' Возвращает расстояние до правой боковой границы выбранной области, мм.
+Public Property Get CandidateRightDistance(ByVal index As Long) As Double
+    CheckCandidate index: CandidateRightDistance = mRightDistance(index)
+End Property
+' Возвращает размер радиуса взаимодействия по нормали к нейтральной линии, мм.
+Public Property Get CandidateNormalRadius(ByVal index As Long) As Double
+    CheckCandidate index: CandidateNormalRadius = mNormalRadius(index)
+End Property
+' Возвращает номер опорного ряда арматуры для выбранной области взаимодействия СП 35.
+Public Property Get CandidateReferenceRow(ByVal index As Long) As Long
+    CheckCandidate index: CandidateReferenceRow = mReferenceRow(index)
+End Property
+' Возвращает количество рядов арматуры внутри выбранной области взаимодействия СП 35.
+Public Property Get CandidateRowCount(ByVal index As Long) As Long
+    CheckCandidate index: CandidateRowCount = mRowCount(index)
+End Property
+' 0 - стержень не растянут; иначе неделимая связная группа.
+Public Property Get BarGroup(ByVal index As Long) As Long
+    BarGroup = mBarGroup(index)
+End Property
+' Центр по реальным площадям As.
+Public Property Get GroupX(ByVal index As Long) As Double
+    GroupX = mGroupX(index)
+End Property
+' Координата центра группы в подготовленной системе СП35, мм.
+Public Property Get GroupY(ByVal index As Long) As Double
+    GroupY = mGroupY(index)
+End Property
+' Число физических стержней внутри неделимой группы СП35.
+Public Property Get GroupBarCount(ByVal index As Long) As Long
+    GroupBarCount = mGroupBars(index)
+End Property
+' Суммарная площадь арматуры неделимой группы, мм^2.
+Public Property Get GroupArea(ByVal index As Long) As Double
+    GroupArea = mGroupArea(index)
+End Property
+' Сохраненный коэффициент группы для формулы и пассивного вывода.
+Public Property Get GroupBeta(ByVal index As Long) As Double
+    GroupBeta = mGroupBeta(index)
+End Property
+' Возвращает номер ряда исходной группы арматуры; боковые границы рассчитываются отдельно.
+Public Property Get GroupRow(ByVal index As Long) As Long
+    GroupRow = mGroupRow(index)
+End Property
+' Собственные копии для результата, не чтение измененной модели позже.
+Public Property Get BarID(ByVal index As Long) As String
+    BarID = mBarID(index)
+End Property
+' Диаметр физического стержня подготовленной группы, мм.
+Public Property Get BarDiameter(ByVal index As Long) As Double
+    BarDiameter = mBarDiameter(index)
+End Property
+' Площадь физического стержня, мм^2.
+Public Property Get BarArea(ByVal index As Long) As Double
+    BarArea = mBarArea(index)
+End Property
+' Деформация физического стержня в подготовленном текущем НДС.
+Public Property Get BarStrain(ByVal index As Long) As Double
+    BarStrain = mBarStrain(index)
+End Property
+' Компонента X направления нормали выбранной геометрической записи.
+Public Property Get NormalX() As Double
+    NormalX = mNx
+End Property
+' Компонента Y направления нормали выбранной геометрической записи.
+Public Property Get NormalY() As Double
+    NormalY = mNy
+End Property
+' Координата проекции нейтральной линии в системе области СП35, мм.
+Public Property Get NeutralProjection() As Double
+    NeutralProjection = mNeutralN
+End Property
+' Допуск объединения соседних стержней в неделимую группу, мм.
+Public Property Get GroupGapTolerance() As Double
+    GroupGapTolerance = mGapTolerance
+End Property
+' Допуск разделения арматурных рядов, мм; сам по себе не меняет границы области.
+Public Property Get RowTolerance() As Double
+    RowTolerance = mRowTolerance
+End Property
+' Порог проекции t / полного расстояния L ближайшего соседа.
+Public Property Get NeighborRatioLimit() As Double
+    NeighborRatioLimit = mNeighborRatioLimit
+End Property
+' Выбранный способ определения диаметра для радиуса взаимодействия СП35.
+Public Property Get RadiusDiameterMode() As String
+    RadiusDiameterMode = mDiameterMode
+End Property
+' Выбранный способ определения радиуса взаимодействия СП35.
+Public Property Get InteractionRadiusMode() As String
+    InteractionRadiusMode = mRadiusMode
+End Property
+' Признак ветви центрального растяжения при построении областей СП35.
+Public Property Get CentralTension() As Boolean
+    CentralTension = mCentralTension
+End Property
+' Версия исходной геометрии, зафиксированная при подготовке.
+Public Property Get SectionRevision() As Long
+    SectionRevision = mSectionRevision
+End Property
+' Возвращает радиус взаимодействия арматуры для выбранной области, мм.
+Public Property Get CandidateReinforcementRadius(ByVal index As Long) As Double
+    CheckCandidate index: CandidateReinforcementRadius = mCandidateRadius(index)
+End Property
+' Возвращает коэффициент psi_cm для выбранной области взаимодействия СП 35.
+Public Property Get CandidatePsiCm(ByVal index As Long) As Double
+    CheckCandidate index: CandidatePsiCm = mCandidatePsi(index)
+End Property
+' Возвращает ширину нормальной трещины для выбранной области взаимодействия, мм.
+Public Property Get CandidateCrackWidth(ByVal index As Long) As Double
+    CheckCandidate index: CandidateCrackWidth = mCandidateWidth(index)
+End Property
+
+' Сохраняет рассчитанные радиус армирования, коэффициент и ширину трещины
+' для каждой проверенной области. Сам класс формулу ширины и итоговый статус не вычисляет.
+Friend Sub StoreFormulaResult(ByVal index As Long, ByVal radius As Double, ByVal psiCm As Double, ByVal width As Double)
+    AssertWritable
+    CheckCandidate index
+    mCandidateRadius(index) = radius: mCandidatePsi(index) = psiCm: mCandidateWidth(index) = width
+End Sub
+
+' Завершает заполнение данных перед сохранением в общем результате.
+' Геометрия возвращается копией; сведения о стержнях и настройках уже сохранены.
+Friend Sub Freeze()
+    mFrozen = True
+    Set mSection = Nothing: Set mQuery = Nothing: Set mDomain = Nothing ' Все необходимые данные уже скопированы. Освобождаем ссылки на модель и временную общую бетонную область, чтобы результаты отдельных сочетаний их не удерживали.
+End Sub
+
+' Запрещает изменение подготовленных данных, уже использованных в результате.
+Private Sub AssertWritable()
+    If mFrozen Then Err.Raise vbObjectError + 5511, "CSP35CrackData", _
+        "Опубликованные данные СП 35 нельзя изменить; для нового сочетания создайте новый объект."
+End Sub
+
+' Возвращает копию списка стержней неделимой арматурной группы.
+' По нему можно вывести ряды, beta, количество и реальные диаметры,
+' в том числе когда в одной группе несколько диаметров.
+Public Function GroupMembers(ByVal group As Long) As Variant
+    If group < 1 Or group > mGroupCount Then InvalidData "Номер растянутой группы СП 35 вне допустимого диапазона."
+    Dim members() As Long, i As Long, count As Long
+    ReDim members(1 To mGroupBars(group))
+    For i = 1 To UBound(mBarGroup)
+        If mBarGroup(i) = group Then count = count + 1: members(count) = i
+    Next i
+    GroupMembers = members
+End Function
+
+' Проверяет номер подготовленной области перед чтением, чтобы исключить
+' неверный индекс и данные другого сочетания.
+Private Sub CheckCandidate(ByVal index As Long)
+    If index < 1 Or index > mCandidateCount Then InvalidData "Номер якорного расчета СП 35 вне допустимого диапазона." & " Запрошен номер " & CStr(index) & "; доступно элементов: " & CStr(mCandidateCount) & "."
+End Sub
+
+' Сообщает вызывающему расчёту об ошибке подготовленных данных.
+' Он сохраняет причину и назначает результату статус по общим правилам.
+Private Sub InvalidData(ByVal reason As String)
+    Err.Raise vbObjectError + 5510, "CSP35CrackData", reason
+End Sub
+
+' Минимум двух геометрических ограничений без зависимости от Excel.
+Private Function MinValue(ByVal first As Double, ByVal second As Double) As Double
+    If first < second Then MinValue = first Else MinValue = second
+End Function

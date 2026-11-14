@@ -1,0 +1,1111 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CStabilitySummaryWriter"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Подробная таблица продольного изгиба и устойчивости на Results
+' ==========================================================================
+' Записывает от rngStabilitySummaryAnchor готовые результаты по главным
+' плоскостям и выбранному нормативу СП 35 или СП 63. Переводит величины
+' в пользовательские единицы и оформляет таблицу без повторного расчёта.
+
+Private mCapturedSnapshot As CCalculationSnapshot ' Приёмник готовых значений без записи и оформления листа.
+Private mMinimalFormatting As Boolean ' Сохраняет готовое оформление; обновляет данные, шапки при изменении и цвета статусов.
+
+Private Const HEADER_ROWS As Long = 5 ' Число строк шапки над первой строкой данных.
+Private Const TOTAL_COLUMNS As Long = STABILITY_SNAPSHOT_COLUMNS ' Ширина таблицы с пустыми разделителями между блоками.
+
+Private Const COL_SUMMARY_FIRST As Long = 1 ' Первый столбец сводки устойчивости.
+Private Const COL_SUMMARY_LAST As Long = 14 ' Последний столбец сводки устойчивости.
+Private Const COL_COMMON_FIRST As Long = 16 ' Первый столбец общих параметров устойчивости.
+Private Const COL_COMMON_LAST As Long = 33 ' Последний столбец общих параметров устойчивости.
+Private Const COL_SP35_FIRST As Long = 35 ' Первый столбец расчёта устойчивости СП 35.
+Private Const COL_SP35_LAST As Long = 65 ' Последний столбец расчёта устойчивости СП 35.
+Private Const COL_SP63_FIRST As Long = 67 ' Первый столбец расчёта устойчивости СП 63.
+Private Const COL_SP63_LAST As Long = TOTAL_COLUMNS ' Последний столбец расчёта устойчивости СП 63.
+
+Private Const SP35_PLANE1_FIRST As Long = COL_SP35_FIRST + 1 ' Первый столбец первой плоскости расчёта СП 35.
+Private Const SP35_PLANE2_FIRST As Long = SP35_PLANE1_FIRST + 15 ' Первый столбец второй плоскости расчёта СП 35.
+Private Const SP63_PLANE1_FIRST As Long = COL_SP63_FIRST ' Первый столбец первой плоскости расчёта СП 63.
+Private Const SP63_PLANE2_FIRST As Long = SP63_PLANE1_FIRST + 12 ' Первый столбец второй плоскости расчёта СП 63.
+Private Const COL_INERTIA_FIRST As Long = 26 ' Начало четырёх моментов инерции бетона и арматуры.
+Private Const COL_MODULUS_FIRST As Long = 32 ' Начало двух общих модулей упругости.
+Private Const SP35_DELTA_OFFSET As Long = 3 ' Смещение delta от начала плоскости СП 35.
+Private Const SP35_PHI_L_OFFSET As Long = 4 ' Смещение phi_l для ветви |ec| > r.
+Private Const SP35_NCR_OFFSET As Long = 5 ' Смещение Ncr после обоих коэффициентов плоскости.
+
+Private Const COMMON_TITLE As String = "Исходные усилия и характеристики устойчивости по главным осям приведённого сечения"
+Private Const DEPTH1_NOTE As String = "Габарит бетона вдоль главной оси 2 при изгибе вокруг оси 1. При совпадении осей 1/2 с X/Y это размер по Y."
+Private Const DEPTH2_NOTE As String = "Габарит бетона вдоль главной оси 1 при изгибе вокруг оси 2. При совпадении осей 1/2 с X/Y это размер по X."
+
+Private Const HEADER_COLOR As Long = &HD9D9D9 ' Серый фон шапки, как в остальных таблицах Results.
+Private Const SMALL_VALUE As Double = 0.000000001 ' Малый порог для деления и пустых расчетных полей.
+
+' Возвращает число строк заголовка над началом таблицы rngStabilitySummaryAnchor.
+Public Function HeaderRowsAboveAnchor() As Long
+    HeaderRowsAboveAnchor = HEADER_ROWS
+End Function
+
+' Возвращает полную высоту таблицы устойчивости вместе с шапкой.
+Public Function RequiredRows(ByVal combinationCount As Long) As Long
+    If combinationCount < 1 Then combinationCount = 1
+    RequiredRows = HEADER_ROWS + combinationCount
+End Function
+
+' Возвращает число строк данных, которое нужно оформить под доступные LC.
+' Учитывает рассчитанные сочетания и все доступные строки rngLoadCombinations, включая пустые.
+Public Function RequiredDataRowsForWorkbook(ByVal workbook As Object, ByVal combinationCount As Long) As Long
+    RequiredDataRowsForWorkbook = combinationCount
+    If RequiredDataRowsForWorkbook < 1 Then RequiredDataRowsForWorkbook = 1
+
+    On Error GoTo SafeExit
+    If workbook Is Nothing Then GoTo SafeExit
+    Dim loads As Object
+    Set loads = workbook.Names.Item("rngLoadCombinations").RefersToRange
+    If loads.Rows.Count > 1 Then
+        If loads.Rows.Count - 1 > RequiredDataRowsForWorkbook Then _
+            RequiredDataRowsForWorkbook = loads.Rows.Count - 1
+    End If
+SafeExit:
+    If RequiredDataRowsForWorkbook < 1 Then RequiredDataRowsForWorkbook = 1
+End Function
+
+' Возвращает полную высоту таблицы для фактической книги, включая пустые
+' доступные строки сочетаний, которые тоже должны иметь рамки.
+Public Function RequiredRowsForWorkbook(ByVal workbook As Object, ByVal combinationCount As Long) As Long
+    RequiredRowsForWorkbook = RequiredRows(RequiredDataRowsForWorkbook(workbook, combinationCount))
+End Function
+
+' Возвращает полную ширину таблицы устойчивости, включая пустые столбцы-разделители.
+Public Function RequiredColumns() As Long
+    RequiredColumns = TOTAL_COLUMNS
+End Function
+
+' Записывает подробную таблицу устойчивости от именованной ячейки rngStabilitySummaryAnchor.
+Public Sub WriteSummary(ByVal workbook As Object, ByVal batch As CBatchSectionCalculator, _
+        Optional ByVal units As CUnitSystem = Nothing, Optional ByVal fullFormatting As Boolean = True)
+    mMinimalFormatting = Not fullFormatting
+    On Error GoTo Failed
+    If workbook Is Nothing Then Err.Raise vbObjectError + 3980, "CStabilitySummaryWriter", "Книга Excel не передана."
+    If batch Is Nothing Then Err.Raise vbObjectError + 3981, "CStabilitySummaryWriter", "Пакетный расчетчик не передан."
+
+    Dim target As Object
+    Set target = TargetRange(workbook, RequiredDataRowsForWorkbook(workbook, batch.Count))
+    If mMinimalFormatting Then
+        mMinimalFormatting = (CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@")
+    End If
+    If mCapturedSnapshot Is Nothing Then PrepareTarget target
+    WriteHeaders target, units, batch
+    If mCapturedSnapshot Is Nothing Then WriteBlockTitle target, "Расчет продольного изгиба и устойчивости"
+    WriteData target, batch, units
+    FormatTable target, batch
+    Exit Sub
+
+Failed:
+    Err.Raise Err.Number, "CStabilitySummaryWriter.WriteSummary", Err.Description
+End Sub
+
+' Очищает данные подробной таблицы устойчивости. При fullFormatting=True
+' удаляет также шапку, объединения и форматы; иначе сохраняет готовое оформление.
+Public Sub ClearSummary(ByVal workbook As Object, Optional ByVal fullFormatting As Boolean = True)
+    mMinimalFormatting = Not fullFormatting
+    If workbook Is Nothing Then Err.Raise vbObjectError + 3982, "CStabilitySummaryWriter", "Книга Excel не передана."
+    PrepareTarget ClearTargetRange(workbook)
+End Sub
+
+' Возвращает диапазон таблицы с пятью строками шапки и фактическими строками сочетаний.
+Private Function TargetRange(ByVal workbook As Object, Optional ByVal dataRows As Long = 1) As Object
+    Dim anchor As Object
+    Set anchor = workbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange
+    If anchor.Row <= HEADER_ROWS Then Err.Raise vbObjectError + 3983, "CStabilitySummaryWriter", _
+        "Диапазон rngStabilitySummaryAnchor привязан к " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & _
+        ". Для шапки таблицы нужны " & CStr(HEADER_ROWS) & " строк выше этой ячейки. Перенесите именованный диапазон ниже."
+    Set TargetRange = anchor.Offset(-HEADER_ROWS, 0).Resize(RequiredRows(dataRows), TOTAL_COLUMNS)
+End Function
+
+' Возвращает область очистки существующей таблицы до начала следующего нижнего блока Results.
+Private Function ClearTargetRange(ByVal workbook As Object) As Object
+    Dim anchor As Object
+    Set anchor = workbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange
+    If anchor.Row <= HEADER_ROWS Then Err.Raise vbObjectError + 3983, "CStabilitySummaryWriter", _
+        "Диапазон rngStabilitySummaryAnchor привязан к " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & _
+        ". Для шапки таблицы нужны " & CStr(HEADER_ROWS) & " строк выше этой ячейки. Перенесите именованный диапазон ниже."
+
+    Dim topRow As Long
+    topRow = anchor.Row - HEADER_ROWS
+
+    Dim rowsToClear As Long
+    rowsToClear = RequiredRows(1)
+
+    On Error GoTo UseDefaultHeight
+    Dim nextAnchor As Object
+    Set nextAnchor = workbook.Names.Item("rngNDMElementResults").RefersToRange
+    If nextAnchor.Row > topRow Then
+        rowsToClear = nextAnchor.Row - topRow
+        If mMinimalFormatting Then rowsToClear = rowsToClear - 1
+    End If
+
+UseDefaultHeight:
+    If topRow + rowsToClear - 1 > anchor.Worksheet.Rows.Count Then _
+        rowsToClear = anchor.Worksheet.Rows.Count - topRow + 1
+    Set ClearTargetRange = anchor.Worksheet.Cells(topRow, anchor.Column).Resize(rowsToClear, TOTAL_COLUMNS)
+End Function
+
+' Готовит область к записи: при полном оформлении очищает её целиком.
+' В минимальном режиме оставляет шапку и форматы, удаляя данные и заливку рассчитанных статусов.
+Private Sub PrepareTarget(ByVal target As Object)
+    If mMinimalFormatting Then
+        If target.Rows.Count > HEADER_ROWS Then
+            With target.Offset(HEADER_ROWS, 0).Resize(target.Rows.Count - HEADER_ROWS, TOTAL_COLUMNS)
+                .ClearContents
+                .Interior.ColorIndex = -4142
+            End With
+        End If
+        Exit Sub
+    End If
+    ClearBlockTitleRow target
+    target.UnMerge
+    target.Clear
+End Sub
+
+' Записывает отдельную строку-название над detailed-блоком устойчивости.
+Private Sub WriteBlockTitle(ByVal target As Object, ByVal titleText As String)
+    If target.Row <= 1 Then Exit Sub
+    If mMinimalFormatting Then
+        target.Worksheet.Cells(target.Row - 1, target.Column).Value2 = titleText
+        Exit Sub
+    End If
+
+    Dim titleRow As Long
+    titleRow = target.Row - 1
+    target.Worksheet.Cells(titleRow, target.Column).Resize(1, TOTAL_COLUMNS).Interior.Color = RGB(189, 215, 238)
+    With target.Worksheet.Cells(titleRow, target.Column)
+        .Value2 = titleText
+        .Font.Name = "Arial"
+        .Font.Size = 12
+        .Font.Bold = True
+        .Font.Color = RGB(255, 0, 0)
+        .HorizontalAlignment = -4131
+        .VerticalAlignment = -4108
+        .WrapText = False
+    End With
+End Sub
+
+' Очищает название и заливку в пределах ширины таблицы устойчивости.
+' Пользовательские ячейки справа не затрагиваются.
+Private Sub ClearBlockTitleRow(ByVal target As Object)
+    If target.Row <= 1 Then Exit Sub
+    target.Worksheet.Cells(target.Row - 1, target.Column).Resize(1, TOTAL_COLUMNS).Clear
+End Sub
+
+' Собирает многоуровневую шапку с актуальными единицами. В минимальном
+' режиме сохраняет совпадающую шапку; при отличии возвращается к полному оформлению.
+Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem, _
+        ByVal batch As CBatchSectionCalculator)
+    If Not mCapturedSnapshot Is Nothing Then
+        Dim savedLabels As Variant: savedLabels = HeaderRowLabels(units, batch)
+        mCapturedSnapshot.AddTable "Stability.Labels", savedLabels
+        Exit Sub
+    End If
+    If mMinimalFormatting Then
+        Dim expectedLabels As Variant: expectedLabels = HeaderRowLabels(units, batch)
+        If StabilityHeaderLayoutMatches(target) Then
+            If ResultHeaderMatches(target.Offset(4, 0), expectedLabels, firstColumn:=4) Then
+                RefreshHeaderNotes target
+                Exit Sub
+            End If
+        End If
+        mMinimalFormatting = False
+        target.Resize(HEADER_ROWS, TOTAL_COLUMNS).UnMerge
+    End If
+    MergeCells target, 1, COL_SUMMARY_FIRST, 1, BlockWidth(COL_SUMMARY_FIRST, COL_SUMMARY_LAST), _
+        "Итог по расчету (с учетом " & ChrW$(&H3B7) & ")"
+    MergeCells target, 2, 1, 4, 1, "Combination ID"
+    MergeCells target, 2, 2, 4, 1, "ResultComment"
+    MergeCells target, 2, 3, 4, 1, "общий статус"
+    MergeCells target, 2, 4, 2, 5, "относительно главных центральных осей приведенного сечения"
+    MergeCells target, 2, 9, 2, 3, "относительно центральных осей приведенного сечения"
+    MergeCells target, 2, 12, 2, 3, "в точке приложения нагрузок"
+
+    MergeCells target, 1, COL_COMMON_FIRST, 1, BlockWidth(COL_COMMON_FIRST, COL_COMMON_LAST), _
+        COMMON_TITLE
+    MergeCells target, 2, 16, 1, 6, "Нагрузки до применения " & ChrW$(&H3B7) & " в ц.т. приведенного сечения"
+    MergeCells target, 3, 16, 1, 3, "Полное сочетание"
+    MergeCells target, 3, 19, 1, 3, "Длительная / постоянная часть"
+    MergeCells target, 2, 22, 2, BlockWidth(22, COL_COMMON_LAST), "Сечение и расчётные длины"
+
+    MergeCells target, 1, COL_SP35_FIRST, 1, BlockWidth(COL_SP35_FIRST, COL_SP35_LAST), "Расчет по СП 35"
+    MergeCells target, 2, COL_SP35_FIRST, 2, 1, "Общее для СП 35" ' Строка 4 остаётся доступной для пояснения коэффициента.
+    WriteSP35PlaneHeaders target, SP35_PLANE1_FIRST, "Плоскость 1 (изгиб вокруг главной оси 1, ближайшей к X)"
+    WriteSP35PlaneHeaders target, SP35_PLANE2_FIRST, "Плоскость 2 (изгиб вокруг главной оси 2, ближайшей к Y)"
+
+    MergeCells target, 1, COL_SP63_FIRST, 1, BlockWidth(COL_SP63_FIRST, COL_SP63_LAST), "Расчет по СП 63"
+    WriteSP63PlaneHeaders target, SP63_PLANE1_FIRST, "Плоскость 1 (изгиб вокруг главной оси 1, ближайшей к X)"
+    WriteSP63PlaneHeaders target, SP63_PLANE2_FIRST, "Плоскость 2 (изгиб вокруг главной оси 2, ближайшей к Y)"
+
+    target.Offset(3, 0).Resize(1, TOTAL_COLUMNS).Value2 = HeaderNotes()
+    PutHeaderRowLabels target, units, batch
+End Sub
+
+' Записывает верхние подписи для одной плоскости СП 35.
+Private Sub WriteSP35PlaneHeaders(ByVal target As Object, ByVal firstColumn As Long, ByVal titleText As String)
+    MergeCells target, 2, firstColumn, 1, 15, titleText
+    MergeCells target, 3, firstColumn, 1, 3, "Общие для плоскости"
+    MergeCells target, 3, firstColumn + 3, 1, 6, "при |ec| > r"
+    MergeCells target, 3, firstColumn + 9, 1, 6, "при |ec| <= r"
+End Sub
+
+' Записывает верхние подписи для одной плоскости СП 63.
+Private Sub WriteSP63PlaneHeaders(ByVal target As Object, ByVal firstColumn As Long, ByVal titleText As String)
+    MergeCells target, 2, firstColumn, 2, 12, titleText
+End Sub
+
+' Проверяет актуальность структуры шапки перед сохранением разметки.
+Private Function StabilityHeaderLayoutMatches(ByVal target As Object) As Boolean
+    StabilityHeaderLayoutMatches = CStr(target.Cells(2, 1).Value2) = "Combination ID" And _
+        CStr(target.Cells(1, COL_COMMON_FIRST).Value2) = COMMON_TITLE
+End Function
+
+' Обновляет пояснения одним блоком, сохраняя готовую разметку и единицы шапки.
+Private Sub RefreshHeaderNotes(ByVal target As Object)
+    Dim notes As Variant: notes = HeaderNotes()
+    If Not ResultHeaderMatches(target.Offset(3, 0), notes, firstColumn:=4) Then _
+        target.Offset(3, 0).Resize(1, TOTAL_COLUMNS).Value2 = notes
+End Sub
+
+' Заполняет строку примечаний над обозначениями. Это обычный текст без переноса:
+' если он не помещается, Excel просто обрезает его по ширине ячейки.
+Private Function HeaderNotes() As Variant
+    Dim notes(1 To 1, 1 To TOTAL_COLUMNS) As Variant
+    notes(1, 4) = "Коэффициент продольного изгиба в плоскости 1: изгиб вокруг главной оси 1"
+    notes(1, 5) = "Коэффициент продольного изгиба в плоскости 2: изгиб вокруг главной оси 2"
+    notes(1, 6) = "Продольная сила после учета продольного изгиба"
+    notes(1, 7) = "Момент после учета продольного изгиба в плоскости 1, вокруг главной оси 1"
+    notes(1, 8) = "Момент после учета продольного изгиба в плоскости 2, вокруг главной оси 2"
+    notes(1, 9) = "Продольная сила после учёта продольного изгиба, в пользовательском знаке"
+    notes(1, 10) = "Момент после учёта продольного изгиба относительно оси X через приведённый центр тяжести"
+    notes(1, 11) = "Момент после учёта продольного изгиба относительно оси Y через приведённый центр тяжести"
+    notes(1, 12) = "Продольная сила после учёта продольного изгиба, в пользовательском знаке"
+    notes(1, 13) = "Момент вокруг X после учёта продольного изгиба, перенесённый к точке приложения нагрузки"
+    notes(1, 14) = "Момент вокруг Y после учёта продольного изгиба, перенесённый к точке приложения нагрузки"
+
+    notes(1, 16) = "Продольная сила до учета продольного изгиба"
+    notes(1, 17) = "Момент в плоскости 1, вокруг главной оси 1, до учета продольного изгиба"
+    notes(1, 18) = "Момент в плоскости 2, вокруг главной оси 2, до учета продольного изгиба"
+    notes(1, 19) = "Продольная сила от длительной части по СП 63 или постоянной части по СП 35"
+    notes(1, 20) = "Момент в плоскости 1, вокруг главной оси 1, от постоянной или длительной части"
+    notes(1, 21) = "Момент в плоскости 2, вокруг главной оси 2, от постоянной или длительной части"
+    notes(1, 22) = DEPTH1_NOTE
+    notes(1, 23) = DEPTH2_NOTE
+    notes(1, 24) = "Радиус инерции приведённого сечения относительно главной оси 1"
+    notes(1, 25) = "Радиус инерции приведённого сечения относительно главной оси 2"
+    notes(1, COL_INERTIA_FIRST) = "Момент инерции бетона относительно главной оси 1 приведённого сечения"
+    notes(1, COL_INERTIA_FIRST + 1) = "Момент инерции бетона относительно главной оси 2 приведённого сечения"
+    notes(1, COL_INERTIA_FIRST + 2) = "Момент инерции арматуры относительно главной оси 1 приведённого сечения"
+    notes(1, COL_INERTIA_FIRST + 3) = "Момент инерции арматуры относительно главной оси 2 приведённого сечения"
+    notes(1, 30) = "Расчётная длина L * Mu1 для изгиба вокруг главной оси 1"
+    notes(1, 31) = "Расчётная длина L * Mu2 для изгиба вокруг главной оси 2"
+    notes(1, COL_MODULUS_FIRST) = "Модуль упругости бетона, использованный при расчёте устойчивости"
+    notes(1, COL_MODULUS_FIRST + 1) = "Модуль упругости арматуры, использованный при расчёте устойчивости"
+
+    notes(1, COL_SP35_FIRST) = "Коэффициент для ненапрягаемой арматуры из Config для расчёта Ncr при |ec| > r"
+    PutSP35PlaneNotes notes, SP35_PLANE1_FIRST
+    PutSP35PlaneNotes notes, SP35_PLANE2_FIRST
+    PutSP63PlaneNotes notes, SP63_PLANE1_FIRST
+    PutSP63PlaneNotes notes, SP63_PLANE2_FIRST
+
+    HeaderNotes = notes
+End Function
+
+' Заполняет примечания одной плоскости СП 35.
+Private Sub PutSP35PlaneNotes(ByRef notes() As Variant, ByVal firstColumn As Long)
+    notes(1, firstColumn) = "Случайный эксцентриситет для рассматриваемой плоскости"
+    notes(1, firstColumn + 1) = "Расчетный эксцентриситет продольной силы"
+    notes(1, firstColumn + 2) = "Ядровое расстояние по направлению ec, перпендикулярно оси изгиба. Оно определяет ветвь СП 35"
+    notes(1, firstColumn + SP35_DELTA_OFFSET) = "Отношение |ec|/h с нижним ограничением для ветви |ec| > r"
+    notes(1, firstColumn + SP35_PHI_L_OFFSET) = "Коэффициент длительного действия нагрузки"
+    notes(1, firstColumn + SP35_NCR_OFFSET) = "Критическая продольная сила для ветви |ec| > r"
+    notes(1, firstColumn + 6) = "Коэффициент увеличения момента"
+    notes(1, firstColumn + 7) = "Запас k*Ncr/N. Коэффициент k — допустимое отношение N/Ncr из Config"
+    notes(1, firstColumn + 8) = "Статус проверки ветви |ec| > r"
+    notes(1, firstColumn + 9) = "Коэффициент постоянной нагрузки по таблице 7.21. Зависит от гибкости l0/i этой плоскости"
+    notes(1, firstColumn + 10) = "Коэффициент кратковременной нагрузки по таблице 7.21. Зависит от l0/i и |ec|/r"
+    notes(1, firstColumn + 11) = "Коэффициент снижения предельной силы с учётом доли постоянной нагрузки"
+    notes(1, firstColumn + 12) = "Предельная продольная сила по ветви |ec| <= r"
+    notes(1, firstColumn + 13) = "Запас Nult/N. Здесь N — модуль действующей сжимающей силы"
+    notes(1, firstColumn + 14) = "Статус проверки ветви |ec| <= r"
+End Sub
+
+' Заполняет примечания одной плоскости СП 63.
+Private Sub PutSP63PlaneNotes(ByRef notes() As Variant, ByVal firstColumn As Long)
+    notes(1, firstColumn) = "Гибкость l0/i. Длина и радиус инерции относятся к одной плоскости изгиба"
+    notes(1, firstColumn + 1) = "Случайный эксцентриситет для рассматриваемой плоскости"
+    notes(1, firstColumn + 2) = "Расчетный эксцентриситет продольной силы"
+    notes(1, firstColumn + 3) = "Коэффициент длительного действия нагрузки"
+    notes(1, firstColumn + 4) = "Относительный эксцентриситет |e0|/h с границами DeltaEMin и DeltaEMax из Config"
+    notes(1, firstColumn + 5) = "Коэффициент жесткости бетонной части"
+    notes(1, firstColumn + 6) = "Коэффициент жесткости арматуры"
+    notes(1, firstColumn + 7) = "Условная жёсткость D = kb*Eb*Ib + ks*Es*Is для этой плоскости"
+    notes(1, firstColumn + 8) = "Критическая сила Ncr = pi^2*D/l0^2 для этой плоскости"
+    notes(1, firstColumn + 9) = "Коэффициент увеличения момента"
+    notes(1, firstColumn + 10) = "Запас Ncr/N. Здесь N — модуль действующей сжимающей силы"
+    notes(1, firstColumn + 11) = "Статус проверки рассматриваемой плоскости"
+End Sub
+
+' Заполняет строку обозначений под многоуровневой шапкой.
+Private Function HeaderRowLabels(ByVal units As CUnitSystem, ByVal batch As CBatchSectionCalculator) As Variant
+    Dim labels As Variant: ReDim labels(1 To 1, 1 To TOTAL_COLUMNS)
+    labels(1, 1) = "Combination ID"
+    labels(1, 2) = "ResultComment"
+    labels(1, 3) = "общий статус"
+    labels(1, 4) = ChrW$(&H3B7) & "1"
+    labels(1, 5) = ChrW$(&H3B7) & "2"
+    labels(1, 6) = "N, " & OutputForceUnit(units)
+    labels(1, 7) = "M1, " & OutputMomentUnit(units)
+    labels(1, 8) = "M2, " & OutputMomentUnit(units)
+    labels(1, 9) = "N, " & OutputForceUnit(units)
+    labels(1, 10) = "Mx, " & OutputMomentUnit(units)
+    labels(1, 11) = "My, " & OutputMomentUnit(units)
+    labels(1, 12) = "N, " & OutputForceUnit(units)
+    labels(1, 13) = "Mx, " & OutputMomentUnit(units)
+    labels(1, 14) = "My, " & OutputMomentUnit(units)
+
+    labels(1, 16) = "N, " & OutputForceUnit(units)
+    labels(1, 17) = "M1, " & OutputMomentUnit(units)
+    labels(1, 18) = "M2, " & OutputMomentUnit(units)
+    labels(1, 19) = "N" & ChrW$(&H2097) & ", " & OutputForceUnit(units)
+    labels(1, 20) = "M1" & ChrW$(&H2097) & ", " & OutputMomentUnit(units)
+    labels(1, 21) = "M2" & ChrW$(&H2097) & ", " & OutputMomentUnit(units)
+    labels(1, 22) = "h1, " & OutputLengthUnit(units)
+    labels(1, 23) = "h2, " & OutputLengthUnit(units)
+    labels(1, 24) = "i1, " & OutputLengthUnit(units)
+    labels(1, 25) = "i2, " & OutputLengthUnit(units)
+    labels(1, 30) = "l01, " & OutputLengthUnit(units)
+    labels(1, 31) = "l02, " & OutputLengthUnit(units)
+    Dim stressUnit As String: stressUnit = "MPa"
+    If Not units Is Nothing Then stressUnit = units.OutputStressUnit
+    PutSectionInputLabels labels, OutputLengthUnit(units), stressUnit
+
+    labels(1, COL_SP35_FIRST) = ChrW$(&H3C6) & "p"
+    PutSP35PlaneLabels labels, SP35_PLANE1_FIRST, units, SP35EtaReserveLabel(batch)
+    PutSP35PlaneLabels labels, SP35_PLANE2_FIRST, units, SP35EtaReserveLabel(batch)
+    PutSP63PlaneLabels labels, SP63_PLANE1_FIRST, units
+    PutSP63PlaneLabels labels, SP63_PLANE2_FIRST, units
+
+    HeaderRowLabels = labels
+End Function
+
+' Заполняет обозначения инерций и модулей в тех же единицах, что и числовые данные.
+Private Sub PutSectionInputLabels(ByRef labels As Variant, ByVal lengthUnit As String, ByVal stressUnit As String)
+    Dim inertiaSuffix As String, modulusSuffix As String
+    If Len(lengthUnit) > 0 Then inertiaSuffix = ", " & lengthUnit & ChrW$(&H2074)
+    If Len(stressUnit) > 0 Then modulusSuffix = ", " & stressUnit
+    labels(1, COL_INERTIA_FIRST) = "Ib1" & inertiaSuffix
+    labels(1, COL_INERTIA_FIRST + 1) = "Ib2" & inertiaSuffix
+    labels(1, COL_INERTIA_FIRST + 2) = "Is1" & inertiaSuffix
+    labels(1, COL_INERTIA_FIRST + 3) = "Is2" & inertiaSuffix
+    labels(1, COL_MODULUS_FIRST) = "Eb" & modulusSuffix
+    labels(1, COL_MODULUS_FIRST + 1) = "Es" & modulusSuffix
+End Sub
+
+' Записывает изменившиеся обозначения и восстанавливает их индексы.
+Private Sub PutHeaderRowLabels(ByVal target As Object, ByVal units As CUnitSystem, _
+        ByVal batch As CBatchSectionCalculator)
+    target.Offset(4, 0).Resize(1, TOTAL_COLUMNS).Value2 = HeaderRowLabels(units, batch)
+    ApplyHeaderSubscripts target
+End Sub
+
+' Формирует заголовок запаса для ветви СП 35 |ec| > r.
+' В нем показывается не условное k, а фактический лимит N/Ncr,
+' заданный пользователем в Stability.SP35.NOverNcrLimit.
+Private Function SP35EtaReserveLabel(ByVal batch As CBatchSectionCalculator) As String
+    Dim limitValue As Double
+    limitValue = 0.7
+    If Not batch Is Nothing Then
+        If batch.StabilitySP35NOverNcrLimit > SMALL_VALUE Then _
+            limitValue = batch.StabilitySP35NOverNcrLimit
+    End If
+    SP35EtaReserveLabel = FormatCoefficientInvariant(limitValue) & "*Ncr/N"
+End Function
+
+' Пишет коэффициент в заголовок с точкой в качестве десятичного разделителя.
+Private Function FormatCoefficientInvariant(ByVal value As Double) As String
+    FormatCoefficientInvariant = Replace$(Format$(value, "0.############"), ",", ".")
+End Function
+
+' Заполняет подписи одной плоскости СП 35, сохраняя раздельные колонки для
+' ветвей |ec| > r и |ec| <= r.
+Private Sub PutSP35PlaneLabels(ByRef labels As Variant, ByVal firstColumn As Long, _
+        ByVal units As CUnitSystem, ByVal etaReserveLabel As String)
+    labels(1, firstColumn) = "ec,sl, " & OutputLengthUnit(units)
+    labels(1, firstColumn + 1) = "ec, " & OutputLengthUnit(units)
+    labels(1, firstColumn + 2) = "r, " & OutputLengthUnit(units)
+    labels(1, firstColumn + SP35_DELTA_OFFSET) = ChrW$(&H3B4)
+    labels(1, firstColumn + SP35_PHI_L_OFFSET) = ChrW$(&H3C6) & "l (пост)"
+    labels(1, firstColumn + SP35_NCR_OFFSET) = "Ncr, " & OutputForceUnit(units)
+    labels(1, firstColumn + 6) = ChrW$(&H3B7)
+    labels(1, firstColumn + 7) = etaReserveLabel
+    labels(1, firstColumn + 8) = "статус"
+    labels(1, firstColumn + 9) = ChrW$(&H3C6) & "l (табл)"
+    labels(1, firstColumn + 10) = ChrW$(&H3C6) & "m"
+    labels(1, firstColumn + 11) = ChrW$(&H3C6)
+    labels(1, firstColumn + 12) = "Nult, " & OutputForceUnit(units)
+    labels(1, firstColumn + 13) = "Nult/N"
+    labels(1, firstColumn + 14) = "статус"
+End Sub
+
+' Возвращает обозначение коэффициента длительности СП 63 для записи и восстановления.
+Private Function SP63DurationLabel() As String
+    SP63DurationLabel = ChrW$(&H3C6) & "l (длит)"
+End Function
+
+' Заполняет обозначения одной плоскости СП 63.
+Private Sub PutSP63PlaneLabels(ByRef labels As Variant, ByVal firstColumn As Long, ByVal units As CUnitSystem)
+    labels(1, firstColumn) = "l0/i"
+    labels(1, firstColumn + 1) = "ea, " & OutputLengthUnit(units)
+    labels(1, firstColumn + 2) = "e0, " & OutputLengthUnit(units)
+    labels(1, firstColumn + 3) = SP63DurationLabel()
+    labels(1, firstColumn + 4) = ChrW$(&H3B4) & "e"
+    labels(1, firstColumn + 5) = "kb"
+    labels(1, firstColumn + 6) = "ks"
+    labels(1, firstColumn + 7) = "D, " & OutputStiffnessUnit(units)
+    labels(1, firstColumn + 8) = "Ncr, " & OutputForceUnit(units)
+    labels(1, firstColumn + 9) = ChrW$(&H3B7)
+    labels(1, firstColumn + 10) = "Ncr/N"
+    labels(1, firstColumn + 11) = "статус"
+End Sub
+
+' Записывает строки LC одним массивом.
+Private Sub WriteData(ByVal target As Object, ByVal batch As CBatchSectionCalculator, ByVal units As CUnitSystem)
+    Dim data() As Variant
+    Dim dataRows As Long
+    dataRows = target.Rows.Count - HEADER_ROWS
+    If dataRows < 1 Then dataRows = 1
+    ReDim data(1 To dataRows, 1 To TOTAL_COLUMNS)
+
+    Dim i As Long, workbook As Object: Set workbook = target.Worksheet.Parent
+    For i = 1 To batch.Count
+        PutCombination data, OutputDataOffset(batch, i, dataRows), batch, i, units, workbook
+    Next i
+
+    If Not mCapturedSnapshot Is Nothing Then
+        mCapturedSnapshot.AddTable "Stability.Data", data
+        Exit Sub
+    End If
+    target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).Value2 = data
+End Sub
+
+' Возвращает позицию LC внутри data-части подробной таблицы.
+' Основной поток читает offset из rngLoadCombinations; прямые тесты без offset продолжают выводиться компактно.
+Private Function OutputDataOffset(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal dataRows As Long) As Long
+    OutputDataOffset = batch.SourceDataOffset(index)
+    If OutputDataOffset < 1 Then OutputDataOffset = index
+    If OutputDataOffset > dataRows Then OutputDataOffset = index
+    If OutputDataOffset > dataRows Then OutputDataOffset = dataRows
+End Function
+
+' Возвращает внешнее обозначение статуса устойчивости по сохранённому результату и общим
+' правилам.
+Private Function StabilityStatusText(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal policy As CResultStatusPolicy) As String
+    Dim meta As CResultMeta
+    Set meta = batch.ResultAt(index).StabilityMeta
+    StabilityStatusText = policy.ExternalStatus(meta)
+End Function
+
+
+' Заполняет строку готовыми величинами и комментарием результата устойчивости.
+' Подробные числовые поля доступны только завершенной проверке; активная ветвь
+' СП 35/СП 63 выбирается по сохраненному результату, без повторения формул.
+Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem, ByVal workbook As Object)
+    Dim policy As CResultStatusPolicy
+    Set policy = StatusPolicy()
+
+    Dim statusText As String
+    statusText = StabilityStatusText(batch, index, policy)
+    data(rowIndex, 1) = batch.CombinationID(index)
+    data(rowIndex, 2) = CalculationResultMessage(batch, index, batch.ResultAt(index).StabilityMeta, workbook)
+    data(rowIndex, 3) = statusText
+    PutDefaultStatusCells data, rowIndex, policy.NotApplicable
+    If Not policy.IsMetaFinished(batch.ResultAt(index).StabilityMeta) Then Exit Sub
+
+    data(rowIndex, 4) = OptionalValue(batch.ResultAt(index).StabilityResult.Eta1)
+    data(rowIndex, 5) = OptionalValue(batch.ResultAt(index).StabilityResult.Eta2)
+    data(rowIndex, 6) = OutputForce(batch.ResultAt(index).StabilityResult.DesignN, units)
+    data(rowIndex, 7) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.DesignMoment1, units)
+    data(rowIndex, 8) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.DesignMoment2, units)
+    data(rowIndex, 9) = OutputForce(batch.ResultAt(index).StabilityResult.DesignN, units)
+    data(rowIndex, 10) = OutputMx(batch.ResultAt(index).StabilityResult.DesignMx, units)
+    data(rowIndex, 11) = OutputMy(batch.ResultAt(index).StabilityResult.DesignMy, units)
+    data(rowIndex, 12) = OutputForce(batch.ResultAt(index).StabilityResult.DesignN, units)
+    data(rowIndex, 13) = OutputMx(batch.StabilityLoadPointMx(index), units)
+    data(rowIndex, 14) = OutputMy(batch.StabilityLoadPointMy(index), units)
+
+    data(rowIndex, 16) = OutputForce(batch.ResultAt(index).StabilityResult.DesignN, units)
+    data(rowIndex, 17) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.Moment1, units)
+    data(rowIndex, 18) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.Moment2, units)
+    data(rowIndex, 19) = OutputSignedCompressionForce(batch.ResultAt(index).StabilityResult.SustainedN, units)
+    data(rowIndex, 20) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.SustainedMoment1, units)
+    data(rowIndex, 21) = OutputMomentMagnitude(batch.ResultAt(index).StabilityResult.SustainedMoment2, units)
+    data(rowIndex, 22) = OutputLength(batch.ResultAt(index).StabilityResult.Depth1, units)
+    data(rowIndex, 23) = OutputLength(batch.ResultAt(index).StabilityResult.Depth2, units)
+    data(rowIndex, 24) = OutputLength(batch.ResultAt(index).StabilityResult.Radius1, units)
+    data(rowIndex, 25) = OutputLength(batch.ResultAt(index).StabilityResult.Radius2, units)
+    data(rowIndex, 30) = OutputLength(batch.ResultAt(index).StabilityResult.EffectiveLength1, units)
+    data(rowIndex, 31) = OutputLength(batch.ResultAt(index).StabilityResult.EffectiveLength2, units)
+    PutSectionInputValues data, rowIndex, batch.ResultAt(index).StabilityResult, units
+
+    If StrComp(batch.ResultAt(index).StabilityResult.Code, "SP35", vbTextCompare) = 0 Then
+        data(rowIndex, COL_SP35_FIRST) = OptionalValue(MaxDouble(batch.ResultAt(index).StabilityResult.PhiP1, batch.ResultAt(index).StabilityResult.PhiP2))
+        PutSP35PlaneValues data, rowIndex, SP35_PLANE1_FIRST, batch, index, 1, units
+        PutSP35PlaneValues data, rowIndex, SP35_PLANE2_FIRST, batch, index, 2, units
+    ElseIf StrComp(batch.ResultAt(index).StabilityResult.Code, "SP63", vbTextCompare) = 0 Then
+        PutSP63PlaneValues data, rowIndex, SP63_PLANE1_FIRST, batch, index, 1, units
+        PutSP63PlaneValues data, rowIndex, SP63_PLANE2_FIRST, batch, index, 2, units
+    End If
+End Sub
+
+' Переводит фактические входы устойчивости из МПа и мм4. Нулевая инерция арматуры допустима.
+Private Sub PutSectionInputValues(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal result As CStabilityResult, ByVal units As CUnitSystem)
+    If result.ConcreteElasticModulus <= 0# Then Exit Sub ' Без рассчитанной устойчивости величины оставляются пустыми.
+    Dim values As Variant
+    values = Array(result.ConcreteInertia1, result.ConcreteInertia2, result.SteelInertia1, result.SteelInertia2)
+    Dim i As Long
+    For i = 0 To 3
+        If Not units Is Nothing Then values(i) = units.InternalFourthPowerLengthToOutput(CDbl(values(i)))
+        data(rowIndex, COL_INERTIA_FIRST + i) = values(i)
+    Next i
+    Dim eb As Double: eb = result.ConcreteElasticModulus
+    Dim es As Double: es = result.SteelElasticModulus
+    If Not units Is Nothing Then
+        eb = units.InternalStressToOutput(eb)
+        es = units.InternalStressToOutput(es)
+    End If
+    data(rowIndex, COL_MODULUS_FIRST) = eb
+    data(rowIndex, COL_MODULUS_FIRST + 1) = es
+End Sub
+
+' Заполняет одну плоскость СП 35. В строке активна только ветвь |ec| > r или |ec| <= r.
+Private Sub PutSP35PlaneValues(ByRef data() As Variant, ByVal rowIndex As Long, ByVal firstColumn As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long, _
+        ByVal units As CUnitSystem)
+    Dim branchName As String
+    branchName = PlaneBranch(batch, index, planeIndex)
+
+    data(rowIndex, firstColumn) = OutputLength(PlaneAccidentalEccentricity(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 1) = OutputLength(PlaneEccentricity(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 2) = OutputLength(PlaneCoreDistance(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + SP35_NCR_OFFSET) = OptionalCompressionForce(PlaneNcr(batch, index, planeIndex), units)
+
+    If StrComp(branchName, "SP35-eta", vbTextCompare) = 0 Then
+        data(rowIndex, firstColumn + SP35_DELTA_OFFSET) = OptionalValue(PlaneDelta(batch, index, planeIndex))
+        data(rowIndex, firstColumn + SP35_PHI_L_OFFSET) = OptionalValue(PlanePhiL(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 6) = OptionalValue(PlaneEta(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 7) = OptionalValue(PlaneReserve(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 8) = PlaneStatus(batch, index, planeIndex)
+        data(rowIndex, firstColumn + 14) = StatusPolicy().NotApplicable
+    ElseIf StrComp(branchName, "SP35-table", vbTextCompare) = 0 Then
+        data(rowIndex, firstColumn + 8) = StatusPolicy().NotApplicable
+        data(rowIndex, firstColumn + 9) = OptionalValue(PlanePhiLTable(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 10) = OptionalValue(PlanePhiM(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 11) = OptionalValue(PlanePhiValue(batch, index, planeIndex))
+        data(rowIndex, firstColumn + 12) = OptionalCompressionForce(PlaneNultimate(batch, index, planeIndex), units)
+        data(rowIndex, firstColumn + 13) = RatioLimitToCompression(PlaneNultimate(batch, index, planeIndex), batch.ResultAt(index).StabilityResult.DesignN)
+        data(rowIndex, firstColumn + 14) = PlaneStatus(batch, index, planeIndex)
+    End If
+End Sub
+
+' Заполняет одну плоскость СП 63.
+Private Sub PutSP63PlaneValues(ByRef data() As Variant, ByVal rowIndex As Long, ByVal firstColumn As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long, _
+        ByVal units As CUnitSystem)
+    data(rowIndex, firstColumn) = OptionalValue(PlaneSlenderness(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 1) = OutputLength(PlaneAccidentalEccentricity(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 2) = OutputLength(PlaneEccentricity(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 3) = OptionalValue(PlanePhiL(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 4) = OptionalValue(PlaneDelta(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 5) = OptionalValue(PlaneKb(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 6) = OptionalValue(PlaneKs(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 7) = OutputStiffness(PlaneStiffnessD(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 8) = OptionalCompressionForce(PlaneNcr(batch, index, planeIndex), units)
+    data(rowIndex, firstColumn + 9) = OptionalValue(PlaneEta(batch, index, planeIndex))
+    data(rowIndex, firstColumn + 10) = RatioLimitToCompression(PlaneNcr(batch, index, planeIndex), batch.ResultAt(index).StabilityResult.DesignN)
+    data(rowIndex, firstColumn + 11) = PlaneStatus(batch, index, planeIndex)
+End Sub
+
+' Оформляет подробную таблицу устойчивости: шапку, рамки, числа и статусы.
+' В минимальном режиме обновляет только подсветку статусов.
+Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalculator, _
+        Optional ByRef preparedValues As Variant)
+    If Not mCapturedSnapshot Is Nothing Then Exit Sub
+    If mMinimalFormatting Then
+        FormatStatusCells target, batch, preparedValues
+        Exit Sub
+    End If
+    target.Font.Name = "Arial"
+    target.Font.Size = 9
+    target.HorizontalAlignment = -4108
+    target.VerticalAlignment = -4108
+    target.WrapText = False
+
+    FormatBlock target, COL_SUMMARY_FIRST, COL_SUMMARY_LAST
+    FormatBlock target, COL_COMMON_FIRST, COL_COMMON_LAST
+    FormatBlock target, COL_SP35_FIRST, COL_SP35_LAST
+    FormatBlock target, COL_SP63_FIRST, COL_SP63_LAST
+
+    target.Offset(0, 0).Resize(HEADER_ROWS, TOTAL_COLUMNS).Font.Bold = True
+    target.Offset(0, 0).Resize(HEADER_ROWS, TOTAL_COLUMNS).WrapText = True
+    target.Offset(HEADER_ROWS - 1, 0).Resize(1, TOTAL_COLUMNS).WrapText = False
+    FormatHeaderNotes target
+    Dim dataRows As Long
+    dataRows = target.Rows.Count - HEADER_ROWS
+    If dataRows < 1 Then dataRows = 1
+    target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).WrapText = False
+    target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).NumberFormat = "0.000"
+    target.Offset(HEADER_ROWS, COL_INERTIA_FIRST - 1).Resize(dataRows, 4).NumberFormat = "0.000E+00"
+    target.Offset(HEADER_ROWS, COL_MODULUS_FIRST - 1).Resize(dataRows, 2).NumberFormat = "[>=1000000]0.000E+00;0.000"
+    target.Offset(HEADER_ROWS, 0).Resize(dataRows, 3).NumberFormat = "@"
+    target.Offset(HEADER_ROWS, 1).Resize(dataRows, 1).HorizontalAlignment = -4131
+
+    FormatStatusCells target, batch, preparedValues
+End Sub
+
+' Оформляет строку примечаний как обычный текст, а не как дополнительный заголовок.
+Private Sub FormatHeaderNotes(ByVal target As Object)
+    With target.Offset(3, 0).Resize(1, TOTAL_COLUMNS)
+        .Font.Bold = False
+        .Font.Size = 8
+        .HorizontalAlignment = -4131
+        .VerticalAlignment = -4108
+        .WrapText = False
+    End With
+End Sub
+
+' Оформляет один раздел таблицы, сохраняя пустой столбец между разделами.
+Private Sub FormatBlock(ByVal target As Object, ByVal firstColumn As Long, ByVal lastColumn As Long)
+    Dim block As Object
+    Set block = target.Offset(0, firstColumn - 1).Resize(target.Rows.Count, lastColumn - firstColumn + 1)
+    block.Borders.LineStyle = 1
+    block.Borders.Color = RGB(0, 0, 0)
+    block.Borders.Weight = 2
+    block.HorizontalAlignment = -4108
+    block.VerticalAlignment = -4108
+    target.Offset(0, firstColumn - 1).Resize(HEADER_ROWS, lastColumn - firstColumn + 1).Interior.Color = HEADER_COLOR
+End Sub
+
+' Красит блоки строки LC по итоговому статусу расчета устойчивости.
+Private Sub FormatStatusCells(ByVal target As Object, ByVal batch As CBatchSectionCalculator, Optional ByRef preparedValues As Variant)
+    Dim rows() As Long, i As Long
+    If batch Is Nothing Then
+        Dim storedRows As Variant: storedRows = ResultSnapshotStatusRows(target, HEADER_ROWS, preparedValues)
+        If IsEmpty(storedRows) Then Exit Sub
+        rows = storedRows
+    Else
+    If batch.Count <= 0 Then Exit Sub
+    Dim dataRows As Long: dataRows = target.Rows.Count - HEADER_ROWS
+    ReDim rows(1 To batch.Count)
+    For i = 1 To batch.Count
+        rows(i) = HEADER_ROWS + OutputDataOffset(batch, i, dataRows)
+    Next i
+    End If
+    ApplyTableStatusFills target, rows, Array( _
+        3, SP35_PLANE1_FIRST + 8, SP35_PLANE1_FIRST + 14, _
+        SP35_PLANE2_FIRST + 8, SP35_PLANE2_FIRST + 14, SP63_PLANE1_FIRST + 11, _
+        SP63_PLANE2_FIRST + 11), False, 0, preparedValues, HEADER_ROWS
+End Sub
+
+' Заполняет все статусные колонки нормативных ветвей значением N/A до записи выбранной методики.
+Private Sub PutDefaultStatusCells(ByRef data() As Variant, ByVal rowIndex As Long, ByVal statusText As String)
+    data(rowIndex, SP35_PLANE1_FIRST + 8) = statusText
+    data(rowIndex, SP35_PLANE1_FIRST + 14) = statusText
+    data(rowIndex, SP35_PLANE2_FIRST + 8) = statusText
+    data(rowIndex, SP35_PLANE2_FIRST + 14) = statusText
+    data(rowIndex, SP63_PLANE1_FIRST + 11) = statusText
+    data(rowIndex, SP63_PLANE2_FIRST + 11) = statusText
+End Sub
+
+
+' Объединяет ячейки шапки и записывает текст.
+Private Sub MergeCells(ByVal target As Object, ByVal rowIndex As Long, ByVal columnIndex As Long, _
+        ByVal rowCount As Long, ByVal columnCount As Long, ByVal valueText As String)
+    Dim area As Object
+    Set area = target.Offset(rowIndex - 1, columnIndex - 1).Resize(rowCount, columnCount)
+    area.Merge
+    area.Value2 = valueText
+End Sub
+
+' Возвращает ширину блока по его первой и последней колонке.
+Private Function BlockWidth(ByVal firstColumn As Long, ByVal lastColumn As Long) As Long
+    BlockWidth = lastColumn - firstColumn + 1
+End Function
+
+' Делает нижние индексы в обозначениях без изменения самого текста заголовка.
+Private Sub ApplyHeaderSubscripts(ByVal target As Object)
+    Dim labels As Object
+    Set labels = target.Offset(4, 0).Resize(1, TOTAL_COLUMNS)
+
+    Dim headers As Variant: headers = labels.Value2
+    Dim column As Long
+    For column = 1 To UBound(headers, 2)
+        ApplySubscriptToken labels, headers, column, "ec,sl", 2, 4
+        ApplySubscriptToken labels, headers, column, "ec", 2, 1
+        ApplySubscriptToken labels, headers, column, "ea", 2, 1
+        ApplySubscriptToken labels, headers, column, "e0", 2, 1
+        ApplySubscriptToken labels, headers, column, "l01", 2, 2
+        ApplySubscriptToken labels, headers, column, "l02", 2, 2
+        ApplySubscriptToken labels, headers, column, "Ib1", 2, 2
+        ApplySubscriptToken labels, headers, column, "Ib2", 2, 2
+        ApplySubscriptToken labels, headers, column, "Is1", 2, 2
+        ApplySubscriptToken labels, headers, column, "Is2", 2, 2
+        ApplySubscriptToken labels, headers, column, "Eb", 2, 1
+        ApplySubscriptToken labels, headers, column, "Es", 2, 1
+        ApplySubscriptToken labels, headers, column, "l0/i", 2, 1
+        ApplySubscriptToken labels, headers, column, "Ncr", 2, 2
+        ApplySubscriptToken labels, headers, column, "Nult", 2, 3
+        ApplySubscriptToken labels, headers, column, "M1", 2, 1
+        ApplySubscriptToken labels, headers, column, "M2", 2, 1
+        ApplySubscriptToken labels, headers, column, ChrW$(&H3C6) & "p", 2, 1
+        ApplySubscriptToken labels, headers, column, ChrW$(&H3C6) & "l", 2, 1
+        ApplySubscriptToken labels, headers, column, ChrW$(&H3C6) & "m", 2, 1
+        ApplySubscriptToken labels, headers, column, ChrW$(&H3B4) & "e", 2, 1
+        ApplySubscriptToken labels, headers, column, "kb", 2, 1
+        ApplySubscriptToken labels, headers, column, "ks", 2, 1
+    Next column
+End Sub
+
+' Применяет нижний индекс к найденному техническому обозначению.
+Private Sub ApplySubscriptToken(ByVal labels As Object, ByRef headers As Variant, ByVal columnIndex As Long, _
+        ByVal token As String, ByVal subStart As Long, ByVal subLength As Long)
+    Dim valueText As String
+    valueText = CStr(headers(1, columnIndex))
+    If Len(valueText) = 0 Then Exit Sub
+
+    Dim position As Long
+    position = InStr(1, valueText, token, vbBinaryCompare)
+    If position <= 0 Then Exit Sub
+
+    Dim cell As Object: Set cell = labels.Cells(1, columnIndex)
+    On Error Resume Next
+    cell.Characters(position + subStart - 1, subLength).Font.Subscript = True
+    On Error GoTo 0
+End Sub
+
+' Возвращает статус одной расчетной плоскости по общему пользовательскому словарю.
+Private Function PlaneStatus(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As String
+    Dim policy As CResultStatusPolicy
+    Set policy = StatusPolicy()
+    If Not PlaneApplicable(batch, index, planeIndex) Then
+        PlaneStatus = policy.NotApplicable
+    ElseIf PlanePassed(batch, index, planeIndex) Then
+        PlaneStatus = policy.OK
+    Else
+        PlaneStatus = policy.Fail
+    End If
+End Function
+
+' Возвращает применимость выбранной главной плоскости (1 или 2)
+' по готовому результату проверки устойчивости сочетания.
+Private Function PlaneApplicable(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Boolean
+    If planeIndex = 1 Then PlaneApplicable = batch.ResultAt(index).StabilityResult.PlaneApplicable1 Else PlaneApplicable = batch.ResultAt(index).StabilityResult.PlaneApplicable2
+End Function
+
+' Возвращает итог PASS/FAIL одной плоскости устойчивости.
+Private Function PlanePassed(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Boolean
+    If planeIndex = 1 Then PlanePassed = batch.ResultAt(index).StabilityResult.PlanePassed1 Else PlanePassed = batch.ResultAt(index).StabilityResult.PlanePassed2
+End Function
+
+' Возвращает расчетную ветвь одной плоскости: SP35-table, SP35-eta или SP63.
+Private Function PlaneBranch(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As String
+    If planeIndex = 1 Then PlaneBranch = batch.ResultAt(index).StabilityResult.PlaneBranch1 Else PlaneBranch = batch.ResultAt(index).StabilityResult.PlaneBranch2
+End Function
+
+' Возвращает критическую силу Ncr одной плоскости.
+Private Function PlaneNcr(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneNcr = batch.ResultAt(index).StabilityResult.Ncr1 Else PlaneNcr = batch.ResultAt(index).StabilityResult.Ncr2
+End Function
+
+' Возвращает табличную несущую силу Nult для ветви СП 35 |ec| <= r.
+Private Function PlaneNultimate(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneNultimate = batch.ResultAt(index).StabilityResult.Nultimate1 Else PlaneNultimate = batch.ResultAt(index).StabilityResult.Nultimate2
+End Function
+
+' Возвращает коэффициент eta одной плоскости.
+Private Function PlaneEta(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneEta = batch.ResultAt(index).StabilityResult.Eta1 Else PlaneEta = batch.ResultAt(index).StabilityResult.Eta2
+End Function
+
+' Возвращает коэффициент длительности phi_l одной плоскости.
+Private Function PlanePhiL(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlanePhiL = batch.ResultAt(index).StabilityResult.PhiL1 Else PlanePhiL = batch.ResultAt(index).StabilityResult.PhiL2
+End Function
+
+' Возвращает табличный phi_l для ветви СП 35 |ec| <= r.
+Private Function PlanePhiLTable(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlanePhiLTable = batch.ResultAt(index).StabilityResult.PhiLTable1 Else PlanePhiLTable = batch.ResultAt(index).StabilityResult.PhiLTable2
+End Function
+
+' Возвращает табличный phi_m для ветви СП 35 |ec| <= r.
+Private Function PlanePhiM(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlanePhiM = batch.ResultAt(index).StabilityResult.PhiM1 Else PlanePhiM = batch.ResultAt(index).StabilityResult.PhiM2
+End Function
+
+' Возвращает итоговый phi для табличной ветви СП 35.
+Private Function PlanePhiValue(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlanePhiValue = batch.ResultAt(index).StabilityResult.PhiValue1 Else PlanePhiValue = batch.ResultAt(index).StabilityResult.PhiValue2
+End Function
+
+' Возвращает полный эксцентриситет ec/e0 одной плоскости.
+Private Function PlaneEccentricity(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneEccentricity = batch.ResultAt(index).StabilityResult.Eccentricity1 Else PlaneEccentricity = batch.ResultAt(index).StabilityResult.Eccentricity2
+End Function
+
+' Возвращает случайный эксцентриситет ec,sl/ea одной плоскости.
+Private Function PlaneAccidentalEccentricity(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneAccidentalEccentricity = batch.ResultAt(index).StabilityResult.AccidentalEcc1 Else PlaneAccidentalEccentricity = batch.ResultAt(index).StabilityResult.AccidentalEcc2
+End Function
+
+' Возвращает гибкость l0/i одной плоскости.
+Private Function PlaneSlenderness(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneSlenderness = batch.ResultAt(index).StabilityResult.Slenderness1 Else PlaneSlenderness = batch.ResultAt(index).StabilityResult.Slenderness2
+End Function
+
+' Возвращает ядровое расстояние r в направлении эксцентриситета.
+Private Function PlaneCoreDistance(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneCoreDistance = batch.ResultAt(index).StabilityResult.CoreDistance1 Else PlaneCoreDistance = batch.ResultAt(index).StabilityResult.CoreDistance2
+End Function
+
+' Возвращает расчетную delta одной плоскости.
+Private Function PlaneDelta(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneDelta = batch.ResultAt(index).StabilityResult.Delta1 Else PlaneDelta = batch.ResultAt(index).StabilityResult.Delta2
+End Function
+
+' Возвращает коэффициент kb для ветви СП 63.
+Private Function PlaneKb(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneKb = batch.ResultAt(index).StabilityResult.Kb1 Else PlaneKb = batch.ResultAt(index).StabilityResult.Kb2
+End Function
+
+' Возвращает коэффициент ks для ветви СП 63.
+Private Function PlaneKs(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneKs = batch.ResultAt(index).StabilityResult.Ks1 Else PlaneKs = batch.ResultAt(index).StabilityResult.Ks2
+End Function
+
+' Возвращает жесткость D одной плоскости.
+Private Function PlaneStiffnessD(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneStiffnessD = batch.ResultAt(index).StabilityResult.StiffnessD1 Else PlaneStiffnessD = batch.ResultAt(index).StabilityResult.StiffnessD2
+End Function
+
+' Возвращает проверочный запас одной плоскости.
+Private Function PlaneReserve(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal planeIndex As Long) As Double
+    If planeIndex = 1 Then PlaneReserve = batch.ResultAt(index).StabilityResult.Reserve1 Else PlaneReserve = batch.ResultAt(index).StabilityResult.Reserve2
+End Function
+
+' Оставляет ячейку пустой, если абсолютное значение не превышает SMALL_VALUE.
+' Так малые остатки вычислений не выводятся вместо нуля.
+Private Function OptionalValue(ByVal value As Double) As Variant
+    If Abs(value) > SMALL_VALUE Then OptionalValue = value Else OptionalValue = vbNullString
+End Function
+
+' Выводит сжимающую силу только когда она физически есть; иначе возвращает
+' стандартный N/A из политики статусов.
+Private Function OptionalCompressionForce(ByVal compressionMagnitude As Double, ByVal units As CUnitSystem) As Variant
+    If compressionMagnitude > SMALL_VALUE Then OptionalCompressionForce = OutputCompressionForce(compressionMagnitude, units) Else OptionalCompressionForce = StatusPolicy().NotApplicable
+End Function
+
+' Возвращает коэффициент запаса limit/Ncompression для ограничения СП 35.
+Private Function RatioLimitToCompression(ByVal limitCompression As Double, ByVal nValue As Double) As Variant
+    Dim compression As Double
+    compression = CompressionMagnitude(nValue)
+    If compression <= SMALL_VALUE Or limitCompression <= SMALL_VALUE Then
+        RatioLimitToCompression = vbNullString
+    Else
+        RatioLimitToCompression = limitCompression / compression
+    End If
+End Function
+
+' Преобразует signed N во внутреннюю положительную величину сжатия.
+Private Function CompressionMagnitude(ByVal nValue As Double) As Double
+    Dim loadState As CSectionLoadState
+    Set loadState = New CSectionLoadState
+    loadState.Initialize nValue, 0#, 0#, 0#, 0#
+    CompressionMagnitude = loadState.CompressionMagnitude(SMALL_VALUE)
+End Function
+
+' Переводит положительную величину сжатия в пользовательские единицы силы
+' с учетом принятого знака Sign.N.User.
+Private Function OutputCompressionForce(ByVal compressionMagnitude As Double, ByVal units As CUnitSystem) As Double
+    If compressionMagnitude <= SMALL_VALUE Then Exit Function
+    OutputCompressionForce = OutputForce(-Abs(compressionMagnitude), units)
+End Function
+
+' Переводит знаковую силу устойчивости, где плюс означает сжатие,
+' в пользовательское N. Перед переводом восстанавливает внутренний знак: сжатие — минус.
+Private Function OutputSignedCompressionForce(ByVal signedCompression As Double, ByVal units As CUnitSystem) As Double
+    OutputSignedCompressionForce = OutputForce(-signedCompression, units)
+End Function
+
+' Переводит длину из внутренних мм в выходную единицу пользователя.
+' Если CUnitSystem не передан, возвращает исходное значение в мм.
+Private Function OutputLength(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputLength = value Else OutputLength = units.InternalLengthToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы длины.
+Private Function OutputLengthUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputLengthUnit = "mm" Else OutputLengthUnit = units.OutputLengthUnit
+End Function
+
+' Переводит внутреннюю силу в пользовательские выходные единицы.
+Private Function OutputForce(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputForce = value Else OutputForce = units.InternalForceToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы силы.
+Private Function OutputForceUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputForceUnit = "N" Else OutputForceUnit = units.OutputForceUnit
+End Function
+
+' Переводит внутренний Mx в пользовательские выходные единицы и знак.
+Private Function OutputMx(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMx = value Else OutputMx = units.InternalMomentMxToOutput(value)
+End Function
+
+' Переводит внутренний My в пользовательские выходные единицы и знак.
+Private Function OutputMy(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMy = value Else OutputMy = units.InternalMomentMyToOutput(value)
+End Function
+
+' Переводит модуль момента без назначения знака конкретной оси.
+Private Function OutputMomentMagnitude(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMomentMagnitude = value Else OutputMomentMagnitude = units.InternalMomentMagnitudeToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы момента.
+Private Function OutputMomentUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputMomentUnit = "N*mm" Else OutputMomentUnit = units.OutputMomentUnit
+End Function
+
+' Переводит жесткость D из Н*мм2 в выбранные выходные единицы.
+Private Function OutputStiffness(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputStiffness = value Else OutputStiffness = units.InternalForceLengthSquaredToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы жесткости.
+Private Function OutputStiffnessUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputStiffnessUnit = "N*mm2" Else OutputStiffnessUnit = units.OutputForceLengthSquaredUnit
+End Function
+
+' Утилитарный максимум без WorksheetFunction для форматирования таблицы.
+Private Function MaxDouble(ByVal a As Double, ByVal b As Double) As Double
+    If a > b Then MaxDouble = a Else MaxDouble = b
+End Function
+
+' Возвращает общую политику отображения статусов PASS/FAIL/N/A.
+Private Function StatusPolicy() As CResultStatusPolicy
+    Static policy As CResultStatusPolicy
+    If policy Is Nothing Then Set policy = New CResultStatusPolicy
+    Set StatusPolicy = policy
+End Function
+
+' Передаёт отдельный приёмник готовых массивов; при Nothing сохраняется обычный вывод.
+Friend Property Set CaptureSnapshot(ByVal value As CCalculationSnapshot)
+    Set mCapturedSnapshot = value
+End Property
+
+' Восстанавливает готовую подробную таблицу и её сохранённое оформление без решения НДС.
+Public Sub RestoreSummary(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, Optional ByVal fullFormatting As Boolean = True)
+    snapshot.Validate
+    RestoreSummaryTables workbook, snapshot, fullFormatting
+End Sub
+
+' Восстанавливает только готовые общие сводки из проверенного адресного источника.
+Public Sub RestoreIndexedSummary(ByVal workbook As Object, ByVal source As CResultReadSource, ByVal fullFormatting As Boolean)
+    source.ValidateForDisplay
+    RestoreSummaryTables workbook, source, fullFormatting
+End Sub
+
+' Записывает те же массивы и оформление для двух явно проверенных входных контрактов.
+Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Object, ByVal fullFormatting As Boolean)
+    Set mCapturedSnapshot = Nothing
+    mMinimalFormatting = Not fullFormatting
+    Dim data As Variant: data = snapshot.Table("Stability.Data")
+    Dim target As Object: Set target = TargetRange(workbook, UBound(data, 1))
+    Dim labels As Variant: labels = snapshot.Table("Stability.Labels")
+    If UBound(labels, 2) = LEGACY_STABILITY_SNAPSHOT_COLUMNS Then
+        labels = ExpandSavedStabilityColumns(labels)
+        data = ExpandSavedStabilityColumns(data)
+        Dim properties As Variant: properties = snapshot.Table("rngNDMSectionProperties")
+        PutSectionInputLabels labels, SavedOutputUnit(properties, "Output.LengthUnit"), SavedOutputUnit(properties, "Output.StressUnit")
+    End If
+    OrderSavedSP35Plane labels, data, SP35_PLANE1_FIRST
+    OrderSavedSP35Plane labels, data, SP35_PLANE2_FIRST
+    labels(1, SP63_PLANE1_FIRST + 3) = SP63DurationLabel()
+    labels(1, SP63_PLANE2_FIRST + 3) = SP63DurationLabel()
+    If mMinimalFormatting Then mMinimalFormatting = CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@" And _
+        StabilityHeaderLayoutMatches(target) And ResultHeaderMatches(target.Offset(4, 0), labels, firstColumn:=4)
+    PrepareTarget target
+    If Not mMinimalFormatting Then
+        WriteHeaders target, Nothing, Nothing
+        target.Offset(4, 0).Resize(1, TOTAL_COLUMNS).Value2 = labels
+        ApplyHeaderSubscripts target
+    Else
+        RefreshHeaderNotes target
+    End If
+    WriteBlockTitle target, "Расчет продольного изгиба и устойчивости"
+    target.Offset(HEADER_ROWS, 0).Resize(UBound(data, 1), TOTAL_COLUMNS).Value2 = data
+    FormatTable target, Nothing, data
+End Sub
+
+' Дополняет 84-колоночную матрицу пустыми полями, которых в снимке ещё не было.
+Private Function ExpandSavedStabilityColumns(ByRef values As Variant) As Variant
+    Dim expanded() As Variant, row As Long, column As Long, destination As Long
+    ReDim expanded(1 To UBound(values, 1), 1 To TOTAL_COLUMNS)
+    For column = 1 To LEGACY_STABILITY_SNAPSHOT_COLUMNS
+        destination = column
+        If column >= COL_INERTIA_FIRST Then destination = column + 4
+        If column > 27 Then destination = column + 6
+        For row = 1 To UBound(values, 1)
+            expanded(row, destination) = values(row, column)
+        Next row
+    Next column
+    ExpandSavedStabilityColumns = expanded
+End Function
+
+' Читает единицу именно сохранённого расчёта для пустых полей совместимости.
+Private Function SavedOutputUnit(ByRef properties As Variant, ByVal key As String) As String
+    Dim row As Long
+    For row = 2 To UBound(properties, 1)
+        If CStr(properties(row, 2)) = "ALL" And CStr(properties(row, 3)) = key Then
+            SavedOutputUnit = CStr(properties(row, 4))
+            Exit Function
+        End If
+    Next row
+End Function
+
+' В снимках с порядком Ncr, delta, phi_l переносит Ncr вместе со значениями и единицей.
+Private Sub OrderSavedSP35Plane(ByRef labels As Variant, ByRef data As Variant, ByVal firstColumn As Long)
+    Dim deltaColumn As Long: deltaColumn = firstColumn + SP35_DELTA_OFFSET
+    If Left$(CStr(labels(1, deltaColumn)), 5) <> "Ncr, " Then Exit Sub
+    Dim phiLColumn As Long: phiLColumn = firstColumn + SP35_PHI_L_OFFSET
+    Dim ncrColumn As Long: ncrColumn = firstColumn + SP35_NCR_OFFSET
+    Dim ncr As Variant
+    ncr = labels(1, deltaColumn)
+    labels(1, deltaColumn) = labels(1, phiLColumn)
+    labels(1, phiLColumn) = labels(1, ncrColumn)
+    labels(1, ncrColumn) = ncr
+    Dim rowIndex As Long
+    For rowIndex = 1 To UBound(data, 1)
+        ncr = data(rowIndex, deltaColumn)
+        data(rowIndex, deltaColumn) = data(rowIndex, phiLColumn)
+        data(rowIndex, phiLColumn) = data(rowIndex, ncrColumn)
+        data(rowIndex, ncrColumn) = ncr
+    Next rowIndex
+End Sub

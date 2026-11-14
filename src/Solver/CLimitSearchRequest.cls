@@ -1,0 +1,334 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CLimitSearchRequest"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Исходные данные общего поиска предельной нагрузки
+' ==========================================================================
+' Передаёт координатору сечение, материалы, траекторию нагрузки,
+' критерий предела и настройки численного метода.
+' Несущая способность и образование трещины используют один формат запроса
+' и один механизм выбора UltimateStrain или LoadMultiplier.
+
+Private mProblem As ILimitSearchProblem ' Объект инженерной задачи с операциями оценки пробной нагрузки и принятия результата.
+Private mSection As CSectionModel ' Расчетная модель сечения, общая для всех lambda-проб.
+Private mConcreteMaterial As Object ' Диаграмма бетона для выбранной инженерной задачи.
+Private mSteelMaterial As Object ' Диаграмма арматуры для выбранной инженерной задачи.
+Private mMaterialSpec As CMaterialModelSpec ' Параметры материалов для сохранения конечного НДС; сам физический критерий задаётся отдельно.
+Private mSolutionStrategy As String ' Auto, UltimateStrain или LoadMultiplier.
+Private mNOffset As Double ' Постоянная часть N в траектории N = N0 + lambda*Nbase.
+Private mNBase As Double ' Масштабируемая часть N в lambda-траектории.
+Private mMxOffset As Double ' Постоянная часть Mx.
+Private mMxBase As Double ' Масштабируемая часть Mx.
+Private mMyOffset As Double ' Постоянная часть My.
+Private mMyBase As Double ' Масштабируемая часть My.
+Private mForceOnly As Boolean ' Признак того, что выбранное изменение нагрузки масштабирует только продольную силу N.
+Private mPureAxialForMethod As Boolean ' True, если после переноса к расчетному центру траектория остается чисто осевой.
+Private mResultKind As EResultKind ' Назначение поиска: несущая способность, образование трещины или другая инженерная проверка.
+Private mCrackFormationPath As String ' Текущий общий путь LambdaMx/My/Mxy/N/NMxy; при низкоуровневом запросе допустим Auto.
+Private mTargetN As Double ' Полная N текущего сочетания для служебных стартов CrackFormation.
+Private mTargetMx As Double ' Полный Mx текущего сочетания во внутренней системе координат.
+Private mTargetMy As Double ' Полный My текущего сочетания во внутренней системе координат.
+Private mMomentMxAtReference As Double ' Mx относительно точки, в которой строится Mcrc.
+Private mMomentMyAtReference As Double ' My относительно точки, в которой строится Mcrc.
+Private mReferenceX As Double ' X расчетной точки CrackFormation во внутренней системе координат.
+Private mReferenceY As Double ' Y расчетной точки CrackFormation во внутренней системе координат.
+Private mLoadState As CSectionLoadState ' Нормализованное сочетание в единственной пользовательской точке приложения.
+Private mRequestedLoadPath As String ' Общий путь LC; Auto и пустой ввод нормализованы одинаково.
+Private mSelectedLoadPath As CLoadPathDescriptor ' Выбранное изменение нагрузки для текущей попытки общего поиска.
+Private mPureAxialLoad As Boolean ' Признак осевой полной нагрузки сочетания для выбора численного метода; не зависит от первого пути Auto.
+
+' Готовит запрос несущей способности с уже заданными сечением, материалами
+' и инженерной задачей. Общий поиск получает готовые данные
+' без чтения Config и самостоятельного выбора диаграмм.
+Public Sub InitializeCapacity(ByVal problem As ILimitSearchProblem, _
+        ByVal section As CSectionModel, ByVal concreteMaterial As Object, ByVal steelMaterial As Object, _
+        ByVal solutionStrategy As String, _
+        ByVal nOffset As Double, ByVal nBase As Double, _
+        ByVal mxOffset As Double, ByVal mxBase As Double, _
+        ByVal myOffset As Double, ByVal myBase As Double, _
+        ByVal forceOnly As Boolean, ByVal pureAxialForMethod As Boolean, _
+        Optional ByVal materialSpec As CMaterialModelSpec = Nothing)
+    ClearLoadPathSelection
+    If problem Is Nothing Then Err.Raise vbObjectError + 4200, "CLimitSearchRequest", "Не передана задача поиска несущей способности."
+    If section Is Nothing Then Err.Raise vbObjectError + 4201, "CLimitSearchRequest", "Для поиска предельного состояния не передана геометрия сечения."
+    If concreteMaterial Is Nothing Then Err.Raise vbObjectError + 4202, "CLimitSearchRequest", "Для поиска предельного состояния не передана диаграмма бетона."
+    If steelMaterial Is Nothing Then Err.Raise vbObjectError + 4203, "CLimitSearchRequest", "Для поиска предельного состояния не передана диаграмма арматуры."
+
+    Set mProblem = problem
+    Set mSection = section
+    Set mConcreteMaterial = concreteMaterial
+    Set mSteelMaterial = steelMaterial
+    Set mMaterialSpec = Nothing
+    If Not materialSpec Is Nothing Then Set mMaterialSpec = materialSpec.Clone
+    mSolutionStrategy = Trim$(solutionStrategy)
+    mNOffset = nOffset
+    mNBase = nBase
+    mMxOffset = mxOffset
+    mMxBase = mxBase
+    mMyOffset = myOffset
+    mMyBase = myBase
+    mForceOnly = forceOnly
+    mPureAxialForMethod = pureAxialForMethod
+    mResultKind = rkCapacity
+End Sub
+
+' Заполняет request для поиска стадии образования нормальной трещины.
+' На вход уже приходят материалы модели CrackInitiation; общий LimitSearch
+' не выбирает профили и не знает о листе Config.
+Public Sub InitializeCrackFormation(ByVal problem As ILimitSearchProblem, _
+        ByVal section As CSectionModel, ByVal concreteMaterial As Object, ByVal steelMaterial As Object, _
+        ByVal solutionStrategy As String, ByVal crackFormationPath As String, _
+        ByVal targetN As Double, ByVal targetMx As Double, ByVal targetMy As Double, _
+        ByVal momentMxAtReference As Double, ByVal momentMyAtReference As Double, _
+        ByVal referenceX As Double, ByVal referenceY As Double)
+    ClearLoadPathSelection
+    If problem Is Nothing Then Err.Raise vbObjectError + 4204, "CLimitSearchRequest", "Не передана задача поиска трещинообразования."
+    If section Is Nothing Then Err.Raise vbObjectError + 4205, "CLimitSearchRequest", "Не передана модель сечения для поиска трещинообразования."
+    If concreteMaterial Is Nothing Then Err.Raise vbObjectError + 4206, "CLimitSearchRequest", "Не передана диаграмма бетона для поиска трещинообразования."
+    If steelMaterial Is Nothing Then Err.Raise vbObjectError + 4207, "CLimitSearchRequest", "Не передана диаграмма арматуры для поиска трещинообразования."
+
+    Set mProblem = problem
+    Set mSection = section
+    Set mConcreteMaterial = concreteMaterial
+    Set mSteelMaterial = steelMaterial
+    mSolutionStrategy = Trim$(solutionStrategy)
+    mCrackFormationPath = Trim$(crackFormationPath)
+    Set mMaterialSpec = Nothing
+    mTargetN = targetN
+    mTargetMx = targetMx
+    mTargetMy = targetMy
+    mMomentMxAtReference = momentMxAtReference
+    mMomentMyAtReference = momentMyAtReference
+    mReferenceX = referenceX
+    mReferenceY = referenceY
+    mNOffset = 0#: mNBase = 0#
+    mMxOffset = 0#: mMxBase = 0#
+    mMyOffset = 0#: mMyBase = 0#
+    mForceOnly = False: mPureAxialForMethod = False ' Повторная инициализация должна дать тот же запрос, что новый объект; фактический путь трещин далее задает его задача или SelectLoadPath.
+    mResultKind = rkCrackFormation
+End Sub
+
+' Готовит запрос для уже созданной задачи ILimitSearchProblem.
+' Используется тестами с управляемым объектом оценки нагрузок.
+' Обычные запросы несущей способности и трещин отдельно проверяют
+' наличие обязательной модели и материалов.
+Public Sub InitializeWithProblem(ByVal problem As ILimitSearchProblem, _
+        ByVal resultKind As EResultKind, ByVal solutionStrategy As String, _
+        ByVal nOffset As Double, ByVal nBase As Double, _
+        ByVal mxOffset As Double, ByVal mxBase As Double, _
+        ByVal myOffset As Double, ByVal myBase As Double, _
+        Optional ByVal crackFormationPath As String = vbNullString)
+    ClearLoadPathSelection
+    If problem Is Nothing Then Err.Raise vbObjectError + 4208, _
+        "CLimitSearchRequest", "Не передана доменная задача LimitSearch."
+
+    Set mProblem = problem
+    Set mSection = Nothing
+    Set mConcreteMaterial = Nothing
+    Set mSteelMaterial = Nothing
+    Set mMaterialSpec = Nothing
+    mSolutionStrategy = Trim$(solutionStrategy)
+    mNOffset = nOffset
+    mNBase = nBase
+    mMxOffset = mxOffset
+    mMxBase = mxBase
+    mMyOffset = myOffset
+    mMyBase = myBase
+    mForceOnly = False
+    mPureAxialForMethod = False
+    mResultKind = resultKind
+    mCrackFormationPath = Trim$(crackFormationPath)
+    mTargetN = 0#
+    mTargetMx = 0#
+    mTargetMy = 0#
+    mMomentMxAtReference = 0#
+    mMomentMyAtReference = 0#
+    mReferenceX = 0#
+    mReferenceY = 0#
+End Sub
+
+' Возвращает объект задачи, который оценивает пробные нагрузки и принимает результат.
+Public Property Get Problem() As ILimitSearchProblem
+    Set Problem = mProblem
+End Property
+
+' Расчетная модель сечения, общая для всех lambda-проб.
+Public Property Get Section() As CSectionModel
+    Set Section = mSection
+End Property
+
+' Возвращает небольшой снимок модели конечного состояния. Низкоуровневые
+' задачи с тестовым Object material API могут не иметь profile-spec.
+Public Property Get MaterialSpec() As CMaterialModelSpec
+    If Not mMaterialSpec Is Nothing Then Set MaterialSpec = mMaterialSpec.Clone
+End Property
+
+' Диаграмма бетона для выбранной инженерной задачи.
+Public Property Get ConcreteMaterial() As Object
+    Set ConcreteMaterial = mConcreteMaterial
+End Property
+
+' Диаграмма арматуры для выбранной инженерной задачи.
+Public Property Get SteelMaterial() As Object
+    Set SteelMaterial = mSteelMaterial
+End Property
+
+' Auto, UltimateStrain или LoadMultiplier.
+Public Property Get SolutionStrategy() As String
+    SolutionStrategy = mSolutionStrategy
+End Property
+
+' Постоянная часть N в траектории N = N0 + lambda*Nbase.
+Public Property Get NOffset() As Double
+    NOffset = mNOffset
+End Property
+
+' Масштабируемая часть N в lambda-траектории.
+Public Property Get NBase() As Double
+    NBase = mNBase
+End Property
+
+' Постоянная часть Mx.
+Public Property Get MxOffset() As Double
+    MxOffset = mMxOffset
+End Property
+
+' Масштабируемая часть Mx.
+Public Property Get MxBase() As Double
+    MxBase = mMxBase
+End Property
+
+' Постоянная часть My.
+Public Property Get MyOffset() As Double
+    MyOffset = mMyOffset
+End Property
+
+' Масштабируемая часть My.
+Public Property Get MyBase() As Double
+    MyBase = mMyBase
+End Property
+
+' Показывает, масштабируется ли на выбранном пути только продольная сила N.
+Public Property Get ForceOnly() As Boolean
+    ForceOnly = mForceOnly
+End Property
+
+' True, если после переноса к расчетному центру траектория остается чисто осевой.
+Public Property Get PureAxialForMethod() As Boolean
+    PureAxialForMethod = mPureAxialForMethod
+End Property
+
+' Возвращает назначение поиска: несущая способность, образование трещины или другую проверку.
+Public Property Get ResultKind() As EResultKind
+    ResultKind = mResultKind
+End Property
+
+' Текущий общий путь LambdaMx/My/Mxy/N/NMxy; при низкоуровневом запросе допустим Auto.
+Public Property Get CrackFormationPath() As String
+    CrackFormationPath = mCrackFormationPath
+End Property
+
+' Полная N текущего сочетания для служебных стартов CrackFormation.
+Public Property Get TargetN() As Double
+    TargetN = mTargetN
+End Property
+
+' Полный Mx текущего сочетания во внутренней системе координат.
+Public Property Get TargetMx() As Double
+    TargetMx = mTargetMx
+End Property
+
+' Полный My текущего сочетания во внутренней системе координат.
+Public Property Get TargetMy() As Double
+    TargetMy = mTargetMy
+End Property
+
+' Mx относительно точки, в которой строится Mcrc.
+Public Property Get MomentMxAtReference() As Double
+    MomentMxAtReference = mMomentMxAtReference
+End Property
+
+' My относительно точки, в которой строится Mcrc.
+Public Property Get MomentMyAtReference() As Double
+    MomentMyAtReference = mMomentMyAtReference
+End Property
+
+' X расчетной точки CrackFormation во внутренней системе координат.
+Public Property Get ReferenceX() As Double
+    ReferenceX = mReferenceX
+End Property
+
+' Y расчетной точки CrackFormation во внутренней системе координат.
+Public Property Get ReferenceY() As Double
+    ReferenceY = mReferenceY
+End Property
+
+' Подключает выбор LoadPath сочетания к подготовленной инженерной задаче.
+' Нагрузки и точка приложения уже проверены и приведены к внутренним единицам;
+' Config и Excel здесь не читаются.
+Public Sub ConfigureLoadPathSelection(ByVal rawPath As String, ByVal loadState As CSectionLoadState, _
+        Optional ByVal pureAxialLoad As Boolean = False)
+    If loadState Is Nothing Then Err.Raise vbObjectError + 4209, "CLimitSearchRequest", "Не передана нагрузка для выбора LoadPath."
+    Dim descriptor As CLoadPathDescriptor
+    Set descriptor = New CLoadPathDescriptor
+    mRequestedLoadPath = descriptor.NormalizeKey(rawPath)
+    If Len(mRequestedLoadPath) = 0 Then Err.Raise vbObjectError + 4210, "CLimitSearchRequest", _
+        "Неизвестный LoadPath. Выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy."
+    Set mLoadState = loadState
+    mPureAxialLoad = pureAxialLoad
+    Set mSelectedLoadPath = Nothing
+End Sub
+
+' Применяет конкретный путь, выбранный общим coordinator-ом.
+' Обе инженерные задачи получают совершенно одинаковые Offset/Base от LC.
+Public Sub SelectLoadPath(ByVal pathKey As String)
+    Set mSelectedLoadPath = New CLoadPathDescriptor
+    mSelectedLoadPath.InitializeFromLoadState pathKey, mLoadState
+    If Not mSelectedLoadPath.Valid Then Err.Raise vbObjectError + 4211, "CLimitSearchRequest", mSelectedLoadPath.ErrorMessage
+    mNOffset = mSelectedLoadPath.NOffset
+    mNBase = mSelectedLoadPath.NBase
+    mMxOffset = mSelectedLoadPath.MxOffset
+    mMxBase = mSelectedLoadPath.MxBase
+    mMyOffset = mSelectedLoadPath.MyOffset
+    mMyBase = mSelectedLoadPath.MyBase
+    mForceOnly = mSelectedLoadPath.ForceOnly
+    mPureAxialForMethod = mForceOnly And mPureAxialLoad
+    mCrackFormationPath = mSelectedLoadPath.Key
+End Sub
+
+' Ниже возвращаются сохранённый выбор LoadPath и фактически используемая траектория нагрузки.
+Public Property Get HasLoadPathSelection() As Boolean
+    HasLoadPathSelection = Not mLoadState Is Nothing
+End Property
+
+' Общий путь LC; Auto и пустой ввод нормализованы одинаково.
+Public Property Get RequestedLoadPath() As String
+    RequestedLoadPath = mRequestedLoadPath
+End Property
+
+' Нормализованное сочетание в единственной пользовательской точке приложения.
+Public Property Get LoadState() As CSectionLoadState
+    Set LoadState = mLoadState
+End Property
+
+' Возвращает выбранное изменение нагрузки для текущей попытки общего поиска.
+Public Property Get SelectedLoadPath() As CLoadPathDescriptor
+    Set SelectedLoadPath = mSelectedLoadPath
+End Property
+
+' Повторная инициализация request не сохраняет выбор другого сочетания.
+' Низкоуровневый request с готовым Offset/Base остается однотраекторным.
+Private Sub ClearLoadPathSelection()
+    Set mLoadState = Nothing
+    Set mSelectedLoadPath = Nothing
+    mRequestedLoadPath = vbNullString
+    mPureAxialLoad = False
+End Sub

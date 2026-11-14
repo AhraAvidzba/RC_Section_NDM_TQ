@@ -1,0 +1,481 @@
+# Audit03: Ревизия Защитных Условий VBA
+
+Дата: 2026-10-02. Статус: частичная содержательная ревизия F07.
+Этот документ не является итоговым PASS всех защитных условий.
+
+## Production IIf И Nothing v171
+
+Повторно просмотрены все восемь production `IIf` и пять составных условий
+с `Nothing` из census v169. Численный production-код v171 в этой части тот
+же; отличие v171 от v169 касается только контролируемого profile-scope fixture.
+
+| Владелец / Метод | Проверенный Контракт |
+| --- | --- |
+| CBatchSectionCalculator.RunCapacity | BuildLoadPath возвращает конкретный descriptor; обе ветви IIf читают безопасные строковые свойства descriptor/валидного LC-index. Ошибочный путь обрабатывает calculator, а не ленивое вычисление IIf. |
+| CBatchSectionCalculator.RunProfileState, два IIf | State проверен последовательным Nothing-guard до чтения Converged/ExtensionUsed; обе альтернативы являются литералами. |
+| CBatchSectionCalculator.RunCrackWidth, отчет CrackFormed | Canonical CrackResult и Formation существуют до отчета; обе альтернативы являются литералами. |
+| CCrackSummaryWriter.PutFormationData | index поступает из обхода допустимых LC; CrackResult/Formation созданы контейнером. Обе альтернативы IIf - строки, дополнительного solve или разыменования в альтернативе нет. |
+| CGeometryHollowRectangle.GetVerticalRebarLine / GetHorizontalRebarPath | IIf выбирает только знак уже прочитанного Double axisDistance. Rotated geometry создается Initialize; builder предварительно проверяет IsValid. Неинициализированная геометрия не является допустимым входом этого маршрута; runtime-ошибка такого private caller не заявляется воспроизведенной. |
+| CMaterialDiagram.InitializeFromArrays | pointCount >= 2 и обе границы входных массивов проверены до ReDim/copy. mPointCount установлен после проверки точек; индекс последней деформации допустим в обеих вычисляемых ветвях. |
+| CStateProvider.GetOrSolve / CStateRepository.BindContext | And/Or проверяют только идентичность объектов с Nothing, не вызывают их свойства. При отсутствии контекста возвращается typed failure либо явная входная ошибка до разыменования. |
+| CSystemSettingsReader.AppendGeometrySettingsRanges | Составное условие проверяет скаляр rangeError и идентичность settingsRange; AppendSettingsRange вызывается уже телом If. Это не blanket приемка всех optional/missing ranges. |
+| CCapacityLimitSearchProblem.BuildSnapshot | hasPoint и проверка materialSpec не разыменовывают spec. LastSolver предварительно проверен отдельным If; InitializeFromSolver вызывается только внутри подтвержденной ветви. |
+| CStateSolutionRunner.TryGetMaterialDiagrams | Обе стороны проверяют только переданные ссылки с Nothing. TypeName/cast выполняются после этого выхода; линейные test materials имеют отдельный допустимый отказ от специализированной подсказки. |
+
+Census содержит 827 production-кандидатов, в том числе 232 упоминания
+LBound/UBound и 601 Boolean-expression; категории пересекаются. Эта запись
+доказывает содержательную ревизию указанной группы, не приемку остальных
+массивных/численных guards или всех test helpers. Нового runtime failure в
+данной группе не обнаружено; код ради замены безопасных IIf не изменялся.
+
+## Массивные Маршруты Текущего Source v173
+
+- `CLimitSearchCoordinator.LoadPathKeys` после проверки load state и ключа
+  возвращает `Array` из одного либо трех путей во всех допустимых ветвях.
+  Поэтому `LBound/UBound` в Formation и `ExecuteLoadPaths` работают с непустым
+  массивом. Нулевое масштабируемое действие проверяется отдельно через
+  `HasScaledLoad`, не через случайное отсутствие массива или деление на ноль.
+- `CStateSolutionRunner.TryRunRetry` создает ключ фиксированной структуры
+  только после проверки identity/revision локальной сессии. Записи коллекции
+  добавляет единственный private `StoreFailedRetryAttempt` с тем же ключом;
+  `TryRestoreFailedRetryAttempt` не принимает внешний произвольный record.
+  Это локальная диагностика неудачной попытки, не reusable physical State.
+- `CBatchSectionCalculator.CombinationCapacity` и `StabilityLoadCapacity`
+  локально перехватывают отсутствие выделенного массива и возвращают 0.
+  Выделение/расширение идет до записи строки; число пользовательских строк
+  ограничено реальным Range Excel. Эта проверка не заявляет успешное создание
+  произвольно огромного массива через низкоуровневый программный API.
+- `CLoadCombinationReader.LoadFromRange` проверяет не менее двух строк и пяти
+  столбцов до `Value2`. На этом пользовательском маршруте результат Excel
+  двухмерный и 1-based; необязательные шестая/седьмая колонки читаются только
+  в соответствующих ветвях. Ошибки пользовательских ячеек проходят отдельный
+  `ReadCellText`/численный parser с сохранением фактического адреса.
+
+Это содержательная проверка перечисленных call paths на текущем source,
+не окончательная приемка всех 1544 guard-кандидатов и не новая физическая
+методика. Синтаксическая полнота census не заменяет runtime доказательство
+неподдержанного или специально поврежденного входа.
+
+## Ранний Ввод И Read-Only Проверка v139
+
+Width.ValidateSettings вызывается до раннего ConfirmedNotCracked и до
+state-solve в batch. При неизвестном режиме или неположительном коэффициенте
+не выполняются Formation/current solves; ответственная ошибка Width получает
+точный адрес от reader. Final negative `1515/120` и positive `1635/0`
+используют один oracle для 55 повреждений десяти настроек. Первая версия
+negative `1480/155` дополнительно содержала 35 ошибок oracle popup, а не
+155 production-дефектов. Full Off/On завершены `26264/0` и `26275/0`;
+общие actual-числа с v137 совпали в 5601/5606 assertions, missing=0,
+differences=0. Чистая сборка и выпускная приемка всей цели еще впереди.
+
+Validate-Workbook теперь читает ZIP только через OpenRead и не исправляет
+имена области печати. Проверяются один канонический `_xlnm.Print_Area` для
+листа Расчет и отсутствие aliases; ошибка прерывает проверку до Excel.
+Настоящая clean-книга прошла `27/27`, SHA не изменился. Контрольная копия
+с alias отклонена, alias не удален и SHA также не изменился. Это directed
+проверка валидатора, не приемка всей книги или всех остальных guards.
+
+## Границы Проверки
+
+`code_census_v41_2026-10-02_summary.json` содержит 101 модуль, 4048 методов
+и 1241 кандидата для проверки guards. Кандидат не равен дефекту: VBA вычисляет
+обе стороны `And/Or` и обе ветви `IIf`, но многие выражения используют только
+скаляры либо объекты, уже проверенные на входе. Нулевое число шаблонных
+комментариев также не доказывает содержательность всех методов.
+
+## Проверенные Группы
+
+| Область | Проверенный Контракт | Результат И Ограничение |
+| --- | --- | --- |
+| Все восемь production `IIf` | Batch report: четыре выбора строк; Crack writer: выбор Cracked/NotCracked; MaterialDiagram: уже выделенный крайний элемент; Hollow: два знака axisDistance | Ошибочная необязательная ветвь не обнаружена. Объекты Batch/report проверены до обращения; строки/знак скалярны. MaterialDiagram требует корректной инициализации массивов. Это review, не замена runtime suite. |
+| `CStateRepository.BindContext` | Проверка двух объектов на Nothing перед Revision; сравнение identity не разыменовывает Nothing | Последовательность безопасна. `FindEquivalent` проверяет request, наличие записи и cached state до обращения к нагрузкам. Неуспешный solve не становится reusable. |
+| `CCrackWidthCalculator.ValidateInputs` | Current state, convergence, section, бетон, арматура, provider | Проверки последовательные. До ReDim selected и вычисления зоны уже проверено положительное число стержней. Физический отказ текущего НДС дополнительно блокирует Width на orchestration-маршруте. |
+| `CLoadMultiplierSearch.CanFinalizeSecantProbe` | Вызов из `And` выполняется даже при большой невязке; solver может быть Nothing у аналитической задачи | Метод проверяет optional solver до Converged и не запускает новый solve. Аналитическая FinalizeAt отвечает за критерий; generic search не должен объявлять чужую физическую несущую. |
+| Геометрические contour helpers | Добавление первой точки, замыкание и удаление повторной последней точки | Начальная аллокация и проверки count предшествуют индексам. Не заменять безопасные ветви общим запретом `And/Or`. Valid-invalid-valid Rounded/Hollow уже имеет отдельный runtime gate. |
+| `CStabilityCalculator.InterpolateSP35Table` | Empty, UBound двух измерений, размеры и чтение численных узлов | Ошибки структуры/значений преобразуются в адресную ошибку таблицы. Production получает 1-based Value2; неподдержанный low-level массив не является доказанным пользовательским падением. |
+| Settings/Profile/Mesh public inputs | Nothing/scalar/narrow Range, Boolean, дробный/overflow Long, размер сетки/subdivisions | Negative v31 и positive v33, затем full Off/On; профильные Boolean дополнительно negative/positive v40. Полное per-key покрытие этим не закрывается. |
+
+## Оставшиеся Контрпримеры И Контракты
+
+1. Молчаливый default для явно пустых/TODO численных Solver/Capacity параметров
+   подтвержден: negative v44 82/60, затем полный per-key negative v45 394/296.
+   Strict чтение включено у четырех реальных consumers; прежний тест v44
+   после правки дал 142/0. Расширенный positive v45: 690/0, full Off/On:
+   9206/0 и 9207/0; окончательная приемка остальных F07 остается обязательной.
+   Optional пустые диаметры и отсутствующий optional API-key сохранены.
+   Неверные ожидания exploratory v43 не считаются production-дефектами.
+2. `CMaterialDiagram.InitializeFromArrays` проверяет доступность индексов
+   1..pointCount до копирования. Реальный `TestAudit03DiagramArrayInputs`
+   проверяет девять неверных вариантов, очистку непригодной диаграммы,
+   восстановление и допустимый дополнительный индекс 0. Эти assertions прошли
+   в полном Material suite v131 Off `2856/0`; это низкоуровневый контракт
+   массива, а не объявление произвольного массива пользовательским Config.
+3. Представимые, но крайне большие нагрузки требуют отдельного L14/L17 gate.
+   Семейство Stress до множителя 1e6 не проверяет границу Double. В частности
+   нельзя считать любой arithmetic overflow физическим отказом или превращать
+   корректный overload в CalcErr без проверки причины на реальном маршруте.
+4. Окончательное закрытие F07 требует просмотреть остальные array/optional
+   candidates и связать каждый подтвержденный дефект с публичным call path,
+   negative/positive логом либо явно недопустимым низкоуровневым входом.
+
+Новые расчетные методы, классы или нормативные допущения этой ревизией
+не вводятся. Исторические отрицательные логи остаются отрицательными.
+
+## Проверенный Срез v46
+
+В source добавлена проверка выделенности/границ входных массивов диаграммы
+до копирования `1..pointCount`. При неудачной повторной инициализации
+`Initialized=False`, `PointCount=0`; прежний материал не становится доступным.
+Сохраняются прежние 3100/3111, для недостаточного массива принят 3113;
+дополнительный индекс 0 допустим, если все используемые индексы присутствуют.
+Направленный negative valid-invalid-valid выполнен на неизменном v45 production
+с импортом только тестов: `f07_diagram_array_negative_v46_2026-10-02.txt`,
+30 успешных и 25 неуспешных assertions. Подтверждены неконтролируемые ошибки
+индекса и доступность прежней/частично замененной диаграммы после отказа.
+Тот же направленный тест текущей v46: 55/0; valid-invalid-valid и недоступность
+ошибочно инициализированной диаграммы подтверждены реальным VBA runtime.
+
+Extreme State test охватывает Newton/Secant, смещенное/центрированное сечение,
+Extension Off/On и последующий обычный solve тем же объектом. В source
+арифметические ошибки 6/11 отделены от прочих внутренних runtime-ошибок.
+Negative `f07_extreme_state_negative_v46_2026-10-02.txt`: 28/28.
+Newton выдавал InternalError при реальном Overflow; Secant возвращал False
+при непригодной начальной матрице, но оставлял FailureCode=None и пустую причину.
+Последний выход теперь сохраняет SingularTangent и русское пояснение,
+без изменения центральных разностей или критерия пригодности матрицы.
+Не введено ограничение величины нагрузки или изменение физических допусков.
+Тот же extreme test текущей v46: 56/0; все восемь вариантов сохраняют typed
+численную причину и затем успешно решают обычную нагрузку тем же solver-ом.
+Проверена ветка Overflow и Secant; отдельное прямое воспроизведение ошибки 11
+этим тестом не заявляется. Full v46 Off 9572/0, On 9573/0; source contracts
+101/101, failed=0. Обычная Stress-матрица v45 не включает эти новые тесты.
+
+Повторно просмотрены все восемь production `IIf` и составные statements с
+`Nothing`, включая продолженные строки. Опасного условного разыменования
+в этих statements не найдено. Остальные array helpers требуют оценки своих
+реальных callers; общий census остается индексом, а не blanket PASS.
+
+## Дополнительная Ревизия v115
+
+Актуальный census: 102 модуля, 4197 методов, 1466 кандидатов, из них 819
+production. Источник: `code_census_v115_2026-10-03_*`. Новое количество строк
+не означает автоматическую приемку всех кандидатов.
+
+- Все восемь production и 35 test `IIf` просмотрены повторно. Обе ветви
+  используют уже доступные поля/строки/скаляры; делитель curvature fixture
+  выбирается между 1 и 0.001, а не между числом и нулем. Дополнительных
+  потенциально ошибочных необязательных ветвей в этой группе не найдено.
+- Пять production statements, одновременно содержащих Nothing и And/Or,
+  не разыменовывают необязательный объект: identity в StateProvider/Repository,
+  проверка существования Range в SettingsReader, проверка strength spec в
+  Capacity adapter и identity двух solver-ов в StateSolutionRunner. Тестовый
+  `runner.ResultSolver Is Nothing Or Not runner.Converged` обращается ко
+  второму свойству самого созданного runner-а, а не к отсутствующему solver-у.
+- Деления в проверках изотропии SectionModel/SectionProperties используют
+  заранее вычисленный масштаб не менее 1. В CFiberMeshBuilder постоянный
+  делитель 2147483646; размеры Long проверяются до ReDim. Деления после Then
+  в Formation/Capacity/Stability защищены положительными знаменателями:
+  это не ветви, вычисляемые самим And/Or.
+- `CSystemSettingsReader.AppendSettingsRange` и
+  `CCalculationProfileCatalog.LoadFromRange` получают именно Excel Range.Value2:
+  скаляр явно отвергается, допустимый массив двухмерный и 1-based. Геометрические
+  распознаватели работают только после этой структурной проверки. Подмена
+  Range произвольным одномерным массивом не является пользовательским call path.
+- `CSectionPlotDataReader.HasRows` и `modAutoCADStressExport.HasResultTableRows`
+  локально обрабатывают отсутствие размерностей. Их ResultColumn вызывается
+  только для таблиц Results из Value2; обязательная колонка ищется до чтения
+  строк. Свободный zero-based массив не является входом этих private helpers.
+- Живой AutoCAD importer получает Centroid/MomentOfInertia по COM-контракту
+  Region. Обход предварительно отбирает Region; координаты не пересчитываются
+  по INPUT Length. `BuildFromRegionArrays` является явно тестовым API: обязательны
+  два измерения и колонки 1..3, отсутствующие optional колонки допустимы.
+  Его `HasArrayRows` проверяет только строки, поэтому произвольный одномерный
+  массив не считается допустимым fixture. Живая COM-приемка поврежденного
+  Region здесь не заявляется.
+
+Остальные массивные/optional/счетчиковые кандидаты и их runtime call paths
+продолжают проверяться. Эта ревизия не меняет расчетную методику и не закрывает
+F07 по одному синтаксическому census.
+
+## Актуальный Индекс v130
+
+Census текущего source: 102 модуля, 4205 методов, 1485 кандидатов guards,
+из них 820 production. Full Off/On `22969/0` / `22980/0` не являются
+автоматическим доказательством всех этих условий. Содержательная ревизия
+счетчиков раскладок продолжается: в Circle суммарный expectedCount нескольких
+рядов вычисляется как Long только после создания стержней. Нужен отдельный
+контрпример и ранняя проверка представимости количества, если дефект
+подтвердится; произвольный новый инженерный лимит количества не вводится.
+Один template-кандидат ClearGeneratedShapes сохранен в очереди D01.
+
+## Массивы И Optional-Маршруты v131
+
+- Повторно просмотрены массивные индексы contour/line helpers, interval merge,
+  retry-attempt session, ParamArray meta aggregation и writers. Контурные
+  массивы создаются существующими геометриями до обхода; интервалы требуют
+  положительного количества до ReDim/первого индекса. Четыре пересечения
+  прямоугольника помещаются в локальный массив из восьми значений.
+- Retry key и failure record создаются одним private маршрутом; идентичность
+  контекста и наличие session проверяются до чтения. ParamArray всегда выделен
+  вызовом, необъектные/пустые записи не разыменовываются.
+- Увеличение массивов LC ограничено реальным количеством строк Excel;
+  ошибочная структура Range отвергается до чтения. Необязательная арматура
+  остается пустой по утвержденному контракту, а не превращается в дефект guard.
+- Предмет следующего направленного теста остается прежним: сумма активных
+  рядов Circle и представимость Long до построения. Ни синтаксический census,
+  ни эта ревизия не объявляют F07 целиком завершенным.
+
+## Суммарное Количество Рядов Circle v132
+
+В Build сумма активных рядов ранее вычислялась в Long после создания всех
+стержней. У двух рядов по 1073741824 и трех по 715827883 сумма не представима.
+Направленный прежний production v131 + только новый test module:
+`circle_count_negative_v132_2026-10-03.txt`, `4/8`, watchdog exit=1.
+Малый радиус специально останавливает прежний маршрут на почти совпавших
+координатах первых стержней; миллиардный цикл и фактический late Overflow
+не запускались и не заявляются воспроизведенными.
+
+Текущий Build суммирует активные ряды в Double до координат и приводит к Long
+только после проверки 2147483646, оставляя представимым шаг Next. Это граница
+типа счетчика, не новый физический лимит армирования. Ошибка 3164 называет
+Config/Rebar.Count и число активных рядов. Нулевой первый ряд по-прежнему
+выключает дополнительные и проходит до этой проверки. Positive v132 `12/0`:
+две early rejection причины, обычные два/три ряда после отказа, disabled base.
+Полная приемка и ревизия остальных счетчиков/Config продолжаются.
+
+## Счетчики Некруглых Раскладок v135
+
+Раннее вычисление запрошенных позиций в Double защищает три builders до
+`n + 1`, циклов и выделения массивов. Negative v134 + только новый тестовый
+модуль: `7/18`; два настоящих Overflow=6 при max Long воспроизведены в
+RoundedRectangle H и HollowRectangle B. Остальные negative fixtures имеют
+неверный отступ, чтобы безопасно завершить прежний маршрут до огромного
+построения; исчерпание памяти или миллиардный цикл не заявляются наблюденными.
+
+Positive v135 `29/0` проверяет ранние причины, выключенные/неактивные грани,
+восстановление и арифметику EverySecondBar. Граница 2147483646 техническая,
+не нормативная; она оставляет представимым следующий шаг Long. Opening
+сохраняет фактические проекции, а CRebarLayout проверяет фактическое добавление.
+Эта последняя миллиардная ветвь проверена статически, без искусственного
+изменения приватного счетчика или создания огромной раскладки.
+
+Full Off/On `23324/0` / `23335/0`; общие actual-числа с v134 совпадают,
+source/export `103/103`. Остальные F07 и полная Config-приемка остаются открыты.
+
+## Обязательные Geometry-Входы v137
+
+Новые обращения к составным таблицам проходят через AppendGeometryValue:
+индексы задают existing table parsers после проверки заголовков/размеров;
+ConfigCellText отделяет CVErr до строкового преобразования и сохраняет адрес.
+Число Long читается после проверки Double-диапазона и целочисленности,
+поэтому дробь не округляется, а Overflow не маскируется нулевым счетчиком.
+GetRequiredChoice получает явный массив вариантов от production-callers;
+условия активности проверяются до чтения неиспользуемых W/R2/H2/B2/offset.
+Новый guard MeshBoundarySubdivisions использует только безопасные скаляры;
+отсутствующая строка не читается как пустота и не получает default.
+Directed runtime `1010/0` включает failure/recovery двух входных маршрутов
+геометрии и общей сборки. Это проверка этого call path, не blanket F07 PASS.
+
+## Повторная Инициализация И Границы Snapshot v199
+
+Во время полного gate v199 production/test source заморожен. Ниже записаны
+конкретные оставшиеся контракты для directed проверки после checkpoint;
+runtime-доказательство и исправление этими записями не заявляются.
+
+- `CMaterialModelSpec.Initialize` устанавливает `mComplete=True` только в конце,
+  но не сбрасывает его перед повторным parse. Проверить valid-invalid-valid
+  на том же объекте и обращение provider-а после отказа. Обычный Catalog
+  создает новый spec, поэтому этот сценарий не объявляется сбоем Config.
+- `CCalculationProfileCatalog.LoadFromRange` присваивает `mCount` до обхода
+  BuildProfile. Ошибка в последнем столбце может оставить предыдущие профили
+  и ID последнего профиля без готового объекта. Проверить Count/HasProfile/
+  ProfileById после такого отказа и успешную повторную загрузку того же Catalog;
+  исключение чтения не должно становиться reusable успешным каталогом.
+- `CExcelAppStateGuard.Enter` активирует восстановление после всех четырех
+  COM-setters. Нужен допустимый реальный fault последнего setter-а и проверка
+  предыдущих настроек, без новой тестовой class и без обращения к чужому Excel.
+- `CSectionPlotDataReader.AnchoredRowCount` использует верхний offset
+  `1048575 - anchor.Row`, который исключает последнюю строку современного
+  Excel. Проверить компактную таблицу, заканчивающуюся на Rows.Count,
+  после переноса именованного якоря; огромный расчет для этого не нужен.
+- `ReadBatchSummaryComment` ограничен offset 1000, хотя число LC определяется
+  таблицей ввода. Проверить поздний LC на сохраненном snapshot без тысячи
+  solver-вызовов и без изменения текущей геометрии/нагрузок пользователя.
+- `ResetReaderState` не сбрасывает `mProfileCrackWidthEnabled`. Обычное успешное
+  ApplyVisualizationProfile перезаписывает флаг; отдельно проверить reuse
+  через geometry-only/ошибку чтения, прежде чем менять этот контракт.
+
+Существующая центральная status-policy по прочитанному source не извлекает
+статус из текста комментария. `AggregateExternalStatus` и `IsNumerical` не имеют
+внешних вызовов, `AggregateMeta` используется только тремя unit assertions;
+рабочие owners используют `WorstResultMeta`. Удаление неиспользуемых методов
+отложено до отдельного проверенного среза, не выполнено во время full gate.
+
+## Уточнение Geometry Snapshot v204
+
+Из перечисленных v199 кандидатов последняя строка/столбец листа и поздний
+LC comment имеют directed negative/positive доказательства в
+`NDM_Audit03_Geometry_Snapshot_Review.md`. Исправленное чтение геометрии
+проверяет CVErr/Null/Boolean/Date и нечисловой текст до CDbl; допустимая
+пустота размеров оболочки/локальных инерций отделена от ошибки данных.
+ResetReaderState также сбрасывает mProfileCrackWidthEnabled, но отдельный
+пользовательский дефект из-за этого флага не заявляется воспроизведенным.
+
+Directed v204: `1111/0`; full Off: `78245/0`, восемь suites;
+17821 общих numeric actual-values с v199 совпали точно. Это не закрывает
+остальные guards: свойства/строки State у plot-reader-а еще используют
+SafeDouble либо CDbl без предварительного различения formula error,
+а повторная инициализация Spec/Catalog и частичный отказ Excel guard еще
+требуют направленной проверки. Общий F07 не получает blanket PASS.
+
+Для performance-кандидата AppendElement требуется actual benchmark:
+двенадцать массивов расширяются через ReDim Preserve при каждом элементе.
+Размер можно подготовить в существующем reader-е, но только после измерения,
+с проверкой повторного чтения/частичной ошибки, чисел и неизменности Results.
+Само статическое наличие ReDim не считается доказанным ускорением.
+
+## Lifecycle И Численный Snapshot v206
+
+Spec/Catalog и partial PlotDataReader из списка v199 воспроизведены actual VBA
+negative v205c 1091/2838; positive v206 3929/0. Четыре Spec ошибки, поздний
+PR4, три публичных reader-режима, 468 variants и восстановление на том же
+экземпляре проверены без равновесия. Формульная ошибка больше не становится
+числом через CDbl, SafeDouble fallback удален. Точная причина читающего
+слоя и relocated address сохраняются; при отказе нет опубликованной части.
+Подробности и ограничения: NDM_Audit03_Read_Lifecycle_Review.md.
+Full Off/On завершены 82221/0 и 82232/0. С v204 точно совпали 18422/18427
+общих numeric actual-values, missing=0/differences=0. Read-only structure
+27/27, formatting 1003/0, palette/save-reopen 355/0 и actual VBE/source
+105/105; source не изменился. Это окончательная приемка данного среза,
+но не всего F07. Census 1639 guard candidates остается индексом для
+семантической проверки. Пункты про Excel guard, Unit/логические metadata
+и крайние численные helpers остаются открытыми.
+
+## General Plot И Аннотации v211
+
+Negative v207c 1000/123 и v209b 1147/168 подтвердили late validation после
+очистки Chart, недостающие ключи/default, обязательный LoadCase, переполнение
+Long мелким шагом label-сетки, потерю нечетных color buckets и игнорирование
+Plot.Enabled import-preview entrypoint-ом. Отдельные ошибки новых fixture/
+oracle перечислены в NDM_Audit03_General_Plot_Review.md, не считаются production.
+
+Frozen v211: 1409/0, готовые snapshots, actual Shapes/Series, 15 arrow tuples,
+19 layout fields + 2 arrow fields, перемещенные таблицы и exact Value2/type.
+Reader lifecycle 3929/0, geometry snapshot 1158/0, presentation 681/0,
+structure 27/27, formatting 1003/0, palette/reopen 355/0, VBE/source 106/106.
+Новых classes нет, стандартный test-модуль не добавляет production behavior.
+
+По разрешению пользователя full On/Off не повторяется для presentation-only
+среза; окончательный release gate не отменен. Numeric expected/tolerance и
+solver/search код не менялись. Это приемка перечисленных контрпримеров, не
+всех Double границ label-сетки или F07. AutoUpdate, snapshot Unit/boolean/text
+metadata, Excel guard, linear-system extreme arithmetic и полная semantic
+ревизия остаются открытыми. Census: 106/4407/1675, acceptance Pending.
+
+## Snapshot Metadata v216
+
+Negative v212 183/266 подтвердил late Output.*Unit и молчаливую подмену
+поврежденных Unit/boolean/status. Двухпроходное чтение сохраняет единицы
+snapshot независимо от порядка строк; проверка Unit использует CUnitSystem,
+display-статуса - CResultStatusPolicy. Ошибка содержит текущий адрес поля,
+включая переставленную Unit-колонку, и действие восстановления снимка.
+
+Новая регрессия v214 3749/180 в missing-state reader устранена без изменения
+старых expected/tolerance. v215: general+metadata 1880/0, lifecycle 3929/0,
+geometry 1158/0, presentation 681/0, structure 27/27, formatting 1003/0,
+palette/reopen 355/0. Final comment-only v216: general+metadata 1880/0.
+66 основных metadata variants, дополнительные флаги/status/единицы/переносы,
+synthetic geometry, noSolve и exact Results Value2/type invariant.
+
+Это приемка перечисленных metadata-потребителей, не всех resolver-ов/арcs,
+Double guards или F07. AutoUpdate, Excel guard и semantic review остаются
+открытыми; census 106 modules/4412 methods/1700 guards - inspection index.
+Full numerical Off/On остается v206 и повторяется на окончательном release.
+
+## AutoUpdate v219
+
+Negative v217d 45/36 подтвердил late active flag validation/missing default
+и очистку Chart при Plot.Enabled=No без named-state. Новый fixture раньше
+имел ошибки профиля/двухстрочной шапки/колонки статуса; они отделены от
+production findings в NDM_Audit03_Auto_Plot_Review.md. Corrected fixture
+использует stability-only профиль и подтверждает отсутствие solve.
+
+Existing workbook-entrypoint проверяет Plot.Enabled и активный AutoUpdate
+до модели/очистки Results, выключенный флаг не потребляет. v218 82/0;
+final v219 general+metadata+auto 1962/0, imported units 228/0, structure
+27/27, formatting 1003/0, palette/save-reopen 355/0, source/export 106/106.
+Help 2004 rows/140 links/118 shapes и input/PrintArea сохранены.
+
+Numerical solver/search/expected/tolerance не менялись, full On/Off оставлен
+для финального release. Registry 666/1064 пока без новых blanket PASS.
+Остальные metadata, arc parsing, Excel guard и extreme arithmetic остаются
+открытыми; census 106/4415/1705 является индексом, не semantic acceptance.
+
+## Contour Arc v223
+
+Negative v220 71/158 подтвердил молчаливый Val-prefix/zero и late failure
+после очистки схемы. Общий helper читает Text целиком, допускает signed
+десятичную/E-запись и только дугу меньше полного оборота; CIRCLE остается
+отдельным типом. Reader атомарно готовит численный угол, plotter его не
+перечитывает; AutoCAD preflight выполняется до записи объектов.
+
+Directed 393/0, frozen presentation 2355/0, lifecycle 3929/0, geometry
+1158/0, units/export snapshot 44/0. Две позиции anchor, понятный адрес,
+сохранность Chart/Results, recovery и Excel separator override проверены.
+Structure 27/27, formatting 1003/0, help failed=0, palette/reopen 355/0.
+Собственная compile error v221 и неквалифицированный macro v222 не PASS;
+подробности и исходные журналы сохранены в Contour_Arc_Review.
+
+НДС/Search/expected/tolerance не менялись; полный On/Off оставлен для
+выпуска. Census 106/4419/1713 не заменяет semantic audit. Остальные
+metadata/header paths, Excel guard и extreme arithmetic еще открыты;
+фактическая DWG/пиксельная приемка не заявлена.
+
+## Excel.Application v225
+
+Реальный последний setter Enter на отдельном пустом Excel воспроизвел
+оставленные выключенными события/экран/предупреждения: negative 120/19.
+Признак восстановления теперь устанавливается до первого изменения,
+rollback выполняется сразу, исходная COM-ошибка не подменяется.
+
+Positive 139/0: восемь failed Enter и 24 valid Enter варианта, повторный
+вход, явное восстановление, деструктор, noSolve. Presentation 2355/0,
+structure 27/27, palette/save-reopen 355/0, source unchanged=True.
+Новых classes и пользовательских Excel-сессий нет. Детали/хеши/границы
+сохранены в NDM_Audit03_Excel_Guard_Review.md. Full On/Off не повторен для
+локального интерфейсного изменения; финальный gate остается обязательным.
+Census 106/4421/1721 не заменяет semantic review; extreme arithmetic,
+остальные metadata/header paths и весь F07 еще не объявлены завершенными.
+
+## Общая Линейная Арифметика v229
+
+Неиспользуемое произведение pivot-ов и переполненная RHS-норма срывали
+системы с конечным известным решением; другие overflow покидали helper
+без typed failure. Frozen negative 10/40; исправленный directed 142/0,
+включая два настоящих Newton-состояния. Determinant удален после call-map,
+не подменен фиктивной диагностикой. Норма RHS масштабируется только при
+overflow; исходный Gaussian алгоритм и допуски сохраняются.
+
+Newton/Secant/Ultimate получают фактическую машинную причину. Три numerical
+suites в Off/On по 5637/0; 1908 прежних значений точно совпали, missing=0.
+Изолированный microbenchmark имеет overhead +6.52%, ускорение не заявлено.
+Два NotRun новых тестов сохранены отдельно; детали в Linear_Arithmetic_Review.
+Census 106/4427/1732 остается индексом. Этот срез не закрывает весь F07,
+Config/semantic review или полный выпускной gate.
+
+## Именованные Таблицы Config v233
+
+Реальный negative для поврежденной шапки/ключа и ошибки нерасчетного
+комментария: 339/242. Reader теперь сохраняет смысл известных таблиц,
+проверяет прежние смысловые заголовки с текущим адресом и не сохраняет
+Error 2015 как служебный комментарий. Усеченный диапазон также имеет
+адрес и действие для восстановления; optional material и LoadFromRange
+сохранены. Final directed 581/0, 166 сценариев, шесть таблиц/две позиции.
+
+Unit/Sign 588/0, material 1442/0, input messages 1973/0,
+presentation 2780/0, lifecycle 3929/0; 636 общих actual-values без
+различий. Structure 27/27; реальные source/export 106/106.
+Новых классов, физической методики и изменений user Config нет.
+Детали и frozen hashes в Settings_Table_Guard_Review. Это не закрывает
+остальные structural geometry/metadata/multi-area пути или весь F07;
+реестр остается 687/1064 и финальный полный On/Off обязателен.

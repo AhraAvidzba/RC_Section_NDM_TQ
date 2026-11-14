@@ -1,0 +1,1654 @@
+Attribute VB_Name = "modTestMaterialDiagrams"
+Option Explicit
+
+' ==========================================================================
+' ДЛЯ ТЕСТОВ: Тесты диаграмм материалов
+' ==========================================================================
+' Проверяются действующие обязанности material-слоя:
+' - CMaterialDiagram хранит готовые точки и выполняет только интерполяцию;
+' - CMaterialModelProvider выбирает расчетный режим, I/II ГПС, TwoLine/ThreeLine
+'   и строит точки диаграмм из параметров бетона и арматуры.
+' Интерполяция проверяется отдельно от нормативного построения точек provider-ом.
+
+Private Type TMaterialTestStats
+    Passed As Long
+    Failed As Long
+    Report As String
+End Type
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает все проверки material-слоя и возвращает текстовый отчет для Run-AllTests.
+Public Function RunMaterialDiagramTests() As String
+    On Error GoTo Failed
+
+    Dim stats As TMaterialTestStats
+    Dim t0 As Double
+    t0 = Timer
+
+    TestConcreteInterpolation stats
+    TestSteelInterpolation stats
+    TestConcreteThreePointDiagram stats
+    TestSteelThreePointDiagram stats
+    TestProviderConcreteDiagrams stats
+    TestProviderSteelDiagrams stats
+    TestProviderAsymmetricSteelStrengths stats
+    TestProviderStateSolutionExtension stats
+    TestUserStrainParametersAffectDiagrams stats
+    TestInvalidParameters stats
+    TestActiveMaterialPointOrder stats
+    TestAudit02PhysicalDiagramPairs stats
+    TestAudit02ExtensionBeyondTechnicalDefault stats
+    TestAudit02ExtensionOverflowIsExplicit stats
+    TestAudit03DiagramArrayInputs stats
+    TestAudit03MaterialConfigBehavior stats
+    TestAudit03MaterialControlUnits stats
+    TestAudit03PublishedMaterialDiagrams stats
+    TestCachedMaterialTransitions stats
+    TestPlateauSlope stats
+
+    Dim elapsedSeconds As Double
+    elapsedSeconds = Timer - t0
+    If elapsedSeconds < 0# Then elapsedSeconds = elapsedSeconds + 86400# ' Timer сбрасывается в полночь; набор длится меньше суток.
+    TestAppendLine stats, "TOTAL_MATERIAL: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed) & _
+        "; elapsedSec=" & TestFormatNumberInvariant(elapsedSeconds)
+    RunMaterialDiagramTests = stats.Report
+    Exit Function
+
+Failed:
+    RunMaterialDiagramTests = "RUNTIME ERROR: " & CStr(Err.Number) & _
+        "; source=" & Err.Source & "; description=" & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' согласованность напряжений и касательных модулей всех ветвей;
+' повторная подготовка материалов после изменения параметров.
+Public Function RunPlateauSlopeTests() As String
+    On Error GoTo Failed
+    Dim stats As TMaterialTestStats
+    TestPlateauSlope stats
+    TestAppendLine stats, "TOTAL_PLATEAU_SLOPE: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunPlateauSlopeTests = stats.Report
+    Exit Function
+Failed:
+    RunPlateauSlopeTests = stats.Report & "RUNTIME ERROR: " & CStr(Err.Number) & "; " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет наклон плато, производные, физические пределы и неизменность выданных снимков материалов при разных диаграммах и коэффициентах.
+Private Sub TestPlateauSlope(ByRef stats As TMaterialTestStats)
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    Dim reference As CMaterialModelProvider, provider As CMaterialModelProvider, spec As CMaterialModelSpec
+    Dim extension As Variant, factor As Variant, kind As Variant, valueSet As Variant, tension As Variant
+    Dim baseline As CMaterialDiagram, diagram As CMaterialDiagram, equilibrium As CMaterialDiagram
+    Dim clone As CMaterialDiagram, i As Long, material As Long, compressionE As Double, tensionE As Double
+    Dim alpha As Double, strain As Double, expected As Double, h As Double, prefix As String, revision As Long
+    concrete.Initialize 14.5, 1.05, 18.5, 1.6, 30000#, 27000#, rbMc2:=22#
+    steel.Initialize 310#, 350#, 360#, 400#, 205000#, 200000#, 0.018, 0.025, 0.014, 0.015
+    For Each extension In Array(False, True)
+        For Each factor In Array(0#, 0.00001, 0.0001, 0.001)
+            Set reference = New CMaterialModelProvider
+            reference.TestInitializeFromParameters concrete, steel, diagramExtensionEnabled:=CBool(extension)
+            Set provider = New CMaterialModelProvider
+            alpha = CDbl(factor)
+            provider.TestInitializeFromParameters concrete, steel, diagramExtensionEnabled:=CBool(extension), plateauSlopeFactor:=alpha
+            For Each kind In Array("TwoLine", "ThreeLine")
+                For Each valueSet In Array("ULS(I)", "SLS(II)")
+                    For Each tension In Array("Ignore", "UseDiagram")
+                        Set spec = New CMaterialModelSpec: spec.Initialize CStr(valueSet), CStr(kind), CStr(tension), CStr(kind)
+                        For material = 0 To 1
+                            If material = 0 Then
+                                Set baseline = reference.ConcreteMaterialFromSpec(spec)
+                                Set diagram = provider.ConcreteMaterialFromSpec(spec)
+                                Set equilibrium = provider.ConcreteMaterialForEquilibriumFromSpec(spec)
+                                compressionE = concrete.Eb: tensionE = concrete.Ebt
+                            Else
+                                Set baseline = reference.SteelMaterialFromSpec(spec)
+                                Set diagram = provider.SteelMaterialFromSpec(spec)
+                                Set equilibrium = provider.SteelMaterialForEquilibriumFromSpec(spec)
+                                compressionE = steel.Esc: tensionE = steel.Es
+                            End If
+                            prefix = "plateau." & CStr(extension) & "." & CStr(factor) & "." & spec.SpecKey & "." & CStr(material)
+                            Set clone = equilibrium.Clone(True)
+                            TestAssertClose stats, prefix & ".compressionLimit", equilibrium.PhysicalCompressionStrain, baseline.PhysicalCompressionStrain, 0#
+                            TestAssertClose stats, prefix & ".tensionLimit", equilibrium.PhysicalTensionStrain, baseline.PhysicalTensionStrain, 0#
+                            TestAssertTrue stats, prefix & ".frozen", diagram.IsFrozen And equilibrium.IsFrozen
+                            For i = 1 To baseline.PointCount
+                                expected = TestPlateauExpectedStress(baseline, i, alpha, compressionE, tensionE)
+                                TestAssertClose stats, prefix & ".node." & CStr(i), diagram.PointStress(i), expected, 0.000000001
+                                TestAssertClose stats, prefix & ".strain." & CStr(i), diagram.PointStrain(i), baseline.PointStrain(i), 0#
+                                TestAssertClose stats, prefix & ".clone." & CStr(i), clone.PointStress(i), diagram.PointStress(i), 0#
+                            Next i
+                            For i = 1 To baseline.PointCount - 1
+                                strain = (baseline.PointStrain(i) + baseline.PointStrain(i + 1)) / 2#
+                                expected = baseline.GetTangentModulus(strain)
+                                If expected = 0# And baseline.GetStress(strain) <> 0# Then
+                                    If strain < 0# Then expected = alpha * compressionE Else expected = alpha * tensionE
+                                End If
+                                TestAssertClose stats, prefix & ".tangent." & CStr(i), diagram.GetTangentModulus(strain), expected, 0.0000001
+                                h = (baseline.PointStrain(i + 1) - baseline.PointStrain(i)) / 1000# ' Малая симметричная разность остаётся внутри одного линейного участка диаграммы.
+                                TestAssertClose stats, prefix & ".derivative." & CStr(i), _
+                                    (diagram.GetStress(strain + h) - diagram.GetStress(strain - h)) / (2# * h), diagram.GetTangentModulus(strain), 0.00001
+                            Next i
+                            If material = 0 And CStr(tension) = "Ignore" Then
+                                TestAssertClose stats, prefix & ".ignoredStress", equilibrium.GetStress(0.1), 0#, 0#
+                                TestAssertClose stats, prefix & ".ignoredTangent", equilibrium.GetTangentModulus(0.1), 0#, 0#
+                            End If
+                            If CBool(extension) Then
+                                TestAssertClose stats, prefix & ".compressionExtension", equilibrium.GetTangentModulus(-1#), 0.01 * compressionE, 0.0000001
+                                If baseline.HasPhysicalTensionLimit Then _
+                                    TestAssertClose stats, prefix & ".tensionExtension", equilibrium.GetTangentModulus(1#), 0.01 * tensionE, 0.0000001
+                            End If
+                        Next material
+                    Next tension
+                Next valueSet
+            Next kind
+            revision = provider.Revision
+            expected = diagram.PointStress(1)
+            provider.TestInitializeFromParameters concrete, steel, plateauSlopeFactor:=alpha + 0.002
+            TestAssertTrue stats, "plateau.cache.newRevision", provider.Revision > revision
+            TestAssertClose stats, "plateau.cache.oldSnapshot", diagram.PointStress(1), expected, 0#
+            TestAssertClose stats, "plateau.cache.newFactor", provider.PlateauSlopeFactor, alpha + 0.002, 0#
+            Set clone = provider.SteelMaterialFromSpec(spec)
+            TestAssertTrue stats, "plateau.cache.newDiagram", clone.PointStress(1) <> expected
+        Next factor
+    Next extension
+    TestPlateauSlopeSetting stats
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Независимый oracle суммирует длины исходных плоских участков между нулем и узлом.
+Private Function TestPlateauExpectedStress(ByVal baseline As CMaterialDiagram, ByVal index As Long, _
+        ByVal alpha As Double, ByVal compressionE As Double, ByVal tensionE As Double) As Double
+    Dim i As Long, change As Double
+    For i = 2 To baseline.PointCount
+        If baseline.PointStress(i) <> 0# And baseline.PointStress(i) = baseline.PointStress(i - 1) Then
+            If baseline.PointStrain(i) <= 0# And index < i Then _
+                change = change - alpha * compressionE * (baseline.PointStrain(i) - baseline.PointStrain(i - 1))
+            If baseline.PointStrain(i - 1) >= 0# And index >= i Then _
+                change = change + alpha * tensionE * (baseline.PointStrain(i) - baseline.PointStrain(i - 1))
+        End If
+    Next i
+    TestPlateauExpectedStress = baseline.PointStress(index) + change
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет чтение коэффициента наклона плато из настоящей ячейки, включая формулу, неверный ввод и отсутствие ключа.
+Private Sub TestPlateauSlopeSetting(ByRef stats As TMaterialTestStats)
+    Dim cell As Object, original As Variant, choice As Variant, provider As CMaterialModelProvider
+    Dim settings As CSystemSettingsReader, units As CUnitSystem, errorNumber As Long, description As String
+    On Error GoTo Failed
+    Set cell = TestPlateauSettingCell()
+    If cell Is Nothing Then Err.Raise 5, , "В Config отсутствует General.PlateauSlopeFactor."
+    original = cell.Formula
+    For Each choice In Array(0#, 0.00001, 0.0001, 0.001, 0.002)
+        cell.Value2 = CDbl(choice)
+        Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook ThisWorkbook
+        Set units = New CUnitSystem: units.LoadFromSettings settings
+        Set provider = New CMaterialModelProvider: provider.Initialize settings, units
+        TestAssertClose stats, "plateau.setting." & CStr(choice), provider.PlateauSlopeFactor, CDbl(choice), 0#
+    Next choice
+    cell.Formula = "=1/1000"
+    settings.LoadFromWorkbook ThisWorkbook: provider.Initialize settings, units
+    TestAssertClose stats, "plateau.setting.formula", provider.PlateauSlopeFactor, 0.001, 0#
+    For Each choice In Array(-0.001, "", "invalid", "1e999", CVErr(2015))
+        cell.Value2 = choice
+        On Error Resume Next
+        settings.LoadFromWorkbook ThisWorkbook
+        If Err.Number = 0 Then provider.Initialize settings, units
+        errorNumber = Err.Number: description = Err.Description: Err.Clear
+        On Error GoTo Failed
+        TestAssertTrue stats, "plateau.setting.invalidRejected", errorNumber <> 0 And _
+            InStr(1, description, "General.PlateauSlopeFactor", vbBinaryCompare) > 0 And _
+            InStr(1, description, cell.Address(False, False), vbBinaryCompare) > 0
+        TestAppendLine stats, "PLATEAU_INPUT_DIAG: " & description
+    Next choice
+    cell.Offset(0, -1).Value2 = "TestMissingPlateauFactor"
+    cell.Value2 = 0.001
+    On Error Resume Next
+    settings.LoadFromWorkbook ThisWorkbook
+    If Err.Number = 0 Then provider.Initialize settings, units
+    errorNumber = Err.Number: description = Err.Description: Err.Clear
+    On Error GoTo Failed
+    TestAssertTrue stats, "plateau.setting.missingRejected", errorNumber <> 0 And InStr(1, description, "General.PlateauSlopeFactor", vbBinaryCompare) > 0
+Restore:
+    If Not cell Is Nothing Then
+        cell.Offset(0, -1).Value2 = "General.PlateauSlopeFactor"
+        cell.Formula = original
+    End If
+    Exit Sub
+Failed:
+    stats.Failed = stats.Failed + 1
+    TestAppendLine stats, "FAIL: plateau.setting.runtime; " & Err.Description
+    Resume Restore
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Находит пользовательскую ячейку коэффициента плато по ключу в текущем именованном диапазоне.
+Private Function TestPlateauSettingCell() As Object
+    Dim table As Object, values As Variant, row As Long
+    Set table = ThisWorkbook.Names.Item("rngSystemSettings").RefersToRange
+    values = table.Value2
+    For row = 2 To table.Rows.Count
+        If CStr(values(row, 1)) = "General.PlateauSlopeFactor" Then Set TestPlateauSettingCell = table.Cells(row, 2): Exit Function
+    Next row
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' кэш переломов сравнивается с прямым перебором всех узлов.
+Public Function RunMaterialTransitionTests() As String
+    On Error GoTo Failed
+    Dim stats As TMaterialTestStats
+    TestCachedMaterialTransitions stats
+    TestAppendLine stats, "TOTAL_MATERIAL_TRANSITIONS: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunMaterialTransitionTests = stats.Report
+    Exit Function
+Failed:
+    RunMaterialTransitionTests = stats.Report & "RUNTIME ERROR: " & CStr(Err.Number) & "; " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет кэш переходов через узлы диаграмм для обоих материалов, разных режимов, повторной инициализации и копии.
+Private Sub TestCachedMaterialTransitions(ByRef stats As TMaterialTestStats)
+    Dim kind As Variant, valueSet As Variant, tension As Variant, mode As Variant
+    Dim provider As CMaterialModelProvider, spec As CMaterialModelSpec, diagram As CMaterialDiagram
+    Dim prefix As String
+    For Each kind In Array("TwoLine", "ThreeLine")
+        For Each valueSet In Array("ULS(I)", "SLS(II)")
+            For Each tension In Array("Ignore", "UseDiagram")
+                For Each mode In Array(False, True)
+                    Set provider = TestProvider(diagramExtensionEnabled:=CBool(mode))
+                    Set spec = New CMaterialModelSpec
+                    spec.Initialize CStr(valueSet), CStr(kind), CStr(tension), CStr(kind)
+                    prefix = "materialTransitions." & spec.SpecKey & "." & CStr(mode)
+                    Set diagram = provider.ConcreteMaterialForEquilibriumFromSpec(spec)
+                    TestAssertMaterialTransitions stats, prefix & ".concrete", diagram
+                    Set diagram = provider.SteelMaterialForEquilibriumFromSpec(spec)
+                    TestAssertMaterialTransitions stats, prefix & ".steel", diagram
+                Next mode
+            Next tension
+        Next valueSet
+    Next kind
+    Dim strains(1 To 3) As Double, stresses(1 To 3) As Double
+    strains(1) = -0.001: strains(2) = 0#: strains(3) = 0.001
+    stresses(1) = -100#: stresses(2) = 0#: stresses(3) = 100#
+    Set diagram = New CMaterialDiagram
+    diagram.InitializeFromArrays strains, stresses, 3
+    TestAssertMaterialTransitions stats, "materialTransitions.collinear", diagram
+    stresses(3) = 50#
+    diagram.InitializeFromArrays strains, stresses, 3
+    TestAssertMaterialTransitions stats, "materialTransitions.reinitialized", diagram
+    TestAssertMaterialTransitions stats, "materialTransitions.clone", diagram.Clone
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает две ближайшие доли шага до узлов диаграммы с независимым перебором для разных начальных оценок.
+Private Sub TestAssertMaterialTransitions(ByRef stats As TMaterialTestStats, ByVal prefix As String, _
+        ByVal diagram As CMaterialDiagram)
+    Dim i As Long, j As Long, strain As Double, delta As Variant, seed As Variant, samples As Variant
+    Dim first As Double, second As Double, expectedFirst As Double, expectedSecond As Double, name As String
+    samples = Array(-1000#, -100#, -10#, -0.05, -0.0035, -0.001, 0#, 0.00015, 0.001, 0.025, 10#, 100#, 1000#)
+    For i = 1 To diagram.PointCount + UBound(samples) + 1
+        If i <= diagram.PointCount Then strain = diagram.PointStrain(i) Else strain = CDbl(samples(i - diagram.PointCount - 1))
+        j = 0
+        For Each delta In Array(-0.01, -0.0001, -0.000000000001, 0#, 0.000000000001, 0.0001, 0.01)
+            j = j + 1
+            For Each seed In Array(0#, 0.125)
+                first = CDbl(seed): second = 4# * CDbl(seed) ' Ненулевая начальная оценка проверяет обновление имеющихся границ, а не только пустого аккумулятора.
+                expectedFirst = first: expectedSecond = second
+                TestMaterialTransitionOracle diagram, strain, CDbl(delta), expectedFirst, expectedSecond
+                diagram.CollectStrainTransitions strain, CDbl(delta), first, second
+                name = prefix & "." & CStr(i) & "." & CStr(j) & "." & CStr(seed)
+                TestAssertClose stats, name & ".first", first, expectedFirst, 0#
+                TestAssertClose stats, name & ".second", second, expectedSecond, 0#
+            Next seed
+        Next delta
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Независимый эталон выполняет поузловой расчёт наклонов и расстояний.
+Private Sub TestMaterialTransitionOracle(ByVal diagram As CMaterialDiagram, ByVal strain As Double, _
+        ByVal delta As Double, ByRef first As Double, ByRef second As Double)
+    If delta = 0# Then Exit Sub
+    Dim i As Long, leftSlope As Double, rightSlope As Double, node As Double, distance As Double
+    For i = 1 To diagram.PointCount
+        node = diagram.PointStrain(i)
+        leftSlope = 0#: rightSlope = 0#
+        If i > 1 Then leftSlope = (diagram.PointStress(i) - diagram.PointStress(i - 1)) / _
+            (node - diagram.PointStrain(i - 1))
+        If i < diagram.PointCount Then rightSlope = (diagram.PointStress(i + 1) - diagram.PointStress(i)) / _
+            (diagram.PointStrain(i + 1) - node)
+        If i = 1 And diagram.HasCompressionExtension Then leftSlope = rightSlope
+        If i = diagram.PointCount And diagram.HasTensionExtension Then rightSlope = leftSlope
+        If leftSlope <> rightSlope Then
+            distance = (node - strain) / delta
+            If distance > 0# And strain + distance * delta <> strain Then
+                If first = 0# Or distance < first Then
+                    second = first: first = distance
+                ElseIf distance > first Then
+                    If second = 0# Or distance < second Then second = distance
+                End If
+            End If
+        End If
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' независимые сопротивления, модули и пределы двух ветвей стали.
+Public Function RunAsymmetricSteelStrengthTests() As String
+    On Error GoTo Failed
+    Dim stats As TMaterialTestStats
+    TestProviderAsymmetricSteelStrengths stats
+    TestAppendLine stats, "TOTAL_ASYMMETRIC_STEEL: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunAsymmetricSteelStrengthTests = stats.Report
+    Exit Function
+Failed:
+    RunAsymmetricSteelStrengthTests = "RUNTIME ERROR: " & CStr(Err.Number) & "; " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Разные Rsc/Rs не должны смешиваться между знаками напряжений и I/II ГПС.
+Private Sub TestProviderAsymmetricSteelStrengths(ByRef stats As TMaterialTestStats)
+    Dim parameters As CSteelMaterialParameters, provider As CMaterialModelProvider
+    Dim steel As CMaterialDiagram, equilibrium As CMaterialDiagram
+    Dim diagramName As Variant, extension As Variant, purpose As Variant
+    Dim rsc As Double, rs As Double, compressionLimit As Double, tensionLimit As Double
+    Dim compressionKnee As Double, tensionKnee As Double, factor As Double, prefix As String
+    Set parameters = New CSteelMaterialParameters
+    parameters.Initialize 250#, 400#, 280#, 450#, 190000#, 210000#, 0.02, 0.03, 0.018, 0.022
+    For Each diagramName In Array("TwoLine", "ThreeLine")
+        For Each extension In Array(False, True)
+            Set provider = New CMaterialModelProvider
+            provider.TestInitializeFromParameters TestConcreteParameters(), parameters, _
+                "TwoLine", "Ignore", CStr(diagramName), "ThreeLine", CStr(diagramName), _
+                "TwoLine", CStr(diagramName), CBool(extension)
+            For Each purpose In Array(cpStrength, cpMcrc, cpCrackedNDS)
+                If CLng(purpose) = cpStrength Then
+                    rsc = 250#: rs = 400#
+                Else
+                    rsc = 280#: rs = 450#
+                End If
+                If CStr(diagramName) = "TwoLine" Then
+                    compressionLimit = 0.02: tensionLimit = 0.03: factor = 1#
+                    compressionKnee = rsc / 190000#: tensionKnee = rs / 210000#
+                Else
+                    compressionLimit = 0.018: tensionLimit = 0.022: factor = 1.1
+                    compressionKnee = 0.9 * rsc / 190000#: tensionKnee = 0.9 * rs / 210000#
+                End If
+                Set steel = provider.SteelMaterial(CLng(purpose))
+                If CLng(purpose) = cpMcrc Then
+                    Set equilibrium = steel
+                Else
+                    Set equilibrium = provider.SteelMaterialForEquilibrium(CLng(purpose))
+                End If
+                prefix = "asymmetricSteel." & CStr(diagramName) & "." & CStr(extension) & "." & CStr(purpose)
+                TestAssertClose stats, prefix & ".compressionStrength", steel.GetStress(-compressionLimit), -factor * rsc, 0.000000001
+                TestAssertClose stats, prefix & ".tensionStrength", steel.GetStress(tensionLimit), factor * rs, 0.000000001
+                TestAssertClose stats, prefix & ".compressionElastic", steel.GetStress(-compressionKnee / 2#), -190000# * compressionKnee / 2#, 0.000000001
+                TestAssertClose stats, prefix & ".tensionElastic", steel.GetStress(tensionKnee / 2#), 210000# * tensionKnee / 2#, 0.000000001
+                TestAssertClose stats, prefix & ".compressionLimit", equilibrium.PhysicalCompressionStrain, -compressionLimit, 0#
+                TestAssertClose stats, prefix & ".tensionLimit", equilibrium.PhysicalTensionStrain, tensionLimit, 0#
+                TestAssertClose stats, prefix & ".equilibriumCompression", equilibrium.GetStress(-compressionLimit), -factor * rsc, 0.000000001
+                TestAssertClose stats, prefix & ".equilibriumTension", equilibrium.GetStress(tensionLimit), factor * rs, 0.000000001
+            Next purpose
+        Next extension
+    Next diagramName
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет сжатую бетонную ветвь: до первой точки держится плато,
+' между точками работает линейная интерполяция, а растяжение выключено.
+Private Sub TestConcreteInterpolation(ByRef stats As TMaterialTestStats)
+    Dim mat As CMaterialDiagram
+    Set mat = New CMaterialDiagram
+    mat.TestInitialize -0.0015, -15.5, -0.0035, -15.5
+
+    TestAssertClose stats, "conc.points.tension.zero", mat.GetStress(0.0001), 0#, 0.000000000001
+    TestAssertClose stats, "conc.points.origin", mat.GetStress(0#), 0#, 0.000000000001
+    TestAssertClose stats, "conc.points.firstSegment", mat.GetStress(-0.00075), -7.75, 0.000000000001
+    TestAssertClose stats, "conc.points.secondSegment", mat.GetStress(-0.0025), -15.5, 0.000000000001
+    TestAssertClose stats, "conc.points.secondTangent", mat.GetTangentModulus(-0.0025), 0#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет трехточечную сжатую ветвь без provider-а, чтобы отдельно закрепить
+' поведение универсальной кусочно-линейной интерполяции.
+Private Sub TestConcreteThreePointDiagram(ByRef stats As TMaterialTestStats)
+    Dim mat As CMaterialDiagram
+    Set mat = New CMaterialDiagram
+    mat.TestInitializeFromThreeCompressionPoints -0.001, -10#, -0.002, -15#, -0.003, -18#
+
+    TestAssertClose stats, "conc.threePoints.firstSegment", mat.GetStress(-0.0005), -5#, 0.000000000001
+    TestAssertClose stats, "conc.threePoints.secondSegment", mat.GetStress(-0.0015), -12.5, 0.000000000001
+    TestAssertClose stats, "conc.threePoints.thirdSegment", mat.GetStress(-0.0025), -16.5, 0.000000000001
+    TestAssertClose stats, "conc.threePoints.ultimate", mat.GetStress(-0.004), -18#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет симметричную трехлинейную диаграмму арматуры как готовую диаграмму,
+' без знания о нормативных формулах построения точек.
+Private Sub TestSteelThreePointDiagram(ByRef stats As TMaterialTestStats)
+    Dim mat As CMaterialDiagram
+    Set mat = New CMaterialDiagram
+    mat.TestInitializeFromThreeTensionPoints 0.001, 200#, 0.01, 350#, 0.025, 420#
+
+    TestAssertClose stats, "steel.threePoints.firstSegment", mat.GetStress(0.0005), 100#, 0.000000000001
+    TestAssertClose stats, "steel.threePoints.secondSegment", mat.GetStress(0.0055), 275#, 0.000000000001
+    TestAssertClose stats, "steel.threePoints.thirdSegment", mat.GetStress(0.0175), 385#, 0.000000000001
+    TestAssertClose stats, "steel.threePoints.compression", mat.GetStress(-0.0175), -385#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет двухлинейную диаграмму арматуры: линейный участок до R/Es
+' и дальнейшее пластическое плато до пользовательской предельной деформации.
+Private Sub TestSteelInterpolation(ByRef stats As TMaterialTestStats)
+    Dim mat As CMaterialDiagram
+    Set mat = New CMaterialDiagram
+    mat.TestInitialize 0.00175, 350#, 0.025
+
+    TestAssertClose stats, "steel.points.tensionFirstSegment", mat.GetStress(0.000875), 175#, 0.000000000001
+    TestAssertClose stats, "steel.points.tensionSecondSegment", mat.GetStress(0.01), 350#, 0.000000000001
+    TestAssertClose stats, "steel.points.compressionFirstSegment", mat.GetStress(-0.000875), -175#, 0.000000000001
+    TestAssertClose stats, "steel.points.compressionSecondSegment", mat.GetStress(-0.01), -350#, 0.000000000001
+    TestAssertClose stats, "steel.points.secondTangent", mat.GetTangentModulus(0.01), 0#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет выбор бетонных характеристик и растянутой ветви для прочности,
+' образования трещины и НДС с трещинами.
+Private Sub TestProviderConcreteDiagrams(ByRef stats As TMaterialTestStats)
+    Dim provider As CMaterialModelProvider
+    Set provider = TestProvider()
+
+    Dim strength As CMaterialDiagram
+    Set strength = provider.ConcreteMaterial(cpStrength)
+    TestAssertClose stats, "conc.provider.strength.point1.eps", strength.PointStrain(1), -0.0035, 0.000000000001
+    TestAssertClose stats, "conc.provider.strength.point1.stress", strength.PointStress(1), -15.5, 0.000000000001
+    TestAssertClose stats, "conc.provider.strength.point2.eps", strength.PointStrain(2), -0.0015, 0.000000000001
+    TestAssertClose stats, "conc.provider.strength.tensionZero", strength.GetStress(0.0001), 0#, 0.000000000001
+    TestAssertClose stats, "conc.provider.strength.compressionLimit", provider.ConcreteCompressionLimit(cpStrength), -0.0035, 0.000000000001
+    TestAssertClose stats, "conc.provider.strength.tensionLimit", provider.ConcreteTensionLimit(cpStrength), 0#, 0.000000000001
+
+    Dim mcrc As CMaterialDiagram
+    Set mcrc = provider.ConcreteMaterial(cpMcrc)
+    TestAssertClose stats, "conc.provider.mcrc.compressionRb", mcrc.GetStress(-0.002), -22#, 0.000000000001
+    TestAssertClose stats, "conc.provider.mcrc.tensionRbt", mcrc.GetStress(0.0001), 1.8, 0.000000000001
+    TestAssertClose stats, "conc.provider.mcrc.epsB1", mcrc.PointStrain(3), -(0.6 * 22# / 32500#), 0.000000000001
+    TestAssertClose stats, "conc.provider.mcrc.epsBt1", mcrc.PointStrain(5), 0.6 * 1.8 / 32500#, 0.000000000001
+    TestAssertClose stats, "conc.provider.mcrc.tensionLimit", provider.ConcreteTensionLimit(cpMcrc), 0.00015, 0.000000000001
+
+    TestAssertClose stats, "conc.provider.cracked.tensionZero", provider.ConcreteMaterial(cpCrackedNDS).GetStress(0.0001), 0#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет нормативные расчетные точки арматуры, которые provider вычисляет
+' из R/E и выбранной двухлинейной или трехлинейной схемы.
+Private Sub TestProviderSteelDiagrams(ByRef stats As TMaterialTestStats)
+    Dim provider As CMaterialModelProvider
+    Set provider = TestProvider()
+
+    Dim twoLine As CMaterialDiagram
+    Set twoLine = provider.SteelMaterial(cpStrength)
+    TestAssertClose stats, "steel.provider.twoline.epsSc0", twoLine.PointStrain(2), -350# / 200000#, 0.000000000001
+    TestAssertClose stats, "steel.provider.twoline.epsS0", twoLine.PointStrain(4), 350# / 200000#, 0.000000000001
+    TestAssertClose stats, "steel.provider.twoline.limit", provider.SteelTensionLimit(cpStrength), 0.025, 0.000000000001
+
+    Dim providerThree As CMaterialModelProvider
+    Set providerThree = TestProvider("TwoLine", "Ignore", "ThreeLine", "ThreeLine", "ThreeLine")
+
+    Dim threeLine As CMaterialDiagram
+    Set threeLine = providerThree.SteelMaterial(cpStrength)
+    Dim epsS0 As Double
+    Dim epsS1 As Double
+    Dim epsSPl As Double
+    epsS0 = 350# / 200000# + 0.002
+    epsS1 = 0.9 * 350# / 200000#
+    epsSPl = 2# * epsS0 - epsS1
+
+    TestAssertClose stats, "steel.provider.threeline.epsS1", threeLine.PointStrain(6), epsS1, 0.000000000001
+    TestAssertClose stats, "steel.provider.threeline.epsS0", threeLine.PointStrain(7), epsS0, 0.000000000001
+    TestAssertClose stats, "steel.provider.threeline.epsSPl", threeLine.PointStrain(8), epsSPl, 0.000000000001
+    TestAssertClose stats, "steel.provider.threeline.limit", providerThree.SteelTensionLimit(cpStrength), 0.015, 0.000000000001
+    TestAssertClose stats, "steel.provider.sls.resistance", provider.SteelMaterial(cpCrackedNDS).GetStress(0.01), 390#, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вспомогательное продолжение добавляется только к диаграммам для поиска равновесия.
+' Физические диаграммы прочности и трещин сохраняют заданные точки и пределы.
+Private Sub TestProviderStateSolutionExtension(ByRef stats As TMaterialTestStats)
+    Dim provider As CMaterialModelProvider
+    Set provider = TestProvider()
+
+    Dim physicalConcrete As CMaterialDiagram
+    Set physicalConcrete = provider.ConcreteMaterial(cpStrength)
+    Dim stateConcrete As CMaterialDiagram
+    Set stateConcrete = provider.ConcreteMaterialForEquilibrium(cpStrength)
+    TestAssertTrue stats, "state.extension.concrete.physicalClean", Not physicalConcrete.HasCompressionExtension
+    TestAssertTrue stats, "state.extension.concrete.compression", stateConcrete.HasCompressionExtension
+    TestAssertTrue stats, "state.extension.concrete.noTension", Not stateConcrete.HasTensionExtension
+    TestAssertClose stats, "state.extension.concrete.physicalLimit", stateConcrete.PhysicalCompressionStrain, _
+        physicalConcrete.PhysicalCompressionStrain, 0.000000000001
+
+    Dim physicalSteel As CMaterialDiagram
+    Set physicalSteel = provider.SteelMaterial(cpStrength)
+    Dim stateSteel As CMaterialDiagram
+    Set stateSteel = provider.SteelMaterialForEquilibrium(cpStrength)
+    TestAssertTrue stats, "state.extension.steel.compression", stateSteel.HasCompressionExtension
+    TestAssertTrue stats, "state.extension.steel.tension", stateSteel.HasTensionExtension
+    TestAssertClose stats, "state.extension.steel.physicalLimit", stateSteel.PhysicalTensionStrain, _
+        physicalSteel.PhysicalTensionStrain, 0.000000000001
+    TestAssertTrue stats, "state.extension.steel.plateauPhysical", Not stateSteel.IsInExtensionRange(0.01)
+    TestAssertTrue stats, "state.extension.steel.beyondUltimate", stateSteel.IsInExtensionRange(0.03)
+
+    Dim strain As Variant, expected As Double, stress As Double, tangent As Double
+    TestAssertTrue stats, "state.extension.concrete.reference", stateConcrete.PointStrain(1) < physicalConcrete.PhysicalCompressionStrain
+    TestAssertTrue stats, "state.extension.steel.leftReference", stateSteel.PointStrain(1) < physicalSteel.PhysicalCompressionStrain
+    TestAssertTrue stats, "state.extension.steel.rightReference", stateSteel.PointStrain(stateSteel.PointCount) > physicalSteel.PhysicalTensionStrain
+    ' Прямая сохраняет наклон 0,01*E и за опорными точками, и за контрольными +/-10 и +/-100.
+    For Each strain In Array(-1000000#, -1000#, -100#, -10.001, -10#, -9.999, 9.999, 10#, 10.001, 100#, 1000#, 1000000#)
+        If CDbl(strain) < 0# Then
+            expected = physicalSteel.GetStress(physicalSteel.PhysicalCompressionStrain) + _
+                (CDbl(strain) - physicalSteel.PhysicalCompressionStrain) * 2000#
+        Else
+            expected = physicalSteel.GetStress(physicalSteel.PhysicalTensionStrain) + _
+                (CDbl(strain) - physicalSteel.PhysicalTensionStrain) * 2000#
+        End If
+        stateSteel.EvaluateAtStrain CDbl(strain), stress, tangent
+        TestAssertClose stats, "state.extension.steel.extendedStress." & CStr(strain), stress, expected, Abs(expected) * 0.000000000001
+        TestAssertClose stats, "state.extension.steel.extendedTangent." & CStr(strain), tangent, 2000#, 0.000000001
+        TestAssertClose stats, "state.extension.steel.stressEvaluator." & CStr(strain), stateSteel.GetStress(CDbl(strain)), expected, Abs(expected) * 0.000000000001
+        TestAssertTrue stats, "state.extension.steel.physicalFail." & CStr(strain), Not stateSteel.IsInPhysicalRange(CDbl(strain))
+        TestAssertTrue stats, "state.extension.steel.extensionUsed." & CStr(strain), stateSteel.IsInExtensionRange(CDbl(strain))
+    Next strain
+    For Each strain In Array(-1000#, 1000#)
+        If CDbl(strain) < 0# Then
+            expected = physicalConcrete.GetStress(physicalConcrete.PhysicalCompressionStrain) + _
+                (CDbl(strain) - physicalConcrete.PhysicalCompressionStrain) * 325#
+        Else
+            expected = 0#
+        End If
+        stateConcrete.EvaluateAtStrain CDbl(strain), stress, tangent
+        TestAssertClose stats, "state.extension.concrete.stress." & CStr(strain), stress, expected, 0.000000001
+        TestAssertClose stats, "state.extension.concrete.tangent." & CStr(strain), tangent, IIf(CDbl(strain) < 0#, 325#, 0#), 0.000000001
+        TestAssertClose stats, "state.extension.concrete.stressEvaluator." & CStr(strain), stateConcrete.GetStress(CDbl(strain)), expected, 0.000000001
+        TestAssertClose stats, "state.extension.concrete.tangentEvaluator." & CStr(strain), stateConcrete.GetTangentModulus(CDbl(strain)), tangent, 0#
+    Next strain
+
+    Dim cloned As CMaterialDiagram
+    Set cloned = stateSteel.Clone
+    TestAssertClose stats, "state.extension.clone.unbounded", cloned.GetStress(1000#), stateSteel.GetStress(1000#), 0#
+    TestAssertClose stats, "state.extension.clone.tangent", cloned.GetTangentModulus(1000#), 2000#, 0.000000001
+    TestAssertMaterialTransitions stats, "state.extension.clone.transitions", cloned
+    Set cloned = stateSteel.Clone(True)
+    TestAssertTrue stats, "state.extension.clone.physicalOnly", Not cloned.HasCompressionExtension And Not cloned.HasTensionExtension
+    TestAssertClose stats, "state.extension.clone.physicalOnlyStress", cloned.GetStress(1000#), 350#, 0.000000001
+
+    Dim disabledProvider As CMaterialModelProvider
+    Set disabledProvider = TestProvider("TwoLine", "Ignore", "TwoLine", "TwoLine", "TwoLine", False)
+    TestAssertTrue stats, "state.extension.disabled", Not disabledProvider.SteelMaterialForEquilibrium(cpStrength).HasTensionExtension
+    Set stateSteel = disabledProvider.SteelMaterialForEquilibrium(cpStrength)
+    For Each strain In Array(-1000#, 1000#)
+        TestAssertClose stats, "state.extension.off.stress." & CStr(strain), stateSteel.GetStress(CDbl(strain)), Sgn(CDbl(strain)) * 350#, 0.000000001
+        TestAssertClose stats, "state.extension.off.tangent." & CStr(strain), stateSteel.GetTangentModulus(CDbl(strain)), 0#, 0#
+    Next strain
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет требование ТЗ: пользовательские предельные деформации берутся из
+' параметров Config, а не зашиты константами в построителе.
+Private Sub TestUserStrainParametersAffectDiagrams(ByRef stats As TMaterialTestStats)
+    Dim concrete As CConcreteMaterialParameters
+    Set concrete = New CConcreteMaterialParameters
+    concrete.Initialize 15.5, 1.1, 22#, 1.8, 32500#, 32500#, _
+        0.0017, 0.00009, 0.0022, 0.00011, 0.004, 0.0002, 14.6
+
+    Dim steel As CSteelMaterialParameters
+    Set steel = New CSteelMaterialParameters
+    steel.Initialize 350#, 350#, 390#, 390#, 200000#, 200000#, _
+        0.03, 0.031, 0.016, 0.017
+
+    Dim provider As CMaterialModelProvider
+    Set provider = New CMaterialModelProvider
+    provider.TestInitializeFromParameters concrete, steel
+
+    TestAssertClose stats, "material.userConcreteLimit", provider.ConcreteMaterial(cpStrength).PointStrain(1), -0.004, 0.000000000001
+    TestAssertClose stats, "material.userConcreteTensionLimit", provider.ConcreteMaterial(cpMcrc).PointStrain(7), 0.0002, 0.000000000001
+    TestAssertClose stats, "material.userSteelTwoLineCompressionLimit", provider.SteelMaterial(cpStrength).PointStrain(1), -0.03, 0.000000000001
+    TestAssertClose stats, "material.userSteelTwoLineTensionLimit", provider.SteelMaterial(cpStrength).PointStrain(5), 0.031, 0.000000000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет базовую защиту от некорректной диаграммы: точки должны иметь
+' физически согласованные знаки и возрастающие деформации.
+Private Sub TestInvalidParameters(ByRef stats As TMaterialTestStats)
+    On Error GoTo ConcreteError
+    Dim concrete As CMaterialDiagram
+    Set concrete = New CMaterialDiagram
+    concrete.TestInitialize 0.0015, -15.5, -0.0035, -15.5
+    TestAssertTrue stats, "material.invalidConcrete", False
+    GoTo SteelCheck
+
+ConcreteError:
+    On Error GoTo 0
+    TestAssertTrue stats, "material.invalidConcrete", True
+    Resume SteelCheck
+
+SteelCheck:
+    On Error GoTo SteelError
+    Dim steel As CMaterialDiagram
+    Set steel = New CMaterialDiagram
+    steel.TestInitialize 0#, 350#, 0.025
+    TestAssertTrue stats, "material.invalidSteel", False
+    Exit Sub
+
+SteelError:
+    On Error GoTo 0
+    TestAssertTrue stats, "material.invalidSteel", True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Создаёт CMaterialModelProvider с явно заданными видами диаграмм и продолжением.
+' Проверяет передачу этих параметров независимо от Config книги.
+Private Function TestProvider(Optional ByVal strengthConcreteDiagram As String = "TwoLine", _
+        Optional ByVal strengthConcreteTension As String = "Ignore", _
+        Optional ByVal strengthSteelDiagram As String = "TwoLine", _
+        Optional ByVal mcrcSteelDiagram As String = "TwoLine", _
+        Optional ByVal crackedSteelDiagram As String = "TwoLine", _
+        Optional ByVal diagramExtensionEnabled As Boolean = True) As CMaterialModelProvider
+    Dim provider As CMaterialModelProvider
+    Set provider = New CMaterialModelProvider
+    provider.TestInitializeFromParameters TestConcreteParameters(), TestSteelParameters(), _
+        strengthConcreteDiagram, strengthConcreteTension, strengthSteelDiagram, _
+        "ThreeLine", mcrcSteelDiagram, "TwoLine", crackedSteelDiagram, diagramExtensionEnabled
+    Set TestProvider = provider
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает фиксированные ULS/SLS сопротивления, модули и деформации бетона,
+' используемые численными эталонами этого набора, а не нормативную марку.
+Private Function TestConcreteParameters() As CConcreteMaterialParameters
+    Dim parameters As CConcreteMaterialParameters
+    Set parameters = New CConcreteMaterialParameters
+    parameters.Initialize 15.5, 1.1, 22#, 1.8, 32500#, 32500#, _
+        0.0015, 0.00008, 0.002, 0.0001, 0.0035, 0.00015, 14.6
+    Set TestConcreteParameters = parameters
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает фиксированные характеристики арматуры с разными предельными
+' деформациями TwoLine/ThreeLine для проверки фактического выбора диаграммы.
+Private Function TestSteelParameters() As CSteelMaterialParameters
+    Dim parameters As CSteelMaterialParameters
+    Set parameters = New CSteelMaterialParameters
+    parameters.Initialize 350#, 350#, 390#, 390#, 200000#, 200000#, _
+        0.025, 0.025, 0.015, 0.015
+    Set TestSteelParameters = parameters
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Однотипные assertions сохраняют конкретный test-ID и счетчики результатов.
+' Численные проверки используют переданный абсолютный допуск без его ослабления.
+Private Sub TestAssertTrue(ByRef stats As TMaterialTestStats, ByVal name As String, ByVal condition As Boolean)
+    If condition Then
+        stats.Passed = stats.Passed + 1
+        TestAppendLine stats, "OK: " & name
+    Else
+        stats.Failed = stats.Failed + 1
+        TestAppendLine stats, "FAIL: " & name
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет точку или характеристику материала по абсолютному допуску теста.
+' Обе величины и разница записываются в лог для независимого сравнения диаграмм.
+Private Sub TestAssertClose(ByRef stats As TMaterialTestStats, ByVal name As String, ByVal actual As Double, _
+        ByVal expected As Double, ByVal tolerance As Double)
+    Dim diff As Double
+    diff = Abs(actual - expected)
+    If diff <= tolerance Then
+        stats.Passed = stats.Passed + 1
+        TestAppendLine stats, "OK: " & name & "; actual=" & TestFormatNumberInvariant(actual) & _
+            "; expected=" & TestFormatNumberInvariant(expected) & "; absDiff=" & TestFormatNumberInvariant(diff)
+    Else
+        stats.Failed = stats.Failed + 1
+        TestAppendLine stats, "FAIL: " & name & "; actual=" & TestFormatNumberInvariant(actual) & _
+            "; expected=" & TestFormatNumberInvariant(expected) & "; absDiff=" & TestFormatNumberInvariant(diff)
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Добавляет диагностическую строку в итоговый отчет материалных тестов.
+Private Sub TestAppendLine(ByRef stats As TMaterialTestStats, ByVal text As String)
+    stats.Report = stats.Report & text & vbCrLf
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Форматирует число для текстового протокола с десятичной точкой; исходные расчётные значения не меняются.
+Private Function TestFormatNumberInvariant(ByVal value As Double) As String
+    TestFormatNumberInvariant = Replace$(Format$(value, "0.############"), ",", ".")
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' ==========================================================================
+' ДЛЯ ТЕСТОВ: физическая модель и активные ветви общего Extension
+' ==========================================================================
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает узлы и внутренние точки всех сочетаний TwoLine/ThreeLine,
+' ULS/SLS и Ignore/UseDiagram. Проверяет stress, tangent и совместный evaluator,
+' а также фактическое продолжение только работающих ветвей конкретного spec.
+Private Sub TestAudit02PhysicalDiagramPairs(ByRef stats As TMaterialTestStats)
+    Dim diagramKind As Variant
+    Dim valueSet As Variant
+    Dim tensionKind As Variant
+    Dim spec As CMaterialModelSpec
+    Dim providerOn As CMaterialModelProvider
+    Dim providerOff As CMaterialModelProvider
+    Dim physical As CMaterialDiagram
+    Dim extended As CMaterialDiagram
+    Dim testKey As String
+    For Each diagramKind In Array("TwoLine", "ThreeLine")
+        For Each valueSet In Array("ULS(I)", "SLS(II)")
+            For Each tensionKind In Array("Ignore", "UseDiagram")
+                Set spec = New CMaterialModelSpec
+                spec.Initialize CStr(valueSet), CStr(diagramKind), CStr(tensionKind), CStr(diagramKind)
+                Set providerOn = TestProvider(diagramExtensionEnabled:=True)
+                Set providerOff = TestProvider(diagramExtensionEnabled:=False)
+                testKey = "audit02.material." & spec.SpecKey
+
+                Set physical = providerOff.ConcreteMaterialForEquilibriumFromSpec(spec)
+                Set extended = providerOn.ConcreteMaterialForEquilibriumFromSpec(spec)
+                TestAssertPhysicalDiagramPair stats, testKey & ".concrete", physical, extended
+                TestAssertTrue stats, testKey & ".concrete.compressionExtension", extended.HasCompressionExtension
+                TestAssertClose stats, testKey & ".concrete.compressionSlope", _
+                    extended.GetTangentModulus(physical.PhysicalCompressionStrain - 0.0001), 325#, 0.000000000001
+                If CStr(tensionKind) = "Ignore" Then
+                    TestAssertTrue stats, testKey & ".ignore.noExtension", Not extended.HasTensionExtension
+                    TestAssertClose stats, testKey & ".ignore.stress", extended.GetStress(100#), 0#, 0.000000000001
+                    TestAssertClose stats, testKey & ".ignore.tangent", extended.GetTangentModulus(100#), 0#, 0.000000000001
+                    TestAssertTrue stats, testKey & ".ignore.range", extended.IsInPhysicalRange(100#)
+                    TestAssertTrue stats, testKey & ".ignore.notUsed", Not extended.IsInExtensionRange(100#)
+                Else
+                    TestAssertTrue stats, testKey & ".tension.extension", extended.HasTensionExtension
+                    TestAssertClose stats, testKey & ".tension.slope", _
+                        extended.GetTangentModulus(physical.PhysicalTensionStrain + 0.0001), 325#, 0.000000000001
+                    TestAssertTrue stats, testKey & ".tension.used", _
+                        extended.IsInExtensionRange(physical.PhysicalTensionStrain + 0.0001)
+                End If
+
+                Set physical = providerOff.SteelMaterialForEquilibriumFromSpec(spec)
+                Set extended = providerOn.SteelMaterialForEquilibriumFromSpec(spec)
+                TestAssertPhysicalDiagramPair stats, testKey & ".steel", physical, extended
+                TestAssertClose stats, testKey & ".steel.compressionSlope", _
+                    extended.GetTangentModulus(physical.PhysicalCompressionStrain - 0.0001), 2000#, 0.000000000001
+                TestAssertClose stats, testKey & ".steel.tensionSlope", _
+                    extended.GetTangentModulus(physical.PhysicalTensionStrain + 0.0001), 2000#, 0.000000000001
+            Next tensionKind
+        Next valueSet
+    Next diagramKind
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет неизменность физического диапазона, узлов и середины каждого
+' отрезка. Общий evaluator должен возвращать те же stress/tangent, что API.
+Private Sub TestAssertPhysicalDiagramPair(ByRef stats As TMaterialTestStats, ByVal testKey As String, _
+        ByVal physical As CMaterialDiagram, ByVal extended As CMaterialDiagram)
+    TestAssertClose stats, testKey & ".compressionLimit", extended.PhysicalCompressionStrain, _
+        physical.PhysicalCompressionStrain, 0.000000000001
+    TestAssertClose stats, testKey & ".tensionLimit", extended.PhysicalTensionStrain, _
+        physical.PhysicalTensionStrain, 0.000000000001
+    TestAssertTrue stats, testKey & ".compressionReference", extended.PointStrain(1) < physical.PhysicalCompressionStrain
+    If physical.HasPhysicalTensionLimit Then
+        TestAssertTrue stats, testKey & ".tensionReference", extended.PointStrain(extended.PointCount) > physical.PhysicalTensionStrain
+    End If
+    Dim i As Long
+    Dim strain As Double
+    Dim stress As Double
+    Dim tangent As Double
+    For i = 1 To 2 * physical.PointCount - 1
+        If i Mod 2 = 1 Then
+            strain = physical.PointStrain((i + 1) \ 2)
+        Else
+            strain = 0.5 * (physical.PointStrain(i \ 2) + physical.PointStrain(i \ 2 + 1))
+        End If
+        TestAssertClose stats, testKey & ".stress." & CStr(i), extended.GetStress(strain), _
+            physical.GetStress(strain), 0.000000000001
+        TestAssertClose stats, testKey & ".tangent." & CStr(i), extended.GetTangentModulus(strain), _
+            physical.GetTangentModulus(strain), 0.000000000001
+        extended.EvaluateAtStrain strain, stress, tangent
+        TestAssertClose stats, testKey & ".evaluateStress." & CStr(i), stress, physical.GetStress(strain), 0.000000000001
+        TestAssertClose stats, testKey & ".evaluateTangent." & CStr(i), tangent, physical.GetTangentModulus(strain), 0.000000000001
+        TestAssertTrue stats, testKey & ".physical." & CStr(i), extended.IsInPhysicalRange(strain)
+        TestAssertTrue stats, testKey & ".notUsed." & CStr(i), Not extended.IsInExtensionRange(strain)
+    Next i
+
+    ' Внутренняя окрестность предела остается физической; малое округление
+    ' за границей учитывается тем же допуском, а не включает extension-флаг.
+    Dim boundary As Double, sign As Double
+    Dim side As Variant
+    For Each side In Array("compression", "tension")
+        If CStr(side) = "compression" Then
+            boundary = physical.PhysicalCompressionStrain
+            sign = -1#
+        Else
+            If Not physical.HasPhysicalTensionLimit Then Exit For
+            boundary = physical.PhysicalTensionStrain
+            sign = 1#
+        End If
+        strain = boundary - sign * 0.000000001
+        TestAssertClose stats, testKey & ".near." & CStr(side) & ".stress", _
+            extended.GetStress(strain), physical.GetStress(strain), 0.000000000001
+        TestAssertClose stats, testKey & ".near." & CStr(side) & ".tangent", _
+            extended.GetTangentModulus(strain), physical.GetTangentModulus(strain), 0.000000000001
+        strain = boundary + sign * 0.0000000000005
+        TestAssertTrue stats, testKey & ".near." & CStr(side) & ".roundingPhysical", extended.IsInPhysicalRange(strain)
+        TestAssertTrue stats, testKey & ".near." & CStr(side) & ".roundingNotUsed", Not extended.IsInExtensionRange(strain)
+        strain = boundary + sign * 0.000000000002
+        TestAssertTrue stats, testKey & ".near." & CStr(side) & ".outside", Not extended.IsInPhysicalRange(strain)
+        TestAssertTrue stats, testKey & ".near." & CStr(side) & ".extensionUsed", extended.IsInExtensionRange(strain)
+    Next side
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет большой пользовательский физический предел. Опорные точки
+' продолжения лежат дальше него, физическое плато и пределы не меняются.
+Private Sub TestAudit02ExtensionBeyondTechnicalDefault(ByRef stats As TMaterialTestStats)
+    Dim steel As CSteelMaterialParameters
+    Set steel = New CSteelMaterialParameters
+    steel.Initialize 350#, 350#, 390#, 390#, 200000#, 200000#, 120#, 140#, 120#, 140#
+    Dim provider As CMaterialModelProvider
+    Set provider = New CMaterialModelProvider
+    provider.TestInitializeFromParameters TestConcreteParameters(), steel
+    Dim extended As CMaterialDiagram
+    Set extended = provider.SteelMaterialForEquilibrium(cpStrength)
+    TestAssertTrue stats, "audit02.technical.compressionExtended", extended.HasCompressionExtension
+    TestAssertTrue stats, "audit02.technical.tensionExtended", extended.HasTensionExtension
+    TestAssertClose stats, "audit02.technical.left", extended.PointStrain(1), -240#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.right", extended.PointStrain(extended.PointCount), 280#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.physicalCompression", extended.PhysicalCompressionStrain, -120#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.physicalTension", extended.PhysicalTensionStrain, 140#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.physicalStress", extended.GetStress(130#), 350#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.extendedStress", extended.GetStress(141#), 2350#, 0.000000000001
+    steel.Initialize 350#, 350#, 390#, 390#, 200000#, 200000#, 100#, 100#, 100#, 100# ' Большой физический предел не превращает опорную точку в конец прямой.
+    provider.TestInitializeFromParameters TestConcreteParameters(), steel
+    Set extended = provider.SteelMaterialForEquilibrium(cpStrength)
+    TestAssertClose stats, "audit02.technical.equal.left", extended.PointStrain(1), -200#, 0#
+    TestAssertClose stats, "audit02.technical.equal.right", extended.PointStrain(extended.PointCount), 200#, 0#
+    TestAssertClose stats, "audit02.technical.beyondReference", extended.GetStress(1000#), 1800350#, 0.00000001
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Переполнение при построении технической ветви возвращается как явная
+' ошибка построения, а не как урезанная диаграмма с ложным пределом.
+Private Sub TestAudit02ExtensionOverflowIsExplicit(ByRef stats As TMaterialTestStats)
+    On Error GoTo ExpectedError
+    Dim steel As CSteelMaterialParameters
+    Set steel = New CSteelMaterialParameters
+    steel.Initialize 350#, 350#, 390#, 390#, 200000#, 200000#, 1E+308, 1E+308, 1E+308, 1E+308
+    Dim provider As CMaterialModelProvider
+    Set provider = New CMaterialModelProvider
+    provider.TestInitializeFromParameters TestConcreteParameters(), steel
+    Dim extended As CMaterialDiagram
+    Set extended = provider.SteelMaterialForEquilibrium(cpStrength)
+    TestAssertTrue stats, "audit02.technical.overflowRejected", False
+    Exit Sub
+ExpectedError:
+    TestAssertTrue stats, "audit02.technical.overflowRejected", Err.Number = vbObjectError + 3245
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' ==========================================================================
+' контракты входных массивов готовой диаграммы
+' ==========================================================================
+' Выполняет тот же направленный контрпример отдельно от полной material suite.
+' Ошибка инициализации не должна оставлять доступной частично замененную диаграмму.
+Public Function RunAudit03DiagramArrayInputTests() As String
+    Dim stats As TMaterialTestStats
+    TestAudit03DiagramArrayInputs stats
+    TestAppendLine stats, "TOTAL_AUDIT03_DIAGRAM_ARRAY_INPUT: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunAudit03DiagramArrayInputTests = stats.Report
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет выделение массива, индексы 1..pointCount, повторные деформации
+' и последовательность корректного, ошибочного и снова корректного ввода.
+' Новые нормативные диаграммы или пределы здесь не вводятся.
+Private Sub TestAudit03DiagramArrayInputs(ByRef stats As TMaterialTestStats)
+    Dim scenario As Variant, strains() As Double, stresses() As Double, diagram As CMaterialDiagram
+    Dim pointCount As Long, expectedCode As Long, actualCode As Long, description As String
+    Dim prefix As String
+    On Error GoTo Failed
+    For Each scenario In Array("CountTooSmall", "MissingStrain", "MissingStress", _
+            "ShortStrain", "ShortStress", "BoundsStrain", "BoundsStress", "CountBeyondArrays", "Duplicate")
+        TestAudit03FillDiagramArrays strains, stresses
+        Set diagram = New CMaterialDiagram
+        diagram.InitializeFromArrays strains, stresses, 3
+        pointCount = 3
+        expectedCode = vbObjectError + 3113
+        Select Case CStr(scenario)
+            Case "CountTooSmall": pointCount = 1: expectedCode = vbObjectError + 3100
+            Case "MissingStrain": Erase strains
+            Case "MissingStress": Erase stresses
+            Case "ShortStrain": ReDim strains(1 To 2)
+            Case "ShortStress": ReDim stresses(1 To 2)
+            Case "BoundsStrain": ReDim strains(2 To 4)
+            Case "BoundsStress": ReDim stresses(2 To 4)
+            Case "CountBeyondArrays": pointCount = 4
+            Case "Duplicate": strains(1) = strains(2): expectedCode = vbObjectError + 3111
+        End Select
+        prefix = "audit03.diagramArray." & CStr(scenario)
+        actualCode = TestAudit03CaptureDiagramInitialize(diagram, strains, stresses, pointCount, description)
+        TestAssertTrue stats, prefix & ".inputError", actualCode = expectedCode
+        TestAssertTrue stats, prefix & ".reason", Len(description) > 0
+        TestAssertTrue stats, prefix & ".noPoints", diagram.PointCount = 0
+        TestAssertTrue stats, prefix & ".notUsable", TestAudit03CaptureDiagramStress(diagram) = vbObjectError + 3112
+        TestAppendLine stats, "DIAGRAM_ARRAY_INPUT: case=" & CStr(scenario) & "|error=" & CStr(actualCode) & "|reason=" & description
+        TestAudit03FillDiagramArrays strains, stresses
+        diagram.InitializeFromArrays strains, stresses, 3
+        TestAssertClose stats, prefix & ".restoredStress", diagram.GetStress(-0.00075), -7.75, 0.000000000001
+        TestAssertTrue stats, prefix & ".restoredPoints", diagram.PointCount = 3
+    Next scenario
+    ' Дополнительный индекс 0 допустим, если нужные индексы 1..pointCount есть.
+    ' Он не участвует в диаграмме; не меняем существующий контракт этого входа.
+    TestAudit03FillDiagramArrays strains, stresses, 0
+    strains(0) = -1#: stresses(0) = -999#
+    diagram.InitializeFromArrays strains, stresses, 3
+    TestAssertClose stats, "audit03.diagramArray.extraZeroIndex", diagram.GetStress(-0.00075), -7.75, 0.000000000001
+    Exit Sub
+Failed:
+    TestAssertTrue stats, "audit03.diagramArray.runtime." & CStr(Err.Number) & "." & Err.Description, False
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Создает точки с нужными индексами для одинакового сравнения до/после guards.
+' Порядок точек и численные эталоны не зависят от проверяемого actual-кода.
+Private Sub TestAudit03FillDiagramArrays(ByRef strains() As Double, ByRef stresses() As Double, _
+        Optional ByVal lowerIndex As Long = 1)
+    ReDim strains(lowerIndex To 3)
+    ReDim stresses(lowerIndex To 3)
+    strains(1) = -0.0035: strains(2) = -0.0015: strains(3) = 0#
+    stresses(1) = -15.5: stresses(2) = -15.5: stresses(3) = 0#
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Перехватывает только ошибку InitializeFromArrays, чтобы не прятать отказ
+' последующей проверки и не переносить Err от предыдущего сценария.
+Private Function TestAudit03CaptureDiagramInitialize(ByVal diagram As CMaterialDiagram, _
+        ByRef strains() As Double, ByRef stresses() As Double, ByVal pointCount As Long, _
+        ByRef description As String) As Long
+    On Error GoTo ExpectedError
+    description = vbNullString
+    diagram.InitializeFromArrays strains, stresses, pointCount
+    Exit Function
+ExpectedError:
+    TestAudit03CaptureDiagramInitialize = Err.Number
+    description = Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет закрытие расчетного API после неуспешной инициализации.
+' Успех или случайная ошибка индекса вместо EnsureInitialized не принимаются.
+Private Function TestAudit03CaptureDiagramStress(ByVal diagram As CMaterialDiagram) As Long
+    Dim stress As Double
+    On Error GoTo ExpectedError
+    stress = diagram.GetStress(-0.00075)
+    Exit Function
+ExpectedError:
+    TestAudit03CaptureDiagramStress = Err.Number
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' ==========================================================================
+' ДЛЯ ТЕСТОВ: передача всех редактируемых параметров материалов из Config
+' ==========================================================================
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает адресную проверку отдельно от общей suite. Читает настоящие таблицы
+' книги; эталонные значения и ожидаемые эффекты не берутся из actual-диаграмм.
+Public Function RunAudit03MaterialConfigBehaviorTests() As String
+    Dim stats As TMaterialTestStats
+    TestAudit03MaterialConfigBehavior stats
+    TestAppendLine stats, "TOTAL_AUDIT03_MATERIAL_CONFIG: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunAudit03MaterialConfigBehaviorTests = stats.Report
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Меняет по одному из 23 входов и проверяет все 16 профильных спецификаций.
+' Неактивные параметры не меняют физическую диаграмму; отдельное Rb,mc2
+' проверяется в калькуляторе продольных трещин, а не в sigma-epsilon диаграмме.
+Private Sub TestAudit03MaterialConfigBehavior(ByRef stats As TMaterialTestStats)
+    Dim concreteRange As Object, steelRange As Object, unitRange As Object
+    Dim savedConcrete As Variant, savedSteel As Variant, savedUnits As Variant
+    Dim values As Variant, changedValues As Variant, rowKeys As Variant, columns As Variant
+    Dim i As Long, cell As Object, provider As CMaterialModelProvider, baseline As CMaterialModelProvider
+    Dim valueSet As Variant, concreteKind As Variant, steelKind As Variant, tension As Variant
+    Dim spec As CMaterialModelSpec, diagram As CMaterialDiagram, original As CMaterialDiagram
+    Dim otherDiagram As CMaterialDiagram, originalOther As CMaterialDiagram
+    Dim prefix As String, actual As Double, expected As Double, affected As Boolean, metricScale As Double
+    Dim invalid As Variant, errorCode As Long, description As String, unitRow As Long
+    Dim failureNumber As Long, failureDescription As String
+    On Error GoTo Failed
+    Set concreteRange = ThisWorkbook.Names("rngConcreteMaterialParameters").RefersToRange
+    Set steelRange = ThisWorkbook.Names("rngSteelMaterialParameters").RefersToRange
+    Set unitRange = ThisWorkbook.Names("rngUnitSettings").RefersToRange
+    savedConcrete = concreteRange.Formula
+    savedSteel = steelRange.Formula
+    savedUnits = unitRange.Formula
+    values = Array(15.5, 1.1, 22#, 1.8, 14.6, 32500#, 31000#, 0.0015, 0.00008, _
+        0.002, 0.0001, 0.0035, 0.00015, 350#, 340#, 390#, 380#, 200000#, 190000#, _
+        0.025, 0.026, 0.015, 0.016)
+    rowKeys = Array("Concrete.R.ULS(I)", "Concrete.R.ULS(I)", "Concrete.R.SLS(II)", _
+        "Concrete.R.SLS(II)", "Concrete.Rb.mc2", "Concrete.E", "Concrete.E", _
+        "Concrete.TwoLine.Eb1Red", "Concrete.TwoLine.Eb1Red", "Concrete.ThreeLine.Eb0", _
+        "Concrete.ThreeLine.Eb0", "Concrete.TwoThreeLine.Eb2", "Concrete.TwoThreeLine.Eb2", _
+        "Steel.R.ULS(I)", "Steel.R.ULS(I)", "Steel.R.SLS(II)", "Steel.R.SLS(II)", _
+        "Steel.E", "Steel.E", "Steel.TwoLine.Es2", "Steel.TwoLine.Es2", _
+        "Steel.ThreeLine.Es2", "Steel.ThreeLine.Es2")
+    columns = Array(2, 3, 2, 3, 2, 2, 3, 2, 3, 2, 3, 2, 3, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2)
+    For unitRow = 2 To unitRange.Rows.Count
+        If StrComp(CStr(unitRange.Cells(unitRow, 1).Value2), "Stress", vbTextCompare) = 0 Then Exit For
+    Next unitRow
+    If unitRow > unitRange.Rows.Count Then Err.Raise vbObjectError + 9901, , "В fixture нет строки Stress."
+    unitRange.Cells(unitRow, 2).Value2 = "MPa"
+    For i = 0 To UBound(values)
+        Set cell = TestAudit03MaterialConfigCell(concreteRange, steelRange, CStr(rowKeys(i)), CLng(columns(i)))
+        cell.Value2 = values(i)
+    Next i
+    Set baseline = TestAudit03MaterialConfigProvider()
+    For i = 0 To UBound(values)
+        Set cell = TestAudit03MaterialConfigCell(concreteRange, steelRange, CStr(rowKeys(i)), CLng(columns(i)))
+        changedValues = values
+        changedValues(i) = CDbl(values(i)) * 1.1
+        cell.Value2 = changedValues(i)
+        Set provider = TestAudit03MaterialConfigProvider()
+        For Each valueSet In Array("ULS(I)", "SLS(II)")
+            For Each concreteKind In Array("TwoLine", "ThreeLine")
+                For Each tension In Array("Ignore", "UseDiagram")
+                    For Each steelKind In Array("TwoLine", "ThreeLine")
+                        Set spec = New CMaterialModelSpec
+                        spec.Initialize CStr(valueSet), CStr(concreteKind), CStr(tension), CStr(steelKind)
+                        prefix = "audit03.materialConfig." & CStr(i) & "." & spec.SpecKey
+                        If i < 13 Then
+                            Set diagram = provider.ConcreteMaterialFromSpec(spec)
+                            Set original = baseline.ConcreteMaterialFromSpec(spec)
+                            Set otherDiagram = provider.SteelMaterialFromSpec(spec)
+                            Set originalOther = baseline.SteelMaterialFromSpec(spec)
+                        Else
+                            Set diagram = provider.SteelMaterialFromSpec(spec)
+                            Set original = baseline.SteelMaterialFromSpec(spec)
+                            Set otherDiagram = provider.ConcreteMaterialFromSpec(spec)
+                            Set originalOther = baseline.ConcreteMaterialFromSpec(spec)
+                        End If
+                        TestAudit03MaterialConfigMetric provider, diagram, i, changedValues, _
+                            CStr(valueSet), CStr(concreteKind), CStr(tension), CStr(steelKind), actual, expected, affected
+                        metricScale = Abs(expected)
+                        If metricScale < 1# Then metricScale = 1#
+                        TestAssertClose stats, prefix & ".expectedEffect", actual, expected, 0.000000001 * metricScale
+                        TestAssertTrue stats, prefix & ".otherMaterialUnchanged", _
+                            TestAudit03MaterialDiagramSignature(otherDiagram) = TestAudit03MaterialDiagramSignature(originalOther)
+                        If affected Then
+                            TestAssertTrue stats, prefix & ".activeChanged", _
+                                TestAudit03MaterialDiagramSignature(diagram) <> TestAudit03MaterialDiagramSignature(original)
+                        Else
+                            TestAssertTrue stats, prefix & ".inactiveUnchanged", _
+                                TestAudit03MaterialDiagramSignature(diagram) = TestAudit03MaterialDiagramSignature(original)
+                        End If
+                        If i = 5 Then TestAssertClose stats, prefix & ".referenceModulus", _
+                            provider.ConcreteElasticModulusFromSpec(spec), CDbl(changedValues(i)), 0.000000001
+                    Next steelKind
+                Next tension
+            Next concreteKind
+        Next valueSet
+        TestAppendLine stats, "MATERIAL_CONFIG_EFFECT: key=" & CStr(rowKeys(i)) & "|column=" & CStr(columns(i)) & _
+            "|address=" & cell.Address & "|before=" & TestFormatNumberInvariant(CDbl(values(i))) & _
+            "|after=" & TestFormatNumberInvariant(CDbl(changedValues(i))) & "|specs=16"
+        For Each invalid In Array(0#, -1#, "TODO", vbNullString, CVErr(xlErrValue), "1e309")
+            cell.Value2 = invalid
+            errorCode = TestAudit03MaterialConfigError(description)
+            TestAssertTrue stats, "audit03.materialConfig." & CStr(i) & ".invalid." & CStr(invalid), _
+                errorCode <> 0 And errorCode <> 6 And errorCode <> 13
+            TestAssertTrue stats, "audit03.materialConfig." & CStr(i) & ".reason." & CStr(invalid), Len(description) > 0
+            TestAppendLine stats, "MATERIAL_CONFIG_INVALID: key=" & CStr(rowKeys(i)) & "|column=" & CStr(columns(i)) & _
+                "|address=" & cell.Address & "|value=" & CStr(invalid) & "|error=" & CStr(errorCode) & "|reason=" & description
+        Next invalid
+        cell.Value2 = values(i)
+        Set provider = TestAudit03MaterialConfigProvider()
+        Set spec = New CMaterialModelSpec
+        spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "ThreeLine"
+        TestAssertTrue stats, "audit03.materialConfig." & CStr(i) & ".recoveryConcrete", _
+            TestAudit03MaterialDiagramSignature(provider.ConcreteMaterialFromSpec(spec)) = _
+            TestAudit03MaterialDiagramSignature(baseline.ConcreteMaterialFromSpec(spec))
+        TestAssertTrue stats, "audit03.materialConfig." & CStr(i) & ".recoverySteel", _
+            TestAudit03MaterialDiagramSignature(provider.SteelMaterialFromSpec(spec)) = _
+            TestAudit03MaterialDiagramSignature(baseline.SteelMaterialFromSpec(spec))
+    Next i
+    GoTo Cleanup
+Failed:
+    failureNumber = Err.Number
+    failureDescription = Err.Description
+    TestAssertTrue stats, "audit03.materialConfig.runtime." & CStr(failureNumber) & "." & failureDescription, False
+Cleanup:
+    On Error Resume Next
+    If Not IsEmpty(savedConcrete) Then concreteRange.Formula = savedConcrete
+    If Not IsEmpty(savedSteel) Then steelRange.Formula = savedSteel
+    If Not IsEmpty(savedUnits) Then unitRange.Formula = savedUnits
+    On Error GoTo 0
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Находит параметр по названию строки и стороне материала, независимо от адреса
+' Config. Отсутствующая строка — ошибка подготовки теста.
+Private Function TestAudit03MaterialConfigCell(ByVal concreteRange As Object, ByVal steelRange As Object, _
+        ByVal rowKey As String, ByVal column As Long) As Object
+    Dim source As Object, row As Long
+    If Left$(rowKey, 9) = "Concrete." Then Set source = concreteRange Else Set source = steelRange
+    For row = 2 To source.Rows.Count
+        If StrComp(CStr(source.Cells(row, 1).Value2), rowKey, vbTextCompare) = 0 Then
+            Set TestAudit03MaterialConfigCell = source.Cells(row, column)
+            Exit Function
+        End If
+    Next row
+    Err.Raise vbObjectError + 9902, , "В fixture нет параметра " & rowKey & "."
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Выполняет обычное чтение всей книги и преобразование единиц.
+' Упрощённый тестовый InitializeFromParameters здесь не вызывается.
+Private Function TestAudit03MaterialConfigProvider(Optional ByVal useCurrentPlateau As Boolean = False) As CMaterialModelProvider
+    Dim settings As CSystemSettingsReader, units As CUnitSystem, provider As CMaterialModelProvider
+    Dim cell As Object, original As Variant, number As Long, source As String, description As String
+    On Error GoTo Failed
+    ' Эти oracle-тесты сверяют исходные нормативные точки. Наклон проверяется отдельно.
+    If Not useCurrentPlateau Then Set cell = TestPlateauSettingCell()
+    If Not cell Is Nothing Then original = cell.Formula: cell.Value2 = 0#
+    Set settings = New CSystemSettingsReader
+    settings.LoadFromWorkbook ThisWorkbook
+    Set units = New CUnitSystem
+    units.LoadFromSettings settings
+    Set provider = New CMaterialModelProvider
+    provider.Initialize settings, units
+    If Not cell Is Nothing Then cell.Formula = original
+    Set TestAudit03MaterialConfigProvider = provider
+    Exit Function
+Failed:
+    number = Err.Number: source = Err.Source: description = Err.Description
+    On Error Resume Next
+    If Not cell Is Nothing Then cell.Formula = original
+    On Error GoTo 0
+    Err.Raise number, source, description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Перехватывает только контролируемую попытку прочитать неверный материал.
+' Последующий recovery использует новый provider, чтобы не скрывать ошибку.
+Private Function TestAudit03MaterialConfigError(ByRef description As String) As Long
+    On Error GoTo ExpectedError
+    Dim provider As CMaterialModelProvider
+    description = vbNullString
+    Set provider = TestAudit03MaterialConfigProvider()
+    Exit Function
+ExpectedError:
+    TestAudit03MaterialConfigError = Err.Number
+    description = Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Выбирает наблюдаемую величину, чувствительную к конкретному входу. Эталон
+' выводится из заданных чисел fixture; флаг affected относится только к самой
+' физической диаграмме, а не к справочному модулю или продольной проверке.
+Private Sub TestAudit03MaterialConfigMetric(ByVal provider As CMaterialModelProvider, ByVal diagram As CMaterialDiagram, _
+        ByVal index As Long, ByRef v As Variant, ByVal valueSet As String, ByVal concreteKind As String, _
+        ByVal tension As String, ByVal steelKind As String, ByRef actual As Double, _
+        ByRef expected As Double, ByRef affected As Boolean)
+    Dim rb As Double, rbt As Double, rs As Double, rsc As Double, three As Boolean, useTension As Boolean
+    Dim longitudinal As CLongitudinalCrackCalculator, result As CLongitudinalCrackResult
+    rb = CDbl(v(0)): rbt = CDbl(v(1)): rs = CDbl(v(13)): rsc = CDbl(v(14))
+    If valueSet = "SLS(II)" Then rb = CDbl(v(2)): rbt = CDbl(v(3)): rs = CDbl(v(15)): rsc = CDbl(v(16))
+    three = (concreteKind = "ThreeLine")
+    useTension = (tension = "UseDiagram")
+    affected = False
+    Select Case index
+        Case 0, 2
+            actual = diagram.GetStress(-0.003): expected = -rb
+            affected = ((index = 0) = (valueSet = "ULS(I)"))
+        Case 1, 3
+            actual = diagram.GetStress(0.00014): expected = 0#
+            If useTension Then expected = rbt
+            affected = useTension And ((index = 1) = (valueSet = "ULS(I)"))
+        Case 4
+            Set longitudinal = New CLongitudinalCrackCalculator
+            Set result = longitudinal.CalculateFromStress(15#, provider.ConcreteParameters.RbMc2)
+            actual = result.Utilization: expected = 15# / CDbl(v(4))
+            If result.Status <> "OK" Then Err.Raise vbObjectError + 9903, , "После увеличения Rb,mc2 проверка должна пройти."
+        Case 5
+            actual = diagram.GetTangentModulus(-0.0000000001)
+            expected = rb / CDbl(v(7)): affected = three
+            If three Then expected = CDbl(v(5))
+        Case 6
+            actual = diagram.GetTangentModulus(0.0000000001): expected = 0#
+            If useTension Then
+                expected = rbt / CDbl(v(8))
+                If three Then expected = CDbl(v(6))
+            End If
+            affected = three And useTension
+        Case 7, 9
+            actual = diagram.PointStrain(2): expected = -CDbl(v(7))
+            If three Then expected = -CDbl(v(9))
+            affected = ((index = 9) = three)
+        Case 8, 10
+            actual = 0#: expected = 0#
+            If useTension Then
+                actual = diagram.PointStrain(diagram.PointCount - 1): expected = CDbl(v(8))
+                If three Then expected = CDbl(v(10))
+            End If
+            affected = useTension And ((index = 10) = three)
+        Case 11
+            actual = diagram.PhysicalCompressionStrain: expected = -CDbl(v(11)): affected = True
+        Case 12
+            actual = diagram.PhysicalTensionStrain: expected = 0#: affected = useTension
+            If useTension Then expected = CDbl(v(12))
+        Case 13, 15
+            actual = diagram.GetStress(0.01): expected = rs
+            If steelKind = "ThreeLine" Then expected = 1.1 * rs
+            affected = ((index = 13) = (valueSet = "ULS(I)"))
+        Case 14, 16
+            actual = diagram.GetStress(-0.01): expected = -rsc
+            If steelKind = "ThreeLine" Then expected = -1.1 * rsc
+            affected = ((index = 14) = (valueSet = "ULS(I)"))
+        Case 17
+            actual = diagram.GetTangentModulus(0.0000000001): expected = CDbl(v(17)): affected = True
+        Case 18
+            actual = diagram.GetTangentModulus(-0.0000000001): expected = CDbl(v(18)): affected = True
+        Case 19, 21
+            actual = diagram.PhysicalTensionStrain: expected = CDbl(v(19))
+            If steelKind = "ThreeLine" Then expected = CDbl(v(21))
+            affected = ((index = 21) = (steelKind = "ThreeLine"))
+        Case 20, 22
+            actual = diagram.PhysicalCompressionStrain: expected = -CDbl(v(20))
+            If steelKind = "ThreeLine" Then expected = -CDbl(v(22))
+            affected = ((index = 22) = (steelKind = "ThreeLine"))
+    End Select
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Точный снимок физических узлов для проверки неизменности неактивной ветви.
+' Не служит численным эталоном активного эффекта, который проверяется отдельно.
+Private Function TestAudit03MaterialDiagramSignature(ByVal diagram As CMaterialDiagram) As String
+    Dim i As Long, signature As String
+    For i = 1 To diagram.PointCount
+        signature = signature & CStr(diagram.PointStrain(i)) & ":" & CStr(diagram.PointStress(i)) & "|"
+    Next i
+    TestAudit03MaterialDiagramSignature = signature
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' ==================== ДЛЯ ТЕСТОВ: ЕДИНИЦЫ КОНТРОЛЬНЫХ ТОЧЕК ====================
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет точки Config при Yes/No в пяти INPUT-единицах Stress.
+' Таблица не решает НДС: ее 52 узла сопоставляются с физическими диаграммами
+' provider-а. Подписи таблицы и графиков должны называть единицу ее чисел,
+' а численные формулы должны сохранять прямые ссылки и обычную арифметику.
+Private Sub TestAudit03MaterialControlUnits(ByRef stats As TMaterialTestStats)
+    Dim config As Object, title As Object, concreteRange As Object, steelRange As Object, unitRange As Object
+    Dim savedConcrete As Variant, savedSteel As Variant, savedUnits As Variant, stressCell As Object
+    Dim settings As CSystemSettingsReader, units As CUnitSystem, provider As CMaterialModelProvider
+    Dim spec As CMaterialModelSpec, diagram As CMaterialDiagram, row As Object, cell As Object
+    Dim unitName As Variant, chartName As Variant, material As String, valueSet As String, kind As String
+    Dim key As String, previousKey As String, pointIndex As Long, rowIndex As Long, columnIndex As Long
+    Dim prefix As String, formula As String, pattern As Object, baselineFactor As Double, factor As Double
+    Dim solveCount As Long, expectedPoints As Long
+    Dim slopeCell As Object, savedSlope As Variant, slopeMode As Variant
+    On Error GoTo Failed
+    solveCount = SectionEquilibriumSolveCount()
+    Set config = ThisWorkbook.Worksheets.Item("Config")
+    Set title = config.Cells.Find("Контрольные точки диаграмм*", config.Cells.Item(1, 1), -4163, 1, 1, 1, False, False, False)
+    If title Is Nothing Then Err.Raise vbObjectError + 9904, "TestAudit03MaterialControlUnits", "В Config нет контрольной таблицы диаграмм."
+    Set concreteRange = ThisWorkbook.Names.Item("rngConcreteMaterialParameters").RefersToRange
+    Set steelRange = ThisWorkbook.Names.Item("rngSteelMaterialParameters").RefersToRange
+    Set unitRange = ThisWorkbook.Names.Item("rngUnitSettings").RefersToRange
+    savedConcrete = concreteRange.Formula: savedSteel = steelRange.Formula: savedUnits = unitRange.Formula
+    For rowIndex = 2 To unitRange.Rows.Count
+        If CStr(unitRange.Cells(rowIndex, 1).Value2) = "Stress" Then Set stressCell = unitRange.Cells(rowIndex, 2)
+    Next rowIndex
+    If stressCell Is Nothing Then Err.Raise vbObjectError + 9905, "TestAudit03MaterialControlUnits", "В Config нет INPUT-единицы Stress."
+    Set slopeCell = TestPlateauSettingCell()
+    If slopeCell Is Nothing Then Err.Raise 5, , "В Config нет настройки наклона плато."
+    savedSlope = slopeCell.Formula
+    Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook ThisWorkbook
+    Set units = New CUnitSystem: units.LoadFromSettings settings
+    baselineFactor = units.InputStressToInternal(1#)
+    Set pattern = CreateObject("VBScript.RegExp")
+    pattern.Pattern = "^=((('Config'|Config)!)?\$?[A-Z]+\$?[1-9][0-9]*|[0-9]+(\.[0-9]+)?|IF|""Yes""|[,+\-*/()=]|\s)+$" ' После перемещения таблиц Excel сохраняет имя листа в прямых ссылках.
+    For Each slopeMode In Array(0#, 0.0001, 0.001)
+    slopeCell.Value2 = CDbl(slopeMode)
+    For Each unitName In Array("MPa", "kPa", "Pa", "kgf/cm2", "tf/m2")
+        concreteRange.Formula = savedConcrete: steelRange.Formula = savedSteel
+        stressCell.Value2 = CStr(unitName)
+        Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook ThisWorkbook
+        units.LoadFromSettings settings
+        factor = units.InputStressToInternal(1#)
+        TestAudit03RescaleControlMaterialInputs concreteRange, baselineFactor / factor
+        TestAudit03RescaleControlMaterialInputs steelRange, baselineFactor / factor
+        config.Calculate
+        Set provider = TestAudit03MaterialConfigProvider(True)
+        prefix = "audit03.materialControls." & CStr(slopeMode) & "." & CStr(unitName)
+        TestAssertTrue stats, prefix & ".tableUnit", CStr(title.Offset(1, 5).Value2) = ChrW$(&H3C3) & ", " & CStr(unitName)
+        For Each chartName In Array("chMaterialConcreteDiagram", "chMaterialSteelDiagram")
+            TestAssertTrue stats, prefix & ".chartUnit." & CStr(chartName), _
+                CStr(config.ChartObjects.Item(CStr(chartName)).Chart.Axes(2).AxisTitle.Text) = ChrW$(&H3C3) & ", " & CStr(unitName)
+        Next chartName
+        previousKey = vbNullString: pointIndex = 0
+        For rowIndex = 0 To 51
+            Set row = title.Offset(rowIndex + 2, 0)
+            material = CStr(row.Value2): kind = CStr(row.Offset(0, 2).Value2)
+            If CStr(row.Offset(0, 1).Value2) = "I" Then valueSet = "ULS(I)" Else valueSet = "SLS(II)"
+            key = material & "|" & valueSet & "|" & kind
+            If key <> previousKey Then
+                If pointIndex > 0 Then TestAssertTrue stats, prefix & ".pointCount." & previousKey, pointIndex = expectedPoints
+                Set spec = New CMaterialModelSpec
+                spec.Initialize valueSet, kind, "UseDiagram", kind
+                If material = "Concrete" Then
+                    Set diagram = provider.ConcreteMaterialFromSpec(spec)
+                ElseIf material = "Steel" Then
+                    Set diagram = provider.SteelMaterialFromSpec(spec)
+                Else
+                    Err.Raise vbObjectError + 9906, "TestAudit03MaterialControlUnits", "Неизвестный материал контрольной строки."
+                End If
+                expectedPoints = diagram.PointCount
+                pointIndex = 0: previousKey = key
+            End If
+            pointIndex = pointIndex + 1
+            TestAssertClose stats, prefix & ".strain." & CStr(rowIndex), CDbl(row.Offset(0, 4).Value2), diagram.PointStrain(pointIndex), 0.000000000001
+            TestAssertClose stats, prefix & ".stress." & CStr(rowIndex), units.InputStressToInternal(CDbl(row.Offset(0, 5).Value2)), diagram.PointStress(pointIndex), 0.00000001
+            For columnIndex = 4 To 5
+                Set cell = row.Offset(0, columnIndex)
+                If cell.HasFormula Then
+                    formula = CStr(cell.Formula)
+                    TestAssertTrue stats, prefix & ".directFormula." & cell.Address(False, False), pattern.Test(formula)
+                Else
+                    TestAssertClose stats, prefix & ".zeroLiteral." & cell.Address(False, False), CDbl(cell.Value2), 0#, 0#
+                End If
+            Next columnIndex
+        Next rowIndex
+        TestAssertTrue stats, prefix & ".pointCount." & previousKey, pointIndex = expectedPoints
+        TestAppendLine stats, "MATERIAL_CONTROL_UNITS: plateau=" & CStr(slopeMode) & "; unit=" & CStr(unitName) & "; points=52; table=" & title.Address(False, False)
+    Next unitName
+    Next slopeMode
+    TestAssertTrue stats, "audit03.materialControls.noSolve", solveCount = SectionEquilibriumSolveCount()
+    GoTo Restore
+Failed:
+    stats.Failed = stats.Failed + 1
+    TestAppendLine stats, "FAIL: audit03.materialControls.runtime; " & CStr(Err.Number) & "; " & Err.Description
+Restore:
+    On Error Resume Next
+    If Not IsEmpty(savedConcrete) Then concreteRange.Formula = savedConcrete
+    If Not IsEmpty(savedSteel) Then steelRange.Formula = savedSteel
+    If Not IsEmpty(savedUnits) Then unitRange.Formula = savedUnits
+    If Not IsEmpty(savedSlope) Then slopeCell.Formula = savedSlope
+    If Not config Is Nothing Then config.Calculate
+    On Error GoTo 0
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Переводит только размерные сопротивления и модули контрольного fixture.
+' Деформации и неприменимая растянутая ячейка Rb,mc2 остаются без изменения.
+Private Sub TestAudit03RescaleControlMaterialInputs(ByVal table As Object, ByVal factor As Double)
+    Dim row As Long, column As Long, key As String
+    For row = 2 To table.Rows.Count
+        key = CStr(table.Cells(row, 1).Value2)
+        If InStr(1, key, ".R.", vbBinaryCompare) > 0 Or Right$(key, 2) = ".E" Or key = "Concrete.Rb.mc2" Then
+            For column = 2 To 3
+                If IsNumeric(table.Cells(row, column).Value2) Then table.Cells(row, column).Value2 = CDbl(table.Cells(row, column).Value2) * factor
+            Next column
+        End If
+    Next row
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает отдельный протокол контрольных точек и подписей без полного
+' material-suite. Все временно измененные входные таблицы возвращаются.
+Public Function RunAudit03MaterialControlUnitsTests() As String
+    Dim stats As TMaterialTestStats
+    TestAudit03MaterialControlUnits stats
+    TestAppendLine stats, "TOTAL_MATERIAL_CONTROL_UNITS: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunAudit03MaterialControlUnitsTests = stats.Report
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' ==================== ДЛЯ ТЕСТОВ: НЕИЗМЕННОСТЬ ВЫДАННЫХ ДИАГРАММ ====================
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет передачу физических и вспомогательных диаграмм обоими методами
+' поставщика материалов. Повторное чтение готового объекта не меняет его версию.
+' Отдельную ещё не завершённую диаграмму можно инициализировать заново.
+Public Function RunAudit03PublishedMaterialDiagramTests() As String
+    Dim stats As TMaterialTestStats
+    TestAudit03PublishedMaterialDiagrams stats
+    TestAppendLine stats, "TOTAL_PUBLISHED_MATERIAL: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunAudit03PublishedMaterialDiagramTests = stats.Report
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет каждый вариант на новом provider-е: неуспешная попытка мутации
+' одного объекта не может влиять на последующие независимые случаи.
+Private Sub TestAudit03PublishedMaterialDiagrams(ByRef stats As TMaterialTestStats)
+    On Error GoTo Failed
+    Dim extension As Variant, purpose As Variant, profileApi As Long, equilibrium As Long, steel As Long
+    Dim provider As CMaterialModelProvider, diagram As CMaterialDiagram, again As CMaterialDiagram
+    Dim spec As CMaterialModelSpec, prefix As String, signature As String, revision As Long
+    Dim strains() As Double, stresses() As Double, i As Long, errorNumber As Long, description As String
+    Dim beforeStress As Double, physicalCompression As Double, physicalTension As Double
+    For Each extension In Array(False, True)
+        For Each purpose In Array(cpStrength, cpMcrc, cpCrackedNDS)
+            For profileApi = 0 To 1
+                For equilibrium = 0 To 1
+                    ' Поиск образования трещины использует только физическую диаграмму.
+                    If equilibrium = 0 Or CLng(purpose) <> cpMcrc Then
+                        For steel = 0 To 1
+                            Set provider = TestProvider(diagramExtensionEnabled:=CBool(extension))
+                            Set spec = New CMaterialModelSpec
+                            If CLng(purpose) = cpStrength Then
+                                spec.Initialize "ULS(I)", "TwoLine", "Ignore", "TwoLine"
+                            ElseIf CLng(purpose) = cpMcrc Then
+                                spec.Initialize "SLS(II)", "ThreeLine", "UseDiagram", "TwoLine"
+                            Else
+                                spec.Initialize "SLS(II)", "TwoLine", "Ignore", "TwoLine"
+                            End If
+                            Set diagram = TestAudit03PublishedDiagram(provider, CLng(purpose), spec, _
+                                profileApi <> 0, equilibrium <> 0, steel <> 0)
+                            prefix = "audit03.publishedMaterial." & CStr(extension) & "." & CStr(purpose) & _
+                                "." & CStr(profileApi) & "." & CStr(equilibrium) & "." & CStr(steel)
+                            signature = TestAudit03MaterialDiagramSignature(diagram)
+                            revision = provider.Revision
+                            beforeStress = diagram.GetStress(-0.0005)
+                            physicalCompression = diagram.PhysicalCompressionStrain
+                            physicalTension = diagram.PhysicalTensionStrain
+                            ReDim strains(1 To diagram.PointCount)
+                            ReDim stresses(1 To diagram.PointCount)
+                            For i = 1 To diagram.PointCount
+                                strains(i) = diagram.PointStrain(i)
+                                stresses(i) = 2# * diagram.PointStress(i)
+                            Next i
+                            description = vbNullString
+                            errorNumber = TestAudit03CapturePublishedDiagramMutation(diagram, strains, stresses, description)
+                            TestAssertTrue stats, prefix & ".mutationRejected", errorNumber = vbObjectError + 3114
+                            TestAssertTrue stats, prefix & ".readableReason", InStr(1, description, "измен", vbTextCompare) > 0
+                            TestAssertTrue stats, prefix & ".pointsUnchanged", signature = TestAudit03MaterialDiagramSignature(diagram)
+                            TestAssertClose stats, prefix & ".stressUnchanged", diagram.GetStress(-0.0005), beforeStress, 0#
+                            TestAssertClose stats, prefix & ".compressionUnchanged", diagram.PhysicalCompressionStrain, physicalCompression, 0#
+                            TestAssertClose stats, prefix & ".tensionUnchanged", diagram.PhysicalTensionStrain, physicalTension, 0#
+                            TestAssertTrue stats, prefix & ".revisionUnchanged", provider.Revision = revision
+                            Set again = TestAudit03PublishedDiagram(provider, CLng(purpose), spec, _
+                                profileApi <> 0, equilibrium <> 0, steel <> 0)
+                            TestAssertTrue stats, prefix & ".nextConsumerUnchanged", signature = TestAudit03MaterialDiagramSignature(again)
+                            provider.TestInitializeFromParameters TestConcreteParameters(), TestSteelParameters(), _
+                                diagramExtensionEnabled:=CBool(extension)
+                            TestAssertTrue stats, prefix & ".reinitializeChangesRevision", provider.Revision > revision
+                            TestAssertTrue stats, prefix & ".oldReferenceUnchanged", signature = TestAudit03MaterialDiagramSignature(diagram)
+                        Next steel
+                    End If
+                Next equilibrium
+            Next profileApi
+        Next purpose
+    Next extension
+
+    Set diagram = New CMaterialDiagram
+    diagram.TestInitialize 0.00175, 350#, 0.025
+    diagram.TestInitialize 0.002, 400#, 0.03
+    TestAssertClose stats, "audit03.publishedMaterial.standaloneReinitialize", diagram.GetStress(0.01), 400#, 0#
+    Exit Sub
+Failed:
+    stats.Failed = stats.Failed + 1
+    TestAppendLine stats, "FAIL: audit03.publishedMaterial.runtime; " & CStr(Err.Number) & "; " & Err.Description
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Получает материал тем же публичным маршрутом, что соответствующий
+' потребитель; helper не создает свою копию и не изменяет returned reference.
+Private Function TestAudit03PublishedDiagram(ByVal provider As CMaterialModelProvider, ByVal purpose As ECalculationPurpose, _
+        ByVal spec As CMaterialModelSpec, ByVal profileApi As Boolean, ByVal equilibrium As Boolean, _
+        ByVal steel As Boolean) As CMaterialDiagram
+    If profileApi Then
+        If steel Then
+            If equilibrium Then Set TestAudit03PublishedDiagram = provider.SteelMaterialForEquilibriumFromSpec(spec) Else Set TestAudit03PublishedDiagram = provider.SteelMaterialFromSpec(spec)
+        Else
+            If equilibrium Then Set TestAudit03PublishedDiagram = provider.ConcreteMaterialForEquilibriumFromSpec(spec) Else Set TestAudit03PublishedDiagram = provider.ConcreteMaterialFromSpec(spec)
+        End If
+    Else
+        If steel Then
+            If equilibrium Then Set TestAudit03PublishedDiagram = provider.SteelMaterialForEquilibrium(purpose) Else Set TestAudit03PublishedDiagram = provider.SteelMaterial(purpose)
+        Else
+            If equilibrium Then Set TestAudit03PublishedDiagram = provider.ConcreteMaterialForEquilibrium(purpose) Else Set TestAudit03PublishedDiagram = provider.ConcreteMaterial(purpose)
+        End If
+    End If
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Перехватывает только ожидаемый отказ повторной инициализации и возвращает
+' его исходную причину; валидные массивы умышленно задают другой материал.
+Private Function TestAudit03CapturePublishedDiagramMutation(ByVal diagram As CMaterialDiagram, _
+        ByRef strains() As Double, ByRef stresses() As Double, ByRef description As String) As Long
+    On Error GoTo Rejected
+    diagram.InitializeFromArrays strains, stresses, UBound(strains), _
+        diagram.PhysicalCompressionStrain, diagram.PhysicalTensionStrain, _
+        diagram.HasCompressionExtension, diagram.HasTensionExtension
+    Exit Function
+Rejected:
+    TestAudit03CapturePublishedDiagramMutation = Err.Number
+    description = Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет отклонение противоречивого порядка точек материалов без численного
+' решения сечения. Валидные границы сохраняют заданный физический предел.
+Public Function RunMaterialPointOrderTests() As String
+    On Error GoTo Failed
+    Dim stats As TMaterialTestStats
+    TestActiveMaterialPointOrder stats
+    TestAppendLine stats, "TOTAL_MATERIAL_POINT_ORDER: passed=" & CStr(stats.Passed) & "; failed=" & CStr(stats.Failed)
+    RunMaterialPointOrderTests = stats.Report
+    Exit Function
+Failed:
+    RunMaterialPointOrderTests = stats.Report & "RUNTIME ERROR: " & CStr(Err.Number) & "; " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Для десяти активных пар проверяет значения ниже, точно на и выше соседнего
+' перелома в обеих ГПС. Наклон плато и extension не должны менять эту проверку.
+Private Sub TestActiveMaterialPointOrder(ByRef stats As TMaterialTestStats)
+    Dim pair As Long, valueSet As Variant, boundary As Variant, alpha As Variant, extension As Variant
+    Dim actualCode As Long, description As String, limit As Double, expectedLimit As Double
+    Dim inputKey As String, prefix As String
+    For pair = 1 To 10
+        For Each valueSet In Array("ULS(I)", "SLS(II)")
+            For Each boundary In Array(-1#, 0#, 1#)
+                For Each alpha In Array(0#, 0.001)
+                    For Each extension In Array(False, True)
+                        actualCode = TestMaterialOrderCase(pair, CStr(valueSet), CDbl(boundary), CDbl(alpha), _
+                            CBool(extension), description, inputKey, limit, expectedLimit)
+                        prefix = "material.pointOrder." & CStr(pair) & "." & CStr(valueSet) & "." & CStr(boundary) & "." & CStr(alpha) & "." & CStr(extension)
+                        If CDbl(boundary) <= 0# Then
+                            TestAssertTrue stats, prefix & ".rejected", actualCode = vbObjectError + 3260
+                            TestAssertTrue stats, prefix & ".sourceKey", InStr(1, description, inputKey, vbBinaryCompare) > 0
+                            TestAssertTrue stats, prefix & ".correction", InStr(1, description, "Проверьте", vbBinaryCompare) > 0
+                        Else
+                            TestAssertTrue stats, prefix & ".accepted", actualCode = 0
+                            TestAssertClose stats, prefix & ".physicalLimit", limit, expectedLimit, 0#
+                        End If
+                    Next extension
+                Next alpha
+            Next boundary
+        Next valueSet
+    Next pair
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Собирает только выбранную опасную пару; остальные ветви имеют допустимый
+' порядок. Поэтому ошибка ULS не маскируется проверкой другой диаграммы SLS.
+Private Function TestMaterialOrderCase(ByVal pair As Long, ByVal valueSet As String, ByVal boundary As Double, _
+        ByVal alpha As Double, ByVal extension As Boolean, ByRef description As String, ByRef inputKey As String, _
+        ByRef actualLimit As Double, ByRef expectedLimit As Double) As Long
+    On Error GoTo ExpectedError
+    description = vbNullString: inputKey = vbNullString: actualLimit = 0#: expectedLimit = 0#
+    Dim eb2 As Double, ebt2 As Double, eb0 As Double, ebt0 As Double, esc2 As Double, es2 As Double
+    Dim threeEsc2 As Double, threeEs2 As Double, factor As Double, resistance As Double
+    Dim kind As String, concreteKind As String, steelKind As String, strengthConcrete As String, mcrcConcrete As String
+    Dim strengthSteel As String, mcrcSteel As String
+    eb2 = 0.0035: ebt2 = 0.00015: eb0 = 0.002: ebt0 = 0.0001
+    esc2 = 0.025: es2 = 0.025: threeEsc2 = 0.015: threeEs2 = 0.015
+    factor = 1# + boundary * 0.00000001
+    kind = "TwoLine": If pair = 3 Or pair = 4 Or pair = 5 Or pair = 6 Or pair = 9 Or pair = 10 Then kind = "ThreeLine"
+    concreteKind = "TwoLine": steelKind = "TwoLine"
+    If pair <= 6 Then concreteKind = kind Else steelKind = kind
+    strengthConcrete = "TwoLine": mcrcConcrete = "TwoLine": strengthSteel = "TwoLine": mcrcSteel = "TwoLine"
+    If valueSet = "ULS(I)" Then
+        strengthConcrete = concreteKind: strengthSteel = steelKind
+    Else
+        mcrcConcrete = concreteKind: mcrcSteel = steelKind
+    End If
+    Select Case pair
+        Case 1: eb2 = 0.0015 * factor: inputKey = "Concrete.Eb2": expectedLimit = -eb2
+        Case 2: ebt2 = 0.00008 * factor: inputKey = "Concrete.Ebt2": expectedLimit = ebt2
+        Case 3: eb2 = eb0 * factor: inputKey = "Concrete.Eb2": expectedLimit = -eb2
+        Case 4: ebt2 = ebt0 * factor: inputKey = "Concrete.Ebt2": expectedLimit = ebt2
+        Case 5
+            If valueSet = "ULS(I)" Then resistance = 15.5 Else resistance = 22#
+            eb0 = 0.6 * resistance / 32500# * factor: inputKey = "Concrete.Eb0": expectedLimit = -eb2
+        Case 6
+            If valueSet = "ULS(I)" Then resistance = 1.1 Else resistance = 1.8
+            ebt0 = 0.6 * resistance / 32500# * factor: inputKey = "Concrete.Ebt0": expectedLimit = ebt2
+        Case 7
+            If valueSet = "ULS(I)" Then resistance = 350# Else resistance = 390#
+            esc2 = resistance / 200000# * factor: inputKey = "Steel.TwoLine.Esc2": expectedLimit = -esc2
+        Case 8
+            If valueSet = "ULS(I)" Then resistance = 350# Else resistance = 390#
+            es2 = resistance / 200000# * factor: inputKey = "Steel.TwoLine.Es2": expectedLimit = es2
+        Case 9
+            If valueSet = "ULS(I)" Then resistance = 350# Else resistance = 390#
+            threeEsc2 = (2# * (resistance / 200000# + 0.002) - 0.9 * resistance / 200000#) * factor
+            inputKey = "Steel.ThreeLine.Esc2": expectedLimit = -threeEsc2
+        Case 10
+            If valueSet = "ULS(I)" Then resistance = 350# Else resistance = 390#
+            threeEs2 = (2# * (resistance / 200000# + 0.002) - 0.9 * resistance / 200000#) * factor
+            inputKey = "Steel.ThreeLine.Es2": expectedLimit = threeEs2
+    End Select
+    Dim concrete As CConcreteMaterialParameters, steel As CSteelMaterialParameters, provider As CMaterialModelProvider
+    Set concrete = New CConcreteMaterialParameters
+    concrete.Initialize 15.5, 1.1, 22#, 1.8, 32500#, 32500#, eb0:=eb0, ebt0:=ebt0, eb2:=eb2, ebt2:=ebt2, rbMc2:=14.6
+    Set steel = New CSteelMaterialParameters
+    Dim slsStrength As Double
+    slsStrength = 390#
+    If valueSet = "ULS(I)" And (pair = 7 Or pair = 8) Then slsStrength = 300# ' Неакцентированная диаграмма SLS также обязана иметь допустимый порядок; ее меньший R исключает посторонний отказ до выбранной ULS-проверки.
+    steel.Initialize 350#, 350#, slsStrength, slsStrength, 200000#, 200000#, esc2, es2, threeEsc2, threeEs2
+    Set provider = New CMaterialModelProvider
+    provider.TestInitializeFromParameters concrete, steel, strengthConcrete, "UseDiagram", strengthSteel, _
+        mcrcConcrete, mcrcSteel, "TwoLine", "TwoLine", extension, alpha
+    Dim spec As CMaterialModelSpec, diagram As CMaterialDiagram
+    Set spec = New CMaterialModelSpec: spec.Initialize valueSet, concreteKind, "UseDiagram", steelKind
+    If pair <= 6 Then Set diagram = provider.ConcreteMaterialFromSpec(spec) Else Set diagram = provider.SteelMaterialFromSpec(spec)
+    If pair = 2 Or pair = 4 Or pair = 6 Or pair = 8 Or pair = 10 Then actualLimit = diagram.PhysicalTensionStrain Else actualLimit = diagram.PhysicalCompressionStrain
+    Exit Function
+ExpectedError:
+    TestMaterialOrderCase = Err.Number: description = Err.Description
+End Function

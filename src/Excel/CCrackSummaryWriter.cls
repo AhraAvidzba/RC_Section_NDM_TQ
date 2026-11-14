@@ -1,0 +1,1144 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "CCrackSummaryWriter"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' ==========================================================================
+' Подробная таблица расчёта трещин на листе Results
+' ==========================================================================
+' Записывает от rngCrackSummaryAnchor готовые результаты по сочетаниям:
+' нагрузки образования трещины, ширину раскрытия и проверку продольных трещин.
+' Переводит величины в пользовательские единицы и оформляет таблицу.
+' Пустой столбец между частями таблицы сохраняется без рамок и заливки.
+
+Private mSnapshotLengthUnit As String ' Сохранённая единица для формата ширины при восстановлении.
+Private mCapturedSnapshot As CCalculationSnapshot ' Приёмник готовых значений без записи и оформления листа.
+Private mMinimalFormatting As Boolean ' Сохраняет готовое оформление; обновляет данные, шапки при изменении и цвета статусов.
+
+Private Const HEADER_ROWS As Long = 4 ' Число строк шапки над первой строкой сочетаний.
+Private Const TOTAL_COLUMNS As Long = 72 ' Ширины разделов таблицы: образование трещины, СП 35, СП 63 и продольные трещины вместе с разделителями.
+
+Private Const COL_LEFT_FIRST As Long = 1 ' Столбец таблицы: первый столбец общих сведений о сочетании.
+Private Const COL_LEFT_LAST As Long = 9 ' Столбец таблицы: последний столбец общих сведений о сочетании.
+Private Const COL_SEPARATOR As Long = 10 ' Столбец таблицы: пустой столбец между сведениями о сочетании и расчётом трещин.
+Private Const COL_MAIN_FIRST As Long = 11 ' Столбец таблицы: первый столбец расчёта трещин.
+Private Const COL_MAIN_LAST As Long = TOTAL_COLUMNS ' Столбец таблицы: последний столбец расчёта трещин.
+
+Private Const COL_ID As Long = 1 ' Столбец таблицы: номер сочетания.
+Private Const COL_RESULT_COMMENT As Long = 2 ' Столбец таблицы: пояснение результата сочетания.
+Private Const COL_STATUS As Long = 3 ' Столбец таблицы: общий статус сочетания.
+Private Const COL_REF_N As Long = 4 ' Продольная сила для расчёта в центре приведённого сечения.
+Private Const COL_REF_MX As Long = 5 ' Момент для расчёта относительно центральной оси X.
+Private Const COL_REF_MY As Long = 6 ' Момент для расчёта относительно центральной оси Y.
+Private Const COL_LOAD_N As Long = 7 ' Столбец таблицы: расчётная продольная сила.
+Private Const COL_LOAD_MX As Long = 8 ' Столбец таблицы: расчётный момент Mx.
+Private Const COL_LOAD_MY As Long = 9 ' Столбец таблицы: расчётный момент My.
+
+Private Const COL_ARED As Long = 11 ' Столбец таблицы: площадь приведённого сечения.
+Private Const COL_RBT_SER As Long = 12 ' Столбец таблицы: сопротивление бетона растяжению для образования трещин.
+Private Const COL_NCRC As Long = 13 ' Столбец таблицы: продольная сила образования трещины.
+Private Const COL_LAMBDA_NCRC As Long = 14 ' Столбец таблицы: множитель нагрузки для осевого образования трещины.
+Private Const COL_FORMATION_METHOD As Long = 15 ' Столбец таблицы: способ поиска образования трещины.
+Private Const COL_FORMATION_NCRC As Long = 16 ' Столбец таблицы: сила N в найденной точке образования трещины.
+Private Const COL_MCRC As Long = 17 ' Столбец таблицы: момент образования трещины.
+Private Const COL_LAMBDA_MCRC As Long = 18 ' Столбец таблицы: множитель нагрузки в найденной точке образования трещины.
+Private Const COL_PRE_EBC As Long = COL_LAMBDA_MCRC + 1 ' Столбец таблицы: деформация сжатого бетона до образования трещины.
+Private Const COL_PRE_EBT As Long = COL_PRE_EBC + 1 ' Столбец таблицы: деформация растянутого бетона до образования трещины.
+Private Const COL_PRE_CRACK_STATUS As Long = COL_PRE_EBT + 1 ' Столбец таблицы: статус НДС до образования трещины.
+Private Const COL_POST_EBC As Long = COL_PRE_CRACK_STATUS + 1 ' Столбец таблицы: деформация сжатого бетона после образования трещины.
+Private Const COL_POST_EBT As Long = COL_POST_EBC + 1 ' Столбец таблицы: деформация растянутого бетона после образования трещины.
+Private Const COL_POST_CRACK_STATUS As Long = COL_POST_EBT + 1 ' Столбец таблицы: статус НДС после образования трещины.
+Private Const COL_FORMATION_STATE As Long = COL_POST_CRACK_STATUS + 1 ' Столбец таблицы: вид состояния, выбранного при образовании трещины.
+Private Const COL_CURRENT_EBC As Long = COL_FORMATION_STATE + 1 ' Столбец таблицы: деформация сжатого бетона при заданной нагрузке.
+Private Const COL_CURRENT_EBT As Long = COL_CURRENT_EBC + 1 ' Столбец таблицы: деформация растянутого бетона при заданной нагрузке.
+Private Const COL_CRACK_STATE_DIAGEXT As Long = COL_CURRENT_EBT + 1 ' Столбец таблицы: признак использования продолжения диаграмм в НДС с трещинами.
+Private Const COL_CRACK_STATE_STATUS As Long = COL_CRACK_STATE_DIAGEXT + 1 ' Столбец таблицы: статус НДС с трещинами.
+Private Const COL_FORMATION_SEPARATOR As Long = COL_CRACK_STATE_STATUS + 1 ' Столбец таблицы: пустой столбец после образования трещины.
+Private Const COL_SP35_AR As Long = COL_FORMATION_SEPARATOR + 1 ' Столбец таблицы: площадь взаимодействия бетона с арматурой по СП 35.
+Private Const COL_SP35_BETA As Long = COL_SP35_AR + 1 ' Столбец таблицы: коэффициент beta профиля арматуры по СП 35.
+Private Const COL_SP35_N As Long = COL_SP35_BETA + 1 ' Столбец таблицы: число стержней в определяющей области СП 35.
+Private Const COL_SP35_D As Long = COL_SP35_N + 1 ' Столбец таблицы: расчётный диаметр арматуры по СП 35.
+Private Const COL_SP35_RR As Long = COL_SP35_D + 1 ' Столбец таблицы: радиус армирования по СП 35.
+Private Const COL_SP35_PSI As Long = COL_SP35_RR + 1 ' Столбец таблицы: коэффициент psi по СП 35.
+Private Const COL_SP35_REBARS As Long = COL_SP35_PSI + 1 ' Столбец таблицы: имена стержней определяющей области СП 35.
+Private Const COL_SP35_NREBARS As Long = COL_SP35_REBARS + 1 ' Столбец таблицы: число стержней определяющей области СП 35.
+Private Const COL_SP35_SIGMA As Long = COL_SP35_NREBARS + 1 ' Столбец таблицы: расчётное напряжение арматуры по СП 35.
+Private Const COL_SP35_ES As Long = COL_SP35_SIGMA + 1 ' Столбец таблицы: модуль упругости арматуры по СП 35.
+Private Const COL_SP35_ACRC As Long = COL_SP35_ES + 1 ' Столбец таблицы: ширина трещины по СП 35.
+Private Const COL_SP35_ALLOWABLE As Long = COL_SP35_ACRC + 1 ' Столбец таблицы: допустимая ширина трещины по СП 35.
+Private Const COL_SP35_RATIO As Long = COL_SP35_ALLOWABLE + 1 ' Столбец таблицы: отношение ширины трещины к допустимой по СП 35.
+Private Const COL_SP35_STATUS As Long = COL_SP35_RATIO + 1 ' Столбец таблицы: статус проверки ширины трещины по СП 35.
+Private Const COL_SP35_SEPARATOR As Long = COL_SP35_STATUS + 1 ' Столбец таблицы: пустой столбец после расчёта СП 35.
+Private Const COL_XT As Long = COL_SP35_SEPARATOR + 1 ' Столбец таблицы: высота сжатой зоны.
+Private Const COL_H As Long = COL_XT + 1 ' Столбец таблицы: высота сечения в направлении расчёта.
+Private Const COL_AS_COVER As Long = COL_H + 1 ' Столбец таблицы: расстояние от растянутой границы до центра арматуры.
+Private Const COL_HBT As Long = COL_AS_COVER + 1 ' Столбец таблицы: высота растянутой области взаимодействия.
+Private Const COL_ABT As Long = COL_HBT + 1 ' Столбец таблицы: площадь растянутого бетона, взаимодействующего с арматурой.
+Private Const COL_AS As Long = COL_ABT + 1 ' Столбец таблицы: площадь растянутой арматуры.
+Private Const COL_DS_EQ As Long = COL_AS + 1 ' Столбец таблицы: эквивалентный диаметр арматуры.
+Private Const COL_LS0 As Long = COL_DS_EQ + 1 ' Столбец таблицы: исходное расстояние между трещинами.
+Private Const COL_LS As Long = COL_LS0 + 1 ' Столбец таблицы: принятое расстояние между трещинами.
+Private Const COL_PHI1 As Long = COL_LS + 1 ' Столбец таблицы: коэффициент phi1 формулы ширины трещины СП 63.
+Private Const COL_PHI2 As Long = COL_PHI1 + 1 ' Столбец таблицы: коэффициент phi2 формулы ширины трещины СП 63.
+Private Const COL_PHI3 As Long = COL_PHI2 + 1 ' Столбец таблицы: коэффициент phi3 формулы ширины трещины СП 63.
+Private Const COL_PSI_S As Long = COL_PHI3 + 1 ' Столбец таблицы: коэффициент psis по СП 63.
+Private Const COL_REBARS As Long = COL_PSI_S + 1 ' Столбец таблицы: имена стержней определяющей области СП 63.
+Private Const COL_NREBARS As Long = COL_REBARS + 1 ' Столбец таблицы: число стержней определяющей области СП 63.
+Private Const COL_SIGMA_S_CRC As Long = COL_NREBARS + 1 ' Столбец таблицы: напряжение арматуры при образовании трещины.
+Private Const COL_SIGMA_S As Long = COL_SIGMA_S_CRC + 1 ' Столбец таблицы: напряжение арматуры при заданной нагрузке.
+Private Const COL_ES As Long = COL_SIGMA_S + 1 ' Столбец таблицы: модуль упругости арматуры.
+Private Const COL_ACRC As Long = COL_ES + 1 ' Столбец таблицы: расчётная ширина трещины по СП 63.
+Private Const COL_ACRC_ULT As Long = COL_ACRC + 1 ' Столбец таблицы: допустимая ширина трещины по СП 63.
+Private Const COL_ACRC_RATIO As Long = COL_ACRC_ULT + 1 ' Столбец таблицы: отношение ширины трещины к допустимой по СП 63.
+Private Const COL_ACRC_STATUS As Long = COL_ACRC_RATIO + 1 ' Столбец таблицы: статус проверки ширины трещины по СП 63.
+Private Const COL_SP63_SEPARATOR As Long = COL_ACRC_STATUS + 1 ' Столбец таблицы: пустой столбец после расчёта СП 63.
+Private Const COL_SIGMA_B_MAX As Long = COL_SP63_SEPARATOR + 1 ' Столбец таблицы: наибольшее напряжение сжатого бетона.
+Private Const COL_RB_MC2 As Long = COL_SIGMA_B_MAX + 1 ' Столбец таблицы: расчётное сопротивление бетона с принятой поправкой.
+Private Const COL_LONG_RATIO As Long = COL_RB_MC2 + 1 ' Столбец таблицы: коэффициент использования проверки продольных трещин.
+Private Const COL_LONG_STATUS As Long = COL_LONG_RATIO + 1 ' Столбец таблицы: статус проверки продольных трещин.
+
+Private Const HEADER_COLOR As Long = &HD9D9D9 ' Серый фон шапки, единый для таблиц Results.
+Private Const SMALL_VALUE As Double = 0.000000001 ' Порог отнесения численного поля к отсутствующему при выводе таблицы.
+Private Const HEADER_NOTES_ROW As Long = 3 ' Строка коротких пояснений над нижними обозначениями.
+Private Const HEADER_LABEL_ROW As Long = 4 ' Строка итоговых обозначений с единицами.
+
+' Возвращает число строк шапки, расположенных выше rngCrackSummaryAnchor.
+Public Function HeaderRowsAboveAnchor() As Long
+    HeaderRowsAboveAnchor = HEADER_ROWS
+End Function
+
+' Возвращает полную высоту блока трещин с учетом шапки и строк сочетаний.
+Public Function RequiredRows(ByVal combinationCount As Long) As Long
+    If combinationCount < 1 Then combinationCount = 1
+    RequiredRows = HEADER_ROWS + combinationCount
+End Function
+
+' Возвращает число строк данных, которое нужно оформить по текущему диапазону
+' сочетаний. Пустые доступные строки тоже получают рамки, как в общей сводке.
+Public Function RequiredDataRowsForWorkbook(ByVal workbook As Object, ByVal combinationCount As Long) As Long
+    RequiredDataRowsForWorkbook = combinationCount
+    If RequiredDataRowsForWorkbook < 1 Then RequiredDataRowsForWorkbook = 1
+
+    On Error GoTo SafeExit
+    If workbook Is Nothing Then GoTo SafeExit
+    Dim loads As Object
+    Set loads = workbook.Names.Item("rngLoadCombinations").RefersToRange
+    If loads.Rows.Count > 1 Then
+        If loads.Rows.Count - 1 > RequiredDataRowsForWorkbook Then _
+            RequiredDataRowsForWorkbook = loads.Rows.Count - 1
+    End If
+SafeExit:
+    If RequiredDataRowsForWorkbook < 1 Then RequiredDataRowsForWorkbook = 1
+End Function
+
+' Возвращает полную высоту блока для фактической книги.
+Public Function RequiredRowsForWorkbook(ByVal workbook As Object, ByVal combinationCount As Long) As Long
+    RequiredRowsForWorkbook = RequiredRows(RequiredDataRowsForWorkbook(workbook, combinationCount))
+End Function
+
+' Возвращает ширину блока вместе с пустым разделительным столбцом.
+Public Function RequiredColumns() As Long
+    RequiredColumns = TOTAL_COLUMNS
+End Function
+
+' Записывает детальную таблицу трещин от rngCrackSummaryAnchor.
+Public Sub WriteSummary(ByVal workbook As Object, ByVal batch As CBatchSectionCalculator, _
+        Optional ByVal units As CUnitSystem = Nothing, Optional ByVal fullFormatting As Boolean = True)
+    mMinimalFormatting = Not fullFormatting
+    On Error GoTo Failed
+    If workbook Is Nothing Then Err.Raise vbObjectError + 3988, "CCrackSummaryWriter", "Книга Excel не передана."
+    If batch Is Nothing Then Err.Raise vbObjectError + 3989, "CCrackSummaryWriter", "Пакетный расчетчик не передан."
+
+    Dim target As Object
+    Set target = TargetRange(workbook, RequiredDataRowsForWorkbook(workbook, batch.Count))
+    If mMinimalFormatting Then
+        mMinimalFormatting = (CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@")
+    End If
+    If mCapturedSnapshot Is Nothing Then PrepareTarget target
+    WriteHeaders target, units
+    If mCapturedSnapshot Is Nothing Then WriteBlockTitle target, "Расчет нормальных и продольных трещин"
+    WriteData target, batch, units
+    FormatTable target, batch, units
+    Exit Sub
+
+Failed:
+    Err.Raise Err.Number, "CCrackSummaryWriter.WriteSummary", Err.Description
+End Sub
+
+' Очищает данные подробной таблицы трещин. При fullFormatting=True
+' удаляет также шапку, объединения и форматы; иначе сохраняет готовое оформление.
+Public Sub ClearSummary(ByVal workbook As Object, Optional ByVal fullFormatting As Boolean = True)
+    mMinimalFormatting = Not fullFormatting
+    If workbook Is Nothing Then Err.Raise vbObjectError + 3990, "CCrackSummaryWriter", "Книга Excel не передана."
+    PrepareTarget ClearTargetRange(workbook)
+End Sub
+
+' Возвращает диапазон текущей таблицы, включающий шапку и строки сочетаний.
+Private Function TargetRange(ByVal workbook As Object, Optional ByVal dataRows As Long = 1) As Object
+    Dim anchor As Object
+    Set anchor = workbook.Names.Item("rngCrackSummaryAnchor").RefersToRange
+    If anchor.Row <= HEADER_ROWS Then Err.Raise vbObjectError + 3991, "CCrackSummaryWriter", _
+        "Диапазон rngCrackSummaryAnchor привязан к " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & _
+        ". Для шапки таблицы нужны " & CStr(HEADER_ROWS) & " строк выше этой ячейки. Перенесите именованный диапазон ниже."
+    Set TargetRange = anchor.Offset(-HEADER_ROWS, 0).Resize(RequiredRows(dataRows), TOTAL_COLUMNS)
+End Function
+
+' Возвращает диапазон безопасной очистки до следующего нижнего блока Results.
+Private Function ClearTargetRange(ByVal workbook As Object) As Object
+    Dim anchor As Object
+    Set anchor = workbook.Names.Item("rngCrackSummaryAnchor").RefersToRange
+    If anchor.Row <= HEADER_ROWS Then Err.Raise vbObjectError + 3991, "CCrackSummaryWriter", _
+        "Диапазон rngCrackSummaryAnchor привязан к " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & _
+        ". Для шапки таблицы нужны " & CStr(HEADER_ROWS) & " строк выше этой ячейки. Перенесите именованный диапазон ниже."
+
+    Dim topRow As Long
+    topRow = anchor.Row - HEADER_ROWS
+
+    Dim rowsToClear As Long
+    rowsToClear = RequiredRows(1)
+    On Error GoTo UseDefaultHeight
+    Dim stabilityWriter As CStabilitySummaryWriter
+    Set stabilityWriter = New CStabilitySummaryWriter
+    Dim stabilityAnchor As Object
+    Set stabilityAnchor = workbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange
+    Dim stabilityTopRow As Long
+    stabilityTopRow = stabilityAnchor.Row - stabilityWriter.HeaderRowsAboveAnchor
+    If stabilityTopRow > topRow Then
+        rowsToClear = stabilityTopRow - topRow
+        If mMinimalFormatting Then rowsToClear = rowsToClear - 1
+    End If
+
+UseDefaultHeight:
+    If topRow + rowsToClear - 1 > anchor.Worksheet.Rows.Count Then rowsToClear = anchor.Worksheet.Rows.Count - topRow + 1
+    Set ClearTargetRange = anchor.Worksheet.Cells(topRow, anchor.Column).Resize(rowsToClear, TOTAL_COLUMNS)
+End Function
+
+' Готовит область к записи: при полном оформлении очищает её целиком.
+' В минимальном режиме оставляет шапку и форматы, удаляя данные и заливку рассчитанных статусов.
+Private Sub PrepareTarget(ByVal target As Object)
+    If mMinimalFormatting Then
+        If target.Rows.Count > HEADER_ROWS Then
+            With target.Offset(HEADER_ROWS, 0).Resize(target.Rows.Count - HEADER_ROWS, TOTAL_COLUMNS)
+                .ClearContents
+                .Interior.ColorIndex = -4142
+            End With
+        End If
+        Exit Sub
+    End If
+    ClearBlockTitleRow target
+    target.UnMerge
+    target.Clear
+End Sub
+
+' Записывает отдельную строку-название над подробным блоком трещин.
+Private Sub WriteBlockTitle(ByVal target As Object, ByVal titleText As String)
+    If target.Row <= 1 Then Exit Sub
+    If mMinimalFormatting Then
+        target.Worksheet.Cells(target.Row - 1, target.Column).Value2 = titleText
+        Exit Sub
+    End If
+
+    Dim titleRow As Long
+    titleRow = target.Row - 1
+    target.Worksheet.Cells(titleRow, target.Column).Resize(1, TOTAL_COLUMNS).Interior.Color = RGB(189, 215, 238)
+    With target.Worksheet.Cells(titleRow, target.Column)
+        .Value2 = titleText
+        .Font.Name = "Arial"
+        .Font.Size = 12
+        .Font.Bold = True
+        .Font.Color = RGB(255, 0, 0)
+        .HorizontalAlignment = -4131
+        .VerticalAlignment = -4108
+        .WrapText = False
+    End With
+End Sub
+
+' Очищает название и заливку только в ширине блока трещин. Ячейки справа
+' не относятся к этой таблице и сохраняются при повторной записи результатов.
+Private Sub ClearBlockTitleRow(ByVal target As Object)
+    If target.Row <= 1 Then Exit Sub
+    target.Worksheet.Cells(target.Row - 1, target.Column).Resize(1, TOTAL_COLUMNS).Clear
+End Sub
+
+' Собирает многоуровневую шапку с актуальными единицами. В минимальном
+' режиме сохраняет совпадающую шапку; при отличии возвращается к полному оформлению.
+Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
+    Dim headers() As Variant
+    ReDim headers(1 To HEADER_ROWS, 1 To TOTAL_COLUMNS)
+
+    headers(1, COL_ID) = "Combination ID"
+    headers(1, COL_RESULT_COMMENT) = "ResultComment"
+    headers(1, COL_STATUS) = "общий статус"
+    headers(1, COL_REF_N) = "относительно центральных осей приведенного сечения"
+    headers(1, COL_LOAD_N) = "в точке приложения нагрузок"
+
+    headers(1, COL_ARED) = "Начало трещинообразования"
+    headers(2, COL_ARED) = "Осевое растяжение"
+    headers(2, COL_FORMATION_METHOD) = "Изгиб N + M"
+    headers(2, COL_PRE_EBC) = "PreCrackState (до трещины)"
+    headers(2, COL_POST_EBC) = "PostCrackState (после трещины)"
+    headers(1, COL_CURRENT_EBC) = "равновесное состояние при заданных нагрузках"
+    headers(1, COL_SP35_AR) = "нормальные трещины по СП 35"
+    headers(2, COL_SP35_AR) = "Коэффициент раскрытия трещин"
+    headers(2, COL_SP35_REBARS) = "Напряжения"
+    headers(2, COL_SP35_ACRC) = "ширина раскрытия нормальных трещин"
+    headers(1, COL_XT) = "нормальные трещины по СП 63"
+    headers(2, COL_XT) = "данные для расстояния между трещинами ls"
+    headers(2, COL_DS_EQ) = "Расстояние между трещинами ls"
+    headers(2, COL_PHI1) = "Коэффициенты"
+    headers(2, COL_REBARS) = "Напряжения"
+    headers(2, COL_ACRC) = "ширина раскрытия нормальных трещин"
+    headers(1, COL_SIGMA_B_MAX) = "продольные трещины"
+
+    PutHeaderNotes headers, units
+    PutColumnLabels headers, units
+    If Not mCapturedSnapshot Is Nothing Then
+        mCapturedSnapshot.AddTable "Cracks.Headers", headers
+        Exit Sub
+    End If
+    If mMinimalFormatting Then
+        If ResultHeaderMatches(target, headers, merges:=HeaderMergeBlocks()) Then Exit Sub
+        mMinimalFormatting = False
+        target.Resize(HEADER_ROWS, TOTAL_COLUMNS).UnMerge
+    End If
+    target.Resize(HEADER_ROWS, TOTAL_COLUMNS).Value2 = headers
+    MergeHeaders target
+End Sub
+
+' Заполняет строку пояснений над нижним ярусом заголовков.
+Private Sub PutHeaderNotes(ByRef headers() As Variant, ByVal units As CUnitSystem)
+    headers(HEADER_NOTES_ROW, COL_PRE_EBC) = "фактическая наибольшая деформация сжатия бетона до трещины"
+    headers(HEADER_NOTES_ROW, COL_PRE_EBT) = "фактическая наибольшая деформация растяжения бетона до трещины"
+    headers(HEADER_NOTES_ROW, COL_POST_EBC) = "фактическая деформация сжатия после трещины"
+    headers(HEADER_NOTES_ROW, COL_POST_EBT) = "растяжение после трещины; пусто при выключенном растянутом бетоне"
+    headers(HEADER_NOTES_ROW, COL_CURRENT_EBC) = "фактическая деформация сжатия при нагрузках сочетания"
+    headers(HEADER_NOTES_ROW, COL_CURRENT_EBT) = "растяжение при текущих нагрузках; пусто при выключенном растянутом бетоне"
+    headers(HEADER_NOTES_ROW, COL_SP35_AR) = "площадь в " & OutputAreaUnit(units) & "; критическая область с вычетом всех проемов"
+    headers(HEADER_NOTES_ROW, COL_SP35_BETA) = "коэффициенты групп каждого расчетного ряда"
+    headers(HEADER_NOTES_ROW, COL_SP35_N) = "число реальных стержней каждой группы ряда"
+    headers(HEADER_NOTES_ROW, COL_SP35_D) = "диаметры в " & OutputLengthUnit(units) & "; все стержни по рядам"
+    headers(HEADER_NOTES_ROW, COL_SP35_RR) = "радиус армирования в " & OutputLengthUnit(units) & ": Ar / сумма beta*nd"
+    headers(HEADER_NOTES_ROW, COL_SP35_PSI) = "коэффициент раскрытия в " & OutputLengthUnit(units) & "; переведен из см"
+    headers(HEADER_NOTES_ROW, COL_SP35_REBARS) = "все включенные стержни каждого ряда критической области"
+    headers(HEADER_NOTES_ROW, COL_SP35_NREBARS) = "общее число стержней критической области"
+    headers(HEADER_NOTES_ROW, COL_SP35_SIGMA) = "напряжение в " & OutputStressUnit(units) & "; критическая группа"
+    headers(HEADER_NOTES_ROW, COL_SP35_ES) = "модуль арматуры в " & OutputStressUnit(units) & "; текущая модель"
+    headers(HEADER_NOTES_ROW, COL_SP35_ACRC) = "раскрытие в " & OutputLengthUnit(units) & "; наибольшее значение среди проверенных стержней"
+    headers(HEADER_NOTES_ROW, COL_SP35_ALLOWABLE) = "допускаемая ширина в " & OutputLengthUnit(units) & "; настройка пользователя"
+    headers(HEADER_NOTES_ROW, COL_SP35_RATIO) = "запас: допускаемая ширина / рассчитанная ширина"
+    headers(HEADER_NOTES_ROW, COL_SP35_STATUS) = "статус проверки ширины раскрытия трещин по общим правилам определения статусов"
+    headers(HEADER_NOTES_ROW, COL_RESULT_COMMENT) = "пояснение расчетного статуса блока трещин"
+    headers(HEADER_NOTES_ROW, COL_REF_N) = "продольная сила N, переданная в расчёт трещин, в центре приведённого сечения"
+    headers(HEADER_NOTES_ROW, COL_REF_MX) = "момент Mx, переданный в расчёт трещин, относительно оси X через центр приведённого сечения"
+    headers(HEADER_NOTES_ROW, COL_REF_MY) = "момент My, переданный в расчёт трещин, относительно оси Y через центр приведённого сечения"
+    headers(HEADER_NOTES_ROW, COL_LOAD_N) = "продольная сила N, переданная в расчёт трещин, в пользовательской точке приложения нагрузки"
+    headers(HEADER_NOTES_ROW, COL_LOAD_MX) = "момент Mx, переданный в расчёт трещин, в пользовательской точке приложения нагрузки. Продольный изгиб учтён, если он включён для сочетания."
+    headers(HEADER_NOTES_ROW, COL_LOAD_MY) = "момент My, переданный в расчёт трещин, в пользовательской точке приложения нагрузки. Продольный изгиб учтён, если он включён для сочетания."
+    headers(HEADER_NOTES_ROW, COL_ARED) = "площадь приведенного сечения для Ncrc"
+    headers(HEADER_NOTES_ROW, COL_RBT_SER) = "растяжение бетона II ГПС"
+    headers(HEADER_NOTES_ROW, COL_FORMATION_METHOD) = "фактически использованный путь поиска точки образования трещины"
+    headers(HEADER_NOTES_ROW, COL_NCRC) = "сила образования трещины при центральном растяжении"
+    headers(HEADER_NOTES_ROW, COL_LAMBDA_NCRC) = "доля заданной растягивающей силы для Ncrc"
+    headers(HEADER_NOTES_ROW, COL_FORMATION_NCRC) = "продольная сила в найденной точке образования трещины для выбранного пути"
+    headers(HEADER_NOTES_ROW, COL_MCRC) = "модуль моментного вектора в найденной точке образования трещины"
+    headers(HEADER_NOTES_ROW, COL_LAMBDA_MCRC) = "доля выбранного пути нагрузки до образования трещины"
+    headers(HEADER_NOTES_ROW, COL_PRE_CRACK_STATUS) = "статус НДС непосредственно перед образованием нормальной трещины"
+    headers(HEADER_NOTES_ROW, COL_POST_CRACK_STATUS) = "статус НДС сразу после образования нормальной трещины"
+    headers(HEADER_NOTES_ROW, COL_FORMATION_STATE) = "итог: нормальная трещина образуется при заданном сочетании или нет"
+    headers(HEADER_NOTES_ROW, COL_CRACK_STATE_DIAGEXT) = "yes - равновесие найдено через продолжение диаграммы; no - продолжение было разрешено, но не понадобилось; - - продолжение выключено в настройках"
+    headers(HEADER_NOTES_ROW, COL_CRACK_STATE_STATUS) = "OK - равновесие при заданных нагрузках сошлось без продолжения диаграммы и все материалы остались в физическом диапазоне; FAIL/NumFail останавливают расчет трещин"
+    headers(HEADER_NOTES_ROW, COL_XT) = "фактическая высота растянутой зоны"
+    headers(HEADER_NOTES_ROW, COL_H) = "полная высота сечения по нормали к нейтральной линии"
+    headers(HEADER_NOTES_ROW, COL_AS_COVER) = "расстояние от оси выбранного стержня до бетонного контура"
+    headers(HEADER_NOTES_ROW, COL_HBT) = "принятая глубина зоны растянутого бетона"
+    headers(HEADER_NOTES_ROW, COL_ABT) = "площадь растянутого бетона расчетной зоны"
+    headers(HEADER_NOTES_ROW, COL_AS) = "площадь выбранной растянутой арматуры"
+    headers(HEADER_NOTES_ROW, COL_DS_EQ) = "эквивалентный диаметр выбранных стержней"
+    headers(HEADER_NOTES_ROW, COL_LS0) = "расстояние до нормативных ограничений"
+    headers(HEADER_NOTES_ROW, COL_LS) = "принятое расстояние между трещинами"
+    headers(HEADER_NOTES_ROW, COL_PHI1) = "коэффициент длительности действия нагрузки"
+    headers(HEADER_NOTES_ROW, COL_PHI2) = "коэффициент профиля арматуры из Config"
+    headers(HEADER_NOTES_ROW, COL_PHI3) = "коэффициент характера нагружения"
+    headers(HEADER_NOTES_ROW, COL_PSI_S) = "коэффициент неравномерности деформаций арматуры"
+    headers(HEADER_NOTES_ROW, COL_REBARS) = "стержни, использованные для As и " & ChrW$(&H3C3) & "s"
+    headers(HEADER_NOTES_ROW, COL_NREBARS) = "количество выбранных стержней"
+    headers(HEADER_NOTES_ROW, COL_SIGMA_S_CRC) = "напряжение выбранной арматуры сразу после образования трещины"
+    headers(HEADER_NOTES_ROW, COL_SIGMA_S) = "напряжение выбранной арматуры при текущем НДС"
+    headers(HEADER_NOTES_ROW, COL_ES) = "модуль упругости арматуры для формулы раскрытия трещины"
+    headers(HEADER_NOTES_ROW, COL_ACRC) = "расчетная ширина раскрытия"
+    headers(HEADER_NOTES_ROW, COL_ACRC_ULT) = "допустимая ширина раскрытия"
+    headers(HEADER_NOTES_ROW, COL_ACRC_RATIO) = "запас: допустимая ширина делится на расчетную"
+    headers(HEADER_NOTES_ROW, COL_ACRC_STATUS) = "статус проверки нормальных трещин"
+    headers(HEADER_NOTES_ROW, COL_SIGMA_B_MAX) = "максимальное сжатие бетона для продольных трещин"
+    headers(HEADER_NOTES_ROW, COL_RB_MC2) = "допустимое Rb,mc2"
+    headers(HEADER_NOTES_ROW, COL_LONG_RATIO) = "запас: Rb,mc2 делится на сжатие бетона"
+    headers(HEADER_NOTES_ROW, COL_LONG_STATUS) = "статус проверки продольных трещин"
+End Sub
+
+' Заполняет нижний ярус заголовков с единицами пользователя.
+Private Sub PutColumnLabels(ByRef headers() As Variant, ByVal units As CUnitSystem)
+    headers(HEADER_LABEL_ROW, COL_PRE_EBC) = ChrW$(&H3B5) & "bc"
+    headers(HEADER_LABEL_ROW, COL_PRE_EBT) = ChrW$(&H3B5) & "bt"
+    headers(HEADER_LABEL_ROW, COL_POST_EBC) = ChrW$(&H3B5) & "bc"
+    headers(HEADER_LABEL_ROW, COL_POST_EBT) = ChrW$(&H3B5) & "bt"
+    headers(HEADER_LABEL_ROW, COL_CURRENT_EBC) = ChrW$(&H3B5) & "bc"
+    headers(HEADER_LABEL_ROW, COL_CURRENT_EBT) = ChrW$(&H3B5) & "bt"
+    headers(HEADER_LABEL_ROW, COL_SP35_AR) = "Ar, " & OutputAreaUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_BETA) = ChrW$(&H3B2)
+    headers(HEADER_LABEL_ROW, COL_SP35_N) = "n"
+    headers(HEADER_LABEL_ROW, COL_SP35_D) = "d, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_RR) = "Rr, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_PSI) = ChrW$(&H3C8) & ", " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_REBARS) = "rebars"
+    headers(HEADER_LABEL_ROW, COL_SP35_NREBARS) = "nrebars"
+    headers(HEADER_LABEL_ROW, COL_SP35_SIGMA) = ChrW$(&H3C3) & "s, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_ES) = "Es, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_ACRC) = "acrc, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_ALLOWABLE) = "acrc,ult, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SP35_RATIO) = "acrc,ult/acrc"
+    headers(HEADER_LABEL_ROW, COL_SP35_STATUS) = "статус"
+    headers(HEADER_LABEL_ROW, COL_REF_N) = "N, " & OutputForceUnit(units)
+    headers(HEADER_LABEL_ROW, COL_REF_MX) = "Mx, " & OutputMomentUnit(units)
+    headers(HEADER_LABEL_ROW, COL_REF_MY) = "My, " & OutputMomentUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LOAD_N) = "N, " & OutputForceUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LOAD_MX) = "Mx, " & OutputMomentUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LOAD_MY) = "My, " & OutputMomentUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ARED) = "Ared, " & OutputAreaUnit(units)
+    headers(HEADER_LABEL_ROW, COL_RBT_SER) = "Rbt,ser, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_FORMATION_METHOD) = "Method"
+    headers(HEADER_LABEL_ROW, COL_NCRC) = "Ncrc, " & OutputForceUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LAMBDA_NCRC) = ChrW$(&H3BB) & "crc"
+    headers(HEADER_LABEL_ROW, COL_FORMATION_NCRC) = "Ncrc, " & OutputForceUnit(units)
+    headers(HEADER_LABEL_ROW, COL_MCRC) = "Mxy,crc, " & OutputMomentUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LAMBDA_MCRC) = ChrW$(&H3BB) & "crc"
+    headers(HEADER_LABEL_ROW, COL_PRE_CRACK_STATUS) = "равновесие"
+    headers(HEADER_LABEL_ROW, COL_POST_CRACK_STATUS) = "равновесие"
+    headers(HEADER_LABEL_ROW, COL_FORMATION_STATE) = "state"
+    headers(HEADER_LABEL_ROW, COL_CRACK_STATE_DIAGEXT) = "ExtUsed"
+    headers(HEADER_LABEL_ROW, COL_CRACK_STATE_STATUS) = "статус"
+    headers(HEADER_LABEL_ROW, COL_XT) = "xt, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_H) = "h, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_AS_COVER) = "as, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_HBT) = "hbt, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ABT) = "Abt, " & OutputAreaUnit(units)
+    headers(HEADER_LABEL_ROW, COL_AS) = "As, " & OutputAreaUnit(units)
+    headers(HEADER_LABEL_ROW, COL_DS_EQ) = "ds,eq, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LS0) = "ls0, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LS) = "ls, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_PHI1) = ChrW$(&H3C6) & "1"
+    headers(HEADER_LABEL_ROW, COL_PHI2) = ChrW$(&H3C6) & "2"
+    headers(HEADER_LABEL_ROW, COL_PHI3) = ChrW$(&H3C6) & "3"
+    headers(HEADER_LABEL_ROW, COL_PSI_S) = ChrW$(&H3C8) & "s"
+    headers(HEADER_LABEL_ROW, COL_REBARS) = "rebars"
+    headers(HEADER_LABEL_ROW, COL_NREBARS) = "nrebars"
+    headers(HEADER_LABEL_ROW, COL_SIGMA_S_CRC) = ChrW$(&H3C3) & "s,crc, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_SIGMA_S) = ChrW$(&H3C3) & "s, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ES) = "Es, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ACRC) = "acrc, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ACRC_ULT) = "acrc,ult, " & OutputLengthUnit(units)
+    headers(HEADER_LABEL_ROW, COL_ACRC_RATIO) = "acrc,ult/acrc"
+    headers(HEADER_LABEL_ROW, COL_ACRC_STATUS) = "статус"
+    headers(HEADER_LABEL_ROW, COL_SIGMA_B_MAX) = ChrW$(&H3C3) & "b,max, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_RB_MC2) = "Rb,mc2, " & OutputStressUnit(units)
+    headers(HEADER_LABEL_ROW, COL_LONG_RATIO) = "Rb,mc2/" & ChrW$(&H3C3) & "b"
+    headers(HEADER_LABEL_ROW, COL_LONG_STATUS) = "статус"
+End Sub
+
+' Объединяет ячейки многоуровневой шапки.
+Private Sub MergeHeaders(ByVal target As Object)
+    Dim block As Variant
+    For Each block In HeaderMergeBlocks()
+        MergeRange target, CLng(block(0)), CLng(block(2)), CLng(block(1)), CLng(block(3))
+    Next block
+End Sub
+
+' Использует одно описание объединений для проверки и построения шапки.
+Private Function HeaderMergeBlocks() As Collection
+    Dim blocks As Collection: Set blocks = New Collection
+    blocks.Add Array(1, HEADER_LABEL_ROW, COL_ID, COL_ID)
+    blocks.Add Array(1, HEADER_LABEL_ROW, COL_RESULT_COMMENT, COL_RESULT_COMMENT)
+    blocks.Add Array(1, HEADER_LABEL_ROW, COL_STATUS, COL_STATUS)
+    blocks.Add Array(1, 2, COL_REF_N, COL_REF_MY)
+    blocks.Add Array(1, 2, COL_LOAD_N, COL_LOAD_MY)
+    blocks.Add Array(1, 1, COL_ARED, COL_FORMATION_STATE)
+    blocks.Add Array(2, 2, COL_ARED, COL_LAMBDA_NCRC)
+    blocks.Add Array(2, 2, COL_FORMATION_METHOD, COL_LAMBDA_MCRC)
+    blocks.Add Array(2, 2, COL_PRE_EBC, COL_PRE_CRACK_STATUS)
+    blocks.Add Array(2, 2, COL_POST_EBC, COL_POST_CRACK_STATUS)
+    blocks.Add Array(1, 2, COL_CURRENT_EBC, COL_CRACK_STATE_STATUS)
+    blocks.Add Array(1, 1, COL_SP35_AR, COL_SP35_STATUS)
+    blocks.Add Array(2, 2, COL_SP35_AR, COL_SP35_PSI)
+    blocks.Add Array(2, 2, COL_SP35_REBARS, COL_SP35_ES)
+    blocks.Add Array(2, 2, COL_SP35_ACRC, COL_SP35_STATUS)
+    blocks.Add Array(1, 1, COL_XT, COL_ACRC_STATUS)
+    blocks.Add Array(2, 2, COL_XT, COL_AS)
+    blocks.Add Array(2, 2, COL_DS_EQ, COL_LS)
+    blocks.Add Array(2, 2, COL_PHI1, COL_PSI_S)
+    blocks.Add Array(2, 2, COL_REBARS, COL_SIGMA_S)
+    blocks.Add Array(2, 2, COL_ACRC, COL_ACRC_STATUS)
+    blocks.Add Array(1, 2, COL_SIGMA_B_MAX, COL_LONG_STATUS)
+    Set HeaderMergeBlocks = blocks
+End Function
+
+' Записывает строки сочетаний одним массивом.
+Private Sub WriteData(ByVal target As Object, ByVal batch As CBatchSectionCalculator, ByVal units As CUnitSystem)
+    Dim dataRows As Long
+    dataRows = target.Rows.Count - HEADER_ROWS
+    If dataRows <= 0 Then Exit Sub
+
+    Dim data() As Variant
+    ReDim data(1 To dataRows, 1 To TOTAL_COLUMNS)
+
+    Dim i As Long, workbook As Object: Set workbook = target.Worksheet.Parent
+    For i = 1 To batch.Count
+        PutCombination data, OutputDataOffset(batch, i, dataRows), batch, i, units, workbook
+    Next i
+    If Not mCapturedSnapshot Is Nothing Then
+        mCapturedSnapshot.AddTable "Cracks.Data", data
+        Exit Sub
+    End If
+    target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).Value2 = data
+End Sub
+
+' Заполняет одну строку сочетания фактически рассчитанными величинами трещин.
+Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem, ByVal workbook As Object)
+    Dim policy As CResultStatusPolicy
+    Set policy = StatusPolicy()
+
+    data(rowIndex, COL_ID) = batch.CombinationID(index)
+    data(rowIndex, COL_RESULT_COMMENT) = CalculationResultMessage(batch, index, batch.ResultAt(index).CrackSummaryMeta, workbook)
+    data(rowIndex, COL_STATUS) = batch.ResultAt(index).CrackSummaryStatus
+
+    If CrackWidthStatusText(batch, index, policy) = policy.NotApplicable And _
+            LongitudinalStatusText(batch, index, policy) = policy.NotApplicable And _
+            Not HasCrackFormationData(batch, index) And _
+            Not batch.ResultAt(index).CrackCurrentStateMeta.Applies And _
+            Not batch.ResultAt(index).CrackFormationMeta.Applies Then
+        Exit Sub
+    End If
+
+    data(rowIndex, COL_REF_N) = OutputForce(batch.CrackReferenceN(index), units)
+    data(rowIndex, COL_REF_MX) = OutputMx(batch.CrackReferenceMx(index), units)
+    data(rowIndex, COL_REF_MY) = OutputMy(batch.CrackReferenceMy(index), units)
+    data(rowIndex, COL_LOAD_N) = OutputForce(batch.CrackLoadPointN(index), units)
+    data(rowIndex, COL_LOAD_MX) = OutputMx(batch.CrackLoadPointMx(index), units)
+    data(rowIndex, COL_LOAD_MY) = OutputMy(batch.CrackLoadPointMy(index), units)
+
+    PutFormationData data, rowIndex, batch, index, units, policy
+    PutCrackedStateData data, rowIndex, batch, index, policy
+    PutCrackWidthData data, rowIndex, batch, index, units, policy
+    PutLongitudinalData data, rowIndex, batch, index, units, policy
+End Sub
+
+' Возвращает позицию LC внутри data-части подробной таблицы.
+' Основной поток читает offset из rngLoadCombinations; прямые тесты без offset продолжают выводиться компактно.
+Private Function OutputDataOffset(ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal dataRows As Long) As Long
+    OutputDataOffset = batch.SourceDataOffset(index)
+    If OutputDataOffset < 1 Then OutputDataOffset = index
+    If OutputDataOffset > dataRows Then OutputDataOffset = index
+    If OutputDataOffset > dataRows Then OutputDataOffset = dataRows
+End Function
+
+' Записывает найденную нагрузку образования трещины и статусы НДС до и после неё.
+' Если пороговая точка отсутствует, не подставляет нулевые Ncrc/Mcrc;
+' использует фактический итог проверки образования трещины.
+Private Sub PutFormationData(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal units As CUnitSystem, ByVal policy As CResultStatusPolicy)
+    Dim hasFormationData As Boolean
+    hasFormationData = HasCrackFormationData(batch, index)
+    Dim formation As CCrackFormationResult
+    Set formation = batch.ResultAt(index).CrackResult.Formation
+
+    If CrackFormationStatusText(batch, index, policy) = policy.NotApplicable And Not hasFormationData Then
+        data(rowIndex, COL_FORMATION_STATE) = policy.NotApplicable
+        Exit Sub
+    End If
+
+    If Len(batch.ResultAt(index).CrackResult.Formation.FormationMethod) > 0 Then _
+        data(rowIndex, COL_FORMATION_METHOD) = batch.ResultAt(index).CrackResult.Formation.FormationMethod
+
+    If formation.CentralTensionBranch And hasFormationData Then
+        data(rowIndex, COL_ARED) = OutputArea(batch.ResultAt(index).CrackResult.Formation.Ared, units)
+        data(rowIndex, COL_RBT_SER) = OutputStress(batch.ResultAt(index).CrackResult.Formation.RbtSer, units)
+        data(rowIndex, COL_NCRC) = OutputForce(batch.ResultAt(index).CrackResult.Formation.Ncrc, units)
+        data(rowIndex, COL_LAMBDA_NCRC) = batch.ResultAt(index).CrackResult.Formation.LambdaCrc
+    Else
+        data(rowIndex, COL_NCRC) = policy.NotApplicable
+    End If
+
+    If Not formation.CentralTensionBranch And hasFormationData Then
+        data(rowIndex, COL_FORMATION_NCRC) = OutputForce(formation.FormationNcrc, units)
+        data(rowIndex, COL_MCRC) = OutputMomentMagnitude(batch.ResultAt(index).CrackResult.Formation.Mcrc, units)
+        data(rowIndex, COL_LAMBDA_MCRC) = batch.ResultAt(index).CrackResult.Formation.LambdaCrc
+    Else
+        data(rowIndex, COL_MCRC) = policy.NotApplicable
+    End If
+
+    data(rowIndex, COL_PRE_CRACK_STATUS) = NamedStateStatus(batch, index, sstPreCrackState, policy)
+    data(rowIndex, COL_POST_CRACK_STATUS) = NamedStateStatus(batch, index, sstPostCrackState, policy)
+    PutNamedStateStrains data, rowIndex, batch.ResultAt(index).CrackResult.Formation.PreCrackState, COL_PRE_EBC, COL_PRE_EBT, True
+    PutNamedStateStrains data, rowIndex, batch.ResultAt(index).CrackResult.Formation.PostCrackState, COL_POST_EBC, COL_POST_EBT, False
+
+    If formation.ConfirmedNotCracked Then
+        data(rowIndex, COL_FORMATION_STATE) = "NotCracked"
+    ElseIf formation.ConfirmedCracked Then
+        data(rowIndex, COL_FORMATION_STATE) = "Cracked"
+    Else
+        data(rowIndex, COL_FORMATION_STATE) = CrackFormationStatusText(batch, index, policy)
+    End If
+End Sub
+
+' Возвращает статус сохранённого НДС. Если такое состояние не требовалось,
+' в его подробной строке показывает N/A, а не общий статус всех трещин.
+Private Function NamedStateStatus(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal stateType As ESectionStateType, ByVal policy As CResultStatusPolicy) As String
+    Dim stateResult As CSectionStateResult
+    If stateType = sstPreCrackState Then
+        Set stateResult = batch.ResultAt(index).CrackResult.Formation.PreCrackState
+    ElseIf stateType = sstPostCrackState Then
+        Set stateResult = batch.ResultAt(index).CrackResult.Formation.PostCrackState
+    Else
+        Set stateResult = batch.ResultAt(index).StateRepository.FindState(stateType)
+    End If
+    If stateResult Is Nothing Then
+        NamedStateStatus = policy.NotApplicable
+    Else
+        NamedStateStatus = policy.ExternalStatus(stateResult.ResultMeta)
+    End If
+End Function
+
+' Выводит экстремумы только полученного состояния. Pre всегда показывает
+' фактическое eps_bt; остальные - при активном растяжении бетона своей spec.
+' Предельные деформации и нули вместо отсутствующего НДС не подставляются.
+Private Sub PutNamedStateStrains(ByRef data() As Variant, ByVal rowIndex As Long, ByVal state As CSectionStateResult, _
+        ByVal compressionColumn As Long, ByVal tensionColumn As Long, ByVal beforeCrack As Boolean)
+    If state Is Nothing Then Exit Sub
+    If Not state.Converged Then Exit Sub
+    If state.HasConcreteCompression Then data(rowIndex, compressionColumn) = state.MinConcreteStrain
+    If beforeCrack Or state.MaterialSpec.ConcreteTension = ctkUseDiagram Then data(rowIndex, tensionColumn) = state.MaxConcreteStrain
+End Sub
+
+' Проверяет наличие подтверждённой пороговой точки в результате образования трещины.
+' Пробные ненулевые усилия без пригодного НДС до трещины подтверждением не считаются.
+Private Function HasCrackFormationData(ByVal batch As CBatchSectionCalculator, ByVal index As Long) As Boolean
+    HasCrackFormationData = batch.ResultAt(index).CrackResult.Formation.HasLimitPoint
+End Function
+
+' Записывает пригодность текущего НДС с трещинами для последующих проверок.
+' Факт образования уже показан отдельно через Ncrc/Mcrc. Здесь важно,
+' найдено ли равновесие полной нагрузки внутри физических пределов диаграмм.
+' Если оно получено только за этими пределами или не найдено, ширина,
+' её исходные величины и продольные трещины по такому НДС не рассчитываются.
+Private Sub PutCrackedStateData(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal policy As CResultStatusPolicy)
+    Dim stateResult As CSectionStateResult
+    Set stateResult = batch.ResultAt(index).StateRepository.FindState(sstCrackedState)
+
+    If stateResult Is Nothing Then
+        If CrackCurrentStateStatusText(batch, index, policy) <> policy.NotApplicable Then _
+            data(rowIndex, COL_CRACK_STATE_STATUS) = CrackCurrentStateStatusText(batch, index, policy)
+        Exit Sub
+    End If
+
+    data(rowIndex, COL_CRACK_STATE_DIAGEXT) = ExtensionUsedText(batch, index, stateResult)
+    data(rowIndex, COL_CRACK_STATE_STATUS) = CrackCurrentStateStatusText(batch, index, policy)
+    PutNamedStateStrains data, rowIndex, stateResult, COL_CURRENT_EBC, COL_CURRENT_EBT, False
+End Sub
+
+' Показывает, использовало ли текущее CrackedState продолжение диаграммы.
+' Значение "-" означает, что General.DiagramExtension был выключен
+' для этого LC, поэтому extension в принципе не мог применяться.
+Private Function ExtensionUsedText(ByVal batch As CBatchSectionCalculator, _
+        ByVal index As Long, ByVal stateResult As CSectionStateResult) As String
+    If Not batch.ResultAt(index).DiagramExtensionEnabled Then
+        ExtensionUsedText = "-"
+    ElseIf stateResult.ExtensionUsed Then
+        ExtensionUsedText = "yes"
+    Else
+        ExtensionUsedText = "no"
+    End If
+End Function
+
+' Записывает готовую ширину и параметры её формулы, в том числе допустимый
+' расчёт с psi_s = 1 при ненайденном пороге. Повторно образование трещины не проверяет.
+Private Sub PutCrackWidthData(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal units As CUnitSystem, ByVal policy As CResultStatusPolicy)
+    Dim width As CCrackWidthResult
+    Set width = batch.ResultAt(index).CrackResult.Width
+    data(rowIndex, COL_SP35_STATUS) = policy.NotApplicable
+    data(rowIndex, COL_ACRC_STATUS) = policy.NotApplicable
+    If width.StandardCode = "SP35" Then
+        data(rowIndex, COL_SP35_STATUS) = policy.ExternalStatus(width.ResultMeta)
+        If width.ResultMeta.Calculated Then PutSP35WidthData data, rowIndex, width, units
+        Exit Sub
+    End If
+
+    If Not batch.ResultAt(index).CrackWidthMeta.Calculated Then
+        data(rowIndex, COL_ACRC_STATUS) = CrackWidthStatusText(batch, index, policy)
+        Exit Sub
+    End If
+
+    If Not policy.IsMetaFinished(batch.ResultAt(index).CrackWidthMeta) Then
+        data(rowIndex, COL_ACRC_STATUS) = CrackWidthStatusText(batch, index, policy)
+        Exit Sub
+    End If
+
+    If Not batch.ResultAt(index).CrackResult.Width.CentralTensionBranch Then
+        data(rowIndex, COL_XT) = OutputLength(batch.ResultAt(index).CrackResult.Width.TensionDepth, units)
+        data(rowIndex, COL_H) = OutputLength(batch.ResultAt(index).CrackResult.Width.SectionDepthH, units)
+        data(rowIndex, COL_AS_COVER) = OutputLength(batch.ResultAt(index).CrackResult.Width.CoverA, units)
+        data(rowIndex, COL_HBT) = OutputLength(batch.ResultAt(index).CrackResult.Width.EffectiveZoneDepth, units)
+    End If
+    data(rowIndex, COL_ABT) = OutputArea(batch.ResultAt(index).CrackResult.Width.Abt, units)
+    data(rowIndex, COL_AS) = OutputArea(batch.ResultAt(index).CrackResult.Width.AsTension, units)
+    data(rowIndex, COL_DS_EQ) = OutputLength(batch.ResultAt(index).CrackResult.Width.DsEquivalent, units)
+    data(rowIndex, COL_LS0) = OutputLength(batch.ResultAt(index).CrackResult.Width.CrackSpacingRaw, units)
+    data(rowIndex, COL_LS) = OutputLength(batch.ResultAt(index).CrackResult.Width.CrackSpacing, units)
+    data(rowIndex, COL_PHI1) = batch.ResultAt(index).CrackResult.Width.Phi1
+    data(rowIndex, COL_PHI2) = batch.ResultAt(index).CrackResult.Width.Phi2
+    data(rowIndex, COL_PHI3) = batch.ResultAt(index).CrackResult.Width.Phi3
+    data(rowIndex, COL_PSI_S) = batch.ResultAt(index).CrackResult.Width.PsiS
+    data(rowIndex, COL_REBARS) = batch.ResultAt(index).CrackResult.Width.TensionRebarIds
+    data(rowIndex, COL_NREBARS) = batch.ResultAt(index).CrackResult.Width.TensionRebarCount
+    data(rowIndex, COL_SIGMA_S_CRC) = OptionalStress(batch.ResultAt(index).CrackResult.Width.SigmaSCrc, units, policy)
+    data(rowIndex, COL_SIGMA_S) = OutputStress(batch.ResultAt(index).CrackResult.Width.SigmaS, units)
+    data(rowIndex, COL_ES) = OutputStress(batch.ResultAt(index).CrackResult.Width.SteelEs, units)
+    data(rowIndex, COL_ACRC) = OutputLength(batch.ResultAt(index).CrackResult.Width.CrackWidth, units)
+    data(rowIndex, COL_ACRC_ULT) = OutputLength(batch.ResultAt(index).CrackResult.Width.AllowableCrackWidth, units)
+    If batch.ResultAt(index).CrackResult.Width.ReserveFactor > SMALL_VALUE Then _
+        data(rowIndex, COL_ACRC_RATIO) = batch.ResultAt(index).CrackResult.Width.ReserveFactor
+    data(rowIndex, COL_ACRC_STATUS) = CrackWidthStatusText(batch, index, policy)
+End Sub
+
+' Записывает проверку продольных трещин по сжатому бетону.
+Private Sub PutLongitudinalData(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal units As CUnitSystem, ByVal policy As CResultStatusPolicy)
+    If Not policy.IsMetaFinished(batch.ResultAt(index).LongitudinalCrackMeta) Then
+        data(rowIndex, COL_LONG_STATUS) = LongitudinalStatusText(batch, index, policy)
+        Exit Sub
+    End If
+
+    data(rowIndex, COL_SIGMA_B_MAX) = OutputStress(batch.ResultAt(index).CrackResult.Longitudinal.MaxCompressionStress, units)
+    data(rowIndex, COL_RB_MC2) = OutputStress(batch.ResultAt(index).CrackResult.Longitudinal.RbMc2, units)
+    If batch.ResultAt(index).CrackResult.Longitudinal.ReserveFactor > SMALL_VALUE Then _
+        data(rowIndex, COL_LONG_RATIO) = batch.ResultAt(index).CrackResult.Longitudinal.ReserveFactor
+    data(rowIndex, COL_LONG_STATUS) = LongitudinalStatusText(batch, index, policy)
+End Sub
+
+' Оформляет подробную таблицу трещин: шапку, рамки, числа и статусы.
+' В минимальном режиме обновляет только подсветку статусов.
+Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalculator, ByVal units As CUnitSystem, _
+        Optional ByRef preparedValues As Variant)
+    If Not mCapturedSnapshot Is Nothing Then Exit Sub
+    If mMinimalFormatting Then
+        ApplyStatusCells target, batch, target.Rows.Count - HEADER_ROWS, preparedValues
+        Exit Sub
+    End If
+    target.Font.Name = "Arial"
+    target.Font.Size = 9
+    target.HorizontalAlignment = -4108
+    target.VerticalAlignment = -4108
+    target.WrapText = False
+
+    FormatBlock target, COL_LEFT_FIRST, COL_LEFT_LAST
+    FormatBlock target, COL_MAIN_FIRST, COL_CRACK_STATE_STATUS
+    FormatBlock target, COL_SP35_AR, COL_SP35_STATUS
+    FormatBlock target, COL_XT, COL_ACRC_STATUS
+    FormatBlock target, COL_SIGMA_B_MAX, COL_LONG_STATUS
+    target.Columns(COL_SEPARATOR).Clear
+    target.Columns(COL_FORMATION_SEPARATOR).Clear
+    target.Columns(COL_SP35_SEPARATOR).Clear
+    target.Columns(COL_SP63_SEPARATOR).Clear
+
+    target.Resize(HEADER_ROWS, TOTAL_COLUMNS).HorizontalAlignment = -4108
+    target.Resize(HEADER_ROWS, TOTAL_COLUMNS).VerticalAlignment = -4108
+    target.Resize(HEADER_ROWS, TOTAL_COLUMNS).WrapText = True
+    target.Rows(HEADER_NOTES_ROW).Font.Bold = False
+    target.Rows(HEADER_NOTES_ROW).HorizontalAlignment = -4131
+    target.Rows(HEADER_NOTES_ROW).WrapText = False
+    target.Rows(HEADER_LABEL_ROW).WrapText = False
+    target.Cells(HEADER_LABEL_ROW, COL_RBT_SER).WrapText = False
+    Dim headerColumn As Variant
+    For Each headerColumn In Array(COL_ID, COL_RESULT_COMMENT, COL_STATUS) ' Вертикально объединенные заголовки остаются многострочными, как в ТЗ. Пояснения и обозначения остальных столбцов не получают перенос.
+        target.Cells(1, CLng(headerColumn)).WrapText = True
+    Next headerColumn
+
+    Dim dataRows As Long
+    dataRows = target.Rows.Count - HEADER_ROWS
+    If dataRows > 0 Then
+        target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).HorizontalAlignment = -4108
+        target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).VerticalAlignment = -4108
+        target.Offset(HEADER_ROWS, 0).Resize(dataRows, TOTAL_COLUMNS).NumberFormat = "0.000"
+        target.Offset(HEADER_ROWS, COL_ID - 1).Resize(dataRows, 3).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_RESULT_COMMENT - 1).Resize(dataRows, 1).HorizontalAlignment = -4131
+        target.Offset(HEADER_ROWS, COL_REBARS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_PRE_CRACK_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_POST_CRACK_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_FORMATION_STATE - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_SP35_BETA - 1).Resize(dataRows, 3).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_SP35_REBARS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_SP35_BETA - 1).Resize(dataRows, 3).WrapText = False
+        target.Offset(HEADER_ROWS, COL_SP35_REBARS - 1).Resize(dataRows, 1).WrapText = False
+        target.Offset(HEADER_ROWS, COL_SP35_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_PRE_EBC - 1).Resize(dataRows, 2).NumberFormat = "0.000000"
+        target.Offset(HEADER_ROWS, COL_POST_EBC - 1).Resize(dataRows, 2).NumberFormat = "0.000000"
+        target.Offset(HEADER_ROWS, COL_CURRENT_EBC - 1).Resize(dataRows, 2).NumberFormat = "0.000000"
+        target.Offset(HEADER_ROWS, COL_CRACK_STATE_DIAGEXT - 1).Resize(dataRows, 2).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_ACRC_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_LONG_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
+        Dim widthFormat As String
+        widthFormat = CrackWidthNumberFormat(units) ' Сохраняем одинаковую физическую точность 0.001 мм: ширина в метрах не должна выглядеть нулевой из-за общего трехзначного формата таблицы.
+        target.Offset(HEADER_ROWS, COL_SP35_ACRC - 1).Resize(dataRows, 2).NumberFormat = widthFormat
+        target.Offset(HEADER_ROWS, COL_ACRC - 1).Resize(dataRows, 2).NumberFormat = widthFormat
+        ApplyStatusCells target, batch, dataRows, preparedValues
+    End If
+    ApplyHeaderSubscripts target
+End Sub
+
+' Возвращает точность отображения ширины/допуска в текущей OUTPUT Length.
+' Форматирование не округляет сохраненное число и не меняет размер столбца.
+Private Function CrackWidthNumberFormat(ByVal units As CUnitSystem) As String
+    Dim lengthUnit As String: lengthUnit = OutputLengthUnit(units)
+    If Len(mSnapshotLengthUnit) > 0 Then lengthUnit = mSnapshotLengthUnit
+    Select Case lengthUnit
+        Case "m": CrackWidthNumberFormat = "0.000000"
+        Case "cm": CrackWidthNumberFormat = "0.0000"
+        Case Else: CrackWidthNumberFormat = "0.000"
+    End Select
+End Function
+
+' Оформляет один непрерывный блок таблицы, не затрагивая пустые разделители.
+Private Sub FormatBlock(ByVal target As Object, ByVal firstCol As Long, ByVal lastCol As Long)
+    Dim block As Object
+    Set block = target.Offset(0, firstCol - 1).Resize(target.Rows.Count, lastCol - firstCol + 1)
+    block.Borders.LineStyle = 1
+    block.Borders.Weight = 2
+    block.Rows(1).Resize(HEADER_ROWS).Font.Bold = True
+    target.Offset(0, firstCol - 1).Resize(HEADER_ROWS, lastCol - firstCol + 1).Interior.Color = HEADER_COLOR
+End Sub
+
+' Красит блоки строки по статусу общей проверки, нормальных и продольных трещин.
+Private Sub ApplyStatusCells(ByVal target As Object, ByVal batch As CBatchSectionCalculator, ByVal dataRows As Long, _
+        Optional ByRef preparedValues As Variant)
+    Dim rows() As Long, i As Long
+    If batch Is Nothing Then
+        Dim storedRows As Variant: storedRows = ResultSnapshotStatusRows(target, HEADER_ROWS, preparedValues)
+        If IsEmpty(storedRows) Then Exit Sub
+        rows = storedRows
+    Else
+    If batch.Count <= 0 Then Exit Sub
+    ReDim rows(1 To batch.Count)
+    For i = 1 To batch.Count
+        rows(i) = HEADER_ROWS + OutputDataOffset(batch, i, dataRows)
+    Next i
+    End If
+    ApplyTableStatusFills target, rows, Array( _
+        COL_STATUS, COL_PRE_CRACK_STATUS, COL_POST_CRACK_STATUS, _
+        COL_FORMATION_STATE, COL_CRACK_STATE_STATUS, COL_ACRC_STATUS, _
+        COL_SP35_STATUS, COL_LONG_STATUS), False, COL_FORMATION_STATE, preparedValues, HEADER_ROWS
+End Sub
+
+' Записывает данные выполненной формулы СП 35: выбранную опорную группу,
+' коэффициенты beta/psi и область взаимодействия. Всё уже сохранено расчётом;
+' здесь только переводятся единицы и оформляются значения.
+Private Sub PutSP35WidthData(ByRef data() As Variant, ByVal rowIndex As Long, ByVal width As CCrackWidthResult, ByVal units As CUnitSystem)
+    data(rowIndex, COL_SP35_AR) = OutputArea(width.Abt, units)
+    data(rowIndex, COL_SP35_BETA) = SP35RowsText(width, "Beta", units)
+    data(rowIndex, COL_SP35_N) = SP35RowsText(width, "Count", units)
+    data(rowIndex, COL_SP35_D) = SP35RowsText(width, "Diameter", units)
+    data(rowIndex, COL_SP35_RR) = OutputLength(width.SP35ReinforcementRadius, units)
+    data(rowIndex, COL_SP35_PSI) = OutputLength(width.SP35PsiCm * 10#, units)
+    data(rowIndex, COL_SP35_REBARS) = SP35RowsText(width, "Rebars", units)
+    data(rowIndex, COL_SP35_NREBARS) = width.TensionRebarCount
+    data(rowIndex, COL_SP35_SIGMA) = OutputStress(width.SigmaS, units)
+    data(rowIndex, COL_SP35_ES) = OutputStress(width.SteelEs, units)
+    data(rowIndex, COL_SP35_ACRC) = OutputLength(width.CrackWidth, units)
+    data(rowIndex, COL_SP35_ALLOWABLE) = OutputLength(width.AllowableCrackWidth, units)
+    If width.ReserveFactor > SMALL_VALUE Then data(rowIndex, COL_SP35_RATIO) = width.ReserveFactor
+End Sub
+
+' Форматирует все ряды критической области. Несколько групп одного ряда
+' сохраняют соответствие beta/n/d/стержней по G-id. Диаметры реальные, не d_ref.
+Private Function SP35RowsText(ByVal width As CCrackWidthResult, ByVal field As String, ByVal units As CUnitSystem) As String
+    Dim prepared As CSP35CrackData, rows As Variant, members As Variant, row As Long, i As Long, j As Long
+    Dim group As Long, count As Long, segment As String, value As String
+    Set prepared = width.SP35Data: rows = prepared.CandidateRows(width.SP35CriticalCandidate)
+    For row = 1 To prepared.CandidateRowCount(width.SP35CriticalCandidate)
+        count = 0: segment = vbNullString
+        For i = LBound(rows, 1) To UBound(rows, 1)
+            If CLng(rows(i, 2)) = row Then count = count + 1
+        Next i
+        For i = LBound(rows, 1) To UBound(rows, 1)
+            If CLng(rows(i, 2)) = row Then
+                group = CLng(rows(i, 1)): value = vbNullString
+                Select Case field
+                    Case "Beta": value = Replace$(Format$(prepared.GroupBeta(group), "0.00"), ",", ".")
+                    Case "Count": value = CStr(prepared.GroupBarCount(group))
+                    Case Else
+                        members = prepared.GroupMembers(group)
+                        For j = LBound(members) To UBound(members)
+                            If Len(value) > 0 Then value = value & ", "
+                            If field = "Diameter" Then
+                                value = value & FormatRowNumber(OutputLength(prepared.BarDiameter(CLng(members(j))), units))
+                            Else
+                                value = value & prepared.BarID(CLng(members(j)))
+                            End If
+                        Next j
+                End Select
+                If count > 1 Then value = "G" & CStr(group) & "=" & value
+                If Len(segment) > 0 Then segment = segment & "; "
+                segment = segment & value
+            End If
+        Next i
+        If Len(SP35RowsText) > 0 Then SP35RowsText = SP35RowsText & " | "
+        SP35RowsText = SP35RowsText & CStr(row) & " ряд: " & segment
+    Next row
+End Function
+
+' Убирает пустой десятичный знак в текстовой расшифровке диаметра.
+Private Function FormatRowNumber(ByVal value As Double) As String
+    FormatRowNumber = Replace$(Format$(value, "0.########"), ",", ".")
+    If Right$(FormatRowNumber, 1) = "." Then FormatRowNumber = Left$(FormatRowNumber, Len(FormatRowNumber) - 1)
+End Function
+
+
+
+' Выставляет нижние индексы в обозначениях нижнего яруса заголовков.
+Private Sub ApplyHeaderSubscripts(ByVal target As Object)
+    Dim labels As Object
+    Set labels = target.Rows(HEADER_LABEL_ROW)
+    Dim headers As Variant: headers = labels.Value2
+    Dim column As Variant
+    For Each column In Array(COL_PRE_EBC, COL_POST_EBC, COL_CURRENT_EBC): ApplySubscriptToken labels, headers, CLng(column), "bc": Next column
+    For Each column In Array(COL_PRE_EBT, COL_POST_EBT, COL_CURRENT_EBT): ApplySubscriptToken labels, headers, CLng(column), "bt": Next column
+    ApplySubscriptToken labels, headers, COL_SP35_AR, "r"
+    ApplySubscriptToken labels, headers, COL_SP35_RR, "r"
+    ApplySubscriptToken labels, headers, COL_SP35_SIGMA, "s"
+    ApplySubscriptToken labels, headers, COL_SP35_ES, "s"
+    ApplySubscriptToken labels, headers, COL_SP35_NREBARS, "rebars"
+    For Each column In Array(COL_SP35_ACRC, COL_SP35_ALLOWABLE, COL_SP35_RATIO): ApplySubscriptToken labels, headers, CLng(column), "crc": Next column
+    ApplySubscriptToken labels, headers, COL_SP35_ALLOWABLE, "ult"
+    ApplySubscriptToken labels, headers, COL_SP35_RATIO, "ult"
+
+    Dim unitLabels As Object, unitHeaders As Variant
+    Set unitLabels = target.Rows(2): unitHeaders = unitLabels.Value2
+    ApplySubscriptToken unitLabels, unitHeaders, COL_DS_EQ, "s"
+
+    ApplySubscriptToken labels, headers, COL_ARED, "red"
+    ApplySubscriptToken labels, headers, COL_RBT_SER, "bt"
+    ApplySubscriptToken labels, headers, COL_RBT_SER, "ser"
+    ApplySubscriptToken labels, headers, COL_NCRC, "crc"
+    ApplySubscriptToken labels, headers, COL_LAMBDA_NCRC, "crc"
+    ApplySubscriptToken labels, headers, COL_FORMATION_NCRC, "crc"
+    ApplySubscriptToken labels, headers, COL_MCRC, "crc"
+    ApplySubscriptToken labels, headers, COL_LAMBDA_MCRC, "crc"
+    ApplySubscriptToken labels, headers, COL_XT, "t"
+    ApplySubscriptToken labels, headers, COL_AS_COVER, "s"
+    ApplySubscriptToken labels, headers, COL_HBT, "bt"
+    ApplySubscriptToken labels, headers, COL_ABT, "bt"
+    ApplySubscriptToken labels, headers, COL_AS, "s"
+    ApplySubscriptToken labels, headers, COL_DS_EQ, "s"
+    ApplySubscriptToken labels, headers, COL_DS_EQ, "eq"
+    ApplySubscriptToken labels, headers, COL_LS0, "s"
+    ApplySubscriptToken labels, headers, COL_LS0, "0"
+    ApplySubscriptToken labels, headers, COL_LS, "s"
+    ApplySubscriptToken labels, headers, COL_PHI1, "1"
+    ApplySubscriptToken labels, headers, COL_PHI2, "2"
+    ApplySubscriptToken labels, headers, COL_PHI3, "3"
+    ApplySubscriptToken labels, headers, COL_PSI_S, "s"
+    ApplySubscriptToken labels, headers, COL_NREBARS, "rebars"
+    ApplySubscriptToken labels, headers, COL_SIGMA_S_CRC, "s"
+    ApplySubscriptToken labels, headers, COL_SIGMA_S_CRC, "crc"
+    ApplySubscriptToken labels, headers, COL_SIGMA_S, "s"
+    ApplySubscriptToken labels, headers, COL_ES, "s"
+    ApplySubscriptToken labels, headers, COL_ACRC, "crc"
+    ApplySubscriptToken labels, headers, COL_ACRC_ULT, "crc"
+    ApplySubscriptToken labels, headers, COL_ACRC_ULT, "ult"
+    ApplySubscriptToken labels, headers, COL_ACRC_RATIO, "crc"
+    ApplySubscriptToken labels, headers, COL_ACRC_RATIO, "ult"
+    ApplySubscriptToken labels, headers, COL_SIGMA_B_MAX, "b"
+    ApplySubscriptToken labels, headers, COL_SIGMA_B_MAX, "max"
+    ApplySubscriptToken labels, headers, COL_RB_MC2, "b"
+    ApplySubscriptToken labels, headers, COL_RB_MC2, "mc2"
+    ApplySubscriptToken labels, headers, COL_LONG_RATIO, "b"
+    ApplySubscriptToken labels, headers, COL_LONG_RATIO, "mc2"
+End Sub
+
+' Ставит нижний индекс найденному текстовому токену внутри одной ячейки.
+Private Sub ApplySubscriptToken(ByVal labels As Object, ByRef headers As Variant, ByVal columnIndex As Long, ByVal token As String)
+    Dim textValue As String
+    textValue = CStr(headers(1, columnIndex))
+    Dim startPos As Long
+    startPos = InStr(1, textValue, token, vbBinaryCompare)
+    If startPos = 0 Then Exit Sub
+    Dim cell As Object: Set cell = labels.Cells(1, columnIndex)
+    Do While startPos > 0
+        cell.Characters(startPos, Len(token)).Font.Subscript = True
+        startPos = InStr(startPos + Len(token), textValue, token, vbBinaryCompare)
+    Loop
+End Sub
+
+' Возвращает внешний статус поиска образования нормальной трещины.
+Private Function CrackFormationStatusText(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal policy As CResultStatusPolicy) As String
+    Dim meta As CResultMeta
+    Set meta = batch.ResultAt(index).CrackFormationMeta
+    CrackFormationStatusText = policy.ExternalStatus(meta)
+End Function
+
+' Возвращает внешний статус прямого CrackedState от заданного сочетания.
+Private Function CrackCurrentStateStatusText(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal policy As CResultStatusPolicy) As String
+    Dim meta As CResultMeta
+    Set meta = batch.ResultAt(index).CrackCurrentStateMeta
+    CrackCurrentStateStatusText = policy.ExternalStatus(meta)
+End Function
+
+' Возвращает внешний статус формульной проверки ширины нормальной трещины.
+Private Function CrackWidthStatusText(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal policy As CResultStatusPolicy) As String
+    Dim meta As CResultMeta
+    Set meta = batch.ResultAt(index).CrackWidthMeta
+    CrackWidthStatusText = policy.ExternalStatus(meta)
+End Function
+
+' Возвращает внешний статус проверки продольных трещин.
+Private Function LongitudinalStatusText(ByVal batch As CBatchSectionCalculator, ByVal index As Long, _
+        ByVal policy As CResultStatusPolicy) As String
+    Dim meta As CResultMeta
+    Set meta = batch.ResultAt(index).LongitudinalCrackMeta
+    LongitudinalStatusText = policy.ExternalStatus(meta)
+End Function
+
+' Возвращает готовое пояснение проверки из ResultMeta.
+
+' Возвращает напряжение или N/A для величин, которые расчетно могут отсутствовать.
+Private Function OptionalStress(ByVal value As Double, ByVal units As CUnitSystem, ByVal policy As CResultStatusPolicy) As Variant
+    If Abs(value) > SMALL_VALUE Then
+        OptionalStress = OutputStress(value, units)
+    Else
+        OptionalStress = policy.NotApplicable
+    End If
+End Function
+
+' Объединяет прямоугольный участок шапки.
+Private Sub MergeRange(ByVal target As Object, ByVal firstRow As Long, ByVal firstCol As Long, _
+        ByVal lastRow As Long, ByVal lastCol As Long)
+    If lastRow < firstRow Or lastCol < firstCol Then Exit Sub
+    target.Worksheet.Range(target.Cells(firstRow, firstCol), target.Cells(lastRow, lastCol)).Merge
+End Sub
+
+' Переводит длину из внутренних мм в выходную единицу пользователя.
+' Если CUnitSystem не передан, возвращает исходное значение в мм.
+Private Function OutputLength(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputLength = value Else OutputLength = units.InternalLengthToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы длины для заголовков crack-таблицы.
+Private Function OutputLengthUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputLengthUnit = "mm" Else OutputLengthUnit = units.OutputLengthUnit
+End Function
+
+' Переводит площадь из внутренних мм2 в выбранную пользователем единицу площади.
+Private Function OutputArea(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputArea = value Else OutputArea = units.InternalAreaToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы площади для заголовков crack-таблицы.
+Private Function OutputAreaUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputAreaUnit = "mm2" Else OutputAreaUnit = units.OutputAreaUnit
+End Function
+
+' Переводит продольную силу из внутренних Н в пользовательскую выходную систему знаков и единиц.
+Private Function OutputForce(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputForce = value Else OutputForce = units.InternalForceToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы силы для заголовков crack-таблицы.
+Private Function OutputForceUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputForceUnit = "N" Else OutputForceUnit = units.OutputForceUnit
+End Function
+
+' Переводит момент Mx с учетом пользовательской системы знаков.
+Private Function OutputMx(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMx = value Else OutputMx = units.InternalMomentMxToOutput(value)
+End Function
+
+' Переводит момент My с учетом пользовательской системы знаков.
+Private Function OutputMy(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMy = value Else OutputMy = units.InternalMomentMyToOutput(value)
+End Function
+
+' Переводит модуль момента; знак здесь не применяется, потому что величина скалярная.
+Private Function OutputMomentMagnitude(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputMomentMagnitude = value Else OutputMomentMagnitude = units.InternalMomentMagnitudeToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы момента для заголовков crack-таблицы.
+Private Function OutputMomentUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputMomentUnit = "N*mm" Else OutputMomentUnit = units.OutputMomentUnit
+End Function
+
+' Переводит напряжение из внутренних МПа в пользовательскую выходную единицу.
+Private Function OutputStress(ByVal value As Double, ByVal units As CUnitSystem) As Double
+    If units Is Nothing Then OutputStress = value Else OutputStress = units.InternalStressToOutput(value)
+End Function
+
+' Возвращает подпись выходной единицы напряжения для заголовков crack-таблицы.
+Private Function OutputStressUnit(ByVal units As CUnitSystem) As String
+    If units Is Nothing Then OutputStressUnit = "MPa" Else OutputStressUnit = units.OutputStressUnit
+End Function
+
+' Возвращает единый словарь статусов для подробного crack-блока.
+Private Function StatusPolicy() As CResultStatusPolicy
+    Static policy As CResultStatusPolicy
+    If policy Is Nothing Then Set policy = New CResultStatusPolicy
+    Set StatusPolicy = policy
+End Function
+
+' Передаёт отдельный приёмник готовых массивов; при Nothing сохраняется обычный вывод.
+Friend Property Set CaptureSnapshot(ByVal value As CCalculationSnapshot)
+    Set mCapturedSnapshot = value
+End Property
+
+' Восстанавливает готовую подробную таблицу и её сохранённое оформление без решения НДС.
+Public Sub RestoreSummary(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, Optional ByVal fullFormatting As Boolean = True)
+    snapshot.Validate
+    RestoreSummaryTables workbook, snapshot, fullFormatting
+End Sub
+
+' Восстанавливает только готовые общие сводки из проверенного адресного источника.
+Public Sub RestoreIndexedSummary(ByVal workbook As Object, ByVal source As CResultReadSource, ByVal fullFormatting As Boolean)
+    source.ValidateForDisplay
+    RestoreSummaryTables workbook, source, fullFormatting
+End Sub
+
+' Записывает те же массивы и оформление для двух явно проверенных входных контрактов.
+Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Object, ByVal fullFormatting As Boolean)
+    Set mCapturedSnapshot = Nothing
+    mMinimalFormatting = Not fullFormatting
+    Dim data As Variant: data = snapshot.Table("Cracks.Data")
+    Dim target As Object: Set target = TargetRange(workbook, UBound(data, 1))
+    Dim headers As Variant: headers = snapshot.Table("Cracks.Headers")
+    If mMinimalFormatting Then mMinimalFormatting = CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@" And ResultHeaderMatches(target, headers, merges:=HeaderMergeBlocks())
+    PrepareTarget target
+    If Not mMinimalFormatting Then
+        target.Resize(HEADER_ROWS, TOTAL_COLUMNS).Value2 = headers
+        MergeHeaders target
+    End If
+    WriteBlockTitle target, "Расчет нормальных и продольных трещин"
+    target.Offset(HEADER_ROWS, 0).Resize(UBound(data, 1), TOTAL_COLUMNS).Value2 = data
+    mSnapshotLengthUnit = snapshot.OutputLengthUnit
+    FormatTable target, Nothing, Nothing, data
+    mSnapshotLengthUnit = vbNullString
+End Sub
