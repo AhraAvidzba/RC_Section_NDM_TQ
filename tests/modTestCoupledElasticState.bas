@@ -763,3 +763,137 @@ Public Function RunTestCoupledEnvelope() As String
 Failed:
     RunTestCoupledEnvelope = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет физические истории бетона и касательную в одной точке.
+' Данные для проверки задаются явно в МПа, Н/мм и мм.
+Public Function RunTestCoupledConcreteResponse() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim material As New CCoupledConcreteResponse, response As ICoupledPointResponse
+    material.Initialize 2, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    Set response = material
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    Dim et As Double, ec As Double, status As ESolverFailureCode
+    strain(6) = 0.00004
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    TestRecord status = sfcNone, "virgin elastic concrete response", passed, failed, report
+    TestExpectNear stress(6), 0.5, 1E-12, "virgin shear", passed, failed, report
+    TestExpectNear tangent(6, 6), 12500#, 1E-12, "virgin shear tangent", passed, failed, report
+
+    strain(6) = 0.0009
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    TestRecord status = sfcNone, "mixed plastic-damage response", passed, failed, report
+    If status <> sfcNone Then GoTo Done
+    Dim base(1 To 6) As Double, derivative As Double, i As Long
+    For i = 1 To 6: base(i) = stress(i): Next i
+    derivative = tangent(6, 6)
+    TestRecord base(6) > 0# And base(6) < 0.0009 * 12500#, "shear affected by multi-axial damage", passed, failed, report
+
+    Const DELTA As Double = 0.00000006
+    strain(6) = 0.0009 + DELTA
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    Dim plus As Double: plus = stress(6)
+    TestRecord status = sfcNone, "shear perturbation plus", passed, failed, report
+    strain(6) = 0.0009 - DELTA
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    Dim checkDerivative As Double: checkDerivative = (plus - stress(6)) / (2# * DELTA)
+    TestRecord status = sfcNone And Abs(derivative - checkDerivative) < 0.2, _
+        "independent tangent increment " & CStr(derivative) & " vs " & CStr(checkDerivative), passed, failed, report
+
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et = 0# And ec = 0#, "trial and tangent leave committed energy untouched", passed, failed, report
+    strain(6) = 0.0009
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    TestRecord status = sfcNone And Abs(stress(6) - base(6)) < 1E-10, "repeat trial gives identical stress", passed, failed, report
+    strain(6) = 0#
+    status = response.EvaluatePoint(2, strain, stress, tangent)
+    TestRecord status = sfcNone, "other concrete location remains elastic", passed, failed, report
+    response.AcceptTrial
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et > 0# And et < 1# And ec > 0# And ec < 1#, _
+        "both histories advance in shear " & CStr(et) & " " & CStr(ec), passed, failed, report
+    Dim committedTension As Double, committedCompression As Double
+    committedTension = et: committedCompression = ec
+    material.AcceptedPointDamage 2, et, ec
+    TestRecord et = 0# And ec = 0#, "virgin integration point remains independent", passed, failed, report
+
+    strain(6) = 0.00088
+    status = response.EvaluatePoint(1, strain, stress, tangent)
+    TestRecord status = sfcNone And stress(6) < base(6), "unloading from cracked concrete", passed, failed, report
+    strain(6) = 0#
+    status = response.EvaluatePoint(2, strain, stress, tangent)
+    response.AcceptTrial
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et = committedTension And ec = committedCompression, "unloading preserves both damage histories", passed, failed, report
+    response.ClearHistory
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et = 0# And ec = 0#, "independent combination clears concrete history", passed, failed, report
+Done:
+    RunTestCoupledConcreteResponse = report & "TOTAL_COUPLED_CONCRETE_RESPONSE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConcreteResponse = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Пропускает реальный пространственный бетон и две модели стали через
+' общий решатель. Сверяет все шесть усилий и необратимость при разгрузке.
+Public Function RunTestCoupledConcreteSection() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout
+    layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A240"
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse
+    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
+    concrete.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
+    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1000#, 0.025, 0.018
+    hoop.Initialize 200000#, 240#, 240#, 2000#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", longitudinal: models.Add "A240", hoop
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize 0#, 26320#, 0#, 479400#, 0#, 169200#, 0#, 1410000#, 0#, 15980#, 0#, -6674#
+    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005
+    Dim ok As Boolean, startTime As Double
+    startTime = Timer
+    ok = branch.Advance(1#)
+    TestRecord ok, "six-action concrete section " & branch.ResultMeta.ResultComment & " " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
+    report = report & "SOLVE_SECONDS: " & CStr(Timer - startTime) & vbCrLf
+    If Not ok Then GoTo Done
+    Dim field() As Double, resultants() As Double, target() As Double, i As Long
+    branch.CopyAccepted field, resultants
+    path.TargetSix 1#, target
+    For i = 1 To 6
+        TestExpectNear resultants(i), target(i), 0.00002, "concrete-integrated component " & CStr(i), passed, failed, report
+    Next i
+    Dim et As Double, ec As Double, maximum As Double, criticalPoint As Long
+    For i = 1 To operators.ConcretePointCount
+        concrete.AcceptedPointDamage i, et, ec
+        If et > maximum Then maximum = et: criticalPoint = i
+    Next i
+    TestRecord maximum > 0#, "concrete damage develops at integration point " & CStr(criticalPoint), passed, failed, report
+    If criticalPoint = 0 Then GoTo Done
+    concrete.AcceptedPointDamage criticalPoint, et, ec
+    ok = solver.TryStep(0.95 * target(1), 0.95 * target(2), 0.95 * target(3), 0.95 * target(4), _
+        0.95 * target(5), 0.95 * target(6), 0.0000005, 0.0000005, 30)
+    TestRecord ok, "six-action unloading gives equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
+    If ok Then
+        solver.AcceptStep
+        concrete.AcceptedPointDamage criticalPoint, et, ec
+        TestRecord et >= maximum, "concrete point cannot heal during unloading", passed, failed, report
+    End If
+Done:
+    RunTestCoupledConcreteSection = report & "TOTAL_COUPLED_CONCRETE_SECTION: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConcreteSection = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

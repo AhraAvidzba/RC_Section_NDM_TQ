@@ -1,0 +1,82 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledConcreteResponse.xlsm
+SOURCE_SHA256: F7104EF85C3A316DB199E30D834F6A6BDD83E61D4E4BB70C7EB67089F5348521
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d6ae995192a2480abeac7a540faddbf7\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=26988; startTicks=639302877969287383
+===== modTestCoupledElasticState.RunTestCoupledConcreteResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:16:43
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.046875
+EXCEL_AFTER_SUITE: pid=26988; workingSet=144367616; privateBytes=95023104; cpu=6.40625
+OK: virgin elastic concrete response
+OK: virgin shear actual=0.5 expected=0.5
+OK: virgin shear tangent actual=12500 expected=12500
+OK: mixed plastic-damage response
+OK: shear affected by multi-axial damage
+OK: shear perturbation plus
+OK: independent tangent increment 3242.7068503645 vs 3242.72003534946
+OK: trial and tangent leave committed energy untouched
+OK: repeat trial gives identical stress
+OK: other concrete location remains elastic
+OK: both histories advance in shear 0.108251908660389 3.44085151951114E-03
+OK: virgin integration point remains independent
+OK: unloading from cracked concrete
+OK: unloading preserves both damage histories
+OK: independent combination clears concrete history
+TOTAL_COUPLED_CONCRETE_RESPONSE: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d6ae995192a2480abeac7a540faddbf7\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:16:44
+===== modTestCoupledElasticState.RunTestCoupledEnvelope =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:16:45
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.046875
+EXCEL_AFTER_SUITE: pid=26988; workingSet=148668416; privateBytes=99426304; cpu=8.21875
+OK: compression yield and virgin modulus
+OK: calibrated compression peak actual=30 expected=30
+OK: calibrated cohesion degradation actual=0.27 expected=0.27
+OK: compression effective strength identity actual=30 expected=30
+OK: analytic prepeak dissipated energy actual=0.03796875 expected=0.03796875
+OK: half compression descending strength actual=15 expected=15
+OK: half tensile stress actual=1.5 expected=1.5
+OK: half tensile stress damage actual=0.5 expected=0.5
+OK: tensile effective cohesion from calibrated damage actual=3 expected=3
+OK: half tensile fracture work actual=0.5 expected=0.5
+OK: independent fracture work integration actual=0.120000146495717 expected=0.12
+OK: incompatible prepeak work and energy rejected
+TOTAL_COUPLED_ENVELOPE: passed=12; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d6ae995192a2480abeac7a540faddbf7\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:16:46
+===== modTestCoupledElasticState.RunTestCoupledConcreteReturn =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:16:47
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183201792; privateBytes=127156224; cpu=35.046875
+EXCEL_AFTER_SUITE: pid=26988; workingSet=147095552; privateBytes=98570240; cpu=10.125
+OK: elastic trial stays unchanged
+OK: return 1
+OK: yield consistency 1
+OK: backward Euler equations 1
+OK: return 2
+OK: yield consistency 2
+OK: backward Euler equations 2
+OK: return 3
+OK: yield consistency 3
+OK: backward Euler equations 3
+OK: pure shear analytical return actual=2.80491473560687 expected=2.80491473534864
+OK: return 4
+OK: yield consistency 4
+OK: backward Euler equations 4
+OK: hydrostatic analytical return actual=3.28358208955224 expected=3.28358208955224
+OK: return 5
+OK: yield consistency 5
+OK: backward Euler equations 5
+OK: hydrostatic tension without volumetric flow reports inability to return
+TOTAL_COUPLED_CONCRETE_RETURN: passed=19; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_d6ae995192a2480abeac7a540faddbf7\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:16:47
+SOURCE_UNCHANGED: True

@@ -1,0 +1,103 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledConcreteSection.xlsm
+SOURCE_SHA256: 5AF27BD4A8B7B085F6ACBDE8F496884A9D392F2BCB610661B7EBE808E24CFA6A
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f9708a9d70fd425fa342cecf0bc011a6\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=13252; startTicks=639302880253629173
+===== modTestCoupledElasticState.RunTestCoupledConcreteSection =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteSection; 2026-11-15T00:20:31
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13252; workingSet=144195584; privateBytes=95027200; cpu=8.921875
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127148032; cpu=35.0625
+OK: six-action concrete section  Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+SOLVE_SECONDS: 2.428955078125
+OK: concrete-integrated component 1 actual=26319.9999998685 expected=26320
+OK: concrete-integrated component 2 actual=479400.00000527 expected=479400
+OK: concrete-integrated component 3 actual=169199.999992953 expected=169200
+OK: concrete-integrated component 4 actual=1409999.99999594 expected=1410000
+OK: concrete-integrated component 5 actual=15979.9999999003 expected=15980
+OK: concrete-integrated component 6 actual=-6673.99999998269 expected=-6674
+OK: concrete damage develops at integration point 3
+OK: six-action unloading gives equilibrium
+OK: concrete point cannot heal during unloading
+TOTAL_COUPLED_CONCRETE_SECTION: passed=10; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f9708a9d70fd425fa342cecf0bc011a6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteSection; 2026-11-15T00:20:35
+===== modTestCoupledElasticState.RunTestCoupledConcreteResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:20:36
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13252; workingSet=147406848; privateBytes=98033664; cpu=10.640625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127148032; cpu=35.0625
+OK: virgin elastic concrete response
+OK: virgin shear actual=0.5 expected=0.5
+OK: virgin shear tangent actual=12500 expected=12500
+OK: mixed plastic-damage response
+OK: shear affected by multi-axial damage
+OK: shear perturbation plus
+OK: independent tangent increment 3242.7068503645 vs 3242.72003534946
+OK: trial and tangent leave committed energy untouched
+OK: repeat trial gives identical stress
+OK: other concrete location remains elastic
+OK: both histories advance in shear 0.108251908660389 3.44085151951114E-03
+OK: virgin integration point remains independent
+OK: unloading from cracked concrete
+OK: unloading preserves both damage histories
+OK: independent combination clears concrete history
+TOTAL_COUPLED_CONCRETE_RESPONSE: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f9708a9d70fd425fa342cecf0bc011a6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:20:37
+===== modTestCoupledElasticState.RunTestCoupledEnvelope =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:20:38
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13252; workingSet=146911232; privateBytes=96907264; cpu=12.40625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127148032; cpu=35.0625
+OK: compression yield and virgin modulus
+OK: calibrated compression peak actual=30 expected=30
+OK: calibrated cohesion degradation actual=0.27 expected=0.27
+OK: compression effective strength identity actual=30 expected=30
+OK: analytic prepeak dissipated energy actual=0.03796875 expected=0.03796875
+OK: half compression descending strength actual=15 expected=15
+OK: half tensile stress actual=1.5 expected=1.5
+OK: half tensile stress damage actual=0.5 expected=0.5
+OK: tensile effective cohesion from calibrated damage actual=3 expected=3
+OK: half tensile fracture work actual=0.5 expected=0.5
+OK: independent fracture work integration actual=0.120000146495717 expected=0.12
+OK: incompatible prepeak work and energy rejected
+TOTAL_COUPLED_ENVELOPE: passed=12; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f9708a9d70fd425fa342cecf0bc011a6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:20:38
+===== modTestCoupledElasticState.RunTestCoupledConcreteReturn =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:20:39
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=13252; workingSet=151003136; privateBytes=101335040; cpu=14.15625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127148032; cpu=35.0625
+OK: elastic trial stays unchanged
+OK: return 1
+OK: yield consistency 1
+OK: backward Euler equations 1
+OK: return 2
+OK: yield consistency 2
+OK: backward Euler equations 2
+OK: return 3
+OK: yield consistency 3
+OK: backward Euler equations 3
+OK: pure shear analytical return actual=2.80491473560687 expected=2.80491473534864
+OK: return 4
+OK: yield consistency 4
+OK: backward Euler equations 4
+OK: hydrostatic analytical return actual=3.28358208955224 expected=3.28358208955224
+OK: return 5
+OK: yield consistency 5
+OK: backward Euler equations 5
+OK: hydrostatic tension without volumetric flow reports inability to return
+TOTAL_COUPLED_CONCRETE_RETURN: passed=19; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f9708a9d70fd425fa342cecf0bc011a6\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:20:40
+SOURCE_UNCHANGED: True

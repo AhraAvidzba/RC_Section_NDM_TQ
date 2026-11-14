@@ -1,0 +1,94 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledConcreteSection.xlsm
+SOURCE_SHA256: 32D791A07D1C2E09637972B829B23F080F240F06567500B8F6612C74DEBB929E
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_1d0d8715d29c45bca0f6f49cdebb0b3b\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=12160; startTicks=639302879478802260
+===== modTestCoupledElasticState.RunTestCoupledConcreteSection =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteSection; 2026-11-15T00:19:14
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=12160; workingSet=143953920; privateBytes=95494144; cpu=35.859375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183156736; privateBytes=127074304; cpu=35.0625
+FAIL: six-action concrete section Не сошёлся минимальный подшаг. Уменьшение поправки не снизило невязку связанного сечения. Доля постоянной части: 1; lambda: 0.9765625; принято: 7; отклонено: 7; проб: 14 | Итерации: 7; пробы: 41; невязка, МПа: 1.59670363641173E-02; мин. ведущий элемент: 0.179527267314539
+SOLVE_SECONDS: 29.1640625
+TOTAL_COUPLED_CONCRETE_SECTION: passed=0; failed=1
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_1d0d8715d29c45bca0f6f49cdebb0b3b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteSection; 2026-11-15T00:19:44
+===== modTestCoupledElasticState.RunTestCoupledConcreteResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:19:45
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=12160; workingSet=147701760; privateBytes=98197504; cpu=37.640625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183156736; privateBytes=127074304; cpu=35.0625
+OK: virgin elastic concrete response
+OK: virgin shear actual=0.5 expected=0.5
+OK: virgin shear tangent actual=12500 expected=12500
+OK: mixed plastic-damage response
+OK: shear affected by multi-axial damage
+OK: shear perturbation plus
+OK: independent tangent increment 3242.7068503645 vs 3242.72003534946
+OK: trial and tangent leave committed energy untouched
+OK: repeat trial gives identical stress
+OK: other concrete location remains elastic
+OK: both histories advance in shear 0.108251908660389 3.44085151951114E-03
+OK: virgin integration point remains independent
+OK: unloading from cracked concrete
+OK: unloading preserves both damage histories
+OK: independent combination clears concrete history
+TOTAL_COUPLED_CONCRETE_RESPONSE: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_1d0d8715d29c45bca0f6f49cdebb0b3b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-15T00:19:46
+===== modTestCoupledElasticState.RunTestCoupledEnvelope =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:19:47
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=12160; workingSet=145735680; privateBytes=96563200; cpu=39.453125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183156736; privateBytes=127074304; cpu=35.0625
+OK: compression yield and virgin modulus
+OK: calibrated compression peak actual=30 expected=30
+OK: calibrated cohesion degradation actual=0.27 expected=0.27
+OK: compression effective strength identity actual=30 expected=30
+OK: analytic prepeak dissipated energy actual=0.03796875 expected=0.03796875
+OK: half compression descending strength actual=15 expected=15
+OK: half tensile stress actual=1.5 expected=1.5
+OK: half tensile stress damage actual=0.5 expected=0.5
+OK: tensile effective cohesion from calibrated damage actual=3 expected=3
+OK: half tensile fracture work actual=0.5 expected=0.5
+OK: independent fracture work integration actual=0.120000146495717 expected=0.12
+OK: incompatible prepeak work and energy rejected
+TOTAL_COUPLED_ENVELOPE: passed=12; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_1d0d8715d29c45bca0f6f49cdebb0b3b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledEnvelope; 2026-11-15T00:19:48
+===== modTestCoupledElasticState.RunTestCoupledConcreteReturn =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:19:49
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=12160; workingSet=150097920; privateBytes=100323328; cpu=41.265625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183156736; privateBytes=127074304; cpu=35.0625
+OK: elastic trial stays unchanged
+OK: return 1
+OK: yield consistency 1
+OK: backward Euler equations 1
+OK: return 2
+OK: yield consistency 2
+OK: backward Euler equations 2
+OK: return 3
+OK: yield consistency 3
+OK: backward Euler equations 3
+OK: pure shear analytical return actual=2.80491473560687 expected=2.80491473534864
+OK: return 4
+OK: yield consistency 4
+OK: backward Euler equations 4
+OK: hydrostatic analytical return actual=3.28358208955224 expected=3.28358208955224
+OK: return 5
+OK: yield consistency 5
+OK: backward Euler equations 5
+OK: hydrostatic tension without volumetric flow reports inability to return
+TOTAL_COUPLED_CONCRETE_RETURN: passed=19; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_1d0d8715d29c45bca0f6f49cdebb0b3b\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-15T00:19:49
+SOURCE_UNCHANGED: True
