@@ -1,0 +1,24 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\TransverseRebar.xlsm
+SOURCE_SHA256: B9E64AC8A7F5F9964A99396CC457282494415E00576C39AC7B730D901953CCD1
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_eb608ea839ed4a619829d46f6e5cc587\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=27380; startTicks=639302826665684077
+===== modTestCoupledSteelModel.RunCoupledSteelTests =====
+SUITE_STARTED: modTestCoupledSteelModel.RunCoupledSteelTests; 2026-11-14T22:51:13
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182165504; privateBytes=126124032; cpu=34.0625
+EXCEL_AFTER_SUITE: pid=27380; workingSet=143536128; privateBytes=94392320; cpu=6.390625
+OK: steel elastic branch
+OK: steel tension hardening
+OK: steel tension consistency
+OK: steel elastic unloading freezes history
+OK: steel reverse yield
+OK: unaccepted reverse step leaves committed history intact
+OK: steel asymmetric compression hardening
+OK: steel sign dependent strain limits
+TOTAL_COUPLED_STEEL: passed=8; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_eb608ea839ed4a619829d46f6e5cc587\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledSteelModel.RunCoupledSteelTests; 2026-11-14T22:51:13
+SOURCE_UNCHANGED: True
