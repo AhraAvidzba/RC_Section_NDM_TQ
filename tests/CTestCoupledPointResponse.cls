@@ -19,6 +19,7 @@ Implements ICoupledPointResponse
 
 Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
+Private mMaximumIncrement As Double
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
@@ -32,6 +33,12 @@ Friend Property Let TestFail(ByVal value As Boolean)
     mFail = value
 End Property
 
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Ограничивает допустимую разницу относительно принятого сжатия или растяжения.
+Friend Property Let TestMaximumIncrement(ByVal value As Double)
+    mMaximumIncrement = value
+End Property
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Возвращает принятый максимум деформации первой контрольной точки.
 Friend Property Get TestAcceptedPeak() As Double
@@ -64,6 +71,8 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     mTrialPeak(point) = mAcceptedPeak(point)
     If Abs(e) > mTrialPeak(point) Then mTrialPeak(point) = Abs(e)
     If mFail And point = 2 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+    If mMaximumIncrement > 0# And mTrialPeak(point) - mAcceptedPeak(point) > mMaximumIncrement Then _
+        ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

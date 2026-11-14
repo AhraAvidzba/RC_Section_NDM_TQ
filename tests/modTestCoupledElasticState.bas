@@ -451,3 +451,70 @@ Public Function RunCoupledNewtonTests() As String
 Failed:
     RunCoupledNewtonTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет принятие постоянной части и уменьшение трудных шагов по lambda.
+' Аналитический материал ограничивает приращение относительно принятой истории.
+Public Function RunTestCoupledContinuation() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#
+    Const FORCE0 As Double = 0.6 * 30000# * 0.001 * AREA
+    Const FORCE1 As Double = 1000000#
+    Dim section As CSectionModel, operators As New CCoupledElasticState
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 8
+    Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    material.TestInitialize operators.PointCount
+    material.TestMaximumIncrement = 0.00022
+    solver.Initialize operators, material, 30000#
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize FORCE0, FORCE1 - FORCE0, 0#, 200000#, 0#, 100000#, 0#, 300000#, 0#, 2000#, 0#, -1000#
+    branch.Initialize solver, path, 1, 100, 20, 1E-8, 1E-8
+    Dim field() As Double, resultants() As Double, expected() As Double, ok As Boolean
+    ok = branch.Advance(0#)
+    TestRecord ok, "constant part reached " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
+    If Not ok Then GoTo Done
+    branch.CopyAccepted field, resultants
+    TestExpectNear resultants(1), FORCE0, 1E-7, "preload resultant", passed, failed, report
+    TestRecord branch.AcceptedOffsetFraction = 1# And branch.AcceptedLambda = 0# And branch.RejectedAttempts > 0, _
+        "preload reduced an unsafe increment and reached its exact target", passed, failed, report
+
+    ok = branch.Advance(1#)
+    TestRecord ok, "direction reached " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
+    If Not ok Then GoTo Done
+    branch.CopyAccepted field, resultants
+    path.TargetSix 1#, expected
+    Dim i As Long
+    For i = 1 To 6
+        TestExpectNear resultants(i), expected(i), 0.00002, "path component " & CStr(i), passed, failed, report
+    Next i
+    TestRecord branch.AcceptedLambda = 1# And branch.RejectedAttempts > 0, _
+        "direction reduced an unsafe increment and reached exact lambda", passed, failed, report
+
+    Dim acceptedBefore As Long, firstDegree As Double
+    acceptedBefore = material.TestAcceptedSteps: firstDegree = field(1)
+    material.TestFail = True
+    ok = branch.Advance(1.1)
+    TestRecord Not ok And branch.ResultMeta.InternalStatus = rsNumericalFailure And branch.AcceptedLambda = 1#, _
+        "minimum step failure stays numerical at last accepted lambda", passed, failed, report
+    branch.CopyAccepted field, resultants
+    TestRecord firstDegree = field(1) And acceptedBefore = material.TestAcceptedSteps, _
+        "failed increments leave accepted section and history unchanged", passed, failed, report
+    material.TestFail = False
+    TestRecord branch.Advance(1.1), "recovered path can continue", passed, failed, report
+    ok = branch.Advance(1#)
+    TestRecord Not ok And branch.ResultMeta.ResultCode = rcInvalidInput, "history cannot be reversed by moving lambda back", passed, failed, report
+    path.Initialize 0#, 0#, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 1, 100, 20, 1E-8, 1E-8
+    TestRecord branch.Advance(0#), "zero load returns a confirmed state", passed, failed, report
+    branch.CopyAccepted field, resultants
+    TestRecord field(1) = 0# And resultants(1) = 0# And material.TestAcceptedPeak = 0#, _
+        "independent zero load starts with a virgin history", passed, failed, report
+Done:
+    RunTestCoupledContinuation = report & "TOTAL_COUPLED_CONTINUATION: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledContinuation = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

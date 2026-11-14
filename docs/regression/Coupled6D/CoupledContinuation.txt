@@ -1,0 +1,60 @@
+SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledContinuation.xlsm
+SOURCE_SHA256: 5941665DD40F1C99FCFA04430D43413600580729D54B4F2C8891D29435158C33
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_fcf4435356044035a723bda91c7b0a29\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=27668; startTicks=639302869964045930
+===== modTestCoupledElasticState.RunTestCoupledContinuation =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledContinuation; 2026-11-15T00:03:22
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182595584; privateBytes=126517248; cpu=34.8125
+EXCEL_AFTER_SUITE: pid=27668; workingSet=143433728; privateBytes=94306304; cpu=11.546875
+OK: constant part reached Доля постоянной части: 1; lambda: 0; принято: 3; отклонено: 2; проб: 5
+OK: preload resultant actual=388800.001779631 expected=388800
+OK: preload reduced an unsafe increment and reached its exact target
+OK: direction reached Доля постоянной части: 1; lambda: 1; принято: 3; отклонено: 2; проб: 5
+OK: path component 1 actual=1000000 expected=1000000
+OK: path component 2 actual=199999.999999995 expected=200000
+OK: path component 3 actual=99999.999999996 expected=100000
+OK: path component 4 actual=300000 expected=300000
+OK: path component 5 actual=2000 expected=2000
+OK: path component 6 actual=-1000 expected=-1000
+OK: direction reduced an unsafe increment and reached exact lambda
+OK: minimum step failure stays numerical at last accepted lambda
+OK: failed increments leave accepted section and history unchanged
+OK: recovered path can continue
+OK: history cannot be reversed by moving lambda back
+OK: zero load returns a confirmed state
+OK: independent zero load starts with a virgin history
+TOTAL_COUPLED_CONTINUATION: passed=17; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_fcf4435356044035a723bda91c7b0a29\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledContinuation; 2026-11-15T00:03:28
+===== modTestCoupledElasticState.RunCoupledNewtonTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledNewtonTests; 2026-11-15T00:03:29
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182595584; privateBytes=126517248; cpu=34.8125
+EXCEL_AFTER_SUITE: pid=27668; workingSet=147886080; privateBytes=98246656; cpu=14.625
+OK: nonlinear axial equilibrium
+OK: nonlinear axial strain actual=1.00000000000024E-03 expected=0.001
+OK: nonlinear axial resultant actual=864000.000000308 expected=864000
+OK: successful trial is uncommitted
+OK: successful step publishes material history once
+OK: local update failure has a numerical status
+OK: point failure includes point index
+OK: material failure leaves accepted field and history
+OK: six component nonlinear equilibrium
+OK: recovered component 1 actual=691200 expected=691200
+OK: recovered component 2 actual=199999.999999993 expected=200000
+OK: recovered component 3 actual=100000.000000001 expected=100000
+OK: recovered component 4 actual=300000 expected=300000
+OK: recovered component 5 actual=2000 expected=2000
+OK: recovered component 6 actual=-999.999999999999 expected=-1000
+OK: discard leaves history
+OK: independent combination starts without history
+TOTAL_COUPLED_NEWTON: passed=17; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_fcf4435356044035a723bda91c7b0a29\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledNewtonTests; 2026-11-15T00:03:31
+SOURCE_UNCHANGED: True
