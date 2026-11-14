@@ -1,0 +1,36 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\SplineBasis.xlsm
+SOURCE_SHA256: BB238D8D5BBF693D1D74E360FEF1739191684135A5EFB636BA1247354504FC82
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f4049fefb417431e9af78d99228ffcd2\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=27584; startTicks=639302812437458570
+===== modTestCoupledSplineBasis.RunCoupledSplineBasisTests =====
+SUITE_STARTED: modTestCoupledSplineBasis.RunCoupledSplineBasisTests; 2026-11-14T22:27:30
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182222848; privateBytes=126218240; cpu=33.859375
+EXCEL_AFTER_SUITE: pid=27584; workingSet=144699392; privateBytes=96313344; cpu=6.09375
+TOTAL_COUPLED_SPLINE_BASIS: passed=31; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f4049fefb417431e9af78d99228ffcd2\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledSplineBasis.RunCoupledSplineBasisTests; 2026-11-14T22:27:30
+===== modTestCoupledElasticState.RunCoupledElasticStateTests =====
+SUITE_STARTED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:27:31
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25900; workingSet=182222848; privateBytes=126218240; cpu=33.859375
+EXCEL_AFTER_SUITE: pid=27584; workingSet=148369408; privateBytes=100245504; cpu=9.0625
+OK: circle axial bending torsion
+OK: circle axial strain actual=9.94718394324349E-06 expected=9.94718394324346E-06
+OK: circle x curvature actual=7.98976130983525E-07 expected=7.95774715459477E-07
+OK: circle y curvature actual=-6.3918090478682E-07 expected=-6.36619772367581E-07
+OK: circle twist actual=9.98720170326198E-07 expected=9.94718394324346E-07
+OK: circle shear
+OK: circle shear field relative L2=7.9740431710712E-03
+OK: circle shear integral actual=10000 expected=10000
+OK: annulus torsion
+OK: annulus twist actual=1.09818918691427E-06 expected=1.09490945240333E-06
+TOTAL_COUPLED_ELASTIC: passed=10; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f4049fefb417431e9af78d99228ffcd2\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunCoupledElasticStateTests; 2026-11-14T22:27:33
+SOURCE_UNCHANGED: True

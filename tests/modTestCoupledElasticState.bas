@@ -1,0 +1,121 @@
+Attribute VB_Name = "modTestCoupledElasticState"
+Option Explicit
+
+' ==========================================================================
+' ДЛЯ ТЕСТОВ: аналитические контрольные случаи упругой задачи
+' ==========================================================================
+' Интегралы сравниваются отдельно от контроля решения дискретных уравнений.
+' Формулы для круга и кольца не используются рабочим расчётным классом.
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет шесть усилий на заданной нагрузке, закручивание Сен-Венана
+' и поле от перерезывающей силы в круге, затем повторяет кручение для кольца.
+Public Function RunCoupledElasticStateTests() As String
+    On Error GoTo Failed
+    Dim solver As CCoupledElasticState
+    Set solver = New CCoupledElasticState
+    Dim geometry As CGeometryRegion
+    Dim section As CSectionModel
+    Dim deformation() As Double, resultants() As Double, stress() As Double
+    Dim passed As Long, failed As Long, report As String
+    Dim ok As Boolean
+    Const RADIUS As Double = 100#
+    Const E_MODULUS As Double = 32000#
+    Const SHEAR_MODULUS As Double = 16000#
+    Const MAX_RELATIVE_ERROR As Double = 0.015
+    Const PURE_SHEAR_FORCE As Double = 10000#
+    Const TORQUE_VALUE As Double = 2500000#
+    Dim area As Double, inertia As Double, torsion As Double
+
+    Set geometry = TestFixtureDisk(2# * RADIUS)
+    Set section = TestBuildSection(geometry)
+    area = GEOM_PI * RADIUS ^ 2
+    inertia = GEOM_PI * RADIUS ^ 4 / 4#
+    torsion = 2# * inertia
+    solver.PrepareModel section, E_MODULUS, 0#, 2, 2, 9
+    ok = solver.Solve(10000#, 2000000#, -1600000#, TORQUE_VALUE, 0#, 0#, deformation, resultants, stress)
+    TestRecordSolve ok, "circle axial bending torsion", solver, passed, failed, report
+    If ok Then
+        TestExpectNear deformation(1), 10000# / (E_MODULUS * area), 1E-8, "circle axial strain", passed, failed, report
+        TestExpectNear deformation(2), 2000000# / (E_MODULUS * inertia), MAX_RELATIVE_ERROR, _
+            "circle x curvature", passed, failed, report
+        TestExpectNear deformation(3), -1600000# / (E_MODULUS * inertia), MAX_RELATIVE_ERROR, _
+            "circle y curvature", passed, failed, report
+        TestExpectNear deformation(4), TORQUE_VALUE / (SHEAR_MODULUS * torsion), MAX_RELATIVE_ERROR, _
+            "circle twist", passed, failed, report
+    End If
+
+    ok = solver.Solve(0#, 0#, 0#, 0#, PURE_SHEAR_FORCE, 0#, deformation, resultants, stress)
+    TestRecordSolve ok, "circle shear", solver, passed, failed, report
+    If ok Then
+        Dim i As Long, x As Double, y As Double, weight As Double
+        Dim referenceX As Double, referenceY As Double, errorNorm As Double, fieldNorm As Double
+        For i = 1 To UBound(stress, 2)
+            solver.Point i, x, y, weight
+            referenceX = PURE_SHEAR_FORCE * (3# * RADIUS ^ 2 - 3# * x ^ 2 - y ^ 2) / (8# * inertia)
+            referenceY = -PURE_SHEAR_FORCE * x * y / (4# * inertia)
+            errorNorm = errorNorm + weight * ((stress(5, i) - referenceX) ^ 2 + (stress(6, i) - referenceY) ^ 2)
+            fieldNorm = fieldNorm + weight * (referenceX ^ 2 + referenceY ^ 2)
+        Next i
+        TestRecord Sqr(errorNorm / fieldNorm) < 0.035, "circle shear field relative L2=" & _
+            CStr(Sqr(errorNorm / fieldNorm)), passed, failed, report
+        TestExpectNear resultants(5), PURE_SHEAR_FORCE, 1E-8, "circle shear integral", passed, failed, report
+    End If
+
+    Dim query As New CSectionGeometryQuery
+    Dim annulus As CConcreteRegion
+    Set annulus = query.SubtractContainedRegion(query.CircleRegion(0#, 0#, RADIUS), query.CircleRegion(0#, 0#, 55#))
+    geometry.Initialize annulus
+    Set section = TestBuildSection(geometry)
+    solver.PrepareModel section, E_MODULUS, 0#, 2, 2, 9
+    ok = solver.Solve(0#, 0#, 0#, TORQUE_VALUE, 0#, 0#, deformation, resultants, stress)
+    TestRecordSolve ok, "annulus torsion", solver, passed, failed, report
+    If ok Then
+        torsion = GEOM_PI * (RADIUS ^ 4 - 55# ^ 4) / 2#
+        TestExpectNear deformation(4), TORQUE_VALUE / (SHEAR_MODULUS * torsion), MAX_RELATIVE_ERROR, _
+            "annulus twist", passed, failed, report
+    End If
+    RunCoupledElasticStateTests = report & "TOTAL_COUPLED_ELASTIC: passed=" & CStr(passed) & "; failed=" & CStr(failed)
+    Exit Function
+Failed:
+    RunCoupledElasticStateTests = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Передаёт достоверные границы диска и кольца через рабочую модель сечения.
+Private Function TestBuildSection(ByVal geometry As CGeometryRegion) As CSectionModel
+    Dim mesh As New CFiberMeshBuilder
+    mesh.BuildMesh geometry, geometry.Width / 20#, geometry.Height / 20#, cellGeometry:="Contour"
+    Dim builder As New CSectionModelBuilder
+    Set TestBuildSection = builder.BuildFromGenerated(mesh, Nothing)
+    geometry.BuildContours TestBuildSection.Contours
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Приводит ошибку вычисления вместе с человеком читаемой причиной.
+Private Sub TestRecordSolve(ByVal ok As Boolean, ByVal name As String, ByVal solver As CCoupledElasticState, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    If Not ok Then name = name & " " & solver.ResultMeta.ResultComment
+    TestRecord ok, name, passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет величину с заранее назначенным относительным допуском.
+Private Sub TestExpectNear(ByVal value As Double, ByVal reference As Double, ByVal tolerance As Double, _
+        ByVal name As String, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    TestRecord Abs(value / reference - 1#) < tolerance, _
+        name & " actual=" & CStr(value) & " expected=" & CStr(reference), passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет итог отдельного сравнения и увеличивает соответствующий счетчик.
+Private Sub TestRecord(ByVal ok As Boolean, ByVal name As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    If ok Then
+        passed = passed + 1
+        report = report & "OK: " & name & vbCrLf
+    Else
+        failed = failed + 1
+        report = report & "FAIL: " & name & vbCrLf
+    End If
+End Sub

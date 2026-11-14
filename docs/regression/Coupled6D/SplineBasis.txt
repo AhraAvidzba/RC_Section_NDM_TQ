@@ -1,0 +1,16 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\SplineBasis.xlsm
+SOURCE_SHA256: 4CC70030125B9C930B3A8A8EA514A156C4D9DA4C844376E3E5928644394B634A
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f859e5dd6f854b4bb5ad744be09c4e4c\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=18064; startTicks=639302801851475608
+===== modTestCoupledSplineBasis.RunCoupledSplineBasisTests =====
+SUITE_STARTED: modTestCoupledSplineBasis.RunCoupledSplineBasisTests; 2026-11-14T22:09:51
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=18064; workingSet=144240640; privateBytes=96137216; cpu=6.359375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=181899264; privateBytes=125853696; cpu=33.65625
+TOTAL_COUPLED_SPLINE_BASIS: passed=31; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_f859e5dd6f854b4bb5ad744be09c4e4c\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledSplineBasis.RunCoupledSplineBasisTests; 2026-11-14T22:09:52
+SOURCE_UNCHANGED: True

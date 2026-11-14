@@ -40,3 +40,65 @@ powershell -ExecutionPolicy Bypass -File tools/build_workbook/Run-Audit02ModeTes
 - [Bairán, диссертация UPC по TINSA](https://upcommons.upc.edu/entities/publication/16c5533f-c9b2-42eb-90ba-fbb618a33063)
 - [Poliotti и Bairán, B-spline sectional model](https://doi.org/10.1016/j.engstruct.2020.110200)
 - [Poliotti и Bairán, пластичность с повреждением и меняющейся дилатансией](https://doi.org/10.1016/j.engstruct.2019.03.086)
+
+## Первая проверка численного базиса
+
+`CCubicSplineBasis` реализует одномерные кубические функции и производные для
+тензорного базиса по Poliotti и Bairán (2020), разд. 3.2, ур. (14)–(15).
+Проверка `modTestCoupledSplineBasis.RunCoupledSplineBasisTests` в реальном
+Excel дала 31 PASS, 0 FAIL. Исходный бинарный файл остался прежним.
+Протокол: `docs/regression/Coupled6D/SplineBasis.txt`.
+
+Скопировать исходную книгу в `docs/regression/Coupled6D/SplineBasis.xlsm` и
+собрать компоненты на копии:
+
+```powershell
+$fixture = 'docs/regression/Coupled6D/SplineBasis.xlsm'
+Copy-Item -LiteralPath 'workbook/output/RC_Section_NDM.xlsm' -Destination $fixture
+& 'tools/build_workbook/Update-PrivateWorkbookCode.ps1' -WorkbookPath $fixture -ModuleNames @('CCubicSplineBasis','modTestCoupledSplineBasis')
+powershell -ExecutionPolicy Bypass -File tools/build_workbook/Run-Audit02ModeTests.ps1 -SourceWorkbook $fixture -Mode No -ReportPath docs/regression/Coupled6D/SplineBasis.txt -Macro 'modTestCoupledSplineBasis.RunCoupledSplineBasisTests'
+```
+
+Четыре неизменённых авторских PDF проверены по заголовку PDF, числу страниц
+и SHA-256. Библиография и команды скачивания находятся в
+[реестре литературы](../../literature/Coupled6D/README.md).
+
+## Упругая постановка
+
+Введены квадратура `CCoupledSectionQuadrature` по общей точной области NDM,
+решение неспряжённой системы `CCoupledLinearSystem` и `CCoupledElasticState`
+для однородного изотропного эталона. Переиспользованы
+`CSectionGeometryQuery`, `CSectionNumericalFrame`, `CGeometryRegion` и
+`CFiberMeshBuilder`. Три цилиндрических поля перемещений разложены по одному
+тензорному базису. Четыре жёсткие моды устраняются интегральными ограничениями,
+без добавления материальной жёсткости.
+
+Слабая форма с продольной производной напряжений соответствует Bairán (2005),
+с. 69–75, ур. (3.30)–(3.43), и с. 85–88, ур. (4.5)–(4.16). Для данной
+упругой задачи четыре производные деформаций определяются по
+`[N′, Mx′, My′, T′] = [0, Qy, Qx, 0]`. Самостоятельная проверка интегралов
+покрывает все шесть компонент. Эта реализация ещё не содержит общего
+пластико-повреждаемого материала, арматуры, закона истории и поиска предела.
+Нелинейный алгоритм источника также фиксирует энергетические моды и решает
+задачу в ортогональном подпространстве, с. 97–101. Упругая проверка не
+устанавливает допустимость упрощения этого шага в нелинейной модели.
+
+На копии, сохранённой после компиляции VBA, `RunCoupledSplineBasisTests`
+дал 31 PASS / 0 FAIL, `RunCoupledElasticStateTests` — 10 PASS / 0 FAIL.
+Относительная погрешность закручивания круга 0,4023%, кольца 0,2995%.
+Взвешенная относительная L2-невязка поля касательных напряжений при сдвиге
+круга 0,7974%. Интеграл Qx в протоколе точно 10 000 Н. Относительные
+допуски до запуска — 1,5% для кривизн и закручивания, 3,5% для поля.
+Протокол `docs/regression/Coupled6D/ElasticState.txt` относится к
+тестовой, а не к публикуемой книге.
+
+Для воспроизведения после подготовки SplineBasis.xlsm:
+
+```powershell
+& 'tools/build_workbook/Update-PrivateWorkbookCode.ps1' -WorkbookPath 'docs/regression/Coupled6D/SplineBasis.xlsm' -ModuleNames @('CCoupledSectionQuadrature','CCoupledLinearSystem','CCoupledElasticState','modTestCoupledElasticState')
+powershell -ExecutionPolicy Bypass -File tools/build_workbook/Run-Audit02ModeTests.ps1 -SourceWorkbook docs/regression/Coupled6D/SplineBasis.xlsm -Mode No -ReportPath docs/regression/Coupled6D/ElasticState.txt -Macro 'modTestCoupledSplineBasis.RunCoupledSplineBasisTests,modTestCoupledElasticState.RunCoupledElasticStateTests'
+```
+
+Следующая контрольная точка: независимые упругие сравнения для невыпуклой
+асимметричной области с отверстием, совместная задача с ненулевыми шестью
+усилиями и подготовка пространственного материала и поперечной арматуры.
