@@ -41,7 +41,7 @@ Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и прина
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 10 ' Пространственные входы и подтверждённые усилия целевого состояния.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 11 ' Пространственные входы, усилия и закручивание целевого состояния.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -145,6 +145,7 @@ Public Sub WriteResults(ByVal workbook As Object, ByVal section As CSectionModel
         WriteElementGeometry workbook, section, runID, units
     End If
     WriteElementResults workbook, section, batch, runID, units
+    WriteCalculatedCoupledFields workbook, section, batch, runID
     WriteSectionProperties workbook, section, snapshot, batch, runID, units, previousDiagnostics
     WriteMaterialDiagrams workbook, batch, runID, units
     WriteSectionAnnotations workbook, section, runID, units, batch, previousAnnotations
@@ -296,6 +297,56 @@ Friend Sub WriteCoupledFields(ByVal workbook As Object, ByRef data As Variant, _
     End If
     target.Resize(UBound(displayData, 1), COUPLED_FIELD_COLUMNS).Value2 = displayData
     FormatResultsBlock target, UBound(displayData, 1), COUPLED_FIELD_COLUMNS, "Пространственные компоненты связанного НДС", displayData
+End Sub
+
+' Готовит пространственные поля тех же состояний и элементов, которые
+' записаны в основной таблице. File получает таблицу без записи через лист.
+Private Sub WriteCalculatedCoupledFields(ByVal workbook As Object, ByVal section As CSectionModel, _
+        ByVal batch As CBatchSectionCalculator, ByVal runID As Variant)
+    Dim count As Long, i As Long, elementCount As Long, state As CSectionStateResult
+    elementCount = section.ConcreteCount + section.RebarCount
+    For i = 1 To batch.Count
+        Set state = batch.ResultAt(i).StateRepository.FindState(sstStrengthState)
+        If Not state Is Nothing Then
+            If Not state.CoupledFields Is Nothing Then count = count + elementCount
+        End If
+    Next i
+    If count = 0 Then
+        If mCapturedSnapshot Is Nothing Then
+            If Not NamedCoupledFieldAnchor(workbook) Is Nothing Then ClearNamedRegion workbook, COUPLED_FIELD_TABLE
+        End If
+        Exit Sub
+    End If
+    Dim data As Variant, row As Long, element As Long, fields As CCoupledFieldSnapshot
+    Dim tx As Double, ty As Double, gx As Double, gy As Double, w As Double
+    Dim combinationID As String, profileID As String, stateType As String
+    data = NewCoupledFieldTable(count): row = 2
+    For i = 1 To batch.Count
+        Set state = batch.ResultAt(i).StateRepository.FindState(sstStrengthState)
+        If Not state Is Nothing Then
+            Set fields = state.CoupledFields
+            If Not fields Is Nothing Then
+                combinationID = batch.CombinationID(i): profileID = batch.ResultAt(i).ProfileId: stateType = state.StateTypeText
+                For element = 1 To elementCount
+                    data(row, 1) = CDbl(runID): data(row, 2) = combinationID: data(row, 3) = profileID: data(row, 4) = stateType
+                    If element <= section.ConcreteCount Then
+                        data(row, 5) = section.ConcreteID(element)
+                    Else
+                        data(row, 5) = section.RebarID(element - section.ConcreteCount)
+                    End If
+                    fields.Spatial element, tx, ty, gx, gy, w
+                    data(row, 6) = tx: data(row, 7) = ty: data(row, 8) = gx: data(row, 9) = gy: data(row, 10) = w
+                    row = row + 1
+                Next element
+            End If
+        End If
+    Next i
+    If mCapturedSnapshot Is Nothing Then
+        WriteCoupledFields workbook, data
+    Else
+        ValidateSnapshotTableShape COUPLED_FIELD_TABLE, data
+        mCapturedSnapshot.AddTable COUPLED_FIELD_TABLE, data
+    End If
 End Sub
 
 ' Очищает прямоугольник одной таблицы результатов. Ширину берёт из её структуры,
@@ -814,6 +865,8 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     PutProperty data, row, runID, id, "Coupled.Internal.T", resultants(4), OutputMomentUnit(units), "Подтверждённый T относительно центра бетонной сетки."
     PutProperty data, row, runID, id, "Coupled.Internal.Qx", resultants(5), OutputForceUnit(units), "Подтверждённая сила вдоль X."
     PutProperty data, row, runID, id, "Coupled.Internal.Qy", resultants(6), OutputForceUnit(units), "Подтверждённая сила вдоль Y."
+    Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
+    If Not state Is Nothing Then PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
 End Sub
 
 ' Записывает логический признак одинаково в любой локали Excel:
@@ -1165,14 +1218,20 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
             prefix = "State." & stateResult.StateTypeText & "."
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "MaterialModelRole", _
                 stateResult.MaterialModelRoleText, "-", "Смысловая роль материальной модели для именованного расчетного состояния."
-            PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "MaterialModelSpec", _
-                stateResult.MaterialSpec.SpecKey, "-", "Фактическая спецификация ValueSet/ConcreteDiagram/ConcreteTension/SteelDiagram."
-            PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "ConcreteDiagramId", _
-                MaterialDiagramId(batch.ResultAt(combinationIndex).ProfileId, stateResult, "Concrete", stateResult.ConcreteDiagramSnapshot), _
-                "-", "Ссылка на бетонную диаграмму в rngNDMMaterialDiagrams."
-            PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "RebarDiagramId", _
-                MaterialDiagramId(batch.ResultAt(combinationIndex).ProfileId, stateResult, "Rebar", stateResult.SteelDiagramSnapshot), _
-                "-", "Ссылка на диаграмму арматуры в rngNDMMaterialDiagrams."
+            If stateResult.CoupledFields Is Nothing Then
+                PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "MaterialModelSpec", _
+                    stateResult.MaterialSpec.SpecKey, "-", "Фактическая спецификация ValueSet/ConcreteDiagram/ConcreteTension/SteelDiagram."
+                PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "ConcreteDiagramId", _
+                    MaterialDiagramId(batch.ResultAt(combinationIndex).ProfileId, stateResult, "Concrete", stateResult.ConcreteDiagramSnapshot), _
+                    "-", "Ссылка на бетонную диаграмму в rngNDMMaterialDiagrams."
+                PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "RebarDiagramId", _
+                    MaterialDiagramId(batch.ResultAt(combinationIndex).ProfileId, stateResult, "Rebar", stateResult.SteelDiagramSnapshot), _
+                    "-", "Ссылка на диаграмму арматуры в rngNDMMaterialDiagrams."
+            Else
+                PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "MaterialModelSpec", _
+                    stateResult.MaterialSpec.ValueSetText & "|CoupledPlasticDamage|UseDiagram|CoupledSteel", "-", _
+                    "Фактические модели бетона с повреждением и двухлинейной стали по классам."
+            End If
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Epsilon0", _
                 stateResult.Epsilon0, "-", "Деформация в исходной точке X=0, Y=0 модели (для импорта AutoCAD - начало МСК/WCS). Численный перенос к центру сечения эту точку вывода не меняет."
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "KappaX", _
@@ -2112,6 +2171,7 @@ Private Sub CapturePreparedResults(ByVal workbook As Object, ByVal section As CS
     Set mPreservedWorkbook = Nothing: mPreservedFromFile = False
     mPreservedGeometry = Empty: mPreservedContours = Empty: mPreservedElementGeometry = Empty: mPreservedAnnotations = Empty: mPreservedDiagnostics = vbNullString
     WriteElementResults workbook, section, batch, runID, units
+    WriteCalculatedCoupledFields workbook, section, batch, runID
     WriteSectionProperties workbook, section, props, batch, runID, units, diagnostics
     WriteMaterialDiagrams workbook, batch, runID, units
     WriteSectionAnnotations workbook, section, runID, units, batch, previousAnnotations

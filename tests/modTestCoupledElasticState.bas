@@ -1055,6 +1055,8 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestInputCell(profiles, "MaterialModel.Strength.ValueSet", 2, pr4).Value2 = "ULS(I)"
     TestInputCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
     TestInputCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
+    TestInputCell(profiles, "Visualization.State", 2, pr4).Value2 = "StrengthState"
+    TestInputCell(profiles, "Visualization.Quantity", 2, pr4).Value2 = "TauXZ"
 
     Dim firstCase(1 To 2, 1 To 10) As Variant
     firstCase(1, 1) = "Spatial": firstCase(1, 2) = -0.05: firstCase(1, 3) = 0.001: firstCase(1, 4) = -0.002
@@ -1136,12 +1138,48 @@ Public Function RunTestCoupledWorkbookInput() As String
                 TestRecord False, CStr(mode) & " has no numerical value for " & components(i), passed, failed, report
             End If
         Next i
+        TestSavedCoupledFields book, CStr(mode), section.ConcreteCount + section.RebarCount, passed, failed, report
     Next mode
     RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет рабочий выбор пространственного поля из фактических Results и File.
+Private Sub TestSavedCoupledFields(ByVal book As Object, ByVal mode As String, ByVal elementCount As Long, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim base As Variant: base = ReadElementResultTable(book, "Spatial", "StrengthState")
+    If Not HasResultTableRows(base) Then
+        TestRecord False, mode & " stores elements of actual coupled state", passed, failed, report
+        Exit Sub
+    End If
+    TestRecord UBound(base, 1) = elementCount + 1, mode & " stores elements of actual coupled state", passed, failed, report
+    TestRecord IsNumeric(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Twist")), mode & " stores twist", passed, failed, report
+    Dim runID As Double: runID = CDbl(base(2, ResultColumn(base, "RunID")))
+    Dim tau As Object, gamma As Object, warping As Object
+    Set tau = ReadCoupledFieldValues(book, vqTauXZ, runID, "Spatial", "PR4", "StrengthState")
+    Set gamma = ReadCoupledFieldValues(book, vqGamma, runID, "Spatial", "PR4", "StrengthState")
+    Set warping = ReadCoupledFieldValues(book, vqWarping, runID, "Spatial", "PR4", "StrengthState")
+    TestRecord tau.Count = elementCount And gamma.Count = elementCount And warping.Count = elementCount, _
+        mode & " keeps all spatial fields", passed, failed, report
+    Dim id As Variant, nonzeroTau As Boolean, nonzeroWarping As Boolean
+    For Each id In tau.Keys
+        If Abs(CDbl(tau(id))) > 0.000000001 Then nonzeroTau = True
+        If Abs(CDbl(warping(id))) > 0.000000001 Then nonzeroWarping = True
+    Next id
+    TestRecord nonzeroTau And nonzeroWarping, mode & " has physical shear and warping", passed, failed, report
+    Dim system As Object: Set system = book.Names.Item("rngSystemSettings").RefersToRange
+    TestInputCell(system, "Output.CombinationID").Value2 = "Spatial"
+    TestInputCell(system, "Output.CombinationMode").Value2 = "User"
+    Dim cfg As New CSystemSettingsReader, plot As New CSectionPlotDataReader
+    cfg.LoadFromWorkbook book
+    plot.LoadFromWorkbook book, cfg
+    TestRecord plot.Count = elementCount And plot.ResultUnit = "MPa", mode & " plot reads the actual shear field", passed, failed, report
+    TestExpectNear plot.ResultValue(1), CDbl(tau(plot.ElementID(1))), 0.0000001, mode & " plot matches saved shear", passed, failed, report
+    TestInputCell(system, "Output.CombinationMode").Value2 = "Worst"
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Находит тестовую ячейку по ключу строки и ожидаемому столбцу значения.

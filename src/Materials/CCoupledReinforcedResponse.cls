@@ -23,6 +23,7 @@ Private mConcrete As ICoupledPointResponse
 Private mSteel() As CCoupledSteelModel
 Private mDirection() As Double
 Private mPlastic() As Double, mBackstress() As Double
+Private mAxialStress() As Double ' Фактическое продольное напряжение стали до вычитания замещённого бетона.
 Private mFirstSteel As Long, mLastSteel As Long
 Private mAcceptedBuffer As Long, mTrialBuffer As Long
 Private mTrialSteelUtilization As Double
@@ -69,6 +70,11 @@ Friend Property Get AcceptedSteelUtilization() As Double
     AcceptedSteelUtilization = mAcceptedSteelUtilization
 End Property
 
+' Считывает принятое напряжение стержня материальной точки в МПа.
+Friend Property Get AcceptedSteelStress(ByVal point As Long) As Double
+    AcceptedSteelStress = mAxialStress(point, mAcceptedBuffer)
+End Property
+
 ' Обновляет независимую материальную точку. В поправке замещения площадь
 ' берётся у геометрических операторов и здесь не учитывается повторно.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
@@ -83,6 +89,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     Next j
     mSteel(point).EvaluateTrial axialStrain, mPlastic(point, mAcceptedBuffer), mBackstress(point, mAcceptedBuffer), _
         axialStress, axialTangent, mPlastic(point, mTrialBuffer), mBackstress(point, mTrialBuffer)
+    mAxialStress(point, mTrialBuffer) = axialStress
     utilization = mSteel(point).StrainUtilization(axialStrain)
     If utilization > mTrialSteelUtilization Then mTrialSteelUtilization = utilization
     For j = 1 To COMPONENT_COUNT
@@ -106,9 +113,10 @@ Private Sub ICoupledPointResponse_ClearHistory()
     mConcrete.ClearHistory
     mAcceptedBuffer = 1: mTrialBuffer = 2
     mTrialSteelUtilization = 0#: mAcceptedSteelUtilization = 0#
-    Erase mPlastic: Erase mBackstress
+    Erase mPlastic: Erase mBackstress: Erase mAxialStress
     If mLastSteel >= mFirstSteel Then
         ReDim mPlastic(mFirstSteel To mLastSteel, 1 To 2)
         ReDim mBackstress(mFirstSteel To mLastSteel, 1 To 2)
+        ReDim mAxialStress(mFirstSteel To mLastSteel, 1 To 2)
     End If
 End Sub

@@ -61,6 +61,8 @@ Private mSnapshotSection As CSectionModel ' Модель сечения, по к
 Private mSnapshotRevision As Long ' Ревизия геометрии при фиксации состояния.
 Private mSnapshotConcrete As CMaterialDiagram ' Неизменяемая фактическая диаграмма бетона.
 Private mSnapshotSteel As CMaterialDiagram ' Неизменяемая фактическая диаграмма арматуры.
+Private mCoupledFields As CCoupledFieldSnapshot ' Напряжения по принятой пространственной истории и поле деформаций.
+Private mTwist As Double ' Закручивание на единицу длины, рад/мм.
 Private Const ELEMENT_ZERO_TOLERANCE As Double = 0.000000001 ' Порог деформации для определения физического состояния элемента при выводе результатов.
 
 ' Сохраняет расчётное НДС по результату CSectionSolver.
@@ -106,6 +108,64 @@ Public Sub InitializeFromSolver(ByVal stateType As ESectionStateType, _
     If Not mSnapshotSection Is Nothing Then mSnapshotRevision = mSnapshotSection.Revision
 End Sub
 
+' Сохраняет прямое связанное НДС с фактическим полем. Усилия состояния
+' переводятся из центра бетонной сетки в исходные оси CSectionModel.
+Friend Sub InitializeFromCoupled(ByVal section As CSectionModel, ByVal spec As CMaterialModelSpec, _
+        ByVal loads As CSectionLoadState, ByRef resultants() As Double, ByVal epsilon0 As Double, _
+        ByVal kappaX As Double, ByVal kappaY As Double, ByVal twist As Double, _
+        ByVal fields As CCoupledFieldSnapshot, ByVal meta As CResultMeta)
+    AssertWritable
+    ClearSnapshot
+    mStateType = sstStrengthState: mMaterialModelRole = cpStrength
+    Set mMaterialSpec = spec.Clone: Set mResultMeta = meta.Clone
+    Set mSnapshotSection = section: mSnapshotRevision = section.Revision
+    Set mCoupledFields = fields
+    mEpsilon0 = epsilon0: mKappaX = kappaX: mKappaY = kappaY: mTwist = twist
+    Dim cx As Double, cy As Double, area As Double, target() As Double
+    section.ConcreteMeshCentroid cx, cy, area
+    loads.LoadAboutPoint 0#, 0#, target
+    mTargetN = target(1): mTargetMx = target(2): mTargetMy = target(3)
+    mNint = resultants(1): mMxint = resultants(2) + mNint * cy: mMyint = resultants(3) + mNint * cx
+    mResidualN = mNint - mTargetN: mResidualMx = mMxint - mTargetMx: mResidualMy = mMyint - mTargetMy
+    If mTargetN <> 0# Then mRelativeResidualN = Abs(mResidualN / mTargetN)
+    If mTargetMx <> 0# Then mRelativeResidualMx = Abs(mResidualMx / mTargetMx)
+    If mTargetMy <> 0# Then mRelativeResidualMy = Abs(mResidualMy / mTargetMy)
+    mConverged = True
+    mDiagnosticLog = meta.DiagnosticDetails
+    UpdateCoupledExtrema section
+End Sub
+
+' Суммирует диапазоны реально сохранённых осевых напряжений и деформаций.
+Private Sub UpdateCoupledExtrema(ByVal section As CSectionModel)
+    Dim i As Long, strain As Double, stress As Double
+    For i = 1 To section.ConcreteCount + section.RebarCount
+        mCoupledFields.Axial i, strain, stress
+        If i <= section.ConcreteCount Then
+            If strain < mMinConcreteStrain Then mMinConcreteStrain = strain
+            If strain > mMaxConcreteStrain Then mMaxConcreteStrain = strain
+            If stress < mMinConcreteStress Then mMinConcreteStress = stress
+            If stress > mMaxConcreteStress Then mMaxConcreteStress = stress
+        Else
+            If strain < mMinSteelStrain Then mMinSteelStrain = strain
+            If strain > mMaxSteelStrain Then mMaxSteelStrain = strain
+            If stress < mMinSteelStress Then mMinSteelStress = stress
+            If stress > mMaxSteelStress Then mMaxSteelStress = stress
+        End If
+    Next i
+    mHasConcreteCompression = (mMinConcreteStress < 0#): mHasConcreteTension = (mMaxConcreteStress > 0#)
+    mHasSteelCompression = (mMinSteelStress < 0#): mHasSteelTension = (mMaxSteelStress > 0#)
+End Sub
+
+' Возвращает неизменённые дополнительные поля принятого связанного состояния.
+Friend Property Get CoupledFields() As CCoupledFieldSnapshot
+    Set CoupledFields = mCoupledFields
+End Property
+
+' Возвращает закручивание принятого связанного состояния, рад/мм.
+Friend Property Get Twist() As Double
+    Twist = mTwist
+End Property
+
 ' Сохраняет причину, по которой решение не удалось начать: обязательные программные
 ' данные не переданы. Такой результат не используется как ранее найденное НДС.
 Public Sub InitializeFailure(ByVal request As CStateRequest, ByVal meta As CResultMeta)
@@ -129,6 +189,7 @@ Private Sub ClearSnapshot()
     Set mSnapshotSection = Nothing
     Set mSnapshotConcrete = Nothing
     Set mSnapshotSteel = Nothing
+    Set mCoupledFields = Nothing: mTwist = 0#
     mSnapshotRevision = 0
     Set mMaterialSpec = Nothing
     Set mResultMeta = Nothing
@@ -176,7 +237,8 @@ Private Sub ValidateElementSnapshotSource(ByVal section As CSectionModel)
     If section Is Nothing Then Err.Raise vbObjectError + 3974, "CSectionStateResult", "Модель для снимка элементов не передана."
     If Not section Is mSnapshotSection Then Err.Raise vbObjectError + 3974, "CSectionStateResult", "Снимок НДС относится к другой модели сечения."
     If section.Revision <> mSnapshotRevision Then Err.Raise vbObjectError + 3974, "CSectionStateResult", "После расчета НДС геометрия изменилась; выполните расчет для текущего сечения."
-    If Not HasMaterialSnapshot Then Err.Raise vbObjectError + 3974, "CSectionStateResult", "Фактические диаграммы состояния недоступны для записи элементов."
+    If Not HasMaterialSnapshot And mCoupledFields Is Nothing Then _
+        Err.Raise vbObjectError + 3974, "CSectionStateResult", "Фактические диаграммы или поля состояния недоступны для записи элементов."
 End Sub
 
 ' Вычисляет ID, тип, деформацию и напряжение элементов в заданном окне массива.
@@ -185,15 +247,23 @@ Private Sub FillElementSnapshot(ByVal section As CSectionModel, ByRef data() As 
     Dim i As Long, row As Long, strain As Double, stress As Double
     row = firstRow
     For i = 1 To section.ConcreteCount
-        strain = mEpsilon0 + mKappaX * section.ConcreteY(i) + mKappaY * section.ConcreteX(i)
-        stress = mSnapshotConcrete.GetStress(strain)
+        If mCoupledFields Is Nothing Then
+            strain = mEpsilon0 + mKappaX * section.ConcreteY(i) + mKappaY * section.ConcreteX(i)
+            stress = mSnapshotConcrete.GetStress(strain)
+        Else
+            mCoupledFields.Axial i, strain, stress
+        End If
         data(row, firstColumn) = section.ConcreteID(i): data(row, firstColumn + 1) = "Concrete"
         data(row, firstColumn + 2) = strain: data(row, firstColumn + 3) = stress: data(row, firstColumn + 4) = ElementPhysicalState("Concrete", strain, stress)
         row = row + 1
     Next i
     For i = 1 To section.RebarCount
-        strain = mEpsilon0 + mKappaX * section.RebarY(i) + mKappaY * section.RebarX(i)
-        stress = mSnapshotSteel.GetStress(strain)
+        If mCoupledFields Is Nothing Then
+            strain = mEpsilon0 + mKappaX * section.RebarY(i) + mKappaY * section.RebarX(i)
+            stress = mSnapshotSteel.GetStress(strain)
+        Else
+            mCoupledFields.Axial section.ConcreteCount + i, strain, stress
+        End If
         data(row, firstColumn) = section.RebarID(i): data(row, firstColumn + 1) = "Rebar"
         data(row, firstColumn + 2) = strain: data(row, firstColumn + 3) = stress: data(row, firstColumn + 4) = ElementPhysicalState("Rebar", strain, stress)
         row = row + 1

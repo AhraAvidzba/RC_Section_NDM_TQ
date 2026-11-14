@@ -67,8 +67,10 @@ End Sub
 ' Решает в выбранной точке траектории и возвращает только подтверждённое
 ' состояние заданных усилий. Численный отказ не публикует итоги промежуточной ступени.
 Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
-        ByVal spec As CMaterialModelSpec, ByRef field() As Double, ByRef resultants() As Double) As CResultMeta
+        ByVal spec As CMaterialModelSpec, ByRef field() As Double, ByRef resultants() As Double, _
+        Optional ByVal captureFields As Boolean = False, Optional ByRef acceptedState As CSectionStateResult = Nothing) As CResultMeta
     Erase field: Erase resultants
+    Set acceptedState = Nothing
     Dim meta As New CResultMeta
     If mSection.Revision <> mRevision Or mProvider.Revision <> mProviderRevision Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Повторно подготовьте связанный расчёт после изменения сечения или материалов."
@@ -98,7 +100,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation
     solver.Initialize mOperators, response, mEb
     continuation.Initialize solver, BuildPath(loads, loadPath), INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
-        STRESS_TOLERANCE, RELATIVE_TOLERANCE
+        STRESS_TOLERANCE, RELATIVE_TOLERANCE, captureFields
     If continuation.Advance(1#) Then
         continuation.CopyAccepted field, resultants
         Set meta = continuation.ResultMeta
@@ -108,6 +110,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
         Else
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."
         End If
+        If captureFields Then Set acceptedState = CaptureAcceptedState(loads, spec, continuation, response, field, resultants, fc, ft, meta)
     Else
         Set meta = continuation.ResultMeta
     End If
@@ -122,6 +125,28 @@ InvalidMaterialOrGeometry:
     Else
         Err.Raise number, source, reason
     End If
+End Function
+
+' Сохраняет осевое и пространственное поля принятой траектории. Отказ
+' отдельной точки вывода сохраняет подтверждённое интегральное равновесие.
+Private Function CaptureAcceptedState(ByVal loads As CSectionLoadState, ByVal spec As CMaterialModelSpec, _
+        ByVal continuation As CCoupledLoadContinuation, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByRef field() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
+        ByVal meta As CResultMeta) As CSectionStateResult
+    Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot, reason As String
+    observer.Initialize mSection.ConcreteCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    If Not fields.Capture(mSection, mOperators, continuation, observer, reinforcement, reason) Then
+        If meta.InternalStatus = rsSuccess Then
+            meta.SetResult rsSuccessWithWarning, rcNone, rkDirectState, meta.ResultComment & " " & reason, meta.DiagnosticDetails
+        Else
+            meta.ResultComment = meta.ResultComment & " " & reason
+        End If
+        Exit Function
+    End If
+    Dim eps0 As Double, kx As Double, ky As Double, twist As Double, state As New CSectionStateResult
+    mOperators.GeneralizedDeformation field, eps0, kx, ky, twist
+    state.InitializeFromCoupled mSection, spec, loads, resultants, eps0, kx, ky, twist, fields, meta
+    Set CaptureAcceptedState = state
 End Function
 
 ' Готовит операторы с модулями фактически назначенных моделей. Профили

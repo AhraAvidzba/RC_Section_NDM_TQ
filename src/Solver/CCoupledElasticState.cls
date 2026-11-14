@@ -384,16 +384,46 @@ End Sub
 ' Снимает продольное перемещение w в мм в исходных координатах сечения.
 ' В поле передаются общие, внутренние и служебные степени свободы этой сетки.
 Friend Function WarpingAt(ByVal x As Double, ByVal y As Double, ByRef field() As Double) As Double
+    Dim fieldStrain(1 To STRESS_COMPONENTS) As Double, warping As Double
+    KinematicsAt x, y, field, fieldStrain, warping
+    WarpingAt = warping
+End Function
+
+' Определяет деформации и продольное перемещение в исходной точке x,y.
+' Использует те же функции и нормирование, что операторы материальных точек.
+Friend Sub KinematicsAt(ByVal x As Double, ByVal y As Double, ByRef field() As Double, _
+        ByRef strain() As Double, ByRef warping As Double)
     Dim indices(1 To SHAPE_COUNT) As Long, values(1 To SHAPE_COUNT) As Double
     Dim dx(1 To SHAPE_COUNT) As Double, dy(1 To SHAPE_COUNT) As Double
-    mQuadrature.EvaluateShape x - mQuadrature.Frame.OriginX, y - mQuadrature.Frame.OriginY, indices, values, dx, dy
-    Dim k As Long, active As Long
+    x = x - mQuadrature.Frame.OriginX: y = y - mQuadrature.Frame.OriginY
+    mQuadrature.EvaluateShape x, y, indices, values, dx, dy
+    strain(1) = 0#: strain(2) = 0#: strain(4) = 0#: warping = 0#
+    strain(3) = field(1) + (field(2) * y + field(3) * x) / mLength
+    strain(5) = -field(4) * y / mLength: strain(6) = field(4) * x / mLength
+    Dim k As Long, active As Long, u As Double, v As Double, w As Double, gx As Double, gy As Double
     For k = 1 To SHAPE_COUNT
         active = mSupport(indices(k))
-        If active > 0 Then WarpingAt = WarpingAt + values(k) * field(PLANE_DOF + 3 * active)
+        If active > 0 Then
+            active = PLANE_DOF + 3 * active
+            u = field(active - 2): v = field(active - 1): w = field(active)
+            gx = dx(k) * mLength: gy = dy(k) * mLength
+            strain(1) = strain(1) + gx * u
+            strain(2) = strain(2) + gy * v
+            strain(4) = strain(4) + gy * u + gx * v
+            strain(5) = strain(5) + gx * w
+            strain(6) = strain(6) + gy * w
+            warping = warping + values(k) * w
+        End If
     Next k
-    WarpingAt = WarpingAt * mLength ' Коэффициенты внутренних перемещений нормированы по габариту.
-End Function
+    warping = warping * mLength ' Коэффициенты внутренних перемещений нормированы по габариту.
+End Sub
+
+' Возвращает обобщённые деформации в начале координат модели и закручивание.
+Friend Sub GeneralizedDeformation(ByRef field() As Double, ByRef epsilon0 As Double, ByRef kappaX As Double, _
+        ByRef kappaY As Double, ByRef twist As Double)
+    kappaX = field(2) / mLength: kappaY = field(3) / mLength: twist = field(4) / mLength
+    epsilon0 = mQuadrature.Frame.OriginalStrain(field(1), kappaX, kappaY)
+End Sub
 
 ' Возвращает класс материала конкретного продольного или поперечного стержня.
 Friend Property Get SteelClassAt(ByVal point As Long) As String

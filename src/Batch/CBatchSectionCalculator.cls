@@ -929,9 +929,11 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
     Dim meta As CResultMeta, field() As Double, resultants() As Double
     ReportSection "Связанное НДС по шести усилиям"
     If profile.StrengthDirectStateEnabled Then
-        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants)
+        Dim acceptedState As CSectionStateResult
+        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants, True, acceptedState)
         combined.SetDirectStateMeta meta
-        If meta.InternalStatus = rsSuccess Or meta.InternalStatus = rsCheckFailed Then _
+        If Not acceptedState Is Nothing Then combined.AddState acceptedState
+        If meta.InternalStatus = rsSuccess Or meta.InternalStatus = rsSuccessWithWarning Or meta.InternalStatus = rsCheckFailed Then _
             combined.StoreCoupledResultants resultants
         ReportStep meta.ResultComment
         If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails

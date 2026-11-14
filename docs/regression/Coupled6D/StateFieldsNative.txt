@@ -1,0 +1,207 @@
+﻿SOURCE: C:\Users\avidzba\Desktop\программы\В_РАБОТЕ!\RC_Section_NDM_TQ\docs\regression\Coupled6D\CoupledStateFields.xlsm
+SOURCE_SHA256: DB76F034443609EF0181A01EF45EA7F67D2BA3C7B732948E1DF3DC11C7EF6ED8
+FIXTURE: C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_5b3c6f8dab5f49e69f52432c42afab47\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=7532; startTicks=639302917029391890
+===== RunTestCoupledConcreteSection =====
+SUITE_STARTED: RunTestCoupledConcreteSection; 2026-11-15T01:21:50
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7532; workingSet=148795392; privateBytes=96903168; cpu=10.328125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127143936; cpu=35.6875
+OK: six-action concrete section  Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+SOLVE_SECONDS: 2.40673828125
+OK: concrete-integrated component 1 actual=26319.9999998685 expected=26320
+OK: concrete-integrated component 2 actual=479400.00000527 expected=479400
+OK: concrete-integrated component 3 actual=169199.999992953 expected=169200
+OK: concrete-integrated component 4 actual=1409999.99999594 expected=1410000
+OK: concrete-integrated component 5 actual=15979.9999999003 expected=15980
+OK: concrete-integrated component 6 actual=-6673.99999998269 expected=-6674
+OK: concrete damage develops at integration point 3
+OK: six-action unloading gives equilibrium
+OK: concrete point cannot heal during unloading
+TOTAL_COUPLED_CONCRETE_SECTION: passed=10; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_5b3c6f8dab5f49e69f52432c42afab47\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledConcreteSection; 2026-11-15T01:21:54
+===== RunTestCoupledBatchRoute =====
+SUITE_STARTED: RunTestCoupledBatchRoute; 2026-11-15T01:21:55
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7532; workingSet=150683648; privateBytes=98693120; cpu=13.5625
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127143936; cpu=35.6875
+OK: target equilibrium
+OK: planar route remains available
+OK: second independent target Несущая способность: Предельный множитель для связанного расчёта не определён.; Устойчивость: Профиль запрашивает устойчивость, для которой не подготовлена проверка при совместном действии шести усилий.
+OK: requested but unverified coupled limit is visible
+OK: requested but unverified coupled stability is visible
+OK: incomplete profile does not report overall success
+OK: both accepted vectors are available
+OK: batch equilibrium component 1 actual=13160 expected=13160
+OK: independent material history component 1
+OK: batch equilibrium component 2 actual=147580 expected=147580
+OK: independent material history component 2
+OK: batch equilibrium component 3 actual=229360 expected=229360
+OK: independent material history component 3
+OK: batch equilibrium component 4 actual=724223 expected=724223
+OK: independent material history component 4
+OK: batch equilibrium component 5 actual=7990 expected=7990
+OK: independent material history component 5
+OK: batch equilibrium component 6 actual=-3337 expected=-3337
+OK: independent material history component 6
+OK: planar result has no coupled vector
+TOTAL_COUPLED_BATCH_ROUTE: passed=20; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_5b3c6f8dab5f49e69f52432c42afab47\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledBatchRoute; 2026-11-15T01:21:57
+===== RunTestCoupledWorkbookInput =====
+SUITE_STARTED: RunTestCoupledWorkbookInput; 2026-11-15T01:21:58
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7532; workingSet=334041088; privateBytes=279691264; cpu=33.59375
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127143936; cpu=35.6875
+OK: named calibration layout
+OK: calibration input fill
+OK: calibration text is not wrapped
+OK: calibration has right border
+OK: steel class catalog layout
+OK: steel class input fill
+OK: steel class catalog has right border
+OK: Excel stores recipe identity on formation
+OK: Excel restores longitudinal steel class
+OK: Excel missing Gt is an input error
+OK: Excel missing Gt names its cell
+OK: Excel planar case unaffected by calibration
+OK: Excel missing hoop modulus is an input error
+OK: Excel invalid class value names its cell
+WORKBOOK_SECONDS Excel (two cases): 2.552734375
+OK: Excel produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.55 с.
+
+Данные сохранены на листе Results текущей книги.
+OK: Excel saves actual solver
+OK: Excel same saved recipe after repeated calculation
+OK: Excel saves internal N actual=-0.05 expected=-0.05
+OK: Excel saves internal Mx actual=0.001 expected=0.001
+OK: Excel saves internal My actual=-0.002 expected=-0.002
+OK: Excel saves internal T actual=0.001 expected=0.001
+OK: Excel saves internal Qx actual=0.002 expected=0.002
+OK: Excel saves internal Qy actual=-0.003 expected=-0.003
+OK: Excel stores elements of actual coupled state
+OK: Excel stores twist
+OK: Excel keeps all spatial fields
+OK: Excel has physical shear and warping
+OK: Excel plot reads the actual shear field
+OK: Excel plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+OK: File stores recipe identity on formation
+OK: File restores longitudinal steel class
+OK: File missing Gt is an input error
+OK: File missing Gt names its cell
+OK: File planar case unaffected by calibration
+OK: File missing hoop modulus is an input error
+OK: File invalid class value names its cell
+WORKBOOK_SECONDS File (two cases): 2.47509765625
+OK: File produces linked equilibrium Расчет завершен.
+
+Геометрия для расчёта загружена из файла «TestCoupledWorkbookInput.ndm».
+
+Обработано сочетаний: 2.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Время расчёта: 2.48 с.
+
+Данные сохранены в файле «TestCoupledWorkbookInput.ndm».
+OK: File saves actual solver
+OK: File same saved recipe after repeated calculation
+OK: File saves internal N actual=-0.05 expected=-0.05
+OK: File saves internal Mx actual=0.001 expected=0.001
+OK: File saves internal My actual=-0.002 expected=-0.002
+OK: File saves internal T actual=0.001 expected=0.001
+OK: File saves internal Qx actual=0.002 expected=0.002
+OK: File saves internal Qy actual=-0.003 expected=-0.003
+OK: File stores elements of actual coupled state
+OK: File stores twist
+OK: File keeps all spatial fields
+OK: File has physical shear and warping
+OK: File plot reads the actual shear field
+OK: File plot matches saved shear actual=1.25488635132204E-05 expected=1.25488635132204E-05
+TOTAL_COUPLED_WORKBOOK_INPUT: passed=51; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_5b3c6f8dab5f49e69f52432c42afab47\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledWorkbookInput; 2026-11-15T01:22:16
+===== RunTestCoupledFieldProfiles =====
+SUITE_STARTED: RunTestCoupledFieldProfiles; 2026-11-15T01:22:17
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7532; workingSet=202457088; privateBytes=145387520; cpu=41.125
+EXCEL_AFTER_SUITE: pid=25900; workingSet=183193600; privateBytes=127143936; cpu=35.6875
+AUTOCAD_SNAPSHOT:
+AUTOCAD_SNAPSHOT:
+OK: autoCADConfig.snapshot.state1
+OK: autoCADConfig.snapshot.state2
+AUTOCAD_NUMBER: TauXZ.reader|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.reader
+AUTOCAD_NUMBER: TauXZ.plot|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.plot
+OK: TauXZ.unit
+AUTOCAD_NUMBER: TauXZ.cad|actual=-3|expected=-3|tolerance=0.00000001
+OK: TauXZ.cad
+AUTOCAD_NUMBER: TauYZ.reader|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.reader
+AUTOCAD_NUMBER: TauYZ.plot|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.plot
+OK: TauYZ.unit
+AUTOCAD_NUMBER: TauYZ.cad|actual=4|expected=4|tolerance=0.00000001
+OK: TauYZ.cad
+AUTOCAD_NUMBER: Tau.reader|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.reader
+AUTOCAD_NUMBER: Tau.plot|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.plot
+OK: Tau.unit
+AUTOCAD_NUMBER: Tau.cad|actual=5|expected=5|tolerance=0.00000001
+OK: Tau.cad
+AUTOCAD_NUMBER: GammaXZ.reader|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.reader
+AUTOCAD_NUMBER: GammaXZ.plot|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.plot
+OK: GammaXZ.unit
+AUTOCAD_NUMBER: GammaXZ.cad|actual=0.0005|expected=0.0005|tolerance=0.00000001
+OK: GammaXZ.cad
+AUTOCAD_NUMBER: GammaYZ.reader|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.reader
+AUTOCAD_NUMBER: GammaYZ.plot|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.plot
+OK: GammaYZ.unit
+AUTOCAD_NUMBER: GammaYZ.cad|actual=-0.0012|expected=-0.0012|tolerance=0.00000001
+OK: GammaYZ.cad
+AUTOCAD_NUMBER: Gamma.reader|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.reader
+AUTOCAD_NUMBER: Gamma.plot|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.plot
+OK: Gamma.unit
+AUTOCAD_NUMBER: Gamma.cad|actual=0.0013|expected=0.0013|tolerance=0.00000001
+OK: Gamma.cad
+AUTOCAD_NUMBER: Warping.reader|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.reader
+AUTOCAD_NUMBER: Warping.plot|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.plot
+OK: Warping.unit
+AUTOCAD_NUMBER: Warping.cad|actual=-0.125|expected=-0.125|tolerance=0.00000001
+OK: Warping.cad
+COUPLED_FIELD_REJECT_RUN: -2147217115 Results!DW157 (rngNDMCoupledFields). Поле относится к другому запуску расчёта.
+OK: coupledField.rejectStaleRun
+OK: coupledField.rejectMissingState
+TOTAL_COUPLED_FIELD_PROFILES: passed=32; failed=0
+
+COM_WORKBOOK_AFTER_SUITE: path=C:\Users\avidzba\AppData\Local\Temp\RC_NDM_ModeSuite_5b3c6f8dab5f49e69f52432c42afab47\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: RunTestCoupledFieldProfiles; 2026-11-15T01:22:22
+SOURCE_UNCHANGED: True

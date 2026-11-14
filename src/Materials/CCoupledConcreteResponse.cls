@@ -116,6 +116,20 @@ Failure:
     ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
 End Function
 
+' Восстанавливает напряжения и историю точки вывода на известном принятом
+' поле. Точка не участвует в равновесии, её касательная не нужна.
+Friend Function EvaluateOutputPoint(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double) As Boolean
+    Dim updated As TConcreteHistory, virginElastic As Boolean
+    If Not UpdatePoint(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then Exit Function
+    mHistory(point, mTrial) = updated
+    EvaluateOutputPoint = True
+End Function
+
+' Подтверждает вычисленный шаг точек вывода перед переходом к следующему полю.
+Friend Sub AcceptOutputPoints()
+    ICoupledPointResponse_AcceptTrial
+End Sub
+
 ' Меняет владение готовыми массивами без покомпонентной записи истории.
 Private Sub ICoupledPointResponse_AcceptTrial()
     mCommitted = mTrial: mTrial = 3 - mCommitted

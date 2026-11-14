@@ -28,12 +28,13 @@ Private mInitialSteps As Long, mMaxAttempts As Long, mMaxIterations As Long
 Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
 Private mMeta As CResultMeta
+Private mAcceptedFields As Collection ' Копии полей принятых шагов для восстановления истории в точках вывода.
 
 ' Начинает новое независимое сочетание. Копирует траекторию и обнуляет
 ' материалы, чтобы результат не зависел от предыдущей строки таблицы.
 Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadPathVector, _
         ByVal initialSteps As Long, ByVal maxAttempts As Long, ByVal maxIterations As Long, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double)
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, Optional ByVal saveAcceptedFields As Boolean = False)
     If solver Is Nothing Or path Is Nothing Then _
         Err.Raise 5, "CCoupledLoadContinuation", "Для прослеживания ветви передайте решатель и траекторию."
     If initialSteps < 1 Or maxAttempts < 1 Or maxIterations < 1 Or absoluteTolerance <= 0# Or relativeTolerance <= 0# Then _
@@ -49,8 +50,20 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mAbsoluteTolerance = absoluteTolerance: mRelativeTolerance = relativeTolerance
     mOffsetFraction = 0#: mLambda = 0#: mHasAccepted = False
     Erase mField: Erase mResultants
+    Set mAcceptedFields = Nothing
+    If saveAcceptedFields Then Set mAcceptedFields = New Collection
     Set mMeta = New CResultMeta
     mSolver.ResetHistory
+End Sub
+
+' Число принятых полей сохранённой траектории, включая постоянную часть.
+Friend Property Get SavedFieldCount() As Long
+    If Not mAcceptedFields Is Nothing Then SavedFieldCount = mAcceptedFields.Count
+End Property
+
+' Снимает отдельную копию степеней свободы принятого шага для вывода.
+Friend Sub CopySavedField(ByVal index As Long, ByRef field() As Double)
+    field = mAcceptedFields.Item(index)
 End Sub
 
 ' Продвигается до заданного lambda по текущей истории. После отказа
@@ -175,6 +188,7 @@ Private Function SolveAndAccept(ByVal parameter As Double, ByVal offsetStage As 
     mSolver.AcceptStep
     mField = field: mResultants = resultants
     mHasAccepted = True: mAccepted = mAccepted + 1
+    If Not mAcceptedFields Is Nothing Then mAcceptedFields.Add field
     SolveAndAccept = True
 End Function
 
