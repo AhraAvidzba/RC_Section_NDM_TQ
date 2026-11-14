@@ -708,3 +708,58 @@ Public Function RunTestCoupledConcreteReturn() As String
 Failed:
     RunTestCoupledConcreteReturn = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет заданный пик, связь эффективной прочности с повреждением
+' и энергию двух пластических ветвей независимой квадратурой трапециями.
+Public Function RunTestCoupledEnvelope() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim envelope As New CCoupledConcreteEnvelope
+    Dim stress As Double, effective As Double, damage As Double, energy As Double
+    Const PEAK_PLASTIC As Double = 0.0009
+    envelope.Initialize 15#, 30#, PEAK_PLASTIC, 80#, 150#, 0.27, PEAK_PLASTIC
+    envelope.Evaluate 0#, stress, effective, damage, energy
+    TestRecord stress = 15# And effective = 15# And damage = 0# And energy = 0#, _
+        "compression yield and virgin modulus", passed, failed, report
+    envelope.Evaluate PEAK_PLASTIC, stress, effective, damage, energy
+    TestExpectNear stress, 30#, 1E-12, "calibrated compression peak", passed, failed, report
+    TestExpectNear damage, 0.27, 1E-12, "calibrated cohesion degradation", passed, failed, report
+    TestExpectNear effective * (1# - damage), stress, 1E-12, "compression effective strength identity", passed, failed, report
+    TestExpectNear energy, (15# + 30#) * PEAK_PLASTIC * 0.5 * 150# / 80#, 1E-12, _
+        "analytic prepeak dissipated energy", passed, failed, report
+    envelope.Evaluate envelope.HalfStrengthPlasticStrain, stress, effective, damage, energy
+    TestExpectNear stress, 15#, 1E-12, "half compression descending strength", passed, failed, report
+
+    Const TENSION_ENERGY As Double = 0.12
+    Const LENGTH As Double = 120#
+    Const FT As Double = 3#
+    Dim half As Double: half = Log(2#) * TENSION_ENERGY / (FT * LENGTH)
+    envelope.Initialize FT, FT, 0#, TENSION_ENERGY, LENGTH, 0.5, half
+    envelope.Evaluate half, stress, effective, damage, energy
+    TestExpectNear stress, 0.5 * FT, 1E-12, "half tensile stress", passed, failed, report
+    TestExpectNear damage, 0.5, 1E-12, "half tensile stress damage", passed, failed, report
+    TestExpectNear effective, FT, 1E-12, "tensile effective cohesion from calibrated damage", passed, failed, report
+    TestExpectNear energy, 0.5, 1E-12, "half tensile fracture work", passed, failed, report
+
+    Const N As Long = 4000
+    Dim dx As Double, i As Long, area As Double
+    dx = 16# * TENSION_ENERGY / (FT * LENGTH) / N
+    For i = 0 To N
+        envelope.Evaluate i * dx, stress, effective, damage, energy
+        If i = 0 Or i = N Then stress = stress * 0.5
+        area = area + stress * dx
+    Next i
+    TestExpectNear area * LENGTH, TENSION_ENERGY, 0.00001, "independent fracture work integration", passed, failed, report
+    Dim invalid As Boolean
+    On Error Resume Next
+    envelope.Initialize 15#, 30#, PEAK_PLASTIC, 0.01, 150#, 0.27, PEAK_PLASTIC
+    invalid = Err.Number = vbObjectError + 1782
+    On Error GoTo Failed
+    TestRecord invalid, "incompatible prepeak work and energy rejected", passed, failed, report
+    RunTestCoupledEnvelope = report & "TOTAL_COUPLED_ENVELOPE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledEnvelope = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
