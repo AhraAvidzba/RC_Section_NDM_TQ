@@ -3358,3 +3358,66 @@ Private Sub TestCoupledTimingNumber(ByVal actual As String, ByVal expected As Do
         TestRecord False, label & " was not published", passed, failed, report
     End If
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет совместное принятие трёх историй, отказ в одной боковой
+' точке и точное воспроизведение по сохранённым полям той же траектории.
+Public Function RunTestCoupledSpatialTransactions() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5
+    center.TestInitialize operators.PointCount
+    plusSide.TestInitialize operators.PointCount
+    minusSide.TestInitialize operators.PointCount
+    solver.Initialize operators, center, 30000#, plusSide, minusSide
+
+    Dim history As New Collection, field() As Double, resultants() As Double
+    If Not solver.TryStep(9000#, 1000#, -1200#, 900#, 650#, -520#, 1E-8, 1E-8, 25) Then _
+        Err.Raise 5, "RunTestCoupledSpatialTransactions", "Не найдено первое пространственное равновесие. " & solver.ResultMeta.ResultComment
+    solver.CopyTrial field, resultants
+    history.Add field
+    solver.AcceptStep
+    Dim firstCenter As Double, firstPlus As Double, firstMinus As Double
+    firstCenter = center.TestAcceptedPeak: firstPlus = plusSide.TestAcceptedPeak: firstMinus = minusSide.TestAcceptedPeak
+    TestRecord center.TestAcceptedSteps = 1 And plusSide.TestAcceptedSteps = 1 And minusSide.TestAcceptedSteps = 1, _
+        "первая фиксация записывает три истории", passed, failed, report
+    TestRecord Abs(firstPlus - firstMinus) > 1E-12, "боковые истории различаются", passed, failed, report
+
+    minusSide.TestFail = True ' Отказ в точке 2 после успешной записи центра и положительной стороны.
+    TestRecord Not solver.TryStep(14000#, 2000#, -3200#, 1500#, 970#, -850#, 1E-8, 1E-8, 25), _
+        "отказ одной боковой точки отклоняет весь шаг", passed, failed, report
+    solver.DiscardStep
+    TestRecord center.TestAcceptedSteps = 1 And plusSide.TestAcceptedSteps = 1 And minusSide.TestAcceptedSteps = 1 And _
+        center.TestAcceptedPeak = firstCenter And plusSide.TestAcceptedPeak = firstPlus And minusSide.TestAcceptedPeak = firstMinus, _
+        "отклонённая проба сохраняет все три истории", passed, failed, report
+
+    minusSide.TestFail = False
+    If Not solver.TryStep(14000#, 2000#, -3200#, 1500#, 970#, -850#, 1E-8, 1E-8, 25) Then _
+        Err.Raise 5, "RunTestCoupledSpatialTransactions", "Повтор после отказа не подтвердил равновесие. " & solver.ResultMeta.ResultComment
+    solver.CopyTrial field, resultants
+    history.Add field
+    solver.AcceptStep
+    Dim lastCenter As Double, lastPlus As Double, lastMinus As Double
+    lastCenter = center.TestAcceptedPeak: lastPlus = plusSide.TestAcceptedPeak: lastMinus = minusSide.TestAcceptedPeak
+    TestRecord center.TestAcceptedSteps = 2 And plusSide.TestAcceptedSteps = 2 And minusSide.TestAcceptedSteps = 2, _
+        "успешный повтор принимает поле только один раз", passed, failed, report
+    TestRecord solver.ReplayAcceptedFields(history, 1), "повтор первого состояния", passed, failed, report
+    TestRecord center.TestAcceptedSteps = 1 And plusSide.TestAcceptedSteps = 1 And minusSide.TestAcceptedSteps = 1 And _
+        center.TestAcceptedPeak = firstCenter And plusSide.TestAcceptedPeak = firstPlus And minusSide.TestAcceptedPeak = firstMinus, _
+        "первое принятое поле восстанавливает каждую историю", passed, failed, report
+    TestRecord solver.ReplayAcceptedFields(history, 2), "повтор полной последовательности", passed, failed, report
+    TestRecord center.TestAcceptedSteps = 2 And plusSide.TestAcceptedSteps = 2 And minusSide.TestAcceptedSteps = 2 And _
+        center.TestAcceptedPeak = lastCenter And plusSide.TestAcceptedPeak = lastPlus And minusSide.TestAcceptedPeak = lastMinus, _
+        "полная последовательность восстанавливает каждую историю", passed, failed, report
+    solver.ResetHistory
+    TestRecord center.TestAcceptedSteps = 0 And plusSide.TestAcceptedSteps = 0 And minusSide.TestAcceptedSteps = 0 And _
+        center.TestAcceptedPeak = 0# And plusSide.TestAcceptedPeak = 0# And minusSide.TestAcceptedPeak = 0#, _
+        "новое сочетание получает три ненагруженных истории", passed, failed, report
+    RunTestCoupledSpatialTransactions = report & "TOTAL_COUPLED_SPATIAL_TRANSACTIONS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledSpatialTransactions = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

@@ -13,19 +13,23 @@ Option Explicit
 ' Нелинейное равновесие связанного сечения при заданном силовом винте
 ' ==========================================================================
 ' Использует те же геометрические операторы, что и упругий расчёт.
-' Каждая проба демпфирования пересчитывает весь остаток. При недостаточной
-' касательной добавляются производные D вдоль продольного градиента.
+' Каждая проба демпфирования пересчитывает весь остаток. С боковыми
+' историями градиент напряжений определяется по двум продольным точкам.
 
 Private Const COMPONENT_COUNT As Long = 6
 Private Const GAUGE_COUNT As Long = 4
 Private Const MIN_FRACTION As Double = 0.0078125
 Private Const MIN_PROGRESS As Double = 0.0001
+Private Const SPATIAL_HALF_STEP As Double = 0.001 ' Полушаг секущей по безразмерной координате z/L.
 Private Const GRADIENT_DIFFERENCE_STEP As Double = 0.0000006 ' Амплитуда возмущения максимальной компоненты деформации.
 Private Const LOCAL_GRADIENT_DIFFERENCE_STEP As Double = 0.00000000025 ' Амплитуда пробы внутри перехода разностной материальной касательной.
 Private Const GRADIENT_TANGENT_CHANGE_RATIO As Double = 0.1 ' Изменение касательной в долях опорного модуля для выбора линеаризации.
 
 Private mSection As CCoupledElasticState
 Private mResponse As ICoupledPointResponse
+Private mPlusResponse As ICoupledPointResponse, mMinusResponse As ICoupledPointResponse
+Private mUseSpatialHistory As Boolean
+Private mLastFailedSide As Long ' 0 — центральная точка, +1 и -1 — продольные точки.
 Private mSystem As CCoupledLinearSystem
 Private mMeta As CResultMeta
 Private mAccepted() As Double, mCandidate() As Double, mTrialResultants() As Double
@@ -35,6 +39,10 @@ Private mTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
 Private mPlusTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
 Private mMinusTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
 Private mGradientTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
+Private mSpatialGradient(1 To COMPONENT_COUNT) As Double
+Private mSlopeTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
+Private mPlusStrain(1 To COMPONENT_COUNT) As Double, mMinusStrain(1 To COMPONENT_COUNT) As Double
+Private mPlusStress(1 To COMPONENT_COUNT) As Double, mMinusStress(1 To COMPONENT_COUNT) As Double
 Private mMatrix() As Double, mExternal() As Double, mResidual() As Double
 Private mCandidateReady As Boolean
 Private mControlActive As Boolean
@@ -50,18 +58,28 @@ Private mLocalGradientBuilds As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
 
-' Подключает готовое сечение и независимый набор материальной истории.
+' Подключает сечение и независимую центральную историю. Две отдельные
+' боковые истории включают секущий продольный градиент напряжений.
 ' Модуль в МПа нужен для масштабирования уравнений перемещений.
 Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As ICoupledPointResponse, _
-        ByVal referenceModulus As Double)
+        ByVal referenceModulus As Double, Optional ByVal plusSide As ICoupledPointResponse = Nothing, _
+        Optional ByVal minusSide As ICoupledPointResponse = Nothing)
     If section Is Nothing Or response Is Nothing Or referenceModulus <= 0# Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Для равновесия требуется подготовленное сечение, материал и положительный модуль."
+    If (plusSide Is Nothing) Xor (minusSide Is Nothing) Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Для секущего градиента требуются обе продольные истории."
+    If Not plusSide Is Nothing Then
+        If (plusSide Is minusSide) Or (plusSide Is response) Or (minusSide Is response) Then _
+            Err.Raise 5, "CCoupledNewtonSolver", "Для секущего градиента требуются три независимые материальные истории."
+    End If
     mDegreeCount = section.DegreeCount
     mPointCount = section.PointCount
     If mDegreeCount <= GAUGE_COUNT Or mPointCount < 1 Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Геометрические операторы связанного сечения не подготовлены."
     mGaugeStart = mDegreeCount - GAUGE_COUNT + 1
     Set mSection = section: Set mResponse = response
+    Set mPlusResponse = plusSide: Set mMinusResponse = minusSide
+    mUseSpatialHistory = Not (plusSide Is Nothing)
     Set mSystem = New CCoupledLinearSystem: Set mMeta = New CResultMeta
     mReferenceModulus = referenceModulus
     ResetHistory
@@ -70,6 +88,10 @@ End Sub
 ' Начинает независимую траекторию. Принятое поле и история других LC здесь не используются.
 Friend Sub ResetHistory()
     mResponse.ClearHistory
+    If mUseSpatialHistory Then
+        mPlusResponse.ClearHistory
+        mMinusResponse.ClearHistory
+    End If
     ReDim mAccepted(1 To mDegreeCount)
     mCandidateReady = False
     mMeta.Clear
@@ -174,7 +196,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mCandidateReady = False
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
     mLocalGradientBuilds = 0
-    mMaterialFailures = 0: mLastFailedPoint = 0
+    mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
     mLastNorm = 0#: mMinimumPivot = 0#
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -212,7 +234,7 @@ RecomputeTangent:
         If mIterations >= maxIterations Then Exit Do
         If Not SolveCorrection(current, correction) Then
             mMinimumPivot = mSystem.MinimumPivot
-            If Not useGradientTangent And mSection.HasAxialGradient(current) Then
+            If Not mUseSpatialHistory And Not useGradientTangent And mSection.HasAxialGradient(current) Then
                 useGradientTangent = True
                 GoTo RecomputeTangent
             End If
@@ -220,7 +242,7 @@ RecomputeTangent:
             Exit Function
         End If
         mMinimumPivot = mSystem.MinimumPivot
-        If mControlActive And useGradientTangent Then
+        If mControlActive And (useGradientTangent Or mUseSpatialHistory) Then
             governingRow = LargestEquilibriumResidualRow()
             baseEquation = mResidual(governingRow)
         End If
@@ -251,7 +273,7 @@ RecomputeTangent:
             fraction = fraction * 0.5
         Loop
         If Not accepted Then
-            If Not useGradientTangent And mSection.HasAxialGradient(current) Then
+            If Not mUseSpatialHistory And Not useGradientTangent And mSection.HasAxialGradient(current) Then
                 useGradientTangent = True
                 GoTo RecomputeTangent
             End If
@@ -374,7 +396,7 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
         ByRef uncertainty As Double) As Boolean
     RequireCandidate
     If Not mControlActive Then Exit Function
-    If Not Evaluate(mCandidate, True, True) Then
+    If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory) Then
         mCandidateReady = False
         Exit Function
     End If
@@ -424,7 +446,7 @@ End Function
 Friend Sub AcceptStep()
     RequireCandidate
     Dim acceptedField() As Double: acceptedField = mCandidate
-    mResponse.AcceptTrial
+    AcceptMaterialTrials
     mAccepted = acceptedField
     mCandidateReady = False
 End Sub
@@ -454,21 +476,31 @@ Friend Function ReplayAcceptedFields(ByVal history As Collection, ByVal lastFiel
     If lastField < 0 Or lastField > history.Count Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Точка восстановления вне сохранённой истории полей."
     ResetHistory
-    Dim index As Long, point As Long, field() As Double
+    Dim index As Long, point As Long, field() As Double, failedSide As Long
     For index = 1 To lastField
         field = history(index)
         For point = 1 To mPointCount
             mSection.PointStrain point, field, mPointStrain
-            If mResponse.EvaluatePoint(point, mPointStrain, mStress, mTangent, ctmStressOnly) <> sfcNone Then
+            If EvaluatePointResponses(point, field, ctmStressOnly, True, failedSide) <> sfcNone Then
                 ResetHistory
                 Exit Function
             End If
         Next point
-        mResponse.AcceptTrial
+        AcceptMaterialTrials
         mAccepted = field
     Next index
     ReplayAcceptedFields = True
 End Function
+
+' Продвигает материальные буферы после успешной пробы всех точек.
+' Цикл проб гарантирует заполнение каждой истории до смены буфера.
+Private Sub AcceptMaterialTrials()
+    mResponse.AcceptTrial
+    If mUseSpatialHistory Then
+        mPlusResponse.AcceptTrial
+        mMinusResponse.AcceptTrial
+    End If
+End Sub
 
 ' Возвращает независимый статус последнего шага.
 Friend Property Get ResultMeta() As CResultMeta
@@ -476,30 +508,38 @@ Friend Property Get ResultMeta() As CResultMeta
 End Property
 
 ' Считает отклик всех точек от фиксированной принятой истории.
-' Line search оставляет только невязку и интегралы, без заполнения матрицы.
+' При демпфировании собирает только невязку и интегралы. Читающая проба
+' касательной сохраняет материальные буферы ранее подтверждённого поля.
 Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, _
-        Optional ByVal useGradientTangent As Boolean = False) As Boolean
+        Optional ByVal useGradientTangent As Boolean = False, Optional ByVal recordTrial As Boolean = True) As Boolean
     mEvaluations = mEvaluations + 1
     mSection.StartEquations field, mExternal, mResidual, mMatrix, withMatrix
     Dim point As Long, useAxialGradient As Boolean, tangentMode As ECoupledTangentMode
-    useAxialGradient = mSection.HasAxialGradient(field)
+    If Not mUseSpatialHistory Then useAxialGradient = mSection.HasAxialGradient(field)
+    tangentMode = ctmFull
     If Not withMatrix Then
         If useAxialGradient Then tangentMode = ctmAxialGradient Else tangentMode = ctmStressOnly
     End If
     useGradientTangent = useGradientTangent And withMatrix And useAxialGradient
     If useGradientTangent Then mGradientBuilds = mGradientBuilds + 1
-    Dim differenceScale As Double, plusOk As Boolean, minusOk As Boolean
+    Dim differenceScale As Double, plusOk As Boolean, minusOk As Boolean, failedSide As Long
     ReDim mTrialResultants(1 To COMPONENT_COUNT)
     For point = 1 To mPointCount
         mMaterialPoint = point
         mSection.PointStrain point, field, mPointStrain
         If useGradientTangent Then TakeGradientProbes point, field, differenceScale, plusOk, minusOk
-        mFailureCode = mResponse.EvaluatePoint(point, mPointStrain, mStress, mTangent, tangentMode)
+        mFailureCode = EvaluatePointResponses(point, field, tangentMode, recordTrial, failedSide)
         If mFailureCode <> sfcNone Then
-            mMaterialFailures = mMaterialFailures + 1: mLastFailedPoint = point
+            mMaterialFailures = mMaterialFailures + 1: mLastFailedPoint = point: mLastFailedSide = failedSide
             Exit Function
         End If
-        mSection.AddPointEquilibrium point, field, mStress, mTangent, mResidual, mMatrix, withMatrix, mTrialResultants, useAxialGradient
+        If mUseSpatialHistory Then
+            BuildSpatialGradient withMatrix
+            mSection.AddSpatialPointEquilibrium point, mStress, mTangent, mSpatialGradient, mGradientTangent, _
+                mSlopeTangent, mResidual, mMatrix, withMatrix, mTrialResultants
+        Else
+            mSection.AddPointEquilibrium point, field, mStress, mTangent, mResidual, mMatrix, withMatrix, mTrialResultants, useAxialGradient
+        End If
         If differenceScale > 0# Then
             If Not plusOk And Not minusOk Then
                 mFailureCode = sfcNumericalFailure
@@ -517,6 +557,47 @@ Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, 
     mMaterialPoint = 0
     Evaluate = True
 End Function
+
+' Получает центральный отклик и отклики продольных точек при необходимости.
+' Каждая история читает свой принятый буфер. Стороны вычисляются и при g=0,
+' поскольку ранее различавшиеся истории могут давать разные напряжения.
+Private Function EvaluatePointResponses(ByVal point As Long, ByRef field() As Double, _
+        ByVal tangentMode As ECoupledTangentMode, ByVal recordTrial As Boolean, _
+        ByRef failedSide As Long) As ESolverFailureCode
+    failedSide = 0
+    EvaluatePointResponses = mResponse.EvaluatePoint(point, mPointStrain, mStress, mTangent, tangentMode, recordTrial)
+    If EvaluatePointResponses <> sfcNone Or Not mUseSpatialHistory Then Exit Function
+
+    Dim gradient(1 To COMPONENT_COUNT) As Double, i As Long, offset As Double
+    mSection.AxialGradientAtPoint point, field, gradient
+    For i = 1 To COMPONENT_COUNT
+        offset = SPATIAL_HALF_STEP * gradient(i) ' Приращение деформации от центра до продольной точки.
+        mPlusStrain(i) = mPointStrain(i) + offset
+        mMinusStrain(i) = mPointStrain(i) - offset
+    Next i
+    failedSide = 1
+    EvaluatePointResponses = mPlusResponse.EvaluatePoint(point, mPlusStrain, mPlusStress, mPlusTangent, tangentMode, recordTrial)
+    If EvaluatePointResponses <> sfcNone Then Exit Function
+    failedSide = -1
+    EvaluatePointResponses = mMinusResponse.EvaluatePoint(point, mMinusStrain, mMinusStress, mMinusTangent, tangentMode, recordTrial)
+End Function
+
+' Собирает секущую по z/L в МПа и её производные. Производная по
+' центральной деформации берётся из разности материальных касательных,
+' производная по уклону g — из их среднего.
+Private Sub BuildSpatialGradient(ByVal withMatrix As Boolean)
+    Dim i As Long, j As Long
+    For i = 1 To COMPONENT_COUNT
+        mSpatialGradient(i) = (mPlusStress(i) - mMinusStress(i)) / (2# * SPATIAL_HALF_STEP)
+    Next i
+    If Not withMatrix Then Exit Sub
+    For j = 1 To COMPONENT_COUNT
+        For i = 1 To COMPONENT_COUNT
+            mGradientTangent(i, j) = (mPlusTangent(i, j) - mMinusTangent(i, j)) / (2# * SPATIAL_HALF_STEP)
+            mSlopeTangent(i, j) = 0.5 * (mPlusTangent(i, j) + mMinusTangent(i, j))
+        Next i
+    Next j
+End Sub
 
 ' При резком изменении касательной бетона на деформационном шаге уточняет
 ' производную фактического Dg по деформации. В g входят zz, xz и yz.
@@ -613,11 +694,19 @@ End Sub
 ' Проба использует принятую историю, которую этот вызов не публикует.
 Friend Function TestEquilibriumLinearization(ByRef field() As Double, ByVal withMatrix As Boolean, _
         ByVal useGradientTangent As Boolean, ByRef residual() As Double, ByRef tangent() As Double) As Boolean
+    Dim savedExternal() As Double, savedResultants() As Double
+    If mCandidateReady Then
+        savedExternal = mExternal: savedResultants = mTrialResultants
+    End If
     ReDim mExternal(1 To mDegreeCount)
-    If Not Evaluate(field, withMatrix, useGradientTangent) Then Exit Function
-    residual = mResidual
-    If withMatrix Then tangent = mMatrix
-    TestEquilibriumLinearization = True
+    If Evaluate(field, withMatrix, useGradientTangent, recordTrial:=False) Then
+        residual = mResidual
+        If withMatrix Then tangent = mMatrix
+        TestEquilibriumLinearization = True
+    End If
+    If mCandidateReady Then
+        mExternal = savedExternal: mTrialResultants = savedResultants
+    End If
 End Function
 
 ' Возвращает максимум по всем силовым уравнениям и интегралам в масштабе МПа.
@@ -674,6 +763,8 @@ Private Function DiagnosticSummary() As String
     If mMaterialPoint > 0 Then DiagnosticSummary = DiagnosticSummary & "; материальная точка: " & CStr(mMaterialPoint)
     If mMaterialFailures > 0 Then DiagnosticSummary = DiagnosticSummary & "; отказов материала: " & CStr(mMaterialFailures) & _
         "; последняя точка отказа: " & CStr(mLastFailedPoint)
+    If mLastFailedSide <> 0 Then DiagnosticSummary = DiagnosticSummary & _
+        "; продольное положение последней точки отказа: " & Format$(mLastFailedSide * SPATIAL_HALF_STEP, "+0.000;-0.000") & " z/L"
     If mGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & "; уточнений касательной: " & CStr(mGradientBuilds)
     If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)

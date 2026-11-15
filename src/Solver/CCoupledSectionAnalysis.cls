@@ -90,9 +90,9 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
     If meta.InternalStatus <> rsUnset Then Set SolveTarget = meta: Exit Function
 
-    Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
+    Dim solver As CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
     Set path = BuildPath(loads, loadPath)
-    solver.Initialize mOperators, response, mEb
+    Set solver = CreateNewtonSolver(response, fc, ft, models)
     continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
         STRESS_TOLERANCE, RELATIVE_TOLERANCE, captureFields
     If continuation.Advance(1#) Then
@@ -149,9 +149,9 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         Exit Function
     End If
 
-    Dim solver As New CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As CLoadPathVector
+    Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As CLoadPathVector
     Set path = BuildPath(loads, loadPath)
-    solver.Initialize mOperators, response, mEb
+    Set solver = CreateNewtonSolver(response, fc, ft, models)
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
     branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
     Set acceptedTrace = branch.SavedTrace
@@ -280,8 +280,7 @@ Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concret
     If meta.InternalStatus <> rsUnset Then Exit Function
     fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
     ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
-    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
-    response.Initialize mOperators, concrete, models
+    InitializePointResponse concrete, response, fc, ft, models
     Exit Function
 
 InvalidMaterialOrGeometry:
@@ -292,6 +291,27 @@ InvalidMaterialOrGeometry:
     Else
         Err.Raise number, source, reason
     End If
+End Function
+
+' Инициализирует одну независимую историю бетона и стали. История использует
+' общие операторы геометрии и неизменяемые диаграммы всех классов стали.
+Private Sub InitializePointResponse(ByVal concrete As CCoupledConcreteResponse, ByVal response As CCoupledReinforcedResponse, _
+        ByVal fc As Double, ByVal ft As Double, ByVal models As Object)
+    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    response.Initialize mOperators, concrete, models
+End Sub
+
+' Подключает центральную и две боковые истории. Боковые точки участвуют
+' в градиенте напряжений, пределы и выходные данные определяются по центру.
+Private Function CreateNewtonSolver(ByVal response As CCoupledReinforcedResponse, ByVal fc As Double, ByVal ft As Double, _
+        ByVal models As Object) As CCoupledNewtonSolver
+    Dim plusConcrete As New CCoupledConcreteResponse, minusConcrete As New CCoupledConcreteResponse
+    Dim plusResponse As New CCoupledReinforcedResponse, minusResponse As New CCoupledReinforcedResponse
+    InitializePointResponse plusConcrete, plusResponse, fc, ft, models
+    InitializePointResponse minusConcrete, minusResponse, fc, ft, models
+    Dim solver As New CCoupledNewtonSolver
+    solver.Initialize mOperators, response, mEb, plusResponse, minusResponse
+    Set CreateNewtonSolver = solver
 End Function
 
 ' Копирует точки фактических моделей один раз для всех сочетаний этого набора.
@@ -468,9 +488,9 @@ Friend Sub TestIntegratedState(ByVal loads As CSectionLoadState, ByVal spec As C
     Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
     If meta.InternalStatus <> rsUnset Then Err.Raise 5, "TestIntegratedState", meta.ResultComment
 
-    Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
+    Dim solver As CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
     Set path = BuildPath(loads, "Auto")
-    solver.Initialize mOperators, response, mEb
+    Set solver = CreateNewtonSolver(response, fc, ft, models)
     continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE
     If Not continuation.Advance(factor) Then
         Set meta = continuation.ResultMeta

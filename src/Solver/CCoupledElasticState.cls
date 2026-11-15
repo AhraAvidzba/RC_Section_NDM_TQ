@@ -555,18 +555,45 @@ Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
         Optional ByVal useAxialGradient As Boolean = True)
     Dim axialGradient(1 To STRESS_COMPONENTS) As Double
     Dim weightedGradient(1 To STRESS_COMPONENTS) As Double
+    If useAxialGradient Then
+        Dim j As Long, weight As Double: weight = mWeight(point)
+        AxialGradientAtPoint point, field, axialGradient
+        For j = 1 To STRESS_COMPONENTS
+            weightedGradient(j) = weight * (tangent(j, 3) * axialGradient(3) + tangent(j, 5) * axialGradient(5) + tangent(j, 6) * axialGradient(6))
+        Next j
+    End If
+    AccumulatePointEquilibrium point, stress, weightedGradient, residual, resultants
+    If assembleMatrix Then AddPointTangent point, tangent, linearized
+End Sub
+
+' Добавляет равновесие по центральным напряжениям и секущему продольному
+' градиенту. Касательная разделяет производные по полю и по его уклонам.
+Friend Sub AddSpatialPointEquilibrium(ByVal point As Long, ByRef stress() As Double, _
+        ByRef centerTangent() As Double, ByRef stressGradient() As Double, ByRef strainTangent() As Double, _
+        ByRef slopeTangent() As Double, ByRef residual() As Double, ByRef linearized() As Double, _
+        ByVal assembleMatrix As Boolean, ByRef resultants() As Double)
+    Dim weightedGradient(1 To STRESS_COMPONENTS) As Double
+    Dim j As Long, weight As Double: weight = mWeight(point)
+    For j = 1 To STRESS_COMPONENTS
+        weightedGradient(j) = weight * stressGradient(j)
+    Next j
+    AccumulatePointEquilibrium point, stress, weightedGradient, residual, resultants
+    If Not assembleMatrix Then Exit Sub
+    AddPointTangent point, centerTangent, linearized, includeGradientColumns:=False
+    AddPointGradientTangent point, strainTangent, linearized
+    AddPointGradientTangent point, slopeTangent, linearized, useGradientDofs:=True
+End Sub
+
+' Проецирует напряжения и взвешенный продольный градиент в общие уравнения.
+' Шесть физических усилий вычисляются по напряжениям центральной точки.
+Private Sub AccumulatePointEquilibrium(ByVal point As Long, ByRef stress() As Double, _
+        ByRef weightedGradient() As Double, ByRef residual() As Double, ByRef resultants() As Double)
     Dim weightedStress(1 To STRESS_COMPONENTS) As Double
     Dim a As Long, j As Long, row As Long, first As Long, second As Long
     Dim weight As Double, value As Double, traction As Long, shapeValue As Double
     Dim coeffFirst As Double, coeffSecond As Double
     weight = mWeight(point)
-    If useAxialGradient Then AxialGradientAtPoint point, field, axialGradient
-    For j = 1 To STRESS_COMPONENTS
-        weightedStress(j) = stress(j) * weight
-        If useAxialGradient Then _
-            weightedGradient(j) = weight * (tangent(j, 3) * axialGradient(3) + tangent(j, 5) * axialGradient(5) + tangent(j, 6) * axialGradient(6))
-    Next j
-
+    For j = 1 To STRESS_COMPONENTS: weightedStress(j) = stress(j) * weight: Next j
     For a = 1 To LOCAL_DOF
         row = mSectionDof(a, point)
         If row > 0 Then
@@ -585,18 +612,22 @@ Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
         End If
     Next a
     AccumulateResultants point, stress, resultants
-    If assembleMatrix Then AddPointTangent point, tangent, linearized
 End Sub
 
-' Добавляет зависимость D Bp d от текущей деформации B q.
-' Столбец первичной матрицы относится к q, а строки содержат обе проекции
-' градиента напряжений, включая слабое равновесие внутренних перемещений.
+' Проецирует производную градиента напряжений в слабое равновесие.
+' Для уклонов используются только четыре обобщённые компоненты, для
+' деформации центрального сечения также участвуют внутренние перемещения.
 Friend Sub AddPointGradientTangent(ByVal point As Long, ByRef stressGradientDerivative() As Double, _
-        ByRef linearized() As Double)
+        ByRef linearized() As Double, Optional ByVal useGradientDofs As Boolean = False)
     Dim weighted(1 To STRESS_COMPONENTS, 1 To LOCAL_DOF) As Double
     Dim a As Long, b As Long, row As Long, col As Long, first As Long, second As Long
     Dim value As Double, shapeValue As Double, traction As Long, coeffFirst As Double, coeffSecond As Double
-    WeightTangentColumns point, stressGradientDerivative, weighted
+    Dim columnCount As Long, columnOffset As Long
+    columnCount = LOCAL_DOF
+    If useGradientDofs Then
+        columnCount = PLANE_DOF: columnOffset = mGradientBase
+    End If
+    WeightTangentColumns point, stressGradientDerivative, weighted, columnCount
     For a = 1 To LOCAL_DOF
         row = mSectionDof(a, point)
         If row > 0 Then
@@ -604,28 +635,33 @@ Friend Sub AddPointGradientTangent(ByVal point As Long, ByRef stressGradientDeri
                 row = mGradientBase + a
                 first = mFirstComponent(a): second = mSecondComponent(a)
                 coeffFirst = mOperators(1, a, point): coeffSecond = mOperators(2, a, point)
-                For b = 1 To LOCAL_DOF
+                For b = 1 To columnCount
                     col = mSectionDof(b, point)
                     If col > 0 Then
                         value = coeffFirst * weighted(first, b) + coeffSecond * weighted(second, b)
+                        col = col + columnOffset
                         linearized(col, row) = linearized(col, row) + value
                     End If
                 Next b
             Else
                 traction = TractionComponent(a)
                 shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
-                For b = 1 To LOCAL_DOF
+                For b = 1 To columnCount
                     col = mSectionDof(b, point)
-                    If col > 0 Then linearized(col, row) = linearized(col, row) - shapeValue * weighted(traction, b)
+                    If col > 0 Then
+                        col = col + columnOffset
+                        linearized(col, row) = linearized(col, row) - shapeValue * weighted(traction, b)
+                    End If
                 Next b
             End If
         End If
     Next a
 End Sub
 
-' Добавляет блоки Bᵀ D B и производные правой части по градиенту деформации.
-' Производные D по деформации при необходимости добавляет AddPointGradientTangent.
-Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRef linearized() As Double)
+' Добавляет блок Bᵀ D B для напряжений центральной точки. При локальном
+' описании градиента Dg также заполняет производную этого члена по уклонам.
+Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRef linearized() As Double, _
+        Optional ByVal includeGradientColumns As Boolean = True)
     Dim weighted(1 To STRESS_COMPONENTS, 1 To LOCAL_DOF) As Double
     Dim a As Long, b As Long, row As Long, col As Long, traction As Long, first As Long, second As Long
     Dim value As Double, shapeValue As Double, coeffFirst As Double, coeffSecond As Double
@@ -640,13 +676,13 @@ Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRe
                 If col > 0 Then
                     value = coeffFirst * weighted(first, b) + coeffSecond * weighted(second, b)
                     linearized(col, row) = linearized(col, row) + value
-                    If a <= PLANE_DOF And b <= PLANE_DOF Then
+                    If includeGradientColumns And a <= PLANE_DOF And b <= PLANE_DOF Then
                         linearized(mGradientBase + b, mGradientBase + a) = _
                             linearized(mGradientBase + b, mGradientBase + a) + value
                     End If
                 End If
             Next b
-            If a > PLANE_DOF Then
+            If includeGradientColumns And a > PLANE_DOF Then
                 traction = TractionComponent(a)
                 shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
                 For b = 1 To PLANE_DOF
@@ -660,11 +696,12 @@ End Sub
 
 ' Умножает D на два сохранённых коэффициента каждой колонки B и вес точки.
 ' Порядок слагаемых совпадает с порядком компонент тензора напряжений.
-Private Sub WeightTangentColumns(ByVal point As Long, ByRef tangent() As Double, ByRef weighted() As Double)
+Private Sub WeightTangentColumns(ByVal point As Long, ByRef tangent() As Double, ByRef weighted() As Double, _
+        Optional ByVal columnCount As Long = LOCAL_DOF)
     Dim b As Long, j As Long, first As Long, second As Long
     Dim weight As Double, coeffFirst As Double, coeffSecond As Double
     weight = mWeight(point)
-    For b = 1 To LOCAL_DOF
+    For b = 1 To columnCount
         If mSectionDof(b, point) > 0 Then
             first = mFirstComponent(b): second = mSecondComponent(b)
             coeffFirst = mOperators(1, b, point): coeffSecond = mOperators(2, b, point)
