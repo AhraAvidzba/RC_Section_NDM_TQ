@@ -467,16 +467,25 @@ Public Function RunTestCoupledTBU3MeasuredHoop(ByVal spansText As String, ByVal 
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Меняет базис при общей бетонной и арматурной квадратуре TBU3.
+' Использует шаг хомутов 76 мм и исходные оси номинального сечения.
+Public Function RunTestCoupledTBU3CommonHoopGauge(ByVal spansText As String, ByVal maximumStageText As String) As String
+    RunTestCoupledTBU3CommonHoopGauge = TraceTBU3HoopGaugeTest(spansText, maximumStageText, _
+        TBU3_MEASURED_HOOP_SPACING, commonHoopQuadrature:=True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Читает разрешение базиса и запускает опыт с заданным шагом хомутов.
 Private Function TraceTBU3HoopGaugeTest(ByVal spansText As String, ByVal maximumStageText As String, _
-        ByVal hoopSpacing As Double) As String
+        ByVal hoopSpacing As Double, Optional ByVal commonHoopQuadrature As Boolean = False) As String
     On Error GoTo Failed
     Dim resolution() As String: resolution = Split(spansText, "x")
     Dim cellsPerSpan As Long: cellsPerSpan = 5
     If UBound(resolution) > 1 Then Err.Raise 5, , "Задайте число интервалов или «интервалы x деления»."
     If UBound(resolution) = 1 Then cellsPerSpan = CLng(Trim$(resolution(1)))
     TraceTBU3HoopGaugeTest = TraceTBU3Test(Trim$(resolution(0)), maximumStageText, True, _
-        spatialHistory:=True, measureHoop:=True, cellsPerSpan:=cellsPerSpan, hoopSpacing:=hoopSpacing)
+        spatialHistory:=True, measureHoop:=True, cellsPerSpan:=cellsPerSpan, hoopSpacing:=hoopSpacing, _
+        commonHoopQuadrature:=commonHoopQuadrature)
     Exit Function
 Failed:
     TraceTBU3HoopGaugeTest = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
@@ -487,7 +496,8 @@ End Function
 Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean, _
         Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False, _
         Optional ByVal measureHoop As Boolean = False, Optional ByVal cellsPerSpan As Long = 5, _
-        Optional ByVal hoopSpacing As Double = TBU3_REFERENCE_HOOP_SPACING) As String
+        Optional ByVal hoopSpacing As Double = TBU3_REFERENCE_HOOP_SPACING, _
+        Optional ByVal commonHoopQuadrature As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -508,6 +518,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
 
     Dim layout As CTransverseRebarLayout, steel As Object, section As CSectionModel
     Set section = BuildTBU3SectionTest(layout, steel, hoopSpacing)
+    If commonHoopQuadrature Then Set layout = CommonTBU3HoopLayoutTest(section, layout)
     Dim gaugeLeftX As Double, gaugeRightX As Double
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
     operators.PrepareModel section, EC, NU, spans, spans, cellsPerSpan, layout, steelModels:=steel
@@ -523,6 +534,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
             CStr(operators.ConcretePointCount) & ";" & CStr(operators.PointCount) & ";" & CStr(operators.DegreeCount)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_COLUMNS;stage;Mx_kNm;T_kNm;strain_left;strain_right"
     End If
+    If commonHoopQuadrature Then RecordTBU3QuadratureTest operators, report, tracePath
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, FC, FT, 0.0045, 0.12, 80#, spatialHistory
     path.Initialize 0#, 0#, MX_OFFSET, DELTA_MX, 0#, 0#, 0#, DELTA_T
@@ -578,6 +590,57 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Делит одну замкнутую ось TBU3 по объединению узлов базисов 2 и 3.
+' Штатная квадратура использует эти границы и для базиса 1.
+Private Function CommonTBU3HoopLayoutTest(ByVal section As CSectionModel, _
+        ByVal layout As CTransverseRebarLayout) As CTransverseRebarLayout
+    Dim original As CGeometryPath: Set original = layout.Path(1)
+    Dim axis As New CGeometryPath: axis.Initialize original.ID
+    Dim basisTwo As New CCoupledSectionQuadrature, basisThree As New CCoupledSectionQuadrature
+    basisTwo.Initialize section, 2, 2
+    basisThree.Initialize section, 3, 3
+    Dim edge As TRegionEdge, part As TRegionEdge, cuts() As Double, extraCuts() As Double
+    Dim i As Long, j As Long, count As Long, extraCount As Long
+    For i = 1 To original.SegmentCount
+        original.CopySegment i, edge
+        basisTwo.PathCuts edge, cuts, count
+        basisThree.PathCuts edge, extraCuts, extraCount
+        For j = 1 To extraCount: modGeometryPrimitives.AddScalar cuts, count, extraCuts(j): Next j
+        modGeometryPrimitives.SortScalars cuts, count
+        For j = 2 To count
+            modGeometryPrimitives.SubEdge edge, cuts(j - 1), cuts(j), part
+            axis.Append original.SegmentID(i) & "_" & CStr(j - 1), part
+        Next j
+    Next i
+    axis.Seal True
+    Dim result As New CTransverseRebarLayout
+    result.AddGroup axis, layout.Diameter(1), layout.Spacing(1), layout.SteelClass(1), layout.SourceReference(1)
+    Set CommonTBU3HoopLayoutTest = result
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает фактические координаты, веса и направления материальных
+' точек в том порядке, в котором их получает решатель.
+Private Sub RecordTBU3QuadratureTest(ByVal operators As CCoupledElasticState, ByRef report As String, ByVal tracePath As String)
+    Dim index As Long, x As Double, y As Double, weight As Double, row As String, group As Long
+    Dim direction(1 To 6) As Double, material As String
+    For index = 1 To operators.PointCount
+        operators.Point index, x, y, weight
+        group = 0: material = "Concrete"
+        If index > operators.ConcretePointCount Then
+            group = operators.TransverseGroupAt(index)
+            material = operators.SteelClassAt(index)
+            operators.SteelProjection index, direction
+        End If
+        row = "TBU3_QUADRATURE;" & CStr(index) & ";" & material & ";" & CStr(group) & ";" & _
+            ExperimentNumberTest(x) & ";" & ExperimentNumberTest(y) & ";" & ExperimentNumberTest(weight) & ";" & _
+            ExperimentNumberTest(direction(1)) & ";" & ExperimentNumberTest(direction(2)) & ";" & _
+            ExperimentNumberTest(direction(3)) & ";" & ExperimentNumberTest(direction(4))
+        AddExperimentTraceTest report, tracePath, row
+    Next index
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Записывает продольные деформации обеих вертикальных ветвей в центре
 ' и на базе измерения. Читает кинематику из принятого поля.
 Private Sub RecordTBU3HoopGaugeTest(ByVal operators As CCoupledElasticState, ByRef field() As Double, _
@@ -594,6 +657,10 @@ Private Sub RecordTBU3HoopGaugeTest(ByVal operators As CCoupledElasticState, ByR
         ExperimentNumberTest(-achieved(2) / 1E+6) & ";" & ExperimentNumberTest(achieved(4) / 1E+6) & ";" & _
         ExperimentNumberTest(MeanTBU3GaugeStrainTest(operators, field, gaugeLeftX, verticalSpans)) & ";" & _
         ExperimentNumberTest(MeanTBU3GaugeStrainTest(operators, field, gaugeRightX, verticalSpans))
+    Dim row As String, component As Long
+    row = "TBU3_INTEGRALS;" & ExperimentNumberTest(stage)
+    For component = 1 To 6: row = row & ";" & ExperimentNumberTest(achieved(component)): Next component
+    AddExperimentTraceTest report, tracePath, row
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
