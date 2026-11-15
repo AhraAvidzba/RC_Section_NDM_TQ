@@ -119,6 +119,16 @@ $currentFeatures=@(
     'modTestCalculationSnapshot.RunGeometryHashTests',
     'modTestCalculationSnapshot.RunWorkbookActionCompletionTests'
 )
+$coupled6D=@(
+    'modTestWorkbookInterface.RunTestCoupledLoadInput',
+    'modTestAutoCADConfig.RunTestCoupledFieldProfiles',
+    'modTestCoupledElasticState.RunTestCoupledContinuation',
+    'modTestCoupledElasticState.RunTestCoupledLoadMatrix',
+    'modTestCoupledElasticState.RunTestCoupledBatchRoute',
+    'modTestCoupledElasticState.RunTestCoupledTraditionalChecks',
+    'modTestCoupledElasticState.RunTestCoupledWorkbookInput',
+    'modTestCoupledElasticState.RunTestCoupledHoopCapacity'
+)
 $jobs=@()
 foreach ($mode in @('No','Yes')) {
     $label=if($mode -eq 'No') {'Off'} else {'On'}
@@ -128,20 +138,26 @@ foreach ($mode in @('No','Yes')) {
     $jobs+=@{Group='Recipes';Mode=$mode;Label=$label;Macro=$recipes;ExpectedSuites=$recipes.Count;MaximumSeconds=3600}
     $jobs+=@{Group='SavedOffsets';Mode=$mode;Label=$label;Macro=$savedOffsets;ExpectedSuites=$savedOffsets.Count;MaximumSeconds=600;FixtureGeometryType='PointedSection'}
     $jobs+=@{Group='CurrentFeatures';Mode=$mode;Label=$label;Macro=$currentFeatures;ExpectedSuites=$currentFeatures.Count;MaximumSeconds=900}
+    $jobs+=@{Group='Coupled6D';Mode=$mode;Label=$label;Macro=$coupled6D;ExpectedSuites=$coupled6D.Count;MaximumSeconds=900}
 }
+$focusedBudgetSeconds=3600
+$reviewReserveSeconds=600
+$coupledNativeBudgetSeconds=420
+$focusedAndReviewReserve=$focusedBudgetSeconds+$reviewReserveSeconds
 $manifest=[ordered]@{Status='RUNNING';StartedUTC=[DateTimeOffset]::UtcNow.ToString('o');Deadline=$limit.ToString('o');ForecastHours=$ForecastHours;
     SourceCommit=(& git -C $root rev-parse HEAD);SourceWorkbook=$source;SourceSHA256=$sourceHash;FrozenWorkbook=$frozen;
     RunnerSHA256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash;
     ModeRunnerSHA256=(Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'Run-Audit02ModeTests.ps1') -Algorithm SHA256).Hash;
     GeometryTypeInTestCopies='Rectangles';Jobs=$jobs;CompletedJobs=@();SourceChanged=$false;
-    CoverageDefinition='AllActiveAcceptanceIncludingFocused';CoverageVersion=7;IncludesFocusedAcceptance=$true;FocusedAcceptance=$null}
+    CoverageDefinition='AllActiveAcceptanceIncludingFocused';CoverageVersion=8;IncludesFocusedAcceptance=$true;
+    FocusedAcceptance=$null;CoupledNativeCAD=$null}
 $manifestPath=Join-Path $directory 'Run.json'
 function Save-Run {$manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8}
 Save-Run
 $failed=$false
 foreach ($job in $jobs) {
-    # Часовой план обязателен; оставляем для него час и 10 минут на итоговую проверку.
-    $remaining=[int][Math]::Floor(($limit-[DateTimeOffset]::UtcNow).TotalSeconds)-4200
+    # Резервируем отдельный нативный этап 6D, часовой план и проверку доказательств.
+    $remaining=[int][Math]::Floor(($limit-[DateTimeOffset]::UtcNow).TotalSeconds)-$focusedAndReviewReserve-$coupledNativeBudgetSeconds
     if ($remaining -lt 30) {$manifest.Status='DEADLINE_REACHED';$failed=$true;break}
     $timeout=[Math]::Min([int]$job.MaximumSeconds,$remaining)
     $relative=$EvidenceDirectory+'/'+$job.Group+'_'+$job.Label+'.txt'
@@ -162,10 +178,29 @@ foreach ($job in $jobs) {
     Save-Run
     Write-Output ('FINISH: '+$manifest.CurrentJob+'; exit='+$code+'; '+[DateTimeOffset]::Now.ToString('o'))
 }
+$coupledNativeDirectory=$EvidenceDirectory+'/CoupledNativeCAD'
+$remaining=[int][Math]::Floor(($limit-[DateTimeOffset]::UtcNow).TotalSeconds)-$focusedAndReviewReserve
+if ($remaining -ge 30) {
+    $nativeBudget=[Math]::Min($coupledNativeBudgetSeconds,$remaining)
+    $nativeDeadline=$limit.AddSeconds(-$focusedAndReviewReserve).ToString('o')
+    $manifest['CurrentJob']='CoupledNativeCAD'
+    Save-Run
+    & (Join-Path $PSHOME 'powershell.exe') -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Run-FocusedNativeAcceptance.ps1') -SourceWorkbook $frozen -ReportDirectory $coupledNativeDirectory -Scope Coupled6D -MaxSeconds $nativeBudget -DeadlineUTC $nativeDeadline
+    $nativeCode=$LASTEXITCODE
+    $nativeStagePath=Join-Path $root ($coupledNativeDirectory+'/Stage.json')
+    $stageWritten=Test-Path -LiteralPath $nativeStagePath -PathType Leaf
+    $manifest.CoupledNativeCAD=@{Passed=($nativeCode -eq 0 -and $stageWritten);ExitCode=$nativeCode;
+        StageSHA256=$(if ($stageWritten) {(Get-FileHash -LiteralPath $nativeStagePath).Hash} else {''})}
+} else {
+    $manifest.CoupledNativeCAD=@{Passed=$false;Reason='Insufficient time for the coupled native CAD stage'}
+}
+if (-not $manifest.CoupledNativeCAD.Passed) {$failed=$true}
+Save-Run
+
 $focusedDirectory=$EvidenceDirectory+'/Focused'
-$remaining=[int][Math]::Floor(($limit-[DateTimeOffset]::UtcNow).TotalSeconds)-600
-if ($remaining -ge 3600) {
-    & (Join-Path $PSHOME 'powershell.exe') -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Run-FocusedAcceptance.ps1') -SourceWorkbook $frozen -EvidenceDirectory $focusedDirectory -MaxSeconds 3600 -Python $Python
+$remaining=[int][Math]::Floor(($limit-[DateTimeOffset]::UtcNow).TotalSeconds)-$reviewReserveSeconds
+if ($remaining -ge $focusedBudgetSeconds) {
+    & (Join-Path $PSHOME 'powershell.exe') -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Run-FocusedAcceptance.ps1') -SourceWorkbook $frozen -EvidenceDirectory $focusedDirectory -MaxSeconds $focusedBudgetSeconds -Python $Python
     $focusedCode=$LASTEXITCODE
     $acceptancePath=Join-Path $root ($focusedDirectory+'/Acceptance.json')
     $focusedPassed=$false

@@ -2,7 +2,8 @@
 param([string]$SourceWorkbook='workbook/output/RC_Section_NDM.xlsm',
       [string]$ReportDirectory='docs/regression/FocusedAcceptance_2026-10-10_V3/NativeCAD',
       [ValidateRange(30,900)][int]$MaxSeconds=420,
-      [string]$DeadlineUTC='')
+      [string]$DeadlineUTC='',
+      [ValidateSet('Focused','Coupled6D')][string]$Scope='Focused')
 $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -Global -ErrorAction Stop
 $root=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
@@ -28,7 +29,12 @@ function Stop-Owned([string]$Directory) {
         }
     }
 }
-foreach ($macro in @('RunRealAutoCADFarOriginTests','RunRealAutoCADFarCapacityTests')) {
+$macros=if ($Scope -eq 'Coupled6D') {
+    @('RunRealAutoCADCoupledTransverseTests')
+} else {
+    @('RunRealAutoCADFarOriginTests','RunRealAutoCADFarCapacityTests')
+}
+foreach ($macro in $macros) {
     $remaining=[math]::Floor(($nativeDeadline-[DateTimeOffset]::UtcNow).TotalSeconds)
     if ($remaining -lt 10) { throw 'Incomplete: native CAD stage deadline reached.' }
     $relative=$ReportDirectory+'/'+$macro
@@ -47,13 +53,19 @@ foreach ($macro in @('RunRealAutoCADFarOriginTests','RunRealAutoCADFarCapacityTe
         if ($child.ExitCode -ne 0) { throw ('Native CAD child failed: '+$macro) }
         $report=Join-Path $directory 'NativeCAD.txt'
         $body=Get-Content -LiteralPath $report -Raw -Encoding UTF8
-        if ($body -notmatch 'TOTAL[^\r\n]*failed=0\b' -or $body -match '(?m)^FAIL:|RUNTIME ERROR') { throw 'Native CAD assertions failed.' }
+        if ($Scope -eq 'Coupled6D') {
+            $totals=[regex]::Matches($body,'(?m)^TOTAL[^\r\n]*')
+            if ($totals.Count -ne 1 -or $totals[0].Value -cnotmatch '^TOTAL_NATIVE_COUPLED_TRANSVERSE: passed=[1-9]\d*; failed=0$') {
+                throw 'The coupled native CAD report must have exactly one successful nonempty total.'
+            }
+        }
+        if ($body -notmatch 'TOTAL[^\r\n]*failed=0\b' -or $body -match '(?m)^FAIL(?::| )|RUNTIME ERROR') { throw 'Native CAD assertions failed.' }
         $results+=@{Macro=$macro; Passed=$true; ReportSHA256=(Get-FileHash -LiteralPath $report).Hash}
         Write-Output (($body -split '\r?\n' | Where-Object {$_ -match '^TOTAL'}) -join '')
     } finally { Stop-Owned $directory }
 }
 if ((Get-FileHash -LiteralPath $nativeRunner).Hash -cne $nativeRunnerHash) {throw 'Native runner changed during the stage.'}
-[ordered]@{Passed=$true; ElapsedSeconds=$watch.Elapsed.TotalSeconds; LimitSeconds=$MaxSeconds; Results=$results; UserDocumentsUsed=$false;RunnerSHA256=$nativeRunnerHash} |
+[ordered]@{Passed=$true; Scope=$Scope; ElapsedSeconds=$watch.Elapsed.TotalSeconds; LimitSeconds=$MaxSeconds; Results=$results; UserDocumentsUsed=$false;RunnerSHA256=$nativeRunnerHash} |
     ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path (Join-Path $root $ReportDirectory) 'Stage.json') -Encoding UTF8
 Write-Output 'NATIVE_FOCUSED_STAGE: passed=True'
 exit 0

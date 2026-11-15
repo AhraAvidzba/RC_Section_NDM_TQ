@@ -45,7 +45,7 @@ def finalize(core,focused):
     expected = 116 if main.get('coverageDefinition') == 'HistoricalCoreSuitesOnly' else main['expectedSuites']
     if suites!=expected:raise ValueError(f'All {expected} core suites are required')
     independent=read(focused/'Independent.json')
-    return {'Status':'PASS','SourceSHA256':source,'CoreSuites':suites,'CorePassedAssertions':assertions,
+    result={'Status':'PASS','SourceSHA256':source,'CoreSuites':suites,'CorePassedAssertions':assertions,
             'FocusedSingleCases':target['IndividualCases'],'FocusedPassedAssertions':target['PassedAssertions'],
             'IndependentIntegrals':independent['IndependentIntegrals'],
             'IndependentlyReviewedNumFailStates':independent['ReviewedNumFailStates'],
@@ -53,6 +53,9 @@ def finalize(core,focused):
             'CoreDirectory':str(core),'FocusedDirectory':str(focused),
             'FocusedRunSHA256':sha(focused/'Run.json'),'IndependentSHA256':sha(focused/'Independent.json'),
             'Meaning':'All current acceptance groups use exactly the same production workbook; invocation is recorded above.'}
+    if main.get('coverageVersion') == 8:
+        result['CoupledNativeCAD'] = main['coupledNativeCAD']
+    return result
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)

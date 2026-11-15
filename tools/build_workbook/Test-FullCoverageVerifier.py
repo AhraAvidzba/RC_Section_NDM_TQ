@@ -1,5 +1,6 @@
 """Проверяет, что новая обязательная приёмка не теряется при сводном PASS."""
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -15,7 +16,7 @@ spec.loader.exec_module(coverage)
 
 
 class TestFullCoverage(unittest.TestCase):
-    """Исторический состав сохраняется; версия 6 требует новую и прежнюю геометрию."""
+    """Проверяет точный состав текущей и исторических версий приёмки."""
 
     def manifest_for_version(self, version):
         """Создаёт только синтетический план для проверки состава, без Excel и расчётов."""
@@ -27,12 +28,14 @@ class TestFullCoverage(unittest.TestCase):
             5: coverage.MESSAGE_PRESENTATION_GROUP_COUNTS,
             6: coverage.CONTOUR_ELEMENT_GROUP_COUNTS,
             7: coverage.ACTION_COMPLETION_GROUP_COUNTS,
+            8: coverage.COUPLED_6D_GROUP_COUNTS,
         }[version]
         feature_macros = {
             4: coverage.SNAPSHOT_ACCELERATION_MACROS,
             5: coverage.MESSAGE_PRESENTATION_MACROS,
             6: coverage.CONTOUR_ELEMENT_MACROS,
             7: coverage.ACTION_COMPLETION_MACROS,
+            8: coverage.ACTION_COMPLETION_MACROS,
         }.get(version, set())
         manifest = dict(CoverageDefinition='AllActiveAcceptanceIncludingFocused',
                         CoverageVersion=version, IncludesFocusedAcceptance=True, Jobs=[])
@@ -42,6 +45,8 @@ class TestFullCoverage(unittest.TestCase):
                     macros = []
                 elif group == 'CurrentFeatures':
                     macros = sorted(feature_macros)
+                elif group == 'Coupled6D':
+                    macros = list(coverage.COUPLED_6D_TOTALS)
                 else:
                     macros = sorted(coverage.INDIVIDUAL_ROW_MACROS) if group == 'Geometry' and version >= 3 else []
                     macros += ['modTestCoverage.TestSyntheticCase' + str(i) for i in range(count - len(macros))]
@@ -165,14 +170,79 @@ class TestFullCoverage(unittest.TestCase):
         broken['IncludesFocusedAcceptance'] = False
         self.assertTrue(coverage.coverage_errors(broken))
 
-    def test_runner_declares_the_same_v7_feature_list(self):
+    def test_runner_declares_the_same_legacy_and_coupled_lists(self):
         text = Path(__file__).with_name('Run-FullOnOffAcceptance.ps1').read_text(encoding='utf-8-sig')
         block = re.search(r'\$currentFeatures\s*=\s*@\((.*?)\)', text, re.S)
         self.assertIsNotNone(block)
         macros = re.findall(r"'([^']+)'", block.group(1))
         self.assertEqual(len(macros), 13)
         self.assertEqual(set(macros), coverage.ACTION_COMPLETION_MACROS)
-        self.assertRegex(text, r'CoverageVersion\s*=\s*7\b')
+        block = re.search(r'\$coupled6D\s*=\s*@\((.*?)\)', text, re.S)
+        self.assertIsNotNone(block)
+        self.assertEqual(re.findall(r"'([^']+)'", block.group(1)), list(coverage.COUPLED_6D_TOTALS))
+        self.assertRegex(text, r'CoverageVersion\s*=\s*8\b')
+        self.assertIn('-Scope Coupled6D', text)
+
+    def test_v8_requires_eight_coupled_suites_in_both_modes(self):
+        manifest = self.manifest_for_version(8)
+        self.assertEqual(sum(job['ExpectedSuites'] for job in manifest['Jobs']), 198)
+        self.assertEqual(coverage.coverage_errors(manifest), [])
+        self.assertEqual(coverage.runner_coverage_errors(manifest, 'CoverageVersion=8;'), [])
+        self.assertTrue(coverage.runner_coverage_errors(self.manifest_for_version(7), 'CoverageVersion=8;'))
+        for mode in ('No', 'Yes'):
+            broken = self.manifest_for_version(8)
+            job = next(job for job in broken['Jobs'] if job['Group'] == 'Coupled6D' and job['Mode'] == mode)
+            job['Macro'][-1] = job['Macro'][0]
+            self.assertTrue(coverage.coverage_errors(broken))
+            broken['Jobs'].remove(job)
+            self.assertTrue(coverage.coverage_errors(broken))
+
+    def test_coupled_totals_must_belong_to_the_right_suite(self):
+        macro, total = next(iter(coverage.COUPLED_6D_TOTALS.items()))
+        prefix = f'SUITE_STARTED: {macro}; today\n'
+        self.assertFalse(coverage.coupled_totals_errors(prefix + f'{total}: passed=1; failed=0\n'))
+        for body in (f'{total}: passed=0; failed=0\n', 'TOTAL_FAKE: passed=1; failed=0\n',
+                     f'{total}: passed=1; failed=0\n{total}: passed=1; failed=0\n',
+                     f'{total}: passed=1; failed=0\nRUNTIME ERROR\n', 'missing'):
+            with self.subTest(body=body):
+                self.assertTrue(coverage.coupled_totals_errors(prefix+body))
+
+    def test_coupled_native_requires_its_exact_report_frozen_source_and_ownership(self):
+        source = 'a' * 64
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            folder = root / 'CoupledNativeCAD'
+            case = folder / coverage.COUPLED_NATIVE_MACRO
+            case.mkdir(parents=True)
+            runner = folder / 'NativeRunner.ps1'
+            runner.write_text('test runner', encoding='utf-8')
+            runner_hash = hashlib.sha256(runner.read_bytes()).hexdigest()
+            report = case / 'NativeCAD.txt'
+            stage_path = folder / 'Stage.json'
+            invocation = dict(Macro=coverage.COUPLED_NATIVE_MACRO, Passed=True, SourceUnchanged=True,
+                              SourceSHA256=source.upper(), RunnerSHA256=runner_hash.upper(),
+                              OwnedCadPID=1234, LaunchedCadPID=1234)
+            stage = dict(Passed=True, Scope='Coupled6D', UserDocumentsUsed=False,
+                         RunnerSHA256=runner_hash.upper())
+            valid = coverage.COUPLED_NATIVE_TOTAL + ': passed=12; failed=0\n'
+
+            def write_evidence(body, **invocation_changes):
+                report.write_text(body, encoding='utf-8')
+                stage['Results'] = [dict(Macro=coverage.COUPLED_NATIVE_MACRO, Passed=True,
+                                         ReportSHA256=hashlib.sha256(report.read_bytes()).hexdigest().upper())]
+                stage_path.write_text(json.dumps(stage), encoding='utf-8')
+                (case / 'NativeInvocation.json').write_text(json.dumps({**invocation, **invocation_changes}), encoding='utf-8')
+                return dict(Passed=True, ExitCode=0, StageSHA256=hashlib.sha256(stage_path.read_bytes()).hexdigest())
+
+            self.assertEqual(coverage.coupled_native_errors(root, write_evidence(valid), source), [])
+            self.assertTrue(coverage.coupled_native_errors(root, None, source))
+            self.assertTrue(coverage.coupled_native_errors(root, write_evidence(valid, SourceSHA256='b' * 64), source))
+            self.assertTrue(coverage.coupled_native_errors(root, write_evidence(valid, LaunchedCadPID=5678), source))
+            self.assertTrue(coverage.coupled_native_errors(root, write_evidence(valid + 'FAIL: drawing closed\n'), source))
+            self.assertTrue(coverage.coupled_native_errors(root, write_evidence('TOTAL_FAKE: passed=2; failed=0\n'), source))
+            stage_result = write_evidence(valid)
+            report.unlink()
+            self.assertTrue(coverage.coupled_native_errors(root, stage_result, source))
 
     def test_finalizer_uses_dynamic_v6_core_count(self):
         """Проверяет композицию Finalize; первичные верификаторы здесь подставлены."""
