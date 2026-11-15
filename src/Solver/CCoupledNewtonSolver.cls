@@ -180,6 +180,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Dim current() As Double, correction() As Double, norm As Double, tolerance As Double
     Dim candidateNorm As Double, fraction As Double, i As Long, accepted As Boolean
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
+    Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
     Dim useGradientTangent As Boolean
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
@@ -215,6 +216,10 @@ RecomputeTangent:
             Exit Function
         End If
         mMinimumPivot = mSystem.MinimumPivot
+        If mControlActive And useGradientTangent Then
+            governingRow = LargestEquilibriumResidualRow()
+            baseEquation = mResidual(governingRow)
+        End If
         ReDim mCandidate(1 To mDegreeCount)
         fraction = 1#: accepted = False: hasValidTrial = False
         Do While fraction >= MIN_FRACTION
@@ -229,6 +234,10 @@ RecomputeTangent:
                 candidateNorm = EquilibriumNorm(load, mCandidate)
                 If Not hasValidTrial Or candidateNorm < bestTrialNorm Then bestTrialNorm = candidateNorm
                 hasValidTrial = True
+                If governingRow > 0 Then
+                    trialEquation = mResidual(governingRow)
+                    trialFraction = fraction
+                End If
                 accepted = (candidateNorm <= tolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
             ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
                 RecordFailure mFailureCode, "Материальная проба не может быть повторена с меньшей поправкой."
@@ -247,6 +256,8 @@ RecomputeTangent:
             If hasValidTrial Then
                 details = details & "; невязка перед демпфированием, МПа: " & CStr(norm) & _
                     "; лучшая невязка проб, МПа: " & CStr(bestTrialNorm)
+                If governingRow > 0 Then details = details & DirectionMismatchDetails(governingRow, baseEquation, _
+                    (trialEquation - baseEquation) / trialFraction, correction)
             Else
                 details = details & "; ни одна уменьшенная поправка не дала материального отклика"
             End If
@@ -274,6 +285,30 @@ EvaluationFailed:
     Else
         RecordFailure sfcInternalError, "Ошибка сборки связанного равновесия. " & description
     End If
+End Function
+
+' Находит наибольшую невязку уравнений равновесия в МПа без уравнений закрепления.
+Private Function LargestEquilibriumResidualRow() As Long
+    Dim i As Long, row As Long: row = 1
+    For i = 2 To mGaugeStart - 1
+        If Abs(mResidual(i)) > Abs(mResidual(row)) Then row = i
+    Next i
+    LargestEquilibriumResidualRow = row
+End Function
+
+' Сравнивает действие касательной расширенной системы с последней вычисленной
+' пробой при той же принятой истории. Дополнительного материального расчёта нет.
+Private Function DirectionMismatchDetails(ByVal row As Long, ByVal baseEquation As Double, _
+        ByVal measured As Double, ByRef correction() As Double) As String
+    If measured = 0# Or Sgn(measured) <> Sgn(baseEquation) Then Exit Function
+    Dim i As Long, calculated As Double
+    calculated = -mDirectionEquations(row) * correction(mDegreeCount + 1) ' Вклад изменения множителя нагрузки в невязку.
+    For i = 1 To mDegreeCount
+        calculated = calculated + mMatrix(i, row) * correction(i)
+    Next i
+    If Sgn(calculated) <> -Sgn(baseEquation) Then Exit Function
+    DirectionMismatchDetails = "; уравнение " & CStr(row) & "; действие касательной, МПа: " & CStr(calculated) & _
+        "; фактическое изменение на единицу доли поправки, МПа: " & CStr(measured)
 End Function
 
 
