@@ -473,8 +473,8 @@ Private Sub HideChartAxes()
     On Error GoTo 0
 End Sub
 
-' Определяет диапазон значений Stress/Strain для окраски элементов и легенды.
-' Неактивный растянутый бетон исключается, чтобы "нет" не расширяло шкалу.
+' Определяет диапазон окраски. Для Stress/Strain знак состояния задаёт
+' носитель НДС, а для пространственных полей он берётся из значения поля.
 Private Sub CalculateResultRange(ByVal data As CSectionPlotDataReader)
     Dim i As Long
     mHasCompression = False
@@ -848,8 +848,8 @@ Private Sub AddBucketSeriesByIndexes(ByVal data As CSectionPlotDataReader, ByVal
 End Sub
 
 ' Выбирает цвет одного расчетного элемента.
-' Цвет берется из PhysicalState и выбранной легенды, а не из пользовательского
-' знака Stress/Strain, потому что знак вывода может быть настроен пользователем.
+' Для Stress/Strain используется состояние материала. Пространственные
+' величины используют группы палитры по знаку своего отображаемого поля.
 Private Function ElementColor(ByVal data As CSectionPlotDataReader, ByVal index As Long) As Long
     If StrComp(data.PhysicalState(index), "InactiveTensionConcrete", vbTextCompare) = 0 Then
         ElementColor = RGB(218, 218, 218)
@@ -1687,16 +1687,33 @@ Private Sub DrawChartLegendScale(ByVal data As CSectionPlotDataReader, ByVal top
     titleText = data.ResultCaption
     If Not IsCommonLegendMode() Then titleText = titleText & " (" & LegendMaterialCaption(materialType) & ")"
     AddLegendText 0#, topOffset, 132#, 22#, titleText & ", " & data.ResultUnit, RGB(30, 30, 30), True
+    Dim quantity As EVisualizationQuantity, magnitude As Boolean
+    quantity = VisualizationQuantityFromText(data.VisualizationQuantity)
+    magnitude = (quantity = vqTau Or quantity = vqGamma)
     Dim i As Long, t As Double
     For i = 0 To 11
         t = CDbl(i) / 11#
+        If magnitude Then t = 0.5 + 0.5 * t ' Модуль занимает диапазон от нуля до положительного максимума.
         AddLegendRect 6#, topOffset + 28# + i * 8#, 18#, 9#, MaterialLegendColor(materialType, t)
     Next i
-    AddLegendText 30#, topOffset + 16#, 88#, 14#, LegendCompressionText(), RGB(40, 40, 40), True
-    AddLegendText 30#, topOffset + 32#, 84#, 16#, LegendValueText(hasCompression, compressionValue, data.ResultPrecision), RGB(40, 40, 40), False
-    AddLegendText 30#, topOffset + 68#, 84#, 16#, "0", RGB(40, 40, 40), False
+    Dim negativeLabel As String, positiveLabel As String
+    If magnitude Then
+        AddLegendText 30#, topOffset + 23#, 84#, 16#, "0", RGB(40, 40, 40), False
+        positiveLabel = "Максимум"
+    Else
+        If VisualizationQuantityRequiresCoupledField(quantity) Then
+            negativeLabel = "Отрицательные"
+            positiveLabel = "Положительные"
+        Else
+            negativeLabel = LegendCompressionText()
+            positiveLabel = LegendTensionText()
+        End If
+        AddLegendText 30#, topOffset + 16#, 88#, 14#, negativeLabel, RGB(40, 40, 40), True
+        AddLegendText 30#, topOffset + 32#, 84#, 16#, LegendValueText(hasCompression, compressionValue, data.ResultPrecision), RGB(40, 40, 40), False
+        AddLegendText 30#, topOffset + 68#, 84#, 16#, "0", RGB(40, 40, 40), False
+    End If
     AddLegendText 30#, topOffset + 114#, 84#, 16#, LegendValueText(hasTension, tensionValue, data.ResultPrecision), RGB(40, 40, 40), False
-    AddLegendText 30#, topOffset + 128#, 88#, 14#, LegendTensionText(), RGB(40, 40, 40), True
+    AddLegendText 30#, topOffset + 128#, 88#, 14#, positiveLabel, RGB(40, 40, 40), True
 End Sub
 
 ' Возвращает материал отдельной шкалы; общая шкала не получает добавочного обозначения.

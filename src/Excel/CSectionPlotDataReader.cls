@@ -19,6 +19,7 @@ Option Explicit
 ' Расчёт не запускается, текущие параметры геометрии Config не перечитываются.
 
 Private mVisualizationQuantity As String ' Отображаемая величина выбранного профиля.
+Private mSpatialField As Boolean ' Пространственные значения имеют собственный знак для раскраски.
 Private mLoadCase As String ' LC, выбранный для схемы после обработки Worst/конкретного ID.
 Private mLoadCaseComment As String ' Комментарий LC для заголовка схемы.
 Private mProfileId As String ' Имя профиля выбранного сочетания, сохранённое вместе с результатами.
@@ -54,7 +55,7 @@ Private mHeight() As Double ' Высота бетонного элемента �
 Private mRotation() As Double ' Угол прямоугольного бетонного элемента, рад; для эквивалентного квадрата может быть принят средний угол сетки.
 Private mElementGeometry() As CConcreteRegion ' Явные аналитические границы Contour; прямоугольные оболочки восстанавливаются по компактным полям только при запросе.
 Private mResultValue() As Double ' Значение Stress или Strain для выбранного LC.
-Private mPhysicalState() As String ' Физическое состояние: сжатие, растяжение, неработающий растянутый бетон или почти нулевое напряжение.
+Private mPhysicalState() As String ' Группа палитры. Для продольных величин берётся из состояния материала.
 Private mMinX As Double ' Левая граница бетонной расчётной модели в мм.
 Private mMaxX As Double ' Правая граница бетонной расчётной модели в мм.
 Private mMinY As Double ' Нижняя граница бетонной расчётной модели в мм.
@@ -239,6 +240,7 @@ Private Sub ApplyVisualizationProfile(ByVal workbook As Object, ByVal settings A
     mStateType = profile.VisualizationStateText
     mStateInputLocation = profile.VisualizationStateLocation
     mVisualizationQuantity = VisualizationQuantityToText(profile.VisualizationQuantity)
+    mSpatialField = VisualizationQuantityRequiresCoupledField(profile.VisualizationQuantity)
     mResultPrecision = profile.VisualizationPrecisionForQuantity(profile.VisualizationQuantity)
 End Sub
 
@@ -825,7 +827,15 @@ Private Sub AppendElement(ByVal elementID As String, ByVal materialType As Strin
     Else
         mResultValue(mCount) = CDbl(resultData(1))
     End If
-    mPhysicalState(mCount) = CStr(resultData(2))
+    If mSpatialField Then
+        Select Case Sgn(mResultValue(mCount))
+            Case -1: mPhysicalState(mCount) = "Compression" ' Отрицательная половина общей палитры.
+            Case 1: mPhysicalState(mCount) = "Tension" ' Положительная половина общей палитры.
+            Case Else: mPhysicalState(mCount) = "NearZero"
+        End Select
+    Else
+        mPhysicalState(mCount) = CStr(resultData(2))
+    End If
 End Sub
 
 ' Увеличивает вместимость массивов с запасом, сохраняя порядок элементов.
@@ -1025,6 +1035,7 @@ Private Sub ResetReaderState()
     mStateInputLocation = vbNullString
     mGeometryReferenceItemsEnabled = False
     mVisualizationQuantity = vbNullString
+    mSpatialField = False
     mLoadCase = vbNullString
     mLoadCaseComment = vbNullString
     mProfileId = vbNullString

@@ -2288,6 +2288,7 @@ Public Function RunTestCoupledWorkbookTiming(ByVal calculation As String, ByVal 
         Next shape
         TestRecord overlayCount = 1 And InStr(message, "Схема не обновлена") = 0, _
             "automatic chart draws the closed hoop from the new snapshot", passed, failed, report
+        If directStatus = "OK" Then TestCoupledActivePlotLegends book, passed, failed, report
     End If
     If calculation <> "Direct" Then
         If IsNumeric(limit) Then
@@ -2311,6 +2312,62 @@ Public Function RunTestCoupledWorkbookTiming(ByVal calculation As String, ByVal 
 Failed:
     RunTestCoupledWorkbookTiming = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Переключает поле на готовом снимке и проверяет подписи диаграммы и
+' знаковые группы. Замер длительности закончен до этой проверки.
+Private Sub TestCoupledActivePlotLegends(ByVal book As Object, ByRef passed As Long, _
+        ByRef failed As Long, ByRef report As String)
+    Dim profiles As Object: Set profiles = book.Names.Item("rngCalculationProfiles").RefersToRange
+    Dim column As Long
+    For column = 3 To profiles.Columns.Count
+        If CStr(profiles.Cells(2, column).Value2) = "PR4" Then Exit For
+    Next column
+    Dim selection As Object: Set selection = TestInputCell(profiles, "Visualization.Quantity", 2, column)
+    Dim settings As New CSystemSettingsReader: settings.LoadFromWorkbook book
+    Dim quantity As Variant, reader As CSectionPlotDataReader, signedGroups As Boolean
+    Dim index As Long, expected As String, chart As Object, shape As Object, legend As String
+    For Each quantity In Array("TauXZ", "Tau", "Warping", "Stress")
+        selection.Value2 = CStr(quantity)
+        UpdateSectionPlotForWorkbook book, True
+        If quantity <> "Stress" Then
+            Set reader = New CSectionPlotDataReader
+            reader.LoadFromWorkbook book, settings
+            signedGroups = True
+            For index = 1 To reader.Count
+                Select Case Sgn(reader.ResultValue(index))
+                    Case -1: expected = "Compression"
+                    Case 1: expected = "Tension"
+                    Case Else: expected = "NearZero"
+                End Select
+                If reader.PhysicalState(index) <> expected Then signedGroups = False: Exit For
+            Next index
+            TestRecord signedGroups, CStr(quantity) & " colours use the actual displayed sign", passed, failed, report
+        End If
+        Set chart = book.Worksheets("Расчет").ChartObjects("chtNDMSectionPlot").Chart
+        legend = vbNullString
+        For Each shape In chart.Shapes
+            If Left$(shape.Name, Len("NDMPlot_LegendText")) = "NDMPlot_LegendText" Then
+                legend = legend & "|" & shape.TextFrame.Characters().Text & "|"
+            End If
+        Next shape
+        Select Case CStr(quantity)
+            Case "TauXZ", "Warping"
+                TestRecord InStr(legend, "|Отрицательные|") > 0 And InStr(legend, "|Положительные|") > 0 And _
+                    InStr(legend, "|Сжатие|") = 0 And InStr(legend, "|Растяжение|") = 0, _
+                    CStr(quantity) & " draws a signed legend", passed, failed, report
+            Case "Tau"
+                TestRecord InStr(legend, "|0|") > 0 And InStr(legend, "|Максимум|") > 0 And _
+                    InStr(legend, "|Отрицательные|") = 0 And InStr(legend, "|Сжатие|") = 0, _
+                    "shear magnitude draws a scale from zero to the maximum", passed, failed, report
+            Case "Stress"
+                TestRecord InStr(legend, "|Сжатие|") > 0 And InStr(legend, "|Растяжение|") > 0, _
+                    "longitudinal stress keeps its material-state legend", passed, failed, report
+        End Select
+    Next quantity
+    selection.Value2 = "TauXZ"
+    UpdateSectionPlotForWorkbook book, True
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сохраняет точную геометрию тяжёлой задачи штатным писателем. Материалы
