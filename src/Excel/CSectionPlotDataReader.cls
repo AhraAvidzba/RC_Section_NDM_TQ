@@ -85,6 +85,8 @@ Private mAnnotationNormalY() As Double ' Компонента безразмер
 Private mAnnotationText() As String ' Готовый текст подписи или размера.
 Private mAnnotationSweepAngle() As Double ' Проверенный signed sweep CONTOUR_ARC, рад; для остальных типов 0.
 Private mCrackInteractionContour As CSectionContours ' Сохранённая зона выбранного сочетания, отдельно от границ сечения и подписей.
+Private mTransversePaths As Collection ' Оси хомутов и ветвей выбранного связанного состояния.
+Private mResultRunID As Double
 Private mUnits As CUnitSystem ' Общий перевод единиц, сохранённых с результатами; текущие единицы Config на эти значения не влияют.
 
 ' Создаёт один объект перевода единиц для всего чтения. Единицы передаются
@@ -505,6 +507,7 @@ Private Sub ReadGeometryAndResults(ByVal workbook As Object, ByVal stateFields A
     End If
     If Not HasRows(results) Then Err.Raise vbObjectError + 4705, "CSectionPlotDataReader", _
         "На листе Results нет результатов элементов."
+    If Not missingSelectedState Then mResultRunID = CDbl(results(2, ResultColumn(results, "RunID")))
 
     Dim resultMap As Object
     Set resultMap = CreateObject("Scripting.Dictionary")
@@ -519,8 +522,7 @@ Private Sub ReadGeometryAndResults(ByVal workbook As Object, ByVal stateFields A
     Dim quantity As EVisualizationQuantity, coupled As Object
     quantity = VisualizationQuantityFromText(mVisualizationQuantity)
     If Not missingSelectedState And VisualizationQuantityRequiresCoupledField(quantity) Then
-        Dim runColumn As Long: runColumn = ResultColumn(results, "RunID")
-        Set coupled = ReadCoupledFieldValues(workbook, quantity, CDbl(results(2, runColumn)), mLoadCase, mProfileId, mStateType)
+        Set coupled = ReadCoupledFieldValues(workbook, quantity, mResultRunID, mLoadCase, mProfileId, mStateType)
     End If
 
     Dim caseStates As Object: Set caseStates = CreateObject("Scripting.Dictionary"): caseStates.CompareMode = vbTextCompare
@@ -868,6 +870,7 @@ Private Sub ReadAnnotations(ByVal workbook As Object, Optional ByVal showCrackCo
     data = ReadAnchoredResultTable(workbook, "rngNDMSectionAnnotations")
     If Not HasRows(data) Then Exit Sub
     If showCrackContour Then Set mCrackInteractionContour = ReadSavedCrackInteractionContour(workbook, mLoadCase, data, anchor)
+    If mResultRunID <> 0# Then Set mTransversePaths = ReadSavedTransversePaths(workbook, mResultRunID, mLoadCase, mProfileId, mStateType, data)
 
     Dim colType As Long: colType = ResultColumn(data, "AnnotationType")
     Dim colStartX As Long: colStartX = ResultColumn(data, "StartX")
@@ -1041,6 +1044,7 @@ Private Sub ResetReaderState()
     mAnnotationCount = 0
     mAnnotationCapacity = 0
     Set mCrackInteractionContour = Nothing
+    Set mTransversePaths = Nothing: mResultRunID = 0#
     Set mLabelContours = Nothing: Set mLabelBoundary = Nothing
     mMinX = 0#: mMaxX = 0#: mMinY = 0#: mMaxY = 0#
     mCentroidX = 0#: mCentroidY = 0#: mPrincipalAngle = 0#
@@ -1453,6 +1457,11 @@ Public Property Get AnnotationCount() As Long: AnnotationCount = mAnnotationCoun
 ' Возвращает готовую область только для выбранного сочетания и состояния трещин.
 Public Property Get CrackInteractionContour() As CSectionContours
     Set CrackInteractionContour = mCrackInteractionContour
+End Property
+
+' Возвращает сохранённые оси поперечной арматуры для отрисовки.
+Friend Property Get TransversePaths() As Collection
+    Set TransversePaths = mTransversePaths
 End Property
 
 ' Отсчёт отступа подписи от сохранённого бетонного контура. На прямой грани

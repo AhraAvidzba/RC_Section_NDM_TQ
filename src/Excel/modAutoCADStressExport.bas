@@ -39,6 +39,8 @@ Private Const EXTENSION_WARNING_LAYER As String = "RC_NDM_Warnings"
 Private Const SECTION_CONTOUR_COLOR_INDEX As Long = 30 ' Наружная граница бетона: оранжевый ACI 30.
 Private Const OPENING_CONTOUR_COLOR_INDEX As Long = 4 ' Контуры отверстий: голубой ACI 4.
 Private Const CRACK_REGION_COLOR_INDEX As Long = 31 ' Расчетная область взаимодействия: ACI 31.
+Private Const TRANSVERSE_REBAR_LAYER As String = "RC_NDM_TransverseRebar"
+Private Const TRANSVERSE_REBAR_COLOR As Long = 6 ' Оси поперечной арматуры: отдельный пурпурный ACI.
 Private Const CONTOUR_POINT_TOLERANCE As Double = 0.000001 ' Допуск совпадения соседних вершин при экспорте, мм.
 Private Const STRAIN_3D_CONCRETE_LAYER As String = "RC_NDM_Strain3D_Concrete"
 Private Const STRAIN_3D_REBAR_LAYER As String = "RC_NDM_Strain3D_Rebar"
@@ -59,9 +61,10 @@ Public Sub ExportSectionStressToAutoCAD()
     Dim resultPrecision As Long, epsilon0 As Double, kappaX As Double, kappaY As Double
     Dim loadReferenceX As Double, loadReferenceY As Double, centroidX As Double, centroidY As Double
     Dim principalAngle As Double, extensionUsed As Boolean, stateWarningText As String, geometryOnly As Boolean
+    Dim transversePaths As Collection
     ReadResultsExportState ThisWorkbook, settings, units, vbNullString, section, resultByID, physicalStateByID, combinationID, _
         profileId, stateType, quantity, resultPrecision, epsilon0, kappaX, kappaY, loadReferenceX, loadReferenceY, _
-        centroidX, centroidY, principalAngle, extensionUsed, stateWarningText, geometryOnly
+        centroidX, centroidY, principalAngle, extensionUsed, stateWarningText, geometryOnly, transversePaths
     Dim contourExportCount As Long, acad As Object, exportDocument As Object, destinationMessage As String
     If geometryOnly Then
         exportSettings = ReadGeometryExportSettings(settings, section.Contours)
@@ -83,7 +86,7 @@ Public Sub ExportSectionStressToAutoCAD()
     destinationMessage = AutoCADExportDestinationMessage(exportDocument)
     DrawResultsStressExport section, resultByID, physicalStateByID, epsilon0, kappaX, kappaY, _
         loadReferenceX, loadReferenceY, centroidX, centroidY, principalAngle, resultPrecision, stateWarningText, exportSettings, _
-        contourExportCount, exportDocument, crackRows, crackSweeps, quantity
+        contourExportCount, exportDocument, crackRows, crackSweeps, quantity, transversePaths
     If informationEnabled Then
         Dim message As String
         message = "Экспорт в AutoCAD завершен." & vbCrLf & vbCrLf & SnapshotActionDataOrigin(ThisWorkbook, "Export") & vbCrLf & vbCrLf & _
@@ -194,6 +197,7 @@ Private Function AutoCADCleanupLayerSet(ByRef exportSettings As TAutoCADExportSe
     AddCleanupLayer layers, STRAIN_3D_REBAR_LAYER
     If Len(exportSettings.ContourLayer) > 0 Then layers.Item(exportSettings.ContourLayer) = False ' Общие контурные слои защищаются целиком, включая созданные NDM объекты, даже при совпадении с другим слоем оформления.
     If Len(exportSettings.OpeningContourLayer) > 0 Then layers.Item(exportSettings.OpeningContourLayer) = False
+    layers.Item(TRANSVERSE_REBAR_LAYER) = False ' Оси принятой поперечной арматуры сохраняются при очистке оформления.
 
     Set AutoCADCleanupLayerSet = layers
 End Function
@@ -235,7 +239,7 @@ Private Sub ReadResultsExportState(ByVal workbook As Object, ByVal settings As C
         ByRef loadReferenceX As Double, ByRef loadReferenceY As Double, _
         ByRef centroidX As Double, ByRef centroidY As Double, ByRef principalAngle As Double, _
         ByRef extensionUsed As Boolean, ByRef stateWarningText As String, _
-        Optional ByRef geometryOnly As Boolean = False)
+        Optional ByRef geometryOnly As Boolean = False, Optional ByRef transversePaths As Collection = Nothing)
     On Error GoTo Failed
     geometryOnly = False
     BeginSectionSnapshotRead workbook
@@ -280,7 +284,9 @@ Private Sub ReadResultsExportState(ByVal workbook As Object, ByVal settings As C
     resultByID.CompareMode = vbTextCompare
     Set physicalStateByID = CreateObject("Scripting.Dictionary")
     physicalStateByID.CompareMode = vbTextCompare
-    ReadElementResultsForCombination workbook, quantity, combinationID, stateType, resultByID, physicalStateByID, profileId
+    Dim runID As Double
+    ReadElementResultsForCombination workbook, quantity, combinationID, stateType, resultByID, physicalStateByID, profileId, runID
+    Set transversePaths = ReadSavedTransversePaths(workbook, runID, combinationID, profileId, stateType)
     ReadSectionPropertiesForCombination workbook, units, combinationID, stateType, principalAxesMode, epsilon0, kappaX, kappaY, _
         loadReferenceX, loadReferenceY, centroidX, centroidY, principalAngle, extensionUsed, stateWarningText
     EndSectionSnapshotRead
@@ -359,7 +365,7 @@ End Function
 ' результат другого сочетания не подставляется.
 Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal resultType As String, _
         ByRef combinationID As String, ByVal stateType As String, _
-        ByVal resultByID As Object, ByVal physicalStateByID As Object, ByVal profileID As String)
+        ByVal resultByID As Object, ByVal physicalStateByID As Object, ByVal profileID As String, ByRef runID As Double)
     Dim anchor As Object
     Set anchor = workbook.Names.Item("rngNDMElementResults").RefersToRange
 
@@ -374,9 +380,9 @@ Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal res
     Dim colState As Long: colState = ResultColumn(data, "PhysicalState")
     Dim colValue As Long, quantity As EVisualizationQuantity, coupled As Object
     quantity = VisualizationQuantityFromText(resultType)
+    runID = CDbl(data(2, ResultColumn(data, "RunID")))
     If VisualizationQuantityRequiresCoupledField(quantity) Then
-        Dim runColumn As Long: runColumn = ResultColumn(data, "RunID")
-        Set coupled = ReadCoupledFieldValues(workbook, quantity, CDbl(data(2, runColumn)), combinationID, profileID, stateType)
+        Set coupled = ReadCoupledFieldValues(workbook, quantity, runID, combinationID, profileID, stateType)
     Else
         colValue = ResultColumn(data, resultType)
     End If
@@ -592,7 +598,7 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
         ByVal resultPrecision As Long, ByVal stateWarningText As String, ByRef exportSettings As TAutoCADExportSettings, _
         ByRef contourExportCount As Long, Optional ByVal targetDocument As Object = Nothing, _
         Optional ByVal crackRows As Object = Nothing, Optional ByVal crackSweeps As Object = Nothing, _
-        Optional ByVal quantity As String = "Stress")
+        Optional ByVal quantity As String = "Stress", Optional ByVal transversePaths As Collection = Nothing)
     Dim arcSweeps As Object
     If exportSettings.ContourEnabled Then Set arcSweeps = ReadSavedContourArcSweeps(ThisWorkbook) ' Проверяем все углы до подключения и добавления объектов в чертеж.
     Dim doc As Object
@@ -711,6 +717,8 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
                 exportSettings.CrackInteractionLayer, crackSweeps, crackRows, "CRACK_REGION_")
         End If
     End If
+
+    If Not transversePaths Is Nothing Then DrawAutoCADTransversePaths doc, ms, transversePaths
 
     DrawCentroidAxesAndLoadPoint ms, section, centroidX, centroidY, principalAngle, _
         loadReferenceX, loadReferenceY, _
@@ -1204,7 +1212,7 @@ Private Sub AppendContourSegment(ByRef startX() As Double, ByRef startY() As Dou
     bulge(segmentCount) = bulgeValue
 End Sub
 
-' Строит одну непрерывную LWPOLYLINE по порядку contour-аннотаций.
+' Строит одну непрерывную LWPOLYLINE по порядку сохранённых сегментов.
 ' Если сохраненный набор сегментов содержит разрыв, экспорт
 ' останавливается с понятной ошибкой: лучше увидеть проблему, чем получить в
 ' AutoCAD контур с паразитной перемычкой.
@@ -1212,7 +1220,7 @@ Private Function DrawContourSegmentPolyline(ByVal ms As Object, ByVal contourLay
         ByRef startX() As Double, ByRef startY() As Double, _
         ByRef endX() As Double, ByRef endY() As Double, ByRef bulge() As Double, ByVal segmentCount As Long, _
         ByVal colorIndex As Long, _
-        Optional ByRef createdEntity As Object = Nothing) As Long
+        Optional ByRef createdEntity As Object = Nothing, Optional ByVal closed As Boolean = True) As Long
     Dim segmentIndex As Long
     For segmentIndex = 1 To segmentCount - 1
         If Not PointsAreClose(endX(segmentIndex), endY(segmentIndex), startX(segmentIndex + 1), startY(segmentIndex + 1)) Then
@@ -1220,17 +1228,23 @@ Private Function DrawContourSegmentPolyline(ByVal ms As Object, ByVal contourLay
                 "Параметрический контур в Results имеет разрыв между соседними сегментами. Экспорт контура остановлен."
         End If
     Next segmentIndex
-    If Not PointsAreClose(endX(segmentCount), endY(segmentCount), startX(1), startY(1)) Then
+    If closed And Not PointsAreClose(endX(segmentCount), endY(segmentCount), startX(1), startY(1)) Then
         Err.Raise vbObjectError + 4371, "DrawParametricSectionContour", _
             "Параметрический контур в Results не замкнут. Экспорт контура остановлен."
     End If
 
-    Dim points() As Double
-    ReDim points(0 To segmentCount * 2 - 1)
+    Dim points() As Double, pointCount As Long
+    pointCount = segmentCount
+    If Not closed Then pointCount = pointCount + 1
+    ReDim points(0 To pointCount * 2 - 1)
     For segmentIndex = 1 To segmentCount
         points((segmentIndex - 1) * 2) = startX(segmentIndex)
         points((segmentIndex - 1) * 2 + 1) = startY(segmentIndex)
     Next segmentIndex
+    If Not closed Then
+        points((pointCount - 1) * 2) = endX(segmentCount)
+        points((pointCount - 1) * 2 + 1) = endY(segmentCount)
+    End If
 
     Dim entity As Object
     Set entity = AddAcadLightWeightPolyline(ms, points, contourLayer, colorIndex)
@@ -1238,10 +1252,35 @@ Private Function DrawContourSegmentPolyline(ByVal ms As Object, ByVal contourLay
     For segmentIndex = 1 To segmentCount
         If Abs(bulge(segmentIndex)) > 0.000000000001 Then Call entity.SetBulge(segmentIndex - 1, bulge(segmentIndex))
     Next segmentIndex
-    entity.Closed = True
+    entity.Closed = closed
     entity.Update
     DrawContourSegmentPolyline = 1
 End Function
+
+' Выгружает по одной полилинии на принятую группу. Открытая ветвь
+' остаётся открытой, а дуги передаются через знаковую стрелу полилинии.
+Private Sub DrawAutoCADTransversePaths(ByVal doc As Object, ByVal ms As Object, ByVal paths As Collection)
+    EnsureAcadLayer doc, TRANSVERSE_REBAR_LAYER, TRANSVERSE_REBAR_COLOR
+    Dim path As CGeometryPath, edge As TRegionEdge, n As Long, i As Long
+    Dim sx() As Double, sy() As Double, ex() As Double, ey() As Double, bulge() As Double
+    For Each path In paths
+        n = path.SegmentCount
+        path.CopySegment 1, edge
+        If n = 1 And Abs(edge.Sweep) >= 2# * GEOM_PI - 0.000000001 Then
+            DrawContourCirclePolyline ms, TRANSVERSE_REBAR_LAYER, edge.CenterX, edge.CenterY, _
+                Sqr((edge.X1 - edge.CenterX) ^ 2 + (edge.Y1 - edge.CenterY) ^ 2), TRANSVERSE_REBAR_COLOR
+        Else
+            ReDim sx(1 To n): ReDim sy(1 To n): ReDim ex(1 To n): ReDim ey(1 To n): ReDim bulge(1 To n)
+            For i = 1 To n
+                path.CopySegment i, edge
+                sx(i) = edge.X1: sy(i) = edge.Y1: ex(i) = edge.X2: ey(i) = edge.Y2
+                bulge(i) = Tan(edge.Sweep / 4#)
+            Next i
+            DrawContourSegmentPolyline ms, TRANSVERSE_REBAR_LAYER, sx, sy, ex, ey, bulge, n, _
+                TRANSVERSE_REBAR_COLOR, closed:=path.IsClosed
+        End If
+    Next path
+End Sub
 
 ' Окружность тоже выводится LWPOLYLINE: четыре четверти с одинаковым bulge дают
 ' непрерывную замкнутую полилинию с дугами, а не отдельный объект Circle.
@@ -1511,6 +1550,9 @@ Public Function RequiredAutoCADLayerName(ByVal settings As CSystemSettingsReader
     If invalid Then Err.Raise vbObjectError + 4385, "RequiredAutoCADLayerName", _
         settings.InputErrorMessage(key, "Имя слоя AutoCAD недопустимо.", _
             "Введите имя длиной от 1 до 255 символов без управляющих символов и <>/\" & Chr$(34) & ":;?,*|='.")
+    If Left$(key, Len("AutoCAD.Common.")) = "AutoCAD.Common." And StrComp(value, TRANSVERSE_REBAR_LAYER, vbTextCompare) = 0 Then _
+        Err.Raise vbObjectError + 4385, "RequiredAutoCADLayerName", settings.InputErrorMessage(key, _
+            "Этот слой занят экспортом осей поперечной арматуры.", "Задайте свой слой исходной геометрии.")
     RequiredAutoCADLayerName = value
 End Function
 
@@ -2387,10 +2429,11 @@ Public Function Audit03ExportAutoCADDocumentForTests(ByVal doc As Object, _
     Dim combinationID As String, profileID As String, stateType As String, quantity As String, precision As Long
     Dim eps0 As Double, kx As Double, ky As Double, referenceX As Double, referenceY As Double
     Dim centroidX As Double, centroidY As Double, angle As Double, extended As Boolean, warning As String, geometryOnly As Boolean
+    Dim transversePaths As Collection
     geometryOnlyWarning = vbNullString
     ReadResultsExportState ThisWorkbook, settings, units, vbNullString, section, values, physicalStates, _
         combinationID, profileID, stateType, quantity, precision, eps0, kx, ky, referenceX, referenceY, _
-        centroidX, centroidY, angle, extended, warning, geometryOnly
+        centroidX, centroidY, angle, extended, warning, geometryOnly, transversePaths
     destinationMessage = AutoCADExportDestinationMessage(doc)
     Dim before As Long, contours As Long: before = doc.ModelSpace.Count
     If geometryOnly Then
@@ -2400,7 +2443,7 @@ Public Function Audit03ExportAutoCADDocumentForTests(ByVal doc As Object, _
     Else
         options = ReadAutoCADExportSettings(settings)
         DrawResultsStressExport section, values, physicalStates, eps0, kx, ky, referenceX, referenceY, _
-            centroidX, centroidY, angle, precision, warning, options, contours, doc, quantity:=quantity
+            centroidX, centroidY, angle, precision, warning, options, contours, doc, quantity:=quantity, transversePaths:=transversePaths
     End If
     Audit03ExportAutoCADDocumentForTests = doc.ModelSpace.Count - before
 End Function

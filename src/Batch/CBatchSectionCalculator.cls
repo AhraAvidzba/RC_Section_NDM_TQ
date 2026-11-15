@@ -237,6 +237,11 @@ Friend Sub ConfigureCoupledAnalysis(ByVal analysis As CCoupledSectionAnalysis, O
     Set mCoupledAnalysis = analysis: mCoupledInputError = inputError
 End Sub
 
+' Передаёт общий ввод связанного расчёта для снимков фактически принятых состояний.
+Friend Property Get CoupledTransverseLayout() As CTransverseRebarLayout
+    If Not mCoupledAnalysis Is Nothing Then Set CoupledTransverseLayout = mCoupledAnalysis.TransverseLayout
+End Property
+
 ' Число различных классов для предварительной проверки строк диаграмм.
 Friend Property Get CoupledSteelClassCount() As Long
     If Not mCoupledAnalysis Is Nothing Then CoupledSteelClassCount = mCoupledAnalysis.SteelClassCount

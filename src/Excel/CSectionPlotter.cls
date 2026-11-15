@@ -213,7 +213,7 @@ Public Sub Draw(ByVal workbook As Object, ByVal data As CSectionPlotDataReader, 
     Set mChartObject = EnsureChart(workbook, containerNotice)
     Set mChart = mChartObject.Chart
 
-    If mLegendEnabled Then ValidateLegendFrame settings
+    If mLegendEnabled Then ValidateLegendFrame settings, Not (data.TransversePaths Is Nothing)
 
     mPlotBottomReserve = 18#
     If data.GeometryOnly Then
@@ -983,6 +983,7 @@ End Sub
 Private Sub DrawShapeDecorations(ByVal data As CSectionPlotDataReader)
     If mContourEnabled Then DrawConcreteContour data
     DrawCrackInteractionContour data.CrackInteractionContour
+    DrawTransversePaths data.TransversePaths
     DrawShapeAnnotations data, mAnnotationLayout.DimensionsEnabled, mAnnotationLayout.RebarLabelsEnabled
     If data.GeometryOnly Then
         DrawGeometryOnlyNote data
@@ -991,6 +992,30 @@ Private Sub DrawShapeDecorations(ByVal data As CSectionPlotDataReader)
     If mResultLabelsEnabled Then DrawResultLabels data, mResultLabelSpacing
     If mLegendEnabled Then DrawLegend data
     DrawStateWarning data
+End Sub
+
+' Рисует оси поверх поля, создавая одну фигуру на группу армирования.
+Private Sub DrawTransversePaths(ByVal paths As Collection)
+    If paths Is Nothing Then Exit Sub
+    Dim path As CGeometryPath, edge As TRegionEdge, i As Long, ink As Long, builder As Object, shape As Object
+    ink = RGB(105, 49, 158)
+    For Each path In paths
+        path.CopySegment 1, edge
+        If path.SegmentCount = 1 And edge.Sweep = 0# Then
+            DrawModelLine edge.X1, edge.Y1, edge.X2, edge.Y2, ink, 1.5, "TransversePath"
+        Else
+            Set builder = mChart.Shapes.BuildFreeform(MSO_EDITING_AUTO, ModelToChartX(edge.X1), ModelToChartY(edge.Y1))
+            For i = 1 To path.SegmentCount
+                path.CopySegment i, edge
+                If edge.Sweep = 0# Then
+                    builder.AddNodes MSO_SEGMENT_LINE, MSO_EDITING_AUTO, ModelToChartX(edge.X2), ModelToChartY(edge.Y2)
+                Else
+                    AppendPlotArc builder, edge.CenterX, edge.CenterY, edge.X1, edge.Y1, edge.X2, edge.Y2, edge.Sweep
+                End If
+            Next i
+            Set shape = FinishPlotCurve(builder, "TransversePath", ink, 1.5)
+        End If
+    Next path
 End Sub
 
 ' Рисует сохранённые отрезки и дуги зоны поверх элементов, отдельно от контура бетона.
@@ -1148,8 +1173,17 @@ Private Function DrawContourArc(ByVal centerX As Double, ByVal centerY As Double
         Exit Function
     End If
 
-    Dim startAngle As Double
-    startAngle = Atn2Local(startY - centerY, startX - centerX)
+    Dim builder As Object
+    Set builder = mChart.Shapes.BuildFreeform(MSO_EDITING_AUTO, ModelToChartX(startX), ModelToChartY(startY))
+    AppendPlotArc builder, centerX, centerY, startX, startY, endX, endY, sweepAngle
+    Set DrawContourArc = FinishPlotCurve(builder, suffix, colorValue, weight)
+End Function
+
+' Добавляет узлы аналитической дуги к начатой линии без создания отдельной фигуры.
+Private Sub AppendPlotArc(ByVal builder As Object, ByVal centerX As Double, ByVal centerY As Double, _
+        ByVal startX As Double, ByVal startY As Double, ByVal endX As Double, ByVal endY As Double, ByVal sweepAngle As Double)
+    Dim startAngle As Double: startAngle = Atn2Local(startY - centerY, startX - centerX)
+    Dim radius As Double: radius = Sqr((startX - centerX) ^ 2 + (startY - centerY) ^ 2)
 
     Dim segmentCount As Long
     segmentCount = CLng(Int(Abs(sweepAngle) / (GEOM_PI / 36#)))
@@ -1159,8 +1193,6 @@ Private Function DrawContourArc(ByVal centerX As Double, ByVal centerY As Double
     Dim i As Long
     Dim nextX As Double, nextY As Double
     Dim angleValue As Double
-    Dim builder As Object, arcShape As Object
-    Set builder = mChart.Shapes.BuildFreeform(MSO_EDITING_AUTO, ModelToChartX(startX), ModelToChartY(startY))
     For i = 1 To segmentCount
         angleValue = startAngle + sweepAngle * CDbl(i) / CDbl(segmentCount)
         If i = segmentCount Then
@@ -1172,13 +1204,17 @@ Private Function DrawContourArc(ByVal centerX As Double, ByVal centerY As Double
         End If
         builder.AddNodes MSO_SEGMENT_LINE, MSO_EDITING_AUTO, ModelToChartX(nextX), ModelToChartY(nextY)
     Next i
-    Set arcShape = builder.ConvertToShape
-    arcShape.Name = SHAPE_PREFIX & suffix & CStr(mChart.Shapes.Count)
-    arcShape.Fill.Visible = False
-    arcShape.Line.Visible = True
-    arcShape.Line.ForeColor.RGB = colorValue
-    arcShape.Line.Weight = weight
-    Set DrawContourArc = arcShape
+End Sub
+
+' Применяет единый стиль открытой линии к завершённой фигуре Excel.
+Private Function FinishPlotCurve(ByVal builder As Object, ByVal suffix As String, ByVal colorValue As Long, ByVal weight As Double) As Object
+    Dim shape As Object: Set shape = builder.ConvertToShape
+    shape.Name = SHAPE_PREFIX & suffix & CStr(mChart.Shapes.Count)
+    shape.Fill.Visible = False
+    shape.Line.Visible = True
+    shape.Line.ForeColor.RGB = colorValue
+    shape.Line.Weight = weight
+    Set FinishPlotCurve = shape
 End Function
 
 ' Строит нейтральную линию по сохранённому полю деформаций сочетания.
@@ -1607,10 +1643,11 @@ End Sub
 
 ' Проверяет размещение легенды до очистки существующего рисунка.
 ' Сравниваем коэффициент с допустимым, а не умножаем на него: очень большой ввод не вызывает Overflow.
-Private Sub ValidateLegendFrame(ByVal settings As CSystemSettingsReader)
+Private Sub ValidateLegendFrame(ByVal settings As CSystemSettingsReader, ByVal showTransverse As Boolean)
     Dim baseHeight As Double
     baseHeight = 142#
     If Not IsCommonLegendMode() Then baseHeight = 300#
+    If showTransverse Then baseHeight = baseHeight + 22#
     If mLegendScale > (mChartObject.Width - PLOT_FRAME_LEFT - 80# - LEGEND_PLOT_GAP - LEGEND_RIGHT_MARGIN) / LEGEND_BASE_WIDTH Or _
             mLegendScale > (mChartObject.Height - PLOT_FRAME_TOP - LEGEND_RIGHT_MARGIN) / baseHeight Then
         Err.Raise vbObjectError + 4812, "CSectionPlotter", _
@@ -1631,6 +1668,13 @@ Private Sub DrawLegend(ByVal data As CSectionPlotDataReader)
             mRebarHasCompression, mRebarCompressionValueAtMaxAbs, mRebarHasTension, mRebarTensionValueAtMaxAbs
         DrawChartLegendScale data, 158#, "Concrete", _
             mConcreteHasCompression, mConcreteCompressionValueAtMaxAbs, mConcreteHasTension, mConcreteTensionValueAtMaxAbs
+    End If
+    If Not data.TransversePaths Is Nothing Then
+        Dim row As Double, ink As Long: row = 146#: ink = RGB(105, 49, 158)
+        If Not IsCommonLegendMode() Then row = row + 158#
+        DrawChartLine mLegendLeft + 6# * mLegendScale, mLegendTop + (row + 7#) * mLegendScale, _
+            mLegendLeft + 24# * mLegendScale, mLegendTop + (row + 7#) * mLegendScale, ink, 1.5, "LegendTransverse"
+        AddLegendText 28#, row, 104#, 14#, "Хомуты / ветви", ink, False
     End If
 End Sub
 

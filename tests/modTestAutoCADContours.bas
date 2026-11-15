@@ -122,6 +122,8 @@ Public Function RunPostAudit03ContourSnapshotTests() As String
     unitSheet.Cells(1, 1).Value2 = "Key": unitSheet.Cells(1, 2).Value2 = "Value"
     unitSheet.Cells(1, 3).Value2 = "Unit": unitSheet.Cells(2, 3).Value2 = "-"
     unitSheet.Cells(2, 1).Value2 = "Units.Length.Output"
+    unitSheet.Cells(3, 1).Value2 = "Results.SnapshotStorage": unitSheet.Cells(3, 2).Value2 = "Excel"
+    fixture.Names.Add "rngSystemSettings", "='" & unitSheet.Name & "'!$A$1:$C$3" ' Тестовая книга должна явно выбирать носитель при чтении геометрии.
     Set writer = New CNDMResultsWriter: Set model = New CSectionModel
     model.AddConcreteElement 0#, 0#, 10000#, 1, , , "Rectangle", 100#, 100#, 0#, , 123456#, 654321#, 12#
     model.AddRebarElement 5#, 5#, 12#, 0#, "A400"
@@ -223,11 +225,12 @@ Public Function RunPostAudit03ContourSnapshotTests() As String
     Set readBack = ReadSavedSectionContours(fixture)
     TestCheck "postAudit03.contours.emptyAvailable", readBack.Count = 0 And anchor.Value2 = "RunID"
     fixture.Names.Item("rngNDMSectionContours").Delete
+    Dim namesAfterRemoval As Long: namesAfterRemoval = fixture.Names.Count
     On Error Resume Next
     Set readBack = ReadSavedSectionContours(fixture): number = Err.Number: Err.Clear
     On Error GoTo Failed
     TestCheck "postAudit03.contours.missingTableRejected", number = vbObjectError + 4376
-    TestCheck "postAudit03.contours.missingTableDoesNotInsert", fixture.Names.Count = 6 And _
+    TestCheck "postAudit03.contours.missingTableDoesNotInsert", fixture.Names.Count = namesAfterRemoval And _
         fixture.Names.Item("rngNDMSectionProperties").RefersToRange.Column = 49
     fixture.Names.Add "rngNDMSectionContours", "=Results!$GR$20"
     Set readBack = New CSectionContours: writer.WriteSectionContours fixture, readBack, Empty
@@ -1573,6 +1576,11 @@ Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As O
     Dim group As Object: Set group = FindNativeCoupledInputTestCell(hoop, "Group1", 1, 2)
     group.Value2 = "Контур": group.Offset(0, 1).Value2 = 8# / lengthFactor: group.Offset(0, 2).Value2 = 100# / lengthFactor
     group.Offset(0, 3).Value2 = 10# / lengthFactor: group.Offset(0, 4).Value2 = "NativeHoop"
+    Set group = FindNativeCoupledInputTestCell(hoop, "Group2", 1, 2)
+    group.Value2 = "Ветвь": group.Offset(0, 1).Value2 = 8# / lengthFactor: group.Offset(0, 2).Value2 = 100# / lengthFactor
+    group.Offset(0, 4).Value2 = "NativeHoop"
+    group.Offset(0, 6).Value2 = CStr(1240# / lengthFactor) & ";" & CStr(-600# / lengthFactor) & ";" & _
+        CStr(1260# / lengthFactor) & ";" & CStr(-600# / lengthFactor)
     Dim classes As Object: Set classes = ThisWorkbook.Names("rngCoupledSteelClasses").RefersToRange
     classes.Cells(2, 1).Value2 = "NativeHoop": classes.Cells(2, 2).Value2 = "ULS(I)"
     classes.Cells(2, 3).Value2 = 180000#: classes.Cells(2, 4).Value2 = 240#: classes.Cells(2, 5).Value2 = 220#
@@ -1609,16 +1617,33 @@ Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As O
     Dim expected As String: expected = Replace$(Format$(CDbl(saved(id)), "0.0000000000"), ",", ".")
     Dim count As Long: count = Audit03ExportAutoCADDocumentForTests(doc)
     TestCheck "native.coupled.export", count > 0 And Abs(CDbl(saved(id))) > 0.000000001
-    Dim entity As Object, matched As Boolean
+    Dim entity As Object, matched As Boolean, transverseCount As Long, closedCount As Long, branchCoordinates As Variant
     For Each entity In doc.ModelSpace
         If entity.ObjectName = "AcDbText" Then
             If InStr(entity.TextString, id & " ") > 0 And InStr(entity.TextString, expected) > 0 Then matched = True
         End If
+        If entity.Layer = "RC_NDM_TransverseRebar" And entity.ObjectName = "AcDbPolyline" Then
+            transverseCount = transverseCount + 1
+            If entity.Closed Then closedCount = closedCount + 1 Else branchCoordinates = entity.Coordinates
+        End If
     Next entity
     TestCheck "native.coupled.exactLabel; " & id & " " & expected, matched
+    TestCheck "native.coupled.hoopAndBranch", transverseCount = 2 And closedCount = 1
+    If IsArray(branchCoordinates) Then
+        TestCheck "native.coupled.branchCoordinates", Abs(branchCoordinates(0) - 1240#) < 0.000001 And _
+            Abs(branchCoordinates(1) + 600#) < 0.000001 And Abs(branchCoordinates(2) - 1260#) < 0.000001
+    Else
+        TestCheck "native.coupled.branchCoordinates", False
+    End If
     Dim path As String: path = ThisWorkbook.Path & "\CoupledAutoCAD_" & Format$(Now, "yyyymmdd_hhnnss") & ".dwg"
     doc.SaveAs path
     mReport = mReport & "NATIVE_DWG: " & path & vbCrLf
+    Dim erased As Long: erased = Audit03CleanupAutoCADDocumentForTests(doc, cfg)
+    transverseCount = 0
+    For Each entity In doc.ModelSpace
+        If entity.Layer = "RC_NDM_TransverseRebar" Then transverseCount = transverseCount + 1
+    Next entity
+    TestCheck "native.coupled.cleanupPreservesHoops", erased > 0 And transverseCount = 2
     GoTo Cleanup
 Failed:
     TestCheck "native.coupled.runtime; " & CStr(Err.Number) & "; " & Err.Description, False

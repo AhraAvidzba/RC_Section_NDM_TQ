@@ -1561,7 +1561,7 @@ Private Sub WriteSectionAnnotations(ByVal workbook As Object, ByVal section As C
             If previousColumns >= 3 Then
                 If Not IsError(previous(savedRow, 3)) Then identity = savedKind & Chr$(30) & CStr(previous(savedRow, 3))
             End If
-            keepPrevious(savedRow) = (Left$(savedKind, 6) <> "CRACK_" And Not fresh.Exists(identity))
+            keepPrevious(savedRow) = (Not IsCalculatedSectionAnnotation(savedKind) And Not fresh.Exists(identity))
             If keepPrevious(savedRow) Then previousCount = previousCount + 1
         Next savedRow
         rowCount = rowCount + previousCount
@@ -1578,6 +1578,9 @@ Private Sub WriteSectionAnnotations(ByVal workbook As Object, ByVal section As C
             End If
         Next i
     End If
+    Dim paths As CTransverseRebarLayout, coupledStates As New Collection
+    If Not batch Is Nothing Then Set paths = batch.CoupledTransverseLayout
+    If Not paths Is Nothing Then rowCount = rowCount + CollectTransverseStates(batch, paths, coupledStates)
     If rowCount < 1 Then rowCount = 1
 
     Dim data() As Variant
@@ -1605,6 +1608,10 @@ Private Sub WriteSectionAnnotations(ByVal workbook As Object, ByVal section As C
         PutCrackRegionRows data, rowIndex, runID, region, units
         PutCrackBoundaryProbeRows data, rowIndex, runID, region, units
     Next region
+    Dim key As Variant
+    For Each key In coupledStates
+        PutTransversePathRows data, rowIndex, runID, CStr(key(0)), CStr(key(1)), CStr(key(2)), paths, units
+    Next key
 
     Dim textColumn As Variant
     If Not mGeometryPreviewCapture Is Nothing Then mGeometryPreviewCapture.AddTable "rngNDMSectionAnnotations", data
@@ -1622,6 +1629,23 @@ Private Sub WriteSectionAnnotations(ByVal workbook As Object, ByVal section As C
     target.Resize(rowCount, ANNOTATION_COLUMNS).Value2 = data
     FormatResultsBlock target, rowCount, ANNOTATION_COLUMNS, "Аннотации схемы (координаты — CoordinateUnit; площадь — AreaUnit; значение — Unit)"
 End Sub
+
+' Подбирает только опубликованные пространственные НДС и оценивает размер массива.
+Private Function CollectTransverseStates(ByVal batch As CBatchSectionCalculator, ByVal paths As CTransverseRebarLayout, _
+        ByVal cases As Collection) As Long
+    Dim segmentCount As Long, i As Long
+    For i = 1 To paths.Count: segmentCount = segmentCount + paths.Path(i).SegmentCount: Next i
+    If segmentCount = 0 Then Exit Function
+    Dim combination As CCombinationResult, repository As CStateRepository, state As CSectionStateResult, j As Long
+    For i = 1 To batch.Count
+        Set combination = batch.ResultAt(i): Set repository = combination.StateRepository
+        For j = 1 To repository.StateCount
+            Set state = repository.StateAt(j)
+            If Not state.CoupledFields Is Nothing Then cases.Add Array(batch.CombinationID(i), combination.ProfileId, state.StateTypeText)
+        Next j
+    Next i
+    CollectTransverseStates = segmentCount * cases.Count
+End Function
 
 ' Оставляет таблицу результатов элементов с одной шапкой.
 ' Для preview нет LC, поэтому записывать Stress/Strain нельзя.

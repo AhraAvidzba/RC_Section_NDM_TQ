@@ -1522,6 +1522,10 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
                 CStr(mode) & " keeps the nonzero capacity twist", passed, failed, report
             TestRecord Len(ReadLoadCasePropertyText(book, "Hoop", "State.CapacityState.Rebar.2.RebarDiagramId")) > 0, _
                 CStr(mode) & " links the distinct hoop material curve at capacity", passed, failed, report
+            Dim pathSet As Collection: Set pathSet = ReadSavedTransversePaths(book, runId, "Hoop", "PR4", "CapacityState")
+            TestRecord Not pathSet Is Nothing, CStr(mode) & " keeps the accepted path at capacity", passed, failed, report
+            Set pathSet = ReadSavedTransversePaths(book, runId, "Hoop", "PR4", "CrackedState")
+            TestRecord pathSet Is Nothing, CStr(mode) & " separates named states of one load case", passed, failed, report
         Else
             TestRecord False, CStr(mode) & " has no elements in the hoop capacity state", passed, failed, report
         End If
@@ -1779,11 +1783,48 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestSavedCoupledMaterialCurves book, CStr(mode), grades.Cells(2, 3), units, passed, failed, report
     Next mode
     TestSavedAutoCADTransverse book, settings, units, passed, failed, report
+    TestSavedCurvedTransversePaths book, units, passed, failed, report
     RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет сохранённые кривые с аналитическими длинами дуги и окружности.
+Private Sub TestSavedCurvedTransversePaths(ByVal book As Object, ByVal units As CUnitSystem, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const RADIUS As Double = 25#
+    Const RUN_ID As Double = 46100#
+    Dim hoop As New CGeometryPath, arc As New CGeometryPath, layout As New CTransverseRebarLayout
+    hoop.Initialize "RoundHoop": hoop.AddArc "FullCircle", 1250#, -600#, RADIUS, 0#, -2# * GEOM_PI: hoop.Seal True
+    arc.Initialize "QuarterBranch": arc.AddArc "Quarter", 1250#, -600#, RADIUS, 0#, GEOM_PI / 2#: arc.Seal
+    layout.AddGroup hoop, 8#, 120#, "TestHoop": layout.AddGroup arc, 8#, 120#, "TestHoop"
+    Dim raw() As Variant, data As Variant, row As Long: ReDim raw(1 To 3, 1 To 24): row = 2
+    PutTransversePathRows raw, row, RUN_ID, "Curved", "PR4", "StrengthState", layout, units
+    data = raw
+    Dim paths As Collection: Set paths = ReadSavedTransversePaths(book, RUN_ID, "Curved", "PR4", "StrengthState", data)
+    If paths Is Nothing Then
+        TestRecord False, "curved transverse axes are missing", passed, failed, report
+        Exit Sub
+    End If
+    If paths.Count <> 2 Then
+        TestRecord False, "curved transverse axes have incorrect grouping", passed, failed, report
+        Exit Sub
+    End If
+    Set hoop = paths(1): Set arc = paths(2)
+    TestExpectNear hoop.Length, 2# * GEOM_PI * RADIUS, 0.000000001, "saved full circle matches analytic circumference", passed, failed, report
+    TestExpectNear arc.Length, GEOM_PI * RADIUS / 2#, 0.000000001, "saved arc matches analytic quarter length", passed, failed, report
+    Dim edge As TRegionEdge: hoop.CopySegment 1, edge
+    TestRecord hoop.IsClosed And Not arc.IsClosed And edge.Sweep = -2# * GEOM_PI, "saved full clockwise axis keeps exact closure and sign", passed, failed, report
+    Dim warning As String
+    On Error Resume Next
+    Set paths = ReadSavedTransversePaths(book, RUN_ID + 1#, "Curved", "PR4", "StrengthState", data)
+    warning = Err.Description: Err.Clear
+    On Error GoTo 0
+    TestRecord InStr(warning, "другому запуску") > 0 And InStr(warning, "Results!") > 0, _
+        "stale paths are rejected with an address", passed, failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет расчёт из сохранённой геометрии с меткой импорта AutoCAD.
@@ -1856,7 +1897,49 @@ Private Sub TestSavedAutoCADTransverse(ByVal book As Object, ByVal settings As O
         TestRecord InStr(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Control"), "TestHoop") > 0 And _
             ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Status") = "OK", _
             label & "uses and reports the separate hoop grade", passed, failed, report
+        TestSavedTransverseOverlay book, label, kind, CX, CY, passed, failed, report
     Next mode
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет открытый и замкнутый пути с геометрией примера после изменения Config.
+Private Sub TestSavedTransverseOverlay(ByVal book As Object, ByVal label As String, ByVal kind As Object, _
+        ByVal cx As Double, ByVal cy As Double, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    kind.Value2 = "Нет"
+    Dim data As Variant: data = ReadElementResultTable(book, "Spatial", "StrengthState")
+    Dim runID As Double: runID = CDbl(data(2, ResultColumn(data, "RunID")))
+    Dim paths As Collection: Set paths = ReadSavedTransversePaths(book, runID, "Spatial", "PR4", "StrengthState")
+    If paths Is Nothing Then
+        TestRecord False, label & "missing the accepted path after editing inputs", passed, failed, report
+        Exit Sub
+    End If
+    TestRecord paths.Count = 2, label & "keeps both accepted paths after editing inputs", passed, failed, report
+    If paths.Count = 2 Then
+        Dim closedPath As CGeometryPath, openPath As CGeometryPath, edge As TRegionEdge
+        Set closedPath = paths(1): Set openPath = paths(2)
+        TestRecord closedPath.IsClosed And Not openPath.IsClosed And openPath.SegmentCount = 1, _
+            label & "distinguishes the closed hoop from the open branch", passed, failed, report
+        openPath.CopySegment 1, edge
+        TestRecord Abs(edge.X1 - cx + 10#) < 0.000001 And Abs(edge.X2 - cx - 10#) < 0.000001 And Abs(edge.Y1 - cy) < 0.000001, _
+            label & "stores the accepted branch in the original WCS coordinates", passed, failed, report
+        Dim minimumX As Double, maximumX As Double
+        closedPath.ProjectionBounds 1#, 0#, minimumX, maximumX
+        TestRecord Abs(minimumX - cx + 76#) < 0.000001 And Abs(maximumX - cx - 76#) < 0.000001, _
+            label & "hoop axis has the expected 14 mm setback", passed, failed, report
+    End If
+    Set paths = ReadSavedTransversePaths(book, runID, "Plane", "PR4", "StrengthState")
+    TestRecord paths Is Nothing, label & "planar case has no transverse overlay", passed, failed, report
+    Dim sys As Object: Set sys = book.Names.Item("rngSystemSettings").RefersToRange
+    TestInputCell(sys, "Output.CombinationMode").Value2 = "User"
+    TestInputCell(sys, "Output.CombinationID").Value2 = "Spatial"
+    UpdateSectionResultsForWorkbook book
+    Dim chart As Object, shape As Object, shapeCount As Long
+    Set chart = book.Worksheets("Расчет").ChartObjects("chtNDMSectionPlot").Chart
+    For Each shape In chart.Shapes
+        If Left$(shape.Name, Len("NDMPlot_Transverse")) = "NDMPlot_Transverse" Then shapeCount = shapeCount + 1
+    Next shape
+    TestRecord shapeCount = 2, label & "actual Excel chart creates one figure per accepted group", passed, failed, report
+    TestInputCell(sys, "Output.CombinationMode").Value2 = "Worst"
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -1940,6 +2023,15 @@ Private Sub TestSavedCoupledFields(ByVal book As Object, ByVal mode As String, B
     plot.LoadFromWorkbook book, cfg
     TestRecord plot.Count = elementCount And plot.ResultUnit = "MPa", mode & " plot reads the actual shear field", passed, failed, report
     TestExpectNear plot.ResultValue(1), CDbl(tau(plot.ElementID(1))), 0.0000001, mode & " plot matches saved shear", passed, failed, report
+    Dim paths As Collection: Set paths = plot.TransversePaths
+    TestRecord Not paths Is Nothing, mode & " plot reads the saved transverse branch", passed, failed, report
+    UpdateSectionResultsForWorkbook book
+    Dim chart As Object, shape As Object, drawn As Boolean
+    Set chart = book.Worksheets("Расчет").ChartObjects("chtNDMSectionPlot").Chart
+    For Each shape In chart.Shapes
+        If Left$(shape.Name, Len("NDMPlot_Transverse")) = "NDMPlot_Transverse" Then drawn = True
+    Next shape
+    TestRecord drawn, mode & " actual Excel chart draws the transverse path", passed, failed, report
     TestInputCell(system, "Output.CombinationMode").Value2 = "Worst"
 End Sub
 

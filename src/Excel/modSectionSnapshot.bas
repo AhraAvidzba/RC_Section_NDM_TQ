@@ -1196,7 +1196,7 @@ Private Sub RestoreModelAnnotations(ByVal workbook As Object, ByVal model As CSe
     Dim text As String, value As Double, valueUnit As String, comment As String
     For row = 2 To UBound(data, 1)
         kind = ReadSavedAnnotationText(data, anchor, row, 2)
-        If Left$(kind, 6) <> "CRACK_" Then
+        If Not IsCalculatedSectionAnnotation(kind) Then
             id = ReadSavedAnnotationText(data, anchor, row, 3)
             unit = ReadSavedAnnotationText(data, anchor, row, 23)
             Set info = ReadSnapshotOptionalRecord(data, anchor, row, 24)

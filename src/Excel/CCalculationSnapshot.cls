@@ -260,7 +260,7 @@ Private Sub ValidateGeometryPreview()
     Next row
     values = Table("rngNDMSectionAnnotations")
     For row = 2 To UBound(values, 1)
-        If Left$(CStr(values(row, 2)), 6) = "CRACK_" Then Err.Raise 5, "CCalculationSnapshot", "Геометрический снимок содержит расчётную область трещин."
+        If IsCalculatedSectionAnnotation(CStr(values(row, 2))) Then Err.Raise 5, "CCalculationSnapshot", "Геометрический снимок содержит расчётные аннотации."
     Next row
     Dim lengthUnit As String: lengthUnit = OutputLengthUnit()
     If Len(lengthUnit) = 0 Then Err.Raise 5, "CCalculationSnapshot", "Не задана единица длины геометрического снимка."
@@ -371,7 +371,7 @@ Public Sub AddSeparatedTable(ByVal key As String, ByVal values As Variant)
     If key = "rngNDMSectionProperties" Then extra = "LoadCase.Properties" Else extra = "LoadCase.Annotations"
     commonCount = 1: caseCount = 1
     For i = 2 To UBound(values, 1)
-        If key = "rngNDMSectionProperties" Then isCase = IsCaseProperty(values, i) Else isCase = Left$(CStr(values(i, 2)), 6) = "CRACK_"
+        If key = "rngNDMSectionProperties" Then isCase = IsCaseProperty(values, i) Else isCase = IsCalculatedSectionAnnotation(CStr(values(i, 2)))
         If isCase Then caseCount = caseCount + 1 Else commonCount = commonCount + 1
     Next i
     Dim common() As Variant, cases() As Variant, c As Long, k As Long
@@ -379,7 +379,7 @@ Public Sub AddSeparatedTable(ByVal key As String, ByVal values As Variant)
     For j = 1 To UBound(values, 2): common(1, j) = values(1, j): cases(1, j) = values(1, j): Next j
     c = 1: k = 1
     For i = 2 To UBound(values, 1)
-        If key = "rngNDMSectionProperties" Then isCase = IsCaseProperty(values, i) Else isCase = Left$(CStr(values(i, 2)), 6) = "CRACK_"
+        If key = "rngNDMSectionProperties" Then isCase = IsCaseProperty(values, i) Else isCase = IsCalculatedSectionAnnotation(CStr(values(i, 2)))
         If isCase Then
             k = k + 1: For j = 1 To UBound(values, 2): cases(k, j) = values(i, j): Next j
         Else

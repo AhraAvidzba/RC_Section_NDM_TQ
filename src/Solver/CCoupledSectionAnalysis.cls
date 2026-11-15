@@ -71,6 +71,11 @@ Friend Property Get SteelClassCount() As Long
     SteelClassCount = mSteelReferences.Count
 End Property
 
+' Передаёт неизменяемые пути подготовленных групп для вывода принятого НДС.
+Friend Property Get TransverseLayout() As CTransverseRebarLayout
+    Set TransverseLayout = mTransverse
+End Property
+
 ' Решает в выбранной точке траектории и возвращает только подтверждённое
 ' состояние заданных усилий. Численный отказ не публикует итоги промежуточной ступени.
 Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
