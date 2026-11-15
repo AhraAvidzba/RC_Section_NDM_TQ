@@ -447,9 +447,18 @@ Public Function RunTestCoupledTBU3SpatialPeak(ByVal spansText As String, ByVal m
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Снимает деформацию обеих вертикальных ветвей в середине стенки
+' на принятых полях с тремя пространственными историями.
+Public Function RunTestCoupledTBU3HoopGauge(ByVal spansText As String, ByVal maximumStageText As String) As String
+    RunTestCoupledTBU3HoopGauge = TraceTBU3Test(spansText, maximumStageText, True, _
+        spatialHistory:=True, measureHoop:=True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Записывает принятые точки силового и деформационного контроля отдельно.
 Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean, _
-        Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False) As String
+        Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False, _
+        Optional ByVal measureHoop As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -469,6 +478,14 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
 
     Dim layout As CTransverseRebarLayout, steel As Object, section As CSectionModel
     Set section = BuildTBU3SectionTest(layout, steel)
+    Dim gaugeLeftX As Double, gaugeRightX As Double
+    If measureHoop Then
+       Dim hoopPath As CGeometryPath: Set hoopPath = layout.Path(1)
+        hoopPath.ProjectionBounds 1#, 0#, gaugeLeftX, gaugeRightX
+        AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_X_MM;" & ExperimentNumberTest(gaugeLeftX) & ";" & _
+            ExperimentNumberTest(gaugeRightX)
+        AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_COLUMNS;stage;Mx_kNm;T_kNm;strain_left;strain_right"
+    End If
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
     operators.PrepareModel section, EC, NU, spans, spans, 5, layout, steelModels:=steel
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
@@ -490,6 +507,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
             path.TargetSix reached, target
             operators.GeneralizedDeformation field, eps0, kx, ky, twist
             errorNorm = TBU3ForceErrorTest(achieved, target)
+            If measureHoop And solved And errorNorm < 0.000005 Then _
+                RecordTBU3HoopGaugeTest operators, field, reached, achieved, gaugeLeftX, gaugeRightX, report, tracePath
             row = row & ";" & ExperimentNumberTest(-achieved(2) / 1E+6) & ";" & ExperimentNumberTest(achieved(4) / 1E+6) & _
                 ";" & ExperimentNumberTest(-kx * 1000#) & ";" & ExperimentNumberTest(twist * 1000#) & _
                 ";" & ExperimentNumberTest(response.AcceptedTransverseSteelUtilization) & ";" & ExperimentNumberTest(response.AcceptedSteelUtilization) & _
@@ -512,7 +531,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         If confirmPeak Then
             ConfirmTBU3PeakTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures
         Else
-            ContinueTBU3ByTwistTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures
+            ContinueTBU3ByTwistTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures, _
+                measureHoop, gaugeLeftX, gaugeRightX
         End If
     End If
     If passed = 0 Then failures = failures + 1
@@ -521,6 +541,21 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
 Failed:
     TraceTBU3Test = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает продольную деформацию вертикальной ветви εyy при y=0.
+' Снимает кинематику с принятого поля без расчёта нового напряжения.
+Private Sub RecordTBU3HoopGaugeTest(ByVal operators As CCoupledElasticState, ByRef field() As Double, _
+        ByVal stage As Double, ByRef achieved() As Double, ByVal gaugeLeftX As Double, ByVal gaugeRightX As Double, _
+        ByRef report As String, ByVal tracePath As String)
+    Dim strain(1 To 6) As Double, unusedWarping As Double, leftGauge As Double
+    operators.KinematicsAt gaugeLeftX, 0#, field, strain, unusedWarping
+    leftGauge = strain(2) ' Вертикальная прямая ветвь, направление ±y даёт одну и ту же проекцию.
+    operators.KinematicsAt gaugeRightX, 0#, field, strain, unusedWarping
+    AddExperimentTraceTest report, tracePath, "TBU3_GAUGE;" & ExperimentNumberTest(stage) & ";" & _
+        ExperimentNumberTest(-achieved(2) / 1E+6) & ";" & ExperimentNumberTest(achieved(4) / 1E+6) & ";" & _
+        ExperimentNumberTest(leftGauge) & ";" & ExperimentNumberTest(strain(2))
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Подключает одну или три истории к одним операторам и параметрам опыта.
@@ -592,7 +627,8 @@ End Sub
 ' сохраняя постоянный момент, отношение приращений и принятую историю.
 Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
         ByVal path As CLoadPathVector, ByVal branch As CCoupledLoadContinuation, ByVal response As CCoupledReinforcedResponse, _
-        ByVal requestedStage As Long, ByRef report As String, ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
+        ByVal requestedStage As Long, ByRef report As String, ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long, _
+        ByVal measureHoop As Boolean, ByVal gaugeLeftX As Double, ByVal gaugeRightX As Double)
     Const MAX_ATTEMPTS As Long = 200 ' Лимит опытного прогона, включая уменьшения шага.
     Dim baseLoad() As Double, direction() As Double, projection() As Double
     path.Components baseLoad, direction
@@ -620,6 +656,8 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
             path.TargetSix reached, target
             operators.GeneralizedDeformation field, eps0, kx, ky, twist
             errorNorm = TBU3ForceErrorTest(achieved, target)
+            If measureHoop And errorNorm < 0.000005 Then _
+                RecordTBU3HoopGaugeTest operators, field, reached, achieved, gaugeLeftX, gaugeRightX, report, tracePath
             row = "Twist" & CStr(attempt) & ";" & ExperimentNumberTest(reached) & ";" & ExperimentNumberTest(-achieved(2) / 1E+6) & _
                 ";" & ExperimentNumberTest(achieved(4) / 1E+6) & ";" & ExperimentNumberTest(-kx * 1000#) & ";" & ExperimentNumberTest(twist * 1000#) & _
                 ";" & ExperimentNumberTest(response.AcceptedTransverseSteelUtilization) & ";" & ExperimentNumberTest(response.AcceptedSteelUtilization) & _

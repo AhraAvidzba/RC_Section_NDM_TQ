@@ -1,7 +1,8 @@
-"""Сверяет T(θ) или M(κ) NDM с векторными кривыми TBU3 на рис. 14 Kagermanov и Ceresa."""
+"""Сверяет поля НДМ с векторными кривыми TBU3 на рис. 14–15 Kagermanov и Ceresa."""
 
 import argparse
 import json
+import math
 import re
 from hashlib import sha256
 from pathlib import Path
@@ -14,6 +15,7 @@ RASP_PDF_SHA256 = "93612557981758e2fc5c0396df3cf1820da0c2d23e06a8cd41c91b9964c9b
 TWISTS = (0.001, 0.002, 0.004, 0.006, 0.008, 0.010, 0.015, 0.020, 0.025, 0.028)
 CURVATURES = (0.0005, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.0075, 0.008, 0.009, 0.0095)
 LOAD_STAGES = (4, 8, 12, 15, 16)
+HOOP_TORQUES = (15, 30, 50, 80, 100, 120, 125, 145, 165, 180, 195)
 INITIAL_MOMENT = 29.6
 BENDING_STEP = 14.87
 TORSION_STEP = 10.35
@@ -78,6 +80,90 @@ def cubic_point(points, s):
     a = 1 - s
     weights = (a**3, 3 * s * a**2, 3 * s**2 * a, s**3)
     return tuple(sum(w * point[axis] for w, point in zip(weights, points)) for axis in (0, 1))
+
+
+def hoop_figure_curves(pdf_path):
+    """Калибрует значения деформации при росте T по осевым линиям рис. 15b."""
+    source = pdf_path.read_bytes()
+    if sha256(source).hexdigest() != PDF_SHA256:
+        raise ValueError("Калибровка хомута относится к зафиксированной версии PDF")
+    curves = {}
+    with fitz.open(stream=source, filetype="pdf") as document:
+        for drawing in document[9].get_drawings():
+            bounds = drawing["rect"]
+            if not (341 < bounds.x0 < 344 and 516 < bounds.y0 < 524 and bounds.width > 100):
+                continue
+            segments = drawing["items"]
+            if any(segment[0] == "c" for segment in segments):
+                name = "experiment"
+                points = [segments[0][1]]
+                for segment in segments:
+                    if segment[0] == "c":
+                        points.extend(cubic_point(segment[1:], step / 128) for step in range(1, 129))
+                    elif segment[0] == "l":
+                        points.append(segment[-1])
+                    else:
+                        raise ValueError("Неподдерживаемая форма отрезка рис. 15b")
+            elif all(segment[0] == "l" for segment in segments):
+                name = "kagermanov_ceresa"
+                points = [segments[0][1]] + [segment[-1] for segment in segments]
+            else:
+                raise ValueError("Не распознана линия рис. 15b")
+            if name in curves:
+                raise ValueError(f"Найдена лишняя линия {name} на рис. 15b")
+            # По X отметки −0,0002 и 0,0018, по Y отметки 0 и 250 кН·м.
+            curves[name] = [((599.495 - y) * 250 / (599.495 - 497.057),
+                             -0.0002 + (x - 328.452) * 0.002 / (478.303 - 328.452)) for x, y in points]
+    if set(curves) != {"experiment", "kagermanov_ceresa"}:
+        raise ValueError("Для хомута нужны обе линии рис. 15b")
+    return curves
+
+
+def native_hoop_curves(report_path):
+    """Проверяет обе координаты измерения, путь нагрузки и соответствие принятому НДС."""
+    rows, accepted = [], []
+    gauge_axes = None
+    passed = None
+    for line in report_path.read_text(encoding="utf-8-sig").splitlines():
+        parts = line.split(";")
+        if parts[0] == "TBU3_GAUGE_X_MM" and len(parts) == 3 and gauge_axes is None:
+            gauge_axes = tuple(map(float, parts[1:]))
+        elif parts[0] == "TBU3_GAUGE" and len(parts) == 6:
+            rows.append(tuple(map(float, parts[1:])))
+        elif len(parts) == 11 and re.fullmatch(r"(?:Twist)?\d+", parts[0]) and parts[-1] == "Accepted":
+            accepted.append(tuple(map(float, parts[1:4])))
+        elif match := re.fullmatch(r"TOTAL_TBU3_FORCE_EQUILIBRIUM: passed=(\d+); failed=0", line):
+            passed = int(match.group(1))
+    if (gauge_axes is None or any(not math.isclose(actual, expected, abs_tol=1e-8, rel_tol=0.)
+                                 for actual, expected in zip(gauge_axes, (-222., 222.), strict=True))
+            or passed is None or passed < len(rows) or len(rows) < 2 or len(rows) != len(accepted)):
+        raise ValueError("Протокол не содержит полного ряда двух измерений из принятых полей TBU3")
+    for (stage, moment, torque, left, right), expected in zip(rows, accepted, strict=True):
+        if not all(map(math.isfinite, (stage, moment, torque, left, right))) or (stage, moment, torque) != expected:
+            raise ValueError("Деформации хомута относятся к отличной от принятой точке траектории")
+        if max(abs(moment - (INITIAL_MOMENT + BENDING_STEP * stage)), abs(torque - TORSION_STEP * stage)) > 0.0002:
+            raise ValueError("Силовые компоненты не совпадают с заданной траекторией TBU3")
+    if abs(rows[0][0]) > 1e-8 or abs(rows[0][2]) > 0.0002:
+        raise ValueError("Отсутствует принятое состояние одного предварительного момента")
+    return {"left": [(torque, left) for _, _, torque, left, _ in rows],
+            "right": [(torque, right) for _, _, torque, _, right in rows]}
+
+
+def compare_hoop_gauge(pdf_path, report_path):
+    """Сопоставляет деформации при общем T с предварительным M и без экстраполяции."""
+    digitized = hoop_figure_curves(pdf_path)
+    native = native_hoop_curves(report_path) if report_path else {}
+    table = []
+    for torque in HOOP_TORQUES:
+        strains = {name: interpolate(points, torque) for name, points in digitized.items()}
+        for side, points in native.items():
+            value = interpolate(points, torque)
+            strains[f"ndm_{side}"] = value
+            strains[f"ndm_{side}_from_preload"] = value - points[0][1] if value is not None else None
+        table.append({"T_kNm": torque, "strain": strains})
+    return {"source_sha256": PDF_SHA256, "figure": "15b", "reading_resolution_microstrain": 5,
+            "native_max_T_kNm": max((torque for torque, _ in native.get("left", [])), default=None),
+            "native_preload_strain_gauges": {side: points[0][1] for side, points in native.items()}, "rows": table}
 
 
 def native_curve(report_path, by_curvature=False):
@@ -195,8 +281,12 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--curvature", action="store_true", help="рисунок 14a, момент от кривизны")
     mode.add_argument("--load-path", action="store_true", help="деформации при общей номинальной паре M, T")
+    mode.add_argument("--hoop-gauge", action="store_true", help="рисунок 15b, деформация хомута на середине стенки")
     mode.add_argument("--rasp-pdf", type=Path, help="добавить опыт и RASP из рисунка 9a")
     args = parser.parse_args()
+    if args.hoop_gauge:
+        print(json.dumps(compare_hoop_gauge(args.pdf, args.native_report), indent=2, allow_nan=False))
+        return
     if args.rasp_pdf:
         print(json.dumps(compare_rasp(args.rasp_pdf, args.pdf, args.native_report), indent=2, allow_nan=False))
         return
