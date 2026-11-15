@@ -262,9 +262,30 @@ Public Sub ClearExisting(ByVal workbook As Object, ByVal titleText As String, Op
     MarkWorkbookDrawingPending workbook
 End Sub
 
+' Помечает сохранённую схему при смене расчёта без перерисовки.
+' Использует только её собственный заголовок и не создаёт контейнер.
+Friend Sub MarkResultsNotDisplayed(ByVal workbook As Object, ByVal titleText As String)
+    Dim notice As String
+    Set mChartObject = EnsureChart(workbook, notice, existingOnly:=True)
+    If mChartObject Is Nothing Then Exit Sub
+    Set mChart = mChartObject.Chart
+    Dim titleShape As Object
+    On Error Resume Next
+    Set titleShape = mChart.Shapes.Item(SHAPE_PREFIX & "Title") ' При прерванном рисовании прежний заголовок мог быть уже удалён.
+    On Error GoTo 0
+    If titleShape Is Nothing Then
+        DrawPlotTitleOverlay titleText
+    Else
+        titleShape.TextFrame.Characters().Text = titleText
+    End If
+    MarkWorkbookDrawingPending workbook
+End Sub
+
 ' Находит единственный контейнер по всем обычным листам до изменения рисунка.
 ' Перенос и размер сохраняются; отсутствие восстанавливается с сообщением, дубликаты требуют выбора пользователя.
-Private Function EnsureChart(ByVal workbook As Object, ByRef containerNotice As String) As Object
+' Для пометки существующего рисунка не создаёт контейнер и не меняет тип диаграммы.
+Private Function EnsureChart(ByVal workbook As Object, ByRef containerNotice As String, _
+        Optional ByVal existingOnly As Boolean = False) As Object
     Dim chartObject As Object, candidate As Object, sheet As Object, matches As Long, locations As String
     For Each sheet In workbook.Worksheets
         For Each candidate In sheet.ChartObjects
@@ -281,6 +302,7 @@ Private Function EnsureChart(ByVal workbook As Object, ByRef containerNotice As 
         "Листы: " & locations & "." & vbCrLf & vbCrLf & _
         "Оставьте это имя только у одной диаграммы; остальные переименуйте или удалите."
 
+    If existingOnly Then Set EnsureChart = chartObject: Exit Function
     If chartObject Is Nothing Then
         Set sheet = Nothing
         On Error Resume Next

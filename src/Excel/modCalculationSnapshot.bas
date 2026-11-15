@@ -12,6 +12,7 @@ Private mReadViewResolved As Boolean
 Private mReadSnapshot As CCalculationSnapshot ' Неизменяемый набор только на время одной операции чтения.
 Private mReadWorkbook As Object ' Книга, которой принадлежит текущий контекст.
 Private mReadDepth As Long ' Вложенные чтения схемы и экспорта не уничтожают внешний контекст.
+Private Const PLOT_NOT_CURRENT As String = "Схема требует обновления для нового расчёта."
 
 ' Открывает короткую область чтения; между пользовательскими действиями кэша нет.
 Public Sub BeginCalculationSnapshotRead(ByVal workbook As Object, Optional ByVal snapshot As CCalculationSnapshot = Nothing)
@@ -275,9 +276,11 @@ Private Function TryUpdateCalculatedSnapshotPlot(ByVal workbook As Object, ByVal
         UpdateSectionPlotForWorkbook workbook, False, containerNotice
     Else
         Dim traceNotice As String: traceNotice = TryUpdateCoupledLoadChart(workbook, settings)
+        Dim plotter As New CSectionPlotter
         If updateScheme Then
-            Dim plotter As CSectionPlotter: Set plotter = New CSectionPlotter
             plotter.ClearExisting workbook, "Схема не обновлена: нет доступных расчётных состояний LC.", containerNotice
+        Else
+            plotter.MarkResultsNotDisplayed workbook, PLOT_NOT_CURRENT
         End If
         containerNotice = WorkbookMessageParagraph(containerNotice, traceNotice)
     End If
@@ -285,9 +288,13 @@ Private Function TryUpdateCalculatedSnapshotPlot(ByVal workbook As Object, ByVal
     TryUpdateCalculatedSnapshotPlot = containerNotice
     Exit Function
 Failed:
+    Dim reason As String: reason = Err.Description
+    On Error Resume Next
+    plotter.MarkResultsNotDisplayed workbook, PLOT_NOT_CURRENT
+    On Error GoTo 0
     plotHasWarning = True
     TryUpdateCalculatedSnapshotPlot = "Предупреждение:" & vbCrLf & "Схема не обновлена. Расчётные результаты сохранены." & vbCrLf & vbCrLf & _
-        Err.Description & vbCrLf & "Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется."
+        reason & vbCrLf & "Исправьте настройки оформления и нажмите «Обновить схему и результаты». Повторный расчёт не требуется."
 End Function
 
 ' Выбирает предупреждение по числу строк и фактической вместимости листа.

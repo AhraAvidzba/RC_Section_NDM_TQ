@@ -276,6 +276,108 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет заголовок сохранённой схемы после успешного расчёта без перерисовки.
+' Ручное обновление читает текущий RunID и сохраняет пользовательский объект.
+Public Function RunTestResultPlotPublication(ByVal storage As String) As String
+    Dim checks As Long, report As String
+    On Error GoTo Failed
+    Dim book As Workbook: Set book = ThisWorkbook
+    If InStr(1, book.Path, "RC_NDM_ModeSuite_", vbTextCompare) = 0 Then _
+        Err.Raise 5, "RunTestResultPlotPublication", "Запустите тест из изолированной копии книги."
+    If storage <> "Excel" And storage <> "File" Then Err.Raise 5, "RunTestResultPlotPublication", "Выберите Excel или File."
+    modTestPerformance.TestConfigurePerformanceFixture "NDS", 1, "Newton", "Rectangles", "Normal", "No"
+    Dim settings As Range, loads As Range, profiles As Range
+    Set settings = book.Names("rngSystemSettings").RefersToRange
+    Set loads = book.Names("rngLoadCombinations").RefersToRange
+    Set profiles = book.Names("rngCalculationProfiles").RefersToRange
+    TestCancellationSetting(settings, "Results.SnapshotStorage").Value2 = storage
+    TestCancellationSetting(settings, "Results.SnapshotName").Value2 = "TestPlotPublication_" & storage
+    TestCancellationSetting(settings, "General.ExecutionReportEnabled").Value2 = "No"
+    TestCancellationSetting(settings, "Output.CombinationMode").Value2 = "Worst"
+    TestCancellationSetting(settings, "Plot.Enabled").Value2 = "Yes"
+    TestCancellationSetting(settings, "Plot.AutoUpdateAfterCalculation").Value2 = "Yes"
+    TestCancellationSetting(settings, "Plot.ResultGradient").Value2 = "Yes"
+    TestChangeFreshnessVisualization book
+    Dim row As Long
+    For row = 1 To profiles.Rows.Count
+        If profiles.Cells(row, 2).Value2 = "Visualization.State" Then
+            profiles.Cells(row, 3).Value2 = "StrengthState"
+            Exit For
+        End If
+    Next row
+    TestCancellationRequire row <= profiles.Rows.Count, storage & " | задано прямое НДС для схемы", checks, report
+
+    Dim chart As Chart, summary As New CBatchResultWriter, originalProperties As Variant, originalRunID As Double
+    loads.Cells(2, 1).Value2 = "TEST_PLOT_RUN_A"
+    FormSectionForWorkbook book
+    RunSectionCalculationForWorkbook book
+    Set chart = book.Worksheets.Item("Расчет").ChartObjects.Item("chtNDMSectionPlot").Chart
+    TestCancellationRequire InStr(TestResultPlotTitle(chart), "TEST_PLOT_RUN_A") > 0, _
+        storage & " | схема первого расчёта показана", checks, report
+    originalProperties = ReadPhysicalResultTable(book, "rngNDMSectionProperties"): originalRunID = CDbl(originalProperties(2, 1))
+    Dim userShape As Shape, retainedShape As Shape
+    Set userShape = chart.Shapes.AddShape(msoShapeRectangle, 12#, 17#, 18#, 19#)
+    userShape.Name = "TestUserPlotMarker"
+    Set retainedShape = chart.Shapes.AddShape(msoShapeRectangle, 14#, 17#, 18#, 19#)
+    retainedShape.Name = "NDMPlot_TestRetained"
+    Dim userName As String, retainedName As String
+    userName = userShape.Name: retainedName = retainedShape.Name
+
+    TestCancellationSetting(settings, "Plot.AutoUpdateAfterCalculation").Value2 = "No"
+    loads.Cells(2, 1).Value2 = "TEST_PLOT_RUN_B"
+    RunSectionCalculationForWorkbook book
+    Dim savedProperties As Variant: savedProperties = ReadPhysicalResultTable(book, "rngNDMSectionProperties")
+    TestCancellationRequire CDbl(savedProperties(2, 1)) <> originalRunID And _
+        ReadLoadCasePropertyText(book, "TEST_PLOT_RUN_B", "DirectStateStatus") = "OK" And _
+        Len(summary.FreshnessNotice(book)) = 0, storage & " | новый расчёт сохранён и актуален", checks, report
+    TestCancellationRequire InStr(TestResultPlotTitle(chart), "Схема требует обновления") = 1 And _
+        chart.Shapes.Item(retainedName).Name = retainedName And chart.Shapes.Item(userName).Name = userName, _
+        storage & " | сохранённый рисунок явно требует обновления", checks, report
+    TestRefreshPublishedPlot book, chart, storage, "TEST_PLOT_RUN_B", userName, checks, report
+
+    TestCancellationSetting(settings, "Plot.AutoUpdateAfterCalculation").Value2 = "Yes"
+    TestCancellationSetting(settings, "Plot.ResultGradient").Value2 = "INVALID"
+    loads.Cells(2, 1).Value2 = "TEST_PLOT_RUN_C"
+    Dim message As String: message = RunSectionCalculationForWorkbook(book)
+    TestCancellationRequire ReadLoadCasePropertyText(book, "TEST_PLOT_RUN_C", "DirectStateStatus") = "OK" And _
+        Len(summary.FreshnessNotice(book)) = 0 And InStr(message, "Plot.ResultGradient") > 0, _
+        storage & " | ошибка оформления сообщена, расчёт опубликован", checks, report
+    TestCancellationRequire InStr(TestResultPlotTitle(chart), "Схема требует обновления") = 1 And _
+        chart.Shapes.Item(userName).Name = userName, storage & " | схема после ошибки явно требует обновления", checks, report
+    TestCancellationSetting(settings, "Plot.ResultGradient").Value2 = "Yes"
+    TestRefreshPublishedPlot book, chart, storage, "TEST_PLOT_RUN_C", userName, checks, report
+
+    RunTestResultPlotPublication = report & "TOTAL_RESULT_PLOT_PUBLICATION: passed=" & CStr(checks) & "; failed=0"
+    Exit Function
+Failed:
+    RunTestResultPlotPublication = report & "FAIL: " & Err.Source & " " & Err.Description & vbCrLf & _
+        "TOTAL_RESULT_PLOT_PUBLICATION: passed=" & CStr(checks) & "; failed=1"
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вручную восстанавливает текущую схему и проверяет неизменность снимка и счётчика решений.
+Private Sub TestRefreshPublishedPlot(ByVal book As Workbook, ByVal chart As Chart, ByVal storage As String, _
+        ByVal combination As String, ByVal userShapeName As String, ByRef checks As Long, ByRef report As String)
+    Dim store As New CCalculationSnapshotStore, checksum As New CFileChecksum, path As String, hash As String
+    If storage = "File" Then path = store.SnapshotPath(book): hash = checksum.FileSHA256(path)
+    Dim properties As Variant: properties = ReadPhysicalResultTable(book, "rngNDMSectionProperties")
+    Dim solveCount As Long: solveCount = SectionEquilibriumSolveCount()
+    UpdateSectionResultsForWorkbook book
+    TestCancellationRequire InStr(TestResultPlotTitle(chart), combination) > 0 And _
+        chart.Shapes.Item(userShapeName).Name = userShapeName, storage & " | восстановлена текущая схема " & combination, checks, report
+    TestCancellationRequire SnapshotMatricesEqual(properties, ReadPhysicalResultTable(book, "rngNDMSectionProperties")) And _
+        solveCount = SectionEquilibriumSolveCount(), storage & " | обновление схемы сохраняет снимок и не решает НДС", checks, report
+    If storage = "File" Then TestCancellationRequire checksum.FileSHA256(path) = hash, _
+        storage & " | обновление схемы не меняет .ndm", checks, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает видимую надпись из собственного заголовка диаграммы.
+Private Function TestResultPlotTitle(ByVal chart As Chart) As String
+    TestResultPlotTitle = chart.Shapes.Item("NDMPlot_Title").TextFrame.Characters().Text
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Устанавливает отображаемую величину профиля по смысловому ключу строки.
 Private Sub TestChangeFreshnessVisualization(ByVal book As Workbook)
     Dim profiles As Range: Set profiles = book.Names("rngCalculationProfiles").RefersToRange
