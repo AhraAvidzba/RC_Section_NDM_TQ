@@ -47,6 +47,7 @@ Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mUsesYieldControl As Boolean
+Private mPostPeakControlName As String, mPostPeakControlPoints As Long
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
@@ -68,6 +69,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
     mUsesYieldControl = False
+    mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mLocalPeak = 0#: mLocalPeakAccuracy = 0#
     mFollowingLocalPeak = False: mRecoveredPeaks = 0
     mReusedRightPoints = 0
@@ -101,14 +103,20 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     minimum = increment * MIN_STEP_RATIO
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
+    Dim lastProbeFailed As Boolean, unresolvedSteel As Boolean
     Dim recoveryProjection() As Double
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If attempt > STEP_LIMIT And mLocalPeak = 0# Then Exit For
+        If increment < minimum Then
+            If Not lastProbeFailed Or unresolvedSteel Then Exit For
+            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum) Then Exit For
+        End If
         trial.Coordinate = current.Coordinate + increment
-        If increment < minimum Or trial.Coordinate <= current.Coordinate Then Exit For
+        If trial.Coordinate <= current.Coordinate Then Exit For
         probed = Probe(trial, current.Lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        lastProbeFailed = Not probed
         changedControl = False
         If probed Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
@@ -117,6 +125,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If Not probed Then mSolver.DiscardStep
             End If
         End If
+        If probed And Len(mPostPeakControlName) > 0 Then probed = TrialMovesForward(history, current.HistoryIndex)
         If Not probed Then
             increment = increment * 0.5
         ElseIf trial.Lambda > maximumLambda Then
@@ -125,6 +134,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", Details()
             Exit Sub
         ElseIf BeyondSteelLimit() Then
+            unresolvedSteel = True ' Смена меры не может пропустить наблюдавшееся пересечение предела арматуры.
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             increment = increment * 0.5
         ElseIf mFollowingLocalPeak Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
@@ -139,6 +149,12 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                     StopSearch "Не удалось повторить пробу после проверки заданных усилий."
                     Exit Sub
                 End If
+                If Len(mPostPeakControlName) > 0 Then
+                    If Not TrialMovesForward(history, current.HistoryIndex) Then
+                        StopSearch "Повторная проба после проверки заданных усилий вернулась по деформационной ветви."
+                        Exit Sub
+                    End If
+                End If
                 If BeyondSteelLimit() Then
                     mSolver.DiscardStep
                     StopSearch "Повторная проба не подтвердила допустимость арматуры."
@@ -146,7 +162,12 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 End If
             End If
             AcceptPoint history, trial
+            unresolvedSteel = False
             If changedControl Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
+            If Len(mPostPeakControlName) > 0 Then
+                If mPostPeakControlPoints = 0 Then mControlName = mPostPeakControlName
+                mPostPeakControlPoints = mPostPeakControlPoints + 1
+            End If
             left = current: current = trial
             If current.Lambda > mBestLambda Then mBestLambda = current.Lambda
             If mFollowingLocalPeak Then CheckRecovery current.Lambda
@@ -189,6 +210,46 @@ Private Sub ResumeAfterLocalPeak(ByRef history As Collection, ByRef current As T
     current = right
     mReusedRightPoints = mReusedRightPoints + current.HistoryIndex - mPeak.HistoryIndex
 End Sub
+
+' Один раз выбирает другую меру, если после подтверждённого спада
+' численная проба потребовала шаг ниже минимального. Сохраняет принятое
+' поле, историю и одностороннюю материальную касательную.
+Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
+    If Len(mPostPeakControlName) > 0 Or Not mFollowingLocalPeak Or Not mUsesYieldControl Then Exit Function
+    If history.Count < 3 Or current.HistoryIndex <> history.Count Or left.HistoryIndex <> history.Count - 1 Then Exit Function
+    Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
+    If code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
+
+    Dim oldest() As Double, previous() As Double, currentField() As Double, accepted() As Double
+    oldest = history(history.Count - 2): previous = history(left.HistoryIndex): currentField = history(current.HistoryIndex)
+    mSolver.CopyAccepted accepted
+    Dim alternate() As Double, currentCoordinate As Double, currentSpacing As Double, name As String
+    If Not mSolver.SelectDeformationControl(previous, currentField, alternate, currentCoordinate, currentSpacing, name) Then Exit Function
+    Dim i As Long, oldestCoordinate As Double, previousCoordinate As Double
+    For i = 1 To UBound(alternate)
+        If currentField(i) <> accepted(i) Then Exit Function
+        previousCoordinate = previousCoordinate + alternate(i) * previous(i)
+        oldestCoordinate = oldestCoordinate + alternate(i) * oldest(i)
+    Next i
+    Dim spacing As Double: spacing = GeomMin(currentCoordinate - previousCoordinate, previousCoordinate - oldestCoordinate)
+    If spacing <= 0# Or currentCoordinate + 0.5 * spacing <= currentCoordinate Then Exit Function
+
+    mProjection = alternate: mPostPeakControlName = name
+    left.Coordinate = previousCoordinate: current.Coordinate = currentCoordinate
+    nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
+    TryChangePostPeakControl = True
+End Function
+
+' Проверяет продвижение по выбранной мере на фактических полях.
+' Отклоняет возврат по ветви до принятия материальной истории.
+Private Function TrialMovesForward(ByVal history As Collection, ByVal currentIndex As Long) As Boolean
+    Dim field() As Double, resultants() As Double, previous() As Double
+    mSolver.CopyTrial field, resultants
+    previous = history(currentIndex)
+    TrialMovesForward = (CoordinateOf(field) > CoordinateOf(previous))
+    If Not TrialMovesForward Then mSolver.DiscardStep
+End Function
 
 ' Считает восстановление после проверенного нисходящего плеча.
 ' Возвращённая нагрузка должна превышать максимум с учётом его погрешности.
@@ -528,6 +589,8 @@ Private Function Details() As String
         "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignVerified) & "; проб: " & CStr(mProbeCount)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
+    If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
+        "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mLocalPeak > 0# Then
         Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
             "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _
