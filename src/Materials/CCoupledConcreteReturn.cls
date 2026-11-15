@@ -25,6 +25,7 @@ Private Const NEAR_YIELD_RANGE_RATIO As Double = 0.00000004
 Private Const NEAR_YIELD_MAX_DEVIATOR_LOSS As Double = 0.0001
 Private Const NEAR_YIELD_ITERS As Long = 8
 Private Const ROUNDING_LIMIT As Double = 0.000000000000007105427357601 ' 32 относительных шага Double.
+Private Const MAX_DIRECT_MULTIPLIER As Double = 1E+308 ' Запас до переполнения при сравнении перед делением.
 Private mTwiceShear As Double
 Private mBulk As Double
 Private mAlpha As Double, mGamma As Double, mEccentricity As Double
@@ -43,13 +44,17 @@ End Sub
 ' Возвращает эффективные напряжения и приращение пластической деформации.
 ' Вход elastic учитывает ранее принятую пластическую деформацию.
 ' Инварианты этого тензора одинаковы на всех итерациях локальной истории.
+' Множитель равен stepMultiplier / multiplierDivisor. Обычно делитель 1.
+' У вершины конечный объёмный поток может соответствовать множителю вне Double.
 ' Неудача оставляет вызывающему право уменьшить материальный шаг.
 Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal q As Double, ByVal principalMax As Double, _
         ByVal cc As Double, ByVal ct As Double, _
         ByVal ft0 As Double, ByVal dilation As Double, ByRef corrected() As Double, _
-        ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double) As Boolean
+        ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double, _
+        ByRef multiplierDivisor As Double) As Boolean
     If mBulk <= 0# Or cc <= 0# Or ct <= 0# Or ft0 <= 0# Or dilation < 0# Then _
         Err.Raise 5, "CCoupledConcreteReturn", "Не заданы параметры текущей поверхности бетона."
+    multiplierDivisor = 1#
     Dim beta As Double
     beta = cc / ct * (1# - mAlpha) - (1# + mAlpha)
     If beta < 0# Then Exit Function ' Монотонная скобка требует допустимой геометрии поверхности.
@@ -74,7 +79,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
     Dim factor As Double, newTrace As Double, devLength As Double, offset As Double
     Dim trialMean As Double: trialMean = trace / 3#
     If q <= 1E-14 * cc Then
-        If Not TensileApex(trace, dilation, beta, cc, newTrace, stepMultiplier) Then Exit Function
+        If Not TensileApex(trace, dilation, beta, cc, newTrace, stepMultiplier, multiplierDivisor) Then Exit Function
     Else
         devLength = DEVIATORIC_NORM * q
         offset = mEccentricity * dilation * ft0
@@ -95,7 +100,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
             If factor < SCALED_APEX_FACTOR And Not triedScaledApex And offset > 0# Then
                 triedScaledApex = True
                 solvedScaledApex = SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
-                    factor, newTrace, stepMultiplier)
+                    factor, newTrace, stepMultiplier, multiplierDivisor)
                 If solvedScaledApex Then Exit For
             End If
             radius = Sqr(offsetSquared + devSquared * factor * factor)
@@ -127,7 +132,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
         If Not solvedScaledApex And Abs(value) > tolerance Then
             If triedScaledApex Then Exit Function
             If Not SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
-                    factor, newTrace, stepMultiplier) Then Exit Function
+                    factor, newTrace, stepMultiplier, multiplierDivisor) Then Exit Function
         End If
     End If
 
@@ -228,7 +233,7 @@ End Function
 Private Function SolveScaledApex(ByVal trace As Double, ByVal q As Double, ByVal largestDev As Double, _
         ByVal cc As Double, ByVal ct As Double, ByVal beta As Double, ByVal ft0 As Double, _
         ByVal dilation As Double, ByVal tolerance As Double, ByRef factor As Double, _
-        ByRef newTrace As Double, ByRef stepMultiplier As Double) As Boolean
+        ByRef newTrace As Double, ByRef stepMultiplier As Double, ByRef multiplierDivisor As Double) As Boolean
     If dilation <= 0# Then Exit Function
     Dim slope As Double: slope = mAlpha + beta / 3#
     If slope <= 0# Then Exit Function
@@ -255,7 +260,11 @@ Private Function SolveScaledApex(ByVal trace As Double, ByVal q As Double, ByVal
         value = CoupledBarcelonaYield(trialTrace, q * trialFactor, trialTrace / 3# + largestDev * trialFactor, cc, ct, mAlpha, mGamma)
         If Abs(value) <= tolerance Then
             factor = trialFactor: newTrace = trialTrace
-            stepMultiplier = scaledVolume / dilation
+            If MultiplierNeedsScaling(scaledVolume, dilation) Then
+                stepMultiplier = scaledVolume: multiplierDivisor = dilation
+            Else
+                stepMultiplier = scaledVolume / dilation
+            End If
             SolveScaledApex = True
             Exit Function
         End If
@@ -276,10 +285,24 @@ End Function
 ' Возвращает изотропную растягивающую пробу непосредственно на вершину.
 ' При нулевом объёмном потоке вершина недостижима из внешней точки.
 Private Function TensileApex(ByVal trace As Double, ByVal dilation As Double, ByVal beta As Double, ByVal cc As Double, _
-        ByRef newTrace As Double, ByRef stepMultiplier As Double) As Boolean
+        ByRef newTrace As Double, ByRef stepMultiplier As Double, ByRef multiplierDivisor As Double) As Boolean
     Dim slope As Double: slope = mAlpha + beta / 3#
     If dilation <= 0# Or slope <= 0# Then Exit Function
     newTrace = cc * (1# - mAlpha) / slope
-    stepMultiplier = (trace - newTrace) / (9# * mBulk * dilation)
+    Dim traceDrop As Double: traceDrop = trace - newTrace
+    If traceDrop <= 0# Then Exit Function
+    Dim bulkScale As Double: bulkScale = 9# * mBulk
+    Dim traceScale As Double: traceScale = bulkScale * dilation
+    If MultiplierNeedsScaling(traceDrop, traceScale) Then
+        stepMultiplier = traceDrop / bulkScale: multiplierDivisor = dilation
+    Else
+        stepMultiplier = traceDrop / traceScale
+    End If
     TensileApex = (stepMultiplier > 0#)
+End Function
+
+' Проверяет диапазон частного до деления, включая субнормальный знаменатель.
+' При знаменателе от единицы частное не превышает конечный числитель.
+Private Function MultiplierNeedsScaling(ByVal numerator As Double, ByVal denominator As Double) As Boolean
+    If denominator < 1# Then MultiplierNeedsScaling = (numerator > MAX_DIRECT_MULTIPLIER * denominator)
 End Function

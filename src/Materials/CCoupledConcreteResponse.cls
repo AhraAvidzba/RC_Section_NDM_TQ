@@ -462,7 +462,8 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     elastic(6) = mElastic(6, 6) * (strain(6) - committed.Plastic(6))
     Dim tension As Double, compression As Double, dilationRate As Double
     Dim nextTension As Double, nextCompression As Double, nextDilation As Double
-    Dim plasticMultiplier As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim plasticMultiplier As Double, multiplierDivisor As Double, trace As Double, q As Double
+    Dim high As Double, mid As Double, low As Double
     Dim trialTrace As Double, trialQ As Double, trialHigh As Double, trialMid As Double, trialLow As Double
     Dim ct As Double, cc As Double, dt As Double, dc As Double, kt As Double, kc As Double
     Dim unusedStress As Double, r As Double, residual As Double
@@ -477,6 +478,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     r = PositiveStressFraction(trialHigh, trialMid, trialLow)
     residual = CoupledBarcelonaYield(trialTrace, trialQ, trialHigh, cc, ct, mAlpha, mGamma)
     Dim firstReturnReady As Boolean, deviatorFactor As Double
+    multiplierDivisor = 1# ' Регулярный возврат отдаёт непосредственно множитель.
     If residual > 0# And residual <= YIELD_TOLERANCE_RATIO * cc Then
         dilationRate = CurrentDilation(kt, kc, r, trialTrace, trialQ)
         firstReturnReady = mReturn.TryRegularNearYield(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, _
@@ -500,13 +502,13 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     For j = 1 To MATERIAL_ITERATIONS
         If j > 1 Or Not firstReturnReady Then
             If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
-                    effective, increment, plasticMultiplier, deviatorFactor) Then
+                    effective, increment, plasticMultiplier, deviatorFactor, multiplierDivisor) Then
                 If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
                 ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
                 ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
                 dilationRate = Tan(mDilationMax)
                 If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
-                        effective, increment, plasticMultiplier, deviatorFactor) Then Exit Function
+                        effective, increment, plasticMultiplier, deviatorFactor, multiplierDivisor) Then Exit Function
             End If
         End If
         ' Изотропный возврат меняет среднее и масштаб девиатора, сохраняя его главные оси.
@@ -534,7 +536,8 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
                 Abs(deltaCompression) <= STATE_TOLERANCE * (mFc / mElastic(3, 3) + nextCompression) And _
                 Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= YIELD_TOLERANCE_RATIO * cc Then
             ' У вершины даже малое изменение угла может вывести давление за допуск поверхности.
-            If Abs(deltaDilation) * plasticMultiplier <= YIELD_TOLERANCE_RATIO * cc / mPressureModulus Then Exit For
+            If DilationConsistent(Abs(deltaDilation), plasticMultiplier, multiplierDivisor, _
+                    YIELD_TOLERANCE_RATIO * cc / mPressureModulus) Then Exit For
         End If
         tension = tension + MAXIMUM_DAMPING * deltaTension
         compression = compression + MAXIMUM_DAMPING * deltaCompression
@@ -553,6 +556,18 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     updated.TensionDamage = dt: updated.CompressionDamage = dc
     updated.TensionEnergy = kt: updated.CompressionEnergy = kc
     UpdatePoint = True
+End Function
+
+' Сверяет изменение объёмной деформации с тем же допуском поверхности.
+' Масштабирует обе части неравенства, если множитель хранится дробью.
+Private Function DilationConsistent(ByVal change As Double, ByVal multiplier As Double, _
+        ByVal divisor As Double, ByVal tolerance As Double) As Boolean
+    If divisor = 1# Then
+        DilationConsistent = (change * multiplier <= tolerance)
+    Else
+        Dim largest As Double: largest = GeomMax(change, divisor)
+        DilationConsistent = ((change / largest) * multiplier <= (divisor / largest) * tolerance)
+    End If
 End Function
 
 ' Возвращает долю положительных главных напряжений по абсолютной сумме.

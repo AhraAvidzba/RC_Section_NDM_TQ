@@ -931,13 +931,13 @@ Public Function RunTestCoupledConcreteReturn() As String
     update.Initialize E, NU, ALPHA, GAMMA, 0.1
     Dim elastic(1 To 6) As Double, corrected(1 To 6) As Double, increment(1 To 6) As Double
     Dim tensor(1 To 6, 1 To 6) As Double, flow(1 To 6) As Double
-    Dim multiplier As Double, value As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim multiplier As Double, multiplierDivisor As Double, value As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
     Dim i As Long, j As Long, caseNo As Long, dilation As Double
     Dim beta As Double: beta = FC / FT * (1# - ALPHA) - (1# + ALPHA)
     Dim ok As Boolean
     elastic(3) = 1#
-    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
-    TestRecord ok And corrected(3) = 1# And multiplier = 0# And increment(3) = 0#, _
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier, multiplierDivisor)
+    TestRecord ok And corrected(3) = 1# And multiplier = 0# And multiplierDivisor = 1# And increment(3) = 0#, _
         "elastic trial stays unchanged", passed, failed, report
     CoupledElasticTensor E, NU, tensor
     For caseNo = 1 To 6
@@ -952,8 +952,8 @@ Public Function RunTestCoupledConcreteReturn() As String
             Case 6
                 elastic(1) = -28#: elastic(2) = -28#: elastic(3) = -28#: elastic(6) = 35#: dilation = 0#
         End Select
-        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier)
-        TestRecord ok And multiplier > 0#, "return " & CStr(caseNo), passed, failed, report
+        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier, multiplierDivisor)
+        TestRecord ok And multiplier > 0# And multiplierDivisor = 1#, "return " & CStr(caseNo), passed, failed, report
         If ok Then
             CoupledStressInvariants corrected, trace, q, high, mid, low
             value = CoupledBarcelonaYield(trace, q, high, FC, FT, ALPHA, GAMMA)
@@ -979,7 +979,7 @@ Public Function RunTestCoupledConcreteReturn() As String
         End If
     Next caseNo
     For i = 1 To 3: elastic(i) = 9#: elastic(i + 3) = 0#: Next i
-    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier, multiplierDivisor)
     TestRecord Not ok, "hydrostatic tension without volumetric flow reports inability to return", passed, failed, report
     For i = 1 To 3: elastic(i) = 4.5: Next i
     elastic(6) = 0.025
@@ -988,17 +988,53 @@ Public Function RunTestCoupledConcreteReturn() As String
     apexVolume = (elastic(1) - apexStress) / (E / (1# - 2# * NU))
     For Each smallDilation In Array(0.000001, 1E-170)
         dilation = CDbl(smallDilation)
-        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier)
-        TestRecord ok And multiplier > 0#, "near-apex return for dilation " & CStr(dilation), passed, failed, report
+        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier, multiplierDivisor)
+        TestRecord ok And multiplier > 0# And multiplierDivisor = 1#, "near-apex return for dilation " & CStr(dilation), passed, failed, report
         If ok Then
             TestExpectNear corrected(1), apexStress, 1E-9, "near-apex analytical pressure", passed, failed, report
-            TestExpectNear multiplier * dilation, apexVolume, 1E-12, "near-apex volumetric flow", passed, failed, report
+            TestExpectNear (dilation / multiplierDivisor) * multiplier, apexVolume, 1E-12, "near-apex volumetric flow", passed, failed, report
             TestExpectNear tensor(6, 6) * increment(6) + corrected(6), elastic(6), 1E-12, _
                 "near-apex engineering shear balance", passed, failed, report
         End If
     Next smallDilation
-    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier, multiplierDivisor)
     TestRecord Not ok, "near-apex deviator does not enable volumetric flow at zero dilation", passed, failed, report
+    dilation = 1E-300
+    dilation = dilation * 3.822077E-18 ' Субнормальное положительное число строится при выполнении, без литерала ниже нормального диапазона.
+    TestRecord dilation > 0# And dilation < 2.22507385850721E-308, "subnormal dilation remains positive", passed, failed, report
+    Dim trialShear As Variant, apexTag As String
+    Dim maxPressureError As Double, maxVolumeError As Double, maxShearStress As Double, maxShearIncrementError As Double
+    For Each trialShear In Array(0.025, 0#)
+        elastic(6) = CDbl(trialShear)
+        apexTag = "hydrostatic apex"
+        If elastic(6) <> 0# Then apexTag = "scaled deviator apex"
+        CoupledStressInvariants elastic, trace, q, high, mid, low
+        TestRecord Abs(q - Sqr(3#) * elastic(6)) < 1E-14 And (q > 0#) = (elastic(6) > 0#), _
+            apexTag & " starts in the intended branch", passed, failed, report
+        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier, multiplierDivisor)
+        TestRecord ok And multiplier > 0# And multiplierDivisor > 0# And multiplierDivisor < 1#, _
+            apexTag & " uses a scaled multiplier", passed, failed, report
+        If ok And multiplierDivisor > 0# Then
+            TestExpectNear (dilation / multiplierDivisor) * multiplier, apexVolume, 1E-12, _
+                apexTag & " analytical volumetric flow", passed, failed, report
+            maxPressureError = 0#: maxVolumeError = 0#: maxShearStress = 0#: maxShearIncrementError = 0#
+            For i = 1 To 3
+                maxPressureError = GeomMax(maxPressureError, Abs(corrected(i) - apexStress))
+                maxVolumeError = GeomMax(maxVolumeError, Abs(increment(i) - apexVolume))
+                maxShearStress = GeomMax(maxShearStress, Abs(corrected(i + 3)))
+                maxShearIncrementError = GeomMax(maxShearIncrementError, _
+                    Abs(tensor(i + 3, i + 3) * increment(i + 3) + corrected(i + 3) - elastic(i + 3))) ' Сдвиговая компонента деформации инженерная.
+            Next i
+            TestRecord maxPressureError < 1E-9 And maxVolumeError < 1E-12, _
+                apexTag & " analytical pressure and normal increments", passed, failed, report
+            TestRecord maxShearStress < 1E-12 And maxShearIncrementError < 1E-12, _
+                apexTag & " constitutive engineering shears", passed, failed, report
+            CoupledStressInvariants corrected, trace, q, high, mid, low
+            value = CoupledBarcelonaYield(trace, q, high, FC, FT, ALPHA, GAMMA)
+            TestRecord Abs(value) < 4E-9 And q < 1E-12 And Abs(high - low) < 1E-12, _
+                apexTag & " yield and hydrostatic invariants", passed, failed, report
+        End If
+    Next trialShear
     RunTestCoupledConcreteReturn = report & "TOTAL_COUPLED_CONCRETE_RETURN: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
@@ -1009,11 +1045,11 @@ End Function
 ' Готовит известный тензор упругой пробы для изолированной проверки возврата.
 Private Function TestConcreteReturn(ByVal update As CCoupledConcreteReturn, ByRef elastic() As Double, _
         ByVal fc As Double, ByVal ft As Double, ByVal dilation As Double, ByRef corrected() As Double, _
-        ByRef increment() As Double, ByRef multiplier As Double) As Boolean
+        ByRef increment() As Double, ByRef multiplier As Double, ByRef multiplierDivisor As Double) As Boolean
     Dim trace As Double, q As Double, maximum As Double, middle As Double, minimum As Double, deviatorFactor As Double
     CoupledStressInvariants elastic, trace, q, maximum, middle, minimum
     TestConcreteReturn = update.Correct(elastic, trace, q, maximum, fc, ft, ft, dilation, _
-        corrected, increment, multiplier, deviatorFactor)
+        corrected, increment, multiplier, deviatorFactor, multiplierDivisor)
 End Function
 
 
@@ -3574,11 +3610,11 @@ Private Sub TestRegularOnsetReturn(ByVal projection As CCoupledConcreteReturn, B
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Dim elastic(1 To 6) As Double, corrected(1 To 6) As Double, increment(1 To 6) As Double, flow(1 To 6) As Double
     elastic(6) = tau
-    Dim multiplier As Double, factor As Double, ok As Boolean, tag As String
+    Dim multiplier As Double, factor As Double, multiplierDivisor As Double, ok As Boolean, tag As String
     tag = TestOnsetNumber(dilation) & ";" & CStr(point)
     ok = projection.Correct(elastic, 0#, Sqr(3#) * tau, tau, cc, ft, ft, dilation, _
-         corrected, increment, multiplier, factor)
-    TestRecord ok And multiplier > 0# And factor < 1#, "active local return " & tag, passed, failed, report
+         corrected, increment, multiplier, factor, multiplierDivisor)
+    TestRecord ok And multiplier > 0# And factor < 1# And multiplierDivisor = 1#, "active local return " & tag, passed, failed, report
     If Not ok Then Exit Sub
     Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, yieldValue As Double
     Dim unused As Double, backward As Double, maxBackward As Double, maxFlow As Double, i As Long, j As Long
