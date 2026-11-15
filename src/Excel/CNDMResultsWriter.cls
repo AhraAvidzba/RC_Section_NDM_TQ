@@ -2475,6 +2475,44 @@ Private Function CalculationElementGeometryTable(ByRef source As Variant) As Var
     CalculationElementGeometryTable = data
 End Function
 
+' Собирает физические области базы и индекса для обратимого вывода в Excel.
+' Каждый блок включает старый хвост, который штатная запись может очистить.
+Friend Sub AddExcelPublicationRanges(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, ByVal ranges As Collection)
+    Dim key As Variant, rows As Long
+    For Each key In snapshot.BaseKeys()
+        rows = snapshot.TableRowCount(CStr(key))
+        If Not snapshot.IsGeometryPreview Then
+            If key = "rngNDMSectionProperties" Then rows = rows + snapshot.TableRowCount("LoadCase.Properties") - 1
+            If key = "rngNDMSectionAnnotations" Then rows = rows + snapshot.TableRowCount("LoadCase.Annotations") - 1
+        End If
+        AddPublicationBlock ranges, workbook.Names.Item(CStr(key)).RefersToRange, CStr(key), rows
+    Next key
+    If Not snapshot.HasTable("rngNDMElementGeometry") Then _
+        AddPublicationBlock ranges, workbook.Names.Item("rngNDMElementGeometry").RefersToRange, "rngNDMElementGeometry", 1
+    Dim coupled As Object: Set coupled = NamedCoupledFieldAnchor(workbook)
+    If Not coupled Is Nothing Then
+        rows = 1
+        If snapshot.HasTable(COUPLED_FIELD_TABLE) Then rows = snapshot.TableRowCount(COUPLED_FIELD_TABLE)
+        AddPublicationBlock ranges, coupled, COUPLED_FIELD_TABLE, rows
+    End If
+    Dim index As CResultBlockIndex: Set index = snapshot.ElementIndex
+    Dim indexAnchor As Object: Set indexAnchor = EnsureElementResultIndexAnchor(workbook, index.Count + 2)
+    AddPublicationBlock ranges, indexAnchor, "rngNDMElementResultIndex", index.Count + 2
+    Dim title As Object: Set title = SnapshotTitleRange(workbook)
+    If Not title Is Nothing Then ranges.Add title
+End Sub
+
+' Сохраняет точную ширину писателя, одну строку заголовка и обе высоты данных.
+Private Sub AddPublicationBlock(ByVal ranges As Collection, ByVal anchor As Object, ByVal key As String, ByVal newRows As Long)
+    Dim rows As Long: rows = ExistingAnchoredRowCount(anchor)
+    If newRows > rows Then rows = newRows
+    If anchor.Row > 1 Then
+        ranges.Add anchor.Offset(-1, 0).Resize(rows + 1, OutputColumnCount(key))
+    Else
+        ranges.Add anchor.Resize(rows, OutputColumnCount(key))
+    End If
+End Sub
+
 ' Выводит общие технические таблицы выбранного сечения, включая сетку,
 ' общие характеристики и диаграммы. В Excel LC-свойства и области трещин
 ' остаются читаемыми строками Results; в File состояния, аннотации и собственные границы остаются только в снимке.

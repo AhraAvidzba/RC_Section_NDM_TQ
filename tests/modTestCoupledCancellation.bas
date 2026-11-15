@@ -197,8 +197,8 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Проверяет отказ после первой записи листа и штатное восстановление.
-' Ошибка вводится только в изолированной книге направленным раннером.
+' Проверяет отказ после записи базы или общей сводки.
+' В Excel остаётся прошлый RunID, в File восстанавливается новый авторитетный снимок.
 Public Function RunTestResultPublicationFailure(ByVal storage As String) As String
     Dim checks As Long, report As String
     On Error GoTo Failed
@@ -212,6 +212,15 @@ Public Function RunTestResultPublicationFailure(ByVal storage As String) As Stri
     TestCancellationSetting(settings, "Results.SnapshotName").Value2 = "TestPublicationFailure_" & storage
     TestCancellationSetting(settings, "General.ExecutionReportEnabled").Value2 = "No"
     TestCancellationSetting(settings, "Plot.Enabled").Value2 = "No"
+    If storage = "File" Then
+        TestCancellationSetting(settings, "Plot.Enabled").Value2 = "Yes"
+        TestCancellationSetting(settings, "Plot.AutoUpdateAfterCalculation").Value2 = "Yes"
+        TestChangeFreshnessVisualization book
+        Dim plotState As Range
+        Set plotState = book.Names("rngCalculationProfiles").RefersToRange.Columns(2).Find("Visualization.State", _
+            LookIn:=xlValues, LookAt:=xlWhole, MatchCase:=True)
+        plotState.Offset(0, 1).Value2 = "StrengthState"
+    End If
     Dim loads As Range: Set loads = book.Names("rngLoadCombinations").RefersToRange
     Dim topLC As Range: Set topLC = book.Names("rngBatchSummary").RefersToRange.Offset(12, 0)
     loads.Cells(2, 1).Value2 = "TEST_PUBLICATION_BASE"
@@ -220,11 +229,50 @@ Public Function RunTestResultPublicationFailure(ByVal storage As String) As Stri
     TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_BASE", storage & " | исходная сводка сохранена", checks, report
 
     Dim store As New CCalculationSnapshotStore, checksum As New CFileChecksum, path As String, oldHash As String, currentHash As String
-    If storage = "File" Then path = store.SnapshotPath(book): oldHash = checksum.FileSHA256(path)
-    Dim properties As Variant: properties = ReadPhysicalResultTable(book, "rngNDMSectionProperties")
-    Dim appState As Variant: appState = TestCancellationAppState(book.Application)
-    Dim reason As String, number As Long, summary As New CBatchResultWriter
+    Dim chart As Chart
     If storage = "File" Then
+        path = store.SnapshotPath(book): oldHash = checksum.FileSHA256(path)
+        Set chart = book.Worksheets.Item("Расчет").ChartObjects.Item("chtNDMSectionPlot").Chart
+        TestCancellationSetting(settings, "Plot.AutoUpdateAfterCalculation").Value2 = "No"
+    End If
+    Dim sheet As Worksheet: Set sheet = topLC.Worksheet
+    Dim reason As String, number As Long, summary As New CBatchResultWriter
+    Dim userCell As Range, formulaCell As Range
+    Set userCell = book.Names("rngBatchSummary").RefersToRange.Offset(0, summary.RequiredSummaryOutputColumns + 3)
+    userCell.Value2 = "Пользовательское значение"
+    book.Names.Add "TestPublicationUserValue", "='" & sheet.Name & "'!" & userCell.Address
+    Set formulaCell = book.Names("rngStrengthSummaryAnchor").RefersToRange.Offset(0, 1)
+    If storage = "Excel" Then formulaCell.Formula = "=TestPublicationUserValue"
+    Dim initialCopyObjects As Boolean, copySettingChanged As Boolean, marker As Shape, originalShapes As Long, markerAnchor As String
+    If storage = "Excel" Then
+        initialCopyObjects = book.Application.CopyObjectsWithCells: copySettingChanged = True
+        book.Application.CopyObjectsWithCells = True
+        Set marker = sheet.Shapes.AddShape(msoShapeRectangle, CSng(formulaCell.Left + 1#), CSng(formulaCell.Top + 1#), 9!, 9!)
+        marker.Name = "TestPublicationShape": marker.Placement = xlMoveAndSize
+        markerAnchor = marker.TopLeftCell.Address: originalShapes = sheet.Shapes.Count
+    End If
+    sheet.Calculate
+    Dim saved As Collection: Set saved = TestSavedPublicationTables(book)
+    Dim oldNames As Long, oldStyles As Long, oldLinks As String, oldWindows As Long, oldBooks As Long, oldFill As Long
+    oldNames = book.Names.Count: oldStyles = book.Styles.Count: oldLinks = TestPublicationLinks(book)
+    oldWindows = book.Application.Windows.Count: oldBooks = book.Application.Workbooks.Count
+    oldFill = topLC.Offset(0, 3).Interior.Color
+    Dim appState As Variant: appState = TestCancellationAppState(book.Application)
+    sheet.Protect UserInterfaceOnly:=False
+    number = TestInvokeCancelledCalculation(book, reason)
+    sheet.Unprotect
+    TestCancellationRequire number <> 0 And InStr(reason, "защищ") > 0 And TestSamePublicationTables(saved, TestSavedPublicationTables(book)), _
+        storage & " | защищённый лист отклонён до записи", checks, report
+    If storage = "Excel" Then
+        sheet.Protect UserInterfaceOnly:=True
+        number = TestInvokeCancelledCalculation(book, reason)
+        TestCancellationRequire number <> 0 And InStr(reason, "вернуть оформление") > 0 And _
+            sheet.ProtectContents And sheet.ProtectionMode And TestSamePublicationTables(saved, TestSavedPublicationTables(book)), _
+            storage & " | запрет записи сохраняет вид и защиту, разрешающую работу макросов", checks, report
+        sheet.Unprotect
+    End If
+    If storage = "File" Then
+        TestCancellationRequire checksum.FileSHA256(path) = oldHash, storage & " | защищённый лист сохраняет прежний файл", checks, report
         Dim fileSystem As Object, occupied As Object
         Set fileSystem = CreateObject("Scripting.FileSystemObject")
         Set occupied = fileSystem.CreateTextFile(path & ".part", False)
@@ -239,40 +287,124 @@ Public Function RunTestResultPublicationFailure(ByVal storage As String) As Stri
         fileSystem.DeleteFile path & ".part"
         TestCancellationRequire refusalPreserved, storage & " | отказ до замены файла сохраняет прежний снимок и его чтение", checks, report
     End If
-    loads.Cells(2, 1).Value2 = "TEST_PUBLICATION_WRITE_FAILURE"
-    loads.Cells(2, 2).Value2 = 0.9 * CDbl(loads.Cells(2, 2).Value2) ' Меняет входную подпись и свойства полей нового НДС.
-    number = TestInvokeCancelledCalculation(book, reason)
-    TestCancellationRequire number = 5 And InStr(1, reason, "TestPublicationAfterBase", vbBinaryCompare) > 0, _
-        storage & " | ошибка введена после записи базы", checks, report
-    TestCancellationRequire TestCancellationStateEqual(book.Application, appState) And TestCalculationSnapshotReadReleased(), _
-        storage & " | настройки Excel и контекст чтения восстановлены", checks, report
-    TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_BASE" And _
-        Not SnapshotMatricesEqual(properties, ReadPhysicalResultTable(book, "rngNDMSectionProperties")) And _
-        InStr(1, summary.FreshnessNotice(book), "Вывод прерван", vbBinaryCompare) = 1, _
-        storage & " | смешанный вид явно отмечен как незавершённый", checks, report
-
+    Dim failures As Variant, expected As Variant, i As Long, message As String
+    failures = Array("TEST_PUBLICATION_WRITE_FAILURE", "TEST_PUBLICATION_SUMMARY_FAILURE")
+    expected = Array("TestPublicationAfterBase", "TestPublicationDuringSummary")
+    For i = 0 To UBound(failures)
+        loads.Cells(2, 1).Value2 = failures(i)
+        loads.Cells(2, 2).Value2 = 0.9 * CDbl(loads.Cells(2, 2).Value2) ' Меняет значения технических полей нового НДС.
+        If storage = "File" Then
+            If i = 1 Then sheet.Protect UserInterfaceOnly:=True
+            message = RunSectionCalculationForWorkbook(book)
+            currentHash = checksum.FileSHA256(path)
+            TestCancellationRequire InStr(1, message, expected(i), vbBinaryCompare) > 0 And _
+                InStr(message, "вывод восстановлен") > 0 And currentHash <> oldHash, _
+                storage & " | автоматически восстановлен новый файл после " & expected(i), checks, report
+            TestCancellationRequire topLC.Value2 = failures(i) And Len(summary.FreshnessNotice(book)) = 0 And _
+                ReadLoadCasePropertyText(book, CStr(failures(i)), "DirectStateStatus") = "OK" And _
+                InStr(TestResultPlotTitle(chart), "Схема требует обновления") = 1, _
+                storage & " | сводка и файл согласованы, автоматическая перерисовка отключена", checks, report
+            Set saved = TestSavedPublicationTables(book)
+            UpdateSectionResultsForWorkbook book
+            TestCancellationRequire checksum.FileSHA256(path) = currentHash And TestSamePublicationTables(saved, TestSavedPublicationTables(book)) And _
+                InStr(TestResultPlotTitle(chart), CStr(failures(i))) > 0, _
+                storage & " | повторный вывод воспроизводит все таблицы без записи файла", checks, report
+            If i = 1 Then
+                TestCancellationRequire sheet.ProtectContents And sheet.ProtectionMode, _
+                    storage & " | восстановление File не изменило защиту, разрешающую работу макросов", checks, report
+            End If
+            oldHash = currentHash
+        Else
+            number = TestInvokeCancelledCalculation(book, reason)
+            TestCancellationRequire number = 5 And InStr(1, reason, expected(i), vbBinaryCompare) > 0, _
+                storage & " | введена ошибка " & expected(i), checks, report
+            TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_BASE" And _
+                TestSamePublicationTables(saved, TestSavedPublicationTables(book)) And _
+                InStr(1, summary.FreshnessNotice(book), "Новый расчёт не выполнен", vbBinaryCompare) = 1, _
+                storage & " | полностью восстановлены прежние сводки и технические таблицы | " & _
+                Replace(reason, vbCrLf, " ") & " | отметка: " & summary.FreshnessNotice(book), checks, report
+            Dim elements As Variant: elements = ReadElementResultTable(book, "TEST_PUBLICATION_BASE", "StrengthState")
+            TestCancellationRequire HasResultTableRows(elements) And formulaCell.Formula = "=TestPublicationUserValue" And _
+                topLC.Offset(0, 3).Interior.Color = oldFill And book.Names.Count = oldNames And _
+                TestPublicationLinks(book) = oldLinks And book.Styles.Count = oldStyles, _
+                storage & " | индекс, формула, цвет, ссылки и стили прежней книги сохранены", checks, report
+            TestCancellationRequire book.Application.CopyObjectsWithCells And sheet.Shapes.Count = originalShapes And _
+                sheet.Shapes.Item("TestPublicationShape").TopLeftCell.Address = markerAnchor, _
+                storage & " | фигура сохранила привязку и параметр копирования восстановлен", checks, report
+        End If
+        TestCancellationRequire TestCancellationStateEqual(book.Application, appState) And TestCalculationSnapshotReadReleased() And _
+            book.Application.Workbooks.Count = oldBooks And book.Application.Windows.Count = oldWindows And userCell.Value2 = "Пользовательское значение", _
+            storage & " | интерфейс, контекст и сторонняя ячейка сохранены", checks, report
+        If storage = "File" And i = 1 Then sheet.Unprotect
+    Next i
     If storage = "File" Then
+        loads.Cells(2, 1).Value2 = "TEST_PUBLICATION_REPAIR_FAILURE"
+        number = TestInvokeCancelledCalculation(book, reason)
         currentHash = checksum.FileSHA256(path)
-        TestCancellationRequire currentHash <> oldHash And _
-            ReadLoadCasePropertyText(book, "TEST_PUBLICATION_WRITE_FAILURE", "DirectStateStatus") = "OK", _
-            storage & " | авторитетный новый файл согласован и читается независимо от листа", checks, report
+        TestCancellationRequire number = 5 And InStr(1, reason, "TestPublicationAfterBase", vbBinaryCompare) > 0 And _
+            InStr(1, summary.FreshnessNotice(book), "Вывод прерван", vbBinaryCompare) = 1 And currentHash <> oldHash, _
+            storage & " | при отказе восстановления сохраняется барьер незавершённого вида", checks, report
         UpdateSectionResultsForWorkbook book
-        TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_WRITE_FAILURE" And Len(summary.FreshnessNotice(book)) = 0 And _
+        TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_REPAIR_FAILURE" And Len(summary.FreshnessNotice(book)) = 0 And _
             checksum.FileSHA256(path) = currentHash, storage & " | ручное обновление восстановило лист без перезаписи файла", checks, report
     Else
-        number = TestInvokeFreshnessUpdate(book)
-        TestCancellationRequire number <> 0 And InStr(1, summary.FreshnessNotice(book), "Вывод прерван", vbBinaryCompare) = 1, _
-            storage & " | схема не читает незавершённый Excel", checks, report
         loads.Cells(2, 1).Value2 = "TEST_PUBLICATION_RECOVERY"
         RunSectionCalculationForWorkbook book
         TestCancellationRequire topLC.Value2 = "TEST_PUBLICATION_RECOVERY" And Len(summary.FreshnessNotice(book)) = 0, _
-            storage & " | повторный расчёт восстановил согласованный лист", checks, report
+            storage & " | следующий расчёт опубликовал новый RunID", checks, report
     End If
+    If copySettingChanged Then book.Application.CopyObjectsWithCells = initialCopyObjects
     RunTestResultPublicationFailure = report & "TOTAL_RESULT_PUBLICATION: passed=" & CStr(checks) & "; failed=0"
     Exit Function
 Failed:
     RunTestResultPublicationFailure = report & "FAIL: " & Err.Source & " " & Err.Description & vbCrLf & _
         "TOTAL_RESULT_PUBLICATION: passed=" & CStr(checks) & "; failed=1"
+    On Error Resume Next
+    If copySettingChanged Then book.Application.CopyObjectsWithCells = initialCopyObjects
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Снимает все расчётные блоки из физического листа, исключая локальную отметку A5.
+Private Function TestSavedPublicationTables(ByVal book As Workbook) As Collection
+    Dim tables As New Collection, key As Variant, data As Variant
+    For Each key In Array("rngNDMSectionGeometry", "rngNDMSectionProperties", "rngNDMMaterialDiagrams", "rngNDMSectionContours", _
+            "rngNDMElementResults", "rngNDMElementGeometry", "rngNDMSectionAnnotations", "rngNDMCoupledFields", "rngNDMElementResultIndex")
+        data = ReadPhysicalResultTable(book, CStr(key))
+        tables.Add data
+    Next key
+    Dim batch As New CBatchResultWriter, strength As New CStrengthSummaryWriter, cracks As New CCrackSummaryWriter, stability As New CStabilitySummaryWriter
+    Dim target As Range
+    Set target = book.Names("rngBatchSummary").RefersToRange.Resize(batch.RequiredSummaryRowsForWorkbook(book, 1), batch.RequiredSummaryOutputColumns)
+    data = target.Value2: data(5, 1) = Empty: tables.Add data
+    Set target = book.Names("rngStrengthSummaryAnchor").RefersToRange.Offset(-strength.HeaderRowsAboveAnchor, 0)
+    tables.Add target.Resize(strength.RequiredRowsForWorkbook(book, 1), strength.RequiredColumns).Value2
+    Set target = book.Names("rngCrackSummaryAnchor").RefersToRange.Offset(-cracks.HeaderRowsAboveAnchor, 0)
+    tables.Add target.Resize(cracks.RequiredRowsForWorkbook(book, 1), cracks.RequiredColumns).Value2
+    Set target = book.Names("rngStabilitySummaryAnchor").RefersToRange.Offset(-stability.HeaderRowsAboveAnchor, 0)
+    tables.Add target.Resize(stability.RequiredRowsForWorkbook(book, 1), stability.RequiredColumns).Value2
+    Set TestSavedPublicationTables = tables
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сопоставляет содержимое каждого физического блока в том же порядке.
+Private Function TestSamePublicationTables(ByVal expected As Collection, ByVal actual As Collection) As Boolean
+    If actual.Count <> expected.Count Then Exit Function
+    Dim i As Long, first As Variant, second As Variant
+    For i = 1 To actual.Count
+        first = expected.Item(i): second = actual.Item(i)
+        If IsArray(first) <> IsArray(second) Then Exit Function
+        If IsArray(first) Then
+            If Not SnapshotMatricesEqual(first, second) Then Exit Function
+        End If
+    Next i
+    TestSamePublicationTables = True
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Превращает список ссылок в сравнимый текст без раскрытия или изменения связей Excel.
+Private Function TestPublicationLinks(ByVal book As Workbook) As String
+    Dim links As Variant: links = book.LinkSources(xlExcelLinks)
+    If IsArray(links) Then TestPublicationLinks = Join(links, vbLf)
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

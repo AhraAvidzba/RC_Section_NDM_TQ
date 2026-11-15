@@ -13,6 +13,7 @@ Private mReadSnapshot As CCalculationSnapshot ' Неизменяемый наб�
 Private mReadWorkbook As Object ' Книга, которой принадлежит текущий контекст.
 Private mReadDepth As Long ' Вложенные чтения схемы и экспорта не уничтожают внешний контекст.
 Private Const PLOT_NOT_CURRENT As String = "Схема требует обновления для нового расчёта."
+Private Const OUTPUT_INDEX_NAME As String = "rngNDMElementResultIndex"
 
 ' Открывает короткую область чтения; между пользовательскими действиями кэша нет.
 Public Sub BeginCalculationSnapshotRead(ByVal workbook As Object, Optional ByVal snapshot As CCalculationSnapshot = Nothing)
@@ -75,10 +76,13 @@ End Function
 ' Ручное обновление Excel читает схему с листа и не восстанавливает верхние сводки.
 Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional ByVal prepared As CCalculationSnapshot = Nothing, _
         Optional ByRef plotWarning As String = "", Optional ByRef plotHasWarning As Boolean = False, _
-        Optional ByRef publicationStarted As Boolean = False)
+        Optional ByRef publicationStarted As Boolean = False, Optional ByRef publicationRolledBack As Boolean = False)
     plotHasWarning = False: plotWarning = vbNullString
     Dim guard As CExcelAppStateGuard: Set guard = New CExcelAppStateGuard
-    Dim entered As Boolean
+    Dim entered As Boolean, sheetStarted As Boolean, sheetComplete As Boolean, indexWasMissing As Boolean
+    Dim backup As Workbook, targets As New Collection, copies As New Collection
+    Dim formulaTargets As New Collection, formulas As New Collection
+    Dim copyObjects As Boolean, copySettingSaved As Boolean
     On Error GoTo Failed
     guard.Enter workbook.Application, True, (Not prepared Is Nothing And workbook.Application.EnableCancelKey = xlDisabled) ' Сохраняет непрерываемость связанной записи файла и таблиц.
     Dim store As CCalculationSnapshotStore: Set store = New CCalculationSnapshotStore
@@ -103,11 +107,21 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
     End If
     snapshot.Validate
     ValidateRestoredSnapshotLayout workbook, snapshot, mode = "Excel"
-    BeginCalculationSnapshotRead workbook, snapshot: entered = True
+    RequireSnapshotPublicationReady workbook, mode
     Dim writer As CNDMResultsWriter: Set writer = New CNDMResultsWriter
     Dim summary As CBatchResultWriter: Set summary = New CBatchResultWriter
     Dim settings As CSystemSettingsReader: Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook workbook
     Dim fullFormatting As Boolean: fullFormatting = settings.GetRequiredBoolean("General.ReformatResultsEnabled")
+    If mode = "Excel" Then
+        indexWasMissing = Not HasWorksheetResultIndex(workbook)
+        writer.AddExcelPublicationRanges workbook, snapshot, targets
+        summary.AddPublicationRanges workbook, snapshot, fullFormatting, targets
+        copyObjects = workbook.Application.CopyObjectsWithCells: copySettingSaved = True
+        workbook.Application.CopyObjectsWithCells = False ' В журнал ячеек не входят привязанные к ним фигуры пользователя.
+        RememberResultsRanges workbook, targets, backup, copies, formulaTargets, formulas
+    End If
+    BeginCalculationSnapshotRead workbook, snapshot: entered = True
+    sheetStarted = True
     publicationStarted = True ' До этого места проверены снимок, раскладка и параметры вывода.
     writer.RestoreSnapshotBase workbook, snapshot, fullFormatting, mode = "Excel"
     If snapshot.IsGeometryPreview Then
@@ -120,6 +134,9 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
     Else
         store.LinkFile workbook
     End If
+    sheetComplete = True
+    If Not backup Is Nothing Then backup.Close False: Set backup = Nothing
+    If copySettingSaved Then workbook.Application.CopyObjectsWithCells = copyObjects: copySettingSaved = False
     If snapshot.IsGeometryPreview Then
         UpdateSectionGeometryPreviewForWorkbook workbook, plotWarning
         plotHasWarning = (Len(plotWarning) > 0)
@@ -138,10 +155,115 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
 Failed:
     Dim errorNumber As Long, reason As String, source As String
     errorNumber = Err.Number: reason = ResultOutputErrorDescription(Err.Description): source = Err.source
-    If entered Then EndCalculationSnapshotRead
+    If entered Then EndCalculationSnapshotRead: entered = False
+    If sheetStarted And Not sheetComplete Then
+        workbook.Application.EnableCancelKey = xlDisabled ' Возвращение согласованного вида нельзя отменить второй раз.
+        If mode = "Excel" Then
+            Dim recoveryReason As String
+            publicationRolledBack = TryRestoreResultsRanges(targets, copies, formulaTargets, formulas, recoveryReason)
+            If Len(recoveryReason) > 0 Then reason = WorkbookMessageParagraph(reason, recoveryReason)
+        ElseIf TryRepairPublishedFileView(workbook, plotWarning, reason) Then
+            plotHasWarning = True
+            guard.Restore True
+            CompleteWorkbookDrawing workbook
+            Exit Sub
+        End If
+    End If
+    On Error Resume Next
+    If Not backup Is Nothing Then backup.Close False
+    If copySettingSaved Then workbook.Application.CopyObjectsWithCells = copyObjects
+    If indexWasMissing And (Not sheetStarted Or publicationRolledBack) Then
+        If HasWorksheetResultIndex(workbook) Then workbook.Names.Item(OUTPUT_INDEX_NAME).Delete
+    End If
+    If publicationRolledBack Then MarkResultAttemptStopped workbook, errorNumber = 18, False
+    On Error GoTo 0
     guard.Restore
     Err.Raise errorNumber, source, reason
 End Sub
+
+' Проверяет существование сгенерированного имени. До первого вывода
+' индекс может отсутствовать, а при откате появившееся имя удаляется.
+Private Function HasWorksheetResultIndex(ByVal workbook As Object) As Boolean
+    Dim indexName As Object
+    On Error Resume Next
+    Set indexName = workbook.Names.Item(OUTPUT_INDEX_NAME)
+    On Error GoTo 0
+    HasWorksheetResultIndex = Not indexName Is Nothing
+End Function
+
+' Сохраняет точные ячейки будущей записи. Объединения и оформление переносит
+' Excel; формулы возвращаются отдельно из исходной книги по своим адресам.
+Private Sub RememberResultsRanges(ByVal workbook As Object, ByVal targets As Collection, ByRef backup As Workbook, _
+        ByVal copies As Collection, ByVal formulaTargets As Collection, ByVal formulas As Collection)
+    Dim current As Object: Set current = workbook.Application.ActiveWindow
+    Set backup = workbook.Application.Workbooks.Add(xlWBATWorksheet)
+    backup.Windows.Item(1).Visible = False
+    If Not current Is Nothing Then current.Activate
+    Dim sheets As Object: Set sheets = CreateObject("Scripting.Dictionary")
+    Dim target As Range, shadow As Worksheet, saved As Range
+    Dim containsFormulas As Variant, formulaCells As Range, area As Range
+    For Each target In targets
+        If sheets.Exists(target.Worksheet.Name) Then
+            Set shadow = sheets.Item(target.Worksheet.Name)
+        Else
+            If sheets.Count = 0 Then Set shadow = backup.Worksheets.Item(1) Else Set shadow = backup.Worksheets.Add
+            sheets.Add target.Worksheet.Name, shadow
+        End If
+        Set saved = shadow.Range(target.Address)
+        saved.UnMerge ' Смежные области могут включать одну общую строку заголовка.
+        target.Copy saved
+        copies.Add saved
+        containsFormulas = target.HasFormula
+        If IsNull(containsFormulas) Or containsFormulas Then
+            If target.CountLarge = 1 Then Set formulaCells = target Else Set formulaCells = target.SpecialCells(xlCellTypeFormulas)
+            For Each area In formulaCells.Areas
+                formulaTargets.Add area: formulas.Add area.Formula
+                shadow.Range(area.Address).ClearContents ' Обратное копирование не переносит внешние формульные ссылки.
+            Next area
+        End If
+    Next target
+End Sub
+
+' Возвращает только сохранённые области. При отказе Excel барьер чтения остаётся.
+Private Function TryRestoreResultsRanges(ByVal targets As Collection, ByVal copies As Collection, _
+        ByVal formulaTargets As Collection, ByVal formulas As Collection, ByRef failure As String) As Boolean
+    On Error GoTo Failed
+    Dim i As Long, target As Range, saved As Range
+    If targets.Count <> copies.Count Then Exit Function
+    For i = 1 To targets.Count
+        Set target = targets.Item(i): Set saved = copies.Item(i)
+        target.UnMerge
+        saved.Copy target
+    Next i
+    For i = 1 To formulaTargets.Count
+        Set target = formulaTargets.Item(i)
+        target.Formula = formulas.Item(i)
+    Next i
+    TryRestoreResultsRanges = True
+Failed:
+    If Not TryRestoreResultsRanges Then
+        Dim cause As String: cause = Err.Description
+        failure = "Не удалось полностью восстановить прежний вывод"
+        If Not target Is Nothing Then failure = failure & " в " & target.Address(External:=True)
+        failure = failure & ". " & cause
+    End If
+End Function
+
+' В File уже записан авторитетный файл. Восстанавливает его имя и вывод
+' штатным адресным путём, без повторного вызова расчёта или записи файла.
+Private Function TryRepairPublishedFileView(ByVal workbook As Object, ByRef plotWarning As String, ByVal originalError As String) As Boolean
+    On Error GoTo Failed
+    Dim warning As String, hasWarning As Boolean, sheetComplete As Boolean
+    UpdateIndexedResultsForWorkbook workbook, warning, hasWarning, sheetComplete, True
+    GoTo Repaired
+Failed:
+    If Not sheetComplete Then Exit Function
+    warning = Err.Description ' Таблицы согласованы даже при отказе схемы.
+Repaired:
+    plotWarning = WorkbookMessageParagraph("После ошибки записи вывод восстановлен из сохранённого файла результатов.", originalError)
+    plotWarning = WorkbookMessageParagraph(plotWarning, warning)
+    TryRepairPublishedFileView = True
+End Function
 
 ' Проверяет вместимость готовых таблиц до очистки; число LC не берётся из текущего Config.
 Private Sub ValidateRestoredSnapshotLayout(ByVal workbook As Object, ByVal snapshot As Object, ByVal includeElements As Boolean)
@@ -248,19 +370,36 @@ End Function
 ' Сохраняет полный снимок только в File; оба режима выводят результаты из памяти.
 ' Excel оставляет обычные читаемые таблицы без второго архива подробных сводок.
 Public Function SaveAndDisplayCalculationSnapshot(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, _
-        Optional ByRef plotHasWarning As Boolean = False, Optional ByRef publicationStarted As Boolean = False) As String
+        Optional ByRef plotHasWarning As Boolean = False, Optional ByRef publicationStarted As Boolean = False, _
+        Optional ByRef publicationRolledBack As Boolean = False) As String
     plotHasWarning = False
     snapshot.Validate
     Dim store As CCalculationSnapshotStore: Set store = New CCalculationSnapshotStore
-    ValidateRestoredSnapshotLayout workbook, snapshot, store.StorageMode(workbook) = "Excel"
-    If store.StorageMode(workbook) = "File" Then
+    Dim mode As String: mode = store.StorageMode(workbook)
+    ValidateRestoredSnapshotLayout workbook, snapshot, mode = "Excel"
+    RequireSnapshotPublicationReady workbook, mode
+    If mode = "File" Then
         store.SaveFile workbook, snapshot
         publicationStarted = True ' Теперь выбранный файл уже содержит новый сохранённый результат.
     End If
     Dim warning As String
-    UpdateSectionResultsForWorkbook workbook, snapshot, warning, plotHasWarning, publicationStarted
+    UpdateSectionResultsForWorkbook workbook, snapshot, warning, plotHasWarning, publicationStarted, publicationRolledBack
     SaveAndDisplayCalculationSnapshot = warning
 End Function
+
+' Проверяет защиту перед первой записью или заменой файла. Excel запрещает
+' обратное копирование форматов на лист с защитой даже при UserInterfaceOnly.
+Private Sub RequireSnapshotPublicationReady(ByVal workbook As Object, ByVal mode As String)
+    PrepareIndexedResultsWrite workbook
+    If mode <> "Excel" Then Exit Sub
+    Dim sheet As Object: Set sheet = workbook.Names.Item("rngNDMElementResults").RefersToRange.Worksheet
+    If Not sheet.ProtectContents Then Exit Sub
+    Dim settings As New CSystemSettingsReader
+    settings.LoadFromRange workbook.Names.Item("rngSystemSettings").RefersToRange
+    Err.Raise 5, "RequireSnapshotPublicationReady", _
+        "Защита листа «" & sheet.Name & "» не позволяет Excel вернуть оформление при прерывании записи. Прежний вывод сохранён." & _
+        vbCrLf & vbCrLf & "Снимите защиту для вывода в Excel либо выберите File (" & settings.InputLocation("Results.SnapshotStorage") & ")."
+End Sub
 
 ' Обновляет историю нагружения с таблицами Results. Схема НДС зависит от
 ' настроек и наличия результатов элементов. Ошибка вывода оставляет расчёт сохранённым.
@@ -386,8 +525,9 @@ End Function
 
 ' Ручное обновление File восстанавливает общие таблицы и выбранную схему без всех НДС.
 ' Источник сначала проверяет обязательные общие блоки, затем допускает изменение Results.
-Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plotWarning As String, ByRef plotHasWarning As Boolean)
-    Dim entered As Boolean, sourceVerified As Boolean, displayStarted As Boolean, displayFinished As Boolean
+Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plotWarning As String, ByRef plotHasWarning As Boolean, _
+        Optional ByRef displayFinished As Boolean = False, Optional ByVal repairing As Boolean = False)
+    Dim entered As Boolean, sourceVerified As Boolean, displayStarted As Boolean
     On Error GoTo Failed
     BeginCalculationSnapshotRead workbook: entered = True
     Dim source As CResultReadSource: Set source = CurrentResultSource(workbook)
@@ -401,7 +541,7 @@ Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plot
     Dim worstCriterion As String, priorAttempt As String
     If Not preview Then
         worstCriterion = summary.SavedWorstCriterion(settings)
-        priorAttempt = PriorAttemptNoticeForSnapshot(workbook, source)
+        If Not repairing Then priorAttempt = PriorAttemptNoticeForSnapshot(workbook, source)
     End If
     displayStarted = True
     writer.RestoreIndexedBase workbook, source, fullFormatting
@@ -413,7 +553,20 @@ Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plot
     store.LinkFile workbook
     RefreshPublishedResultFreshness workbook, source, priorAttempt
     displayFinished = True
-    If preview Then UpdateSectionGeometryPreviewForWorkbook workbook, plotWarning Else UpdateSectionPlotForWorkbook workbook, False, plotWarning
+    Dim updateScheme As Boolean: updateScheme = True
+    If repairing And Not preview Then
+        Dim plotter As New CSectionPlotter
+        plotter.MarkResultsNotDisplayed workbook, PLOT_NOT_CURRENT
+        updateScheme = settings.GetRequiredBoolean("Plot.Enabled")
+        If updateScheme Then updateScheme = settings.GetRequiredBoolean("Plot.AutoUpdateAfterCalculation")
+    End If
+    If preview Then
+        UpdateSectionGeometryPreviewForWorkbook workbook, plotWarning
+    ElseIf updateScheme Then
+        UpdateSectionPlotForWorkbook workbook, False, plotWarning
+    Else
+        plotWarning = TryUpdateCoupledLoadChart(workbook, settings)
+    End If
     plotHasWarning = (Len(plotWarning) > 0)
     EndCalculationSnapshotRead
     entered = False

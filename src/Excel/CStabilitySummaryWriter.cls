@@ -121,6 +121,20 @@ Public Sub ClearSummary(ByVal workbook As Object, Optional ByVal fullFormatting 
 End Sub
 
 ' Возвращает диапазон таблицы с пятью строками шапки и фактическими строками сочетаний.
+' Возвращает область, которую меняет публикация этого блока, включая его заголовок.
+Friend Function PublicationRange(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, ByVal fullFormatting As Boolean) As Object
+    mMinimalFormatting = Not fullFormatting
+    Dim target As Object
+    If snapshot.IsGeometryPreview Then
+        Set target = ClearTargetRange(workbook)
+    Else
+        Set target = TargetRange(workbook, snapshot.TableRowCount("Stability.Data"))
+    End If
+    If target.Row > 1 Then Set target = target.Offset(-1, 0).Resize(target.Rows.Count + 1, target.Columns.Count)
+    Set PublicationRange = target
+End Function
+
+' Возвращает область шапки и данных по фактическому якорю Results.
 Private Function TargetRange(ByVal workbook As Object, Optional ByVal dataRows As Long = 1) As Object
     Dim anchor As Object
     Set anchor = workbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange

@@ -1148,6 +1148,23 @@ Public Sub RestoreSummary(ByVal workbook As Object, ByVal snapshot As CCalculati
     RestoreSummaryTables workbook, snapshot, fullFormatting
 End Sub
 
+' Собирает области всех сводок, которые может изменить подготовленный вывод.
+' За ширину и расположение подробных блоков отвечают их собственные писатели.
+Friend Sub AddPublicationRanges(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, _
+        ByVal fullFormatting As Boolean, ByVal ranges As Collection)
+    mMinimalFormatting = Not fullFormatting
+    Dim target As Object: Set target = SummaryClearRange(workbook)
+    If Not snapshot.IsGeometryPreview Then
+        Dim rows As Long: rows = snapshot.TableRowCount("Summary")
+        If rows > target.Rows.Count Then Set target = target.Resize(rows, target.Columns.Count)
+    End If
+    ranges.Add target
+    Dim strength As New CStrengthSummaryWriter, cracks As New CCrackSummaryWriter, stability As New CStabilitySummaryWriter
+    ranges.Add strength.PublicationRange(workbook, snapshot, fullFormatting)
+    ranges.Add cracks.PublicationRange(workbook, snapshot, fullFormatting)
+    ranges.Add stability.PublicationRange(workbook, snapshot, fullFormatting)
+End Sub
+
 ' Восстанавливает только готовые общие сводки из проверенного адресного источника.
 Public Sub RestoreIndexedSummary(ByVal workbook As Object, ByVal source As CResultReadSource, ByVal fullFormatting As Boolean, _
         Optional ByVal worstCriterion As String = vbNullString)

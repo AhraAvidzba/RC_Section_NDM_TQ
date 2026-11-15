@@ -520,8 +520,9 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     savedSnapshot.Validate
     report.AddStep "Результаты подготовлены; сохранение в выбранном режиме и вывод из памяти."
     Dim plotWarning As String, plotHasWarning As Boolean, publicationStarted As Boolean, publicationFinished As Boolean
+    Dim publicationRolledBack As Boolean
     If hasCoupled Then workbook.Application.EnableCancelKey = xlDisabled ' Единая публикация файла и листа. Исходный режим вернёт excelGuard.
-    plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning, publicationStarted)
+    plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning, publicationStarted, publicationRolledBack)
     publicationFinished = True
     report.AddStep "Подробные таблицы и схема заполнены из готовых данных без повторного решения. Полный файл снимка сохраняется только в режиме File."
 
@@ -558,11 +559,16 @@ Failed:
     errorDescription = ResultOutputErrorDescription(Err.Description)
     If errorNumber = 18 Then
         errorDescription = "Расчёт отменён."
-        If Not publicationStarted Then errorDescription = errorDescription & " Запись результатов ещё не началась."
+        If publicationRolledBack Then
+            errorDescription = errorDescription & " Предыдущие результаты восстановлены."
+        ElseIf Not publicationStarted Then
+            errorDescription = errorDescription & " Запись результатов ещё не началась."
+        End If
     End If
     If Not excelGuard Is Nothing Then excelGuard.Restore ' Интерфейс возвращаем до записи отчёта: недоступный каталог отчёта не должен оставлять события и экран выключенными или подменять ошибку.
     On Error Resume Next
-    If Not publicationFinished And Not workbook Is Nothing Then MarkResultAttemptStopped workbook, errorNumber = 18, publicationStarted
+    If Not publicationFinished And Not workbook Is Nothing Then _
+        MarkResultAttemptStopped workbook, errorNumber = 18, publicationStarted And Not publicationRolledBack
     If Not report Is Nothing Then
         report.AddError "Расчет остановлен", errorDescription
         report.Save "Расчет не выполнен: " & errorDescription

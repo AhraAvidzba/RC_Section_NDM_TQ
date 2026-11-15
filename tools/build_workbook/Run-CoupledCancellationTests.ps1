@@ -79,12 +79,26 @@ try {
     } else {
         $trigger = @'
     If Not prepared Is Nothing Then
-        If CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2) = "TEST_PUBLICATION_WRITE_FAILURE" Then _
-            Err.Raise 5, "TestPublicationAfterBase", "TestPublicationAfterBase: injected after worksheet base write"
+        Select Case CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2)
+            Case "TEST_PUBLICATION_WRITE_FAILURE", "TEST_PUBLICATION_REPAIR_FAILURE"
+                Err.Raise 5, "TestPublicationAfterBase", "TestPublicationAfterBase: injected after worksheet base write"
+        End Select
     End If
 '@
         Add-TestCancellationTrigger $project 'modCalculationSnapshot' `
             'writer.RestoreSnapshotBase workbook, snapshot, fullFormatting, mode = "Excel"' $trigger $true
+        Add-TestCancellationTrigger $project 'CBatchResultWriter' 'FormatSummary workbook, target, Nothing, data' @'
+    If TypeOf snapshot Is CCalculationSnapshot Then
+        If CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2) = "TEST_PUBLICATION_SUMMARY_FAILURE" Then _
+            Err.Raise 5, "TestPublicationDuringSummary", "TestPublicationDuringSummary: injected after the general summary write"
+    End If
+'@ $true
+        Add-TestCancellationTrigger $project 'modCalculationSnapshot' 'writer.RestoreIndexedBase workbook, source, fullFormatting' @'
+    If repairing Then
+        If CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2) = "TEST_PUBLICATION_REPAIR_FAILURE" Then _
+            Err.Raise 5, "TestPublicationRepair", "TestPublicationRepair: injected before any automatic repair write"
+    End If
+'@
     }
     $excel.VBE.ActiveVBProject = $project
     $compile = $excel.VBE.CommandBars.FindControl(1, 578)
@@ -124,7 +138,7 @@ foreach ($storage in @('Excel','File')) {
     $closure = Get-Content -LiteralPath (Join-Path $root ($report+'.ProcessClosure.json')) -Raw -Encoding UTF8 | ConvertFrom-Json
     if (-not $closure.Passed) { throw "Закрытие собственного экземпляра Excel после $storage не подтверждено." }
     $expected = if ($Verification -eq 'PublicationFailure') {
-        if ($storage -eq 'File') { 7 } else { 6 }
+        if ($storage -eq 'File') { 15 } else { 14 }
     } elseif ($storage -eq 'File') { 16 } else { 13 }
     if ($code -ne 0 -or (Get-Content -LiteralPath (Join-Path $root $report) -Encoding UTF8) `
             -cnotcontains "${total}: passed=$expected; failed=0") {
