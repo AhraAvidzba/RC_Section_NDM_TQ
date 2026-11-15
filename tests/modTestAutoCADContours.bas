@@ -1689,6 +1689,111 @@ Cleanup:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Экспортирует два НДС хомута из заранее подготовленного файла
+' TestSavedHoopCapacityFields.ndm в папке отдельной нативной копии.
+Public Function RunRealAutoCADCoupledCapacitySnapshotTests(ByVal ownedApplication As Object, ByVal templatePath As String) As String
+    mPassed = 0: mFailed = 0: mReport = vbNullString: mNativeProgress = True
+    Dim doc As Object
+    On Error GoTo Failed
+    If InStr(1, CStr(ownedApplication.FullName), "\AutoCAD 2023\acad.exe", vbTextCompare) = 0 Then _
+        Err.Raise 5, , "Тест требует Autodesk AutoCAD 2023."
+    Const COMBINATION As String = "Hoop", PROFILE_ID As String = "PR4"
+    Dim book As Workbook: Set book = ThisWorkbook
+    Dim sys As Object: Set sys = book.Names.Item("rngSystemSettings").RefersToRange
+    Dim profiles As Object: Set profiles = book.Names.Item("rngCalculationProfiles").RefersToRange
+    TestSetGeometryExportSetting sys, "Results.SnapshotStorage", "File"
+    TestSetGeometryExportSetting sys, "Results.SnapshotName", "TestSavedHoopCapacityFields"
+    TestSetGeometryExportSetting sys, "Output.CombinationMode", "User"
+    TestSetGeometryExportSetting sys, "Output.CombinationID", COMBINATION
+    TestSetGeometryExportSetting sys, "AutoCAD.Export.LabelMode", "NamesAndValues"
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.ConcreteCompression", 34
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.ConcreteTension", 54
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.RebarCompression", 74
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.RebarTension", 94
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.Neutral", 8
+    Dim store As New CCalculationSnapshotStore, checksum As New CFileChecksum, path As String, hash As String
+    path = store.SnapshotPath(book)
+    If Len(Dir$(path)) = 0 Then Err.Raise 5, , "Поместите сохранённый тестовый снимок рядом с копией книги. Ожидается " & path
+    hash = checksum.FileSHA256(path)
+    Dim solveCount As Long: solveCount = SectionEquilibriumSolveCount()
+    Dim section As CSectionModel: Set section = ReadFormedSectionFromResults(book)
+    Dim reserve As Double: reserve = CDbl(ReadLoadCasePropertyText(book, COMBINATION, "Coupled.Transverse.Limit.Lambda"))
+    TestCheck "native.capacity.confirmedHoopLimit; lambda=" & CStr(reserve) & "; SHA256=" & hash, _
+        reserve > 0# And reserve < 1# And ReadLoadCasePropertyText(book, COMBINATION, "Coupled.Transverse.Limit.Status") = "FAIL" And _
+        InStr(ReadLoadCasePropertyText(book, COMBINATION, "Coupled.Transverse.Limit.Control"), "TestWeakHoop") > 0
+
+    Dim column As Long
+    For column = 3 To profiles.Columns.Count
+        If CStr(profiles.Cells(2, column).Value2) = PROFILE_ID Then Exit For
+    Next column
+    If column > profiles.Columns.Count Then Err.Raise 5, , "В таблице профилей не найден PR4."
+    FindNativeCoupledInputTestCell(profiles, "Visualization.Quantity", 2, column).Value2 = "TauXZ"
+    FindNativeCoupledInputTestCell(profiles, "Visualization.StressPrecision", 2, column).Value2 = 10
+
+    Dim state As Variant, payload As Variant, saved As Object, paths As Collection, hoopPath As CGeometryPath
+    Dim runID As Double, initialRunID As Double, strengthLabel As String, stateLabel As String, filePath As String
+    For Each state In Array("StrengthState", "CapacityState")
+        Dim tag As String: tag = "native.capacity." & CStr(state)
+        payload = ReadElementResultTable(book, COMBINATION, CStr(state))
+        If Not HasResultTableRows(payload) Then Err.Raise 5, , "В тестовом снимке отсутствует состояние " & CStr(state) & "."
+        runID = CDbl(payload(2, ResultColumn(payload, "RunID")))
+        If initialRunID = 0# Then initialRunID = runID
+        TestCheck tag & ".snapshotIdentity", runID > 0# And runID = initialRunID And _
+            CStr(payload(2, ResultColumn(payload, "ProfileId"))) = PROFILE_ID
+        Set saved = ReadCoupledFieldValues(book, vqTauXZ, runID, COMBINATION, PROFILE_ID, CStr(state))
+        stateLabel = Format$(CDbl(saved.Item(section.ConcreteID(1))), "0.0000000000")
+        If CStr(state) = "StrengthState" Then
+            strengthLabel = stateLabel
+        Else
+            TestCheck tag & ".distinguishableLabels; first element " & strengthLabel & " vs " & stateLabel, stateLabel <> strengthLabel
+        End If
+        Set paths = ReadSavedTransversePaths(book, runID, COMBINATION, PROFILE_ID, CStr(state))
+        If paths Is Nothing Then Err.Raise 5, , "В выбранном состоянии нет сохранённой оси хомута."
+        Set hoopPath = paths.Item(1)
+        TestCheck tag & ".closedSavedHoop", paths.Count = 1 And hoopPath.ID = "TestWeakHoop" And hoopPath.IsClosed
+
+        FindNativeCoupledInputTestCell(profiles, "Visualization.State", 2, column).Value2 = CStr(state)
+        filePath = book.Path & "\CoupledHoop_" & CStr(state) & ".dwg"
+        If Len(Dir$(filePath)) > 0 Then Err.Raise 5, , "Тестовый DWG уже существует: " & filePath
+        Set doc = ownedApplication.Documents.Add(templatePath)
+        TestWaitForCAD ownedApplication
+        TestCheck tag & ".export", Audit03ExportAutoCADDocumentForTests(doc) > 0
+        doc.SaveAs filePath
+        doc.Close False: Set doc = Nothing
+        Set doc = ownedApplication.Documents.Open(filePath, False)
+        TestWaitForCAD ownedApplication
+        TestNativeCoupledFieldLabels doc, section, saved, CStr(state) & ".TauXZ", True
+        TestCheck tag & ".reopenedClosedHoop", TestCapacityDrawingHoop(doc, hoopPath.Length)
+        doc.Close False: Set doc = Nothing
+        mReport = mReport & "NATIVE_DWG: " & filePath & vbCrLf
+    Next state
+    TestCheck "native.capacity.fileAndSolverUnchanged", checksum.FileSHA256(path) = hash And SectionEquilibriumSolveCount() = solveCount
+    GoTo Cleanup
+Failed:
+    TestCheck "native.capacity.runtime; " & CStr(Err.Number) & "; " & Err.Description, False
+Cleanup:
+    On Error Resume Next
+    If Not doc Is Nothing Then doc.Close False
+    On Error GoTo 0
+    mNativeProgress = False
+    RunRealAutoCADCoupledCapacitySnapshotTests = mReport & "TOTAL_NATIVE_COUPLED_CAPACITY: passed=" & CStr(mPassed) & _
+        "; failed=" & CStr(mFailed) & vbCrLf
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет одну замкнутую ось и её длину в миллиметрах после открытия DWG.
+Private Function TestCapacityDrawingHoop(ByVal doc As Object, ByVal expectedLength As Double) As Boolean
+    Dim entity As Object, count As Long, matched As Boolean
+    For Each entity In doc.ModelSpace
+        If entity.Layer = "RC_NDM_TransverseRebar" Then
+            count = count + 1
+            If entity.ObjectName = "AcDbPolyline" Then matched = entity.Closed And Abs(entity.Length - expectedLength) < 0.000001
+        End If
+    Next entity
+    TestCapacityDrawingHoop = count = 1 And matched
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет все числовые подписи реального DWG с сохранённым полем.
 ' Ожидаемые слои и ACI заданы отдельно от рабочих функций экспорта.
 Private Sub TestNativeCoupledFieldLabels(ByVal doc As Object, ByVal section As CSectionModel, ByVal values As Object, _
