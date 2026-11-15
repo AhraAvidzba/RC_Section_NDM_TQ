@@ -27,8 +27,14 @@ try {
     $book=$app.Workbooks.Open($path,0,$true)
     if(-not $book.ReadOnly){throw 'Expected read-only workbook.'}
     $sheet=$book.Worksheets.Item('Справка');$rows=Get-HelpMainRows $sheet
-    $config=[int]$rows[$script:HelpMainTitles[-1]];$last=Get-HelpContentLastRow $sheet
-    if($sheet.Rows.Item('2:85').Hidden -ne $true -or $sheet.Rows.Item(($config+1).ToString()+':'+$last).Hidden -ne $false){throw 'Workbook_Open did not set Help defaults.'}
+    $config=[int]$rows[$script:HelpConfigTitle];$last=Get-HelpContentLastRow $sheet
+    $configEnd=Get-HelpSectionLastRow $rows $config $last
+    $configBody=$sheet.Rows.Item(($config+1).ToString()+':'+$configEnd)
+    if($sheet.Rows.Item('2:85').Hidden -ne $true -or $configBody.Hidden -ne $false){throw 'Workbook_Open did not set Help defaults.'}
+    if ($rows.ContainsKey($script:HelpCoupledTitle)) {
+        $coupled=[int]$rows[$script:HelpCoupledTitle]
+        if ($sheet.Rows.Item(($coupled+1).ToString()+':'+$last).Hidden -ne $true) {throw 'The coupled Help section must open collapsed.'}
+    }
     $setting=$book.Worksheets.Item('Config').Cells.Find('General.ReformatResultsEnabled',$book.Worksheets.Item('Config').Cells.Item(1,1),-4163,1)
     $links=@($book.Worksheets.Item('Config').Cells.Item($setting.Row,5).Hyperlinks.Item(1))
     foreach($name in @('rngCircleGeometry','rngRectanglesGeometry','rngPointedSectionGeometry','rngHollowRectangleGeometry')){
@@ -42,7 +48,7 @@ try {
         if($target -notmatch "^'?Справка'?!([A-Z]+)([0-9]+)$"){throw 'Unexpected Help link target.'}
         $targetRow=[int]$Matches[2]
         $link.Follow()
-        if($app.ActiveSheet.Name -cne 'Справка' -or $app.ActiveWindow.ScrollRow -ne $targetRow -or $sheet.Rows.Item(($config+1).ToString()+':'+$last).Hidden -ne $false){throw ('Help navigation failed: '+$target)}
+        if($app.ActiveSheet.Name -cne 'Справка' -or $app.ActiveWindow.ScrollRow -ne $targetRow -or $configBody.Hidden -ne $false){throw ('Help navigation failed: '+$target)}
         $checks+=,[ordered]@{Target=$target;ScrollRow=[int]$app.ActiveWindow.ScrollRow;WholeSectionExpanded=$true}
     }
     $layout=Read-WorkbookLayout

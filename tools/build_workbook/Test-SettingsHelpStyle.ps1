@@ -167,8 +167,9 @@ try{
     foreach($key in @('General.ReformatResultsEnabled','Mesh.StepMode','Results.SnapshotStorage','Results.SnapshotName')){
         $r=Test-FindRow $config $key;$target=Test-FindRow $help $key
         $help.Outline.ShowLevels(1);$config.Activate();$config.Cells.Item($r,5).Hyperlinks.Item(1).Follow()
-        $start=[int]$sections[$script:HelpMainTitles[-1]]
-        if($app.ActiveSheet.Name -cne 'Справка' -or $app.ActiveWindow.ScrollRow -ne $target -or $help.Rows.Item(($start+1).ToString()+':'+$last).Hidden -ne $false){throw ('Help navigation failed: '+$key)}
+        $start=[int]$sections[$script:HelpConfigTitle]
+        $end=Get-HelpSectionLastRow $sections $start $last
+        if($app.ActiveSheet.Name -cne 'Справка' -or $app.ActiveWindow.ScrollRow -ne $target -or $help.Rows.Item(($start+1).ToString()+':'+$end).Hidden -ne $false){throw ('Help navigation failed: '+$key)}
         $navigation+=,[ordered]@{Key=$key;ScrollRow=[int]$app.ActiveWindow.ScrollRow;WholeSectionExpanded=$true}
     }
     $app.EnableEvents=$false;$help.Outline.ShowLevels(8)

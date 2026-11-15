@@ -51,6 +51,10 @@ try {
     $null=Add-CrackWidthMethodologyGuide $temp ([int]$rows[$script:HelpMainTitles[3]]+1)
     $null=Add-StabilityMethodologyGuide $temp ([int]$rows[$script:HelpMainTitles[4]]+1)
     $null=Add-ResultsSheetGuide $temp ([int]$rows[$script:HelpMainTitles[5]]+1)
+    $titles=@($script:HelpMainTitles | Where-Object {$rows.ContainsKey($_)})
+    if ($rows.ContainsKey($script:HelpCoupledTitle)) {
+        $null=Add-CoupledAnalysisGuide $temp ([int]$rows[$script:HelpCoupledTitle]+1)
+    }
     $expected=@(foreach($item in $script:FormulaImageRows){$shape=$temp.Shapes.Item($item.Name);[ordered]@{Name=$item.Name;Row=$item.Row;RowHeight=$item.Height;Width=$item.PictureWidth;Height=$item.PictureHeight;Description=[string]$shape.AlternativeText;TargetBlank=([string]$sheet.Cells.Item($item.Row,1).Value2 -eq '');TargetMerged=[bool]$sheet.Cells.Item($item.Row,1).MergeCells}})
     if($Strict){
         if($actual.Count -ne $expected.Count){throw 'Help picture count differs from builder.'}
@@ -60,15 +64,14 @@ try {
         }
         $outline=@()
         $book.Activate();$sheet.Activate() # Excel ShowDetail требует активного листа при открытой вспомогательной книге.
-        for($i=0;$i -lt $script:HelpMainTitles.Count;$i++){
-            $first=[int]$rows[$script:HelpMainTitles[$i]];$last=Get-HelpContentLastRow $sheet
-            if($i+1 -lt $script:HelpMainTitles.Count){$last=[int]$rows[$script:HelpMainTitles[$i+1]]-1}
+        for($i=0;$i -lt $titles.Count;$i++){
+            $first=[int]$rows[$titles[$i]];$last=Get-HelpSectionLastRow $rows $first (Get-HelpContentLastRow $sheet)
             $body=$sheet.Rows.Item(($first+1).ToString()+':'+$last)
             try{$sheet.Rows.Item($first).ShowDetail=$false}catch{
                 $failure=$_.Exception.Message
                 $details=@(foreach($shape in $sheet.Shapes){[ordered]@{Name=$shape.Name;Top=$shape.Top;Height=$shape.Height;From=$shape.TopLeftCell.Row;To=$shape.BottomRightCell.Row;Placement=$shape.Placement}})
                 $details | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $output 'OutlineFailure.json') -Encoding UTF8
-                throw ('Cannot collapse Help section '+$script:HelpMainTitles[$i]+' at row '+$first+': '+$failure)
+                throw ('Cannot collapse Help section '+$titles[$i]+' at row '+$first+': '+$failure)
             }
             if($body.Hidden -ne $true){throw 'Help section did not collapse completely.'}
             $sheet.Rows.Item($first).ShowDetail=$true
@@ -94,7 +97,7 @@ try {
         Export-TestHelpRange $sheet $temp 305 309 'SP35Diagram'
         $book.Activate();$sheet.Activate()
         $book.SaveCopyAs((Join-Path $output 'ExpandedNative.xlsm'))
-        foreach($row in $rows.Values){if([int]$row -ne [int]$rows[$script:HelpMainTitles[-1]]){$sheet.Rows.Item([int]$row).ShowDetail=$false}}
+        foreach($row in $rows.Values){if([int]$row -ne [int]$rows[$script:HelpConfigTitle]){$sheet.Rows.Item([int]$row).ShowDetail=$false}}
         $roundTrip=Join-Path $output 'RoundTrip.xlsm';$book.SaveCopyAs($roundTrip)
         $probe=$app.Workbooks.Open($roundTrip,0,$true)
         try {

@@ -82,8 +82,8 @@ try {
     $probe=$sheet.Cells.Find('Справка по настройкам Config и листа «Сечения»',$sheet.Cells.Item(1,1),-4163,1)
     Write-Output ('OPEN_CONFIG_TITLE: '+$probe.Row+'; codeLines='+$book.VBProject.VBComponents.Item($book.CodeName).CodeModule.CountOfLines)
     $states=@()
-    foreach ($title in $script:HelpMainTitles) {
-        $r=[int]$rows[$title];$expanded=$title -eq $script:HelpMainTitles[-1]
+    foreach ($title in ($script:HelpMainTitles | Where-Object {$rows.ContainsKey($_)})) {
+        $r=[int]$rows[$title];$expanded=$title -eq $script:HelpConfigTitle
         Write-Output ('CHECK_OUTLINE: '+$title+'; row='+$r+'; protected='+$sheet.ProtectContents+'; summaryRow='+$sheet.Outline.SummaryRow)
         $end=Get-HelpSectionLastRow $rows $r (Get-HelpContentLastRow $sheet)
         $body=$sheet.Range($sheet.Cells.Item($r+1,1),$sheet.Cells.Item($end,6)).EntireRow
@@ -103,7 +103,7 @@ try {
     $guideEnd=Get-HelpSectionLastRow $rows $guideStart (Get-HelpContentLastRow $sheet)
     $lines=@(Get-RecipeGuideNativeLines $sheet $guideStart $guideEnd)
     if ((Get-RecipeGuideTextHash $lines) -cne $first.BodySHA256) {throw 'Reopen guide text differs.'}
-    $config=[int]$rows[$script:HelpMainTitles[-1]]
+    $config=[int]$rows[$script:HelpConfigTitle]
     $settings=@()
     foreach ($key in @('SLS.Crack.ToleranceLambda','General.PlateauSlopeFactor')) {
         $anchor=$sheet.Cells.Find($key,$sheet.Cells.Item(1,1),-4163,1)

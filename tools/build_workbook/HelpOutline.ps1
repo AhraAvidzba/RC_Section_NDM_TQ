@@ -1,4 +1,6 @@
 ﻿# Переставляет готовые блоки Справки, сохраняя ячейки, рисунки и точные ссылки.
+$script:HelpConfigTitle='Справка по настройкам Config и листа «Сечения»'
+$script:HelpCoupledTitle='Совместный расчёт N, Mx, My, T, Qx, Qy'
 $script:HelpMainTitles=@(
     'Подготовка геометрии в AutoCAD и импорт',
     'Поиск НДС текущего сочетания',
@@ -7,7 +9,8 @@ $script:HelpMainTitles=@(
     'Расчет продольного изгиба и устойчивости',
     'Справка по результатам расчета листа Results',
     'Добавление нового типа сечения',
-    'Справка по настройкам Config и листа «Сечения»'
+    $script:HelpConfigTitle,
+    $script:HelpCoupledTitle
 )
 
 # Ищет содержимое, а не оставшийся после старого большого гайда UsedRange.
@@ -148,7 +151,8 @@ function Set-HelpMainTitlePresentation($Sheet,$Rows) {
     }
 }
 
-# Создаёт одну outline-группу для каждого раздела; Config последний.
+# Создаёт одну группу для каждого раздела. В штатной сборке методика по
+# шести усилиям замыкает справку, раздел настроек открыт по умолчанию.
 # При сборке сохраняет раскрытые строки, чтобы Excel не сжал рисунки формул.
 function Set-HelpSectionOrderAndOutline($Workbook,[switch]$Expanded) {
     $script:HelpRowMoves=@()
@@ -156,8 +160,9 @@ function Set-HelpSectionOrderAndOutline($Workbook,[switch]$Expanded) {
     $sheet.Rows.Hidden=$false
     Repair-HelpConfigEntries $Workbook
     $rows=Get-HelpMainRows $sheet
-    $configTitle=$script:HelpMainTitles[-1]
-    foreach ($title in $script:HelpMainTitles) {
+    $configTitle=$script:HelpConfigTitle
+    $titles=@($script:HelpMainTitles | Where-Object {$_ -ne $script:HelpCoupledTitle -or $rows.ContainsKey($_)}) # Отдельные процедуры также обслуживают книги без связанного раздела.
+    foreach ($title in $titles) {
         if (-not $rows.ContainsKey($title)) {throw ('Missing Help section: '+$title)}
     }
     foreach ($title in $script:HelpMainTitles[5..6]) {
@@ -169,7 +174,7 @@ function Set-HelpSectionOrderAndOutline($Workbook,[switch]$Expanded) {
         }
     }
     $rows=Get-HelpMainRows $sheet
-    $ordered=@($script:HelpMainTitles | ForEach-Object {[int]$rows[$_]})
+    $ordered=@($titles | ForEach-Object {[int]$rows[$_]})
     for ($i=1;$i -lt $ordered.Count;$i++) {
         if ($ordered[$i] -le $ordered[$i-1]) {throw 'Help sections have an unexpected order.'}
     }
@@ -186,7 +191,7 @@ function Set-HelpSectionOrderAndOutline($Workbook,[switch]$Expanded) {
         $sheet.Rows.Item([int]$rows[$configTitle]).ShowDetail=$true
     }
     $sheet.Range($sheet.Cells.Item(1,1),$sheet.Cells.Item($last,6)).Borders.Item(10).LineStyle=1
-    return [ordered]@{Titles=$script:HelpMainTitles;Rows=$ordered;LastRow=$last;DefaultExpanded=$configTitle;Groups=8;Moves=$script:HelpRowMoves}
+    return [ordered]@{Titles=$titles;Rows=$ordered;LastRow=$last;DefaultExpanded=$configTitle;Groups=$ordered.Count;Moves=$script:HelpRowMoves}
 }
 
 # Узкие прежние обновления дописывали эти настройки после Results.
@@ -195,7 +200,7 @@ function Repair-HelpConfigEntries($Workbook) {
     $sheet=$Workbook.Worksheets.Item('Справка')
     foreach ($key in @('SLS.Crack.ToleranceLambda','General.PlateauSlopeFactor')) {
         $rows=Get-HelpMainRows $sheet
-        $config=[int]$rows['Справка по настройкам Config и листа «Сечения»']
+        $config=[int]$rows[$script:HelpConfigTitle]
         if ($config -eq 0) {throw 'Config Help section is missing.'}
         $next=@($rows.Values | Where-Object {$_ -gt $config} | Sort-Object)[0]
         $found=$sheet.Cells.Find($key,$sheet.Cells.Item(1,1),-4163,1)
@@ -204,7 +209,10 @@ function Repair-HelpConfigEntries($Workbook) {
         $first=[int]$found.Row;$last=$first
         $bottom=Get-HelpContentLastRow $sheet
         while ($last -lt $bottom -and [string]$sheet.Cells.Item($last+1,1).Value2 -ne '') {$last++}
-        if ($first -lt $config) {Move-HelpRowsBefore $Workbook $sheet $first $last ($bottom+1)}
+        if ($first -lt $config) {
+            $destination=if ($null -eq $next) {$bottom+1} else {[int]$next}
+            Move-HelpRowsBefore $Workbook $sheet $first $last $destination
+        }
         else {Move-HelpRowsBefore $Workbook $sheet $first $last ([int]$next)}
     }
 }
