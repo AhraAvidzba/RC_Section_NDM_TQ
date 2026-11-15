@@ -19,8 +19,8 @@ Public Function IsCalculatedSectionAnnotation(ByVal annotationType As String) As
 End Function
 
 ' Записывает оси хомутов и ветвей, ранее подготовленные для равновесия.
-' Идентификатор группы и порядок сохраняются независимо от формата снимка.
-Public Sub PutTransversePathRows(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+' Идентификатор запуска записывается числом и доступен сразу в снимке в памяти.
+Public Sub PutTransversePathRows(ByRef data() As Variant, ByRef row As Long, ByVal runID As Double, _
         ByVal combinationID As String, ByVal profileID As String, ByVal stateType As String, _
         ByVal layout As CTransverseRebarLayout, ByVal units As CUnitSystem)
     Dim i As Long, j As Long, path As CGeometryPath, edge As TRegionEdge, extra As String

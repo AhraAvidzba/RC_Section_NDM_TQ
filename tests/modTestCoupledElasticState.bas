@@ -1206,7 +1206,8 @@ Public Function RunTestCoupledHardShear() As String
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, solver As New CCoupledNewtonSolver
     TestPrepareCoupledConcreteSection operators, concrete, solver
     Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
-    path.Initialize 0#, 28000#, 0#, 510000#, 0#, 180000#, 0#, 1500000#, 0#, 17000#, 0#, -7100#
+    Dim loads As Variant: loads = TestHardShearLoads()
+    path.Initialize 0#, loads(0), 0#, loads(1), 0#, loads(2), 0#, loads(3), 0#, loads(4), 0#, loads(5)
     branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005
     Dim started As Double: started = Timer
     Dim solved As Boolean: solved = branch.Advance(1#)
@@ -1355,9 +1356,7 @@ End Function
 ' Готовит одинаковую геометрию, материалы и решатель для двух уровней нагрузки.
 Private Sub TestPrepareCoupledConcreteSection(ByVal operators As CCoupledElasticState, _
         ByVal concrete As CCoupledConcreteResponse, ByVal solver As CCoupledNewtonSolver)
-    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
-    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
-    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim section As CSectionModel: Set section = TestHardShearSection()
     Dim layout As New CTransverseRebarLayout
     layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A240"
     operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
@@ -1371,6 +1370,21 @@ Private Sub TestPrepareCoupledConcreteSection(ByVal operators As CCoupledElastic
     material.Initialize operators, concrete, models
     solver.Initialize operators, material, 30000#
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Содержит одно тяжёлое сочетание в Н и Н·мм для обоих способов запуска.
+Private Function TestHardShearLoads() As Variant
+    TestHardShearLoads = Array(28000#, 510000#, 180000#, 1500000#, 17000#, -7100#)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Строит общую геометрию тяжёлого сдвига с двумя продольными стержнями.
+Private Function TestHardShearSection() As CSectionModel
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Set TestHardShearSection = section
+End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Запускает штатный пакет с пространственным и плоским сочетаниями.
@@ -2188,3 +2202,194 @@ Private Function TestInputCell(ByVal table As Object, ByVal key As String, _
     Next row
     Err.Raise 5, "TestInputCell", "Ключ не найден: " & key
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Измеряет один штатный запуск на тяжёлом сочетании. Подготовка входной
+' книги отделена от времени чтения, расчёта и записи Results со схемой.
+Public Function RunTestCoupledWorkbookTiming(ByVal calculation As String, ByVal storage As String) As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) = 0 Then _
+        Err.Raise 5, "RunTestCoupledWorkbookTiming", "Запустите замер из изолированной копии книги."
+    If calculation <> "Direct" And calculation <> "Capacity" And calculation <> "Both" Then _
+        Err.Raise 5, "RunTestCoupledWorkbookTiming", "Укажите Direct, Capacity или Both."
+    If storage <> "Excel" And storage <> "File" Then _
+        Err.Raise 5, "RunTestCoupledWorkbookTiming", "Укажите Excel или File."
+
+    Dim book As Object: Set book = ThisWorkbook
+    Dim loads As Variant: loads = TestHardShearLoads()
+    Dim units As CUnitSystem: Set units = TestPrepareCoupledTimingBook(book, calculation, storage, loads)
+    Dim started As Double, elapsed As Double, message As String
+    started = Timer
+    message = RunSectionCalculationForWorkbook(book)
+    elapsed = Timer - started
+    If elapsed < 0# Then elapsed = elapsed + 86400#
+    report = "TIMING_SECONDS: " & CStr(elapsed) & " | " & calculation & " | " & storage & vbCrLf
+    report = report & "TIMING_MESSAGE: " & Replace(message, vbCrLf, " | ") & vbCrLf
+
+    Const CASE_ID As String = "HardShear"
+    Dim directStatus As String, capacityStatus As String, lower As String, limit As String, capacityCode As String
+    directStatus = ReadLoadCasePropertyText(book, CASE_ID, "DirectStateStatus")
+    capacityStatus = ReadLoadCasePropertyText(book, CASE_ID, "CapacityStatus")
+    lower = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity.LowerLambda")
+    limit = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity.PeakLambda")
+    If Len(limit) = 0 Then limit = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity.SteelLambda")
+    capacityCode = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity.ResultCode")
+    report = report & "TIMING_STATES: direct=" & directStatus & "; capacity=" & capacityStatus & _
+        "; confirmed lower=" & lower & "; limit=" & limit & "; code=" & capacityCode & vbCrLf
+    report = report & "TIMING_LIMIT_REASON: " & ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity.LimitState") & vbCrLf
+
+    Dim components As Variant: components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    Dim values As Variant
+    values = Array(units.InternalForceToOutput(loads(0)), units.InternalMomentMxToOutput(loads(1)), _
+        units.InternalMomentMyToOutput(loads(2)), units.InternalTorqueToOutput(loads(3)), _
+        units.InternalShearToOutput(loads(4)), units.InternalShearToOutput(loads(5)))
+    Dim i As Long, actual As String, lambda As Double
+    If calculation <> "Capacity" Then
+        TestRecord directStatus = "OK", "workbook balances the requested hard-shear case", passed, failed, report
+        For i = 0 To 5
+            actual = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Internal." & components(i))
+            TestCoupledTimingNumber actual, CDbl(values(i)), "direct " & components(i), passed, failed, report
+        Next i
+        Dim chart As Object: Set chart = book.Worksheets("Расчет").ChartObjects("chtNDMSectionPlot").Chart
+        Dim shape As Object, overlayCount As Long
+        For Each shape In chart.Shapes
+            If Left$(shape.Name, Len("NDMPlot_TransversePath")) = "NDMPlot_TransversePath" Then overlayCount = overlayCount + 1
+        Next shape
+        TestRecord overlayCount = 1 And InStr(message, "Схема не обновлена") = 0, _
+            "automatic chart draws the closed hoop from the new snapshot", passed, failed, report
+    End If
+    If calculation <> "Direct" Then
+        If IsNumeric(limit) Then
+            lambda = CDbl(limit)
+            TestRecord lambda > 0#, "positive confirmed capacity factor", passed, failed, report
+            For i = 0 To 5
+                actual = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity." & components(i) & "Ultimate")
+                TestCoupledTimingNumber actual, lambda * CDbl(values(i)), "capacity " & components(i), passed, failed, report
+            Next i
+        Else
+            TestRecord capacityStatus = "NumFail" And IsNumeric(lower) And Len(capacityCode) > 0, _
+                "unresolved capacity gives a confirmed lower bound and a reason", passed, failed, report
+            For i = 0 To 5
+                actual = ReadLoadCasePropertyText(book, CASE_ID, "Coupled.Capacity." & components(i) & "Ultimate")
+                TestRecord Len(actual) = 0, "no unconfirmed limit component " & components(i), passed, failed, report
+            Next i
+        End If
+    End If
+    RunTestCoupledWorkbookTiming = report & "TOTAL_COUPLED_WORKBOOK_TIMING: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledWorkbookTiming = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет точную геометрию тяжёлой задачи штатным писателем. Материалы
+' берёт из Config с одним общим коэффициентом наклона плато стали.
+Private Function TestPrepareCoupledTimingBook(ByVal book As Object, ByVal calculation As String, ByVal storage As String, _
+        ByVal forces As Variant) As CUnitSystem
+    Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
+    TestInputCell(settings, "Results.SnapshotStorage").Value2 = storage
+    TestInputCell(settings, "Results.SnapshotName").Value2 = "HardShearWorkbook"
+    TestInputCell(settings, "Output.CombinationMode").Value2 = "Worst"
+    TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = 0#
+    TestInputCell(settings, "Load.ReferenceOffsetY").Value2 = 0#
+    TestInputCell(settings, "General.ExecutionReportEnabled").Value2 = "Yes"
+    TestInputCell(settings, "General.PlateauSlopeFactor").Value2 = 0.0075
+    TestInputCell(settings, "Solver.MaxIterations").Value2 = 30
+    TestInputCell(settings, "Capacity.SolverMaxIterations").Value2 = 30
+    TestInputCell(settings, "Capacity.InitialLambda").Value2 = 1#
+    TestInputCell(settings, "Capacity.MaxLambda").Value2 = 4#
+    TestInputCell(settings, "Capacity.ToleranceLambda").Value2 = 0.01
+
+    Dim reader As New CSystemSettingsReader, units As New CUnitSystem
+    reader.LoadFromWorkbook book: units.LoadFromSettings reader
+    Dim calibration As Object: Set calibration = book.Names.Item("rngCoupledMaterialSettings").RefersToRange
+    TestInputCell(calibration, "Coupled.Poisson").Value2 = 0.2
+    TestInputCell(calibration, "Coupled.Gt").Value2 = 0.12
+    TestInputCell(calibration, "Coupled.Gc").Value2 = 80#
+    TestInputCell(calibration, "Coupled.Localization").Value2 = 125#
+    TestInputCell(calibration, "Coupled.YieldRatio").Value2 = 16# / 30#
+    TestInputCell(calibration, "Coupled.PeakStrain").Value2 = 0.002
+    TestInputCell(calibration, "Coupled.SteelClass").Value2 = "A400"
+
+    Dim concrete As Object: Set concrete = book.Names.Item("rngConcreteMaterialParameters").RefersToRange
+    Dim steel As Object: Set steel = book.Names.Item("rngSteelMaterialParameters").RefersToRange
+    TestInputCell(concrete, "Concrete.E").Value2 = 30000# / units.InputStressToInternal(1#)
+    TestInputCell(concrete, "Concrete.E", 1, 3).Value2 = 30000# / units.InputStressToInternal(1#)
+    TestInputCell(concrete, "Concrete.R.ULS(I)").Value2 = 30# / units.InputStressToInternal(1#)
+    TestInputCell(concrete, "Concrete.R.ULS(I)", 1, 3).Value2 = 3# / units.InputStressToInternal(1#)
+    TestInputCell(steel, "Steel.E").Value2 = 200000# / units.InputStressToInternal(1#)
+    TestInputCell(steel, "Steel.E", 1, 3).Value2 = 200000# / units.InputStressToInternal(1#)
+    TestInputCell(steel, "Steel.R.ULS(I)").Value2 = 350# / units.InputStressToInternal(1#)
+    TestInputCell(steel, "Steel.R.ULS(I)", 1, 3).Value2 = 400# / units.InputStressToInternal(1#)
+    TestInputCell(steel, "Steel.TwoLine.Es2").Value2 = 0.018
+    TestInputCell(steel, "Steel.TwoLine.Es2", 1, 3).Value2 = 0.025
+    Dim grades As Object: Set grades = book.Names.Item("rngCoupledSteelClasses").RefersToRange
+    grades.Cells(2, 1).Value2 = "A240": grades.Cells(2, 2).Value2 = "ULS(I)"
+    grades.Cells(2, 3).Value2 = 200000#: grades.Cells(2, 4).Value2 = 240#: grades.Cells(2, 5).Value2 = 240#
+    grades.Cells(2, 6).Value2 = 0.02: grades.Cells(2, 7).Value2 = 0.02
+
+    Dim profiles As Object: Set profiles = book.Names.Item("rngCalculationProfiles").RefersToRange
+    Dim pr4 As Long
+    For pr4 = 3 To profiles.Columns.Count
+        If CStr(profiles.Cells(2, pr4).Value2) = "PR4" Then Exit For
+    Next pr4
+    If pr4 > profiles.Columns.Count Then Err.Raise 5, "TestPrepareCoupledTimingBook", "Профиль PR4 не найден."
+    Dim flag As Variant
+    For Each flag In Array("Calculation.Strength.DirectState", "Calculation.Strength.Capacity", "Calculation.Stability.Enabled", "Calculation.Crack.Width")
+        TestInputCell(profiles, CStr(flag), 2, pr4).Value2 = "No"
+    Next flag
+    If calculation <> "Capacity" Then TestInputCell(profiles, "Calculation.Strength.DirectState", 2, pr4).Value2 = "Yes"
+    If calculation <> "Direct" Then TestInputCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "Yes"
+    TestInputCell(profiles, "MaterialModel.Strength.ValueSet", 2, pr4).Value2 = "ULS(I)"
+    TestInputCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
+    TestInputCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
+    TestInputCell(profiles, "Visualization.State", 2, pr4).Value2 = "StrengthState"
+    TestInputCell(profiles, "Visualization.Quantity", 2, pr4).Value2 = "TauXZ"
+    If calculation = "Capacity" Then TestInputCell(profiles, "Visualization.State", 2, pr4).Value2 = "CapacityState"
+
+    Dim loads As Object: Set loads = book.Names.Item("rngLoadCombinations").RefersToRange
+    Dim data(1 To 1, 1 To 10) As Variant
+    data(1, 1) = "HardShear": data(1, 5) = "PR4"
+    data(1, 2) = forces(0) / units.InputForceToInternal(1#)
+    data(1, 3) = forces(1) / units.InputMomentMxToInternal(1#)
+    data(1, 4) = forces(2) / units.InputMomentMyToInternal(1#)
+    data(1, 8) = forces(3) / units.InputTorqueToInternal(1#)
+    data(1, 9) = forces(4) / units.InputShearToInternal(1#)
+    data(1, 10) = forces(5) / units.InputShearToInternal(1#)
+    loads.Offset(1, 0).Resize(loads.Rows.Count - 1, loads.Columns.Count).ClearContents
+    loads.Cells(2, 1).Resize(1, 10).Value2 = data
+
+    Dim geometry As Object: Set geometry = book.Names.Item("rngRectanglesGeometry").RefersToRange
+    Dim group As Object: Set group = TestInputCell(geometry, "Group1")
+    group.Value2 = "Контур"
+    group.Offset(0, 1).Value2 = 8# / units.InputLengthToInternal(1#)
+    group.Offset(0, 2).Value2 = 100# / units.InputLengthToInternal(1#)
+    group.Offset(0, 3).Value2 = 10# / units.InputLengthToInternal(1#)
+    group.Offset(0, 4).Value2 = "A240": group.Offset(0, 5).ClearContents
+    TestInputCell(geometry, "Group2").ClearContents
+    TestInputCell(geometry, "Group3").ClearContents
+
+    Dim section As CSectionModel: Set section = TestHardShearSection()
+    section.RecipeType = "Rectangles"
+    Dim properties As CSectionPropertiesCalculator: Set properties = PrepareSectionSnapshot(section)
+    Dim writer As New CNDMResultsWriter, preview As CCalculationSnapshot, store As New CCalculationSnapshotStore
+    If storage = "Excel" Then
+        Set preview = writer.WriteGeometryPreviewForDisplay(book, section, properties, units, False)
+    Else
+        Set preview = writer.PrepareGeometryPreviewSnapshot(book, section, properties, units)
+        store.SaveFile book, preview
+    End If
+    Set TestPrepareCoupledTimingBook = units
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает числовое поле Results с усилием в штатных выходных единицах.
+Private Sub TestCoupledTimingNumber(ByVal actual As String, ByVal expected As Double, ByVal label As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    If IsNumeric(actual) Then
+        TestExpectNear CDbl(actual), expected, 0.00005, label, passed, failed, report
+    Else
+        TestRecord False, label & " was not published", passed, failed, report
+    End If
+End Sub
