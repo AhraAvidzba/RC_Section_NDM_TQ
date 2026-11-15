@@ -127,6 +127,20 @@ RunID, значения сводок и подробных таблиц. В File
 `Update-PrivateWorkbookCode.ps1 -WorkbookEvents`. Постановка охватывает
 реальные события ввода и принудительный сбой между записями листа.
 
+Для истории армированной призмы используйте `prepare` из
+`tools/validate_opensees_reinforced_prism.py` с параметрами
+`--reference <NDMReference8x8x16Steps48.json> --out <CSV>`, затем
+`Run-Audit03Watchdog.ps1` для собранной проверочной копии. Макрос
+`modTestCoupledReinforcedPrism.RunTestCoupledReinforcedPrism`
+принимает абсолютный путь CSV и число интервалов базиса от 1 до 3.
+Макрос `RunTestCoupledReinforcedPrismSubsteps` допускает деление
+между теми же точками до 1/16 исходного шага. Передайте файл из
+строки `PRISM_TRACE` в команду `compare` с параметрами
+`--reference`, `--raw-open-sees`, `--native`, `--out`. Протокол
+проверяет принятый префикс и независимо собирает шесть усилий.
+Файлы сырого внешнего расчёта и эталона указаны в
+[журнале армированной призмы](reports/Coupled6DProgress.md#114-внешний-контроль-с-продольной-сталью-и-хомутами).
+
 ## Команды
 
 Сохранённое расположение и оформление книги, 19.10.2026:
