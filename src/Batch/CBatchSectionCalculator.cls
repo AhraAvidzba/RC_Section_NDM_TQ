@@ -966,7 +966,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
             Set meta = capacity.ResultMeta
             ReportStep meta.ResultComment
             If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
-            If capacity.CoupledLimitLambda > 0# Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
+            If capacity.CoupledLimitLambda > 0# And Not capacity.IsTransverseLimit Then _
+                ReportValue "Множитель предела продольной арматуры", FormatNumberInvariant(capacity.CoupledLimitLambda)
             If capacity.PeakLambda > 0# Then
                 ReportValue "Множитель при максимуме", FormatNumberInvariant(capacity.PeakLambda)
                 ReportValue "Оценка погрешности множителя", FormatNumberInvariant(capacity.PeakAccuracy)
@@ -986,8 +987,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
     End If
 End Sub
 
-' Выводит отдельный раздел проверки поперечной арматуры. При поиске только
-' предела показывает достигнутый критерий и запас определяющего хомута.
+' Выводит отдельный раздел проверки поперечной арматуры. У предельной точки
+' показывает запас хомута и фактические значения на допустимой стороне предела.
 Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal capacity As CCapacityResult)
     Dim control As String, utilization As Double, stress As Double, hasState As Boolean, hasLimit As Boolean
     If Not state Is Nothing Then hasState = state.CopyCoupledTransverseControl(control, utilization, stress)
@@ -1003,7 +1004,17 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
     If hasLimit Then
         ReportValue "Статус предела поперечной арматуры", capacity.TransverseLimitStatus
         ReportStep capacity.LimitState
-        If capacity.HasUltimatePoint Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
+        If capacity.HasUltimatePoint Then
+            ReportValue "Коэффициент запаса хомута на выбранной траектории", FormatNumberInvariant(capacity.CoupledLimitLambda)
+            Dim limitState As CSectionStateResult: Set limitState = capacity.StateResult
+            If Not limitState Is Nothing Then
+                If limitState.CopyCoupledTransverseControl(control, utilization, stress) Then
+                    ReportValue "Контрольная точка при предельной нагрузке", control
+                    ReportValue "Напряжение вдоль стержня при предельной нагрузке, МПа", FormatNumberInvariant(stress)
+                    ReportValue "Отношение деформации к пределу при предельной нагрузке", FormatNumberInvariant(utilization)
+                End If
+            End If
+        End If
     End If
 End Sub
 

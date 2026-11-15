@@ -111,29 +111,29 @@ Public Sub InitializeFromSolver(ByVal stateType As ESectionStateType, _
     If Not mSnapshotSection Is Nothing Then mSnapshotRevision = mSnapshotSection.Revision
 End Sub
 
-' Сохраняет прямое связанное НДС с фактическим полем. Усилия состояния
+' Сохраняет прямое или предельное связанное НДС с фактическим полем. Усилия
 ' переводятся из центра бетонной сетки в исходные оси CSectionModel.
-Friend Sub InitializeFromCoupled(ByVal section As CSectionModel, ByVal spec As CMaterialModelSpec, _
-        ByVal loads As CSectionLoadState, ByRef resultants() As Double, ByVal epsilon0 As Double, _
+Friend Sub InitializeFromCoupled(ByVal stateType As ESectionStateType, ByVal section As CSectionModel, _
+        ByVal spec As CMaterialModelSpec, ByRef target() As Double, ByRef resultants() As Double, ByVal epsilon0 As Double, _
         ByVal kappaX As Double, ByVal kappaY As Double, ByVal twist As Double, _
-        ByVal fields As CCoupledFieldSnapshot, ByVal meta As CResultMeta)
+        ByVal fields As CCoupledFieldSnapshot, ByVal meta As CResultMeta, ByVal withinPhysicalRange As Boolean)
     AssertWritable
     ClearSnapshot
-    mStateType = sstStrengthState: mMaterialModelRole = cpStrength
+    mStateType = stateType: mMaterialModelRole = cpStrength
     Set mMaterialSpec = spec.Clone: Set mResultMeta = meta.Clone
     Set mSnapshotSection = section: mSnapshotRevision = section.Revision
     Set mCoupledFields = fields
     mEpsilon0 = epsilon0: mKappaX = kappaX: mKappaY = kappaY: mTwist = twist
-    Dim cx As Double, cy As Double, area As Double, target() As Double
+    Dim cx As Double, cy As Double, area As Double
     section.ConcreteMeshCentroid cx, cy, area
-    loads.LoadAboutPoint 0#, 0#, target
-    mTargetN = target(1): mTargetMx = target(2): mTargetMy = target(3)
+    mTargetN = target(1): mTargetMx = target(2) + mTargetN * cy: mTargetMy = target(3) + mTargetN * cx
     mNint = resultants(1): mMxint = resultants(2) + mNint * cy: mMyint = resultants(3) + mNint * cx
     mResidualN = mNint - mTargetN: mResidualMx = mMxint - mTargetMx: mResidualMy = mMyint - mTargetMy
     If mTargetN <> 0# Then mRelativeResidualN = Abs(mResidualN / mTargetN)
     If mTargetMx <> 0# Then mRelativeResidualMx = Abs(mResidualMx / mTargetMx)
     If mTargetMy <> 0# Then mRelativeResidualMy = Abs(mResidualMy / mTargetMy)
     mConverged = True
+    mWithinPhysicalRange = withinPhysicalRange
     mDiagnosticLog = meta.DiagnosticDetails
     UpdateCoupledExtrema section
 End Sub

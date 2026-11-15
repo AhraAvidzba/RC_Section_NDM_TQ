@@ -45,6 +45,21 @@ Private Sub Class_Initialize()
     mResultMeta.SetNotApplicable rkCapacity
 End Sub
 
+' Добавляет восстановленное предельное НДС либо сохраняет причину, по
+' которой поля вывода получить не удалось при подтверждённом пределе.
+Friend Sub AttachCoupledState(ByVal state As CSectionStateResult, ByVal warning As String)
+    AssertWritable
+    Set mStateResult = state
+    If Len(warning) = 0 Then Exit Sub
+    Dim comment As String
+    comment = Trim$(mResultMeta.ResultComment & " " & warning)
+    If mResultMeta.InternalStatus = rsSuccess Then
+        mResultMeta.SetResult rsSuccessWithWarning, mResultMeta.ResultCode, rkCapacity, comment, mResultMeta.DiagnosticDetails
+    Else
+        mResultMeta.ResultComment = comment
+    End If
+End Sub
+
 ' Сохраняет подтверждённый арматурный предел. При lambda < 1 критерий
 ' достаточен для FAIL. При lambda >= 1 полный запас требует проверки
 ' бетонного механизма и число остаётся множителем арматурного предела.

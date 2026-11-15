@@ -36,6 +36,8 @@ Private mLimitTolerance As Double
 Private mHasSteelLimit As Boolean, mSteelLimitOnOffset As Boolean
 Private mSteelLimitLow As Double, mSteelLimitHigh As Double
 Private mSteelLimitPoint As Long ' Материальная точка, определившая численно уточнённую верхнюю границу.
+Private mLimitFields As Collection
+Private mLimitResultants() As Double
 
 ' Начинает новое независимое сочетание. Копирует траекторию и обнуляет
 ' материалы, чтобы результат не зависел от предыдущей строки таблицы.
@@ -61,6 +63,7 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     Set mReinforcement = Nothing
     mHasSteelLimit = False: mSteelLimitOnOffset = False
     mSteelLimitPoint = 0
+    Set mLimitFields = Nothing: Erase mLimitResultants
     Erase mField: Erase mResultants
     Set mAcceptedFields = Nothing
     If saveAcceptedFields Then Set mAcceptedFields = New Collection
@@ -113,7 +116,7 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupled
     If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or mPreviousLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
     controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
-        mPreviousLambda, mLambda, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
+        mPreviousLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
     Set ContinueByDeformation = controlled
 End Function
 
@@ -141,6 +144,22 @@ End Property
 Friend Sub CopySavedField(ByVal index As Long, ByRef field() As Double)
     field = mAcceptedFields.Item(index)
 End Sub
+
+' Передаёт принятые поля для восстановления напряжений в точках вывода.
+' Получатель читает готовую последовательность без изменения.
+Friend Property Get AcceptedFields() As Collection
+    Set AcceptedFields = mAcceptedFields
+End Property
+
+' Передаёт историю и усилия допустимого плеча стального предела.
+' Пробы бисации используют одну историю, поэтому добавляется только
+' окончательная допустимая точка, если она отличается от левого поля.
+Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As Double) As Boolean
+    If mLimitFields Is Nothing Then Exit Function
+    Set fields = mLimitFields
+    resultants = mLimitResultants
+    CopyLimitState = True
+End Function
 
 ' Продвигается до заданного lambda по текущей истории. После отказа
 ' доступны достигнутая точка и повтор от неё. Уменьшение lambda требует
@@ -296,6 +315,8 @@ End Sub
 Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
     Dim low As Double, candidate As Double, tolerance As Double
     Dim lowRatio As Double, highRatio As Double, ratio As Double, limitPoint As Long
+    Dim finalField() As Double, finalResultants() As Double, keepFields As Boolean
+    keepFields = (Not offsetStage And Not mAcceptedFields Is Nothing)
     low = mLambda
     If offsetStage Then low = mOffsetFraction
     lowRatio = mReinforcement.AcceptedSteelUtilization
@@ -317,17 +338,29 @@ Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
         End If
         If Not TryEquilibrium(candidate, offsetStage) Then Exit Sub
         ratio = mReinforcement.TrialSteelUtilization
-        mSolver.DiscardStep
         If ratio > 1# Then
             high = candidate: highRatio = ratio
             limitPoint = mReinforcement.TrialSteelCriticalPoint
         Else
             low = candidate: lowRatio = ratio
+            If keepFields Then mSolver.CopyTrial finalField, finalResultants
         End If
+        mSolver.DiscardStep
     Loop
     mSteelLimitLow = low: mSteelLimitHigh = high: mSteelLimitOnOffset = offsetStage
     mSteelLimitPoint = limitPoint
     mHasSteelLimit = True
+    If keepFields And (mHasAccepted Or low > mLambda) Then
+        Set mLimitFields = New Collection
+        Dim i As Long
+        For i = 1 To mAcceptedFields.Count: mLimitFields.Add mAcceptedFields.Item(i): Next i
+        If low > mLambda Then
+            mLimitFields.Add finalField
+            mLimitResultants = finalResultants
+        Else
+            mLimitResultants = mResultants
+        End If
+    End If
     mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
         "На ветви достигнута предельная деформация арматуры.", _
         ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _

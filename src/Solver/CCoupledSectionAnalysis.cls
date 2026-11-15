@@ -83,9 +83,10 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
     If meta.InternalStatus <> rsUnset Then Set SolveTarget = meta: Exit Function
 
-    Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation
+    Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
+    Set path = BuildPath(loads, loadPath)
     solver.Initialize mOperators, response, mEb
-    continuation.Initialize solver, BuildPath(loads, loadPath), INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
+    continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
         STRESS_TOLERANCE, RELATIVE_TOLERANCE, captureFields
     If continuation.Advance(1#) Then
         continuation.CopyAccepted field, resultants
@@ -101,13 +102,13 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
         Else
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."
         End If
-        If captureFields Then Set acceptedState = CaptureAcceptedState(loads, spec, continuation, response, field, resultants, fc, ft, meta)
-        If Not acceptedState Is Nothing Then
-            acceptedState.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
-            Dim transversePoint As Long: transversePoint = response.AcceptedTransverseCriticalPoint
-            If transversePoint > 0 Then acceptedState.SetCoupledTransverseControl _
-                SteelControlDescription(transversePoint), response.AcceptedTransverseSteelUtilization, _
-                response.AcceptedSteelStress(transversePoint)
+        If captureFields Then
+            Dim target() As Double, warning As String
+            path.TargetSix 1#, target
+            Set acceptedState = CaptureAcceptedState(sstStrengthState, spec, continuation.AcceptedFields, _
+                concrete, response, target, resultants, fc, ft, meta, warning)
+            SetStateMaterials acceptedState, spec, concrete, response, models
+            If Len(warning) > 0 Then AppendStateWarning meta, warning
         End If
     Else
         Set meta = continuation.ResultMeta
@@ -147,6 +148,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
     Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
+    Dim limitHistory As Collection, actual() As Double, limitTarget() As Double
     hasSteel = branch.CopySteelLimit(low, high, onOffset, criticalPoint)
     If Not hasSteel Then
         Set controlled = branch.ContinueByDeformation(maximumLambda)
@@ -157,9 +159,12 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
             hasSteel = controlled.CopySteelLimit(low, high, criticalPoint)
             Dim peak As Double, accuracy As Double, designVerified As Boolean
             If controlled.CopyPeak(peak, accuracy, designVerified) Then
-                path.TargetSix peak, ultimate
+                path.TargetSix peak, limitTarget
+                ultimate = limitTarget
                 loads.MoveResultantsToLoadPoint mCenterX, mCenterY, ultimate
                 capacity.InitializeCoupledPeak peak, accuracy, designVerified, ultimate, loadPath, meta.DiagnosticDetails
+                controlled.CopyLimitState limitHistory, actual
+                SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft
                 Exit Function
             End If
         End If
@@ -170,9 +175,16 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         If onOffset Then
             capacity.InitializeCoupledBaseFail reason, loadPath, meta.DiagnosticDetails, transverseLimit
         Else
-            path.TargetSix low, ultimate
+            path.TargetSix low, limitTarget
+            ultimate = limitTarget
             loads.MoveResultantsToLoadPoint mCenterX, mCenterY, ultimate
             capacity.InitializeCoupledLimit low, ultimate, loadPath, reason, Nothing, meta.DiagnosticDetails, transverseLimit
+            If controlled Is Nothing Then
+                branch.CopyLimitState limitHistory, actual
+            Else
+                controlled.CopyLimitState limitHistory, actual
+            End If
+            SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft
         End If
     Else
         low = -1#
@@ -181,6 +193,27 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         capacity.InitializeCoupledUnresolved meta, loadPath, low
     End If
 End Function
+
+' Восстанавливает материалы только до проверенной предельной точки.
+' При неполных полях сохраняет интегральный результат и предупреждение.
+Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver As CCoupledNewtonSolver, _
+        ByVal spec As CMaterialModelSpec, ByVal history As Collection, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal models As Object, ByRef target() As Double, _
+        ByRef actual() As Double, ByVal fc As Double, ByVal ft As Double)
+    Dim warning As String, state As CSectionStateResult
+    If history Is Nothing Then
+        warning = "История предельной точки недоступна для вывода полей."
+    ElseIf Not solver.ReplayAcceptedFields(history, history.Count) Then
+        warning = "Не удалось восстановить историю материалов в предельной точке."
+    Else
+        Dim stateMeta As New CResultMeta, capacityMeta As CResultMeta
+        Set capacityMeta = capacity.ResultMeta
+        stateMeta.SetResult rsSuccess, rcNone, rkCapacity, "Предельное равновесие подтверждено.", capacityMeta.DiagnosticDetails
+        Set state = CaptureAcceptedState(sstCapacityState, spec, history, concrete, reinforcement, target, actual, fc, ft, stateMeta, warning)
+        SetStateMaterials state, spec, concrete, reinforcement, models
+    End If
+    capacity.AttachCoupledState state, warning
+End Sub
 
 ' Формулирует проверяемый механизм и привязывает его к точке арматуры.
 Private Function SteelLimitComment(ByVal point As Long) As String
@@ -258,25 +291,42 @@ End Function
 
 ' Сохраняет осевое и пространственное поля принятой траектории. Отказ
 ' отдельной точки вывода сохраняет подтверждённое интегральное равновесие.
-Private Function CaptureAcceptedState(ByVal loads As CSectionLoadState, ByVal spec As CMaterialModelSpec, _
-        ByVal continuation As CCoupledLoadContinuation, ByVal reinforcement As CCoupledReinforcedResponse, _
-        ByRef field() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
-        ByVal meta As CResultMeta) As CSectionStateResult
-    Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot, reason As String
+Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVal spec As CMaterialModelSpec, _
+        ByVal history As Collection, ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByRef target() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
+        ByVal meta As CResultMeta, ByRef warning As String) As CSectionStateResult
+    Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot
     observer.Initialize mSection.ConcreteCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
-    If Not fields.Capture(mSection, mOperators, continuation, observer, reinforcement, reason) Then
-        If meta.InternalStatus = rsSuccess Then
-            meta.SetResult rsSuccessWithWarning, rcNone, rkDirectState, meta.ResultComment & " " & reason, meta.DiagnosticDetails
-        Else
-            meta.ResultComment = meta.ResultComment & " " & reason
-        End If
-        Exit Function
-    End If
-    Dim eps0 As Double, kx As Double, ky As Double, twist As Double, state As New CSectionStateResult
+    fields.Capture mSection, mOperators, history, observer, concrete, reinforcement, warning
+    Dim fieldMeta As CResultMeta: Set fieldMeta = meta.Clone
+    If Len(warning) > 0 Then AppendStateWarning fieldMeta, warning
+    Dim eps0 As Double, kx As Double, ky As Double, twist As Double, state As New CSectionStateResult, field() As Double
+    field = history.Item(history.Count)
     mOperators.GeneralizedDeformation field, eps0, kx, ky, twist
-    state.InitializeFromCoupled mSection, spec, loads, resultants, eps0, kx, ky, twist, fields, meta
+    state.InitializeFromCoupled stateType, mSection, spec, target, resultants, eps0, kx, ky, twist, fields, fieldMeta, _
+        (reinforcement.AcceptedSteelUtilization <= 1#)
     Set CaptureAcceptedState = state
 End Function
+
+' Дополняет готовое состояние его диаграммами и фактической контрольной
+' точкой поперечной арматуры, если она входит в модель сечения.
+Private Sub SetStateMaterials(ByVal state As CSectionStateResult, ByVal spec As CMaterialModelSpec, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, ByVal models As Object)
+    state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
+    Dim point As Long: point = reinforcement.AcceptedTransverseCriticalPoint
+    If point > 0 Then state.SetCoupledTransverseControl SteelControlDescription(point), _
+        reinforcement.AcceptedTransverseSteelUtilization, reinforcement.AcceptedSteelStress(point)
+End Sub
+
+' Добавляет предупреждение о поле, сохраняя статус физической проверки.
+Private Sub AppendStateWarning(ByVal meta As CResultMeta, ByVal warning As String)
+    Dim comment As String: comment = Trim$(meta.ResultComment & " " & warning)
+    If meta.InternalStatus = rsSuccess Then
+        meta.SetResult rsSuccessWithWarning, meta.ResultCode, meta.ResultKind, comment, meta.DiagnosticDetails
+    Else
+        meta.ResultComment = comment
+    End If
+End Sub
 
 ' Готовит операторы с модулями фактически назначенных моделей. Профили
 ' с одним набором материалов переиспользуют готовые операторы запуска.

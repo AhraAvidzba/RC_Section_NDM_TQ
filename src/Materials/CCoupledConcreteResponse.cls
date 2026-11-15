@@ -222,6 +222,12 @@ Private Sub ICoupledPointResponse_ClearHistory()
     For point = 1 To mPointCount: mHistory(point, mCommitted).ElasticTangentExact = True: Next point
 End Sub
 
+' Читает напряжения принятой точки квадратуры без повторного решения материала.
+Friend Sub CopyAcceptedStress(ByVal point As Long, ByRef stress() As Double)
+    Dim i As Long
+    For i = 1 To N_COMPONENTS: stress(i) = mHistory(point, mCommitted).Stress(i): Next i
+End Sub
+
 ' Снимает одноосную огибающую из фактического закона данного бетона.
 ' Отрицательная ветвь передаётся от начала к хвосту сжатия.
 Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal modulus As Double, _

@@ -42,7 +42,7 @@ Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек в
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
 Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 27 ' Пространственное НДС, предельный вектор и сведения о поперечной арматуре.
-Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
+Private Const STATE_SECTION_PROPERTY_ROWS As Long = 14 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
 ' Возвращает фактическое число столбцов выбранной таблицы сохраняемых результатов.
@@ -303,13 +303,15 @@ End Sub
 ' записаны в основной таблице. File получает таблицу без записи через лист.
 Private Sub WriteCalculatedCoupledFields(ByVal workbook As Object, ByVal section As CSectionModel, _
         ByVal batch As CBatchSectionCalculator, ByVal runID As Variant)
-    Dim count As Long, i As Long, elementCount As Long, state As CSectionStateResult
+    Dim count As Long, i As Long, stateIndex As Long, elementCount As Long
+    Dim repository As CStateRepository, state As CSectionStateResult
     elementCount = section.ConcreteCount + section.RebarCount
     For i = 1 To batch.Count
-        Set state = batch.ResultAt(i).StateRepository.FindState(sstStrengthState)
-        If Not state Is Nothing Then
+        Set repository = batch.ResultAt(i).StateRepository
+        For stateIndex = 1 To repository.StateCount
+            Set state = repository.StateAt(stateIndex)
             If Not state.CoupledFields Is Nothing Then count = count + elementCount
-        End If
+        Next stateIndex
     Next i
     If count = 0 Then
         If mCapturedSnapshot Is Nothing Then
@@ -322,11 +324,13 @@ Private Sub WriteCalculatedCoupledFields(ByVal workbook As Object, ByVal section
     Dim combinationID As String, profileID As String, stateType As String
     data = NewCoupledFieldTable(count): row = 2
     For i = 1 To batch.Count
-        Set state = batch.ResultAt(i).StateRepository.FindState(sstStrengthState)
-        If Not state Is Nothing Then
+        Set repository = batch.ResultAt(i).StateRepository
+        combinationID = batch.CombinationID(i): profileID = batch.ResultAt(i).ProfileId
+        For stateIndex = 1 To repository.StateCount
+            Set state = repository.StateAt(stateIndex)
             Set fields = state.CoupledFields
             If Not fields Is Nothing Then
-                combinationID = batch.CombinationID(i): profileID = batch.ResultAt(i).ProfileId: stateType = state.StateTypeText
+                stateType = state.StateTypeText
                 For element = 1 To elementCount
                     data(row, 1) = CDbl(runID): data(row, 2) = combinationID: data(row, 3) = profileID: data(row, 4) = stateType
                     If element <= section.ConcreteCount Then
@@ -339,7 +343,7 @@ Private Sub WriteCalculatedCoupledFields(ByVal workbook As Object, ByVal section
                     row = row + 1
                 Next element
             End If
-        End If
+        Next stateIndex
     Next i
     If mCapturedSnapshot Is Nothing Then
         WriteCoupledFields workbook, data
@@ -1322,6 +1326,8 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
                     CoupledMaterialSpecKey(stateResult), "-", _
                     "Фактические модели бетона с повреждением и двухлинейной стали по классам."
                 PutCoupledMaterialLinks data, rowIndex, runID, batch, combinationIndex, stateResult, prefix
+                PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Twist", _
+                    stateResult.Twist, "rad/mm", "Относительный угол закручивания сечения по длине элемента."
             End If
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Epsilon0", _
                 stateResult.Epsilon0, "-", "Деформация в исходной точке X=0, Y=0 модели (для импорта AutoCAD - начало МСК/WCS). Численный перенос к центру сечения эту точку вывода не меняет."
@@ -1432,18 +1438,19 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
     Dim rowCount As Long
     rowCount = 1 + COMMON_SECTION_PROPERTY_ROWS + batch.Count * LC_SECTION_PROPERTY_ROWS
 
-    Dim combinationIndex As Long
-    Dim state As CSectionStateResult: Dim curves As CCoupledMaterialSnapshot
+    Dim combinationIndex As Long, stateIndex As Long
+    Dim repository As CStateRepository, state As CSectionStateResult, curves As CCoupledMaterialSnapshot
     For combinationIndex = 1 To batch.Count
         If batch.HasSpatialLoads(combinationIndex) Then rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
-        rowCount = rowCount + batch.ResultAt(combinationIndex).StateRepository.StateCount * STATE_SECTION_PROPERTY_ROWS
-        Set state = batch.ResultAt(combinationIndex).StateRepository.FindState(sstStrengthState)
-        If Not state Is Nothing Then
+        Set repository = batch.ResultAt(combinationIndex).StateRepository
+        rowCount = rowCount + repository.StateCount * STATE_SECTION_PROPERTY_ROWS
+        For stateIndex = 1 To repository.StateCount
+            Set state = repository.StateAt(stateIndex)
             Set curves = state.CoupledMaterialCurves
             If Not curves Is Nothing Then
                 If curves.SeriesCount > 2 Then rowCount = rowCount + curves.SeriesCount - 2
             End If
-        End If
+        Next stateIndex
     Next combinationIndex
 
     SectionPropertyRowCount = rowCount

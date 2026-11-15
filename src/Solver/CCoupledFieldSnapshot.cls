@@ -14,33 +14,45 @@ Option Explicit
 ' ==========================================================================
 ' Для центров бетонных элементов воспроизводит историю материала по полям
 ' принятых шагов. Эти точки вывода не входят в квадратуру равновесия.
+' При локальном отказе принимает фактическое напряжение ближайшей бетонной
+' точки квадратуры и сообщает об аппроксимации в комментарии состояния.
 ' Напряжения продольных стержней берутся из принятого состояния решателя.
 
 Private mFields() As Double ' Строка элемента: εz, σz, τxz, τyz, γxz, γyz, w.
 Private mCount As Long
 
-' Заполняет снимок наблюдений в порядке CSectionModel, при отказе оставляет
-' его пустым. Пробные шаги итерационного решателя сюда не попадают.
-Friend Function Capture(ByVal section As CSectionModel, ByVal operators As CCoupledElasticState, _
-        ByVal continuation As CCoupledLoadContinuation, ByVal observer As CCoupledConcreteResponse, _
-        ByVal reinforcement As CCoupledReinforcedResponse, ByRef failure As String) As Boolean
+' Заполняет снимок наблюдений в порядке CSectionModel. Пробные шаги
+' итерационного решателя сюда не попадают.
+Friend Sub Capture(ByVal section As CSectionModel, ByVal operators As CCoupledElasticState, _
+        ByVal history As Collection, ByVal observer As CCoupledConcreteResponse, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByRef warning As String)
     If mCount > 0 Then Err.Raise 5, "CCoupledFieldSnapshot", "Поля принятого снимка уже заполнены."
-    If continuation.SavedFieldCount = 0 Then Err.Raise 5, "CCoupledFieldSnapshot", "Для вывода отсутствуют принятые поля траектории."
+    If history Is Nothing Then Err.Raise 5, "CCoupledFieldSnapshot", "Для вывода отсутствует принятая история."
+    If history.Count = 0 Then Err.Raise 5, "CCoupledFieldSnapshot", "Для вывода отсутствуют принятые поля траектории."
     ReDim mFields(1 To 7, 1 To section.ConcreteCount + section.RebarCount)
     Dim field() As Double, strain(1 To 6) As Double, stress(1 To 6) As Double, warping As Double
-    Dim stepIndex As Long, i As Long, lastStep As Long
-    lastStep = continuation.SavedFieldCount
+    Dim stepIndex As Long, i As Long, lastStep As Long, affected As Long, firstElement As String
+    Dim useQuadrature() As Boolean, x As Double, y As Double, pointX() As Double, pointY() As Double
+    ReDim useQuadrature(1 To section.ConcreteCount)
+    lastStep = history.Count
     For stepIndex = 1 To lastStep
-        continuation.CopySavedField stepIndex, field
+        field = history.Item(stepIndex)
         For i = 1 To section.ConcreteCount
-            operators.KinematicsAt section.ConcreteX(i), section.ConcreteY(i), field, strain, warping
-            If Not observer.EvaluateOutputPoint(i, strain, stress) Then
-                failure = "Не удалось восстановить напряжения бетона для " & section.ConcreteID(i) & _
-                    " в rngNDMSectionGeometry на принятом шаге " & CStr(stepIndex) & "."
-                Erase mFields
-                Exit Function
+            If Not useQuadrature(i) Or stepIndex = lastStep Then
+                x = section.ConcreteX(i): y = section.ConcreteY(i)
+                operators.KinematicsAt x, y, field, strain, warping
+                If Not useQuadrature(i) Then
+                    If Not observer.EvaluateOutputPoint(i, strain, stress) Then
+                        useQuadrature(i) = True: affected = affected + 1
+                        If affected = 1 Then firstElement = section.ConcreteID(i)
+                    End If
+                End If
+                If stepIndex = lastStep Then
+                    If useQuadrature(i) Then concrete.CopyAcceptedStress NearestConcretePoint(operators, x, y, pointX, pointY), stress
+                    SavePoint i, strain, stress(3), stress(5), stress(6), warping
+                End If
             End If
-            If stepIndex = lastStep Then SavePoint i, strain, stress(3), stress(5), stress(6), warping
         Next i
         observer.AcceptOutputPoints
     Next stepIndex
@@ -49,8 +61,32 @@ Friend Function Capture(ByVal section As CSectionModel, ByVal operators As CCoup
         SavePoint section.ConcreteCount + i, strain, reinforcement.AcceptedSteelStress(operators.ConcretePointCount + i), _
             0#, 0#, warping ' Модель продольного стержня работает только на осевое напряжение.
     Next i
+    If affected > 0 Then warning = "Для " & CStr(affected) & " бетонных элементов (первый: " & firstElement & _
+        " в rngNDMSectionGeometry) напряжения приближённо представлены значениями ближайших точек интегрирования."
     mCount = section.ConcreteCount + section.RebarCount
-    Capture = True
+End Sub
+
+' Находит ближайшую точку исходного бетона по расстоянию в плоскости.
+' Координаты вычисляет один раз, только если понадобится такой вывод.
+Private Function NearestConcretePoint(ByVal operators As CCoupledElasticState, ByVal x As Double, ByVal y As Double, _
+        ByRef pointX() As Double, ByRef pointY() As Double) As Long
+    Dim point As Long, area As Double, dx As Double, dy As Double, distance As Double, nearest As Double
+    If NearestConcretePointCount(pointX) = 0 Then
+        ReDim pointX(1 To operators.ConcretePointCount): ReDim pointY(1 To operators.ConcretePointCount)
+        For point = 1 To operators.ConcretePointCount: operators.Point point, pointX(point), pointY(point), area: Next point
+    End If
+    NearestConcretePoint = 1: nearest = (pointX(1) - x) ^ 2 + (pointY(1) - y) ^ 2
+    For point = 2 To operators.ConcretePointCount
+        dx = pointX(point) - x: dy = pointY(point) - y
+        distance = dx * dx + dy * dy
+        If distance < nearest Then nearest = distance: NearestConcretePoint = point
+    Next point
+End Function
+
+' Различает ещё не подготовленные и заполненные координаты квадратуры.
+Private Function NearestConcretePointCount(ByRef x() As Double) As Long
+    On Error Resume Next
+    NearestConcretePointCount = UBound(x)
 End Function
 
 ' Сохраняет вектор одной точки в канонических единицах МПа и мм.

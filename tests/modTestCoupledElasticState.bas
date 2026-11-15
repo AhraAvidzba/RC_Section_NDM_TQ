@@ -689,8 +689,9 @@ Public Function RunTestCoupledDeformationControl() As String
     TestExpectNear material.TestAcceptedPeak, 0.0006, 0.00000001, "replay restores history instead of retaining accepted postpeak strain", passed, failed, report
     Dim prefix As New Collection, i As Long
     For i = 1 To 3: prefix.Add history(i): Next i
+    For i = 1 To 6: resultants(i) = baseLoad(i) + 0.592 * direction(i): Next i
     Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
-    branch.Trace solver, Nothing, baseLoad, direction, prefix, 0.096, 0.592, 1.5, 0.001, 30, 1E-8, 1E-8
+    branch.Trace solver, Nothing, baseLoad, direction, prefix, 0.096, 0.592, resultants, 1.5, 0.001, 30, 1E-8, 1E-8
     TestRecord branch.CopyPeak(peak, accuracy, designVerified), _
         "confirms first peak across two independently replayed increments " & branch.ResultMeta.ResultComment & _
         " " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
@@ -698,6 +699,18 @@ Public Function RunTestCoupledDeformationControl() As String
     TestRecord accuracy > 0# And accuracy <= 0.001 And Not designVerified, _
         "reports resolution of peak below design", passed, failed, report
     TestRecord Abs(peak - 0.8) <= accuracy, "numerical resolution covers the independent peak", passed, failed, report
+    Dim atPeak As Collection
+    branch.CopyLimitState atPeak, resultants
+    If atPeak Is Nothing Then
+        TestRecord False, "independently confirmed peak has no saved field", passed, failed, report
+    Else
+        field = atPeak.Item(atPeak.Count)
+        expected = (AREA * (30000# * field(1) - 1E+10# * field(1) ^ 3) - baseLoad(1)) / direction(1)
+        TestExpectNear expected, peak, 0.00000001, "saved strain gives the confirmed peak multiplier on the independent cubic law", passed, failed, report
+        TestExpectNear resultants(4), baseLoad(4) + peak * direction(4), 0.000001, "actual resultants of the saved peak", passed, failed, report
+        TestRecord solver.ReplayAcceptedFields(atPeak, atPeak.Count), "saved peak history replays", passed, failed, report
+        TestExpectNear material.TestAcceptedPeak, field(1), 0.00000001, "no descending shoulder in the saved history", passed, failed, report
+    End If
     Dim capacity As New CCapacityResult, vector(1 To 6) As Double
     If peak > 0# Then
         capacity.InitializeCoupledPeak peak, accuracy, designVerified, vector, "Auto", vbNullString
@@ -1182,6 +1195,16 @@ Private Function TestRunConcretePeak(ByVal force As Double, ByVal independentStr
         TestRecord capacity.Status = "FAIL" And capacity.LambdaCapacity = capacity.PeakLambda, "real peak before design load fails", passed, failed, report
         TestExpectNear capacity.NUltimate, force * capacity.PeakLambda, 0.000001, "ultimate axial force", passed, failed, report
         TestExpectNear capacity.TUltimate, TORQUE * capacity.PeakLambda, 0.000001, "ultimate torque", passed, failed, report
+        Dim peakState As CSectionStateResult: Set peakState = capacity.StateResult
+        If peakState Is Nothing Then
+            TestRecord False, "actual state at concrete peak is missing " & capacity.ResultMeta.ResultComment, passed, failed, report
+        Else
+            TestRecord peakState.StateType = sstCapacityState And peakState.Converged And peakState.WithinPhysicalRange, _
+                "concrete peak retains the named equilibrium state", passed, failed, report
+            TestExpectNear peakState.Nint, capacity.NUltimate, 0.05, "actual integrated N at the concrete peak", passed, failed, report
+            TestRecord peakState.Twist <> 0# And Not (peakState.CoupledFields Is Nothing) And Not (peakState.CoupledMaterialCurves Is Nothing), _
+                "concrete peak retains twist, element fields and material curves", passed, failed, report
+        End If
     End If
     TestRunConcretePeak = report & "TOTAL_COUPLED_CONCRETE_" & mode & "_PEAK: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -1392,6 +1415,17 @@ Public Function RunTestCoupledHoopCapacity() As String
     TestExpectNear capacity.TUltimate, lambda * 250000#, 1E-7, "ultimate T at load point", passed, failed, report
     TestExpectNear capacity.QxUltimate, lambda * 120#, 1E-7, "ultimate Qx", passed, failed, report
     TestExpectNear capacity.QyUltimate, lambda * -80#, 1E-7, "ultimate Qy", passed, failed, report
+    Dim limitState As CSectionStateResult: Set limitState = capacity.StateResult
+    If limitState Is Nothing Then
+        TestRecord False, "actual state at the hoop limit is missing " & capacity.ResultMeta.ResultComment, passed, failed, report
+    Else
+        TestRecord limitState.StateType = sstCapacityState And limitState.Converged And limitState.WithinPhysicalRange, _
+            "safe side of hoop limit has its own equilibrium state", passed, failed, report
+        TestRecord limitState.CopyCoupledTransverseControl(control, utilization, stress) And _
+            InStr(control, "TestWeakHoop") > 0 And utilization > 0.99 And utilization <= 1#, _
+            "saved governing hoop is immediately below the limit", passed, failed, report
+        TestExpectNear limitState.Nint, capacity.NUltimate, 0.05, "actual axial equilibrium at the hoop limit", passed, failed, report
+    End If
     Dim missingState As New CResultMeta, combined As New CCombinationResult
     missingState.SetSolverFailure sfcNumericalFailure, rkDirectState, "Unresolved direct state", True
     combined.SetDirectStateMeta missingState
@@ -1416,11 +1450,31 @@ Public Function RunTestCoupledHoopCapacity() As String
         profile.Initialize "PR4", "Test hoop capacity", "", True, True, False, False
         profile.SetStrengthSpec spec
         batch.Initialize section, provider
+        Dim settings As New CSystemSettingsReader, execution As New CExecutionReport
+        TestInputCell(ThisWorkbook.Names.Item("rngSystemSettings").RefersToRange, "General.ExecutionReportEnabled").Value2 = "Yes"
+        settings.LoadFromWorkbook ThisWorkbook: execution.Initialize ThisWorkbook, settings
+        Set batch.ExecutionReport = execution
         Set batch.ProfileCatalog = catalog
         batch.ConfigureCoupledAnalysis analysis
         batch.AddCombination "Hoop", -216000#, 90000#, -40000#, "PR4", "", torque:=250000#, qx:=120#, qy:=-80#
         batch.ApplyLoadReference 2#, -1#, 2#, -1#
         batch.Execute
+        execution.Save
+        Dim fso As Object, stream As Object, reportText As String, heading As Long, ending As Long, detail As String
+        Set fso = CreateObject("Scripting.FileSystemObject")
+        Set stream = fso.OpenTextFile(execution.FilePath, 1, False, -1)
+        reportText = stream.ReadAll: stream.Close
+        heading = InStr(reportText, vbCrLf & "Поперечная арматура" & vbCrLf)
+        If heading > 0 Then ending = InStr(heading + Len(vbCrLf & "Поперечная арматура" & vbCrLf & String$(72, "-")), _
+            reportText, vbCrLf & String$(72, "-") & vbCrLf)
+        If ending > heading Then detail = Mid$(reportText, heading, ending - heading)
+        TestRecord InStr(detail, "Статус по деформации при заданной нагрузке: FAIL") > 0 And _
+            InStr(detail, "Статус предела поперечной арматуры: FAIL") > 0, "detailed hoop subsection shows both statuses", passed, failed, report
+        TestRecord InStr(detail, "TestWeakHoop") > 0 And InStr(detail, "TestHoopGrade") > 0 And _
+            InStr(detail, "Коэффициент запаса хомута на выбранной траектории:") > 0 And _
+            InStr(detail, "Контрольная точка при предельной нагрузке:") > 0, "detail gives the hoop grade, reserve and near-limit state", passed, failed, report
+        TestRecord InStr(Left$(reportText, heading), "Коэффициент запаса хомута на выбранной траектории:") = 0 And _
+            InStr(detail, "Множитель предела продольной арматуры") = 0, "reinforcement checks have separate details", passed, failed, report
         Dim writer As New CStrengthSummaryWriter, anchor As Object
         writer.WriteSummary ThisWorkbook, batch, section:=section
         Set anchor = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
@@ -1430,12 +1484,49 @@ Public Function RunTestCoupledHoopCapacity() As String
         TestRecord InStr(anchor.Offset(0, 50).Value2, "TestWeakHoop") > 0 And InStr(anchor.Offset(0, 55).Value2, "TestWeakHoop") > 0, _
             "Results names the governing hoop in each check", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 54).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
+        TestSavedHoopCapacityFields ThisWorkbook, section, provider, batch, passed, failed, report
     End If
     RunTestCoupledHoopCapacity = report & "TOTAL_COUPLED_HOOP_CAPACITY: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledHoopCapacity = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет по ElementID и ключу состояния предельные поля обоих носителей.
+Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As CSectionModel, _
+        ByVal provider As CMaterialModelProvider, ByVal batch As CBatchSectionCalculator, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
+    TestInputCell(settings, "Results.SnapshotName").Value2 = "TestSavedHoopCapacityFields"
+    Dim props As New CSectionPropertiesCalculator, writer As New CNDMResultsWriter, summary As New CBatchResultWriter
+    props.PrepareSnapshot section, provider
+    Dim snap As New CCalculationSnapshot, store As New CCalculationSnapshotStore
+    Set summary.CaptureSnapshot = snap: Set writer.CaptureSnapshot = snap
+    summary.WriteSummary book, batch, section:=section
+    writer.WriteResults book, section, props, batch
+    snap.AddTable "Calculation.Profiles", book.Names.Item("rngCalculationProfiles").RefersToRange.Value2
+    TestInputCell(settings, "Results.SnapshotStorage").Value2 = "File"
+    store.SaveFile book, snap
+    Dim mode As Variant, values As Variant, n As Long, shear As Object, runId As Double
+    n = section.ConcreteCount + section.RebarCount
+    For Each mode In Array("Excel", "File")
+        TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
+        If mode = "Excel" Then UpdateSectionResultsForWorkbook book, snap
+        values = ReadElementResultTable(book, "Hoop", "CapacityState")
+        If HasResultTableRows(values) Then
+            runId = CDbl(values(2, ResultColumn(values, "RunID")))
+            Set shear = ReadCoupledFieldValues(book, vqTauXZ, runId, "Hoop", "PR4", "CapacityState")
+            TestRecord UBound(values, 1) = n + 1 And shear.Count = n, CStr(mode) & " keeps capacity element and shear fields", passed, failed, report
+            TestRecord Val(ReadLoadCasePropertyText(book, "Hoop", "State.CapacityState.Twist")) <> 0#, _
+                CStr(mode) & " keeps the nonzero capacity twist", passed, failed, report
+            TestRecord Len(ReadLoadCasePropertyText(book, "Hoop", "State.CapacityState.Rebar.2.RebarDiagramId")) > 0, _
+                CStr(mode) & " links the distinct hoop material curve at capacity", passed, failed, report
+        Else
+            TestRecord False, CStr(mode) & " has no elements in the hoop capacity state", passed, failed, report
+        End If
+    Next mode
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет действующие проверки СП в плоском и пространственном сочетаниях

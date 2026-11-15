@@ -673,7 +673,10 @@ Private Sub ValidateResultsOutputLayout(ByVal workbook As Object, ByVal section 
     estimatedStateCount = EstimatedNamedStateCountForOutput(batch, profiles)
     elementCount = section.ConcreteCount + section.RebarCount
     For index = 1 To batch.Count
-        If batch.HasSpatialLoads(index) And batch.StrengthDirectStateRequested(index) Then coupledStates = coupledStates + 1
+        If batch.HasSpatialLoads(index) Then
+            If batch.StrengthDirectStateRequested(index) Then coupledStates = coupledStates + 1
+            If batch.StrengthCapacityRequested(index) Then coupledStates = coupledStates + 1
+        End If
     Next index
     Dim coupledDiagramRows As Double: coupledDiagramRows = CDbl(coupledStates) * (24# + 5# * batch.CoupledSteelClassCount) ' Максимум точек калибровки бетона и пять узлов на класс стали.
     Dim coupledPropertyRows As Double: coupledPropertyRows = CDbl(coupledStates) * MaxLong(0, batch.CoupledSteelClassCount - 1)

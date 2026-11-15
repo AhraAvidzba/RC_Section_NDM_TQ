@@ -38,13 +38,16 @@ Private mPeak As TBranchPoint, mPeakAccuracy As Double
 Private mHasPeak As Boolean, mDesignVerified As Boolean
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mProbeCount As Long
+Private mLimitFields As Collection
+Private mLimitResultants() As Double
+Private mCurrentResultants() As Double
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
 ' точек принадлежит той же траектории, что и текущий решатель.
 Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CCoupledReinforcedResponse, _
         ByRef offset() As Double, ByRef direction() As Double, ByVal history As Collection, _
-        ByVal previousLambda As Double, ByVal currentLambda As Double, _
+        ByVal previousLambda As Double, ByVal currentLambda As Double, ByRef initialResultants() As Double, _
         ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, ByVal maximumIterations As Long, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double)
     Set mSolver = solver: Set mReinforcement = reinforcement
@@ -53,6 +56,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    Set mLimitFields = Nothing: Erase mLimitResultants
+    mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
     Set mMeta = New CResultMeta
     If history Is Nothing Then
@@ -90,7 +95,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 "Достигнута граница Capacity.MaxLambda до подтверждения максимума.", Details()
             Exit Sub
         ElseIf BeyondSteelLimit() Then
-            If ResolveSteelCrossing(current, trial) Then Exit Sub
+            If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             increment = increment * 0.5
         ElseIf trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
             If Not mDesignVerified And current.Lambda < 1# And trial.Lambda >= 1# Then
@@ -142,6 +147,15 @@ Friend Function CopyPeak(ByRef lambda As Double, ByRef accuracy As Double, ByRef
     CopyPeak = True
 End Function
 
+' Передаёт только поля до подтверждённой предельной точки и её
+' фактические интегралы. Поздние точки нисходящего плеча не включаются.
+Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As Double) As Boolean
+    If mLimitFields Is Nothing Then Exit Function
+    Set fields = mLimitFields
+    resultants = mLimitResultants
+    CopyLimitState = True
+End Function
+
 ' Передаёт арматурный предел на восходящем деформационном участке.
 Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long) As Boolean
     If mSteelPoint = 0 Then Exit Function
@@ -177,8 +191,8 @@ End Function
 
 ' Продвигает принятую материальную историю и фиксирует индекс её поля.
 Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint)
-    Dim field() As Double, resultants() As Double
-    mSolver.CopyTrial field, resultants
+    Dim field() As Double
+    mSolver.CopyTrial field, mCurrentResultants
     mSolver.AcceptStep
     history.Add field
     point.HistoryIndex = history.Count
@@ -207,12 +221,12 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     Dim first As TBranchPoint, second As TBranchPoint, tolerance As Double
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
-    Dim sampling As Double
+    Dim sampling As Double, refinedFields As Collection, actual As Variant
     If Not ReplayShoulders(history, left, middle, right, 2, first, sampling) Then Exit Function
     Dim accuracy As Double, divisions As Long
     divisions = 4
     Do
-        If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling) Then Exit Function
+        If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual) Then Exit Function
         accuracy = Abs(first.Lambda - second.Lambda)
         If sampling > accuracy Then accuracy = sampling
         accuracy = accuracy + first.Uncertainty + second.Uncertainty
@@ -223,6 +237,7 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     Loop While divisions <= 16
     If accuracy > tolerance Then Exit Function
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
+    Set mLimitFields = refinedFields: mLimitResultants = actual
     If second.Lambda > mBestLambda Then mBestLambda = second.Lambda
     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
         "Подтверждён первый максимум прослеженной ветви.", Details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
@@ -234,10 +249,17 @@ End Function
 ' шаги только вперёд. Сравнивает пик с обоими концами с учётом невязки.
 Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
-        ByRef peak As TBranchPoint, ByRef sampling As Double) As Boolean
+        ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
+        Optional ByRef limitResultants As Variant) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim start As Double, finish As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
+    Dim saveFields As Boolean, refined As Collection, integrated As Collection
+    saveFields = Not IsMissing(limitResultants)
+    If saveFields Then
+        Set refined = New Collection: Set integrated = New Collection
+    End If
+    Dim field() As Double, resultants() As Double
     ReDim samples(0 To 2 * divisions)
     samples(0) = left: previousLambda = left.Lambda
     For shoulder = 1 To 2
@@ -252,6 +274,10 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
                 mSolver.DiscardStep
                 Exit Function
+            End If
+            If saveFields Then
+                mSolver.CopyTrial field, resultants
+                refined.Add field: integrated.Add resultants
             End If
             mSolver.AcceptStep
             index = index + 1
@@ -271,6 +297,13 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             dropRight = peak.Lambda - samples(i + 1).Lambda + samples(i + 1).Uncertainty
             sampling = dropLeft
             If dropRight > sampling Then sampling = dropRight
+            If saveFields Then
+                Set limitFields = New Collection
+                Dim j As Long
+                For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
+                For j = 1 To i: limitFields.Add refined.Item(j): Next j
+                limitResultants = integrated.Item(i)
+            End If
             ReplayShoulders = True
             Exit Function
         End If
@@ -280,9 +313,11 @@ End Function
 ' Уточняет пересечение стального критерия от одного принятого поля.
 ' Падение множителя внутри интервала оставляет порядок механизмов
 ' неопределённым и требует сокращения внешнего шага.
-Private Function ResolveSteelCrossing(ByRef left As TBranchPoint, ByRef right As TBranchPoint) As Boolean
+Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef right As TBranchPoint) As Boolean
     Dim low As TBranchPoint, high As TBranchPoint, probePoint As TBranchPoint
     Dim point As Long, attempt As Long, tolerance As Double
+    Dim field() As Double, resultants() As Double
     low = left: high = right
     point = mReinforcement.TrialSteelCriticalPoint
     mSolver.DiscardStep
@@ -293,6 +328,15 @@ Private Function ResolveSteelCrossing(ByRef left As TBranchPoint, ByRef right As
         If high.Lambda - low.Lambda <= tolerance Then
             If low.Lambda <= 0# Then Exit Function
             mSteelLow = low.Lambda: mSteelHigh = high.Lambda: mSteelPoint = point
+            Set mLimitFields = New Collection
+            Dim i As Long
+            For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
+            If low.Lambda > left.Lambda Then
+                mLimitFields.Add field
+                mLimitResultants = resultants
+            Else
+                mLimitResultants = mCurrentResultants
+            End If
             mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
                 "Достигнута предельная деформация арматуры на возрастающем участке.", _
                 Details() & " | Интервал: [" & CStr(mSteelLow) & ", " & CStr(mSteelHigh) & "]"
@@ -310,6 +354,7 @@ Private Function ResolveSteelCrossing(ByRef left As TBranchPoint, ByRef right As
             point = mReinforcement.TrialSteelCriticalPoint: high = probePoint
         Else
             low = probePoint
+            mSolver.CopyTrial field, resultants
         End If
         mSolver.DiscardStep
     Next attempt
