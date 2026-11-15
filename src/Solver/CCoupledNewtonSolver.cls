@@ -307,7 +307,8 @@ Private Function DirectionMismatchDetails(ByVal row As Long, ByVal baseEquation 
         calculated = calculated + mMatrix(i, row) * correction(i)
     Next i
     If Sgn(calculated) <> -Sgn(baseEquation) Then Exit Function
-    DirectionMismatchDetails = "; уравнение " & CStr(row) & "; действие касательной, МПа: " & CStr(calculated) & _
+    DirectionMismatchDetails = "; уравнение " & CStr(row) & " (" & mSection.EquilibriumEquationDescription(row) & _
+        "); действие касательной, МПа: " & CStr(calculated) & _
         "; фактическое изменение на единицу доли поправки, МПа: " & CStr(measured)
 End Function
 

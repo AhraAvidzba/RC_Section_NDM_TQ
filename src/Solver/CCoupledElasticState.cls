@@ -369,6 +369,33 @@ Friend Property Get ConcretePointCount() As Long
     ConcretePointCount = mConcreteCount
 End Property
 
+' Расшифровывает строку силового равновесия в журнале. Номер строки
+' зависит от разрешения базиса. Ограничители перемещений идут после сил.
+Friend Function EquilibriumEquationDescription(ByVal row As Long) As String
+    Dim component As Long, prefix As String
+    If row < 1 Or row > mGaugeBase Then Exit Function
+    If row <= PLANE_DOF Then
+        component = row
+        prefix = "равновесие по "
+    ElseIf row > mGradientBase Then
+        component = row - mGradientBase
+        prefix = "продольный градиент "
+    Else
+        Select Case (row - PLANE_DOF - 1) Mod 3
+            Case 0: EquilibriumEquationDescription = "внутреннее равновесие по перемещению u"
+            Case 1: EquilibriumEquationDescription = "внутреннее равновесие по перемещению v"
+            Case 2: EquilibriumEquationDescription = "внутреннее равновесие по депланации w"
+        End Select
+        Exit Function
+    End If
+    Select Case component
+        Case 1: EquilibriumEquationDescription = prefix & "N"
+        Case 2: EquilibriumEquationDescription = prefix & "Mx"
+        Case 3: EquilibriumEquationDescription = prefix & "My"
+        Case 4: EquilibriumEquationDescription = prefix & "T"
+    End Select
+End Function
+
 ' Готовит правые части равновесия в масштабе напряжений.
 ' Моменты заданы относительно подготовленного численного начала.
 Friend Sub LoadEquations(ByVal force As Double, ByVal mx As Double, ByVal my As Double, _

@@ -224,6 +224,13 @@ Public Function RunCoupledEquationAssemblyTests() As String
 
     Dim external() As Double, state() As Double, residual() As Double, linearized() As Double
     Dim i As Long, j As Long, point As Long, passed As Long, failed As Long, report As String
+    TestRecord solver.EquilibriumEquationDescription(4) = "равновесие по T" And _
+        solver.EquilibriumEquationDescription(7) = "внутреннее равновесие по депланации w", _
+        "equation diagnostics distinguish torsion and local warping", passed, failed, report
+    TestRecord solver.EquilibriumEquationDescription(solver.DegreeCount - 7) = "продольный градиент N" And _
+        solver.EquilibriumEquationDescription(solver.DegreeCount - 5) = "продольный градиент My" And _
+        Len(solver.EquilibriumEquationDescription(solver.DegreeCount - 3)) = 0, _
+        "equation diagnostics identify gradients and exclude gauge constraints", passed, failed, report
     Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double, strain(1 To 6) As Double
     Dim forces(1 To 6) As Double, trialForces(1 To 6) As Double
     For i = 1 To 3
