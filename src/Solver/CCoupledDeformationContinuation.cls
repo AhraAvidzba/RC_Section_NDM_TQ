@@ -38,8 +38,10 @@ Private mMaxIterations As Long, mMaximumLambda As Double, mBestLambda As Double
 Private mControlName As String, mProbeDetails As String, mMeta As CResultMeta
 Private mPeak As TBranchPoint, mPeakAccuracy As Double
 Private mHasPeak As Boolean, mDesignVerified As Boolean
-Private mLocalPeak As Double, mLocalPeakAccuracy As Double, mPassedDrop As Boolean
+Private mLocalPeak As Double, mLocalPeakAccuracy As Double
 Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
+Private mReusedRightPoints As Long
+Private mShoulderProbes As Long
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mProbeCount As Long
 Private mLimitFields As Collection
@@ -60,8 +62,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
-    mLocalPeak = 0#: mLocalPeakAccuracy = 0#: mPassedDrop = False
+    mLocalPeak = 0#: mLocalPeakAccuracy = 0#
     mFollowingLocalPeak = False: mRecoveredPeaks = 0
+    mReusedRightPoints = 0
+    mShoulderProbes = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
     mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
@@ -130,9 +134,9 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If increment < nominal / 1.25 Then increment = increment * 1.25
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
             mSolver.DiscardStep
-            If VerifyPeak(history, left, current, trial) Then
+            If VerifyPeak(history, left, current, trial, reinforced) Then
                 If Not reinforced Then Exit Sub
-                If Not ResumeFromLocalPeak(history, current) Then Exit Sub
+                ResumeAfterLocalPeak history, current, trial
                 increment = nominal * 0.25
                 minimum = increment * MIN_STEP_RATIO
             Else
@@ -154,28 +158,22 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     End If
 End Sub
 
-' Возобновляет расчёт от уточнённого максимума, начиная с его собственной
-' принятой истории. Предельные поля публикуются только после критерия.
-Private Function ResumeFromLocalPeak(ByRef history As Collection, ByRef current As TBranchPoint) As Boolean
+' Продолжает от уже проверенного правого плеча. Последняя уточняющая
+' проходка завершилась именно в этом материальном состоянии.
+Private Sub ResumeAfterLocalPeak(ByRef history As Collection, ByRef current As TBranchPoint, ByRef right As TBranchPoint)
     mLocalPeak = mPeak.Lambda: mLocalPeakAccuracy = mPeakAccuracy
-    mHasPeak = False: mFollowingLocalPeak = True: mPassedDrop = False
+    mHasPeak = False: mFollowingLocalPeak = True
     Set history = mLimitFields
-    If Not mSolver.ReplayAcceptedFields(history, history.Count) Then
-        StopSearch "Не удалось восстановить историю локального максимума железобетонного сечения."
-        Exit Function
-    End If
     mCurrentResultants = mLimitResultants
     Set mLimitFields = Nothing: Erase mLimitResultants
-    current = mPeak
-    current.HistoryIndex = history.Count
-    ResumeFromLocalPeak = True
-End Function
+    current = right
+    mReusedRightPoints = mReusedRightPoints + current.HistoryIndex - mPeak.HistoryIndex
+End Sub
 
-' Считает превышение локального максимума после подтверждённого спада.
-' Предел точности отделяет восстановление нагрузки от колебаний решателя.
+' Считает восстановление после проверенного нисходящего плеча.
+' Возвращённая нагрузка должна превышать максимум с учётом его погрешности.
 Private Sub CheckRecovery(ByVal lambda As Double)
-    If lambda < mLocalPeak - mLocalPeakAccuracy Then mPassedDrop = True
-    If Not mPassedDrop Or lambda <= mLocalPeak + mLocalPeakAccuracy Then Exit Sub
+    If lambda <= mLocalPeak + mLocalPeakAccuracy Then Exit Sub
     mFollowingLocalPeak = False
     mRecoveredPeaks = mRecoveredPeaks + 1
 End Sub
@@ -259,29 +257,38 @@ Private Sub VerifyDesignLoad(ByRef left As TBranchPoint, ByRef right As TBranchP
     mSolver.DiscardStep
 End Sub
 
-' Повторяет оба плеча от одного принятого левого состояния. Делит
-' интервалы до тех пор, пока не стабилизируется оценка максимума.
+' Повторяет оба плеча от одного принятого левого состояния.
+' Для предела без арматуры уточняет максимум до допуска. Для
+' локального максимума железобетона сохраняет проверенное правое плечо.
 Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPoint, _
-        ByRef middle As TBranchPoint, ByRef right As TBranchPoint) As Boolean
+        ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal keepRight As Boolean) As Boolean
     If middle.Lambda <= left.Lambda + LoadResolution(middle.Lambda) Then Exit Function
     Dim first As TBranchPoint, second As TBranchPoint, tolerance As Double
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
     Dim sampling As Double, refinedFields As Collection, actual As Variant
-    If Not ReplayShoulders(history, left, middle, right, 2, first, sampling) Then Exit Function
     Dim accuracy As Double, divisions As Long
-    divisions = 4
-    Do
-        If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual) Then Exit Function
-        accuracy = Abs(first.Lambda - second.Lambda)
+    If keepRight Then
+        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True) Then Exit Function
+        accuracy = Abs(middle.Lambda - second.Lambda)
         If sampling > accuracy Then accuracy = sampling
-        accuracy = accuracy + first.Uncertainty + second.Uncertainty
+        accuracy = accuracy + second.Uncertainty
         If mBestLambda - second.Lambda > accuracy Then accuracy = mBestLambda - second.Lambda
-        If accuracy <= tolerance Then Exit Do
-        first = second
-        divisions = divisions * 2
-    Loop While divisions <= 16
-    If accuracy > tolerance Then Exit Function
+    Else
+        If Not ReplayShoulders(history, left, middle, right, 2, first, sampling) Then Exit Function
+        divisions = 4
+        Do
+            If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual) Then Exit Function
+            accuracy = Abs(first.Lambda - second.Lambda)
+            If sampling > accuracy Then accuracy = sampling
+            accuracy = accuracy + first.Uncertainty + second.Uncertainty
+            If mBestLambda - second.Lambda > accuracy Then accuracy = mBestLambda - second.Lambda
+            If accuracy <= tolerance Then Exit Do
+            first = second
+            divisions = divisions * 2
+        Loop While divisions <= 16
+        If accuracy > tolerance Then Exit Function
+    End If
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
     Set mLimitFields = refinedFields: mLimitResultants = actual
     If second.Lambda > mBestLambda Then mBestLambda = second.Lambda
@@ -296,7 +303,7 @@ End Function
 Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
-        Optional ByRef limitResultants As Variant) As Boolean
+        Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim start As Double, finish As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
@@ -316,8 +323,13 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         End If
         For i = 1 To divisions
             point.Coordinate = start + (finish - start) * i / divisions
+            If mProbeCount < PROBE_LIMIT Then mShoulderProbes = mShoulderProbes + 1
             If Not Probe(point, previousLambda, True) Then Exit Function
             If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
+                mSolver.DiscardStep
+                Exit Function
+            End If
+            If keepRight And point.Lambda <= 0# Then
                 mSolver.DiscardStep
                 Exit Function
             End If
@@ -327,6 +339,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             End If
             mSolver.AcceptStep
             index = index + 1
+            point.HistoryIndex = left.HistoryIndex + index
             samples(index) = point
             previousLambda = point.Lambda
         Next i
@@ -345,10 +358,15 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             If dropRight > sampling Then sampling = dropRight
             If saveFields Then
                 Set limitFields = New Collection
-                Dim j As Long
+                Dim j As Long, fieldCount As Long
+                fieldCount = i
+                If keepRight Then
+                    fieldCount = index
+                    right = samples(index)
+                End If
                 For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
-                For j = 1 To i: limitFields.Add refined.Item(j): Next j
-                limitResultants = integrated.Item(i)
+                For j = 1 To fieldCount: limitFields.Add refined.Item(j): Next j
+                limitResultants = integrated.Item(fieldCount)
             End If
             ReplayShoulders = True
             Exit Function
@@ -444,6 +462,8 @@ Private Function Details() As String
         Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
             "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _
             "; максимумов превзойдено после спада: " & CStr(mRecoveredPeaks)
+        Details = Details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
+        Details = Details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function

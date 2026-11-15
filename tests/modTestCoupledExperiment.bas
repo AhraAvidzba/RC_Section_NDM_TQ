@@ -339,9 +339,14 @@ Private Sub CheckLopesA2LocalPeakTest(ByVal controlled As CCoupledDeformationCon
         ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
     Dim passedLocal As Boolean, details As String, capacity As New CCapacityResult
     If Not controlled Is Nothing Then
+        Const RECOVERY_MARKER As String = "максимумов превзойдено после спада: "
         Dim meta As CResultMeta: Set meta = controlled.ResultMeta
         details = meta.DiagnosticDetails
-        passedLocal = (InStr(details, "локальный максимум lambda:") > 0 And peak = 0# And best > 1.54)
+        Dim recoveryAt As Long: recoveryAt = InStr(details, RECOVERY_MARKER)
+        If recoveryAt > 0 Then
+            passedLocal = (Val(Mid$(details, recoveryAt + Len(RECOVERY_MARKER))) > 0 And _
+                InStr(details, "локальный максимум lambda:") > 0 And peak = 0# And best > 1.54)
+        End If
         If steelPoint = 0 Then
             capacity.InitializeCoupledUnresolved meta, "Auto", best
             passedLocal = passedLocal And (fields Is Nothing) And capacity.Status = "NumFail" And _

@@ -1,4 +1,4 @@
-"""Независимая проверка двух отклонённых проб точки 7 балки A2."""
+"""Независимая проверка отклонённых проб бетонной точки 7 балки A2."""
 
 import json
 from math import acos, cos, exp, expm1, hypot, log, pi, radians, sin, sqrt, tan
@@ -15,12 +15,23 @@ ECCENTRIC_OFFSET = 0.1 * FT
 PHI = radians(65)
 PSI = radians(32)
 COMPRESSION_PLASTIC = 1.33878957702629e-6
+EARLY_TENSION_PLASTIC = 1.82475503620492e-4
 TENSION_PLASTIC = 1.88140523638028e-4
 COMPRESSION_COHESION = 28.4472458689923
 
 # Компоненты эффективной упругой пробы: xx, yy, zz, xy, xz, yz, в МПа.
-# Сняты от одной принятой истории при последних двух отказах A2.
+# Сняты от двух принятых историй в семи отклонённых пробах A2.
 PROBES = {
+    6: (3.93684800207994, 3.9520981347758, 3.90372801185138,
+        0.0705291743711791, 0.302299361384909, -0.302040159837977),
+    7: (3.93535327899118, 3.95056396412467, 3.9023011251657,
+        0.0703708052692076, 0.300958029373394, -0.300699887521766),
+    8: (3.92467925049125, 3.93958940065286, 3.8918311869306,
+        0.0693831070959353, 0.296958120359973, -0.296698589602584),
+    9: (3.92367765723099, 3.93856022884774, 3.89101757736516,
+        0.0691986571098343, 0.293084672928512, -0.292830466123371),
+    10: (3.92141926458198, 3.93614058779922, 3.89303000661829,
+         0.066500232762178, 0.210392652140264, -0.210193935499326),
     12: (3.91754565725314, 3.9209229697028, 3.91178456183784,
          0.0141653818281136, 0.0552028969616966, -0.0551704164620378),
     13: (3.91699893410672, 3.92036002442804, 3.91135673389847,
@@ -79,7 +90,7 @@ def non_tensile_yield_upper(q_trial, high_deviator, low_deviator):
     return numerator / (1 - ALPHA) - COMPRESSION_COHESION
 
 
-def verify_probe(stress):
+def verify_probe(stress, committed_tension):
     """Исключает корень исходной модели во всём диапазоне возврата конкретной пробы."""
     trace, q_trial, high, low = invariants(stress)
     beta = COMPRESSION_COHESION / FT * (1 - ALPHA) - (1 + ALPHA)
@@ -101,7 +112,7 @@ def verify_probe(stress):
     def volumes(factor):
         """Возвращает нормальную пластическую добавку и историю растяжения."""
         volume = (trace - apex + trace_drop * factor) / BULK9
-        tension = TENSION_PLASTIC + volume + (1 - factor) * high / SHEAR2
+        tension = committed_tension + volume + (1 - factor) * high / SHEAR2
         return volume, tension
 
     def return_dilation(factor):
@@ -110,6 +121,21 @@ def verify_probe(stress):
         return required_dilation(volume * SHEAR2 * factor / (1 - factor), radius_part * factor)
 
     cutoff = 1e-12 * FC / q_trial
+    if log_ratio >= 0:
+        def prescribed_log_bound(factor):
+            """Ограничивает дилатансию сверху по положительному следу."""
+            current_trace = apex - trace_drop * factor
+            return log(tan(PSI)) - current_trace / FC - current_trace**2 / (FC * q_trial * factor)
+
+        first = 0.0001
+        middle = (1 + first) / 2
+        if cutoff >= first or (apex - trace_drop * first)**2 / (FC * q_trial * first) <= 0.5:
+            raise ValueError("Первая граница не покрывает монотонный приосевой интервал")
+        # На двух последних интервалах обе границы растут. Сопоставляем
+        # предписанный максимум справа с требуемым минимумом слева.
+        log_ratio = max(prescribed_log_bound(first) - log(scale) - 0.5 * log(first),
+                        prescribed_log_bound(middle) - log(return_dilation(first)),
+                        prescribed_log_bound(1) - log(return_dilation(middle)))
     cutoff_required = return_dilation(cutoff)  # Требуемая дилатансия монотонно растёт с f.
     minimum_tension = min(volumes(0)[1], volumes(cutoff)[1])
     cutoff_prescribed = prescribed_dilation(minimum_tension, 1)
@@ -128,5 +154,6 @@ def verify_probe(stress):
 
 
 if __name__ == "__main__":
-    print(json.dumps({attempt: verify_probe(stress) for attempt, stress in PROBES.items()},
+    print(json.dumps({attempt: verify_probe(stress, EARLY_TENSION_PLASTIC if attempt < 12 else TENSION_PLASTIC)
+                      for attempt, stress in PROBES.items()},
                      indent=2, allow_nan=False))
