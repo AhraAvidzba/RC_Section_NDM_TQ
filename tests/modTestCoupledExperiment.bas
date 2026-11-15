@@ -6,10 +6,14 @@ Option Explicit
 ' Геометрия и стали восстановлены по первичным публикациям в literature/Coupled6D.
 ' Параметры, отсутствующие в источниках, фиксируются как допущения расчёта.
 
+Private Const TBU3_HALF_WIDTH As Double = 254#
 Private Const TBU3_HALF_HEIGHT As Double = 205# ' Полувысота номинального прямоугольника, мм.
 Private Const TBU3_MEASUREMENT_HALF_HEIGHT As Double = 76# ' Две соседние базы измерения по 76 мм.
 Private Const TBU3_REFERENCE_HOOP_SPACING As Double = 150# ' Контрольный вариант исторического ряда.
 Private Const TBU3_MEASURED_HOOP_SPACING As Double = 76# ' Схема TBU по Rahal и Collins.
+Private Const TBU3_REFERENCE_BOTTOM_Y As Double = -154# ' Оценка положения нижнего ряда, мм.
+Private Const TBU3_PUBLISHED_HOOP_COVER As Double = 6.35 ' Слой до поверхности по Kuan и соавторам, рис. 9, мм.
+Private Const TBU3_PUBLISHED_BOTTOM_Y As Double = -173# ' Приведённая глубина оси 378 мм от верхней грани.
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Прослеживает чистый Qy с заданием среднего инженерного сдвига yz.
@@ -475,6 +479,25 @@ Public Function RunTestCoupledTBU3CommonHoopGauge(ByVal spansText As String, ByV
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Оценивает чувствительность TBU3 к положению осей по рис. 9 Kuan и соавторов.
+' В обоих случаях сохраняет бетонную сетку, материалы и общую квадратуру хомута.
+Public Function RunTestCoupledTBU3PublishedAxes(ByVal caseText As String, ByVal maximumStageText As String) As String
+    On Error GoTo Failed
+    Dim bottomY As Double
+    Select Case LCase$(Trim$(caseText))
+        Case "cover": bottomY = TBU3_REFERENCE_BOTTOM_Y
+        Case "coverandbottom": bottomY = TBU3_PUBLISHED_BOTTOM_Y
+        Case Else: Err.Raise 5, , "Задайте вариант Cover или CoverAndBottom."
+    End Select
+    RunTestCoupledTBU3PublishedAxes = TraceTBU3Test("2", maximumStageText, True, spatialHistory:=True, _
+        measureHoop:=True, cellsPerSpan:=6, hoopSpacing:=TBU3_MEASURED_HOOP_SPACING, _
+        commonHoopQuadrature:=True, bottomY:=bottomY, publishedCover:=True)
+    Exit Function
+Failed:
+    RunTestCoupledTBU3PublishedAxes = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Читает разрешение базиса и запускает опыт с заданным шагом хомутов.
 Private Function TraceTBU3HoopGaugeTest(ByVal spansText As String, ByVal maximumStageText As String, _
         ByVal hoopSpacing As Double, Optional ByVal commonHoopQuadrature As Boolean = False) As String
@@ -497,7 +520,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False, _
         Optional ByVal measureHoop As Boolean = False, Optional ByVal cellsPerSpan As Long = 5, _
         Optional ByVal hoopSpacing As Double = TBU3_REFERENCE_HOOP_SPACING, _
-        Optional ByVal commonHoopQuadrature As Boolean = False) As String
+        Optional ByVal commonHoopQuadrature As Boolean = False, _
+        Optional ByVal bottomY As Double = TBU3_REFERENCE_BOTTOM_Y, Optional ByVal publishedCover As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -517,7 +541,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     AddExperimentTraceTest report, tracePath, "stage;actual_stage;Mx_kNm;T_kNm;kappa_per_m;twist_rad_per_m;hoop_utilization;steel_utilization;stress_residual_MPa;elapsed_s;status"
 
     Dim layout As CTransverseRebarLayout, steel As Object, section As CSectionModel
-    Set section = BuildTBU3SectionTest(layout, steel, hoopSpacing)
+    Set section = BuildTBU3SectionTest(layout, steel, hoopSpacing, bottomY, publishedCover)
     If commonHoopQuadrature Then Set layout = CommonTBU3HoopLayoutTest(section, layout)
     Dim gaugeLeftX As Double, gaugeRightX As Double
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
@@ -528,6 +552,11 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_X_MM;" & ExperimentNumberTest(gaugeLeftX) & ";" & _
             ExperimentNumberTest(gaugeRightX)
         AddExperimentTraceTest report, tracePath, "TBU3_HOOP_SPACING_MM;" & ExperimentNumberTest(hoopSpacing)
+        If publishedCover Then
+            AddExperimentTraceTest report, tracePath, "TBU3_LONG_BOTTOM_Y_MM;" & ExperimentNumberTest(bottomY)
+            AddExperimentTraceTest report, tracePath, "TBU3_HOOP_CLEAR_COVER_MM;" & _
+                ExperimentNumberTest(TBU3_HALF_WIDTH - gaugeRightX - layout.Diameter(1) / 2#)
+        End If
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_BASE_MM;" & ExperimentNumberTest(-TBU3_MEASUREMENT_HALF_HEIGHT) & _
             ";" & ExperimentNumberTest(TBU3_MEASUREMENT_HALF_HEIGHT)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_RESOLUTION;" & CStr(spans) & ";" & CStr(cellsPerSpan) & ";" & _
@@ -860,16 +889,17 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Строит номинальную коробку и измеренные площади стали. Позиции осей
-' оценены по рис. 6.39. Малая длина стыка хомута отдельно не моделируется.
+' Строит номинальную коробку и измеренные площади стали. Для контроля
+' чувствительности принимает положение нижнего ряда и слой хомута по публикации.
+' Малая длина стыка хомута отдельно не моделируется.
 Private Function BuildTBU3SectionTest(ByRef layout As CTransverseRebarLayout, ByRef steel As Object, _
-        ByVal hoopSpacing As Double) As CSectionModel
+        ByVal hoopSpacing As Double, ByVal bottomY As Double, ByVal publishedCover As Boolean) As CSectionModel
     Dim section As CSectionModel: Set section = BuildTBU3BoxTest()
 
     Dim i As Long, dx As Double
     For i = -3 To 3
         dx = 206# * CDbl(i) / 3#
-        section.AddRebarElement dx, -154#, Sqr(4# * 510# / GEOM_PI), 510#, "TBU3_8"
+        section.AddRebarElement dx, bottomY, Sqr(4# * 510# / GEOM_PI), 510#, "TBU3_8"
     Next i
     For i = -1 To 1
         section.AddRebarElement 216# * i, 167#, Sqr(4# * 129# / GEOM_PI), 129#, "TBU3_4"
@@ -878,7 +908,9 @@ Private Function BuildTBU3SectionTest(ByRef layout As CTransverseRebarLayout, By
     Next i
     Set layout = New CTransverseRebarLayout
     Dim diameter As Double: diameter = Sqr(4# * 129# / GEOM_PI)
-    layout.AddContourGroup section, "TBU3_HOOP", vbNullString, diameter, hoopSpacing, 32# - diameter / 2#, "TBU3_HOOP"
+    Dim cover As Double: cover = 32# - diameter / 2# ' Исходная ось отстоит от контура бетона на 32 мм.
+    If publishedCover Then cover = TBU3_PUBLISHED_HOOP_COVER
+    layout.AddContourGroup section, "TBU3_HOOP", vbNullString, diameter, hoopSpacing, cover, "TBU3_HOOP"
 
     Set steel = CreateObject("Scripting.Dictionary")
     steel.Add "TBU3_8", ExperimentBilinearSteelTest(194200#, 436#, 9000#)
@@ -892,7 +924,7 @@ End Function
 ' Использует одинаковые контуры для упругой и нелинейной постановок.
 Private Function BuildTBU3BoxTest() As CSectionModel
     Dim query As New CSectionGeometryQuery, outer As CConcreteRegion, inner As CConcreteRegion, geometry As New CGeometryRegion
-    Set outer = query.RegionFromPath(query.AdjacentRectangles("TBU3_Outer", Array(Array(-254#, -TBU3_HALF_HEIGHT, 508#, 2# * TBU3_HALF_HEIGHT))))
+    Set outer = query.RegionFromPath(query.AdjacentRectangles("TBU3_Outer", Array(Array(-TBU3_HALF_WIDTH, -TBU3_HALF_HEIGHT, 2# * TBU3_HALF_WIDTH, 2# * TBU3_HALF_HEIGHT))))
     Set inner = query.RegionFromPath(query.AdjacentRectangles("TBU3_Opening", Array(Array(-178#, -129#, 356#, 258#))))
     geometry.Initialize query.SubtractContainedRegion(outer, inner)
     Dim mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder, section As CSectionModel
