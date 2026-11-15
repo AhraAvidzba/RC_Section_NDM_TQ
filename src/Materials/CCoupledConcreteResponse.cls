@@ -343,7 +343,13 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     CoupledStressInvariants elastic, trialTrace, trialQ, trialHigh, trialMid, trialLow
     r = PositiveStressFraction(trialHigh, trialMid, trialLow)
     residual = CoupledBarcelonaYield(trialTrace, trialQ, trialHigh, cc, ct, mAlpha, mGamma)
-    If residual <= YIELD_TOLERANCE_RATIO * cc Then
+    Dim firstReturnReady As Boolean, deviatorFactor As Double
+    If residual > 0# And residual <= YIELD_TOLERANCE_RATIO * cc Then
+        dilationRate = CurrentDilation(kt, kc, r, trialTrace, trialQ)
+        firstReturnReady = mReturn.TryRegularNearYield(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, _
+            dilationRate, residual, effective, increment, plasticMultiplier, deviatorFactor)
+    End If
+    If residual <= YIELD_TOLERANCE_RATIO * cc And Not firstReturnReady Then
         Dim fraction As Double
         fraction = (1# - r * dt) * (1# - dc)
         For i = 1 To N_COMPONENTS: apparent(i) = fraction * elastic(i): Next i
@@ -352,21 +358,23 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         Exit Function
     End If
 
-    dilationRate = CurrentDilation(kt, kc, r, trialTrace, trialQ)
+    If Not firstReturnReady Then dilationRate = CurrentDilation(kt, kc, r, trialTrace, trialQ)
     Dim trialMean As Double, highDev As Double, midDev As Double, lowDev As Double
     trialMean = trialTrace / 3#
     highDev = trialHigh - trialMean: midDev = trialMid - trialMean: lowDev = trialLow - trialMean
-    Dim deviatorFactor As Double, mean As Double, plasticMean As Double, plasticFactor As Double
+    Dim mean As Double, plasticMean As Double, plasticFactor As Double
     Dim eHigh As Double, eLow As Double
     For j = 1 To MATERIAL_ITERATIONS
-        If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
-                effective, increment, plasticMultiplier, deviatorFactor) Then
-            If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
-            ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
-            ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
-            dilationRate = Tan(mDilationMax)
+        If j > 1 Or Not firstReturnReady Then
             If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
-                    effective, increment, plasticMultiplier, deviatorFactor) Then Exit Function
+                    effective, increment, plasticMultiplier, deviatorFactor) Then
+                If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
+                ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
+                ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
+                dilationRate = Tan(mDilationMax)
+                If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
+                        effective, increment, plasticMultiplier, deviatorFactor) Then Exit Function
+            End If
         End If
         ' Изотропный возврат меняет среднее и масштаб девиатора, сохраняя его главные оси.
         trace = effective(1) + effective(2) + effective(3)

@@ -3421,3 +3421,108 @@ Public Function RunTestCoupledSpatialTransactions() As String
 Failed:
     RunTestCoupledSpatialTransactions = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет непрерывность номинального сдвига вблизи поверхности текучести
+' и независимое локальное замыкание возврата при двух дилатансиях.
+Public Function RunTestRegularYieldOnset() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const E As Double = 30000#
+    Const NU As Double = 0.2
+    Const CC As Double = 16#
+    Const FT As Double = 3#
+    Const ALPHA As Double = 0.12
+    Const GAMMA As Double = 3#
+    Const ECC As Double = 0.1
+    Const PROBE_LEVEL As Double = 0.00000001
+    Const MARGIN As Double = 0.000000000001
+    Dim material As New CCoupledConcreteResponse, response As ICoupledPointResponse, projection As New CCoupledConcreteReturn
+    material.Initialize 2, E, NU, CC, 30#, FT, 0.002, 0.12, 80#, 125#
+    Set response = material
+    projection.Initialize E, NU, ALPHA, GAMMA, ECC
+    Dim tensor(1 To 6, 1 To 6) As Double
+    CoupledElasticTensor E, NU, tensor
+    Dim beta As Double, yieldShear As Double, tau(1 To 2) As Double, apparent(1 To 2) As Double
+    beta = CC / FT * (1# - ALPHA) - (1# + ALPHA)
+    yieldShear = CC * (1# - ALPHA) / (Sqr(3#) + beta)
+    tau(1) = yieldShear * (1# + PROBE_LEVEL - MARGIN)
+    tau(2) = yieldShear * (1# + PROBE_LEVEL + MARGIN)
+
+    Dim point As Long, trialYield As Double, reserve As Double, historyT As Double, historyC As Double
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double, status As ESolverFailureCode
+    For point = 1 To 2
+        trialYield = (Sqr(3#) + beta) * tau(point) / (1# - ALPHA) - CC
+        reserve = trialYield - PROBE_LEVEL * CC
+        TestRecord Abs(reserve - CDbl(2 * point - 3) * MARGIN * CC) < 2E-14, _
+            "yield residual brackets reference probe level " & CStr(point), passed, failed, report
+        strain(6) = tau(point) / tensor(6, 6)
+        status = response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly, recordTrial:=False)
+        TestRecord status = sfcNone, "virgin shear response " & CStr(point), passed, failed, report
+        apparent(point) = stress(6)
+        material.AcceptedPointDamage point, historyT, historyC
+        material.CopyAcceptedStress point, stress
+        TestRecord historyT = 0# And historyC = 0# And stress(6) = 0#, _
+            "read-only probe leaves virgin history " & CStr(point), passed, failed, report
+        report = report & "ONSET_SAMPLE;" & CStr(point) & ";" & TestOnsetNumber(tau(point)) & ";" & _
+            TestOnsetNumber(reserve) & ";" & TestOnsetNumber(apparent(point)) & vbCrLf
+    Next point
+    Dim signal As Double, inputGap As Double
+    signal = apparent(2) - apparent(1): inputGap = tau(2) - tau(1)
+    TestRecord Abs(signal) < 20# * inputGap, "regular return is continuous near yield", passed, failed, report
+    report = report & "ONSET_GAP;" & TestOnsetNumber(inputGap) & ";" & TestOnsetNumber(signal) & vbCrLf
+
+    Dim dilation As Variant
+    For Each dilation In Array(0#, 0.3)
+        For point = 1 To 2
+            TestRegularOnsetReturn projection, tensor, tau(point), CC, FT, ALPHA, GAMMA, ECC, CDbl(dilation), point, passed, failed, report
+        Next point
+    Next dilation
+    RunTestRegularYieldOnset = report & "TOTAL_REGULAR_YIELD_ONSET: passed=" & CStr(passed) & "; failed=" & CStr(failed)
+    Exit Function
+Failed:
+    RunTestRegularYieldOnset = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Восстанавливает поверхность и уравнения обратного Эйлера из возвращённых
+' напряжений, матрицы упругости и градиента гиперболического потенциала.
+Private Sub TestRegularOnsetReturn(ByVal projection As CCoupledConcreteReturn, ByRef tensor() As Double, _
+        ByVal tau As Double, ByVal cc As Double, ByVal ft As Double, ByVal alpha As Double, ByVal gamma As Double, _
+        ByVal eccentricity As Double, ByVal dilation As Double, ByVal point As Long, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim elastic(1 To 6) As Double, corrected(1 To 6) As Double, increment(1 To 6) As Double, flow(1 To 6) As Double
+    elastic(6) = tau
+    Dim multiplier As Double, factor As Double, ok As Boolean, tag As String
+    tag = TestOnsetNumber(dilation) & ";" & CStr(point)
+    ok = projection.Correct(elastic, 0#, Sqr(3#) * tau, tau, cc, ft, ft, dilation, _
+         corrected, increment, multiplier, factor)
+    TestRecord ok And multiplier > 0# And factor < 1#, "active local return " & tag, passed, failed, report
+    If Not ok Then Exit Sub
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, yieldValue As Double
+    Dim unused As Double, backward As Double, maxBackward As Double, maxFlow As Double, i As Long, j As Long
+    CoupledStressInvariants corrected, trace, q, high, middle, low
+    yieldValue = CoupledBarcelonaYield(trace, q, high, cc, ft, alpha, gamma)
+    unused = CoupledConcretePotential(corrected, trace, q, dilation, ft, eccentricity, flow)
+    For i = 1 To 6
+        backward = corrected(i) - elastic(i)
+        For j = 1 To 6: backward = backward + tensor(i, j) * increment(j): Next j
+        maxBackward = GeomMax(maxBackward, Abs(backward))
+        maxFlow = GeomMax(maxFlow, Abs(increment(i) - multiplier * flow(i)))
+    Next i
+    TestRecord Abs(yieldValue) <= 2E-12, "local F closes " & tag, passed, failed, report
+    TestRecord maxBackward < 2E-12 And maxFlow < 2E-13, "local backward and flow equations close " & tag, passed, failed, report
+    If dilation > 0# Then
+        TestRecord trace < 0#, "positive dilation reduces pressure trace " & tag, passed, failed, report
+    Else
+        TestRecord trace = 0#, "zero dilation preserves pressure trace " & tag, passed, failed, report
+    End If
+    report = report & "ONSET_RETURN;" & tag & ";" & TestOnsetNumber(yieldValue) & ";" & TestOnsetNumber(maxBackward) & _
+        ";" & TestOnsetNumber(maxFlow) & ";" & TestOnsetNumber(trace) & ";" & TestOnsetNumber(multiplier) & vbCrLf
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Пишет десятичные числа языка отчёта вне зависимости от локали Excel.
+Private Function TestOnsetNumber(ByVal value As Double) As String
+    TestOnsetNumber = Trim$(Str$(value))
+End Function

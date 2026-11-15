@@ -21,6 +21,10 @@ Private Const MAX_ITERATIONS As Long = 64
 Private Const NEWTON_ITERATIONS As Long = 10
 Private Const SCALED_APEX_FACTOR As Double = 0.00000001
 Private Const RELATIVE_YIELD_TOLERANCE As Double = 0.0000000001
+Private Const NEAR_YIELD_RANGE_RATIO As Double = 0.00000004
+Private Const NEAR_YIELD_MAX_DEVIATOR_LOSS As Double = 0.0001
+Private Const NEAR_YIELD_ITERS As Long = 8
+Private Const ROUNDING_LIMIT As Double = 0.000000000000007105427357601 ' 32 относительных шага Double.
 Private mTwiceShear As Double
 Private mBulk As Double
 Private mAlpha As Double, mGamma As Double, mEccentricity As Double
@@ -52,6 +56,13 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
     Dim tolerance As Double, value As Double, k As Long
     tolerance = RELATIVE_YIELD_TOLERANCE * cc
     value = CoupledBarcelonaYield(trace, q, principalMax, cc, ct, mAlpha, mGamma)
+    If value > 0# And value <= NEAR_YIELD_RANGE_RATIO * cc Then
+        If TryRegularNearYield(elastic, trace, q, principalMax, cc, ct, ft0, dilation, value, _
+                corrected, plasticIncrement, stepMultiplier, deviatorFactor) Then
+            Correct = True
+            Exit Function
+        End If
+    End If
     stepMultiplier = 0#
     If value <= tolerance Then
         For k = 1 To 6: corrected(k) = elastic(k): plasticIncrement(k) = 0#: Next k
@@ -131,6 +142,85 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
     Next k
     deviatorFactor = factor
     Correct = True
+End Function
+
+' Возвращает малую положительную пробу точно на F=0 на одной гладкой
+' меридиональной ветви. При вершине, смене знака sigma1 или неопределённом
+' знаке F по точности Double решение оставляет общему пути.
+Friend Function TryRegularNearYield(ByRef elastic() As Double, ByVal trace As Double, ByVal q As Double, _
+        ByVal principalMax As Double, ByVal cc As Double, ByVal ct As Double, ByVal ft0 As Double, _
+        ByVal dilation As Double, ByVal trialYield As Double, ByRef corrected() As Double, _
+        ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double) As Boolean
+    If q <= 1E-14 * cc Then Exit Function
+    If trialYield <= 0# Or trialYield > NEAR_YIELD_RANGE_RATIO * cc Then Exit Function
+
+    Dim largestDev As Double, trialMean As Double, branchSlope As Double, elasticPart As Double, beta As Double
+    Dim pressurePart As Double, initialNumerator As Double, inputScale As Double
+    trialMean = trace / 3#
+    largestDev = principalMax - trialMean
+    If largestDev < 0# Then Exit Function ' Для верхнего главного напряжения требуется неотрицательный девиатор.
+    beta = cc / ct * (1# - mAlpha) - (1# + mAlpha)
+    If beta < 0# Then Exit Function
+    branchSlope = mGamma
+    If principalMax > 0# Then branchSlope = beta
+    initialNumerator = trialYield * (1# - mAlpha)
+    inputScale = Abs(mAlpha * trace) + q + Abs(branchSlope * principalMax) + cc * (1# - mAlpha)
+    If initialNumerator <= ROUNDING_LIMIT * inputScale Then Exit Function
+
+    elasticPart = q + branchSlope * largestDev
+    pressurePart = mAlpha + branchSlope / 3#
+    Dim dev As Double, offset As Double, volumeScale As Double, firstRadius As Double
+    dev = DEVIATORIC_NORM * q
+    offset = mEccentricity * dilation * ft0
+    volumeScale = 9# * mBulk * dilation / mTwiceShear
+    firstRadius = Sqr(dev * dev + offset * offset)
+    If firstRadius <= 0# Then Exit Function
+
+    ' При u=1-f приращение давления пропорционально u*r(u), где r
+    ' не убывает. Линеаризация в u=0 ограничивает физический корень сверху.
+    Dim lower As Double, upper As Double, loss As Double, offsetScaled As Double
+    Dim pressureDrop As Double, radius As Double, rest As Double, residualTolerance As Double
+    upper = initialNumerator / (elasticPart + pressurePart * volumeScale * firstRadius)
+    If upper > NEAR_YIELD_MAX_DEVIATOR_LOSS Then Exit Function
+    offsetScaled = offset / (1# - upper)
+    radius = Sqr(dev * dev + offsetScaled * offsetScaled)
+    pressureDrop = upper * volumeScale * radius
+    If principalMax > 0# Then
+        If principalMax <= pressureDrop / 3# + upper * largestDev Then Exit Function
+    End If
+
+    loss = upper
+    residualTolerance = ROUNDING_LIMIT * initialNumerator
+    Dim iteration As Long, denominator As Double, proposal As Double
+    For iteration = 1 To NEAR_YIELD_ITERS
+        offsetScaled = offset / (1# - loss)
+        radius = Sqr(dev * dev + offsetScaled * offsetScaled)
+        pressureDrop = loss * volumeScale * radius
+        rest = initialNumerator - loss * elasticPart - pressurePart * pressureDrop
+        If Abs(rest) <= residualTolerance Then Exit For
+        If rest > 0# Then lower = loss Else upper = loss
+        denominator = elasticPart + pressurePart * volumeScale * _
+            (radius + loss * offsetScaled * offsetScaled / ((1# - loss) * radius))
+        proposal = loss + rest / denominator
+        If proposal <= lower Or proposal >= upper Then proposal = lower + (upper - lower) * 0.5
+        loss = proposal
+    Next iteration
+    If iteration > NEAR_YIELD_ITERS Then Exit Function
+
+    ' Собираем приращение через малое u. Вычитание (1-f) теряет
+    ' эту величину при округлении f к единице.
+    stepMultiplier = loss * radius / mTwiceShear
+    deviatorFactor = 1# - loss
+    Dim k As Long, deviator As Double, volumetric As Double
+    volumetric = dilation * stepMultiplier
+    For k = 1 To 3
+        deviator = loss * (elastic(k) - trialMean)
+        corrected(k) = elastic(k) - deviator - pressureDrop / 3#
+        corrected(k + 3) = elastic(k + 3) - loss * elastic(k + 3)
+        plasticIncrement(k) = volumetric + deviator / mTwiceShear
+        plasticIncrement(k + 3) = 2# * loss * elastic(k + 3) / mTwiceShear
+    Next k
+    TryRegularNearYield = True
 End Function
 
 ' У растягивающей вершины q/qElastic пропорционально квадрату дилатансии.
