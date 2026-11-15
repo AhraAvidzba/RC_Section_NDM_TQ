@@ -27,6 +27,10 @@ Public Sub RunSectionCalculation()
     Exit Sub
 
 Failed:
+    If Err.Number = 18 Then
+        ShowWorkbookMessage Err.Description, vbInformation, "RC Section NDM"
+        Exit Sub
+    End If
     ShowWorkbookMessage WorkbookErrorMessage("Расчет не выполнен", Err.Number, Err.Source, Err.Description, ThisWorkbook), vbExclamation, "RC Section NDM"
 End Sub
 
@@ -508,7 +512,9 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     savedSnapshot.AddTable "Calculation.Profiles", savedProfileValues
     savedSnapshot.Validate
     report.AddStep "Результаты подготовлены; сохранение в выбранном режиме и вывод из памяти."
-    Dim plotWarning As String, plotHasWarning As Boolean
+    Dim plotWarning As String, plotHasWarning As Boolean, publicationStarted As Boolean
+    If hasCoupled Then workbook.Application.EnableCancelKey = xlDisabled ' Единая публикация файла и листа. Исходный режим вернёт excelGuard.
+    publicationStarted = True
     plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning)
     report.AddStep "Подробные таблицы и схема заполнены из готовых данных без повторного решения. Полный файл снимка сохраняется только в режиме File."
 
@@ -543,6 +549,10 @@ Failed:
     errorNumber = Err.Number
     errorSource = Err.Source
     errorDescription = ResultOutputErrorDescription(Err.Description)
+    If errorNumber = 18 Then
+        errorDescription = "Расчёт отменён."
+        If Not publicationStarted Then errorDescription = errorDescription & " Запись результатов ещё не началась."
+    End If
     If Not excelGuard Is Nothing Then excelGuard.Restore ' Интерфейс возвращаем до записи отчёта: недоступный каталог отчёта не должен оставлять события и экран выключенными или подменять ошибку.
     On Error Resume Next
     If Not report Is Nothing Then

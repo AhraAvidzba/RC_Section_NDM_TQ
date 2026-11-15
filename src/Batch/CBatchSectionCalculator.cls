@@ -402,6 +402,7 @@ Public Sub ApplySettings(ByVal settings As CSystemSettingsReader, Optional ByVal
     Exit Sub
 
 InvalidSettings:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description ' Отмена завершает весь запуск.
     mSettingsValid = False
     If Err.Number = 6 And Len(conversionKey) > 0 Then
         mSettingsError = settings.InputErrorMessage(conversionKey, _
@@ -917,6 +918,7 @@ FinalizeCombination:
 Failed:
     Dim failureNumber As Long, failureText As String, failureSource As String, failureMeta As CResultMeta
     failureNumber = Err.Number: failureText = Err.Description: failureSource = Err.Source
+    If failureNumber = 18 Then Err.Raise failureNumber, failureSource, failureText ' Execute освобождает подготовку всего пакета.
     ReportStep "Ошибка при расчете сочетания: " & failureText
     Set failureMeta = New CResultMeta
     failureMeta.SetResult rsInternalError, rcInternalError, rkGeneric, _
@@ -1111,6 +1113,7 @@ Private Sub RunStabilityFilter(ByVal index As Long, ByVal valueSet As EMaterialV
     Exit Sub
 
 Failed:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
     mResults(index).SetStabilityMeta InvalidInputMeta(rkStability, Err.Description), Err.Description
     ReportStep "Устойчивость не рассчитана: " & Err.Description
 End Sub

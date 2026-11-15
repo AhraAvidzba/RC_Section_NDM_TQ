@@ -45,6 +45,7 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
     batch.ConfigureCoupledAnalysis analysis
     Exit Sub
 Failed:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description ' Отмена прерывает запуск, ошибка ввода относится к сочетанию.
     Dim reason As String: reason = Err.Description
     batch.ConfigureCoupledAnalysis Nothing, reason
 End Sub
@@ -109,7 +110,9 @@ Private Function ReadSupplementarySteel(ByVal workbook As Object, ByVal section 
     Dim table As Object
     On Error Resume Next
     Set table = workbook.Names.Item("rngCoupledSteelClasses").RefersToRange
+    Dim wasCancelled As Boolean: wasCancelled = (Err.Number = 18)
     On Error GoTo 0
+    If wasCancelled Then Err.Raise 18, "ReadSupplementarySteel"
     If table Is Nothing Then Err.Raise vbObjectError + 4194, "ReadSupplementarySteel", _
         "На Config отсутствует таблица дополнительных классов арматуры rngCoupledSteelClasses."
     If table.Areas.Count <> 1 Or table.Columns.Count <> 7 Or table.Rows.Count < 2 Then _
@@ -180,6 +183,7 @@ Private Function ReadSteelModel(ByRef data As Variant, ByVal table As Object, By
     Set ReadSteelModel = model
     Exit Function
 Failed:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
     inputError = Err.Description
 End Function
 

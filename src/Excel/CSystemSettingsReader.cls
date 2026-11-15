@@ -60,6 +60,7 @@ Private Sub AppendRequiredNamedSettingsRange(ByVal workbook As Object, ByVal ran
     AppendSettingsRange settingsRange, rangeName
     Exit Sub
 MissingRange:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
     Err.Raise vbObjectError + 4316, "CSystemSettingsReader.LoadFromWorkbook", _
         "На листе Config недоступна обязательная таблица """ & caption & """ (имя " & rangeName & _
         "). Восстановите таблицу и ссылку на нее в диспетчере имен Excel или используйте исправный шаблон книги."
@@ -96,9 +97,11 @@ Private Sub AppendNamedSettingsRangeIfExists(ByVal workbook As Object, ByVal ran
     AppendSettingsRange settingsRange, rangeName
     Exit Sub
 MissingName:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
     On Error GoTo 0
     Exit Sub
 BrokenRange:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
     Err.Raise vbObjectError + 4316, "CSystemSettingsReader.LoadFromWorkbook", _
         "Таблица параметров материала (именованный диапазон " & rangeName & ") недоступна. " & _
         "Восстановите ссылку на один непрерывный прямоугольный диапазон со всей таблицей " & _
