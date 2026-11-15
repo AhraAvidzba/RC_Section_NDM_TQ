@@ -56,7 +56,7 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     Set mSteelReferences = CreateObject("Scripting.Dictionary"): mSteelReferences.CompareMode = vbTextCompare
     Dim i As Long
     For i = 1 To section.RebarCount
-        RegisterSteelClass section.RebarSteelClass(i), "rngNDMSectionGeometry, стержень " & section.RebarID(i)
+        RegisterSteelClass section.RebarSteelClassForMaterial(i, mSteelClass), "rngNDMSectionGeometry, стержень " & section.RebarID(i)
     Next i
     For i = 1 To transverse.Count
         RegisterSteelClass transverse.SteelClass(i), transverse.SourceReference(i)
@@ -337,7 +337,7 @@ Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As O
         Set mOperators = mOperatorCache(key)
     Else
         Dim prepared As New CCoupledElasticState
-        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models
+        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models, importedGrade:=mSteelClass
         mOperatorCache.Add key, prepared
         Set mOperators = prepared
     End If

@@ -1778,11 +1778,86 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestSavedCoupledFields book, CStr(mode), section.ConcreteCount + section.RebarCount, passed, failed, report
         TestSavedCoupledMaterialCurves book, CStr(mode), grades.Cells(2, 3), units, passed, failed, report
     Next mode
+    TestSavedAutoCADTransverse book, settings, units, passed, failed, report
     RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет расчёт из сохранённой геометрии с меткой импорта AutoCAD.
+' Сетка моделирует сохранённый импорт, без обращения к открытому чертежу.
+Private Sub TestSavedAutoCADTransverse(ByVal book As Object, ByVal settings As Object, ByVal units As CUnitSystem, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const CX As Double = 1250#, CY As Double = -600#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#, CX, CY))
+    section.AddRebarElement CX, CY - 30#, 12#, GEOM_PI * 36#, "Rebar"
+    section.AddRebarElement CX, CY + 30#, 12#, GEOM_PI * 36#, "Rebar"
+    section.SourceType = "AutoCADImport"
+    Dim properties As CSectionPropertiesCalculator: Set properties = PrepareSectionSnapshot(section)
+    Dim target As Object, kind As Object, secondKind As Object
+    Set target = book.Names.Item("rngAutoCADTransverseRebar").RefersToRange
+    Set kind = TestInputCell(target, "Group1"): Set secondKind = TestInputCell(target, "Group2")
+    TestRecord target.Address = "$A$167:$K$173" And Not target.WrapText And target.Borders.Item(10).LineStyle <> -4142, _
+        "native AutoCAD input layout, no wrapping and right border", passed, failed, report
+    TestRecord kind.Interior.Color = RGB(255, 242, 230) And kind.HorizontalAlignment = -4108, _
+        "native AutoCAD input fill and alignment", passed, failed, report
+    Dim cell As Object, choice As Variant
+    For Each cell In kind.Resize(3, 1).Cells
+        For Each choice In Array("Нет", "Контур", "Ветвь")
+            cell.Value2 = CStr(choice)
+            TestRecord cell.Validation.Value, "native AutoCAD scheme list accepts " & CStr(choice), passed, failed, report
+        Next choice
+        For Each choice In Array("Нет,Контур,Ветвь", "Нет;Контур;Ветвь", "__INVALID__")
+            cell.Value2 = CStr(choice)
+            TestRecord Not cell.Validation.Value, "native AutoCAD scheme list rejects " & CStr(choice), passed, failed, report
+        Next choice
+        cell.ClearContents
+    Next cell
+    TestInputCell(settings, "Results.SnapshotName").Value2 = "TestSavedAutoCADTransverse"
+    TestInputCell(settings, "Geometry.Source").Value2 = "Generated" ' Выбор для следующего формирования намеренно расходится со снимком.
+    Dim mode As Variant, writer As New CNDMResultsWriter, preview As CCalculationSnapshot, store As New CCalculationSnapshotStore
+    Dim lengthFactor As Double: lengthFactor = units.InputLengthToInternal(1#)
+    For Each mode In Array("Excel", "File")
+        TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
+        If mode = "Excel" Then
+            Set preview = writer.WriteGeometryPreviewForDisplay(book, section, properties, units, False)
+        Else
+            Set preview = writer.PrepareGeometryPreviewSnapshot(book, section, properties, units)
+            store.SaveFile book, preview
+            book.Names.Item("rngNDMSectionGeometry").RefersToRange.Offset(1, 0).Resize(1, 8).ClearContents
+        End If
+        kind.ClearContents: secondKind.ClearContents
+        Dim message As String, label As String: label = CStr(mode) & " imported section "
+        message = RunSectionCalculationForWorkbook(book)
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr" And _
+            InStr(message, kind.Worksheet.Name & "!" & kind.Address(False, False)) > 0, _
+            label & "requires an addressed transverse declaration", passed, failed, report
+        TestRecord ReadLoadCasePropertyText(book, "Plane", "DirectStateStatus") = "OK", _
+            label & "still solves the planar case", passed, failed, report
+
+        kind.Value2 = "Нет"
+        message = RunSectionCalculationForWorkbook(book)
+        TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK" And _
+            Len(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Status")) = 0, _
+            label & "accepts explicit absence", passed, failed, report
+        kind.Value2 = "Контур"
+        kind.Offset(0, 1).Value2 = 8# / lengthFactor: kind.Offset(0, 2).Value2 = 120# / lengthFactor
+        kind.Offset(0, 3).Value2 = 10# / lengthFactor: kind.Offset(0, 4).Value2 = "TestHoop"
+        secondKind.Value2 = "Ветвь"
+        secondKind.Offset(0, 1).Value2 = 8# / lengthFactor: secondKind.Offset(0, 2).Value2 = 100# / lengthFactor
+        secondKind.Offset(0, 4).Value2 = "TestHoop"
+        secondKind.Offset(0, 6).Value2 = CStr((CX - 10#) / lengthFactor) & ";" & CStr(CY / lengthFactor) & ";" & _
+            CStr((CX + 10#) / lengthFactor) & ";" & CStr(CY / lengthFactor)
+        message = RunSectionCalculationForWorkbook(book)
+        TestRecord ResultsGeometrySource(book) = "AutoCADImport" And ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK", _
+            label & "solves the saved contour and WCS branch", passed, failed, report
+        TestRecord InStr(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Control"), "TestHoop") > 0 And _
+            ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Status") = "OK", _
+            label & "uses and reports the separate hoop grade", passed, failed, report
+    Next mode
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Восстанавливает совместимую старую таблицу и проверяет отказ до очистки

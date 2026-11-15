@@ -28,7 +28,14 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
 
     Dim steelClass As String, layout As CTransverseRebarLayout, supplementary As Object
     steelClass = settings.GetString("Coupled.SteelClass")
-    Set layout = ReadSavedRecipeTransverse(workbook, section, units, steelClass)
+    If Len(steelClass) = 0 And section.SourceType = "AutoCADImport" Then
+        Dim bar As Long
+        For bar = 1 To section.RebarCount
+            If Len(section.RebarSteelClassForMaterial(bar, steelClass)) = 0 Then _
+                CalibrationError settings, "Coupled.SteelClass", "Укажите основной класс продольной арматуры, импортированной из AutoCAD."
+        Next bar
+    End If
+    Set layout = ReadSavedSectionTransverse(workbook, section, units, steelClass)
     ValidateConcreteMaterial section
     Set supplementary = ReadSupplementarySteel(workbook, section, layout, steelClass, provider.PlateauSlopeFactor)
 
@@ -42,29 +49,34 @@ Failed:
     batch.ConfigureCoupledAnalysis Nothing, reason
 End Sub
 
-' Находит блок Transverse для фактически сохранённого типа сечения.
-' Старый снимок без метки нужно сформировать средствами текущей книги.
-Private Function ReadSavedRecipeTransverse(ByVal workbook As Object, ByVal section As CSectionModel, _
+' Находит Transverse по источнику уже сохранённого сечения. Для AutoCAD
+' координаты ветвей читаются в осях импортированной модели (МСК).
+Private Function ReadSavedSectionTransverse(ByVal workbook As Object, ByVal section As CSectionModel, _
         ByVal units As CUnitSystem, ByVal steelClass As String) As CTransverseRebarLayout
-    If StrComp(section.SourceType, "AutoCADImport", vbTextCompare) = 0 Then _
-        Err.Raise vbObjectError + 4194, "ReadSavedRecipeTransverse", _
-            "Для сечения из AutoCAD пока нет источника данных поперечного армирования. Проверьте предпосылки связанного расчёта."
-    If Len(section.RecipeType) = 0 Then _
-        Err.Raise vbObjectError + 4194, "ReadSavedRecipeTransverse", _
-            "В сохранённой геометрии отсутствует тип рецепта (rngNDMSectionProperties). Нажмите «Сформировать сечение»."
-
-    Dim registry As New CSectionTypeRegistry, tables As Variant, name As Variant
-    tables = registry.RecipeTableNames(section.RecipeType)
+    Const AUTOCAD_TABLE As String = "rngAutoCADTransverseRebar"
+    Dim tables As Variant, imported As Boolean
+    imported = (StrComp(section.SourceType, "AutoCADImport", vbTextCompare) = 0)
+    If imported Then
+        tables = Array(AUTOCAD_TABLE)
+    Else
+        If Len(section.RecipeType) = 0 Then _
+            Err.Raise vbObjectError + 4194, "ReadSavedSectionTransverse", _
+                "В сохранённой геометрии отсутствует тип рецепта (rngNDMSectionProperties). Нажмите «Сформировать сечение»."
+        Dim registry As New CSectionTypeRegistry
+        tables = registry.RecipeTableNames(section.RecipeType)
+    End If
     Dim reader As New CSectionInputSnapshotReader, context As CSectionRecipeContext
     Set context = reader.Capture(workbook, tables, units)
-    Dim sectionInput As CSectionInputReader, layout As CTransverseRebarLayout
+    Dim sectionInput As CSectionInputReader, layout As CTransverseRebarLayout, name As Variant
     For Each name In tables
         Set sectionInput = context.Reader(CStr(name))
         Set layout = sectionInput.ReadTransverseLayout(section, steelClass)
-        If layout.IsSpecified Then Set ReadSavedRecipeTransverse = layout: Exit Function
+        If layout.IsSpecified Then Set ReadSavedSectionTransverse = layout: Exit Function
     Next name
-    Err.Raise vbObjectError + 4194, "ReadSavedRecipeTransverse", _
-        "В блоке Transverse на листе «Сечения» укажите поперечную арматуру или выберите «Нет» (" & Join(tables, ", ") & ")."
+    Dim address As String: address = Join(tables, ", ")
+    If imported Then address = AUTOCAD_TABLE & ", " & sectionInput.SourceReference("Transverse", "Group1", "kind")
+    Err.Raise vbObjectError + 4194, "ReadSavedSectionTransverse", _
+        "В блоке Transverse на листе «Сечения» укажите поперечную арматуру или выберите «Нет» (" & address & ")."
 End Function
 
 ' Сверяет идентификаторы бетона, пока для всего сечения задана одна калибровка.
@@ -85,7 +97,7 @@ Private Function ReadSupplementarySteel(ByVal workbook As Object, ByVal section 
     Dim needed As Object: Set needed = CreateObject("Scripting.Dictionary"): needed.CompareMode = vbTextCompare
     Dim i As Long, grade As String
     For i = 1 To section.RebarCount
-        grade = section.RebarSteelClass(i)
+        grade = section.RebarSteelClassForMaterial(i, primaryClass)
         If StrComp(grade, primaryClass, vbTextCompare) <> 0 Then needed(grade) = True
     Next i
     For i = 1 To layout.Count

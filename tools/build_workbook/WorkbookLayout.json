@@ -2,6 +2,14 @@
   "Schema": 1,
   "Names": [
     {
+      "Name": "rngAutoCADTransverseRebar",
+      "RefersTo": "=Сечения!$A$167:$K$173",
+      "Sheet": "Сечения",
+      "Address": "$A$167:$K$173",
+      "Rows": 7,
+      "Columns": 11
+    },
+    {
       "Name": "rngBatchSummary",
       "RefersTo": "=Results!$A$1",
       "Sheet": "Results",

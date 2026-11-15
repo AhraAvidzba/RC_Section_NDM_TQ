@@ -43,7 +43,9 @@ try{
   if($range.FormatConditions.Count -ne 0 -or $range.WrapText -ne $false -or $range.RowHeight -ne 15){throw 'Static non-wrapping table formatting required.'}
   foreach($edge in 7,8,9,10,11,12){if($range.Borders.Item($edge).LineStyle -ne -4115){throw 'Full dotted border required.'}}
   $blocks=@(Get-GeometryTableBlocks $range)
-  if(($blocks.Key -join '|') -cne 'General|Main|Extra'){throw 'One complete General/Main/Extra table required.'}
+  $expectedBlocks='General|Main|Extra|Transverse'
+  if($def.RangeName -eq 'rngAutoCADTransverseRebar'){$expectedBlocks='Transverse'}
+  if(($blocks.Key -join '|') -cne $expectedBlocks){throw ('Wrong blocks for '+$def.RangeName)}
   for($b=0;$b -lt $blocks.Count;$b++){
    $block=$blocks[$b];$expected=$def.Blocks[$b]
    for($c=0;$c -lt $expected.Keys.Count;$c++){
@@ -66,10 +68,11 @@ try{
      if($editable -and ($cell.Interior.Color -ne 15135487 -or $cell.HorizontalAlignment -ne -4108)){throw ('Input format: '+$def.RangeName+'/'+$block.Key+'/'+$record[0]+'/'+$key)}
      if(-not $editable -and $cell.Interior.Color -eq 15135487){throw 'Derived field highlighted as input.'}
      if($CheckDefaults){if([string]$cell.Value2 -cne [string]$record[$c-1]){throw ('Default mismatch: '+$def.RangeName+'/'+$block.Key+'/'+$record[0]+'/'+$key)};$defaults++}
-     if($key -in @('bind2','bind3','pos2','pos3')){
+     if($key -in @('bind2','bind3','pos2','pos3','kind')){
       $formula=[string]$cell.Validation.Formula1
       $expectedList='EachBar,EverySecondBar'
       if($key -like 'pos*'){$expectedList='Stacked,SideBySide'}
+      if($key -eq 'kind'){$expectedList='Нет,Контур,Ветвь'}
       if($formula -cne ($expectedList.Split(',') -join [string]$app.International(5))){throw ('Inline choices mismatch: '+$formula)}
       $old=$cell.Formula
       foreach($option in $formula.Split([string]$app.International(5))){$cell.Value2=$option;if(-not $cell.Validation.Value){throw "Valid choice rejected: $($def.RangeName)/$($block.Key)/$($record[0])/$key; option=$option; Formula1=$($cell.Validation.Formula1); Value2=$($cell.Value2); separator=$($app.International(5))"};$options++}
@@ -79,7 +82,8 @@ try{
    }
   }
   $snapshots[$def.RangeName]=$range.Formula
-  $tables+=,[ordered]@{Name=$def.RangeName;Address=$range.Address();Blocks=$blocks.Key;RebarRows=$def.Blocks[1].Rows.Count}
+  $main=@($def.Blocks | Where-Object Key -eq 'Main')
+  $tables+=,[ordered]@{Name=$def.RangeName;Address=$range.Address();Blocks=$blocks.Key;RebarRows=($main.Rows.Count)}
  }
  if($PreservedInputs){
   $receipt=Get-Content -LiteralPath (Join-Path $root $PreservedInputs) -Raw -Encoding UTF8 | ConvertFrom-Json

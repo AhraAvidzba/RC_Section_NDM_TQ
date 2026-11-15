@@ -1188,6 +1188,14 @@ Public Property Get RebarSteelClass(ByVal index As Long) As String
     RebarSteelClass = mRebarSteelClass(index)
 End Property
 
+' Возвращает заданный класс продольной стали для численного расчёта.
+' В импорте AutoCAD «Rebar» обозначает тип объекта, класс берётся из Config.
+Friend Function RebarSteelClassForMaterial(ByVal index As Long, ByVal importedGrade As String) As String
+    RebarSteelClassForMaterial = RebarSteelClass(index)
+    If mSourceType = "AutoCADImport" And RebarSteelClassForMaterial = "Rebar" Then _
+        RebarSteelClassForMaterial = importedGrade
+End Function
+
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Позволяет сравнить полный поиск с прямым обходом без изменения сетки и материалов.
 Public Sub TestSetForceIntegrationEnabled(ByVal enabled As Boolean)

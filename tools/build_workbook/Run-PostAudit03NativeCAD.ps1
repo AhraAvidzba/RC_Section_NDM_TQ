@@ -2,7 +2,7 @@
 # Existing user/SOFiPLUS instances are never edited, closed, or reused.
 param([string]$SourceWorkbook='workbook/output/RC_Section_NDM.xlsm',
       [string]$ReportDirectory='docs/regression/PostAudit03/NativeCAD',
-      [ValidateSet('RunRealAutoCADContourTests','RunRealAutoCADContourFormatTests','RunRealAutoCADContourMeshTests','RunRealAutoCADFarOriginTests','RunRealAutoCADFarCapacityTests','RunSP35WorkbookTests')]
+      [ValidateSet('RunRealAutoCADContourTests','RunRealAutoCADContourFormatTests','RunRealAutoCADContourMeshTests','RunRealAutoCADFarOriginTests','RunRealAutoCADFarCapacityTests','RunRealAutoCADCoupledTransverseTests','RunSP35WorkbookTests')]
       [string]$Macro='RunRealAutoCADContourTests',
       [ValidateSet('No','Yes')][string]$Mode,
       [switch]$LaunchInstalledAutoCAD,

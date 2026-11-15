@@ -47,7 +47,8 @@ Private mMeta As CResultMeta
 Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double, ByVal poisson As Double, _
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
-        Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing)
+        Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing, _
+        Optional ByVal importedGrade As String = vbNullString)
     Set mMeta = New CResultMeta
     mArea = 0#
     If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
@@ -62,7 +63,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
     mPointCount = mConcreteCount
-    PrepareReinforcement section, transverse, steelModulus, steelModels, indices, dx, dy
+    PrepareReinforcement section, transverse, steelModulus, steelModels, importedGrade, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
     Set mSystem = New CCoupledLinearSystem
@@ -132,7 +133,8 @@ End Property
 ' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
-        ByVal steelModulus As Double, ByVal steelModels As Object, ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
+        ByVal steelModulus As Double, ByVal steelModels As Object, ByVal importedGrade As String, _
+        ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
     Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass: Erase mTransverseGroup
     Dim bars As New CTransverseRebarQuadrature
     If Not transverse Is Nothing Then bars.Prepare transverse, mQuadrature
@@ -168,7 +170,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             End If
             x = x - frame.OriginX: y = y - frame.OriginY
             mSteelDirection(3, point) = 1#
-            mSteelClass(point) = section.RebarSteelClass(i)
+            mSteelClass(point) = section.RebarSteelClassForMaterial(i, importedGrade)
         Else
             bars.Point i - section.RebarCount, x, y, area, txx, tyy, txy, group
             mSteelDirection(1, point) = txx

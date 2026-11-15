@@ -1516,6 +1516,135 @@ Public Function RunRealAutoCADContourMeshTests(ByVal ownedApplication As Object,
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Импортирует настоящий DWG, считает шесть усилий с хомутом из листа
+' «Сечения» и сравнивает подпись AutoCAD с сохранённым полем TauXZ.
+Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As Object, ByVal templatePath As String) As String
+    mPassed = 0: mFailed = 0: mReport = vbNullString: mNativeProgress = True
+    Dim doc As Object
+    On Error GoTo Failed
+    If InStr(1, CStr(ownedApplication.FullName), "\AutoCAD 2023\acad.exe", vbTextCompare) = 0 Then _
+        Err.Raise 5, , "Тест требует Autodesk AutoCAD 2023."
+    Set doc = ownedApplication.Documents.Add(templatePath)
+    TestWaitForCAD ownedApplication
+    Dim sys As Object, calibration As Object, profiles As Object, hoop As Object, inputLoads As Object
+    Set sys = ThisWorkbook.Names("rngSystemSettings").RefersToRange
+    Set calibration = ThisWorkbook.Names("rngCoupledMaterialSettings").RefersToRange
+    Set profiles = ThisWorkbook.Names("rngCalculationProfiles").RefersToRange
+    Set hoop = ThisWorkbook.Names("rngAutoCADTransverseRebar").RefersToRange
+    Set inputLoads = ThisWorkbook.Names("rngLoadCombinations").RefersToRange
+    TestSetGeometryExportSetting sys, "AutoCAD.Common.ConcreteLayer", "NDM6_Concrete"
+    TestSetGeometryExportSetting sys, "AutoCAD.Common.RebarLayer", "NDM6_Rebar"
+    TestSetGeometryExportSetting sys, "AutoCAD.Common.SectionContourLayer", "NDM6_Outer"
+    TestSetGeometryExportSetting sys, "AutoCAD.Common.OpeningContourLayer", "NDM6_Opening"
+    doc.Layers.Add "NDM6_Concrete": doc.Layers.Add "NDM6_Rebar": doc.Layers.Add "NDM6_Outer": doc.Layers.Add "NDM6_Opening"
+    Dim outline As Object: Set outline = TestNativeRectangle(doc, 180#, 120#, 0#, 1250#, -600#)
+    outline.Layer = "NDM6_Outer"
+    Dim barCenter(0 To 2) As Double, curves(0 To 0) As Object, barRegions As Variant, bar As Object
+    barCenter(0) = 1250#: barCenter(1) = -630#
+    Set curves(0) = doc.ModelSpace.AddCircle(barCenter, 6#)
+    barRegions = doc.ModelSpace.AddRegion(curves): Set bar = barRegions(LBound(barRegions))
+    bar.Layer = "NDM6_Rebar": curves(0).Delete
+    TestSetGeometryExportSetting sys, "Geometry.Source", "AutoCAD"
+    TestSetGeometryExportSetting sys, "Plot.Enabled", "No"
+    TestSetGeometryExportSetting sys, "Load.ReferenceOffsetX", 0#
+    TestSetGeometryExportSetting sys, "Load.ReferenceOffsetY", 0#
+    TestSetGeometryExportSetting sys, "Results.SnapshotStorage", "File"
+    TestSetGeometryExportSetting sys, "Results.SnapshotName", "NativeCoupledTransverse"
+    TestSetGeometryExportSetting sys, "Output.CombinationMode", "User"
+    TestSetGeometryExportSetting sys, "Output.CombinationID", "NativeSpatial"
+    TestSetGeometryExportSetting sys, "AutoCAD.Export.LabelMode", "NamesAndValues"
+    TestSetGeometryExportSetting calibration, "Coupled.Gt", 0.12
+    TestSetGeometryExportSetting calibration, "Coupled.Gc", 80#
+    TestSetGeometryExportSetting calibration, "Coupled.Localization", 125#
+    TestSetGeometryExportSetting calibration, "Coupled.YieldRatio", 0.6
+    TestSetGeometryExportSetting calibration, "Coupled.PeakStrain", 0.002
+    TestSetGeometryExportSetting calibration, "Coupled.SteelClass", "A400"
+    Dim cfg As New CSystemSettingsReader, units As New CUnitSystem
+    cfg.LoadFromWorkbook ThisWorkbook: units.LoadFromSettings cfg
+    Dim importer As New CAutoCADSectionModelImporter, section As CSectionModel
+    Set section = importer.ImportFromDocument(doc, cfg, units)
+    TestCheck "native.coupled.actualImport", section.SourceType = "AutoCADImport" And section.ConcreteCount > 0 And _
+        section.RebarCount = 1 And doc.ModelSpace.Count = 2
+    Dim writer As New CNDMResultsWriter, preview As CCalculationSnapshot, store As New CCalculationSnapshotStore
+    Set preview = writer.PrepareGeometryPreviewSnapshot(ThisWorkbook, section, PrepareSectionSnapshot(section), units)
+    store.SaveFile ThisWorkbook, preview
+
+    Dim lengthFactor As Double: lengthFactor = units.InputLengthToInternal(1#)
+    Dim group As Object: Set group = FindNativeCoupledInputTestCell(hoop, "Group1", 1, 2)
+    group.Value2 = "Контур": group.Offset(0, 1).Value2 = 8# / lengthFactor: group.Offset(0, 2).Value2 = 100# / lengthFactor
+    group.Offset(0, 3).Value2 = 10# / lengthFactor: group.Offset(0, 4).Value2 = "NativeHoop"
+    Dim classes As Object: Set classes = ThisWorkbook.Names("rngCoupledSteelClasses").RefersToRange
+    classes.Cells(2, 1).Value2 = "NativeHoop": classes.Cells(2, 2).Value2 = "ULS(I)"
+    classes.Cells(2, 3).Value2 = 180000#: classes.Cells(2, 4).Value2 = 240#: classes.Cells(2, 5).Value2 = 220#
+    classes.Cells(2, 6).Value2 = 0.021: classes.Cells(2, 7).Value2 = 0.018
+    Dim pr4 As Long
+    ' Вторая строка профиля содержит идентификаторы по столбцам.
+    For pr4 = 3 To profiles.Columns.Count
+        If CStr(profiles.Cells(2, pr4).Value2) = "PR4" Then Exit For
+    Next pr4
+    FindNativeCoupledInputTestCell(profiles, "Calculation.Strength.DirectState", 2, pr4).Value2 = "Yes"
+    FindNativeCoupledInputTestCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "No"
+    FindNativeCoupledInputTestCell(profiles, "Calculation.Stability.Enabled", 2, pr4).Value2 = "No"
+    FindNativeCoupledInputTestCell(profiles, "Calculation.Crack.Width", 2, pr4).Value2 = "No"
+    FindNativeCoupledInputTestCell(profiles, "MaterialModel.Strength.ValueSet", 2, pr4).Value2 = "ULS(I)"
+    FindNativeCoupledInputTestCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
+    FindNativeCoupledInputTestCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
+    FindNativeCoupledInputTestCell(profiles, "Visualization.State", 2, pr4).Value2 = "StrengthState"
+    FindNativeCoupledInputTestCell(profiles, "Visualization.Quantity", 2, pr4).Value2 = "TauXZ"
+    FindNativeCoupledInputTestCell(profiles, "Visualization.StressPrecision", 2, pr4).Value2 = 10
+    Dim loads(1 To 1, 1 To 10) As Variant
+    loads(1, 1) = "NativeSpatial": loads(1, 2) = 0.05: loads(1, 3) = 0.001: loads(1, 4) = -0.002: loads(1, 5) = "PR4"
+    loads(1, 8) = 0.005: loads(1, 9) = 0.002: loads(1, 10) = -0.003
+    inputLoads.Offset(1, 0).Resize(inputLoads.Rows.Count - 1, inputLoads.Columns.Count).ClearContents
+    inputLoads.Cells(2, 1).Resize(1, 10).Value2 = loads
+    Dim message As String: message = RunSectionCalculationForWorkbook(ThisWorkbook)
+    TestCheck "native.coupled.strength; " & message, ReadLoadCasePropertyText(ThisWorkbook, "NativeSpatial", "DirectStateStatus") = "OK"
+    TestCheck "native.coupled.hoop", ReadLoadCasePropertyText(ThisWorkbook, "NativeSpatial", "Coupled.Transverse.Status") = "OK" And _
+        InStr(ReadLoadCasePropertyText(ThisWorkbook, "NativeSpatial", "Coupled.Transverse.Control"), "NativeHoop") > 0
+    Dim payload As Variant, runId As Double, saved As Object
+    payload = ReadElementResultTable(ThisWorkbook, "NativeSpatial", "StrengthState")
+    runId = payload(2, ResultColumn(payload, "RunID"))
+    Set saved = ReadCoupledFieldValues(ThisWorkbook, vqTauXZ, runId, "NativeSpatial", "PR4", "StrengthState")
+    Dim id As String: id = section.ConcreteID(1)
+    Dim expected As String: expected = Replace$(Format$(CDbl(saved(id)), "0.0000000000"), ",", ".")
+    Dim count As Long: count = Audit03ExportAutoCADDocumentForTests(doc)
+    TestCheck "native.coupled.export", count > 0 And Abs(CDbl(saved(id))) > 0.000000001
+    Dim entity As Object, matched As Boolean
+    For Each entity In doc.ModelSpace
+        If entity.ObjectName = "AcDbText" Then
+            If InStr(entity.TextString, id & " ") > 0 And InStr(entity.TextString, expected) > 0 Then matched = True
+        End If
+    Next entity
+    TestCheck "native.coupled.exactLabel; " & id & " " & expected, matched
+    Dim path As String: path = ThisWorkbook.Path & "\CoupledAutoCAD_" & Format$(Now, "yyyymmdd_hhnnss") & ".dwg"
+    doc.SaveAs path
+    mReport = mReport & "NATIVE_DWG: " & path & vbCrLf
+    GoTo Cleanup
+Failed:
+    TestCheck "native.coupled.runtime; " & CStr(Err.Number) & "; " & Err.Description, False
+Cleanup:
+    On Error Resume Next
+    If Not doc Is Nothing Then doc.Close False
+    On Error GoTo 0
+    mNativeProgress = False
+    RunRealAutoCADCoupledTransverseTests = mReport & "TOTAL_NATIVE_COUPLED_TRANSVERSE: passed=" & CStr(mPassed) & "; failed=" & CStr(mFailed) & vbCrLf
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает поле контрольного диапазона по ключу строки.
+Private Function FindNativeCoupledInputTestCell(ByVal table As Object, ByVal key As String, _
+        ByVal keyColumn As Long, ByVal valueColumn As Long) As Object
+    Dim row As Long
+    For row = 1 To table.Rows.Count
+        If CStr(table.Cells(row, keyColumn).Value2) = key Then
+            Set FindNativeCoupledInputTestCell = table.Cells(row, valueColumn)
+            Exit Function
+        End If
+    Next row
+    Err.Raise 5, "FindNativeCoupledInputTestCell", "Отсутствует ключ " & key
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' настоящий импорт одного сечения у начала координат и в 1000 м.
 ' Проверяет два отверстия, неизменные исходные координаты, НДС и трещины.
 Public Function RunRealAutoCADFarOriginTests(ByVal ownedApplication As Object, _
