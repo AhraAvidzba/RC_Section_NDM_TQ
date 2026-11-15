@@ -41,7 +41,7 @@ Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и прина
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 26 ' Пространственное НДС, предельный вектор и сведения о поперечной арматуре.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 27 ' Пространственное НДС, предельный вектор и сведения о поперечной арматуре.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 13 ' Число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -886,7 +886,7 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     End If
 End Sub
 
-' Сохраняет механизм и подтверждённый вектор арматурного предела
+' Сохраняет механизм и подтверждённый вектор физического предела
 ' в пользовательской точке даже при отсутствии НДС заданных нагрузок.
 Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
         ByVal id As String, ByVal capacity As CCapacityResult, ByVal units As CUnitSystem)
@@ -902,13 +902,18 @@ Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As L
         torque = units.InternalTorqueToOutput(torque)
         qx = units.InternalShearToOutput(qx): qy = units.InternalShearToOutput(qy)
     End If
-    PutProperty data, row, runID, id, "Coupled.Capacity.SteelLambda", capacity.CoupledLimitLambda, "-", "Множитель достижения предельной деформации арматуры."
-    PutProperty data, row, runID, id, "Coupled.Capacity.NUltimate", OutputForce(capacity.NUltimate, units), OutputForceUnit(units), "Продольная сила при арматурном пределе."
-    PutProperty data, row, runID, id, "Coupled.Capacity.MxUltimate", OutputMx(capacity.MxUltimate, units), OutputMomentUnit(units), "Изгибающий момент Mx при арматурном пределе."
-    PutProperty data, row, runID, id, "Coupled.Capacity.MyUltimate", OutputMy(capacity.MyUltimate, units), OutputMomentUnit(units), "Изгибающий момент My при арматурном пределе."
-    PutProperty data, row, runID, id, "Coupled.Capacity.TUltimate", torque, OutputMomentUnit(units), "Крутящий момент при арматурном пределе."
-    PutProperty data, row, runID, id, "Coupled.Capacity.QxUltimate", qx, OutputForceUnit(units), "Поперечная сила X при арматурном пределе."
-    PutProperty data, row, runID, id, "Coupled.Capacity.QyUltimate", qy, OutputForceUnit(units), "Поперечная сила Y при арматурном пределе."
+    If capacity.PeakLambda > 0# Then
+        PutProperty data, row, runID, id, "Coupled.Capacity.PeakLambda", capacity.PeakLambda, "-", "Множитель в первом подтверждённом максимуме."
+        PutProperty data, row, runID, id, "Coupled.Capacity.PeakAccuracy", capacity.PeakAccuracy, "-", "Оценка погрешности по невязке и делению деформационного шага."
+    Else
+        PutProperty data, row, runID, id, "Coupled.Capacity.SteelLambda", capacity.CoupledLimitLambda, "-", "Множитель достижения предельной деформации арматуры."
+    End If
+    PutProperty data, row, runID, id, "Coupled.Capacity.NUltimate", OutputForce(capacity.NUltimate, units), OutputForceUnit(units), "Продольная сила в предельной точке."
+    PutProperty data, row, runID, id, "Coupled.Capacity.MxUltimate", OutputMx(capacity.MxUltimate, units), OutputMomentUnit(units), "Изгибающий момент Mx в предельной точке."
+    PutProperty data, row, runID, id, "Coupled.Capacity.MyUltimate", OutputMy(capacity.MyUltimate, units), OutputMomentUnit(units), "Изгибающий момент My в предельной точке."
+    PutProperty data, row, runID, id, "Coupled.Capacity.TUltimate", torque, OutputMomentUnit(units), "Крутящий момент в предельной точке."
+    PutProperty data, row, runID, id, "Coupled.Capacity.QxUltimate", qx, OutputForceUnit(units), "Поперечная сила X в предельной точке."
+    PutProperty data, row, runID, id, "Coupled.Capacity.QyUltimate", qy, OutputForceUnit(units), "Поперечная сила Y в предельной точке."
 End Sub
 
 ' Записывает логический признак одинаково в любой локали Excel:

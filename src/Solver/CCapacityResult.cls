@@ -35,6 +35,7 @@ Private mPureAxialForMethod As Boolean ' Признак выбора осево�
 Private mResultMeta As CResultMeta ' Статус, код причины и пояснение результата несущей способности.
 Private mCoupledSearch As Boolean, mIsTransverseLimit As Boolean
 Private mCoupledLimitLambda As Double, mConfirmedLowerLambda As Double, mHasConfirmedLowerBound As Boolean
+Private mPeakLambda As Double, mPeakAccuracy As Double
 Private mTUltimate As Double, mQxUltimate As Double, mQyUltimate As Double
 
 ' Задаёт начальный статус неприменимой проверки, чтобы ранний выход
@@ -60,9 +61,7 @@ Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Do
     mPathResolved = pathKey
     mSolutionMethod = "CoupledContinuation"
     mLimitState = mechanism
-    mNUltimate = ultimate(1): mMxUltimate = ultimate(2): mMyUltimate = ultimate(3)
-    mTUltimate = ultimate(4): mQxUltimate = ultimate(5): mQyUltimate = ultimate(6)
-    mMomentUltimate = Sqr(mMxUltimate * mMxUltimate + mMyUltimate * mMyUltimate)
+    StoreCoupledVector ultimate
     Set mStateResult = state
     Set mResultMeta = New CResultMeta
     If lambda < 1# Then
@@ -73,6 +72,46 @@ Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Do
         mResultMeta.SetResult rsNumericalFailure, rcCoupledConcreteLimitUnresolved, rkCapacity, _
             mechanism & ". Определён арматурный предел. Для полного запаса требуется проверка предела бетонной ветви.", details
     End If
+End Sub
+
+' Сохраняет подтверждённый максимум. Проверка у единицы требует
+' отделить пик от расчётной нагрузки с учётом оценённой погрешности.
+Friend Sub InitializeCoupledPeak(ByVal lambda As Double, ByVal accuracy As Double, _
+        ByVal designVerified As Boolean, ByRef ultimate() As Double, ByVal pathKey As String, ByVal details As String)
+    AssertWritable
+    If lambda <= 0# Or accuracy < 0# Or LBound(ultimate) <> 1 Or UBound(ultimate) <> 6 Then _
+        Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и оценку подтверждённого максимума."
+    ResetNumericSnapshot
+    mCoupledSearch = True: mPeakLambda = lambda: mPeakAccuracy = accuracy
+    mPathResolved = pathKey
+    mSolutionMethod = "CoupledDeformationControl"
+    mLimitState = "Максимум нагрузки на прослеженной ветви"
+    StoreCoupledVector ultimate
+    Dim reason As String, status As EResultInternalStatus, code As EResultCode
+    reason = mLimitState & ". Множитель " & Format$(lambda, "0.000000") & _
+        ", оценка погрешности " & Format$(accuracy, "0.000000") & "."
+    If lambda + accuracy < 1# And Not designVerified Then
+        status = rsCheckFailed: code = rcPhysicalLimitExceeded
+    ElseIf lambda - accuracy > 1# And designVerified Then
+        status = rsSuccess: code = rcCheckPassed
+    Else
+        status = rsNumericalFailure: code = rcNumericalFailure
+        If Abs(lambda - 1#) <= accuracy Then
+            reason = reason & " Погрешность охватывает заданную нагрузку (lambda = 1)."
+        Else
+            reason = reason & " Положение заданной нагрузки не подтверждено на восходящей ветви."
+        End If
+    End If
+    If status <> rsNumericalFailure Then mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
+    Set mResultMeta = New CResultMeta
+    mResultMeta.SetResult status, code, rkCapacity, reason, details
+End Sub
+
+' Сохраняет все подтверждённые усилия в пользовательской точке.
+Private Sub StoreCoupledVector(ByRef ultimate() As Double)
+    mNUltimate = ultimate(1): mMxUltimate = ultimate(2): mMyUltimate = ultimate(3)
+    mTUltimate = ultimate(4): mQxUltimate = ultimate(5): mQyUltimate = ultimate(6)
+    mMomentUltimate = Sqr(mMxUltimate * mMxUltimate + mMyUltimate * mMyUltimate)
 End Sub
 
 ' Сохраняет подтверждённое превышение при нагружении постоянной части пути.
@@ -242,6 +281,7 @@ Private Sub ResetNumericSnapshot()
     mPureAxialForMethod = False
     mCoupledSearch = False: mIsTransverseLimit = False
     mCoupledLimitLambda = 0#: mConfirmedLowerLambda = 0#: mHasConfirmedLowerBound = False
+    mPeakLambda = 0#: mPeakAccuracy = 0#
     mTUltimate = 0#: mQxUltimate = 0#: mQyUltimate = 0#
 End Sub
 
@@ -408,8 +448,23 @@ End Property
 
 ' Сообщает, что сохранены подтверждённые предельные усилия.
 Friend Property Get HasUltimatePoint() As Boolean
-    HasUltimatePoint = (mCoupledLimitLambda > 0#)
+    HasUltimatePoint = (mCoupledLimitLambda > 0# Or mPeakLambda > 0#)
     If Not mSearchResult Is Nothing Then HasUltimatePoint = mSearchResult.HasLimitPoint
+End Property
+
+' Возвращает множитель подтверждённого максимума, если он найден.
+Friend Property Get PeakLambda() As Double
+    PeakLambda = mPeakLambda
+End Property
+
+' Возвращает оценку погрешности максимума по двум разбиениям и невязке.
+Friend Property Get PeakAccuracy() As Double
+    PeakAccuracy = mPeakAccuracy
+End Property
+
+' Отличает поиск пространственной модели от одномерного LimitSearch.
+Friend Property Get IsCoupledSearch() As Boolean
+    IsCoupledSearch = mCoupledSearch
 End Property
 
 ' Возвращает множитель именно арматурного предела связанной модели.

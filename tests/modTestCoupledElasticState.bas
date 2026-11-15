@@ -687,6 +687,27 @@ Public Function RunTestCoupledDeformationControl() As String
     solver.CopyAccepted field
     TestExpectNear field(1), 0.0006, 0.00000001, "restored field before peak", passed, failed, report
     TestExpectNear material.TestAcceptedPeak, 0.0006, 0.00000001, "replay restores history instead of retaining accepted postpeak strain", passed, failed, report
+    Dim prefix As New Collection, i As Long
+    For i = 1 To 3: prefix.Add history(i): Next i
+    Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
+    branch.Trace solver, Nothing, baseLoad, direction, prefix, 0.096, 0.592, 1.5, 0.001, 30, 1E-8, 1E-8
+    TestRecord branch.CopyPeak(peak, accuracy, designVerified), _
+        "confirms first peak across two independently replayed increments " & branch.ResultMeta.ResultComment & _
+        " " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
+    TestExpectNear peak, 0.8, 0.001, "first peak agrees with independent closed form", passed, failed, report
+    TestRecord accuracy > 0# And accuracy <= 0.001 And Not designVerified, _
+        "reports resolution of peak below design", passed, failed, report
+    TestRecord Abs(peak - 0.8) <= accuracy, "numerical resolution covers the independent peak", passed, failed, report
+    Dim capacity As New CCapacityResult, vector(1 To 6) As Double
+    If peak > 0# Then
+        capacity.InitializeCoupledPeak peak, accuracy, designVerified, vector, "Auto", vbNullString
+        TestRecord capacity.Status = "FAIL" And capacity.LambdaCapacity = peak, "peak below load gives physical FAIL", passed, failed, report
+    End If
+    capacity.InitializeCoupledPeak 0.99998, 0.00004, False, vector, "Auto", vbNullString
+    TestRecord capacity.Status = "NumFail" And capacity.LambdaCapacity = 0# And capacity.HasUltimatePoint, _
+        "uncertain peak near design remains explicit without definitive reserve", passed, failed, report
+    capacity.InitializeCoupledPeak 1.12, 0.001, True, vector, "Auto", vbNullString
+    TestRecord capacity.Status = "OK" And capacity.LambdaCapacity = 1.12, "peak above verified design load gives reserve", passed, failed, report
     RunTestCoupledDeformationControl = report & "TOTAL_COUPLED_DEFORMATION_CONTROL: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
@@ -1111,6 +1132,61 @@ Public Function RunTestCoupledHardShear() As String
     Exit Function
 Failed:
     RunTestCoupledHardShear = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет предельную силу пространственного бетона с независимым A·fc.
+' Малый крутящий момент включает совместный режим и слабо возмущает
+' контрольную задачу однородного одноосного сжатия.
+Public Function RunTestCoupledConcreteCompressionPeak() As String
+    RunTestCoupledConcreteCompressionPeak = TestRunConcretePeak(-720000#, 30#, "COMPRESSION")
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет отдельный физический максимум растянутого бетона под N и T.
+Public Function RunTestCoupledConcreteTensionPeak() As String
+    RunTestCoupledConcreteTensionPeak = TestRunConcretePeak(72000#, 3#, "TENSION")
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Собирает одно и то же сечение для двух предельных механизмов бетона.
+Private Function TestRunConcretePeak(ByVal force As Double, ByVal independentStrength As Double, _
+        ByVal mode As String) As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#
+    Const FC As Double = 30#
+    Const TORQUE As Double = 4000#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim layout As New CTransverseRebarLayout: layout.DeclareNone
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters
+    concrete.Initialize FC, 3#, FC, 3#, 30000#, 30000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    Dim provider As New CMaterialModelProvider
+    provider.TestInitializeFromParameters concrete, steel
+    Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / FC, 0.002, "A400", 30
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    Dim loads As New CSectionLoadState
+    loads.Initialize FORCE, 0#, 0#, 0#, 0#
+    loads.SetSpatialComponents TORQUE, 0#, 0#
+    Dim started As Double, capacity As CCapacityResult
+    started = Timer
+    Set capacity = analysis.SolveCapacity(loads, "Auto", spec, 0.5, 1.25, 0.006, 30)
+    report = report & "PEAK_SECONDS: " & CStr(Timer - started) & " | " & capacity.ResultMeta.ResultComment & " | " & _
+        capacity.ResultMeta.DiagnosticDetails & vbCrLf
+    TestRecord capacity.HasUltimatePoint And capacity.PeakLambda > 0#, "identifies real concrete peak", passed, failed, report
+    If capacity.PeakLambda > 0# Then
+        TestExpectNear capacity.PeakLambda, AREA * independentStrength / Abs(force), 0.02, _
+            "comparison with uniform stress A*R", passed, failed, report
+        TestRecord capacity.Status = "FAIL" And capacity.LambdaCapacity = capacity.PeakLambda, "real peak before design load fails", passed, failed, report
+        TestExpectNear capacity.NUltimate, force * capacity.PeakLambda, 0.000001, "ultimate axial force", passed, failed, report
+        TestExpectNear capacity.TUltimate, TORQUE * capacity.PeakLambda, 0.000001, "ultimate torque", passed, failed, report
+    End If
+    TestRunConcretePeak = report & "TOTAL_COUPLED_CONCRETE_" & mode & "_PEAK: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    TestRunConcretePeak = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

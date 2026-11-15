@@ -20,17 +20,22 @@ Option Explicit
 Implements ICoupledPointResponse
 
 Private Type TConcreteHistory
+    Strain(1 To 6) As Double ' Полная деформация принятой точки для локального деления шага.
+    Stress(1 To 6) As Double ' Напряжения той же принятой точки при точно нулевом приращении.
     Plastic(1 To 6) As Double
     Tension As Double
     Compression As Double
+    ElasticTangentExact As Boolean
 End Type
 
 Private Const N_COMPONENTS As Long = 6
 Private Const MATERIAL_ITERATIONS As Long = 70
 Private Const STATE_TOLERANCE As Double = 0.0000000005
+Private Const YIELD_TOLERANCE_RATIO As Double = 0.00000001 ' Единый допуск для возврата и повторной оценки принятой истории.
 Private Const STRAIN_PERTURBATION As Double = 0.000000002
 Private Const MIXED_DAMAGE_WEIGHT As Double = 20#
 Private Const MAXIMUM_DAMPING As Double = 0.5
+Private Const MAX_LOCAL_DIVISIONS As Long = 16
 
 Private mHistory() As TConcreteHistory
 Private mCommitted As Long, mTrial As Long, mPointCount As Long
@@ -82,7 +87,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         ByRef stress() As Double, ByRef tangent() As Double, _
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
     Dim updated As TConcreteHistory, scratch As TConcreteHistory, virginElastic As Boolean
-    If Not UpdatePoint(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
+    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
     If tangentMode = ctmStressOnly Then GoTo StoreTrial
     Dim i As Long, j As Long
     If virginElastic Then
@@ -93,15 +98,19 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         Next j
     Else
         Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
-        Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean
+        Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
         For i = 1 To N_COMPONENTS: perturbed(i) = strain(i): Next i
         For j = 1 To N_COMPONENTS
             If tangentMode = ctmFull Or j = 3 Or j >= 5 Then ' Продольный градиент деформаций имеет только компоненты zz, xz, yz.
                 delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
-                perturbed(j) = strain(j) + delta
-                plusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, plus, unused)
-                perturbed(j) = strain(j) - delta
-                minusOk = UpdatePoint(perturbed, mHistory(point, mCommitted), scratch, minus, unused)
+                For attempt = 1 To 3
+                    perturbed(j) = strain(j) + delta
+                    plusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, plus, unused)
+                    perturbed(j) = strain(j) - delta
+                    minusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, minus, unused)
+                    If plusOk Or minusOk Then Exit For
+                    delta = delta * 0.25 ' На границе ветвей уменьшаем только численное возмущение.
+                Next attempt
                 perturbed(j) = strain(j)
                 If Not plusOk And Not minusOk Then GoTo Failure
                 For i = 1 To N_COMPONENTS
@@ -127,7 +136,7 @@ End Function
 ' поле. Точка не участвует в равновесии, её касательная не нужна.
 Friend Function EvaluateOutputPoint(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double) As Boolean
     Dim updated As TConcreteHistory, virginElastic As Boolean
-    If Not UpdatePoint(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then Exit Function
+    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then Exit Function
     mHistory(point, mTrial) = updated
     EvaluateOutputPoint = True
 End Function
@@ -135,6 +144,69 @@ End Function
 ' Подтверждает вычисленный шаг точек вывода перед переходом к следующему полю.
 Friend Sub AcceptOutputPoints()
     ICoupledPointResponse_AcceptTrial
+End Sub
+
+' При отказе обратного Эйлера делит локальный путь деформации. Все
+' попытки начинают от того же материала. Промежуточные подшаги не
+' переходят в принятое состояние до приёмки всего сечения.
+Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
+        ByRef updated As TConcreteHistory, ByRef stress() As Double, ByRef virginElastic As Boolean) As Boolean
+    Dim i As Long, moved As Boolean
+    For i = 1 To N_COMPONENTS
+        If strain(i) <> committed.Strain(i) Then
+            moved = True
+            Exit For
+        End If
+    Next i
+    If Not moved Then
+        updated = committed
+        For i = 1 To N_COMPONENTS: stress(i) = committed.Stress(i): Next i
+        virginElastic = committed.ElasticTangentExact
+        UpdateWithSubsteps = True
+        Exit Function
+    End If
+    If UpdatePoint(strain, committed, updated, stress, virginElastic) Then
+        StoreStatePosition updated, strain, stress
+        updated.ElasticTangentExact = virginElastic
+        UpdateWithSubsteps = True
+        Exit Function
+    End If
+    Dim divisions As Long, stepIndex As Long, intermediate(1 To N_COMPONENTS) As Double
+    Dim history As TConcreteHistory, fraction As Double, succeeded As Boolean
+    divisions = 2
+    Do
+        history = committed
+        For stepIndex = 1 To divisions
+            fraction = CDbl(stepIndex) / divisions
+            For i = 1 To N_COMPONENTS
+                If stepIndex = divisions Then
+                    intermediate(i) = strain(i)
+                Else
+                    intermediate(i) = committed.Strain(i) + fraction * (strain(i) - committed.Strain(i))
+                End If
+            Next i
+            succeeded = UpdatePoint(intermediate, history, updated, stress, virginElastic)
+            If Not succeeded Then Exit For
+            history = updated
+        Next stepIndex
+        If succeeded Then
+            StoreStatePosition updated, strain, stress
+            virginElastic = False
+            updated.ElasticTangentExact = False
+            UpdateWithSubsteps = True
+            Exit Function
+        End If
+        divisions = divisions * 2
+    Loop While divisions <= MAX_LOCAL_DIVISIONS
+End Function
+
+' Сохраняет сопряжённые полную деформацию и напряжения данной пробы.
+Private Sub StoreStatePosition(ByRef history As TConcreteHistory, ByRef strain() As Double, ByRef stress() As Double)
+    Dim i As Long
+    For i = 1 To N_COMPONENTS
+        history.Strain(i) = strain(i)
+        history.Stress(i) = stress(i)
+    Next i
 End Sub
 
 ' Меняет владение готовыми массивами без покомпонентной записи истории.
@@ -146,6 +218,8 @@ End Sub
 Private Sub ICoupledPointResponse_ClearHistory()
     ReDim mHistory(1 To mPointCount, 1 To 2)
     mCommitted = 1: mTrial = 2
+    Dim point As Long
+    For point = 1 To mPointCount: mHistory(point, mCommitted).ElasticTangentExact = True: Next point
 End Sub
 
 ' Снимает одноосную огибающую из фактического закона данного бетона.
@@ -193,7 +267,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     CoupledStressInvariants elastic, trace, q, high, mid, low
     r = PositiveStressFraction(high, mid, low)
     residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
-    If residual <= 1E-10 * cc Then
+    If residual <= YIELD_TOLERANCE_RATIO * cc Then
         Dim fraction As Double
         fraction = (1# - r * dt) * (1# - dc)
         For i = 1 To N_COMPONENTS: apparent(i) = fraction * elastic(i): Next i
@@ -226,7 +300,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
         If Abs(deltaTension) <= STATE_TOLERANCE * (mFt / mElastic(3, 3) + nextTension) And _
                 Abs(deltaCompression) <= STATE_TOLERANCE * (mFc / mElastic(3, 3) + nextCompression) And _
-                Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= 1E-8 * cc Then Exit For
+                Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= YIELD_TOLERANCE_RATIO * cc Then Exit For
         tension = tension + MAXIMUM_DAMPING * deltaTension
         compression = compression + MAXIMUM_DAMPING * deltaCompression
         dilationRate = dilationRate + MAXIMUM_DAMPING * deltaDilation

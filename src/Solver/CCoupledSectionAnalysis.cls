@@ -115,8 +115,8 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Set SolveTarget = meta
 End Function
 
-' Ищет пересечение с предельной деформацией арматуры на независимой
-' ветви. Вектор результата относится к пользовательской точке приложения.
+' Ищет физический предел на независимой ветви, при необходимости управляя
+' деформацией. Вектор относится к пользовательской точке приложения.
 Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
         ByVal spec As CMaterialModelSpec, ByVal initialLambda As Double, ByVal maximumLambda As Double, _
         ByVal lambdaTolerance As Double, ByVal maxIterations As Long) As CCapacityResult
@@ -142,11 +142,29 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Dim solver As New CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As CLoadPathVector
     Set path = BuildPath(loads, loadPath)
     solver.Initialize mOperators, response, mEb
-    branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE
-    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance
+    branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
+    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
-    If branch.CopySteelLimit(low, high, onOffset, criticalPoint) Then
+    Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
+    hasSteel = branch.CopySteelLimit(low, high, onOffset, criticalPoint)
+    If Not hasSteel Then
+        Set controlled = branch.ContinueByDeformation(maximumLambda)
+        If Not controlled Is Nothing Then
+            Dim forceDetails As String: forceDetails = meta.DiagnosticDetails
+            Set meta = controlled.ResultMeta
+            If Len(forceDetails) > 0 Then meta.DiagnosticDetails = forceDetails & " | " & meta.DiagnosticDetails
+            hasSteel = controlled.CopySteelLimit(low, high, criticalPoint)
+            Dim peak As Double, accuracy As Double, designVerified As Boolean
+            If controlled.CopyPeak(peak, accuracy, designVerified) Then
+                path.TargetSix peak, ultimate
+                loads.MoveResultantsToLoadPoint mCenterX, mCenterY, ultimate
+                capacity.InitializeCoupledPeak peak, accuracy, designVerified, ultimate, loadPath, meta.DiagnosticDetails
+                Exit Function
+            End If
+        End If
+    End If
+    If hasSteel Then
         reason = SteelLimitComment(criticalPoint)
         Dim transverseLimit As Boolean: transverseLimit = (mOperators.TransverseGroupAt(criticalPoint) > 0)
         If onOffset Then
@@ -159,6 +177,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Else
         low = -1#
         If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
+        If Not controlled Is Nothing Then low = controlled.BestAdmissibleLambda
         capacity.InitializeCoupledUnresolved meta, loadPath, low
     End If
 End Function

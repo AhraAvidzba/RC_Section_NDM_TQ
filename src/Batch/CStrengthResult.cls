@@ -108,25 +108,25 @@ Public Property Get ResultMeta() As CResultMeta
     End If
     Set ResultMeta = mPolicy.WorstResultMeta(rkGeneric, direct, capacity)
     If ResultMeta.InternalStatus = rsNumericalFailure Then
-        Dim transverseFailure As CResultMeta: Set transverseFailure = ConfirmedTransverseFailure
-        If Not transverseFailure Is Nothing Then Set ResultMeta = transverseFailure
+        Dim coupledFailure As CResultMeta: Set coupledFailure = ConfirmedCoupledFailure
+        If Not coupledFailure Is Nothing Then Set ResultMeta = coupledFailure
     End If
     ResultMeta.ResultComment = comment
 End Property
 
-' Выбирает подтверждённое превышение хомута при заданной нагрузке либо
-' на пройденной ветви. Численные отказы других этапов сохраняются отдельно.
-Friend Function ConfirmedTransverseFailure() As CResultMeta
+' Выбирает подтверждённый физический отказ связанного расчёта. Численные
+' отказы других этапов сохраняются отдельно.
+Friend Function ConfirmedCoupledFailure() As CResultMeta
     Dim meta As CResultMeta: Set meta = CapacityMeta
     If meta.InternalStatus = rsCheckFailed Then
-        If mCapacity.IsTransverseLimit Then
-            Set ConfirmedTransverseFailure = meta
+        If mCapacity.IsCoupledSearch Then
+            Set ConfirmedCoupledFailure = meta
             Exit Function
         End If
     End If
     Set meta = DirectMeta
     If meta.InternalStatus = rsCheckFailed And meta.ResultCode = rcTransverseStrainExceeded Then _
-        Set ConfirmedTransverseFailure = meta
+        Set ConfirmedCoupledFailure = meta
 End Function
 
 ' Объединяет причины завершения последовательных решений НДС в одном запуске.

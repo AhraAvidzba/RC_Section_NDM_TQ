@@ -286,7 +286,7 @@ End Sub
 ' Решает поправку Ньютона. При управлении деформацией добавляет столбец
 ' производной нагрузки по lambda и строку выбранной меры деформации.
 Private Function SolveCorrection(ByRef field() As Double, ByRef correction() As Double) As Boolean
-    Dim i As Long, j As Long
+    Dim i As Long
     If Not mControlActive Then
         correction = mResidual
         For i = 1 To mDegreeCount: correction(i) = -correction(i): Next i
@@ -296,15 +296,64 @@ Private Function SolveCorrection(ByRef field() As Double, ByRef correction() As 
 
     Dim augmented() As Double, size As Long
     size = mDegreeCount + 1
-    ReDim correction(1 To size), augmented(1 To size, 1 To size)
+    ReDim correction(1 To size)
+    BuildControlledMatrix augmented, size
+    For i = 1 To mDegreeCount: correction(i) = -mResidual(i): Next i
+    correction(size) = -ControlResidual(field)
+    SolveCorrection = mSystem.Solve(augmented, correction, size)
+End Function
+
+' Добавляет неизвестный множитель и уравнение управления деформацией.
+Private Sub BuildControlledMatrix(ByRef augmented() As Double, ByVal size As Long)
+    Dim i As Long, j As Long
+    ReDim augmented(1 To size, 1 To size)
     For i = 1 To mDegreeCount
-        correction(i) = -mResidual(i)
         For j = 1 To mDegreeCount: augmented(j, i) = mMatrix(j, i): Next j
         augmented(size, i) = -mDirectionEquations(i)
         If i < mGaugeStart Then augmented(i, size) = mControlProjection(i) * mReferenceModulus
     Next i
-    correction(size) = -ControlResidual(field)
-    SolveCorrection = mSystem.Solve(augmented, correction, size)
+End Sub
+
+' Оценивает чувствительность множителя к невязке при том же принятом
+' состоянии. Сопряжённая система даёт строку обратного оператора по lambda.
+' Ошибка повторной сборки исключает принятие пробы.
+Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByRef uncertainty As Double) As Boolean
+    RequireCandidate
+    If Not mControlActive Then Exit Function
+    If Not Evaluate(mCandidate, True, True) Then
+        mCandidateReady = False
+        Exit Function
+    End If
+    Dim matrix() As Double, weights() As Double, i As Long, j As Long, size As Long
+    size = mDegreeCount + 1
+    BuildControlledMatrix matrix, size
+    For i = mGaugeStart To mDegreeCount
+        For j = 1 To size: matrix(j, i) = matrix(j, i) * mReferenceModulus: Next j
+    Next i
+    Dim temp As Double
+    For i = 1 To size
+        For j = i + 1 To size
+            temp = matrix(j, i): matrix(j, i) = matrix(i, j): matrix(i, j) = temp
+        Next j
+    Next i
+    ReDim weights(1 To size)
+    weights(size) = 1#
+    Dim adjoint As New CCoupledLinearSystem
+    If Not adjoint.Solve(matrix, weights, size) Then Exit Function
+    Dim norm As Double, residual As Double
+    norm = absoluteTolerance + relativeTolerance * StressScale(mExternal)
+    For i = 1 To mDegreeCount
+        residual = Abs(mResidual(i))
+        If i >= mGaugeStart Then residual = residual * mReferenceModulus
+        If residual > norm Then norm = residual
+    Next i
+    residual = Abs(ControlResidual(mCandidate))
+    If residual > norm Then norm = residual
+    uncertainty = 0#
+    For i = 1 To size: uncertainty = uncertainty + Abs(weights(i)): Next i
+    uncertainty = uncertainty * norm + 2E-12 * (1# + Abs(mTrialLambda))
+    TrialLambdaUncertainty = True
 End Function
 
 ' Приводит невязку контролируемой деформации к масштабу силовых уравнений.

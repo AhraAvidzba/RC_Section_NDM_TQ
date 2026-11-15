@@ -966,7 +966,11 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
             Set meta = capacity.ResultMeta
             ReportStep meta.ResultComment
             If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
-            If capacity.HasUltimatePoint Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
+            If capacity.CoupledLimitLambda > 0# Then ReportValue "Множитель арматурного предела", FormatNumberInvariant(capacity.CoupledLimitLambda)
+            If capacity.PeakLambda > 0# Then
+                ReportValue "Множитель при максимуме", FormatNumberInvariant(capacity.PeakLambda)
+                ReportValue "Оценка погрешности множителя", FormatNumberInvariant(capacity.PeakAccuracy)
+            End If
         End If
     Else
         StoreNotCalculatedCapacity index

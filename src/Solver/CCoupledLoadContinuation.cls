@@ -24,6 +24,8 @@ Private mOffset() As Double, mDirection() As Double
 Private mField() As Double, mResultants() As Double
 Private mHasOffset As Boolean, mHasDirection As Boolean, mHasAccepted As Boolean
 Private mOffsetFraction As Double, mLambda As Double
+Private mPreviousLambda As Double
+Private mPreferDeformationOnStall As Boolean
 Private mInitialSteps As Long, mMaxAttempts As Long, mMaxIterations As Long
 Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
@@ -54,7 +56,8 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     Next i
     mInitialSteps = initialSteps: mMaxAttempts = maxAttempts: mMaxIterations = maxIterations
     mAbsoluteTolerance = absoluteTolerance: mRelativeTolerance = relativeTolerance
-    mOffsetFraction = 0#: mLambda = 0#: mHasAccepted = False
+    mOffsetFraction = 0#: mLambda = 0#: mPreviousLambda = -1#: mHasAccepted = False
+    mPreferDeformationOnStall = False
     Set mReinforcement = Nothing
     mHasSteelLimit = False: mSteelLimitOnOffset = False
     mSteelLimitPoint = 0
@@ -69,11 +72,13 @@ End Sub
 ' траектории. Всегда проверяет расчётное lambda = 1, если оно в диапазоне.
 ' Достигнутая численная или заданная граница отдельно хранится в ResultMeta.
 Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
-        ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double)
+        ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
+        Optional ByVal preferDeformationOnStall As Boolean = False)
     If reinforcement Is Nothing Or mHasAccepted Or initialLambda <= 0# Or maximumLambda <= 0# Or lambdaTolerance <= 0# Then _
         Err.Raise 5, "CCoupledLoadContinuation", "Для поиска предела передайте свежую ветвь и положительные настройки Capacity."
     Set mReinforcement = reinforcement
     mLimitTolerance = lambdaTolerance
+    mPreferDeformationOnStall = preferDeformationOnStall
     If Not mHasDirection Then
         If Advance(0#) Then mMeta.SetResult rsNotApplicable, rcNotApplicable, rkCapacity, _
             "Выбранный путь не изменяет усилия. Задайте путь с ненулевой переменной частью."
@@ -100,6 +105,17 @@ Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
         "Достигнута граница Capacity.MaxLambda. Предельная деформация арматуры на пройденном участке не достигнута."
     mMeta.DiagnosticDetails = ProgressDetails()
 End Sub
+
+' Начинает деформационный поиск от конца подтверждённой силовой ветви
+' после численного отказа. Техническая конечная граница уже является исходом.
+Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupledDeformationContinuation
+    If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
+    If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or mPreviousLambda >= mLambda Then Exit Function
+    Dim controlled As New CCoupledDeformationContinuation
+    controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
+        mPreviousLambda, mLambda, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
+    Set ContinueByDeformation = controlled
+End Function
 
 ' Возвращает интервал пересечения арматурного критерия, подтверждённый
 ' равновесными пробами. Для преднагружения границы относятся к его доле.
@@ -216,6 +232,12 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
         Else
             If mHasSteelLimit Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
             mRejected = mRejected + 1
+            If mPreferDeformationOnStall And Not offsetStage And mRejected >= 2 Then
+                If SavedFieldCount >= 2 And mPreviousLambda < mLambda Then
+                    mMeta.DiagnosticDetails = ProgressDetails() & " | " & mMeta.DiagnosticDetails
+                    Exit Function
+                End If
+            End If
             increment = (candidate - reached) * 0.5
             If increment < minimum Then
                 mMeta.ResultComment = "Не сошёлся минимальный подшаг. " & mMeta.ResultComment
@@ -262,6 +284,7 @@ End Function
 
 ' Принимает равновесную пробу целиком и при необходимости копирует поле.
 Private Sub SaveCandidate()
+    If mHasAccepted Then mPreviousLambda = mLambda
     mSolver.CopyTrial mField, mResultants
     mSolver.AcceptStep
     mHasAccepted = True: mAccepted = mAccepted + 1

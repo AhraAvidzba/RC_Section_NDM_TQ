@@ -113,8 +113,8 @@ Public Property Get OverallMeta() As CResultMeta
     Set stability = mStabilityResult.Meta
     Set OverallMeta = Policy.WorstResultMeta(rkGeneric, mWorkflowMeta, strength, crack, stability)
     If strength.InternalStatus = rsCheckFailed And OverallMeta.InternalStatus = rsNumericalFailure Then
-        Dim transverseFailure As CResultMeta: Set transverseFailure = mStrengthResult.ConfirmedTransverseFailure
-        If Not transverseFailure Is Nothing Then Set OverallMeta = transverseFailure
+        Dim coupledFailure As CResultMeta: Set coupledFailure = mStrengthResult.ConfirmedCoupledFailure
+        If Not coupledFailure Is Nothing Then Set OverallMeta = coupledFailure
     End If
     If mWorkflowMeta.InternalStatus = rsInvalidInput Or mWorkflowMeta.InternalStatus = rsInvalidConfiguration Then
         If OverallMeta.InternalStatus = mWorkflowMeta.InternalStatus And OverallMeta.ResultCode = mWorkflowMeta.ResultCode Then
@@ -221,7 +221,8 @@ End Property
 ' Сохранённый расчётный ключ PathResolved преобразуется в обозначение lambda*...
 ' общим CLoadPathDescriptor.
 Public Property Get CapacityPathDisplayName() As String
-    If mStrengthResult.Capacity.SolutionMethod = "CoupledContinuation" And _
+    If (mStrengthResult.Capacity.SolutionMethod = "CoupledContinuation" Or _
+            mStrengthResult.Capacity.SolutionMethod = "CoupledDeformationControl") And _
             mStrengthResult.Capacity.PathResolved = "Auto" Then
         CapacityPathDisplayName = ChrW$(&H3BB) & "*(N, Mx, My, T, Qx, Qy)"
         Exit Property
