@@ -2,7 +2,7 @@ Attribute VB_Name = "modTestCoupledExperiment"
 Option Explicit
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Сопоставление связанного НДС с опытами Onsongo TBU3 и Kani.
+' Сопоставление связанного НДС с опытами Onsongo TBU3, Kani и Lopes A2.
 ' Геометрия и стали восстановлены по первичным публикациям в literature/Coupled6D.
 ' Параметры, отсутствующие в источниках, фиксируются как допущения расчёта.
 
@@ -129,6 +129,204 @@ Private Function BuildKaniSectionTest(ByRef layout As CTransverseRebarLayout, By
     steel.Add "KANI_HOOP", ExperimentBilinearSteelTest(200000#, 400#, 0#)
     Set BuildKaniSectionTest = section
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Нагружает полую балку A2 заданным закручиванием. Независимо записывает
+' первое повреждение бетона, текучесть хомута и продольной стали.
+Public Function RunTestCoupledLopesA2(ByVal spansText As String, ByVal twistText As String) As String
+    RunTestCoupledLopesA2 = TraceLopesA2Test(spansText, twistText, False)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет чистое кручение с уточнённой стенкой и отдельными параметрами
+' бетона и двух видов стали по таблицам 4.1–4.2 Martins.
+Public Function RunTestCoupledLopesA2RefinedInputs(ByVal spansText As String, ByVal twistText As String) As String
+    RunTestCoupledLopesA2RefinedInputs = TraceLopesA2Test(spansText, twistText, True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Воспроизводит сжатие 1279,1 кН из таблицы 3 Bernardo и Taborda
+' до увеличения кручения. Продольная сила затем остаётся постоянной.
+Public Function RunTestCoupledLopesA2Compression(ByVal spansText As String, ByVal twistText As String) As String
+    RunTestCoupledLopesA2Compression = TraceLopesA2Test(spansText, twistText, True, -1279100#)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает упругое сечение и последующую нелинейную ветвь с армированием.
+Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As String, ByVal refinedInputs As Boolean, _
+        Optional ByVal normalForce As Double = 0#) As String
+    On Error GoTo Failed
+    Const NU As Double = 0.2
+    Const FC As Double = 47.3
+    Const START_INCREMENT As Double = 0.00025 ' рад/м
+    Const MAX_INCREMENT As Double = 0.001 ' рад/м
+    Dim spans As Long: spans = CLng(spansText)
+    Dim limitTwist As Double: limitTwist = Val(twistText)
+    If spans < 1 Or spans > 3 Or limitTwist <= 0# Or limitTwist > 0.035 Then _
+        Err.Raise 5, , "Тестовые границы A2: базис 1–3, закручивание до 0,035 рад/м."
+    Dim report As String, tracePath As String, passed As Long, failed As Long
+    If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then tracePath = ThisWorkbook.Path & "\A2_Trace.csv"
+
+    Dim ec As Double, ft As Double, gt As Double, gc As Double, peakStrain As Double, wall As Double
+    Dim hoopYield As Double, longitudinalYield As Double
+    ec = 35000#: ft = 0.302 * FC ^ (2# / 3#): peakStrain = 0.0024: wall = 100#
+    hoopYield = 686#: longitudinalYield = 686#
+    If refinedInputs Then
+        ec = 36100#: ft = 3.5: peakStrain = 0.002: wall = 107#
+        hoopYield = 696#: longitudinalYield = 672#
+    End If
+    gt = 0.073 * FC ^ 0.18: gc = (FC / ft) ^ 2 * gt
+    Dim section As CSectionModel: Set section = BuildLopesA2SectionTest(wall)
+    Dim operators As New CCoupledElasticState
+    operators.PrepareModel section, ec, NU, spans, spans, 5
+    Dim field() As Double, actual() As Double, deformation() As Double, stress() As Double
+    If Not operators.Solve(0#, 0#, 0#, 10000000#, 0#, 0#, deformation, actual, stress) Then _
+        Err.Raise 5, , operators.ResultMeta.ResultComment
+    Dim rigidity As Double: rigidity = actual(4) / deformation(4)
+    AddExperimentTraceTest report, tracePath, "A2_ELASTIC_J_MM4: " & ExperimentNumberTest(rigidity * 2# * (1# + NU) / ec)
+    AddExperimentTraceTest report, tracePath, "A2_ELASTIC_RIGIDITY_KNM2: " & ExperimentNumberTest(rigidity / 1E+9)
+
+    Dim layout As New CTransverseRebarLayout, steel As Object
+    AddLopesA2ReinforcementTest section, layout
+    Set steel = CreateObject("Scripting.Dictionary")
+    steel.Add "A2_LONG", ExperimentBilinearSteelTest(200000#, longitudinalYield, 0#)
+    steel.Add "A2_HOOP", ExperimentBilinearSteelTest(200000#, hoopYield, 0#)
+    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
+    AddExperimentTraceTest report, tracePath, "A2_PARAMETERS: Ec " & ExperimentNumberTest(ec) & " | Ft " & _
+        ExperimentNumberTest(ft) & " | Gt " & ExperimentNumberTest(gt) & " | Gc " & ExperimentNumberTest(gc) & _
+        " | wall " & ExperimentNumberTest(wall) & " | fy hoop " & ExperimentNumberTest(hoopYield) & _
+        " | fy longitudinal " & ExperimentNumberTest(longitudinalYield)
+    AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.DegreeCount)
+    Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    concrete.Initialize operators.PointCount, ec, NU, 0.6 * FC, FC, ft, peakStrain, gt, gc, 125#
+    response.Initialize operators, concrete, steel
+    solver.Initialize operators, response, ec
+    If normalForce <> 0# Then
+        Dim path As New CLoadPathVector, preload As New CCoupledLoadContinuation
+        path.Initialize normalForce, 0#, 0#, 0#, 0#, 0#
+        preload.Initialize solver, path, 4, 12, 24, 0.0000005, 0.00000002
+        If Not preload.Advance(0#) Then Err.Raise 5, , preload.ResultMeta.ResultComment & " " & preload.ResultMeta.DiagnosticDetails
+        preload.CopyAccepted field, actual
+        AddExperimentTraceTest report, tracePath, "A2_PRELOAD_N_KN: " & ExperimentNumberTest(actual(1) / 1000#)
+    End If
+    Dim projection() As Double, baseLoad(1 To 6) As Double, direction(1 To 6) As Double, target(1 To 6) As Double
+    ReDim projection(1 To operators.DegreeCount): projection(4) = 1#
+    baseLoad(1) = normalForce: target(1) = normalForce
+    direction(4) = 100000000# ' Множитель в долях 100 кН·м.
+    Dim eps0 As Double, kx As Double, ky As Double, twist As Double, coordinatePerRadPerM As Double
+    operators.GeneralizedDeformation projection, eps0, kx, ky, twist
+    coordinatePerRadPerM = 1# / (1000# * twist)
+    AddExperimentTraceTest report, tracePath, "attempt;twist_rad_per_m;T_kNm;hoop_stress_MPa;longitudinal_stress_MPa;tension_energy_ratio;residual_MPa;seconds"
+
+    Dim coordinate As Double, increment As Double, requested As Double, lambda As Double, trialLambda As Double
+    Dim attempt As Long, i As Long, tension As Double, compression As Double, damage As Double, longStress As Double
+    Dim moment As Double, previousMoment As Double, hoopStress As Double, errorNorm As Double, started As Double
+    Dim sawDamage As Boolean, sawHoop As Boolean, sawLongitudinal As Boolean, stopReason As String
+    increment = START_INCREMENT: stopReason = "AttemptLimit"
+    For attempt = 1 To 100
+        requested = coordinate + increment
+        If requested > limitTwist Then requested = limitTwist
+        started = Timer
+        If solver.TryDeformationStep(baseLoad, direction, projection, requested * coordinatePerRadPerM, lambda, _
+                trialLambda, 0.0000005, 0.00000002, 24) Then
+            solver.CopyTrial field, actual: solver.AcceptStep
+            lambda = trialLambda: target(4) = lambda * direction(4)
+            moment = actual(4) / 1E+6
+            operators.GeneralizedDeformation field, eps0, kx, ky, twist
+            errorNorm = operators.ResultantResidualNorm(actual, target)
+            damage = 0#: longStress = 0#
+            For i = 1 To operators.ConcretePointCount
+                concrete.AcceptedPointDamage i, tension, compression
+                If tension > damage Then damage = tension
+            Next i
+            For i = operators.ConcretePointCount + 1 To operators.ConcretePointCount + section.RebarCount
+                If Abs(response.AcceptedSteelStress(i)) > longStress Then longStress = Abs(response.AcceptedSteelStress(i))
+            Next i
+            hoopStress = Abs(response.AcceptedSteelStress(response.AcceptedTransverseCriticalPoint))
+            AddExperimentTraceTest report, tracePath, "A2Step" & CStr(attempt) & ";" & ExperimentNumberTest(twist * 1000#) & _
+                ";" & ExperimentNumberTest(moment) & ";" & ExperimentNumberTest(hoopStress) & ";" & ExperimentNumberTest(longStress) & _
+                ";" & ExperimentNumberTest(damage) & ";" & ExperimentNumberTest(errorNorm) & ";" & ExperimentNumberTest(Timer - started)
+            If errorNorm < 0.000005 And Abs(twist * 1000# - requested) < 0.00000001 Then passed = passed + 1 Else failed = failed + 1
+            RecordLopesA2EventTest "TENSION_DAMAGE", (damage > 0.000001), sawDamage, coordinate, previousMoment, requested, moment, report, tracePath
+            RecordLopesA2EventTest "HOOP_YIELD", (hoopStress >= hoopYield - 0.000001), sawHoop, coordinate, previousMoment, requested, moment, report, tracePath
+            RecordLopesA2EventTest "LONGITUDINAL_YIELD", (longStress >= longitudinalYield - 0.000001), sawLongitudinal, coordinate, previousMoment, requested, moment, report, tracePath
+            coordinate = requested: previousMoment = moment
+            If coordinate = limitTwist Then
+                stopReason = "TargetReached"
+                Exit For
+            End If
+            increment = increment * 1.25
+            If increment > MAX_INCREMENT Then increment = MAX_INCREMENT
+        Else
+            Dim meta As CResultMeta: Set meta = solver.ResultMeta
+            AddExperimentTraceTest report, tracePath, "A2_REJECTED: " & CStr(attempt) & " | " & ExperimentNumberTest(requested) & _
+                " | " & meta.ResultComment & " | " & meta.DiagnosticDetails
+            increment = increment * 0.5
+            If increment < START_INCREMENT / 32# Then
+                stopReason = "MinimumTwistIncrement"
+                Exit For
+            End If
+        End If
+    Next attempt
+    AddExperimentTraceTest report, tracePath, "A2_STOP: " & stopReason
+    If passed = 0 Then failed = failed + 1
+    TraceLopesA2Test = report & "TOTAL_A2_TORSION_EQUILIBRIUM: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    TraceLopesA2Test = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Фиксирует первое обнаружение события интервалом двух принятых точек.
+Private Sub RecordLopesA2EventTest(ByVal eventName As String, ByVal detected As Boolean, ByRef reported As Boolean, _
+        ByVal leftTwist As Double, ByVal leftMoment As Double, ByVal rightTwist As Double, ByVal rightMoment As Double, _
+        ByRef report As String, ByVal tracePath As String)
+    If Not detected Or reported Then Exit Sub
+    reported = True
+    AddExperimentTraceTest report, tracePath, "A2_EVENT;" & eventName & ";" & ExperimentNumberTest(leftTwist) & ";" & _
+        ExperimentNumberTest(leftMoment) & ";" & ExperimentNumberTest(rightTwist) & ";" & ExperimentNumberTest(rightMoment)
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Строит тот же наружный квадрат и восьмиугольный проём, что и КЭ-эталон.
+Private Function BuildLopesA2SectionTest(ByVal wall As Double) As CSectionModel
+    Dim query As New CSectionGeometryQuery, outer As CConcreteRegion, inner As CConcreteRegion, geometry As New CGeometryRegion
+    Set outer = query.RectangleRegion(0#, 0#, 600#, 600#)
+    Dim coordinates(1 To 8, 1 To 2) As Double, vertex As Variant, index As Long
+    Dim halfOpening As Double, chamferStart As Double
+    halfOpening = 300# - wall: chamferStart = halfOpening - 50#
+    For Each vertex In Array(Array(-chamferStart, -halfOpening), Array(chamferStart, -halfOpening), _
+            Array(halfOpening, -chamferStart), Array(halfOpening, chamferStart), Array(chamferStart, halfOpening), _
+            Array(-chamferStart, halfOpening), Array(-halfOpening, chamferStart), Array(-halfOpening, -chamferStart))
+        index = index + 1
+        coordinates(index, 1) = vertex(0): coordinates(index, 2) = vertex(1)
+    Next vertex
+    Set inner = query.PolygonRegion(coordinates)
+    geometry.Initialize query.SubtractContainedRegion(outer, inner)
+    Dim mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder, section As CSectionModel
+    mesh.BuildMesh geometry, 24#, 24#, cellGeometry:="Contour"
+    Set section = builder.BuildFromGenerated(mesh, Nothing)
+    geometry.BuildContours section.Contours
+    Set BuildLopesA2SectionTest = section
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт опубликованные размеры осей хомута и размещает стержни внутри него.
+Private Sub AddLopesA2ReinforcementTest(ByVal section As CSectionModel, ByVal layout As CTransverseRebarLayout)
+    Dim query As New CSectionGeometryQuery, path As CGeometryPath
+    Set path = query.AdjacentRectangles("A2_HOOP", Array(Array(-269#, -265.5, 538#, 531#)))
+    layout.AddGroup path, 8#, 80#, "A2_HOOP"
+    Dim sx As Long, sy As Long, i As Long
+    For sx = -1 To 1 Step 2
+        For sy = -1 To 1 Step 2
+            section.AddRebarElement sx * 259#, sy * 255.5, 12#, GEOM_PI * 36#, "A2_LONG"
+        Next sy
+        For i = -1 To 1
+            section.AddRebarElement sx * 260#, i * 127.75, 10#, GEOM_PI * 25#, "A2_LONG"
+            section.AddRebarElement i * 129.5, sx * 256.5, 10#, GEOM_PI * 25#, "A2_LONG"
+        Next i
+    Next sx
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Воспроизводит предварительный момент и натурные приращения Mx/T.
