@@ -1,6 +1,7 @@
 ﻿# скрипт проверяет структуру собранной книги, именованные диапазоны и ключевые правила интерфейса.
 
-# Не исправляет проверяемый файл. Excel открывается read-only без макросов и
+# Штатное оформление листа «Расчет» сверяется с автономным шаблоном сборки.
+# Скрипт не исправляет файл. Excel открывается read-only без макросов и
 # событий; хеш входной книги после проверки должен совпасть. По запросу
 # сохраняется машинно-читаемый отчет отдельных структурных проверок.
 param(
@@ -66,10 +67,10 @@ function Is-AllowedFormulaCell {
 $root = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "../..")
 . (Join-Path $PSScriptRoot 'WorkbookLayout.ps1')
 $layout = Read-WorkbookLayout
-# Положение входных таблиц задаёт тот же сохранённый снимок, что использует сборщик.
+# Положение таблиц задаёт тот же сохранённый снимок, что использует сборщик.
 function Test-SavedNamedRange([object]$Range, [string]$Name) {
-    $expected = @($layout.Names | Where-Object Name -eq $Name)[0]
-    return $Range.Worksheet.Name -ceq $expected.Sheet -and $Range.Address() -ceq $expected.Address
+    $expected = @($layout.Names | Where-Object Name -ceq $Name)
+    return $expected.Count -eq 1 -and $Range.Worksheet.Name -ceq $expected[0].Sheet -and $Range.Address() -ceq $expected[0].Address
 }
 $fullWorkbookPath = Join-Path $root $WorkbookPath
 
@@ -82,22 +83,52 @@ $excel = $null
 $workbook = $null
 $beforeHash = (Get-FileHash -LiteralPath $fullWorkbookPath -Algorithm SHA256).Hash
 
-# Читает каноническую область печати именно листа Расчет без открытия ZIP
-# на запись. Неканоническое/повторное имя не удаляется из проверяемой книги:
-# структурная ошибка фиксируется в отчете, а исходный файл остается неизменным.
-function Get-PrintAreaFromWorkbookXml {
+# Читает один обязательный текстовый компонент пакета, не изменяя архив.
+function Read-PackageText([IO.Compression.ZipArchive]$Package, [string]$Part) {
+    $entry = $Package.GetEntry($Part)
+    if ($null -eq $entry) { throw "В пакете отсутствует $Part." }
+    $reader = [IO.StreamReader]::new($entry.Open())
+    try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
+}
+
+# Сравнивает параметры печати по сохранённым узлам. Идентификатор локального
+# драйвера принтера не задаёт оформление и поэтому в сравнение не входит.
+function Get-PrintNodeSignature([Xml.XmlNode]$Node) {
+    if ($null -eq $Node) { return "" }
+    $attributes = @($Node.Attributes | Where-Object {
+        $_.NamespaceURI -ne 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+    } | Sort-Object Name | ForEach-Object { "$($_.Name)=$($_.Value)" })
+    $children = @($Node.ChildNodes | Where-Object NodeType -eq 'Element' | ForEach-Object { Get-PrintNodeSignature $_ })
+    return "$($Node.LocalName)[$($attributes -join ',')]($($children -join ','))"
+}
+
+# Извлекает параметры страницы и сохранённые ручные разрывы. Автоматические
+# разрывы текущего принтера могут отличаться при открытии той же книги.
+function Get-PrintPageSignature([xml]$Sheet) {
+    $signature = [ordered]@{}
+    foreach ($part in @("pageSetup", "pageMargins", "printOptions", "rowBreaks", "colBreaks")) {
+        $signature[$part] = Get-PrintNodeSignature ($Sheet.DocumentElement.SelectSingleNode("*[local-name()='$part']"))
+    }
+    $signature["pageSetUpPr"] = Get-PrintNodeSignature ($Sheet.DocumentElement.SelectSingleNode("*[local-name()='sheetPr']/*[local-name()='pageSetUpPr']"))
+    return $signature
+}
+
+# Читает каноническую область печати и настройки именно листа «Расчет».
+# Неканоническое или повторное имя фиксирует как структурную ошибку.
+function Get-WorkbookPrintDefinition {
     param([string]$Path, [System.Collections.Generic.List[object]]$Checks)
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
     try {
-        $entry = $zip.GetEntry("xl/workbook.xml")
-        if ($entry -eq $null) { throw "В книге отсутствует xl/workbook.xml." }
-        $reader = New-Object IO.StreamReader($entry.Open())
-        try { [xml]$xml = $reader.ReadToEnd() } finally { $reader.Dispose() }
+        [xml]$xml = Read-PackageText $zip "xl/workbook.xml"
         $sheetIndex = -1
         $index = 0
+        $id = ''
         foreach ($sheet in $xml.workbook.sheets.sheet) {
-            if ([string]$sheet.name -eq "Расчет") { $sheetIndex = $index }
+            if ([string]$sheet.name -eq "Расчет") {
+                $sheetIndex = $index
+                $id = $sheet.GetAttribute('id', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships')
+            }
             $index++
         }
         $namespaces = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
@@ -112,20 +143,40 @@ function Get-PrintAreaFromWorkbookXml {
         })
         Add-Check $Checks "Canonical print area names" ($sheetIndex -ge 0 -and $areas.Count -eq 1 -and $aliases.Count -eq 0) (
             "CalculationSheetIndex=$sheetIndex; canonical=$($areas.Count); noncanonical=$($aliases.Count); file not repaired")
-        if ($areas.Count -eq 1) { return [string]$areas[0].InnerText }
-        return ""
+        if ($sheetIndex -lt 0 -or $areas.Count -ne 1 -or $aliases.Count -ne 0) { return $null }
+        [xml]$relations = Read-PackageText $zip "xl/_rels/workbook.xml.rels"
+        $relation = @($relations.Relationships.Relationship | Where-Object Id -ceq $id)
+        if ($relation.Count -ne 1) { throw "Не найден компонент листа «Расчет»." }
+        $target = [string]$relation[0].Target
+        $part = if ($target.StartsWith('/')) { $target.TrimStart('/') } else { "xl/$target" }
+        [xml]$sheetXml = Read-PackageText $zip $part
+        return @{ Area = [string]$areas[0].InnerText; Page = Get-PrintPageSignature $sheetXml }
     }
     finally {
         if ($zip -ne $null) { $zip.Dispose() }
     }
 }
 
-$printAreaXml = Get-PrintAreaFromWorkbookXml $fullWorkbookPath $checks
+# Формат штатной оформленной книги задан автономным шаблоном сборщика.
+function Get-TemplatePrintDefinition([string]$Path) {
+    $zip = [IO.Compression.ZipFile]::OpenRead($Path)
+    try {
+        $manifest = (Read-PackageText $zip "manifest.json") | ConvertFrom-Json
+        $area = @($manifest.names | Where-Object { $_.attributes.name -ceq '_xlnm.Print_Area' })
+        if ($area.Count -ne 1) { throw "В шаблоне отсутствует однозначная область печати листа «Расчет»." }
+        [xml]$sheetXml = Read-PackageText $zip $manifest.sheet
+        return @{ Area = [string]$area[0].formula; Page = Get-PrintPageSignature $sheetXml }
+    }
+    finally { $zip.Dispose() }
+}
+
+$printed = Get-WorkbookPrintDefinition $fullWorkbookPath $checks
 
 try {
     if (@($checks | Where-Object { -not $_.Passed }).Count -gt 0) {
         throw "Именованная область печати листа Расчет отсутствует, повторяется или содержит неканоническое имя Print_Area. Исправьте имя в книге; проверка остановлена без изменения файла."
     }
+    $expectedPrint = Get-TemplatePrintDefinition (Join-Path $PSScriptRoot 'CalculationPresentation.zip')
     $excel = New-Object -ComObject Excel.Application
     $excel.Visible = $false
     $excel.DisplayAlerts = $false
@@ -170,7 +221,9 @@ try {
         "rngNDMSectionContours",
         "rngNDMSectionProperties",
         "rngNDMSectionAnnotations",
-        "rngNDMMaterialDiagrams"
+        "rngNDMMaterialDiagrams",
+        "rngNDMElementGeometry",
+        "rngNDMElementResultIndex"
     )
 
     $actualNames = @()
@@ -182,35 +235,21 @@ try {
     Add-Check $checks "Required named ranges" ($missingNames.Count -eq 0) ("Missing: " + ($missingNames -join ", "))
 
     if ($missingNames.Count -eq 0) {
-        $batchSummaryRange = $workbook.Names.Item("rngBatchSummary").RefersToRange
-        $strengthSummaryAnchorRange = $workbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-        $crackSummaryAnchorRange = $workbook.Names.Item("rngCrackSummaryAnchor").RefersToRange
-        $stabilitySummaryAnchorRange = $workbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange
-        $elementResultsRange = $workbook.Names.Item("rngNDMElementResults").RefersToRange
-        $geometryResultsRange = $workbook.Names.Item("rngNDMSectionGeometry").RefersToRange
-        $sectionContoursRange = $workbook.Names.Item("rngNDMSectionContours").RefersToRange
-        $sectionPropertiesRange = $workbook.Names.Item("rngNDMSectionProperties").RefersToRange
-        $sectionAnnotationsRange = $workbook.Names.Item("rngNDMSectionAnnotations").RefersToRange
-        $materialDiagramsRange = $workbook.Names.Item("rngNDMMaterialDiagrams").RefersToRange
+        $resultsNames = @(
+            "rngBatchSummary", "rngStrengthSummaryAnchor", "rngCrackSummaryAnchor",
+            "rngStabilitySummaryAnchor", "rngNDMSectionGeometry", "rngNDMSectionProperties",
+            "rngNDMMaterialDiagrams", "rngNDMSectionContours", "rngNDMElementResults",
+            "rngNDMElementGeometry", "rngNDMSectionAnnotations", "rngNDMElementResultIndex"
+        )
+        $resultsLayoutOk = $true
+        $resultAddresses = foreach ($name in $resultsNames) {
+            $range = $workbook.Names.Item($name).RefersToRange
+            if (-not (Test-SavedNamedRange $range $name)) { $resultsLayoutOk = $false }
+            "$name=$($range.Worksheet.Name)!$($range.Address())"
+        }
+        Add-Check $checks "Results ranges layout" $resultsLayoutOk ($resultAddresses -join "; ")
         $stabilityLoadsRange = $workbook.Names.Item("rngStabilityDurationLoads").RefersToRange
         $sp35TableRange = $workbook.Names.Item("rngSP35Table721").RefersToRange
-        Add-Check $checks "Results ranges layout" (
-            ([string]$batchSummaryRange.Worksheet.Name -eq "Results") -and
-            ($batchSummaryRange.Row -eq 1) -and ($batchSummaryRange.Column -eq 1) -and
-            ($batchSummaryRange.Rows.Count -eq 1) -and ($batchSummaryRange.Columns.Count -eq 1) -and
-            ($strengthSummaryAnchorRange.Worksheet.Name -eq "Results") -and
-            ($strengthSummaryAnchorRange.Row -eq 49) -and ($strengthSummaryAnchorRange.Column -eq 1) -and
-            ($crackSummaryAnchorRange.Worksheet.Name -eq "Results") -and
-            ($crackSummaryAnchorRange.Row -eq 85) -and ($crackSummaryAnchorRange.Column -eq 1) -and
-            ($stabilitySummaryAnchorRange.Worksheet.Name -eq "Results") -and
-            ($stabilitySummaryAnchorRange.Row -eq 122) -and ($stabilitySummaryAnchorRange.Column -eq 1) -and
-            ($elementResultsRange.Row -eq 156) -and ($elementResultsRange.Column -eq 1) -and
-            ($geometryResultsRange.Row -eq 156) -and ($geometryResultsRange.Column -eq 12) -and
-            ($sectionContoursRange.Row -eq 156) -and ($sectionContoursRange.Column -eq 30) -and
-            ($sectionPropertiesRange.Row -eq 156) -and ($sectionPropertiesRange.Column -eq 49) -and
-            ($materialDiagramsRange.Row -eq 156) -and ($materialDiagramsRange.Column -eq 57) -and
-            ($sectionAnnotationsRange.Row -eq 156) -and ($sectionAnnotationsRange.Column -eq 70)
-        ) ("batch=$($batchSummaryRange.Worksheet.Name)!R$($batchSummaryRange.Row)C$($batchSummaryRange.Column):$($batchSummaryRange.Columns.Count) cols; strengthAnchor=R$($strengthSummaryAnchorRange.Row)C$($strengthSummaryAnchorRange.Column); crackAnchor=R$($crackSummaryAnchorRange.Row)C$($crackSummaryAnchorRange.Column); stabilityAnchor=R$($stabilitySummaryAnchorRange.Row)C$($stabilitySummaryAnchorRange.Column); elements=R$($elementResultsRange.Row)C$($elementResultsRange.Column); geometry=R$($geometryResultsRange.Row)C$($geometryResultsRange.Column); properties=R$($sectionPropertiesRange.Row)C$($sectionPropertiesRange.Column); annotations=R$($sectionAnnotationsRange.Row)C$($sectionAnnotationsRange.Column); materialDiagrams=R$($materialDiagramsRange.Row)C$($materialDiagramsRange.Column)")
         Add-Check $checks "Stability duration loads range" (
             ($stabilityLoadsRange.Worksheet.Name -eq "Config") -and
             (Test-SavedNamedRange $stabilityLoadsRange "rngStabilityDurationLoads") -and
@@ -235,24 +274,14 @@ try {
     $presentObsoleteNames = @($obsoleteNames | Where-Object { $actualNames -contains $_ })
     Add-Check $checks "No obsolete named ranges" ($presentObsoleteNames.Count -eq 0) ("Present: " + ($presentObsoleteNames -join ", "))
 
-    $calc = $workbook.Worksheets.Item("Расчет")
     $system = $workbook.Worksheets.Item("Config")
 
-    $printArea = [string]$calc.PageSetup.PrintArea
-    $printAreaOk = $printArea.Contains('$A$1:$AJ$60') -or $printAreaXml.Contains('$A$1:$AJ$60')
-    Add-Check $checks "Print area" $printAreaOk ("PageSetup=$printArea; Xml=$printAreaXml")
-    Add-Check $checks "A4 portrait" (($calc.PageSetup.PaperSize -eq 9) -and ($calc.PageSetup.Orientation -eq 1)) ("PaperSize=$($calc.PageSetup.PaperSize); Orientation=$($calc.PageSetup.Orientation)")
-    Add-Check $checks "Print scale for one-page blocks" (($calc.PageSetup.Zoom -le 100) -and ($calc.HPageBreaks.Count -eq 0)) ("Zoom=$($calc.PageSetup.Zoom); HBreaks=$($calc.HPageBreaks.Count)")
-
-    $breakColumns = @()
-    foreach ($break in $calc.VPageBreaks) {
-        if ($break.Type -eq -4135) {
-            $breakColumns += $break.Location.Column
-        }
-    }
-    $expectedBreakColumns = @(19)
-    $hasBreaks = -not (@($expectedBreakColumns | Where-Object { $breakColumns -notcontains $_ }).Count)
-    Add-Check $checks "Vertical page breaks" $hasBreaks ("Columns: " + ($breakColumns -join ", "))
+    Add-Check $checks "Print area" ($printed.Area -ceq $expectedPrint.Area) "File=$($printed.Area); template=$($expectedPrint.Area)"
+    $pageOptions = @("pageSetup", "pageMargins", "printOptions", "pageSetUpPr")
+    $changedOptions = @($pageOptions | Where-Object { $printed.Page[$_] -cne $expectedPrint.Page[$_] })
+    Add-Check $checks "Saved print page setup" ($changedOptions.Count -eq 0) ("Differences from template: " + ($changedOptions -join ", "))
+    Add-Check $checks "Saved horizontal page breaks" ($printed.Page.rowBreaks -ceq $expectedPrint.Page.rowBreaks) "File=$($printed.Page.rowBreaks); template=$($expectedPrint.Page.rowBreaks)"
+    Add-Check $checks "Saved vertical page breaks" ($printed.Page.colBreaks -ceq $expectedPrint.Page.colBreaks) "File=$($printed.Page.colBreaks); template=$($expectedPrint.Page.colBreaks)"
 
     $loadsRangeForLayout = $workbook.Names.Item("rngLoadCombinations").RefersToRange
     $loadCombinationsOnConfig = (Test-SavedNamedRange $loadsRangeForLayout "rngLoadCombinations")
@@ -387,12 +416,23 @@ try {
     Add-Check $checks "Config right-side ranges vertical stack" $rightStackOk ($rightStackDetails -join "; ")
 
     $loads = $workbook.Names.Item("rngLoadCombinations").RefersToRange
-    $expectedLoadHeaders = @("CombinationID", "N, tf", "Mx, tf*m", "My, tf*m", "ProfileId", "LoadPath", "Comment")
+    $unitValues = $workbook.Names.Item("rngUnitSettings").RefersToRange.Value2
+    $inputUnits = @{}
+    for ($i = 2; $i -le $unitValues.GetUpperBound(0); $i++) {
+        $inputUnits[[string]$unitValues[$i, 1]] = [string]$unitValues[$i, 2]
+    }
+    $force = $inputUnits["Force"]
+    $moment = $inputUnits["Moment"]
+    $expectedLoadHeaders = @("CombinationID", "N, $force", "Mx, $moment", "My, $moment", "ProfileId", "LoadPath",
+        "Comment", "T, $moment", "Qx, $force", "Qy, $force")
     $actualLoadHeaders = @()
-    for ($i = 1; $i -le 7; $i++) {
+    for ($i = 1; $i -le [Math]::Min($loads.Columns.Count, $expectedLoadHeaders.Count); $i++) {
         $actualLoadHeaders += [string]$loads.Cells.Item(1, $i).Value2
     }
-    Add-Check $checks "Load combinations table headers" (($actualLoadHeaders -join "|") -eq ($expectedLoadHeaders -join "|")) ($actualLoadHeaders -join " | ")
+    Add-Check $checks "Load combinations table headers" (
+        $force -and $moment -and $loads.Columns.Count -eq $expectedLoadHeaders.Count -and
+        ($actualLoadHeaders -join "|") -ceq ($expectedLoadHeaders -join "|")
+    ) ($actualLoadHeaders -join " | ")
     Add-Check $checks "Formulas allowed on workbook sheets" $true "Excel formulas are allowed and preferred for transparent user-level calculations; VBA validation covers workbook structure."
 
     $excelSourceDir = Join-Path $root "src/Excel"

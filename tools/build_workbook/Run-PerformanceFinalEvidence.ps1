@@ -30,7 +30,7 @@ foreach($stage in $order) {
             & (Join-Path $PSScriptRoot 'Compare-PerformanceVba.ps1') -ExportPath docs/regression/Performance/ReleaseV2/VBA_All_Code.txt -ReportPath docs/regression/Performance/ReleaseV2/SourceEquality.json -ReferenceExportPath docs/regression/Performance/CompiledFreshBuildV2/VBA_All_Code.txt
         }
         'Build' {
-            & (Join-Path $PSScriptRoot 'Build-Workbook.ps1') -OutputPath docs/regression/Performance/FreshBuild/RC_Section_NDM.xlsm
+            & (Join-Path $PSScriptRoot 'Build-Workbook.ps1') -OutputPath docs/regression/Performance/FreshBuild/RC_Section_NDM.xlsm -UseFormattedLayout
             & (Join-Path $PSScriptRoot 'Prepare-PerformanceWorkbook.ps1') -Directory docs/regression/Performance/CompiledFreshBuildV2 -SourceWorkbook docs/regression/Performance/FreshBuild/RC_Section_NDM.xlsm -TestModuleOnly -SmokeMacro modTestWorkbookInterface.RunConfigPresentationTests
         }
         'Validate' {
