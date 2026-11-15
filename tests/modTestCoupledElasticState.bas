@@ -141,11 +141,16 @@ End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Готовит единую невыпуклую область с эксцентричным круглым отверстием.
-Private Function TestAsymmetricCoupledSection(ByRef region As CConcreteRegion) As CSectionModel
+Private Function TestAsymmetricCoupledSection(ByRef region As CConcreteRegion, Optional ByVal shiftX As Double = 0#, _
+        Optional ByVal shiftY As Double = 0#, Optional ByVal rotation As Double = 0#, _
+        Optional ByVal reflectX As Boolean = False) As CSectionModel
     Dim query As New CSectionGeometryQuery, outline As CGeometryPath, geometry As New CGeometryRegion
     Set outline = query.AdjacentRectangles("AsymmetricSix", Array( _
         Array(-100#, -80#, 200#, 100#), Array(-100#, 20#, 135#, 80#)))
-    Set region = query.SubtractContainedRegion(query.RegionFromPath(outline), query.CircleRegion(-40#, -24#, 21#))
+    Dim x As Double, y As Double: x = -40#: y = -24#
+    query.TransformCoordinates x, y, shiftX, shiftY, rotation, reflectX
+    Set outline = outline.Transformed(shiftX, shiftY, rotation, reflectX)
+    Set region = query.SubtractContainedRegion(query.RegionFromPath(outline), query.CircleRegion(x, y, 21#))
     geometry.Initialize region
     Set TestAsymmetricCoupledSection = TestBuildSection(geometry)
 End Function
@@ -1481,24 +1486,11 @@ End Function
 Public Function RunTestCoupledLoadMatrix() As String
     Dim passed As Long, failed As Long, report As String
     On Error GoTo Failed
-    Dim region As CConcreteRegion, section As CSectionModel
-    Set section = TestAsymmetricCoupledSection(region)
-    section.AddRebarElement -76#, -54#, 12#, GEOM_PI * 36#, "A400"
-    section.AddRebarElement 68#, -47#, 12#, GEOM_PI * 36#, "A400"
-    section.AddRebarElement -55#, 65#, 10#, GEOM_PI * 25#, "A400"
-    Dim layout As New CTransverseRebarLayout, hoop As New CGeometryPath
-    hoop.Initialize "MatrixHoop"
-    hoop.AddLine "Bottom", -85#, -65#, 20#, -65#
-    hoop.AddLine "Right", 20#, -65#, 20#, 12#
-    hoop.AddLine "Top", 20#, 12#, -85#, 12#
-    hoop.AddLine "Left", -85#, 12#, -85#, -65#
-    hoop.Seal True
+    Dim section As CSectionModel, hoop As CGeometryPath, layout As New CTransverseRebarLayout
+    Set section = TestReinforcedAsymmetricSection(hoop)
     layout.AddGroup hoop, 8#, 100#, "A400"
 
-    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters, provider As New CMaterialModelProvider
-    concrete.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
-    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
-    provider.TestInitializeFromParameters concrete, steel
+    Dim provider As CMaterialModelProvider: Set provider = TestMatrixMaterials()
     Dim analysis As New CCoupledSectionAnalysis, profiles As New CCalculationProfileCatalog, spec As New CMaterialModelSpec
     analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
     profiles.LoadFromWorkbook ThisWorkbook, False
@@ -1580,6 +1572,205 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Готовит три продольных стержня и хомут в стенке сечения. Все части
+' преобразуются вместе, включая замкнутый путь поперечной арматуры.
+Private Function TestReinforcedAsymmetricSection(ByRef hoop As CGeometryPath, Optional ByVal shiftX As Double = 0#, _
+        Optional ByVal shiftY As Double = 0#, Optional ByVal rotation As Double = 0#, _
+        Optional ByVal reflectX As Boolean = False) As CSectionModel
+    Dim region As CConcreteRegion, section As CSectionModel, query As New CSectionGeometryQuery
+    Set section = TestAsymmetricCoupledSection(region, shiftX, shiftY, rotation, reflectX)
+    Dim bar As Variant, x As Double, y As Double, diameter As Double
+    For Each bar In Array(Array(-76#, -54#, 12#), Array(68#, -47#, 12#), Array(-55#, 65#, 10#))
+        x = CDbl(bar(0)): y = CDbl(bar(1)): diameter = CDbl(bar(2))
+        query.TransformCoordinates x, y, shiftX, shiftY, rotation, reflectX
+        section.AddRebarElement x, y, diameter, GEOM_PI * diameter ^ 2 / 4#, "A400"
+    Next bar
+    Dim path As New CGeometryPath
+    path.Initialize "MatrixHoop"
+    path.AddLine "Bottom", -85#, -65#, 20#, -65#
+    path.AddLine "Right", 20#, -65#, 20#, 12#
+    path.AddLine "Top", 20#, 12#, -85#, 12#
+    path.AddLine "Left", -85#, 12#, -85#, -65#
+    path.Seal True
+    Set hoop = path.Transformed(shiftX, shiftY, rotation, reflectX)
+    Set TestReinforcedAsymmetricSection = section
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Создаёт единый контрольный набор параметров бетона и стали.
+Private Function TestMatrixMaterials() As CMaterialModelProvider
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters, provider As New CMaterialModelProvider
+    concrete.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    provider.TestInitializeFromParameters concrete, steel
+    Set TestMatrixMaterials = provider
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет перенос, поворот на 90°, отражение и смену точки приведения
+' полного вектора. Ортогональные преобразования сохраняют шаг сетки.
+Public Function RunTestCoupledFrameInvariance() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim provider As CMaterialModelProvider: Set provider = TestMatrixMaterials()
+    Dim spec As New CMaterialModelSpec: spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    Dim frames As Variant
+    frames = Array(Array("Reference", 1#, 0#, 0#, 1#, 0#, 0#, 0#, False), _
+        Array("Translated", 1#, 0#, 0#, 1#, 93000#, -71000#, 0#, False), _
+        Array("QuarterTurn", 0#, -1#, 1#, 0#, 0#, 0#, GEOM_PI / 2#, False), _
+        Array("MirrorX", 1#, 0#, 0#, -1#, 0#, 0#, 0#, True), _
+        Array("NewLoadPoint", 1#, 0#, 0#, 1#, 0#, 0#, 0#, False))
+    Dim components As Variant: components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    Dim referenceSection As CSectionModel, referenceState As CSectionStateResult, refX As Double, refY As Double
+    Dim referenceLambda As Double
+    Dim frame As Variant
+    For Each frame In frames
+        Dim tag As String: tag = CStr(frame(0))
+        Dim section As CSectionModel, hoop As CGeometryPath, layout As CTransverseRebarLayout
+        Set section = TestReinforcedAsymmetricSection(hoop, CDbl(frame(5)), CDbl(frame(6)), CDbl(frame(7)), CBool(frame(8)))
+        Set layout = New CTransverseRebarLayout: layout.AddGroup hoop, 8#, 100#, "A400"
+        Dim cx As Double, cy As Double, area As Double
+        section.ConcreteMeshCentroid cx, cy, area
+        Dim loads As CSectionLoadState, analysis As CCoupledSectionAnalysis, expected As Variant, atPoint As Variant
+        Set loads = TestFrameLoads(Array(28000#, 1300000#, -1700000#, 1800000#, 12500#, -10500#), frame, cx, cy, expected, atPoint)
+        Set analysis = New CCoupledSectionAnalysis
+        analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+        Dim meta As CResultMeta, state As CSectionStateResult, field() As Double, resultants() As Double
+        Set meta = analysis.SolveTarget(loads, "Auto", spec, field, resultants, True, state)
+        TestRecord meta.InternalStatus = rsSuccess, tag & " converged: " & meta.ResultComment, passed, failed, report
+        If Not state Is Nothing Then
+            Dim i As Long
+            For i = 0 To 5
+                TestExpectNear resultants(i + 1), CDbl(expected(i)), 0.000002, _
+                    tag & " equilibrium " & CStr(components(i)), passed, failed, report
+            Next i
+            If tag = "Reference" Then
+                Set referenceSection = section: Set referenceState = state
+                refX = cx: refY = cy
+            ElseIf Not referenceState Is Nothing Then
+                TestExpectNear state.Epsilon0 + state.KappaX * cy + state.KappaY * cx, _
+                    referenceState.Epsilon0 + referenceState.KappaX * refY + referenceState.KappaY * refX, _
+                    0.00001, tag & " strain at the concrete centroid", passed, failed, report
+                TestExpectNear state.KappaX, frame(3) * referenceState.KappaY + frame(4) * referenceState.KappaX, _
+                    0.00001, tag & " rotated kappaX", passed, failed, report
+                TestExpectNear state.KappaY, frame(1) * referenceState.KappaY + frame(2) * referenceState.KappaX, _
+                    0.00001, tag & " rotated kappaY", passed, failed, report
+                TestExpectNear state.Twist, (frame(1) * frame(4) - frame(2) * frame(3)) * referenceState.Twist, _
+                    0.00001, tag & " oriented twist", passed, failed, report
+                TestFrameFields referenceSection, section, referenceState, state, frame, passed, failed, report
+            End If
+        End If
+        TestFrameCapacity section, hoop, provider, spec, frame, cx, cy, referenceLambda, passed, failed, report
+    Next frame
+    RunTestCoupledFrameInvariance = report & "TOTAL_COUPLED_FRAME: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledFrameInvariance = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Независимо преобразует пары (My,Mx) и (Qx,Qy). T умножается на
+' определитель ортогонального преобразования, а N сохраняет знак.
+Private Function TestFrameLoads(ByVal baseline As Variant, ByVal frame As Variant, ByVal cx As Double, ByVal cy As Double, _
+        ByRef aboutCentroid As Variant, ByRef aboutApplication As Variant) As CSectionLoadState
+    Dim force As Double, mx As Double, my As Double, torque As Double, qx As Double, qy As Double
+    Dim dx As Double, dy As Double, leverX As Double, leverY As Double
+    force = baseline(0)
+    my = frame(1) * baseline(2) + frame(2) * baseline(1): mx = frame(3) * baseline(2) + frame(4) * baseline(1)
+    qx = frame(1) * baseline(4) + frame(2) * baseline(5): qy = frame(3) * baseline(4) + frame(4) * baseline(5)
+    torque = (frame(1) * frame(4) - frame(2) * frame(3)) * baseline(3)
+    dx = frame(1) * 9# + frame(2) * -7#: dy = frame(3) * 9# + frame(4) * -7#
+    If CStr(frame(0)) = "NewLoadPoint" Then
+        leverX = -13#: leverY = 8# ' Компенсируем перенос точки, сохраняя тот же физический силовой винт.
+        mx = mx - force * leverY: my = my - force * leverX
+        torque = torque - (leverX * qy - leverY * qx)
+    End If
+    dx = dx + leverX: dy = dy + leverY
+    aboutApplication = Array(force, mx, my, torque, qx, qy)
+    aboutCentroid = Array(force, mx + force * dy, my + force * dx, torque + dx * qy - dy * qx, qx, qy)
+    Dim loads As New CSectionLoadState
+    loads.Initialize force, mx, my, cx + dx, cy + dy
+    loads.SetSpatialComponents torque, qx, qy
+    Set TestFrameLoads = loads
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет тот же определяющий механизм и запас, а моменты предельной
+' точки сверяет в пользовательской точке приложения каждого варианта.
+Private Sub TestFrameCapacity(ByVal section As CSectionModel, ByVal hoop As CGeometryPath, ByVal provider As CMaterialModelProvider, _
+        ByVal spec As CMaterialModelSpec, ByVal frame As Variant, ByVal cx As Double, ByVal cy As Double, ByRef referenceLambda As Double, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim aboutCentroid As Variant, atPoint As Variant, loads As CSectionLoadState, capacity As CCapacityResult
+    Set loads = TestFrameLoads(Array(-100000#, 120000#, -90000#, 200000#, 240#, -120#), frame, cx, cy, aboutCentroid, atPoint)
+    Set capacity = TestWeakHoopCapacity(section, hoop, provider, spec, loads, 0.000012)
+    Dim tag As String: tag = CStr(frame(0))
+    TestRecord capacity.HasUltimatePoint And capacity.IsTransverseLimit And capacity.Status = "FAIL", _
+        tag & " hoop governs the physical limit: " & capacity.ResultMeta.ResultComment, passed, failed, report
+    If Not capacity.HasUltimatePoint Then Exit Sub
+    Dim lambda As Double: lambda = capacity.LambdaCapacity
+    If tag = "Reference" Then
+        referenceLambda = lambda
+    Else
+        TestRecord Abs(lambda - referenceLambda) <= 0.0001, tag & " same hoop reserve " & lambda, passed, failed, report
+    End If
+    Dim actual As Variant, i As Long
+    actual = Array(capacity.NUltimate, capacity.MxUltimate, capacity.MyUltimate, capacity.TUltimate, capacity.QxUltimate, capacity.QyUltimate)
+    For i = 0 To 5
+        TestExpectNear CDbl(actual(i)), lambda * CDbl(atPoint(i)), 0.000002, _
+            tag & " ultimate component " & CStr(i + 1), passed, failed, report
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет семь полей в соответствующих центрах. Сумма σzz·εzz и
+' τ·γ по бетонным элементам проверяет инвариантность измеренной работы.
+Private Sub TestFrameFields(ByVal referenceSection As CSectionModel, ByVal section As CSectionModel, _
+        ByVal referenceState As CSectionStateResult, ByVal state As CSectionStateResult, ByVal frame As Variant, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim tag As String: tag = CStr(frame(0))
+    Dim reference As CCoupledFieldSnapshot, moved As CCoupledFieldSnapshot
+    Set reference = referenceState.CoupledFields: Set moved = state.CoupledFields
+    Dim count As Long: count = referenceSection.ConcreteCount
+    If count <> section.ConcreteCount Or reference Is Nothing Or moved Is Nothing Then
+        TestRecord False, tag & " matching concrete mesh and saved fields", passed, failed, report
+        Exit Sub
+    End If
+    Dim used() As Boolean: ReDim used(1 To count)
+    Dim i As Long, j As Long, k As Long, x As Double, y As Double, newX As Double, newY As Double
+    Dim a(0 To 6) As Double, b(0 To 6) As Double, expected As Variant
+    Dim errorByField(0 To 6) As Double, baseWork As Double, movedWork As Double
+    For i = 1 To count
+        x = referenceSection.ConcreteX(i): y = referenceSection.ConcreteY(i)
+        newX = frame(1) * x + frame(2) * y + frame(5): newY = frame(3) * x + frame(4) * y + frame(6)
+        For j = 1 To count
+            If Not used(j) Then
+                If Abs(section.ConcreteX(j) - newX) < 0.000001 And Abs(section.ConcreteY(j) - newY) < 0.000001 Then Exit For
+            End If
+        Next j
+        If j > count Then
+            TestRecord False, tag & " missing matching concrete point " & CStr(i), passed, failed, report
+            Exit Sub
+        End If
+        used(j) = True
+        reference.Axial i, a(0), a(1): moved.Axial j, b(0), b(1)
+        reference.Spatial i, a(2), a(3), a(4), a(5), a(6): moved.Spatial j, b(2), b(3), b(4), b(5), b(6)
+        expected = Array(a(0), a(1), frame(1) * a(2) + frame(2) * a(3), frame(3) * a(2) + frame(4) * a(3), _
+            frame(1) * a(4) + frame(2) * a(5), frame(3) * a(4) + frame(4) * a(5), a(6))
+        For k = 0 To 6: errorByField(k) = GeomMax(errorByField(k), Abs(b(k) - expected(k))): Next k
+        baseWork = baseWork + referenceSection.ConcreteArea(i) * (a(0) * a(1) + a(2) * a(4) + a(3) * a(5))
+        movedWork = movedWork + section.ConcreteArea(j) * (b(0) * b(1) + b(2) * b(4) + b(3) * b(5))
+    Next i
+    Dim labels As Variant, tolerance As Variant
+    labels = Array("epsilonZ", "sigmaZ", "tauXZ", "tauYZ", "gammaXZ", "gammaYZ", "warping")
+    tolerance = Array(0.00000001, 0.00001, 0.00001, 0.00001, 0.00000001, 0.00000001, 0.0000001)
+    For k = 0 To 6
+        TestRecord errorByField(k) <= tolerance(k), tag & " field " & labels(k) & " max deviation " & errorByField(k), _
+            passed, failed, report
+    Next k
+    TestExpectNear movedWork, baseWork, 0.00001, tag & " axial and shear work density integral", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' На той же геометрии проверяет предел хомута при шести ненулевых усилиях.
 ' Для контрольной стали заданы малые деформации текучести и предела.
 Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop As CGeometryPath, _
@@ -1589,16 +1780,10 @@ Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop A
     Const POISSON_RATIO As Double = 0.2
     Const MODULUS As Double = 30000#
     Const FORCE As Double = -100000#
-    Dim layout As New CTransverseRebarLayout: layout.AddGroup hoop, 8#, 100#, "TestMatrixHoopGrade"
-    Dim steel As New CCoupledSteelModel: steel.Initialize 200000#, 2#, 2#, 500#, 500#, STRAIN_LIMIT, STRAIN_LIMIT
-    Dim grades As Object, supplementary As Object
-    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "TestMatrixHoopGrade", steel
-    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
-    Dim analysis As New CCoupledSectionAnalysis, loads As New CSectionLoadState, capacity As CCapacityResult
-    analysis.Initialize section, layout, provider, POISSON_RATIO, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary
+    Dim loads As New CSectionLoadState, capacity As CCapacityResult
     loads.Initialize FORCE, 120000#, -90000#, cx, cy
     loads.SetSpatialComponents 200000#, 240#, -120#
-    Set capacity = analysis.SolveCapacity(loads, "Auto", spec, 1#, 1.5, 0.0001, 30)
+    Set capacity = TestWeakHoopCapacity(section, hoop, provider, spec, loads, STRAIN_LIMIT)
     Dim lambda As Double: lambda = capacity.LambdaCapacity
     TestRecord capacity.HasUltimatePoint And capacity.IsTransverseLimit And capacity.Status = "FAIL", _
         "perforated section reaches the hoop limit: " & capacity.ResultMeta.ResultComment, passed, failed, report
@@ -1622,6 +1807,21 @@ Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop A
         TestRecord False, "missing perforated limit state", passed, failed, report
     End If
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Ищет предел с искусственно слабым хомутом при заданных усилиях.
+Private Function TestWeakHoopCapacity(ByVal section As CSectionModel, ByVal hoop As CGeometryPath, _
+        ByVal provider As CMaterialModelProvider, ByVal spec As CMaterialModelSpec, ByVal loads As CSectionLoadState, _
+        ByVal strainLimit As Double) As CCapacityResult
+    Dim layout As New CTransverseRebarLayout: layout.AddGroup hoop, 8#, 100#, "TestMatrixHoopGrade"
+    Dim steel As New CCoupledSteelModel: steel.Initialize 200000#, 2#, 2#, 500#, 500#, strainLimit, strainLimit
+    Dim grades As Object, supplementary As Object
+    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "TestMatrixHoopGrade", steel
+    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
+    Dim analysis As New CCoupledSectionAnalysis
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary
+    Set TestWeakHoopCapacity = analysis.SolveCapacity(loads, "Auto", spec, 1#, 1.5, 0.0001, 30)
+End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Загружает настройки без инженерного обнуления моментов. Даже малая
