@@ -10,11 +10,13 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ==========================================================================
-' Поиск первого максимума связанной ветви при управлении деформацией
+' Поиск предела связанной ветви при управлении деформацией
 ' ==========================================================================
 ' Приращения меры деформации положительны. Плечи предполагаемого максимума
 ' проверяются повторно с меньшим шагом от восстановленной истории левого
 ' плеча. Численный отказ, плато и предел диапазона не считаются максимумом.
+' В железобетоне локальный максимум может предшествовать набору нагрузки
+' на трещиноватой ветви. Он сохраняется в диагностике, поиск идёт дальше.
 
 Private Type TBranchPoint
     Coordinate As Double
@@ -36,6 +38,8 @@ Private mMaxIterations As Long, mMaximumLambda As Double, mBestLambda As Double
 Private mControlName As String, mProbeDetails As String, mMeta As CResultMeta
 Private mPeak As TBranchPoint, mPeakAccuracy As Double
 Private mHasPeak As Boolean, mDesignVerified As Boolean
+Private mLocalPeak As Double, mLocalPeakAccuracy As Double, mPassedDrop As Boolean
+Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mProbeCount As Long
 Private mLimitFields As Collection
@@ -56,6 +60,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    mLocalPeak = 0#: mLocalPeakAccuracy = 0#: mPassedDrop = False
+    mFollowingLocalPeak = False: mRecoveredPeaks = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
     mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
@@ -82,9 +88,11 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     increment = nominal * 0.5
     minimum = increment * MIN_STEP_RATIO
 
-    Dim attempt As Long
-    For attempt = 1 To STEP_LIMIT
+    Dim attempt As Long, reinforced As Boolean
+    If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
+    For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
+        If attempt > STEP_LIMIT And mLocalPeak = 0# Then Exit For
         trial.Coordinate = current.Coordinate + increment
         If increment < minimum Or trial.Coordinate <= current.Coordinate Then Exit For
         If Not Probe(trial, current.Lambda, False) Then
@@ -92,12 +100,17 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         ElseIf trial.Lambda > maximumLambda Then
             mSolver.DiscardStep
             mMeta.SetResult rsNumericalFailure, rcSearchBoundReached, rkCapacity, _
-                "Достигнута граница Capacity.MaxLambda до подтверждения максимума.", Details()
+                "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", Details()
             Exit Sub
         ElseIf BeyondSteelLimit() Then
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             increment = increment * 0.5
-        ElseIf trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
+        ElseIf mFollowingLocalPeak Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
+            If trial.Lambda <= 0# Then
+                mSolver.DiscardStep
+                StopSearch "После локального максимума множитель вышел из области положительной нагрузки."
+                Exit Sub
+            End If
             If Not mDesignVerified And current.Lambda < 1# And trial.Lambda >= 1# Then
                 VerifyDesignLoad current, trial
                 If Not Probe(trial, current.Lambda, False) Then
@@ -113,15 +126,22 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             AcceptPoint history, trial
             left = current: current = trial
             If current.Lambda > mBestLambda Then mBestLambda = current.Lambda
+            If mFollowingLocalPeak Then CheckRecovery current.Lambda
             If increment < nominal / 1.25 Then increment = increment * 1.25
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
             mSolver.DiscardStep
-            If VerifyPeak(history, left, current, trial) Then Exit Sub
-            If Not mSolver.ReplayAcceptedFields(history, current.HistoryIndex) Then
-                StopSearch "Не удалось восстановить историю возрастающей ветви."
-                Exit Sub
+            If VerifyPeak(history, left, current, trial) Then
+                If Not reinforced Then Exit Sub
+                If Not ResumeFromLocalPeak(history, current) Then Exit Sub
+                increment = nominal * 0.25
+                minimum = increment * MIN_STEP_RATIO
+            Else
+                If Not mSolver.ReplayAcceptedFields(history, current.HistoryIndex) Then
+                    StopSearch "Не удалось восстановить историю возрастающей ветви."
+                    Exit Sub
+                End If
+                increment = increment * 0.5
             End If
-            increment = increment * 0.5
         Else
             mSolver.DiscardStep
             increment = increment * 0.5
@@ -134,13 +154,39 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     End If
 End Sub
 
+' Возобновляет расчёт от уточнённого максимума, начиная с его собственной
+' принятой истории. Предельные поля публикуются только после критерия.
+Private Function ResumeFromLocalPeak(ByRef history As Collection, ByRef current As TBranchPoint) As Boolean
+    mLocalPeak = mPeak.Lambda: mLocalPeakAccuracy = mPeakAccuracy
+    mHasPeak = False: mFollowingLocalPeak = True: mPassedDrop = False
+    Set history = mLimitFields
+    If Not mSolver.ReplayAcceptedFields(history, history.Count) Then
+        StopSearch "Не удалось восстановить историю локального максимума железобетонного сечения."
+        Exit Function
+    End If
+    mCurrentResultants = mLimitResultants
+    Set mLimitFields = Nothing: Erase mLimitResultants
+    current = mPeak
+    current.HistoryIndex = history.Count
+    ResumeFromLocalPeak = True
+End Function
+
+' Считает превышение локального максимума после подтверждённого спада.
+' Предел точности отделяет восстановление нагрузки от колебаний решателя.
+Private Sub CheckRecovery(ByVal lambda As Double)
+    If lambda < mLocalPeak - mLocalPeakAccuracy Then mPassedDrop = True
+    If Not mPassedDrop Or lambda <= mLocalPeak + mLocalPeakAccuracy Then Exit Sub
+    mFollowingLocalPeak = False
+    mRecoveredPeaks = mRecoveredPeaks + 1
+End Sub
+
 ' Возвращает максимальный подтверждённый множитель на пройденной
 ' допустимой ветви, даже если общий предел остался неопределённым.
 Friend Property Get BestAdmissibleLambda() As Double
     BestAdmissibleLambda = mBestLambda
 End Property
 
-' Передаёт подтверждённый максимум и оценку его численной точности.
+' Передаёт подтверждённый максимум ветви без арматуры и оценку точности.
 Friend Function CopyPeak(ByRef lambda As Double, ByRef accuracy As Double, ByRef designVerified As Boolean) As Boolean
     If Not mHasPeak Then Exit Function
     lambda = mPeak.Lambda: accuracy = mPeakAccuracy: designVerified = mDesignVerified
@@ -327,6 +373,11 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
     For attempt = 1 To STEP_LIMIT
         If high.Lambda - low.Lambda <= tolerance Then
             If low.Lambda <= 0# Then Exit Function
+            If mLocalPeak > 0# And high.Lambda < mBestLambda - mLocalPeakAccuracy Then
+                StopSearch "Арматурный предел достигнут при нагрузке ниже ранее подтверждённого равновесия. Нужна оценка порядка предельных состояний."
+                ResolveSteelCrossing = True
+                Exit Function
+            End If
             mSteelLow = low.Lambda: mSteelHigh = high.Lambda: mSteelPoint = point
             Set mLimitFields = New Collection
             Dim i As Long
@@ -379,6 +430,8 @@ End Function
 
 ' Сохраняет численную неопределённость и достигнутую допустимую нагрузку.
 Private Sub StopSearch(ByVal reason As String)
+    If mLocalPeak > 0# Then reason = "Подтверждён локальный максимум при lambda = " & Format$(mLocalPeak, "0.000000") & _
+        ". Предельное состояние железобетонного сечения не установлено. " & reason
     If mBestLambda > 0# Then reason = reason & " Допустимое равновесие подтверждено до lambda = " & Format$(mBestLambda, "0.000000") & "."
     mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, reason, Details()
 End Sub
@@ -387,5 +440,10 @@ End Sub
 Private Function Details() As String
     Details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
         "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignVerified) & "; проб: " & CStr(mProbeCount)
+    If mLocalPeak > 0# Then
+        Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
+            "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _
+            "; максимумов превзойдено после спада: " & CStr(mRecoveredPeaks)
+    End If
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function

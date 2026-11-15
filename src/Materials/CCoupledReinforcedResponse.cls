@@ -64,6 +64,11 @@ Friend Sub Initialize(ByVal operators As CCoupledElasticState, ByVal concrete As
     ICoupledPointResponse_ClearHistory
 End Sub
 
+' Показывает наличие продольной или поперечной арматуры в балансе сечения.
+Friend Property Get HasSteel() As Boolean
+    HasSteel = (mFirstSteel > 0 And mLastSteel >= mFirstSteel)
+End Property
+
 ' Показывает максимальное отношение деформации к пределу на последнем
 ' полностью вычисленном пробном поле. Первый вызов точки сбрасывает максимум.
 Friend Property Get TrialSteelUtilization() As Double

@@ -152,9 +152,15 @@ Public Function RunTestCoupledLopesA2Compression(ByVal spansText As String, ByVa
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет диагностический пик и итог прочности A2 с восстановленной ветвью.
+Public Function RunTestCoupledLopesA2LocalPeak(ByVal spansText As String, ByVal maximumLambdaText As String) As String
+    RunTestCoupledLopesA2LocalPeak = TraceLopesA2Test(spansText, ".029", True, strengthMaximum:=Val(maximumLambdaText))
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сравнивает упругое сечение и последующую нелинейную ветвь с армированием.
 Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As String, ByVal refinedInputs As Boolean, _
-        Optional ByVal normalForce As Double = 0#) As String
+        Optional ByVal normalForce As Double = 0#, Optional ByVal strengthMaximum As Double = 0#) As String
     On Error GoTo Failed
     Const NU As Double = 0.2
     Const FC As Double = 47.3
@@ -201,6 +207,10 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
     concrete.Initialize operators.PointCount, ec, NU, 0.6 * FC, FC, ft, peakStrain, gt, gc, 125#
     response.Initialize operators, concrete, steel
     solver.Initialize operators, response, ec
+    If strengthMaximum > 0# Then
+        TraceLopesA2Test = SearchLopesA2StrengthTest(operators, solver, response, strengthMaximum, report, tracePath)
+        Exit Function
+    End If
     If normalForce <> 0# Then
         Dim path As New CLoadPathVector, preload As New CCoupledLoadContinuation
         path.Initialize normalForce, 0#, 0#, 0#, 0#, 0#
@@ -275,6 +285,72 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
 Failed:
     TraceLopesA2Test = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает тот же силовой и деформационный поиск, что использует проверка прочности.
+Private Function SearchLopesA2StrengthTest(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
+        ByVal response As CCoupledReinforcedResponse, ByVal maximum As Double, ByRef report As String, ByVal tracePath As String) As String
+    Const UNIT_MOMENT As Double = 100000000#
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize 0#, 0#, 0#, 0#, 0#, 0#, 0#, UNIT_MOMENT
+    branch.Initialize solver, path, 4, 64, 24, 0.0000005, 0.0000005, True
+    branch.TraceSteelLimit response, 0.25, maximum, 0.005, True
+    Dim forceMeta As CResultMeta: Set forceMeta = branch.ResultMeta
+    AddExperimentTraceTest report, tracePath, "A2_STRENGTH_FORCE: " & ExperimentNumberTest(branch.AcceptedLambda) & " | " & _
+        forceMeta.ResultComment & " | " & forceMeta.DiagnosticDetails
+    Dim controlled As CCoupledDeformationContinuation, best As Double, peak As Double, accuracy As Double, verified As Boolean
+    Dim limitFields As Collection, actual() As Double, force() As Double, field() As Double
+    Dim low As Double, high As Double, onOffset As Boolean, point As Long, failure As Long, passed As Long
+    Dim eps0 As Double, kx As Double, ky As Double, twist As Double
+    If branch.CopySteelLimit(low, high, onOffset, point) Then
+        branch.CopyLimitState limitFields, actual
+    Else
+        Set controlled = branch.ContinueByDeformation(maximum)
+        If Not controlled Is Nothing Then
+            Dim meta As CResultMeta: Set meta = controlled.ResultMeta
+            best = controlled.BestAdmissibleLambda
+            AddExperimentTraceTest report, tracePath, "A2_STRENGTH_CONTROL: " & meta.ResultComment & " | " & meta.DiagnosticDetails
+            If controlled.CopyPeak(peak, accuracy, verified) Or controlled.CopySteelLimit(low, high, point) Then _
+                controlled.CopyLimitState limitFields, actual
+        End If
+    End If
+    AddExperimentTraceTest report, tracePath, "A2_STRENGTH_LIMIT;" & ExperimentNumberTest(best) & ";" & _
+        ExperimentNumberTest(peak) & ";" & ExperimentNumberTest(accuracy) & ";" & CStr(verified) & ";" & _
+        ExperimentNumberTest(low) & ";" & ExperimentNumberTest(high) & ";" & CStr(point)
+    CheckLopesA2LocalPeakTest controlled, best, peak, point, limitFields, report, tracePath, passed, failure
+    If limitFields Is Nothing Then
+        If peak = 0# And point = 0 Then passed = passed + 1 Else failure = failure + 1
+    Else
+        If peak > 0# Then path.TargetSix peak, force Else path.TargetSix low, force
+        field = limitFields.Item(limitFields.Count)
+        operators.GeneralizedDeformation field, eps0, kx, ky, twist
+        Dim errorNorm As Double: errorNorm = operators.ResultantResidualNorm(actual, force)
+        AddExperimentTraceTest report, tracePath, "A2_STRENGTH_RESULTANT;" & ExperimentNumberTest(actual(4) / 1E+6) & ";" & _
+            ExperimentNumberTest(twist * 1000#) & ";" & ExperimentNumberTest(errorNorm)
+        If errorNorm < 0.000005 Then passed = passed + 1 Else failure = failure + 1
+    End If
+    SearchLopesA2StrengthTest = report & "TOTAL_A2_STRENGTH_SEARCH: passed=" & passed & "; failed=" & failure
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Подтверждает, что ранний пик не записан как предельный максимум.
+Private Sub CheckLopesA2LocalPeakTest(ByVal controlled As CCoupledDeformationContinuation, ByVal best As Double, _
+        ByVal peak As Double, ByVal steelPoint As Long, ByVal fields As Collection, ByRef report As String, _
+        ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
+    Dim passedLocal As Boolean, details As String, capacity As New CCapacityResult
+    If Not controlled Is Nothing Then
+        Dim meta As CResultMeta: Set meta = controlled.ResultMeta
+        details = meta.DiagnosticDetails
+        passedLocal = (InStr(details, "локальный максимум lambda:") > 0 And peak = 0# And best > 1.54)
+        If steelPoint = 0 Then
+            capacity.InitializeCoupledUnresolved meta, "Auto", best
+            passedLocal = passedLocal And (fields Is Nothing) And capacity.Status = "NumFail" And _
+                capacity.HasConfirmedLowerBound And Not capacity.HasUltimatePoint
+        End If
+    End If
+    AddExperimentTraceTest report, tracePath, "A2_LOCAL_PEAK_NOT_ULTIMATE: " & CStr(passedLocal)
+    If passedLocal Then passed = passed + 1 Else failures = failures + 1
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Фиксирует первое обнаружение события интервалом двух принятых точек.
