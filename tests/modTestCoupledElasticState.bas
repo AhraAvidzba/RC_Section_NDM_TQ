@@ -1068,12 +1068,43 @@ Public Function RunTestCoupledConcreteResponse() As String
     response.ClearHistory
     material.AcceptedPointDamage 1, et, ec
     TestRecord et = 0# And ec = 0#, "independent combination clears concrete history", passed, failed, report
+    TestHydrostaticConcreteResponse passed, failed, report
 Done:
     RunTestCoupledConcreteResponse = report & "TOTAL_COUPLED_CONCRETE_RESPONSE: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledConcreteResponse = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет изотропное растяжение при нулевой начальной дилатансии.
+' Растягивающая вершина за пределом требует объёмного пластического приращения.
+Private Sub TestHydrostaticConcreteResponse(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim material As New CCoupledConcreteResponse, response As ICoupledPointResponse
+    material.Initialize 1, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    Set response = material
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    strain(1) = 0.0001: strain(2) = strain(1): strain(3) = strain(1)
+    Dim status As ESolverFailureCode
+    status = response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly)
+    TestRecord status = sfcNone, "hydrostatic tension reaches a constitutively consistent return", passed, failed, report
+    If status <> sfcNone Then Exit Sub
+    TestRecord stress(1) > 0# And stress(1) < 5# And stress(1) = stress(2) And stress(1) = stress(3) And _
+        stress(4) = 0# And stress(5) = 0# And stress(6) = 0#, _
+        "hydrostatic return preserves symmetry and reduces elastic pressure", passed, failed, report
+    Dim beta As Double, apex As Double, plastic As Double, expectedStress As Double
+    beta = 16# * 0.88 / 3# - 1.12
+    apex = 16# * 0.88 / (3# * 0.12 + beta) ' При q=0 эффективное давление следует из поверхности текучести.
+    plastic = strain(1) - apex / 50000# ' Изотропное растяжение даёт модуль E/(1-2ν).
+    expectedStress = apex * Exp(-3# * 125# * plastic / 0.12)
+    TestExpectNear stress(1), expectedStress, 0.0000001, "hydrostatic damaged stress matches the scalar reference", passed, failed, report
+    Dim et As Double, ec As Double
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et = 0# And ec = 0#, "hydrostatic trial keeps accepted history unchanged", passed, failed, report
+    response.AcceptTrial
+    material.AcceptedPointDamage 1, et, ec
+    TestRecord et > 0# And ec = 0#, "hydrostatic tension advances only tension history", passed, failed, report
+End Sub
 
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

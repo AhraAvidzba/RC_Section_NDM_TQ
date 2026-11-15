@@ -332,7 +332,13 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
 
     dilationRate = CurrentDilation(kt, kc, r, trace, q)
     For j = 1 To MATERIAL_ITERATIONS
-        If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, duration) Then Exit Function
+        If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, duration) Then
+            If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
+            ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
+            ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
+            dilationRate = Tan(mDilationMax)
+            If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, duration) Then Exit Function
+        End If
         CoupledStressInvariants effective, trace, q, high, mid, low
         r = PositiveStressFraction(high, mid, low)
         For i = 1 To 3

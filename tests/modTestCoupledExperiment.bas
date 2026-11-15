@@ -2,9 +2,133 @@ Attribute VB_Name = "modTestCoupledExperiment"
 Option Explicit
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Сопоставление связанного НДС с измерениями на коробчатой балке Onsongo TBU3.
-' Геометрия и стали восстановлены по Bairán, рис. 6.39, и Yamamoto, разд. 4.2.
+' Сопоставление связанного НДС с опытами Onsongo TBU3 и Kani.
+' Геометрия и стали восстановлены по первичным публикациям в literature/Coupled6D.
 ' Параметры, отсутствующие в источниках, фиксируются как допущения расчёта.
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Прослеживает чистый Qy с заданием среднего инженерного сдвига yz.
+' Опытная кривая сравнивается с принятыми точками без экстраполяции.
+Public Function RunTestCoupledKaniShear(ByVal spansText As String, ByVal shearText As String) As String
+    RunTestCoupledKaniShear = TraceKaniShearTest(spansText, shearText, False)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет траекторию с оценками энергий из формул (16.3–16.4)
+' Poliotti и Bairán (2019). Характеристическую длину сохраняет.
+Public Function RunTestCoupledKaniPublishedEnergy(ByVal spansText As String, ByVal shearText As String) As String
+    RunTestCoupledKaniPublishedEnergy = TraceKaniShearTest(spansText, shearText, True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет точки равновесия и причины уменьшения шага при заданном сдвиге.
+Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText As String, ByVal publishedEnergies As Boolean) As String
+    On Error GoTo Failed
+    Const EC As Double = 25600#
+    Const FC As Double = 28.2
+    Const FT As Double = 1.75
+    Const NOMINAL_INCREMENT As Double = 0.0002
+    Const MAX_ATTEMPTS As Long = 120
+    Const FORCE_SCALE As Double = 100000# ' Множитель равновесия отсчитывается в долях 100 кН.
+    Const AREA As Double = 305# * 610#
+    Dim report As String, tracePath As String, passed As Long, failed As Long
+    Dim spans As Long: spans = CLng(spansText)
+    Dim maximumShear As Double: maximumShear = Val(shearText)
+    If spans < 1 Or spans > 3 Or maximumShear <= 0# Or maximumShear > 0.008 Then _
+        Err.Raise 5, , "Тестовые границы: базис 1–3, инженерный сдвиг от 0 до 0,008."
+    If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then tracePath = ThisWorkbook.Path & "\Kani_Trace.csv"
+    AddExperimentTraceTest report, tracePath, "attempt;gamma_yz;Qy_kN;hoop_stress_MPa;hoop_utilization;stress_residual_MPa;seconds"
+    Dim gt As Double, gc As Double
+    gt = 0.12: gc = 80#
+    If publishedEnergies Then
+        gt = 0.073 * FC ^ 0.18
+        gc = (FC / FT) ^ 2 * gt
+    End If
+    AddExperimentTraceTest report, tracePath, "KANI_ENERGIES_N_PER_MM: " & ExperimentNumberTest(gt) & " | " & ExperimentNumberTest(gc)
+    Dim section As CSectionModel, layout As CTransverseRebarLayout, steel As Object
+    Set section = BuildKaniSectionTest(layout, steel)
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
+    operators.PrepareModel section, EC, 0.2, spans, spans, 5, layout, steelModels:=steel
+    concrete.Initialize operators.PointCount, EC, 0.2, 0.6 * FC, FC, FT, 0.0022, gt, gc, 125#
+    response.Initialize operators, concrete, steel
+    Dim solver As New CCoupledNewtonSolver, shearX() As Double, shearY() As Double
+    solver.Initialize operators, response, EC
+    operators.MeanShearProjections shearX, shearY
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
+    direction(6) = FORCE_SCALE
+    AddExperimentTraceTest report, tracePath, "KANI_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.DegreeCount)
+
+    Dim coordinate As Double, increment As Double, candidate As Double, trialLambda As Double, reached As Double
+    Dim field() As Double, actual() As Double, attempt As Long, i As Long, errorNorm As Double, difference As Double
+    Dim gamma As Double, expected As Double, hoopPoint As Long, started As Double, stopReason As String
+    increment = NOMINAL_INCREMENT: stopReason = "AttemptLimit"
+    For attempt = 1 To MAX_ATTEMPTS
+        candidate = coordinate + increment
+        If candidate > maximumShear Then candidate = maximumShear
+        started = Timer
+        If solver.TryDeformationStep(baseLoad, direction, shearY, candidate, reached, trialLambda, 0.0000005, 0.00000002, 24) Then
+            solver.CopyTrial field, actual: solver.AcceptStep
+            reached = trialLambda: coordinate = candidate: errorNorm = 0#: gamma = 0#
+            For i = 1 To operators.DegreeCount: gamma = gamma + shearY(i) * field(i): Next i
+            For i = 1 To 6
+                expected = reached * direction(i)
+                difference = Abs(actual(i) - expected) / AREA
+                If i >= 2 And i <= 4 Then difference = difference / 610#
+                If difference > errorNorm Then errorNorm = difference
+            Next i
+            hoopPoint = response.AcceptedTransverseCriticalPoint
+            AddExperimentTraceTest report, tracePath, "Kani" & CStr(attempt) & ";" & ExperimentNumberTest(gamma) & ";" & _
+                ExperimentNumberTest(actual(6) / 1000#) & ";" & ExperimentNumberTest(response.AcceptedSteelStress(hoopPoint)) & ";" & _
+                ExperimentNumberTest(response.AcceptedTransverseSteelUtilization) & ";" & ExperimentNumberTest(errorNorm) & ";" & ExperimentNumberTest(Timer - started)
+            If errorNorm < 0.000005 And Abs(gamma - candidate) < 0.000000001 Then passed = passed + 1 Else failed = failed + 1
+            If coordinate = maximumShear Then
+                stopReason = "TargetReached"
+                Exit For
+            End If
+            increment = increment * 1.25
+            If increment > NOMINAL_INCREMENT Then increment = NOMINAL_INCREMENT
+        Else
+            AddExperimentTraceTest report, tracePath, "KANI_REJECTED: " & CStr(attempt) & " | gamma: " & ExperimentNumberTest(candidate) & _
+                " | " & solver.ResultMeta.ResultComment & " | " & solver.ResultMeta.DiagnosticDetails
+            increment = increment * 0.5
+            If increment < NOMINAL_INCREMENT / 32# Then
+                stopReason = "MinimumShearIncrement"
+                Exit For
+            End If
+        End If
+    Next attempt
+    AddExperimentTraceTest report, tracePath, "KANI_STOP: " & stopReason
+    If passed = 0 Then failed = failed + 1
+    TraceKaniShearTest = report & "TOTAL_KANI_SHEAR_EQUILIBRIUM: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    TraceKaniShearTest = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Строит номинальное сечение Kani. Положение осей масштабировано по рис. 4a
+' Poliotti и Bairán. Фактические радиусы загибов и диаграммы после текучести неизвестны.
+Private Function BuildKaniSectionTest(ByRef layout As CTransverseRebarLayout, ByRef steel As Object) As CSectionModel
+    Dim query As New CSectionGeometryQuery, region As New CGeometryRegion
+    region.Initialize query.RegionFromPath(query.AdjacentRectangles("Kani_Outer", Array(Array(-152.5, -305#, 305#, 610#))))
+    Dim mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder, section As CSectionModel
+    mesh.BuildMesh region, 20#, 20#, cellGeometry:="Contour"
+    Set section = builder.BuildFromGenerated(mesh, Nothing)
+    region.BuildContours section.Contours
+
+    Dim i As Long, x As Double
+    For i = 0 To 3
+        x = -105# + 70# * i
+        section.AddRebarElement x, -254#, 25#, GEOM_PI * 156.25, "KANI_LONG"
+        section.AddRebarElement x, 254#, 25#, GEOM_PI * 156.25, "KANI_LONG"
+    Next i
+    Set layout = New CTransverseRebarLayout
+    layout.AddContourGroup section, "KANI_HOOP", vbNullString, 10#, 100#, 25#, "KANI_HOOP"
+    Set steel = CreateObject("Scripting.Dictionary")
+    steel.Add "KANI_LONG", ExperimentBilinearSteelTest(200000#, 442#, 0#)
+    steel.Add "KANI_HOOP", ExperimentBilinearSteelTest(200000#, 400#, 0#)
+    Set BuildKaniSectionTest = section
+End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Воспроизводит предварительный момент и натурные приращения Mx/T.
@@ -46,7 +170,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Dim forceStage As Long: forceStage = maximumStage
     If followTwist And forceStage > 5 Then forceStage = 5
     If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then tracePath = ThisWorkbook.Path & "\TBU3_Trace.csv"
-    AddTBU3TraceTest report, tracePath, "stage;actual_stage;Mx_kNm;T_kNm;kappa_per_m;twist_rad_per_m;hoop_utilization;steel_utilization;stress_residual_MPa;elapsed_s;status"
+    AddExperimentTraceTest report, tracePath, "stage;actual_stage;Mx_kNm;T_kNm;kappa_per_m;twist_rad_per_m;hoop_utilization;steel_utilization;stress_residual_MPa;elapsed_s;status"
 
     Dim layout As CTransverseRebarLayout, steel As Object, section As CSectionModel
     Set section = BuildTBU3SectionTest(layout, steel)
@@ -67,30 +191,30 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         solved = branch.Advance(CDbl(stage))
         Set meta = branch.ResultMeta
         reached = branch.AcceptedLambda
-        row = CStr(stage) & ";" & TBU3NumberTest(reached)
+        row = CStr(stage) & ";" & ExperimentNumberTest(reached)
         If branch.HasAcceptedVariableState Or branch.AcceptedOffsetFraction = 1# And solved Then
             branch.CopyAccepted field, achieved
             path.TargetSix reached, target
             operators.GeneralizedDeformation field, eps0, kx, ky, twist
             errorNorm = TBU3ForceErrorTest(achieved, target)
-            row = row & ";" & TBU3NumberTest(-achieved(2) / 1E+6) & ";" & TBU3NumberTest(achieved(4) / 1E+6) & _
-                ";" & TBU3NumberTest(-kx * 1000#) & ";" & TBU3NumberTest(twist * 1000#) & _
-                ";" & TBU3NumberTest(response.AcceptedTransverseSteelUtilization) & ";" & TBU3NumberTest(response.AcceptedSteelUtilization) & _
-                ";" & TBU3NumberTest(errorNorm)
+            row = row & ";" & ExperimentNumberTest(-achieved(2) / 1E+6) & ";" & ExperimentNumberTest(achieved(4) / 1E+6) & _
+                ";" & ExperimentNumberTest(-kx * 1000#) & ";" & ExperimentNumberTest(twist * 1000#) & _
+                ";" & ExperimentNumberTest(response.AcceptedTransverseSteelUtilization) & ";" & ExperimentNumberTest(response.AcceptedSteelUtilization) & _
+                ";" & ExperimentNumberTest(errorNorm)
             If errorNorm < 0.000005 Then passed = passed + 1 Else failures = failures + 1
         Else
             row = row & ";;;;;;;"
         End If
-        row = row & ";" & TBU3NumberTest(Timer - started)
+        row = row & ";" & ExperimentNumberTest(Timer - started)
         If solved Then
-            AddTBU3TraceTest report, tracePath, row & ";Accepted"
+            AddExperimentTraceTest report, tracePath, row & ";Accepted"
         Else
-            AddTBU3TraceTest report, tracePath, row & ";Unresolved"
-            AddTBU3TraceTest report, tracePath, "DIAGNOSTICS: " & meta.ResultComment & " | " & meta.DiagnosticDetails
+            AddExperimentTraceTest report, tracePath, row & ";Unresolved"
+            AddExperimentTraceTest report, tracePath, "DIAGNOSTICS: " & meta.ResultComment & " | " & meta.DiagnosticDetails
             Exit For
         End If
     Next stage
-    AddTBU3TraceTest report, tracePath, "LAST_REQUESTED_STAGE_ACCEPTED: " & CStr(solved)
+    AddExperimentTraceTest report, tracePath, "LAST_REQUESTED_STAGE_ACCEPTED: " & CStr(solved)
     If followTwist And branch.HasAcceptedVariableState And reached < maximumStage Then
         If confirmPeak Then
             ConfirmTBU3PeakTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures
@@ -116,19 +240,19 @@ Private Sub ConfirmTBU3PeakTest(ByVal operators As CCoupledElasticState, ByVal s
     path.Components baseLoad, direction
     branch.CopyAccepted accepted, resultants
     Dim controlled As New CCoupledDeformationContinuation
-    AddTBU3TraceTest report, tracePath, "PEAK_SEARCH_STARTED: " & TBU3NumberTest(branch.AcceptedLambda)
+    AddExperimentTraceTest report, tracePath, "PEAK_SEARCH_STARTED: " & ExperimentNumberTest(branch.AcceptedLambda)
     controlled.Trace solver, response, baseLoad, direction, branch.AcceptedFields, branch.PreviousAcceptedLambda, _
         branch.AcceptedLambda, resultants, CDbl(requestedStage), STAGE_TOLERANCE, 24, 0.0000005, 0.00000002
 
     Dim meta As CResultMeta: Set meta = controlled.ResultMeta
-    AddTBU3TraceTest report, tracePath, "PEAK_DIAGNOSTICS: " & meta.ResultComment & " | " & meta.DiagnosticDetails
-    AddTBU3TraceTest report, tracePath, "PEAK_BEST_ADMISSIBLE_STAGE: " & TBU3NumberTest(controlled.BestAdmissibleLambda)
+    AddExperimentTraceTest report, tracePath, "PEAK_DIAGNOSTICS: " & meta.ResultComment & " | " & meta.DiagnosticDetails
+    AddExperimentTraceTest report, tracePath, "PEAK_BEST_ADMISSIBLE_STAGE: " & ExperimentNumberTest(controlled.BestAdmissibleLambda)
     Dim peak As Double, accuracy As Double, designVerified As Boolean
     If Not controlled.CopyPeak(peak, accuracy, designVerified) Then
-        AddTBU3TraceTest report, tracePath, "PEAK_CONFIRMED: False"
+        AddExperimentTraceTest report, tracePath, "PEAK_CONFIRMED: False"
         Exit Sub
     End If
-    AddTBU3TraceTest report, tracePath, "PEAK_CONFIRMED: True"
+    AddExperimentTraceTest report, tracePath, "PEAK_CONFIRMED: True"
     Dim fields As Collection
     If Not controlled.CopyLimitState(fields, resultants) Then
         failures = failures + 1
@@ -139,9 +263,9 @@ Private Sub ConfirmTBU3PeakTest(ByVal operators As CCoupledElasticState, ByVal s
     accepted = fields(fields.Count)
     operators.GeneralizedDeformation accepted, eps0, kx, ky, twist
     errorNorm = TBU3ForceErrorTest(resultants, target)
-    AddTBU3TraceTest report, tracePath, "PEAK_STAGE_M_T_TWIST_ERROR_ACCURACY;" & TBU3NumberTest(peak) & ";" & _
-        TBU3NumberTest(-resultants(2) / 1E+6) & ";" & TBU3NumberTest(resultants(4) / 1E+6) & ";" & _
-        TBU3NumberTest(twist * 1000#) & ";" & TBU3NumberTest(errorNorm) & ";" & TBU3NumberTest(accuracy)
+    AddExperimentTraceTest report, tracePath, "PEAK_STAGE_M_T_TWIST_ERROR_ACCURACY;" & ExperimentNumberTest(peak) & ";" & _
+        ExperimentNumberTest(-resultants(2) / 1E+6) & ";" & ExperimentNumberTest(resultants(4) / 1E+6) & ";" & _
+        ExperimentNumberTest(twist * 1000#) & ";" & ExperimentNumberTest(errorNorm) & ";" & ExperimentNumberTest(accuracy)
     If errorNorm < 0.000005 And accuracy <= STAGE_TOLERANCE Then passed = passed + 1 Else failures = failures + 1
 End Sub
 
@@ -159,7 +283,7 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
     branch.CopyAccepted field, achieved
     operators.GeneralizedDeformation field, eps0, kx, ky, twist
     If twist <= 0# Then
-        AddTBU3TraceTest report, tracePath, "TWIST_STOP: NonpositiveInitialTwist"
+        AddExperimentTraceTest report, tracePath, "TWIST_STOP: NonpositiveInitialTwist"
         Exit Sub
     End If
     Dim increment As Double, initialIncrement As Double, length As Double, reached As Double, coordinate As Double
@@ -168,7 +292,7 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
     increment = initialIncrement: reached = branch.AcceptedLambda: coordinate = field(4)
     Dim attempt As Long, trialLambda As Double, errorNorm As Double, row As String, started As Double, stopReason As String
     stopReason = "AttemptLimit"
-    AddTBU3TraceTest report, tracePath, "TWIST_REQUESTED_STAGE: " & CStr(requestedStage)
+    AddExperimentTraceTest report, tracePath, "TWIST_REQUESTED_STAGE: " & CStr(requestedStage)
     For attempt = 1 To MAX_ATTEMPTS
         started = Timer
         If solver.TryDeformationStep(baseLoad, direction, projection, coordinate + increment, reached, trialLambda, _
@@ -178,11 +302,11 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
             path.TargetSix reached, target
             operators.GeneralizedDeformation field, eps0, kx, ky, twist
             errorNorm = TBU3ForceErrorTest(achieved, target)
-            row = "Twist" & CStr(attempt) & ";" & TBU3NumberTest(reached) & ";" & TBU3NumberTest(-achieved(2) / 1E+6) & _
-                ";" & TBU3NumberTest(achieved(4) / 1E+6) & ";" & TBU3NumberTest(-kx * 1000#) & ";" & TBU3NumberTest(twist * 1000#) & _
-                ";" & TBU3NumberTest(response.AcceptedTransverseSteelUtilization) & ";" & TBU3NumberTest(response.AcceptedSteelUtilization) & _
-                ";" & TBU3NumberTest(errorNorm) & ";" & TBU3NumberTest(Timer - started) & ";Accepted"
-            AddTBU3TraceTest report, tracePath, row
+            row = "Twist" & CStr(attempt) & ";" & ExperimentNumberTest(reached) & ";" & ExperimentNumberTest(-achieved(2) / 1E+6) & _
+                ";" & ExperimentNumberTest(achieved(4) / 1E+6) & ";" & ExperimentNumberTest(-kx * 1000#) & ";" & ExperimentNumberTest(twist * 1000#) & _
+                ";" & ExperimentNumberTest(response.AcceptedTransverseSteelUtilization) & ";" & ExperimentNumberTest(response.AcceptedSteelUtilization) & _
+                ";" & ExperimentNumberTest(errorNorm) & ";" & ExperimentNumberTest(Timer - started) & ";Accepted"
+            AddExperimentTraceTest report, tracePath, row
             If errorNorm < 0.000005 Then passed = passed + 1 Else failures = failures + 1
             If reached >= requestedStage Then
                 stopReason = "TargetReached"
@@ -191,7 +315,7 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
             If increment < initialIncrement Then increment = increment * 1.25
             If increment > initialIncrement Then increment = initialIncrement
         Else
-            AddTBU3TraceTest report, tracePath, "TWIST_REJECTED: " & CStr(attempt) & " | " & TBU3NumberTest(Timer - started) & _
+            AddExperimentTraceTest report, tracePath, "TWIST_REJECTED: " & CStr(attempt) & " | " & ExperimentNumberTest(Timer - started) & _
                 " | " & solver.ResultMeta.ResultComment & " | " & solver.ResultMeta.DiagnosticDetails
             increment = increment * 0.5
             If increment < initialIncrement / 32# Then
@@ -200,8 +324,8 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
             End If
         End If
     Next attempt
-    AddTBU3TraceTest report, tracePath, "TWIST_CONTROL_REACHED_STAGE: " & TBU3NumberTest(reached)
-    AddTBU3TraceTest report, tracePath, "TWIST_STOP: " & stopReason
+    AddExperimentTraceTest report, tracePath, "TWIST_CONTROL_REACHED_STAGE: " & ExperimentNumberTest(reached)
+    AddExperimentTraceTest report, tracePath, "TWIST_STOP: " & stopReason
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -231,12 +355,12 @@ Public Function RunTestCoupledTBU3Elastic() As String
         solver.PrepareModel section, E, 0#, spans, spans, 7
         If solver.Solve(FORCE, MX, MY, TORQUE, QX, QY, deformation, resultants, stress, raw) Then
             field = raw
-            report = report & "ELASTIC_RIGIDITY;" & CStr(spans) & ";" & TBU3NumberTest(TORQUE / (G * deformation(4))) & vbCrLf
+            report = report & "ELASTIC_RIGIDITY;" & CStr(spans) & ";" & ExperimentNumberTest(TORQUE / (G * deformation(4))) & vbCrLf
             If TBU3ForceErrorTest(resultants, target) < 0.0000001 Then passed = passed + 1 Else failed = failed + 1
             For Each point In points
                 solver.KinematicsAt CDbl(point(0)), CDbl(point(1)), field, strain, warping
-                report = report & "ELASTIC_STRESS;" & CStr(spans) & ";" & TBU3NumberTest(CDbl(point(0))) & ";" & TBU3NumberTest(CDbl(point(1))) & _
-                    ";" & TBU3NumberTest(E * strain(3)) & ";" & TBU3NumberTest(G * strain(5)) & ";" & TBU3NumberTest(G * strain(6)) & vbCrLf
+                report = report & "ELASTIC_STRESS;" & CStr(spans) & ";" & ExperimentNumberTest(CDbl(point(0))) & ";" & ExperimentNumberTest(CDbl(point(1))) & _
+                    ";" & ExperimentNumberTest(E * strain(3)) & ";" & ExperimentNumberTest(G * strain(5)) & ";" & ExperimentNumberTest(G * strain(6)) & vbCrLf
             Next point
         Else
             failed = failed + 1
@@ -270,10 +394,10 @@ Private Function BuildTBU3SectionTest(ByRef layout As CTransverseRebarLayout, By
     layout.AddContourGroup section, "TBU3_HOOP", vbNullString, diameter, 150#, 32# - diameter / 2#, "TBU3_HOOP"
 
     Set steel = CreateObject("Scripting.Dictionary")
-    steel.Add "TBU3_8", TBU3SteelModelTest(194200#, 436#, 9000#)
-    steel.Add "TBU3_4", TBU3SteelModelTest(201900#, 393#, 4900#)
-    steel.Add "TBU3_3", TBU3SteelModelTest(205100#, 552#, 9000#)
-    steel.Add "TBU3_HOOP", TBU3SteelModelTest(198500#, 379#, 5200#)
+    steel.Add "TBU3_8", ExperimentBilinearSteelTest(194200#, 436#, 9000#)
+    steel.Add "TBU3_4", ExperimentBilinearSteelTest(201900#, 393#, 4900#)
+    steel.Add "TBU3_3", ExperimentBilinearSteelTest(205100#, 552#, 9000#)
+    steel.Add "TBU3_HOOP", ExperimentBilinearSteelTest(198500#, 379#, 5200#)
     Set BuildTBU3SectionTest = section
 End Function
 
@@ -294,10 +418,10 @@ End Function
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Двухлинейная аппроксимация измеренной стали. После текучести модуль
 ' упрочнения включается сразу. Предел 0,05 принят только для диагностики.
-Private Function TBU3SteelModelTest(ByVal modulus As Double, ByVal strength As Double, ByVal hardening As Double) As CCoupledSteelModel
+Private Function ExperimentBilinearSteelTest(ByVal modulus As Double, ByVal strength As Double, ByVal hardening As Double) As CCoupledSteelModel
     Dim steel As New CCoupledSteelModel
     steel.Initialize modulus, strength, strength, hardening, hardening, 0.05, 0.05
-    Set TBU3SteelModelTest = steel
+    Set ExperimentBilinearSteelTest = steel
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -314,14 +438,14 @@ End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Русская локаль Excel не меняет десятичную точку в машинном протоколе.
-Private Function TBU3NumberTest(ByVal value As Double) As String
-    TBU3NumberTest = Trim$(Str$(value))
+Private Function ExperimentNumberTest(ByVal value As Double) As String
+    ExperimentNumberTest = Trim$(Str$(value))
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Отмечает завершённую стадию также на диске, чтобы длительный контроль
 ' можно было наблюдать без обращения к пользовательскому экземпляру Excel.
-Private Sub AddTBU3TraceTest(ByRef report As String, ByVal path As String, ByVal row As String)
+Private Sub AddExperimentTraceTest(ByRef report As String, ByVal path As String, ByVal row As String)
     report = report & row & vbCrLf
     If Len(path) = 0 Then Exit Sub
     Dim file As Integer: file = FreeFile
