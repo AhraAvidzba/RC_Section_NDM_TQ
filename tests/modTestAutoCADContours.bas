@@ -1556,6 +1556,11 @@ Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As O
     TestSetGeometryExportSetting sys, "Output.CombinationMode", "User"
     TestSetGeometryExportSetting sys, "Output.CombinationID", "NativeSpatial"
     TestSetGeometryExportSetting sys, "AutoCAD.Export.LabelMode", "NamesAndValues"
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.ConcreteCompression", 34
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.ConcreteTension", 54
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.RebarCompression", 74
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.RebarTension", 94
+    TestSetGeometryExportSetting sys, "AutoCAD.Color.Neutral", 8
     TestSetGeometryExportSetting calibration, "Coupled.Gt", 0.12
     TestSetGeometryExportSetting calibration, "Coupled.Gc", 80#
     TestSetGeometryExportSetting calibration, "Coupled.Localization", 125#
@@ -1600,6 +1605,7 @@ Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As O
     FindNativeCoupledInputTestCell(profiles, "Visualization.State", 2, pr4).Value2 = "StrengthState"
     FindNativeCoupledInputTestCell(profiles, "Visualization.Quantity", 2, pr4).Value2 = "TauXZ"
     FindNativeCoupledInputTestCell(profiles, "Visualization.StressPrecision", 2, pr4).Value2 = 10
+    FindNativeCoupledInputTestCell(profiles, "Visualization.StrainPrecision", 2, pr4).Value2 = 10
     Dim loads(1 To 1, 1 To 10) As Variant
     loads(1, 1) = "NativeSpatial": loads(1, 2) = 0.05: loads(1, 3) = 0.001: loads(1, 4) = -0.002: loads(1, 5) = "PR4"
     loads(1, 8) = 0.005: loads(1, 9) = 0.002: loads(1, 10) = -0.003
@@ -1638,12 +1644,39 @@ Public Function RunRealAutoCADCoupledTransverseTests(ByVal ownedApplication As O
     Dim path As String: path = ThisWorkbook.Path & "\CoupledAutoCAD_" & Format$(Now, "yyyymmdd_hhnnss") & ".dwg"
     doc.SaveAs path
     mReport = mReport & "NATIVE_DWG: " & path & vbCrLf
+    doc.Close False
+    Set doc = Nothing
+    Set doc = ownedApplication.Documents.Open(path, False)
+    TestWaitForCAD ownedApplication
+    TestNativeCoupledFieldLabels doc, section, saved, "TauXZ", True
     Dim erased As Long: erased = Audit03CleanupAutoCADDocumentForTests(doc, cfg)
-    transverseCount = 0
+    Dim labelCount As Long, geometryCount As Long: transverseCount = 0
     For Each entity In doc.ModelSpace
         If entity.Layer = "RC_NDM_TransverseRebar" Then transverseCount = transverseCount + 1
+        If Left$(entity.Layer, 12) = "RC_NDM_Field" Then labelCount = labelCount + 1
+        If entity.Layer = "NDM6_Concrete" Or entity.Layer = "NDM6_Rebar" Then geometryCount = geometryCount + 1
     Next entity
     TestCheck "native.coupled.cleanupPreservesHoops", erased > 0 And transverseCount = 2
+    TestCheck "native.coupled.cleanupRemovesFieldLabelsOnly", labelCount = 0 And _
+        geometryCount >= section.ConcreteCount + section.RebarCount
+    doc.Close False: Set doc = Nothing
+
+    Dim fieldName As Variant, quantity As EVisualizationQuantity
+    For Each fieldName In Array("Tau", "Warping")
+        Set doc = ownedApplication.Documents.Add(templatePath)
+        TestWaitForCAD ownedApplication
+        FindNativeCoupledInputTestCell(profiles, "Visualization.Quantity", 2, pr4).Value2 = CStr(fieldName)
+        quantity = VisualizationQuantityFromText(CStr(fieldName))
+        Set saved = ReadCoupledFieldValues(ThisWorkbook, quantity, runId, "NativeSpatial", "PR4", "StrengthState")
+        count = Audit03ExportAutoCADDocumentForTests(doc)
+        TestCheck "native.coupled.export." & CStr(fieldName), count > 0
+        TestNativeCoupledFieldLabels doc, section, saved, CStr(fieldName), quantity = vqWarping
+        If quantity = vqWarping Then TestNativeCoupledWarpingBounds doc, saved
+        path = ThisWorkbook.Path & "\CoupledAutoCAD_" & CStr(fieldName) & ".dwg"
+        doc.SaveAs path
+        mReport = mReport & "NATIVE_DWG: " & path & vbCrLf
+        doc.Close False: Set doc = Nothing
+    Next fieldName
     GoTo Cleanup
 Failed:
     TestCheck "native.coupled.runtime; " & CStr(Err.Number) & "; " & Err.Description, False
@@ -1654,6 +1687,81 @@ Cleanup:
     mNativeProgress = False
     RunRealAutoCADCoupledTransverseTests = mReport & "TOTAL_NATIVE_COUPLED_TRANSVERSE: passed=" & CStr(mPassed) & "; failed=" & CStr(mFailed) & vbCrLf
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет все числовые подписи реального DWG с сохранённым полем.
+' Ожидаемые слои и ACI заданы отдельно от рабочих функций экспорта.
+Private Sub TestNativeCoupledFieldLabels(ByVal doc As Object, ByVal section As CSectionModel, ByVal values As Object, _
+        ByVal fieldName As String, ByVal signedField As Boolean)
+    Dim expected As Object: Set expected = CreateObject("Scripting.Dictionary")
+    Dim i As Long, id As String, number As Double, layer As String, color As Long, rebar As Boolean, text As String
+    Dim positive As Long, negative As Long, zeros As Long
+    For i = 1 To section.ConcreteCount + section.RebarCount
+        rebar = (i > section.ConcreteCount)
+        If rebar Then id = section.RebarID(i - section.ConcreteCount) Else id = section.ConcreteID(i)
+        number = CDbl(values(id))
+        Select Case Sgn(number)
+            Case -1
+                layer = "RC_NDM_FieldNegative": negative = negative + 1
+                If rebar Then color = 74 Else color = 34
+            Case 1
+                layer = "RC_NDM_FieldPositive": positive = positive + 1
+                If rebar Then color = 94 Else color = 54
+            Case Else
+                layer = "RC_NDM_FieldZero": zeros = zeros + 1: color = 8
+        End Select
+        text = id & " " & Replace$(Format$(number, "0.0000000000"), ",", ".")
+        expected.Add text, Array(layer, color)
+    Next i
+    Dim entity As Object, record As Variant, valid As Boolean
+    valid = True
+    For Each entity In doc.ModelSpace
+        If entity.ObjectName = "AcDbText" And Left$(entity.Layer, 12) = "RC_NDM_Field" Then
+            text = entity.TextString
+            If expected.Exists(text) Then
+                record = expected(text)
+                If entity.Layer <> record(0) Or entity.Color <> record(1) Then valid = False
+                expected.Remove text
+            Else
+                valid = False
+            End If
+        End If
+    Next entity
+    TestCheck "native.coupled.fieldLabels." & fieldName & "; positive=" & CStr(positive) & "; negative=" & _
+        CStr(negative) & "; zero=" & CStr(zeros), valid And expected.Count = 0 And positive > 0 And _
+        (signedField = (negative > 0))
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Контролирует направления выдавливания и максимальную высоту относительно
+' плоскости XY. Для прямоугольника 180×120 мм ожидается 0,35 от 180 мм.
+Private Sub TestNativeCoupledWarpingBounds(ByVal doc As Object, ByVal values As Object)
+    Dim item As Variant, peak As Double, expectedBelow As Long, expectedAbove As Long
+    For Each item In values.Items
+        If Abs(CDbl(item)) > peak Then peak = Abs(CDbl(item))
+    Next item
+    If peak > 0# Then
+        For Each item In values.Items
+            If CDbl(item) * (63# / peak) < -0.000001 Then expectedBelow = expectedBelow + 1
+            If CDbl(item) * (63# / peak) > 0.000001 Then expectedAbove = expectedAbove + 1
+        Next item
+    End If
+    Dim entity As Object, boundsMin As Variant, boundsMax As Variant, height As Double
+    Dim lower As Long, upper As Long, total As Long
+    For Each entity In doc.ModelSpace
+        If entity.ObjectName = "AcDb3dSolid" Then
+            entity.GetBoundingBox boundsMin, boundsMax
+            If CDbl(boundsMin(2)) < -0.000001 Then lower = lower + 1
+            If CDbl(boundsMax(2)) > 0.000001 Then upper = upper + 1
+            If Abs(CDbl(boundsMin(2))) > height Then height = Abs(CDbl(boundsMin(2)))
+            If Abs(CDbl(boundsMax(2))) > height Then height = Abs(CDbl(boundsMax(2)))
+            total = total + 1
+        End If
+    Next entity
+    TestCheck "native.coupled.warpingBothSides", lower = expectedBelow And upper = expectedAbove And _
+        lower > 0 And upper > 0 And lower + upper = total
+    TestCheck "native.coupled.warpingScale63mm", Abs(height - 63#) < 0.00001
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Возвращает поле контрольного диапазона по ключу строки.

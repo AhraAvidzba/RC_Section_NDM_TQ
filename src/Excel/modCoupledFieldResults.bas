@@ -10,6 +10,16 @@ Option Explicit
 Public Const COUPLED_FIELD_TABLE As String = "rngNDMCoupledFields"
 Public Const COUPLED_FIELD_COLUMNS As Long = 10
 
+' Возвращает позицию в существующей палитре по знаку пространственного
+' значения. Эти ключи не описывают продольное состояние материала.
+Public Function CoupledFieldPaletteState(ByVal value As Double) As String
+    Select Case Sgn(value)
+        Case -1: CoupledFieldPaletteState = "Compression"
+        Case 1: CoupledFieldPaletteState = "Tension"
+        Case Else: CoupledFieldPaletteState = "NearZero"
+    End Select
+End Function
+
 ' Создаёт шапку и место для строк подтверждённых состояний.
 ' Касательные напряжения хранятся в МПа, продольное перемещение в мм.
 Public Function NewCoupledFieldTable(ByVal rows As Long) As Variant

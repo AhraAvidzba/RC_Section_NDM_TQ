@@ -828,11 +828,7 @@ Private Sub AppendElement(ByVal elementID As String, ByVal materialType As Strin
         mResultValue(mCount) = CDbl(resultData(1))
     End If
     If mSpatialField Then
-        Select Case Sgn(mResultValue(mCount))
-            Case -1: mPhysicalState(mCount) = "Compression" ' Отрицательная половина общей палитры.
-            Case 1: mPhysicalState(mCount) = "Tension" ' Положительная половина общей палитры.
-            Case Else: mPhysicalState(mCount) = "NearZero"
-        End Select
+        mPhysicalState(mCount) = CoupledFieldPaletteState(mResultValue(mCount))
     Else
         mPhysicalState(mCount) = CStr(resultData(2))
     End If

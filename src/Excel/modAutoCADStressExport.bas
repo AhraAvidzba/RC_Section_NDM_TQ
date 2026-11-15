@@ -44,6 +44,9 @@ Private Const TRANSVERSE_REBAR_COLOR As Long = 6 ' Оси поперечной �
 Private Const CONTOUR_POINT_TOLERANCE As Double = 0.000001 ' Допуск совпадения соседних вершин при экспорте, мм.
 Private Const STRAIN_3D_CONCRETE_LAYER As String = "RC_NDM_Strain3D_Concrete"
 Private Const STRAIN_3D_REBAR_LAYER As String = "RC_NDM_Strain3D_Rebar"
+Private Const FIELD_NEGATIVE_LAYER As String = "RC_NDM_FieldNegative"
+Private Const FIELD_POSITIVE_LAYER As String = "RC_NDM_FieldPositive"
+Private Const FIELD_ZERO_LAYER As String = "RC_NDM_FieldZero"
 Private Const STRAIN_3D_MAX_HEIGHT_RATIO As Double = 0.35 ' Наибольшая абсолютная высота относительно габарита сечения.
 Private Const STRAIN_3D_MIN_HEIGHT As Double = 0.000001 ' Ниже допуска геометрического ядра, мм, остаётся плоская область.
 Private Const TEMPORARY_SOURCE_BATCH_SIZE As Long = 1024 ' Ограничение числа живых исходных кривых одной партии.
@@ -195,6 +198,9 @@ Private Function AutoCADCleanupLayerSet(ByRef exportSettings As TAutoCADExportSe
     AddCleanupLayer layers, EXTENSION_WARNING_LAYER
     AddCleanupLayer layers, STRAIN_3D_CONCRETE_LAYER
     AddCleanupLayer layers, STRAIN_3D_REBAR_LAYER
+    AddCleanupLayer layers, FIELD_NEGATIVE_LAYER
+    AddCleanupLayer layers, FIELD_POSITIVE_LAYER
+    AddCleanupLayer layers, FIELD_ZERO_LAYER
     If Len(exportSettings.ContourLayer) > 0 Then layers.Item(exportSettings.ContourLayer) = False ' Общие контурные слои защищаются целиком, включая созданные NDM объекты, даже при совпадении с другим слоем оформления.
     If Len(exportSettings.OpeningContourLayer) > 0 Then layers.Item(exportSettings.OpeningContourLayer) = False
     layers.Item(TRANSVERSE_REBAR_LAYER) = False ' Оси принятой поперечной арматуры сохраняются при очистке оформления.
@@ -360,9 +366,8 @@ Private Function ReadProfileIdFromElementResults(ByVal workbook As Object, ByVal
 Failed:
 End Function
 
-' Читает напряжения, деформации и физическое состояние элементов для выбранного
-' сочетания и вида НДС. Если такого НДС нет, сообщает об этом с адресом таблицы;
-' результат другого сочетания не подставляется.
+' Читает значения выбранного НДС для подписей и окраски. Stress и Strain
+' используют состояние материала, пространственные поля — свой знак.
 Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal resultType As String, _
         ByRef combinationID As String, ByVal stateType As String, _
         ByVal resultByID As Object, ByVal physicalStateByID As Object, ByVal profileID As String, ByRef runID As Double)
@@ -391,7 +396,7 @@ Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal res
         "В Results нет рассчитанных сочетаний для экспорта."
 
     Dim found As Boolean
-    Dim rowIndex As Long
+    Dim rowIndex As Long, value As Double
     For rowIndex = 2 To UBound(data, 1)
         If StrComp(Trim$(SafeText(data(rowIndex, colCombination))), combinationID, vbTextCompare) = 0 And _
                 StrComp(Trim$(SafeText(data(rowIndex, colStateType))), stateType, vbTextCompare) = 0 Then
@@ -399,10 +404,12 @@ Private Sub ReadElementResultsForCombination(ByVal workbook As Object, ByVal res
             Dim elementID As String: elementID = CStr(data(rowIndex, colID))
             If coupled Is Nothing Then
                 resultByID(elementID) = ReadExportSnapshotNumber(data, anchor, rowIndex, colValue)
+                physicalStateByID(elementID) = CStr(data(rowIndex, colState))
             Else
-                resultByID(elementID) = CoupledFieldValue(coupled, elementID)
+                value = CoupledFieldValue(coupled, elementID)
+                resultByID(elementID) = value
+                physicalStateByID(elementID) = CoupledFieldPaletteState(value)
             End If
-            physicalStateByID(elementID) = CStr(data(rowIndex, colState))
         End If
     Next rowIndex
 
@@ -615,6 +622,7 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     Dim solidOutputs As Collection, elementRegions As Collection
     Dim maxStrain As Double, maxHeight As Double, legendX As Double, legendY As Double, legendHeight As Double
     Dim fieldQuantity As EVisualizationQuantity: fieldQuantity = VisualizationQuantityFromText(quantity)
+    Dim spatialField As Boolean: spatialField = VisualizationQuantityRequiresCoupledField(fieldQuantity)
     If fieldQuantity = vqStrain Or fieldQuantity = vqWarping Then
         PrepareStrainDiagram section, resultByID, maxStrain, maxHeight, legendX, legendY, legendHeight
         Set solidOutputs = New Collection
@@ -627,6 +635,11 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
     EnsureAcadLayer doc, exportSettings.ConcreteCompressionLayer, exportSettings.ConcreteCompressionColor
     EnsureAcadLayer doc, exportSettings.RebarTensionLayer, exportSettings.RebarTensionColor
     EnsureAcadLayer doc, exportSettings.RebarCompressionLayer, exportSettings.RebarCompressionColor
+    If spatialField Then
+        EnsureAcadLayer doc, FIELD_NEGATIVE_LAYER, exportSettings.NeutralColor
+        EnsureAcadLayer doc, FIELD_POSITIVE_LAYER, exportSettings.NeutralColor
+        EnsureAcadLayer doc, FIELD_ZERO_LAYER, exportSettings.NeutralColor
+    End If
     EnsureAcadLayer doc, "RC_NDM_Axes", 3
     EnsureAcadLayer doc, "RC_NDM_LoadPoint", 2
     EnsureAcadLayer doc, "RC_NDM_NeutralLine", exportSettings.NeutralColor
@@ -670,8 +683,7 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
 
         AddAcadText ms, ResultLabelText(section.ConcreteID(i), resultValue, exportSettings.IncludeElementNames, resultPrecision), _
             labelX, labelY, textHeight, _
-            ResultAnnotationLayerByPhysicalState("Concrete", physicalState, exportSettings), _
-            ResultColorByPhysicalState("Concrete", physicalState, exportSettings)
+            ResultAnnotationLayerByPhysicalState("Concrete", physicalState, exportSettings, spatialField), color
         If temporarySources.Count >= TEMPORARY_SOURCE_BATCH_SIZE Then DeleteAcadTemporarySources doc, temporarySources
     Next i
 
@@ -686,8 +698,7 @@ Private Sub DrawResultsStressExport(ByVal section As CSectionModel, _
         AddAcadText ms, ResultLabelText(section.RebarID(i), resultValue, exportSettings.IncludeElementNames, resultPrecision), _
             section.RebarX(i) + section.RebarDiameter(i) / 2#, section.RebarY(i) + section.RebarDiameter(i) / 2#, _
             MaxDouble(2.5, section.RebarDiameter(i) * 0.18), _
-            ResultAnnotationLayerByPhysicalState("Rebar", physicalState, exportSettings), _
-            ResultColorByPhysicalState("Rebar", physicalState, exportSettings)
+            ResultAnnotationLayerByPhysicalState("Rebar", physicalState, exportSettings, spatialField), color
         If temporarySources.Count >= TEMPORARY_SOURCE_BATCH_SIZE Then DeleteAcadTemporarySources doc, temporarySources
     Next i
 
@@ -2199,9 +2210,8 @@ Private Sub AddAcadText(ByVal ms As Object, ByVal value As String, ByVal x As Do
     entity.Color = colorIndex
 End Sub
 
-' Выбирает цвет по физическому состоянию элемента из Results.
-' Цвета сжатия и растяжения зависят от материала. Почти нулевые напряжения
-' и неработающий растянутый бетон показываются нейтральным серым.
+' Выбирает настроенный цвет материала по группе палитры для текущего поля.
+' Нулевые поля и неработающий растянутый бетон используют нейтральный цвет.
 Private Function ResultColorByPhysicalState(ByVal materialType As String, ByVal physicalState As String, _
         ByRef exportSettings As TAutoCADExportSettings) As Long
     If StrComp(physicalState, "Compression", vbTextCompare) = 0 Then
@@ -2221,11 +2231,18 @@ Private Function ResultColorByPhysicalState(ByVal materialType As String, ByVal 
     End If
 End Function
 
-' Помещает подписи в tension/compression-слои по PhysicalState.
-' Нейтральные и выключенные растянутые бетонные элементы уходят в
-' compression-слой материала, чтобы нулевые значения не теряли слой вывода.
+' Для пространственного поля выбирает общий слой отрицательных, положительных
+' или нулевых подписей. Для продольных полей сохраняет назначение слоёв Config.
 Private Function ResultAnnotationLayerByPhysicalState(ByVal materialType As String, ByVal physicalState As String, _
-        ByRef exportSettings As TAutoCADExportSettings) As String
+        ByRef exportSettings As TAutoCADExportSettings, Optional ByVal spatialField As Boolean = False) As String
+    If spatialField Then
+        Select Case physicalState
+            Case "Compression": ResultAnnotationLayerByPhysicalState = FIELD_NEGATIVE_LAYER
+            Case "Tension": ResultAnnotationLayerByPhysicalState = FIELD_POSITIVE_LAYER
+            Case Else: ResultAnnotationLayerByPhysicalState = FIELD_ZERO_LAYER
+        End Select
+        Exit Function
+    End If
     If StrComp(materialType, "Rebar", vbTextCompare) = 0 Then
         If StrComp(physicalState, "Tension", vbTextCompare) = 0 Then
             ResultAnnotationLayerByPhysicalState = exportSettings.RebarTensionLayer
