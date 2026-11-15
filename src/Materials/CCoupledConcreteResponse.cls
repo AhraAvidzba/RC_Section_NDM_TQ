@@ -591,6 +591,11 @@ End Function
 
 ' Возвращает долю положительных главных напряжений по абсолютной сумме.
 Private Function PositiveStressFraction(ByVal high As Double, ByVal mid As Double, ByVal low As Double) As Double
+    If high <= 0# Then Exit Function ' Упорядоченный спектр без растягивающих напряжений.
+    If low >= 0# Then
+        PositiveStressFraction = 1# ' При полностью растянутом спектре доля задаётся точно.
+        Exit Function
+    End If
     Dim denominator As Double
     denominator = Abs(high) + Abs(mid) + Abs(low)
     If denominator = 0# Then Exit Function
