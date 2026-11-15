@@ -423,12 +423,20 @@ Public Function RunCoupledNewtonTests() As String
     ok = solver.TryStep(1.1 * FORCE, 0#, 0#, 0#, 0#, 0#, 1E-10, 1E-9, 12)
     TestRecord Not ok And solver.ResultMeta.InternalStatus = rsNumericalFailure, _
         "local update failure has a numerical status", passed, failed, report
-    TestRecord InStr(solver.ResultMeta.DiagnosticDetails, " 2") > 0, _
+    TestRecord InStr(solver.ResultMeta.DiagnosticDetails, "последняя точка отказа: 2") > 0, _
         "point failure includes point index", passed, failed, report
     solver.CopyAccepted acceptedField
     TestRecord Abs(acceptedField(1) - STRAIN) < 1E-12 And material.TestAcceptedSteps = 1, _
         "material failure leaves accepted field and history", passed, failed, report
     material.TestFail = False
+    material.TestMaximumIncrement = 1E-14
+    ok = solver.TryStep(1.1 * FORCE, 0#, 0#, 0#, 0#, 0#, 1E-10, 1E-9, 12)
+    TestRecord Not ok And InStr(solver.ResultMeta.DiagnosticDetails, "ни одна уменьшенная поправка") > 0, _
+        "reports whether every reduced correction was rejected by the material", passed, failed, report
+    solver.CopyAccepted acceptedField
+    TestRecord Abs(acceptedField(1) - STRAIN) < 1E-12 And material.TestAcceptedSteps = 1, _
+        "rejected damping probes leave committed history unchanged", passed, failed, report
+    material.TestMaximumIncrement = 0#
     ok = solver.TryStep(0.8 * FORCE, 200000#, 100000#, 300000#, 2000#, -1000#, 1E-9, 1E-8, 25)
     TestRecord ok, "six component nonlinear equilibrium " & solver.ResultMeta.ResultComment, passed, failed, report
     If ok Then

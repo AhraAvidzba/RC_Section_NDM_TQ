@@ -42,6 +42,7 @@ Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
 Private mDegreeCount As Long, mPointCount As Long, mGaugeStart As Long
 Private mIterations As Long, mEvaluations As Long, mMaterialPoint As Long
+Private mMaterialFailures As Long, mLastFailedPoint As Long
 Private mGradientBuilds As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
@@ -169,6 +170,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mMeta.Clear
     mCandidateReady = False
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
+    mMaterialFailures = 0: mLastFailedPoint = 0
     mLastNorm = 0#: mMinimumPivot = 0#
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -177,6 +179,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     On Error GoTo EvaluationFailed
     Dim current() As Double, correction() As Double, norm As Double, tolerance As Double
     Dim candidateNorm As Double, fraction As Double, i As Long, accepted As Boolean
+    Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim useGradientTangent As Boolean
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
@@ -213,7 +216,7 @@ RecomputeTangent:
         End If
         mMinimumPivot = mSystem.MinimumPivot
         ReDim mCandidate(1 To mDegreeCount)
-        fraction = 1#: accepted = False
+        fraction = 1#: accepted = False: hasValidTrial = False
         Do While fraction >= MIN_FRACTION
             For i = 1 To mDegreeCount
                 mCandidate(i) = current(i) + fraction * correction(i)
@@ -224,6 +227,8 @@ RecomputeTangent:
             End If
             If Evaluate(mCandidate, False) Then
                 candidateNorm = EquilibriumNorm(load, mCandidate)
+                If Not hasValidTrial Or candidateNorm < bestTrialNorm Then bestTrialNorm = candidateNorm
+                hasValidTrial = True
                 accepted = (candidateNorm <= tolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
             ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
                 RecordFailure mFailureCode, "Материальная проба не может быть повторена с меньшей поправкой."
@@ -238,6 +243,14 @@ RecomputeTangent:
                 GoTo RecomputeTangent
             End If
             RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
+            Dim details As String: details = mMeta.DiagnosticDetails
+            If hasValidTrial Then
+                details = details & "; невязка перед демпфированием, МПа: " & CStr(norm) & _
+                    "; лучшая невязка проб, МПа: " & CStr(bestTrialNorm)
+            Else
+                details = details & "; ни одна уменьшенная поправка не дала материального отклика"
+            End If
+            mMeta.DiagnosticDetails = details
             Exit Function
         End If
         mIterations = mIterations + 1
@@ -442,11 +455,15 @@ Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, 
         mSection.PointStrain point, field, mPointStrain
         If useGradientTangent Then TakeGradientProbes point, field, differenceScale, plusOk, minusOk
         mFailureCode = mResponse.EvaluatePoint(point, mPointStrain, mStress, mTangent, tangentMode)
-        If mFailureCode <> sfcNone Then Exit Function
+        If mFailureCode <> sfcNone Then
+            mMaterialFailures = mMaterialFailures + 1: mLastFailedPoint = point
+            Exit Function
+        End If
         mSection.AddPointEquilibrium point, field, mStress, mTangent, mResidual, mMatrix, withMatrix, mTrialResultants, useAxialGradient
         If differenceScale > 0# Then
             If Not plusOk And Not minusOk Then
                 mFailureCode = sfcNumericalFailure
+                mMaterialFailures = mMaterialFailures + 1: mLastFailedPoint = point
                 Exit Function
             End If
             AddGradientDerivative point, differenceScale, plusOk, minusOk
@@ -563,5 +580,7 @@ Private Function DiagnosticSummary() As String
     DiagnosticSummary = "Итерации: " & CStr(mIterations) & "; пробы: " & CStr(mEvaluations) & _
         "; невязка, МПа: " & CStr(mLastNorm) & "; мин. ведущий элемент: " & CStr(mMinimumPivot)
     If mMaterialPoint > 0 Then DiagnosticSummary = DiagnosticSummary & "; материальная точка: " & CStr(mMaterialPoint)
+    If mMaterialFailures > 0 Then DiagnosticSummary = DiagnosticSummary & "; отказов материала: " & CStr(mMaterialFailures) & _
+        "; последняя точка отказа: " & CStr(mLastFailedPoint)
     If mGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & "; уточнений касательной: " & CStr(mGradientBuilds)
 End Function
