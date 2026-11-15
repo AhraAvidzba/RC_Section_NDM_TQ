@@ -13,7 +13,7 @@ Option Explicit
 ' Чтение таблицы сочетаний нагрузок
 ' ==========================================================================
 ' Переносит строки rngLoadCombinations в CBatchSectionCalculator. Пустые
-' компоненты N, Mx и My считаются нулём; полностью нулевая нагрузка пропускается,
+' компоненты усилий считаются нулём; полностью нулевая нагрузка пропускается,
 ' а неполные/некорректные строки сохраняются как InvalidInput, чтобы пользователь
 ' увидел их в отчете. Повторяющиеся заполненные ID прерывают запуск до добавления строк.
 '
@@ -104,9 +104,12 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
     Dim loadPathText As String
     Dim comment As String
     Dim errorText As String, hasError As Boolean
-    Dim pathLocation As String
+    Dim pathLocation As String, pathReference As String
     pathLocation = "LoadPath"
-    If UBound(data, 2) >= 6 Then pathLocation = CellLocation(source, rowIndex, 6, "LoadPath")
+    If UBound(data, 2) >= 6 Then
+        pathLocation = CellLocation(source, rowIndex, 6, "LoadPath")
+        pathReference = source.Worksheet.Name & "!" & source.Cells(rowIndex, 6).Address(False, False)
+    End If
     combinationID = ReadCellText(data(rowIndex, 1), CellLocation(source, rowIndex, 1, "CombinationID"), errorText, hasError)
     Dim nValue As Double, mxValue As Double, myValue As Double
     nValue = ReadOptionalLoadDouble(data(rowIndex, 2), CellLocation(source, rowIndex, 2, "N"), errorText, hasError)
@@ -136,7 +139,7 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
     Dim pathDescriptor As CLoadPathDescriptor
     Set pathDescriptor = New CLoadPathDescriptor
     If Len(pathDescriptor.NormalizeKey(loadPathText)) = 0 Then _
-        AppendError errorText, hasError, pathLocation & ": выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy. " & InputDiagnosticValueLine(loadPathText)
+        AppendError errorText, hasError, pathLocation & ". " & pathDescriptor.LoadPathChoices & " " & InputDiagnosticValueLine(loadPathText)
 
     If Len(Trim$(combinationID)) = 0 Then AppendError errorText, hasError, CellLocation(source, rowIndex, 1, "CombinationID") & " не заполнен"
     If Len(profileId) = 0 Then AppendError errorText, hasError, CellLocation(source, rowIndex, 5, "ProfileId") & " не заполнен"
@@ -145,7 +148,8 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
         batch.AddInvalidCombination combinationID, profileId, comment, errorText, loadPathText, rowIndex - 1, RowLocation(source, rowIndex)
     Else
         batch.AddCombination combinationID, nValue, mxValue, myValue, profileId, comment, loadPathText, rowIndex - 1, _
-            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False), torque, qx, qy
+            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False), _
+            torque, qx, qy, pathReference
     End If
 End Sub
 

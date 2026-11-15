@@ -53,16 +53,41 @@ End Sub
 ' Вектор от нового начала к точке исходной нагрузки задаёт добавку r×F.
 ' Рабочий знак My противоположен физической компоненте момента вокруг Y.
 Friend Sub LoadAboutPoint(ByVal pointX As Double, ByVal pointY As Double, ByRef components() As Double)
-    Dim dx As Double, dy As Double
-    dx = mLoadReferenceX - pointX: dy = mLoadReferenceY - pointY
     ReDim components(1 To 6)
     components(1) = mN
     components(2) = MxAboutPoint(pointY)
     components(3) = MyAboutPoint(pointX)
-    components(4) = mTorque + dx * mQy - dy * mQx
+    components(4) = TranslateLoadPointTorque(mTorque, mQx, mQy, pointX, pointY)
     components(5) = mQx
     components(6) = mQy
 End Sub
+
+' Переносит крутящий момент и выбранную часть поперечных сил к точке
+' расчёта. Раздельный перенос Offset и Base сохраняет их пропорцию.
+Friend Function TranslateLoadPointTorque(ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, _
+        ByVal pointX As Double, ByVal pointY As Double) As Double
+    TranslateLoadPointTorque = torque + (mLoadReferenceX - pointX) * qy - (mLoadReferenceY - pointY) * qx
+End Function
+
+' Определяет применимость связанной модели по фактически заданным усилиям.
+Friend Property Get HasSpatialComponents() As Boolean
+    HasSpatialComponents = (mTorque <> 0# Or mQx <> 0# Or mQy <> 0#)
+End Property
+
+' Возвращает заданное кручение в пользовательской точке приложения, Н*мм.
+Friend Property Get LoadPointTorque() As Double
+    LoadPointTorque = mTorque
+End Property
+
+' Возвращает заданную поперечную силу вдоль оси X, Н.
+Friend Property Get Qx() As Double
+    Qx = mQx
+End Property
+
+' Возвращает заданную поперечную силу вдоль оси Y, Н.
+Friend Property Get Qy() As Double
+    Qy = mQy
+End Property
 
 ' Возвращает шесть усилий равновесия из известной расчётной точки
 ' в пользовательскую. Фильтр нулевого момента относится только к нагрузкам.

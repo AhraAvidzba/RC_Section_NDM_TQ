@@ -30,6 +30,7 @@ Private Type TCombinationInput
     SourceDataOffset As Long ' Смещение строки сочетания от начала входной таблицы.
     SourceReference As String ' Фактический адрес исходной строки, переданный ридером без зависимости расчёта от Excel.
     ProfileReference As String ' Адрес ячейки ProfileId для отсутствующего профиля.
+    LoadPathReference As String ' Адрес ячейки выбора пути для диагностики несущей способности.
     N As Double ' Продольная сила во внутренних единицах, Н.
     Mx As Double ' Момент Mx во внутренних единицах, Н*мм.
     My As Double ' Момент My во внутренних единицах, Н*мм.
@@ -528,9 +529,11 @@ Public Sub AddCombination(ByVal combinationID As String, ByVal nValue As Double,
         ByVal myValue As Double, ByVal profileId As String, ByVal comment As String, _
         Optional ByVal loadPathText As String = vbNullString, Optional ByVal sourceDataOffset As Long = 0, _
         Optional ByVal sourceReference As String = vbNullString, Optional ByVal profileReference As String = vbNullString, _
-        Optional ByVal torque As Double = 0#, Optional ByVal qx As Double = 0#, Optional ByVal qy As Double = 0#)
+        Optional ByVal torque As Double = 0#, Optional ByVal qx As Double = 0#, Optional ByVal qy As Double = 0#, _
+        Optional ByVal loadPathReference As String = vbNullString)
     AddCombinationInternal combinationID, nValue, mxValue, myValue, profileId, comment, True, vbNullString, loadPathText, sourceDataOffset, sourceReference
     mInputs(mCount).ProfileReference = profileReference
+    mInputs(mCount).LoadPathReference = loadPathReference
     mInputs(mCount).Torque = torque: mInputs(mCount).Qx = qx: mInputs(mCount).Qy = qy
     If HasSpatialLoads(mCount) Then NormalizeCombinationMoments mCount
 End Sub
@@ -839,7 +842,7 @@ Private Sub RunCombination(ByVal index As Long)
     normalizedPath = pathDescriptor.NormalizeKey(mWorkingPaths(index))
     If Len(normalizedPath) = 0 Then
         MarkInvalid index, "В сочетании " & mInputs(index).CombinationID & _
-            " исправьте LoadPath: выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy."
+            " исправьте LoadPath. " & pathDescriptor.LoadPathChoices
         Exit Sub
     End If
     mWorkingPaths(index) = normalizedPath
@@ -874,8 +877,11 @@ Private Sub RunCombination(ByVal index As Long)
         Exit Sub
     End If
 
+    Dim capacitySkipped As Boolean
+    If profile.StrengthCapacityEnabled And pathDescriptor.IsSingleSpatialKey(normalizedPath) Then _
+        capacitySkipped = SkipUnscaledSpatialCapacity(index, pathDescriptor)
     If HasSpatialLoads(index) Then
-        RunCoupledCombination index, profile
+        RunCoupledCombination index, profile, capacitySkipped
         GoTo FinalizeCombination
     End If
 
@@ -892,7 +898,7 @@ Private Sub RunCombination(ByVal index As Long)
     ReportSection "Расчет по модели прочности"
     If profile.StrengthCapacityEnabled Then
         ReportStep "Запускается проверка несущей способности по профилю."
-        RunCapacity index, profile.StrengthSpec
+        If Not capacitySkipped Then RunCapacity index, profile.StrengthSpec
     Else
         ReportStep "Проверка несущей способности не запрошена профилем."
         StoreNotCalculatedCapacity index
@@ -930,8 +936,9 @@ End Sub
 
 ' Передаёт все шесть усилий в одну модель и отмечает доступность каждой
 ' запрошенной проверки в штатных результатах профиля.
-Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile)
+Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile, ByVal capacitySkipped As Boolean)
     Dim combined As CCombinationResult: Set combined = mResults(index)
+    Dim capacityRequested As Boolean: capacityRequested = profile.StrengthCapacityEnabled And Not capacitySkipped
     Dim meta As CResultMeta, field() As Double, resultants() As Double, trace As CCoupledLoadTrace
     If profile.StabilityEnabled Then
         ReportSection "Продольный изгиб и устойчивость по N, Mx и My"
@@ -944,13 +951,13 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
     End If
 
     ReportSection "Связанное НДС по шести усилиям"
-    If mCoupledAnalysis Is Nothing And (profile.StrengthDirectStateEnabled Or profile.StrengthCapacityEnabled) Then
+    If mCoupledAnalysis Is Nothing And (profile.StrengthDirectStateEnabled Or capacityRequested) Then
         Dim reason As String: reason = mCoupledInputError
         If Len(reason) = 0 Then reason = "Для ненулевых T, Qx или Qy заполните параметры связанного расчёта."
         reason = reason & " " & mInputs(index).SourceReference
         combined.SetWorkflowMeta InvalidInputMeta(rkGeneric, reason)
         If profile.StrengthDirectStateEnabled Then combined.SetDirectStateMeta InvalidInputMeta(rkDirectState, reason)
-        If profile.StrengthCapacityEnabled Then StoreInvalidCapacity index, reason
+        If capacityRequested Then StoreInvalidCapacity index, reason
         ReportStep reason
     ElseIf profile.StrengthDirectStateEnabled Then
         Dim acceptedState As CSectionStateResult
@@ -964,7 +971,7 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
         If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
     End If
 
-    If profile.StrengthCapacityEnabled Then
+    If capacityRequested Then
         If Not mCoupledAnalysis Is Nothing Then
             ReportSection "Предельная нагрузка для связанного сечения"
             Dim capacity As CCapacityResult
@@ -982,7 +989,7 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
                 ReportValue "Оценка погрешности множителя", FormatNumberInvariant(capacity.PeakAccuracy)
             End If
         End If
-    Else
+    ElseIf Not capacitySkipped Then
         StoreNotCalculatedCapacity index
     End If
 
@@ -1399,9 +1406,14 @@ Private Sub RunCrackWidth(ByVal index As Long, ByVal profile As CCalculationProf
     Set crack = New CCrackWidthCalculator
     ConfigureCrackCalculator crack
     ReportStep "Запускается проверка образования нормальной трещины."
-    ReportValue "Путь образования трещины", mWorkingPaths(index)
+    Dim pathDescriptor As New CLoadPathDescriptor, normalPath As String
+    normalPath = pathDescriptor.NormalCrackKey(mWorkingPaths(index))
+    If normalPath <> mWorkingPaths(index) Then _
+        ReportStep "Для образования нормальных трещин используются N, Mx и My. Путь " & _
+            pathDescriptor.DisplayNameForKey(mWorkingPaths(index)) & " соответствует " & pathDescriptor.DisplayNameForKey(normalPath) & "."
+    ReportValue "Путь образования трещины", normalPath
     ReportValue "Стратегия поиска образования трещины", mCrackFormationSolutionStrategy
-    If Not mReport Is Nothing Then mReport.ReportCrackFormationSearchStart mWorkingPaths(index)
+    If Not mReport Is Nothing Then mReport.ReportCrackFormationSearchStart normalPath
 
     Dim crackReferenceX As Double
     Dim crackReferenceY As Double
@@ -1416,7 +1428,7 @@ Private Sub RunCrackWidth(ByVal index As Long, ByVal profile As CCalculationProf
     ' CSectionLoadState, поэтому здесь нет ручной формулы N*dx/dy.
     Dim formationCalculator As CCrackFormationCalculator
     Set formationCalculator = New CCrackFormationCalculator
-    ConfigureCrackFormationCalculator formationCalculator, index
+    ConfigureCrackFormationCalculator formationCalculator, normalPath
     Set formationCalculator.StateProvider = CreateStateProvider(index)
     Dim formationResult As CCrackFormationResult
     Set formationResult = formationCalculator.CheckFormation(mSection, _
@@ -1602,6 +1614,21 @@ Private Sub MergeDirectStateMeta(ByVal index As Long, ByVal meta As CResultMeta)
     mResults(index).MergeDirectStateMeta meta
 End Sub
 
+' Останавливает только поиск предела по нулевому выбранному усилию.
+' НДС и нормативные проверки продолжаются с полной заданной нагрузкой.
+Private Function SkipUnscaledSpatialCapacity(ByVal index As Long, ByVal descriptor As CLoadPathDescriptor) As Boolean
+    descriptor.InitializeFromLoadState mWorkingPaths(index), mWorkingLoads(index)
+    Dim reason As String: reason = descriptor.MissingSpatialLoadReason
+    If Len(reason) = 0 Then Exit Function
+    If Len(mInputs(index).LoadPathReference) > 0 Then _
+        reason = InputDiagnosticText(reason, mInputs(index).LoadPathReference, "Параметр LoadPath", mInputs(index).LoadPath)
+    Dim capacity As New CCapacityResult
+    capacity.InitializeSkipped reason, descriptor.Key
+    mResults(index).StoreCapacityResult capacity
+    ReportStep reason
+    SkipUnscaledSpatialCapacity = True
+End Function
+
 ' Отмечает несущую способность как незапрошенную, если её проверка
 ' не предусмотрена выбранной группой или режимом расчёта.
 Private Sub StoreNotCalculatedCapacity(ByVal index As Long)
@@ -1721,8 +1748,8 @@ End Sub
 ' Передаёт численные настройки расчёту образования трещины.
 ' Расчёт ширины не выбирает траекторию нагрузки и не ищет состояния
 ' до и после образования трещины.
-Private Sub ConfigureCrackFormationCalculator(ByVal formation As CCrackFormationCalculator, ByVal index As Long)
-    formation.CrackFormationPath = mWorkingPaths(index)
+Private Sub ConfigureCrackFormationCalculator(ByVal formation As CCrackFormationCalculator, ByVal normalPath As String)
+    formation.CrackFormationPath = normalPath
     formation.CrackFormationSolutionStrategy = mCrackFormationSolutionStrategy
     formation.LambdaTolerance = mCrackToleranceLambda
     formation.SolverLoadSteps = mSolverLoadSteps

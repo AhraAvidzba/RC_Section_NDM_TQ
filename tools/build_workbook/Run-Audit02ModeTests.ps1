@@ -150,10 +150,15 @@ function Get-ResultsStatusStyleHash([object]$Book) {
     $records = New-Object 'System.Collections.Generic.List[object]'
     $strengthColumns = @(3,30,49)
     $strengthAnchor = $names.Item('rngStrengthSummaryAnchor').RefersToRange
-    $hoopTitle = $strengthAnchor.Worksheet.Cells.Item($strengthAnchor.Row - 4, $strengthAnchor.Column + 50)
-    switch ($hoopTitle.MergeArea.Columns.Count) {
-        7  { $strengthColumns += @(54,57) }
-        12 { $strengthColumns += @(56,62) }
+    $hoopTitle = $strengthAnchor.Worksheet.Cells.Item($strengthAnchor.Row - 4, $strengthAnchor.Column + 53)
+    if ($hoopTitle.MergeArea.Column -eq $hoopTitle.Column -and $hoopTitle.MergeArea.Columns.Count -eq 12) {
+        $strengthColumns = @(3,30,52,59,65)
+    } else {
+        $hoopTitle = $strengthAnchor.Worksheet.Cells.Item($strengthAnchor.Row - 4, $strengthAnchor.Column + 50)
+        switch ($hoopTitle.MergeArea.Columns.Count) {
+            7  { $strengthColumns += @(54,57) }
+            12 { $strengthColumns += @(56,62) }
+        }
     }
     $blocks = @(
         @{name='rngBatchSummary'; offset=12; columns=@(4,6,7,8,9,10,11,12,13,14,15)},

@@ -51,7 +51,9 @@ End Function
         $summary = $book.Names.Item('rngBatchSummary').RefersToRange
         $table = $summary.Resize($loadRows + 12, 26).Value2
         $anchor = $book.Names.Item('rngStrengthSummaryAnchor').RefersToRange
-        $detail = $anchor.Resize($loadRows, 49).Value2
+        $capacityStatusColumn = 49
+        if ([string]$anchor.Offset(-1, 41).Value2 -like 'Tult,*') { $capacityStatusColumn = 52 }
+        $detail = $anchor.Resize($loadRows, $capacityStatusColumn).Value2
         $rows = @{}
         for ($r = 13; $r -le $table.GetLength(0); $r++) {
             $id = [string]$table[$r, 1]
@@ -59,7 +61,7 @@ End Function
             $status = [string]$table[$r, 7]
             $detailStatus = $null
             for ($d = 1; $d -le $detail.GetLength(0); $d++) {
-                if ([string]$detail[$d, 1] -eq $id) { $detailStatus = [string]$detail[$d, 49]; break }
+                if ([string]$detail[$d, 1] -eq $id) { $detailStatus = [string]$detail[$d, $capacityStatusColumn]; break }
             }
             if ($detailStatus -ne $status) { throw "LC $id ($mode): summary=$status, detail=$detailStatus." }
             $rows[$id] = [pscustomobject]@{ Status=$status; Overall=[string]$table[$r,4]; Comment=[string]$table[$r,3] }

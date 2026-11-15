@@ -74,7 +74,8 @@ Public Function LoadPathKeys(ByVal requestedPath As String, ByVal loadState As C
     Set descriptor = New CLoadPathDescriptor
     Dim pathKey As String
     pathKey = descriptor.NormalizeKey(requestedPath)
-    If Len(pathKey) = 0 Then Err.Raise vbObjectError + 4233, "CLimitSearchCoordinator", "Не распознан способ изменения нагрузки (LoadPath). Выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy."
+    If Len(pathKey) = 0 Then Err.Raise vbObjectError + 4233, "CLimitSearchCoordinator", _
+        "Не распознан способ изменения нагрузки (LoadPath). " & descriptor.LoadPathChoices
     If pathKey <> "Auto" Then
         LoadPathKeys = Array(pathKey)
         Exit Function

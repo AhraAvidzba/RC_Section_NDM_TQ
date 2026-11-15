@@ -1609,8 +1609,8 @@ function Add-CapacityMethodologyGuide {
     $row = Add-GuideParagraph $Sheet $StartRow "Несущая способность определяется достижением предельной деформации бетона или арматуры на выбранной траектории нагружения. Множитель λ = 1 соответствует заданному сочетанию. Критерии деформаций — СП 63, пп. 8.1.20, 8.1.29–8.1.30; траектория поиска задаётся программой."
     $row = Add-GuideTitle $Sheet $row "1. Расчетный профиль и путь нагружения" 13
     $row = Add-GuideParagraph $Sheet $row "Расчет включается в профиле настройкой Calculation.Strength.Capacity = Yes. Используется модель прочности MaterialModel.Strength.*, общая с прямым расчетом НДС."
-    $row = Add-GuideParagraph $Sheet $row "LoadPath в строке сочетания задает масштабируемые составляющие: Mx, My, оба момента, N или все усилия. Auto выбирает путь по ненулевым составляющим; пустое значение принимается как Auto."
-    $row = Add-GuideParagraph $Sheet $row "При N + M режим Auto последовательно пробует моментный путь, λ*N и λ*NMxy до получения предельной точки. Найденный предел с λ < 1 завершает поиск. Явно заданный путь не заменяется другим."
+    $row = Add-GuideParagraph $Sheet $row "LoadPath задаёт, какие усилия меняются. Можно выбрать N, Mx, My, T, Qx, Qy, оба изгибающих момента, N с обоими моментами или все шесть усилий (λ*All6). Пустое поле означает Auto."
+    $row = Add-GuideParagraph $Sheet $row "В Auto при кручении или поперечной силе пропорционально меняются все шесть усилий. При N + M без них Auto пробует моментный путь, λ*N и λ*NMxy. Найденный предел с λ < 1 завершает поиск."
     $row = Add-GuideFormula $Sheet $row "SF_capacity = λ_ult"
     $row = Add-GuideParagraph $Sheet $row "SF_capacity - коэффициент запаса по несущей способности; λ_ult - найденный предельный множитель. При λ_ult ≥ 1 заданная нагрузка проходит проверку, при λ_ult < 1 - не проходит."
     $row = Add-GuideCompositeFormula $Sheet $row @(
@@ -1641,7 +1641,7 @@ function Add-CapacityMethodologyGuide {
     $row = Add-GuideParagraph $Sheet $row "Настройка Config General.DiagramExtension может помогать найти равновесие пробной нагрузки за пределами диаграммы. Физический критерий по деформациям остается исходным: численное продолжение не прибавляет сечению несущую способность."
     $row = Add-GuideTitle $Sheet $row "5. Результаты поиска" 13
     $row = Add-GuideParagraph $Sheet $row "BaseFail означает подтвержденный физический отказ постоянной части при λ = 0. NumFail означает, что предельную точку не удалось надежно найти численно; сам по себе он не доказывает разрушение. Комментарий объясняет причину и использованный путь."
-    $row = Add-GuideParagraph $Sheet $row "В Results также показаны N_ult, Mx_ult и My_ult - усилия в найденной предельной точке, фактический метод и LoadPath. Усилия возвращаются к пользовательской точке приложения и выводятся в OUTPUT и пользовательских знаках; напряжения и деформации сохраняют физические знаки."
+    $row = Add-GuideParagraph $Sheet $row "В блоке предельных компонентов Results показаны N_ult, Mx_ult, My_ult, T_ult, Qx_ult и Qy_ult. Это усилия в найденной предельной точке в единицах OUTPUT и пользовательской точке приложения. Рядом показаны LoadPath и метод."
     return $row + 2
 }
 
@@ -2274,7 +2274,7 @@ function Add-CoupledAnalysisGuide {
     $row = Add-GuideTitle $Sheet $row "2. Траектория и вывод" 13
     $row = Add-GuideParagraph $Sheet $row "Множитель λ задаёт положение на выбранной траектории. При λ = 1 проверяется заданное сочетание."
     $row = Add-GuideFormula $Sheet $row "F(λ) = F_0 + λ·F_1"
-    $row = Add-GuideParagraph $Sheet $row "В Auto или при пустом LoadPath от нуля растут все шесть усилий. При явном выборе LoadPath меняются выбранные N и изгибающие моменты с учётом переноса, а T, Qx и Qy относятся к постоянной части."
+    $row = Add-GuideParagraph $Sheet $row "В Auto, при пустом LoadPath и в λ*All6 от нуля меняются все шесть усилий. При λ*T, λ*Qx, λ*Qy меняется выбранное усилие, при λ*NMxy — N, Mx и My. Остальные усилия заданы на постоянной части. Поиск требует ненулевой масштабируемой компоненты."
     $row = Add-GuideParagraph $Sheet $row "Найдённый предельный множитель показывает запас по этой траектории. OK означает подтверждённую проверку, FAIL — подтверждённое превышение критерия. NumFail означает неопределённый результат численного поиска. При нём может быть показан достигнутый множитель равновесия. InputErr указывает на исходные данные и сопровождается причиной и адресом."
     $row = Add-GuideParagraph $Sheet $row "На Results в таблице «Характеристики сечения и сочетаний» поля Equilibrium показывают заданные и восстановленные усилия в центре бетонной сетки. Абсолютная невязка записана в единицах усилия. Приведённую невязку получают делением абсолютной на площадь бетона, а для момента также на характерное плечо. Она выводится в единицах напряжения OUTPUT. В режиме File эти сведения входят в снимок."
     $row = Add-GuideParagraph $Sheet $row "На Results откройте подраздел «Хомуты и поперечные ветви» в подробной таблице прочности. Группа «При заданных усилиях» показывает класс стали, точку наибольшего использования, напряжение вдоль ветви и знаковые деформации. Использование равно |ε / εlim|, где ε — деформация в контрольной точке, εlim — предел для этого класса стали и знака деформации."
@@ -2645,13 +2645,15 @@ function Add-LoadCombinationsTable {
     $Sheet.Cells.Item($HeaderRow + 1, $StartColumn + 4).Value2 = $defaultProfileName
 
     $lambda = [char]0x03BB
-    $capacityLoadPathOptions = @("Auto", "$lambda*Mx", "$lambda*My", "$lambda*Mxy", "$lambda*N", "$lambda*NMxy")
+    $capacityLoadPathOptions = @("Auto", "$lambda*Mx", "$lambda*My", "$lambda*Mxy", "$lambda*N", "$lambda*NMxy",
+        "$lambda*T", "$lambda*Qx", "$lambda*Qy", "$lambda*All6")
     $capacityLoadPathListAddress = Get-ConfigValidationListAddress $Sheet $capacityLoadPathOptions
     $capacityLoadPathRange = $Sheet.Range($Sheet.Cells.Item($HeaderRow + 1, $StartColumn + 5), $Sheet.Cells.Item($HeaderRow + 30, $StartColumn + 5))
     $capacityLoadPathRange.Validation.Delete()
     $capacityLoadPathRange.Validation.Add(3, 1, 1, $capacityLoadPathListAddress)
     $capacityLoadPathRange.Validation.IgnoreBlank = $true
     $capacityLoadPathRange.Validation.InCellDropdown = $true
+    $capacityLoadPathRange.Validation.ShowError = $true
     $capacityLoadPathRange.Value2 = "Auto"
 
     Set-WorkbookNameByBounds $Workbook "rngLoadCombinations" $Sheet $HeaderRow $StartColumn ($HeaderRow + 30) ($StartColumn + 9)

@@ -2209,17 +2209,23 @@ Public Function RunTestCoupledHoopCapacity() As String
         Dim writer As New CStrengthSummaryWriter, anchor As Object
         writer.WriteSummary ThisWorkbook, batch, section:=section
         Set anchor = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-        TestRecord anchor.Offset(-4, 50).Value2 = "Хомуты и поперечные ветви" And anchor.Offset(-4, 50).MergeArea.Columns.Count = 12 And _
-            anchor.Offset(-4, 50).Resize(5, 12).Borders.Item(10).LineStyle <> -4142, _
+        TestRecord anchor.Offset(-1, 41).Value2 = "Tult, N*mm" And anchor.Offset(-1, 42).Value2 = "Qx,ult, N" And _
+            anchor.Offset(-1, 43).Value2 = "Qy,ult, N", "the three ultimate components follow My", passed, failed, report
+        Dim cellCapacity As CCapacityResult: Set cellCapacity = batch.ResultAt(1).StrengthResult.Capacity
+        TestExpectNear CDbl(anchor.Offset(0, 41).Value2), cellCapacity.TUltimate, 1E-7, "Results ultimate T", passed, failed, report
+        TestExpectNear CDbl(anchor.Offset(0, 42).Value2), cellCapacity.QxUltimate, 1E-7, "Results ultimate Qx", passed, failed, report
+        TestExpectNear CDbl(anchor.Offset(0, 43).Value2), cellCapacity.QyUltimate, 1E-7, "Results ultimate signed Qy", passed, failed, report
+        TestRecord anchor.Offset(-4, 53).Value2 = "Хомуты и поперечные ветви" And anchor.Offset(-4, 53).MergeArea.Columns.Count = 12 And _
+            anchor.Offset(-4, 53).Resize(5, 12).Borders.Item(10).LineStyle <> -4142, _
             "separate Results heading spans the fully framed hoop subsection", passed, failed, report
-        TestRecord anchor.Offset(0, 55).Value2 = "FAIL" And anchor.Offset(0, 61).Value2 = "FAIL", _
+        TestRecord anchor.Offset(0, 58).Value2 = "FAIL" And anchor.Offset(0, 64).Value2 = "FAIL", _
             "separate current and reserve statuses are written", passed, failed, report
-        TestRecord anchor.Offset(0, 55).Interior.Color = StatusFillColor("FAIL") And _
-            anchor.Offset(0, 61).Interior.Color = StatusFillColor("FAIL"), "both hoop statuses use the standard failure fill", passed, failed, report
-        TestRecord InStr(anchor.Offset(0, 50).Value2, "TestWeakHoop (TestHoopGrade)") = 1 And _
-            InStr(anchor.Offset(0, 57).Value2, "TestWeakHoop (TestHoopGrade)") = 1, _
+        TestRecord anchor.Offset(0, 58).Interior.Color = StatusFillColor("FAIL") And _
+            anchor.Offset(0, 64).Interior.Color = StatusFillColor("FAIL"), "both hoop statuses use the standard failure fill", passed, failed, report
+        TestRecord InStr(anchor.Offset(0, 53).Value2, "TestWeakHoop (TestHoopGrade)") = 1 And _
+            InStr(anchor.Offset(0, 60).Value2, "TestWeakHoop (TestHoopGrade)") = 1, _
             "Results starts with the governing hoop and its grade in each check", passed, failed, report
-        TestExpectNear CDbl(anchor.Offset(0, 56).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
+        TestExpectNear CDbl(anchor.Offset(0, 59).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
         TestSavedHoopCapacityFields ThisWorkbook, section, provider, batch, passed, failed, report
     End If
     RunTestCoupledHoopCapacity = report & "TOTAL_COUPLED_HOOP_CAPACITY: passed=" & passed & "; failed=" & failed
@@ -2246,29 +2252,29 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
     TestInputCell(settings, "Results.SnapshotStorage").Value2 = "File"
     store.SaveFile book, snap
     Dim anchor As Object: Set anchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-    Dim reserve As Double: reserve = CDbl(anchor.Offset(0, 56).Value2)
+    Dim reserve As Double: reserve = CDbl(anchor.Offset(0, 59).Value2)
     Dim mode As Variant, values As Variant, n As Long, shear As Object, runId As Double
     n = section.ConcreteCount + section.RebarCount
     For Each mode In Array("Excel", "File")
         TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
-        anchor.Offset(0, 50).Resize(1, 12).ClearContents ' Проверяем вывод заново, без значений от другого носителя.
+        anchor.Offset(0, 53).Resize(1, 12).ClearContents ' Проверяем вывод заново, без значений от другого носителя.
         If mode = "Excel" Then
             UpdateSectionResultsForWorkbook book, snap
         Else
             anchor.Worksheet.ChartObjects("chtNDMCoupledLoadTrace").Left = anchor.Offset(0, 58).Left ' Сохранённая позиция при подтаблице из 57 столбцов.
             UpdateSectionResultsForWorkbook book
         End If
-        TestRecord anchor.Offset(0, 55).Value2 = "FAIL" And anchor.Offset(0, 61).Value2 = "FAIL", _
+        TestRecord anchor.Offset(0, 58).Value2 = "FAIL" And anchor.Offset(0, 64).Value2 = "FAIL", _
             CStr(mode) & " restores both independent hoop statuses on Results", passed, failed, report
-        TestExpectNear CDbl(anchor.Offset(0, 56).Value2), reserve, 1E-10, _
+        TestExpectNear CDbl(anchor.Offset(0, 59).Value2), reserve, 1E-10, _
             CStr(mode) & " restores the hoop reserve on Results", passed, failed, report
-        TestExpectNear CDbl(anchor.Offset(0, 47).Value2), reserve, 1E-10, _
+        TestExpectNear CDbl(anchor.Offset(0, 50).Value2), reserve, 1E-10, _
             CStr(mode) & " uses the hoop reserve as the section reserve", passed, failed, report
         TestLoadTraceChart book, "Hoop", True, True, True, passed, failed, report
-        TestRecord anchor.Worksheet.ChartObjects("chtNDMCoupledLoadTrace").Left >= anchor.Offset(0, 63).Left, _
+        TestRecord anchor.Worksheet.ChartObjects("chtNDMCoupledLoadTrace").Left >= anchor.Offset(0, 66).Left, _
             CStr(mode) & " keeps the loading chart to the right of the hoop table", passed, failed, report
-        TestRecord InStr(CStr(anchor.Offset(0, 50).Value2), "TestWeakHoop (TestHoopGrade)") = 1 And _
-            InStr(CStr(anchor.Offset(0, 57).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
+        TestRecord InStr(CStr(anchor.Offset(0, 53).Value2), "TestWeakHoop (TestHoopGrade)") = 1 And _
+            InStr(CStr(anchor.Offset(0, 60).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
             CStr(mode) & " restores the hoop and its grade in both checks", passed, failed, report
         TestHoopStrainDetails book, anchor, CStr(mode), passed, failed, report
         Dim expected As Variant
@@ -2342,8 +2348,8 @@ Private Sub TestHoopStrainDetails(ByVal book As Object, ByVal anchor As Object, 
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Const HOOP_LIMIT As Double = 0.00004
     Dim direct As Variant, limit As Variant
-    direct = anchor.Offset(0, 50).Resize(1, 6).Value2
-    limit = anchor.Offset(0, 56).Resize(1, 6).Value2
+    direct = anchor.Offset(0, 53).Resize(1, 6).Value2
+    limit = anchor.Offset(0, 59).Resize(1, 6).Value2
     TestRecord direct(1, 2) > 6# And limit(1, 3) > 6#, mode & " displays stresses along the hoop from both states", passed, failed, report
     TestExpectNear CDbl(direct(1, 4)), HOOP_LIMIT, 1E-12, mode & " displays the hoop grade's tension limit", passed, failed, report
     TestExpectNear CDbl(limit(1, 5)), HOOP_LIMIT, 1E-12, mode & " displays the same limit in the limit state", passed, failed, report
@@ -2559,8 +2565,8 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestRecord Len(ReadLoadCasePropertyText(book, "Spatial", "State.StrengthState.Equilibrium.Reference")) = 0 And _
             Len(ReadLoadCasePropertyText(book, "Spatial", "State.CapacityState.Equilibrium.Reference")) = 0, _
             CStr(mode) & " input failure saves no stale equilibrium", passed, failed, report
-        TestRecord hoopAnchor.Offset(0, 55).Value2 = "InputErr" And hoopAnchor.Offset(0, 61).Value2 = "InputErr" And _
-            Len(hoopAnchor.Offset(0, 56).Value2) = 0, CStr(mode) & " hoop subdivision reports failed preparation for both requested checks", passed, failed, report
+        TestRecord hoopAnchor.Offset(0, 58).Value2 = "InputErr" And hoopAnchor.Offset(0, 64).Value2 = "InputErr" And _
+            Len(hoopAnchor.Offset(0, 59).Value2) = 0, CStr(mode) & " hoop subdivision reports failed preparation for both requested checks", passed, failed, report
         TestRecord InStr(1, ignored, gt.Worksheet.Name & "!" & gt.Address(False, False), vbTextCompare) > 0, CStr(mode) & " missing Gt names its cell", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "Plane", "DirectStateStatus") = "OK", CStr(mode) & " planar case unaffected by calibration", passed, failed, report
 
@@ -2580,7 +2586,7 @@ Public Function RunTestCoupledWorkbookInput() As String
         grades.Cells(2, 7).Value2 = 0.018
         ignored = RunSectionCalculationForWorkbook(book)
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing hoop modulus is an input error", passed, failed, report
-        TestRecord hoopAnchor.Offset(0, 55).Value2 = "InputErr" And hoopAnchor.Offset(0, 61).Value2 = "N/A", _
+        TestRecord hoopAnchor.Offset(0, 58).Value2 = "InputErr" And hoopAnchor.Offset(0, 64).Value2 = "N/A", _
             CStr(mode) & " invalid hoop steel keeps its input error in the hoop subdivision", passed, failed, report
         TestRecord InStr(1, ignored, grades.Worksheet.Name & "!" & grades.Cells(2, 3).Address(False, False), vbTextCompare) > 0, _
             CStr(mode) & " invalid class value names its cell", passed, failed, report
@@ -2593,21 +2599,21 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK", CStr(mode) & " produces linked equilibrium " & ignored, passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "Coupled.StateSolver") = "SplineNewton", CStr(mode) & " saves actual solver", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "ALL", "Geometry.RecipeType") = "Rectangles", CStr(mode) & " same saved recipe after repeated calculation", passed, failed, report
-        TestRecord hoopAnchor.Offset(-4, 50).Value2 = "Хомуты и поперечные ветви", _
+        TestRecord hoopAnchor.Offset(-4, 53).Value2 = "Хомуты и поперечные ветви", _
             CStr(mode) & " has separate hoop heading", passed, failed, report
-        TestRecord hoopAnchor.Offset(0, 55).Value2 = "OK" And Len(hoopAnchor.Offset(1, 55).Value2) = 0, _
+        TestRecord hoopAnchor.Offset(0, 58).Value2 = "OK" And Len(hoopAnchor.Offset(1, 58).Value2) = 0, _
             CStr(mode) & " writes hoop status only for spatial case", passed, failed, report
-        TestRecord hoopAnchor.Offset(0, 61).Value2 = "N/A" And Len(hoopAnchor.Offset(0, 56).Value2) = 0, _
+        TestRecord hoopAnchor.Offset(0, 64).Value2 = "N/A" And Len(hoopAnchor.Offset(0, 59).Value2) = 0, _
             CStr(mode) & " distinguishes direct OK from a switched-off reserve search", passed, failed, report
         If CStr(mode) = "File" Then
             Dim savedStrength As Variant, reader As CResultReadSource
             Set reader = CurrentResultSource(book)
             savedStrength = reader.Table("Strength.Data")
-            TestRecord UBound(savedStrength, 2) = STRENGTH_SNAPSHOT_COLUMNS And savedStrength(1, 56) = "OK", _
+            TestRecord UBound(savedStrength, 2) = STRENGTH_SNAPSHOT_COLUMNS And savedStrength(1, 59) = "OK", _
                 "File stores separate hoop status and schema", passed, failed, report
-            hoopAnchor.Offset(0, 55).ClearContents
+            hoopAnchor.Offset(0, 58).ClearContents
             UpdateSectionResultsForWorkbook book
-            TestRecord hoopAnchor.Offset(0, 55).Value2 = "OK", "File restores a removed hoop status", passed, failed, report
+            TestRecord hoopAnchor.Offset(0, 58).Value2 = "OK", "File restores a removed hoop status", passed, failed, report
             TestStrengthSnapshotWidths book, reader, hoopAnchor, passed, failed, report
         End If
         Dim components As Variant, i As Long, actual As String
@@ -2834,8 +2840,8 @@ Private Sub TestSavedAutoCADTransverse(ByVal book As Object, ByVal settings As O
             Len(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Status")) = 0, _
             label & "accepts explicit absence", passed, failed, report
         Dim hoopSummary As Object: Set hoopSummary = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-        TestRecord hoopSummary.Value2 = "Spatial" And hoopSummary.Offset(0, 55).Value2 = "N/A" And _
-            hoopSummary.Offset(0, 61).Value2 = "N/A", label & "reports the hoop checks as inapplicable for explicit None", passed, failed, report
+        TestRecord hoopSummary.Value2 = "Spatial" And hoopSummary.Offset(0, 58).Value2 = "N/A" And _
+            hoopSummary.Offset(0, 64).Value2 = "N/A", label & "reports the hoop checks as inapplicable for explicit None", passed, failed, report
         kind.Value2 = "Контур"
         kind.Offset(0, 1).Value2 = 8# / lengthFactor: kind.Offset(0, 2).Value2 = 120# / lengthFactor
         kind.Offset(0, 3).Value2 = 10# / lengthFactor: kind.Offset(0, 4).Value2 = "TestHoop"
@@ -2901,23 +2907,27 @@ End Sub
 Private Sub TestStrengthSnapshotWidths(ByVal book As Object, ByVal source As CResultReadSource, _
         ByVal anchor As Object, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Dim current As CCalculationSnapshot: Set current = source.LoadAll
-    Dim legacy As New CCalculationSnapshot, legacyHoop As New CCalculationSnapshot, damaged As New CCalculationSnapshot
+    Dim legacy As New CCalculationSnapshot, legacyHoop As New CCalculationSnapshot
+    Dim legacyHoopStates As New CCalculationSnapshot, damaged As New CCalculationSnapshot
     Dim key As Variant, values As Variant, cropped As Variant, hoopControl As String, hoopUtil As Double
-    hoopControl = CStr(anchor.Offset(0, 50).Value2): hoopUtil = CDbl(anchor.Offset(0, 54).Value2)
-    legacy.RunID = current.RunID: legacyHoop.RunID = current.RunID: damaged.RunID = current.RunID
+    hoopControl = CStr(anchor.Offset(0, 53).Value2): hoopUtil = CDbl(anchor.Offset(0, 57).Value2)
+    legacy.RunID = current.RunID: legacyHoop.RunID = current.RunID
+    legacyHoopStates.RunID = current.RunID: damaged.RunID = current.RunID
     For Each key In current.Keys
         values = current.Table(CStr(key))
         If key = "Strength.Headers" Or key = "Strength.Data" Then
             cropped = TestCropStrengthTable(values)
             legacy.AddTable CStr(key), cropped
-            legacyHoop.AddTable CStr(key), TestCropStrengthTable(values, True)
+            legacyHoop.AddTable CStr(key), TestCropStrengthTable(values, LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS)
+            legacyHoopStates.AddTable CStr(key), TestCropStrengthTable(values, LEGACY_HOOP_STATES_STRENGTH_SNAPSHOT_COLUMNS)
             If key = "Strength.Headers" Then
                 damaged.AddTable CStr(key), cropped
             Else
                 damaged.AddTable CStr(key), values
             End If
         Else
-            legacy.AddTable CStr(key), values: legacyHoop.AddTable CStr(key), values: damaged.AddTable CStr(key), values
+            legacy.AddTable CStr(key), values: legacyHoop.AddTable CStr(key), values
+            legacyHoopStates.AddTable CStr(key), values: damaged.AddTable CStr(key), values
         End If
     Next key
     Dim errText As String
@@ -2926,32 +2936,40 @@ Private Sub TestStrengthSnapshotWidths(ByVal book As Object, ByVal source As CRe
     errText = Err.Description
     Err.Clear
     On Error GoTo 0
-    TestRecord InStr(errText, "число столбцов") > 0 And anchor.Offset(0, 55).Value2 = "OK", _
+    TestRecord InStr(errText, "число столбцов") > 0 And anchor.Offset(0, 58).Value2 = "OK", _
         "mismatched snapshot widths are rejected before Results changes", passed, failed, report
     UpdateSectionResultsForWorkbook book, legacy
-    TestRecord anchor.Value2 = "Spatial" And Len(anchor.Offset(0, 55).Value2) = 0, _
+    TestRecord anchor.Value2 = "Spatial" And Len(anchor.Offset(0, 58).Value2) = 0, _
         "49-column strength snapshot restores existing cells and leaves the hoop subsection empty", passed, failed, report
     UpdateSectionResultsForWorkbook book, legacyHoop
-    TestRecord anchor.Offset(0, 50).Value2 = hoopControl And anchor.Offset(0, 54).Value2 = hoopUtil And _
-        anchor.Offset(0, 55).Value2 = "OK" And Len(anchor.Offset(0, 52).Value2) = 0 And Len(anchor.Offset(0, 59).Value2) = 0, _
+    TestRecord anchor.Offset(0, 53).Value2 = hoopControl And anchor.Offset(0, 57).Value2 = hoopUtil And _
+        anchor.Offset(0, 58).Value2 = "OK" And Len(anchor.Offset(0, 55).Value2) = 0 And Len(anchor.Offset(0, 62).Value2) = 0, _
         "57-column strength snapshot restores saved hoop cells and leaves unavailable strains blank", passed, failed, report
+    UpdateSectionResultsForWorkbook book, legacyHoopStates
+    TestRecord anchor.Offset(0, 58).Value2 = "OK" And IsNumeric(anchor.Offset(0, 55).Value2) And _
+        Len(anchor.Offset(0, 41).Value2 & anchor.Offset(0, 42).Value2 & anchor.Offset(0, 43).Value2) = 0, _
+        "62-column strength snapshot restores hoop strains and leaves unavailable ultimate components blank", passed, failed, report
     UpdateSectionResultsForWorkbook book
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Копирует данные в сохранённую структуру прочности с 49 или 57 столбцами.
-Private Function TestCropStrengthTable(ByRef values As Variant, Optional ByVal includeHoop As Boolean = False) As Variant
-    Dim result() As Variant, row As Long, column As Long, width As Long
-    width = LEGACY_STRENGTH_SNAPSHOT_COLUMNS
-    If includeHoop Then width = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS
+' Копирует таблицу в структуру снимка из 49, 57 или 62 столбцов.
+Private Function TestCropStrengthTable(ByRef values As Variant, _
+        Optional ByVal width As Long = LEGACY_STRENGTH_SNAPSHOT_COLUMNS) As Variant
+    Dim result() As Variant, row As Long, column As Long, endColumn As Long
+    endColumn = LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+    If width = LEGACY_HOOP_STATES_STRENGTH_SNAPSHOT_COLUMNS Then endColumn = width
     ReDim result(1 To UBound(values, 1), 1 To width)
     For row = 1 To UBound(values, 1)
-        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+        For column = 1 To 41
             result(row, column) = values(row, column)
         Next column
+        For column = 42 To endColumn
+            result(row, column) = values(row, column + 3)
+        Next column
     Next row
-    If includeHoop Then
-        Dim sourceColumns As Variant: sourceColumns = Array(51, 52, 55, 56, 57, 58, 62)
+    If width = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then
+        Dim sourceColumns As Variant: sourceColumns = Array(54, 55, 58, 59, 60, 61, 65)
         For row = 1 To UBound(values, 1)
             For column = LBound(sourceColumns) To UBound(sourceColumns)
                 result(row, 51 + column) = values(row, CLng(sourceColumns(column)))

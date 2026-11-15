@@ -4483,7 +4483,7 @@ Private Sub TestBatchSummaryWriter(ByRef stats As TBatchTestStats)
     TestAssertTrue stats, "batch.writer.strength.statusColors", _
         TestStatusCellHasExpectedFill(resultsSheet, strengthAnchor.Row, 3) And _
         TestStatusCellHasExpectedFill(resultsSheet, strengthAnchor.Row, 30) And _
-        TestStatusCellHasExpectedFill(resultsSheet, strengthAnchor.Row, 49) And _
+        TestStatusCellHasExpectedFill(resultsSheet, strengthAnchor.Row, 52) And _
         TestCellHasNoFill(resultsSheet, strengthAnchor.Row, 1) And _
         TestCellHasNoFill(resultsSheet, strengthAnchor.Row, 10) And _
         TestCellHasNoFill(resultsSheet, strengthAnchor.Row, 31)
@@ -4687,7 +4687,7 @@ Private Sub TestAssertBatchSummaryReservesMatchDetailed(ByRef stats As TBatchTes
             resultsSheet.Cells.Item(strengthRow, 29).Value2
         TestAssertOptionalReserve stats, "batch.writer.reserve." & combinationID & ".capacity", _
             resultsSheet.Cells.Item(summaryRow, 18).Value2, _
-            resultsSheet.Cells.Item(strengthRow, 48).Value2
+            resultsSheet.Cells.Item(strengthRow, 51).Value2
     End If
     If checkCrack And crackRow > 0 Then
         TestAssertOptionalReserve stats, "batch.writer.reserve." & combinationID & ".crack", _
@@ -6905,7 +6905,7 @@ Private Sub TestAudit02InitialOffsetOnOffStatuses(ByRef stats As TBatchTestStats
                 batch.ResultAt(i).StrengthResult.Capacity.Status
             TestAssertEquals stats, prefix & ".overall", CStr(sheet.Cells.Item(summaryRow, 4).Value2), batch.ResultAt(i).Status
             TestAssertTrue stats, prefix & ".colorSummary", TestStatusCellHasExpectedFill(sheet, summaryRow, 7)
-            TestAssertTrue stats, prefix & ".colorDetailed", TestStatusCellHasExpectedFill(sheet, detailedRow, 49)
+            TestAssertTrue stats, prefix & ".colorDetailed", TestStatusCellHasExpectedFill(sheet, detailedRow, 52)
         Next i
     Next mode
     TestSetProfileValue "Calculation.Stability.Enabled", "PR1", oldStability
@@ -8229,7 +8229,7 @@ Private Sub TestAudit03CheckWriterPalette(ByRef stats As TBatchTestStats, ByVal 
         firstRow = anchor.Row
         Select Case CStr(block)
             Case "rngBatchSummary": firstRow = firstRow + 12: columns = Array(4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-            Case "rngStrengthSummaryAnchor": columns = Array(3, 30, 49)
+            Case "rngStrengthSummaryAnchor": columns = Array(3, 30, 52, 59, 65)
             Case "rngCrackSummaryAnchor": columns = Array(3, 21, 24, 25, 29, 44, 67, 72)
             Case "rngStabilitySummaryAnchor": columns = Array(3, 44, 50, 59, 65, 78, 90)
         End Select

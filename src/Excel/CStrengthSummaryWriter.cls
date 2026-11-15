@@ -31,7 +31,7 @@ Private Const COL_STATE_FIRST As Long = 11 ' Столбец таблицы: пе
 Private Const COL_STATE_LAST As Long = 30 ' Столбец таблицы: последний столбец текущего НДС.
 Private Const COL_SEPARATOR2 As Long = 31 ' Столбец таблицы: пустой столбец перед несущей способностью.
 Private Const COL_CAPACITY_FIRST As Long = 32 ' Столбец таблицы: первый столбец несущей способности.
-Private Const COL_CAPACITY_LAST As Long = 49 ' Столбец таблицы: последний столбец несущей способности.
+Private Const COL_CAPACITY_LAST As Long = 52 ' Столбец таблицы: последний столбец несущей способности.
 
 Private Const COL_ID As Long = 1 ' Столбец таблицы: номер сочетания.
 Private Const COL_RESULT_COMMENT As Long = 2 ' Столбец таблицы: пояснение результата сочетания.
@@ -74,27 +74,30 @@ Private Const COL_CAP_LAMBDA As Long = 38 ' Столбец таблицы: пр�
 Private Const COL_CAP_N As Long = 39 ' Столбец таблицы: предельное НДС: предельная сила N.
 Private Const COL_CAP_MX As Long = 40 ' Столбец таблицы: предельное НДС: предельный момент Mx.
 Private Const COL_CAP_MY As Long = 41 ' Столбец таблицы: предельное НДС: предельный момент My.
-Private Const COL_CAP_EBC As Long = 42 ' Столбец таблицы: предельное НДС: наибольшая деформация сжатия бетона.
-Private Const COL_CAP_EBT As Long = 43 ' Столбец таблицы: предельное НДС: наибольшая деформация растяжения бетона.
-Private Const COL_CAP_ESC As Long = 44 ' Столбец таблицы: предельное НДС: наибольшая деформация сжатия арматуры.
-Private Const COL_CAP_EST As Long = 45 ' Столбец таблицы: предельное НДС: наибольшая деформация растяжения арматуры.
-Private Const COL_CAP_H As Long = 46 ' Столбец таблицы: предельное НДС: высота сечения.
-Private Const COL_CAP_X As Long = 47 ' Столбец таблицы: предельное НДС: высота сжатой зоны.
-Private Const COL_CAP_RESERVE As Long = 48 ' Столбец таблицы: предельное НДС: коэффициент запаса.
-Private Const COL_CAP_STATUS As Long = 49 ' Столбец таблицы: предельное НДС: статус расчёта.
-Private Const COL_SEPARATOR3 As Long = 50 ' Пустой столбец перед поперечной арматурой.
-Private Const COL_TRANSVERSE_POINT As Long = 51 ' Контрольная точка поперечной арматуры при заданных усилиях.
-Private Const COL_TRANSVERSE_STRESS As Long = 52 ' Знаковое напряжение в той же точке.
-Private Const COL_TRANSVERSE_STRAIN As Long = 53 ' Знаковая деформация при заданных усилиях.
-Private Const COL_TRANSVERSE_STRAIN_LIMIT As Long = 54 ' Предел деформации класса стали и её знака.
-Private Const COL_TRANSVERSE_UTIL As Long = 55 ' Отношение деформации к пределу своего знака.
-Private Const COL_TRANSVERSE_STATUS As Long = 56 ' Статус критерия деформации поперечной арматуры.
-Private Const COL_TRANSVERSE_RESERVE As Long = 57 ' Коэффициент запаса, когда поперечная арматура определяет предел.
-Private Const COL_TRANSVERSE_LIMIT As Long = 58 ' Определяющая точка и причина арматурного предела.
-Private Const COL_TRANSVERSE_LIMIT_STRESS As Long = 59 ' Напряжение в сохранённом предельном НДС хомута.
-Private Const COL_TRANSVERSE_LIMIT_STRAIN As Long = 60 ' Деформация в сохранённом предельном НДС хомута.
-Private Const COL_TRANSVERSE_LIMIT_STRAIN_LIMIT As Long = 61 ' Знаковый предел деформации класса стали в предельном НДС.
-Private Const COL_TRANSVERSE_LIMIT_STATUS As Long = 62 ' Статус хомута при определении предельного множителя.
+Private Const COL_CAP_T As Long = 42 ' Крутящий момент в предельной точке.
+Private Const COL_CAP_QX As Long = 43 ' Поперечная сила X в предельной точке.
+Private Const COL_CAP_QY As Long = 44 ' Поперечная сила Y в предельной точке.
+Private Const COL_CAP_EBC As Long = 45 ' Столбец таблицы: предельное НДС: наибольшая деформация сжатия бетона.
+Private Const COL_CAP_EBT As Long = 46 ' Столбец таблицы: предельное НДС: наибольшая деформация растяжения бетона.
+Private Const COL_CAP_ESC As Long = 47 ' Столбец таблицы: предельное НДС: наибольшая деформация сжатия арматуры.
+Private Const COL_CAP_EST As Long = 48 ' Столбец таблицы: предельное НДС: наибольшая деформация растяжения арматуры.
+Private Const COL_CAP_H As Long = 49 ' Столбец таблицы: предельное НДС: высота сечения.
+Private Const COL_CAP_X As Long = 50 ' Столбец таблицы: предельное НДС: высота сжатой зоны.
+Private Const COL_CAP_RESERVE As Long = 51 ' Столбец таблицы: предельное НДС: коэффициент запаса.
+Private Const COL_CAP_STATUS As Long = 52 ' Столбец таблицы: предельное НДС: статус расчёта.
+Private Const COL_SEPARATOR3 As Long = 53 ' Пустой столбец перед поперечной арматурой.
+Private Const COL_TRANSVERSE_POINT As Long = 54 ' Контрольная точка поперечной арматуры при заданных усилиях.
+Private Const COL_TRANSVERSE_STRESS As Long = 55 ' Знаковое напряжение в той же точке.
+Private Const COL_TRANSVERSE_STRAIN As Long = 56 ' Знаковая деформация при заданных усилиях.
+Private Const COL_TRANSVERSE_STRAIN_LIMIT As Long = 57 ' Предел деформации класса стали и её знака.
+Private Const COL_TRANSVERSE_UTIL As Long = 58 ' Отношение деформации к пределу своего знака.
+Private Const COL_TRANSVERSE_STATUS As Long = 59 ' Статус критерия деформации поперечной арматуры.
+Private Const COL_TRANSVERSE_RESERVE As Long = 60 ' Коэффициент запаса, когда поперечная арматура определяет предел.
+Private Const COL_TRANSVERSE_LIMIT As Long = 61 ' Определяющая точка и причина арматурного предела.
+Private Const COL_TRANSVERSE_LIMIT_STRESS As Long = 62 ' Напряжение в сохранённом предельном НДС хомута.
+Private Const COL_TRANSVERSE_LIMIT_STRAIN As Long = 63 ' Деформация в сохранённом предельном НДС хомута.
+Private Const COL_TRANSVERSE_LIMIT_STRAIN_LIMIT As Long = 64 ' Знаковый предел деформации класса стали в предельном НДС.
+Private Const COL_TRANSVERSE_LIMIT_STATUS As Long = 65 ' Статус хомута при определении предельного множителя.
 
 Private Const HEADER_COLOR As Long = &HD9D9D9 ' Серый фон шапки, как в остальных подробных блоках.
 Private Const SMALL_VALUE As Double = 0.000000001 ' Порог для определения отсутствующего численного поля при выводе таблицы.
@@ -299,6 +302,7 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(2, COL_CAP_H) = "параметры сечения при " & ChrW$(&H3BB) & "ult и статус"
     PutHeaderNotes headers
     PutColumnLabels headers, units
+    PutCapacitySpatialHeaders headers, OutputMomentUnit(units), OutputForceUnit(units)
     PutTransverseHeaders headers, ChrW$(&H3C3) & ", " & OutputStressUnit(units)
     If Not mCapturedSnapshot Is Nothing Then
         mCapturedSnapshot.AddTable "Strength.Headers", headers
@@ -311,6 +315,16 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     End If
     target.Resize(HEADER_ROWS, TOTAL_COLUMNS).Value2 = headers
     MergeHeaders target
+End Sub
+
+' Задаёт подписи и единицы пространственных усилий в точке приложения нагрузки.
+Private Sub PutCapacitySpatialHeaders(ByRef headers() As Variant, ByVal momentUnit As String, ByVal forceUnit As String)
+    headers(HEADER_NOTES_ROW, COL_CAP_T) = "полный T при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
+    headers(HEADER_NOTES_ROW, COL_CAP_QX) = "полная Qx при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
+    headers(HEADER_NOTES_ROW, COL_CAP_QY) = "полная Qy при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
+    headers(HEADER_LABEL_ROW, COL_CAP_T) = "Tult, " & momentUnit
+    headers(HEADER_LABEL_ROW, COL_CAP_QX) = "Qx,ult, " & forceUnit
+    headers(HEADER_LABEL_ROW, COL_CAP_QY) = "Qy,ult, " & forceUnit
 End Sub
 
 ' Задаёт две группы столбцов хомута. Подпись напряжения содержит единицу
@@ -461,7 +475,7 @@ Private Function HeaderMergeBlocks() As Collection
     blocks.Add Array(1, 1, COL_CAP_EPS0, COL_CAP_STATUS)
     blocks.Add Array(2, 2, COL_CAP_EPS0, COL_CAP_KY)
     blocks.Add Array(2, 2, COL_CAP_LIMIT_STATE, COL_CAP_METHOD)
-    blocks.Add Array(2, 2, COL_CAP_LAMBDA, COL_CAP_MY)
+    blocks.Add Array(2, 2, COL_CAP_LAMBDA, COL_CAP_QY)
     blocks.Add Array(2, 2, COL_CAP_EBC, COL_CAP_EST)
     blocks.Add Array(2, 2, COL_CAP_H, COL_CAP_STATUS)
     blocks.Add Array(1, 1, COL_TRANSVERSE_POINT, COL_TRANSVERSE_LIMIT_STATUS)
@@ -653,10 +667,10 @@ Private Sub PutCapacityState(ByRef data() As Variant, ByVal rowIndex As Long, _
     If batch.ResultAt(index).StrengthResult.Capacity.LambdaCapacity > SMALL_VALUE Then data(rowIndex, COL_CAP_LAMBDA) = batch.ResultAt(index).StrengthResult.Capacity.LambdaCapacity
 
     Dim stateResult As CSectionStateResult
+    Dim capacity As CCapacityResult: Set capacity = batch.ResultAt(index).StrengthResult.Capacity
     Set stateResult = batch.ResultAt(index).StateRepository.FindState(sstCapacityState)
-    If Not stateResult Is Nothing Or (batch.ResultAt(index).StrengthResult.Capacity.HasUltimatePoint And _
-            batch.ResultAt(index).StrengthResult.Capacity.ReserveFactor > 0#) Then _
-        PutCapacityLoadPointComponents data, rowIndex, batch, index, units
+    If capacity.HasUltimatePoint And (Not stateResult Is Nothing Or capacity.ReserveFactor > 0#) Then _
+        PutCapacityLoadPointComponents data, rowIndex, capacity, units
     If Not stateResult Is Nothing Then
         PutStatePlane data, rowIndex, stateResult, units, COL_CAP_EPS0, COL_CAP_KX, COL_CAP_KY
         PutStateExtremes data, rowIndex, stateResult, units, _
@@ -669,12 +683,21 @@ Private Sub PutCapacityState(ByRef data() As Variant, ByVal rowIndex As Long, _
     data(rowIndex, COL_CAP_STATUS) = CapacityStatusText(batch, index, policy)
 End Sub
 
-' Выводит полный предельный вектор CapacityState в точке приложения нагрузки.
+' Выводит шесть подтверждённых предельных усилий в пользовательской точке приложения.
 Private Sub PutCapacityLoadPointComponents(ByRef data() As Variant, ByVal rowIndex As Long, _
-        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem)
-    data(rowIndex, COL_CAP_N) = OutputForce(batch.ResultAt(index).StrengthResult.Capacity.NUltimate, units)
-    data(rowIndex, COL_CAP_MX) = OutputMx(batch.ResultAt(index).StrengthResult.Capacity.MxUltimate, units)
-    data(rowIndex, COL_CAP_MY) = OutputMy(batch.ResultAt(index).StrengthResult.Capacity.MyUltimate, units)
+        ByVal capacity As CCapacityResult, ByVal units As CUnitSystem)
+    data(rowIndex, COL_CAP_N) = OutputForce(capacity.NUltimate, units)
+    data(rowIndex, COL_CAP_MX) = OutputMx(capacity.MxUltimate, units)
+    data(rowIndex, COL_CAP_MY) = OutputMy(capacity.MyUltimate, units)
+    If units Is Nothing Then
+        data(rowIndex, COL_CAP_T) = capacity.TUltimate
+        data(rowIndex, COL_CAP_QX) = capacity.QxUltimate
+        data(rowIndex, COL_CAP_QY) = capacity.QyUltimate
+    Else
+        data(rowIndex, COL_CAP_T) = units.InternalTorqueToOutput(capacity.TUltimate)
+        data(rowIndex, COL_CAP_QX) = units.InternalShearToOutput(capacity.QxUltimate)
+        data(rowIndex, COL_CAP_QY) = units.InternalShearToOutput(capacity.QyUltimate)
+    End If
 End Sub
 
 ' Записывает сохранённое поле деформаций: epsilon0 в начале координат модели
@@ -828,7 +851,7 @@ Private Sub ApplyHeaderSubscripts(ByVal target As Object)
         COL_STATE_EPS0, COL_STATE_KX, COL_STATE_KY, _
         COL_STATE_EBC, COL_STATE_EBT, COL_STATE_ESC, COL_STATE_EST, _
         COL_STATE_SBC, COL_STATE_SBT, COL_STATE_SSC, COL_STATE_SST, _
-        COL_CAP_LAMBDA, COL_CAP_N, COL_CAP_MX, COL_CAP_MY, _
+        COL_CAP_LAMBDA, COL_CAP_N, COL_CAP_MX, COL_CAP_MY, COL_CAP_T, COL_CAP_QX, COL_CAP_QY, _
         COL_CAP_EPS0, COL_CAP_KX, COL_CAP_KY, _
         COL_CAP_EBC, COL_CAP_EBT, COL_CAP_ESC, COL_CAP_EST)
 
@@ -998,43 +1021,55 @@ Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Obj
     FormatTable target, Nothing, data
 End Sub
 
-' Приводит снятые версии к текущей ширине. Из снимка 57 столбцов переносит
-' использование и статусы в их текущие позиции. Новые величины без измерений пусты.
+' Восстанавливает шапку и значения форматов 49, 57 и 62 столбцов. Три
+' добавленных предельных усилия имеют единицы снимка и пустые значения.
 Private Sub ExpandStrengthSnapshot(ByRef headers As Variant, ByRef data As Variant)
-    Dim newHeaders() As Variant, row As Long, column As Long
-    ReDim newHeaders(1 To HEADER_ROWS, 1 To TOTAL_COLUMNS)
-    For row = 1 To HEADER_ROWS
-        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
-            newHeaders(row, column) = headers(row, column)
-        Next column
-    Next row
-    Dim stressLabel As String: stressLabel = ChrW$(&H3C3)
-    If UBound(headers, 2) = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then _
-        stressLabel = CStr(headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS)) ' Восстанавливаем именно сохранённые единицы.
-    PutTransverseHeaders newHeaders, stressLabel
+    Dim newHeaders() As Variant, expanded() As Variant, sourceColumns As Long
+    sourceColumns = UBound(headers, 2)
+    CopyStrengthSnapshotMatrix headers, newHeaders
+    PutCapacitySpatialHeaders newHeaders, StrengthSnapshotUnit(headers(HEADER_LABEL_ROW, COL_CAP_MX)), _
+        StrengthSnapshotUnit(headers(HEADER_LABEL_ROW, COL_CAP_N))
+    If sourceColumns <> LEGACY_HOOP_STATES_STRENGTH_SNAPSHOT_COLUMNS Then
+        Dim stressLabel As String: stressLabel = ChrW$(&H3C3)
+        If sourceColumns = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then _
+            stressLabel = CStr(headers(HEADER_LABEL_ROW, 52)) ' Единица напряжения хомута в формате 57 столбцов.
+        PutTransverseHeaders newHeaders, stressLabel
+    End If
     headers = newHeaders
-    data = ExpandStrengthSnapshotData(data)
-End Sub
-
-' Сохраняет значения первых 49 столбцов и явно переносит известные данные
-' хомута из 57-колоночного снимка. Числа читаются без пересчёта.
-Private Function ExpandStrengthSnapshotData(ByRef values As Variant) As Variant
-    Dim expanded() As Variant, row As Long, column As Long
-    ReDim expanded(1 To UBound(values, 1), 1 To TOTAL_COLUMNS)
-    For row = 1 To UBound(values, 1)
-        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
-            expanded(row, column) = values(row, column)
-        Next column
-    Next row
-    If UBound(values, 2) = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then
-        Dim destination As Variant
+    CopyStrengthSnapshotMatrix data, expanded
+    If sourceColumns = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then
+        Dim destination As Variant, row As Long, column As Long
         destination = Array(COL_TRANSVERSE_POINT, COL_TRANSVERSE_STRESS, COL_TRANSVERSE_UTIL, COL_TRANSVERSE_STATUS, _
             COL_TRANSVERSE_RESERVE, COL_TRANSVERSE_LIMIT, COL_TRANSVERSE_LIMIT_STATUS)
-        For row = 1 To UBound(values, 1)
+        For row = 1 To UBound(data, 1)
             For column = LBound(destination) To UBound(destination)
-                expanded(row, CLng(destination(column))) = values(row, 51 + column)
+                expanded(row, CLng(destination(column))) = data(row, 51 + column)
             Next column
         Next row
     End If
-    ExpandStrengthSnapshotData = expanded
+    data = expanded
+End Sub
+
+' Переносит общие старые столбцы, оставляя место для T, Qx и Qy. В формате
+' 62 столбцов состояние хомута уже полное и переносится тем же смещением.
+Private Sub CopyStrengthSnapshotMatrix(ByRef values As Variant, ByRef expanded() As Variant)
+    Dim row As Long, column As Long, endColumn As Long, offset As Long
+    endColumn = LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+    If UBound(values, 2) = LEGACY_HOOP_STATES_STRENGTH_SNAPSHOT_COLUMNS Then endColumn = UBound(values, 2)
+    offset = COL_CAP_QY - COL_CAP_MY
+    ReDim expanded(1 To UBound(values, 1), 1 To TOTAL_COLUMNS)
+    For row = 1 To UBound(values, 1)
+        For column = 1 To COL_CAP_MY
+            expanded(row, column) = values(row, column)
+        Next column
+        For column = COL_CAP_T To endColumn
+            expanded(row, column + offset) = values(row, column)
+        Next column
+    Next row
+End Sub
+
+' Читает единицу после последней запятой в сохранённой подписи усилия.
+Private Function StrengthSnapshotUnit(ByVal label As String) As String
+    Dim separator As Long: separator = InStrRev(label, ",")
+    If separator > 0 Then StrengthSnapshotUnit = Trim$(Mid$(label, separator + 1))
 End Function

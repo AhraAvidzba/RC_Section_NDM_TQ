@@ -347,8 +347,7 @@ Private Sub TestLoadCombinationsOnConfig(ByRef stats As TUiTestStats)
     TestAssertTrue stats, "ui.loads.layout.title", _
         InStr(1, CStr(loads.Worksheet.Cells.Item(loads.Row - 1, loads.Column).Value2), "Сочетания нагрузок", vbTextCompare) > 0
     Dim pathOptions As Variant
-    pathOptions = Array("Auto", ChrW$(&H3BB) & "*Mx", ChrW$(&H3BB) & "*My", _
-        ChrW$(&H3BB) & "*Mxy", ChrW$(&H3BB) & "*N", ChrW$(&H3BB) & "*NMxy")
+    pathOptions = TestLoadPathOptions()
     TestAssertTrue stats, "ui.loads.layout.capacityPathValidation", _
         TestLoadCombinationValidationHasOptions(6, pathOptions)
 End Sub
@@ -1802,7 +1801,7 @@ Private Sub TestRectanglesMomentUltimateStrainWorkbookPath(ByRef stats As TUiTes
 
     Dim capacityStatus As String
     Dim solutionMethod As String
-    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 49).Value2)
+    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 52).Value2)
     solutionMethod = CStr(resultsSheet.Cells.Item(firstRow, 37).Value2)
 
     TestAppendLine stats, "INFO: ui.rectangles.momentUltimate capacityStatus=" & capacityStatus & _
@@ -1895,7 +1894,7 @@ Private Sub TestRectanglesPureBendingUltimateStrainWorkbookPath(ByRef stats As T
     Dim capacityStatus As String
     Dim solutionMethod As String
     directStatus = CStr(resultsSheet.Cells.Item(firstRow, 30).Value2)
-    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 49).Value2)
+    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 52).Value2)
     solutionMethod = CStr(resultsSheet.Cells.Item(firstRow, 37).Value2)
 
     TestAppendLine stats, "INFO: ui.rectangles.pureBending direct=" & directStatus & _
@@ -1935,7 +1934,7 @@ Private Sub TestRectanglesPureBendingDirectStateWorkbookPath(ByRef stats As TUiT
     Dim directStatus As String
     Dim capacityStatus As String
     directStatus = CStr(resultsSheet.Cells.Item(firstRow, 30).Value2)
-    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 49).Value2)
+    capacityStatus = CStr(resultsSheet.Cells.Item(firstRow, 52).Value2)
 
     TestAppendLine stats, "INFO: ui.rectangles.pureBendingDirect direct=" & directStatus & _
         "; capacity=" & capacityStatus
@@ -3387,10 +3386,17 @@ Private Function TestUniversalLoadPathValidationHasOptions() As Boolean
     Set cell = loads.Cells(2, 6)
     If cell.Validation.Type <> xlValidateList Or Not cell.Validation.IgnoreBlank Then Exit Function
     Dim expected As Variant
-    expected = Array("Auto", ChrW$(&H3BB) & "*Mx", ChrW$(&H3BB) & "*My", _
-        ChrW$(&H3BB) & "*Mxy", ChrW$(&H3BB) & "*N", ChrW$(&H3BB) & "*NMxy")
+    expected = TestLoadPathOptions()
     TestUniversalLoadPathValidationHasOptions = TestValidationCellHasOptions(cell, expected)
 Failed:
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт ожидаемый порядок LoadPath в сохранённой книге.
+Private Function TestLoadPathOptions() As Variant
+    Dim lambda As String: lambda = ChrW$(&H3BB)
+    TestLoadPathOptions = Array("Auto", lambda & "*Mx", lambda & "*My", lambda & "*Mxy", lambda & "*N", _
+        lambda & "*NMxy", lambda & "*T", lambda & "*Qx", lambda & "*Qy", lambda & "*All6")
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -6296,7 +6302,7 @@ Private Sub TestAudit03InputUnitConsumers(ByRef stats As TUiTestStats)
                         baselineGeometry = TestResultTable("rngNDMSectionGeometry")
                         baselineProperties = TestResultTable("rngNDMSectionProperties")
                         baselineDiagrams = TestResultTable("rngNDMMaterialDiagrams")
-                        baselineStrength = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange.Resize(4, 49).Value2
+                        baselineStrength = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange.Resize(4, STRENGTH_SNAPSHOT_COLUMNS).Value2
                         baselineCrack = ThisWorkbook.Names.Item("rngCrackSummaryAnchor").RefersToRange.Resize(4, 72).Value2
                         baselineStability = ThisWorkbook.Names.Item("rngStabilitySummaryAnchor").RefersToRange.Resize(4, STABILITY_SNAPSHOT_COLUMNS).Value2
                     Else
@@ -6309,7 +6315,7 @@ Private Sub TestAudit03InputUnitConsumers(ByRef stats As TUiTestStats)
                         TestAudit03CompareUnitSnapshot stats, prefix & ".properties", baselineProperties, actual, "Properties", 1#, 1#, 1#, 1#, 1#, 1#, 1#, 1#, 1#, True
                         actual = TestResultTable("rngNDMMaterialDiagrams")
                         TestAudit03ComparePlainSnapshot stats, prefix & ".diagrams", baselineDiagrams, actual, 2
-                        actual = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange.Resize(4, 49).Value2
+                        actual = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange.Resize(4, STRENGTH_SNAPSHOT_COLUMNS).Value2
                         TestAudit03ComparePlainSnapshot stats, prefix & ".strength", baselineStrength, actual, 1
                         actual = ThisWorkbook.Names.Item("rngCrackSummaryAnchor").RefersToRange.Resize(4, 72).Value2
                         TestAudit03ComparePlainSnapshot stats, prefix & ".crack", baselineCrack, actual, 1, True
@@ -8071,6 +8077,45 @@ Public Function RunConfigPresentationTests() As String
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет нативное принятие каждого пункта LoadPath в изолированной книге.
+' Восстанавливает текущий ввод и отклоняет целую строку списка и чужой путь.
+Public Function RunTestLoadPathDropdown() As String
+    On Error GoTo Failed
+    Dim loads As Object: Set loads = ThisWorkbook.Names.Item("rngLoadCombinations").RefersToRange
+    Dim stats As TUiTestStats, row As Variant, expected As Variant, item As Variant
+    Dim cell As Object, saved As Variant, formula As String, prefix As String
+    expected = TestLoadPathOptions()
+    For Each row In Array(2, loads.Rows.Count)
+        Set cell = loads.Cells(CLng(row), 6)
+        saved = cell.Formula
+        formula = CStr(cell.Validation.Formula1)
+        prefix = "LoadPath." & cell.Address(False, False)
+        TestAssertTrue stats, prefix & ".inline", Len(formula) > 0 And Left$(formula, 1) <> "="
+        TestAssertTrue stats, prefix & ".separateItems", TestValidationCellHasOptions(cell, expected)
+        TestAssertTrue stats, prefix & ".stopValidation", cell.Validation.InCellDropdown And _
+            cell.Validation.ShowError And cell.Validation.AlertStyle = xlValidAlertStop
+        For Each item In expected
+            cell.Value2 = CStr(item)
+            TestAssertTrue stats, prefix & ".accepts." & CStr(item), cell.Validation.Value
+        Next item
+        cell.ClearContents
+        TestAssertTrue stats, prefix & ".acceptsBlank", cell.Validation.Value
+        cell.Value2 = formula
+        TestAssertTrue stats, prefix & ".rejectsJoinedList", Not cell.Validation.Value
+        cell.Value2 = "lambda*Qz"
+        TestAssertTrue stats, prefix & ".rejectsUnknown", Not cell.Validation.Value
+        cell.Formula = saved
+        Set cell = Nothing
+    Next row
+    RunTestLoadPathDropdown = stats.Report & "TOTAL_LOAD_PATH_DROPDOWN: passed=" & stats.Passed & "; failed=" & stats.Failed
+    Exit Function
+Failed:
+    RunTestLoadPathDropdown = stats.Report & "RUNTIME ERROR: " & Err.Description
+    On Error Resume Next
+    If Not cell Is Nothing Then cell.Formula = saved
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет предупреждение в инструкции подготовки геометрии, включая
 ' риски завышения/занижения площади и красное выделение всего абзаца.
 ' Адреса не фиксированы: после пересборки справки ищутся ее заголовки.
@@ -8180,7 +8225,7 @@ Private Sub TestConfigDropdownMeaning(ByRef stats As TUiTestStats)
                 If CStr(name) = "rngCalculationProfiles" Then key = CStr(table.Cells(row, 2).Value2)
                 expected = TestExpectedConfigDropdownOptions(key)
                 If CStr(name) = "rngLoadCombinations" Then
-                    If column = 6 Then expected = "Auto|" & ChrW(&H3BB) & "*Mx|" & ChrW(&H3BB) & "*My|" & ChrW(&H3BB) & "*Mxy|" & ChrW(&H3BB) & "*N|" & ChrW(&H3BB) & "*NMxy"
+                    If column = 6 Then expected = Join(TestLoadPathOptions(), "|")
                 End If
                 If InStr(1, CStr(name), "Geometry", vbTextCompare) > 0 And Len(expected) = 0 Then
                     For headerRow = row - 1 To 1 Step -1

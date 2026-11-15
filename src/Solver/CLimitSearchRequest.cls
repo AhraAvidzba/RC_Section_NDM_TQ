@@ -281,7 +281,7 @@ Public Sub ConfigureLoadPathSelection(ByVal rawPath As String, ByVal loadState A
     Set descriptor = New CLoadPathDescriptor
     mRequestedLoadPath = descriptor.NormalizeKey(rawPath)
     If Len(mRequestedLoadPath) = 0 Then Err.Raise vbObjectError + 4210, "CLimitSearchRequest", _
-        "Неизвестный LoadPath. Выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy."
+        "Неизвестный LoadPath. " & descriptor.LoadPathChoices
     Set mLoadState = loadState
     mPureAxialLoad = pureAxialLoad
     Set mSelectedLoadPath = Nothing

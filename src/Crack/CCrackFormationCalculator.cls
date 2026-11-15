@@ -1871,9 +1871,9 @@ End Function
 Private Function NormalizeCrackFormationPath(ByVal rawPath As String) As String
     Dim descriptor As CLoadPathDescriptor
     Set descriptor = New CLoadPathDescriptor
-    NormalizeCrackFormationPath = descriptor.NormalizeKey(rawPath)
+    NormalizeCrackFormationPath = descriptor.NormalCrackKey(rawPath)
     If Len(NormalizeCrackFormationPath) = 0 Then Err.Raise vbObjectError + 3734, "CCrackFormationCalculator", _
-        "В таблице сочетаний исправьте LoadPath: выберите Auto, lambda*Mx, lambda*My, lambda*Mxy, lambda*N или lambda*NMxy."
+        "В таблице сочетаний исправьте LoadPath. " & descriptor.LoadPathChoices
 End Function
 
 ' Проверяет выбор стратегии образования трещины: Auto, UltimateStrain или LoadMultiplier.

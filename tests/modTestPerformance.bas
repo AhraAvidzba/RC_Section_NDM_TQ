@@ -917,7 +917,7 @@ Public Function TestPerformanceResultsFingerprint() As String
         If name = "rngBatchSummary" Then
             rows = 42: columns = 26
         ElseIf name = "rngStrengthSummaryAnchor" Then
-            rows = 30: columns = 49
+            rows = 30: columns = STRENGTH_SNAPSHOT_COLUMNS
         ElseIf name = "rngCrackSummaryAnchor" Then
             Dim cw As CCrackSummaryWriter: Set cw = New CCrackSummaryWriter
             rows = 30: columns = cw.RequiredColumns

@@ -141,6 +141,13 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         Exit Function
     End If
 
+    Dim path As CLoadPathVector
+    Set path = BuildPath(loads, loadPath, reason)
+    If Len(reason) > 0 Then
+        capacity.InitializeSkipped reason, loadPath
+        Exit Function
+    End If
+
     Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
     Dim models As Object, fc As Double, ft As Double
     Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
@@ -149,8 +156,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         Exit Function
     End If
 
-    Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As CLoadPathVector
-    Set path = BuildPath(loads, loadPath)
+    Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
     branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
@@ -452,16 +458,27 @@ Private Function SupplementarySteelModel(ByVal available As Object, ByVal grade 
         "Для класса «" & grade & "» (" & mSteelReferences(grade) & ") заполните строку " & key & " в rngCoupledSteelClasses на Config."
 End Function
 
-' Для Auto пропорционально наращивает шесть усилий. Явные траектории
-' сохраняют правило N/Mx/My, а T, Qx и Qy относятся к преднагружению.
-' Все моменты переносит к тому же центру, который использует интегрирование.
-Private Function BuildPath(ByVal loads As CSectionLoadState, ByVal loadPath As String) As CLoadPathVector
+' Auto и All6 пропорционально наращивают шесть усилий. Явные пути T/Q
+' сохраняют остальные усилия в точке приложения при любом множителе.
+' Моменты переносятся к тому же центру, который использует интегрирование.
+Private Function BuildPath(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
+        Optional ByRef noDirectionReason As String = vbNullString) As CLoadPathVector
+    Dim descriptor As New CLoadPathDescriptor
+    loadPath = descriptor.NormalizeKey(loadPath)
+    If Len(loadPath) = 0 Then Err.Raise 5, "CCoupledSectionAnalysis", descriptor.LoadPathChoices
+    If descriptor.IsSingleSpatialKey(loadPath) Then
+        descriptor.InitializeFromLoadState loadPath, loads
+        noDirectionReason = descriptor.MissingSpatialLoadReason
+        Set BuildPath = descriptor.SpatialVectorAboutPoint(loads, mCenterX, mCenterY)
+        Exit Function
+    End If
+
     Dim target() As Double, result As New CLoadPathVector
     loads.LoadAboutPoint mCenterX, mCenterY, target
-    If loadPath = "Auto" Then
+    If loadPath = "Auto" Or loadPath = "LambdaAll6" Then
         result.Initialize 0#, target(1), 0#, target(2), 0#, target(3), 0#, target(4), 0#, target(5), 0#, target(6)
     Else
-        Dim descriptor As New CLoadPathDescriptor, mxOffset As Double, myOffset As Double
+        Dim mxOffset As Double, myOffset As Double
         descriptor.InitializeFromLoadState loadPath, loads
         mxOffset = descriptor.MxOffset - descriptor.NOffset * mCenterY
         myOffset = descriptor.MyOffset - descriptor.NOffset * mCenterX

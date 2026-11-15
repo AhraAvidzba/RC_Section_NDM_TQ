@@ -152,6 +152,23 @@ Public Function Calculate(ByVal section As CSectionModel, _
         Exit Function
     End If
 
+    If loadPath.IsSingleSpatialKey(loadPath.Key) Then
+        If Not loadPath.HasScaledLoad Then
+            result.InitializeSkipped loadPath.MissingSpatialLoadReason, loadPath.Key
+        Else
+            result.InitializeInvalidInput "Для " & loadPath.DisplayName & " требуется связанный расчёт по шести усилиям.", loadPath.Key
+        End If
+        Set Calculate = result
+        Exit Function
+    End If
+    If loadPath.Key = "LambdaAll6" Then
+        If loadState.HasSpatialComponents Then
+            result.InitializeInvalidInput "Для " & loadPath.DisplayName & " с ненулевыми T или Q требуется связанный расчёт по шести усилиям.", loadPath.Key
+            Set Calculate = result
+            Exit Function
+        End If
+    End If
+
     If Not loadPath.HasPath Then
         result.InitializeSkipped "Поиск несущей способности не выполнялся: масштабируемая нагрузка отсутствует."
         Set Calculate = result
