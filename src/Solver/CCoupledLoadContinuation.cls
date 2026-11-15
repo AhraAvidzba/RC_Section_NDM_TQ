@@ -27,6 +27,7 @@ Private mHasOffset As Boolean, mHasDirection As Boolean, mHasAccepted As Boolean
 Private mOffsetFraction As Double, mLambda As Double
 Private mPreviousLambda As Double
 Private mPreferDeformationOnStall As Boolean
+Private mExactTargetRecovered As Boolean ' Последняя точная проба восстановила прямой расчёт.
 Private mInitialSteps As Long, mMaxAttempts As Long, mMaxIterations As Long
 Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
@@ -178,6 +179,7 @@ End Function
 Friend Function Advance(ByVal targetLambda As Double) As Boolean
     mMeta.Clear
     mRejected = 0: mAccepted = 0: mAttempts = 0
+    mExactTargetRecovered = False
     If targetLambda < mLambda Then
         mMeta.SetSolverFailure sfcInvalidInput, rkDirectState, _
             "Целевой множитель ниже достигнутого. Начните траекторию заново.", False
@@ -235,11 +237,13 @@ Friend Property Get ResultMeta() As CResultMeta
     Set ResultMeta = mMeta.Clone
 End Property
 
-' Проходит один отрезок параметра со стабильным ограничением числа проб.
-' Повтор численно трудного шага допускается только с меньшим приращением.
+' Проходит отрезок, уменьшая приращение после численного отказа.
+' При остановке прямого расчёта возможна одна проба точной конечной нагрузки.
 Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, ByVal offsetStage As Boolean) As Boolean
     Dim nominal As Double, minimum As Double, increment As Double, candidate As Double
-    nominal = (target - reached) / mInitialSteps
+    Dim segmentStart As Double, triedExactTarget As Boolean
+    segmentStart = reached
+    nominal = (target - segmentStart) / mInitialSteps
     minimum = nominal * MIN_STEP_RATIO
     increment = nominal
     Do While reached < target
@@ -260,8 +264,10 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             mMeta.DiagnosticDetails = ProgressDetails()
             Exit Function
         End If
+        If candidate = target Then triedExactTarget = True
         If SolveAndAccept(candidate, offsetStage) Then
             reached = candidate
+            triedExactTarget = False
             If increment < nominal / STEP_GROWTH Then
                 increment = increment * STEP_GROWTH
             Else
@@ -278,6 +284,14 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             End If
             increment = (candidate - reached) * 0.5
             If increment < minimum Then
+                If Not offsetStage And Not triedExactTarget And mReinforcement Is Nothing And _
+                        reached > segmentStart And target - reached <= nominal And mAttempts < mMaxAttempts Then
+                    If TryRecoverExactTarget(target) Then
+                        reached = target
+                        FollowSegment = True
+                        Exit Function
+                    End If
+                End If
                 mMeta.ResultComment = "Не сошёлся минимальный подшаг. " & mMeta.ResultComment
                 mMeta.DiagnosticDetails = ProgressDetails() & " | " & mMeta.DiagnosticDetails
                 Exit Function
@@ -285,6 +299,20 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
         End If
     Loop
     FollowSegment = True
+End Function
+
+' Проверяет конечную нагрузку от последнего принятого поля. При отказе
+' сохраняет причину остановки на минимальном подшаге и историю ветви.
+Private Function TryRecoverExactTarget(ByVal target As Double) As Boolean
+    Dim stall As CResultMeta: Set stall = mMeta
+    If SolveAndAccept(target, False) Then
+        mExactTargetRecovered = True
+        TryRecoverExactTarget = True
+    Else
+        mRejected = mRejected + 1
+        stall.DiagnosticDetails = stall.DiagnosticDetails & " | Точная конечная проба: " & mMeta.ResultComment
+        Set mMeta = stall
+    End If
 End Function
 
 ' Подставляет усилия этапа и принимает только сошедшееся состояние полностью.
@@ -401,4 +429,5 @@ End Function
 Private Function ProgressDetails() As String
     ProgressDetails = "Доля постоянной части: " & CStr(mOffsetFraction) & "; lambda: " & CStr(mLambda) & _
         "; принято: " & CStr(mAccepted) & "; отклонено: " & CStr(mRejected) & "; проб: " & CStr(mAttempts)
+    If mExactTargetRecovered Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено точной конечной пробой."
 End Function
