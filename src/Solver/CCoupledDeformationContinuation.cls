@@ -31,6 +31,9 @@ Private Const PROBE_LIMIT As Long = 96 ' Общий предел проб про
 Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Дорогие пробы с выбором другой меры при остановке.
 Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
+Private Const STEP_GROWTH As Double = 1.25
+Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
+Private Const POST_PEAK_SECANT_TOLERANCE As Double = 0.02 ' Допустимое отклонение приращений поля и множителя от секущей.
 
 Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedResponse
 Private mOffset() As Double, mDirection() As Double, mProjection() As Double
@@ -48,6 +51,7 @@ Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mUsesYieldControl As Boolean
 Private mPostPeakControlName As String, mPostPeakControlPoints As Long
+Private mPostPeakWidePoints As Long
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
@@ -70,6 +74,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
+    mPostPeakWidePoints = 0
     mLocalPeak = 0#: mLocalPeakAccuracy = 0#
     mFollowingLocalPeak = False: mRecoveredPeaks = 0
     mReusedRightPoints = 0
@@ -104,6 +109,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, unresolvedSteel As Boolean
+    Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double
     Dim recoveryProjection() As Double
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
@@ -117,7 +123,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         If trial.Coordinate <= current.Coordinate Then Exit For
         probed = Probe(trial, current.Lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
         lastProbeFailed = Not probed
-        changedControl = False
+        changedControl = False: smoothTrial = False
         If probed Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
                 probed = TryAdoptRecoveredControl(history, current, trial, recoveryProjection, nominal, increment, minimum)
@@ -125,8 +131,17 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If Not probed Then mSolver.DiscardStep
             End If
         End If
-        If probed And Len(mPostPeakControlName) > 0 Then probed = TrialMovesForward(history, current.HistoryIndex)
+        If probed And Len(mPostPeakControlName) > 0 Then
+            probed = TrialMovesForward(history, current.HistoryIndex)
+            If probed And mFollowingLocalPeak Then smoothTrial = FitsPostPeakSecant(history, left, current, trial)
+        End If
         If Not probed Then
+            smoothSteps = 0
+            increment = increment * 0.5
+        ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 And increment > nominal And Not smoothTrial Then
+            If BeyondSteelLimit() Then unresolvedSteel = True ' Уточнение требует меньшей пробы на прослеженной ветви.
+            mSolver.DiscardStep ' На прежнем размере можно пройти изменение наклона без экстраполяции ветви.
+            smoothSteps = 0
             increment = increment * 0.5
         ElseIf trial.Lambda > maximumLambda Then
             mSolver.DiscardStep
@@ -136,6 +151,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         ElseIf BeyondSteelLimit() Then
             unresolvedSteel = True ' Смена меры не может пропустить наблюдавшееся пересечение предела арматуры.
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
+            smoothSteps = 0
             increment = increment * 0.5
         ElseIf mFollowingLocalPeak Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
             If trial.Lambda <= 0# Then
@@ -167,11 +183,16 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If Len(mPostPeakControlName) > 0 Then
                 If mPostPeakControlPoints = 0 Then mControlName = mPostPeakControlName
                 mPostPeakControlPoints = mPostPeakControlPoints + 1
+                If increment > nominal Then mPostPeakWidePoints = mPostPeakWidePoints + 1
             End If
             left = current: current = trial
             If current.Lambda > mBestLambda Then mBestLambda = current.Lambda
             If mFollowingLocalPeak Then CheckRecovery current.Lambda
-            If increment < nominal / 1.25 Then increment = increment * 1.25
+            If smoothTrial And mFollowingLocalPeak Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
+            stepCeiling = nominal
+            If smoothSteps >= 2 Then stepCeiling = POST_PEAK_STEP_RATIO * nominal
+            If increment > stepCeiling Then increment = stepCeiling
+            If increment < stepCeiling / STEP_GROWTH Then increment = increment * STEP_GROWTH
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
             mSolver.DiscardStep
             If VerifyPeak(history, left, current, trial, reinforced) Then
@@ -239,6 +260,32 @@ Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef lef
     left.Coordinate = previousCoordinate: current.Coordinate = currentCoordinate
     nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
     TryChangePostPeakControl = True
+End Function
+
+' Сравнивает приращения на двух соседних шагах одной нисходящей ветви.
+' Не меняет ни поля, ни историю. Рост шага возможен при устойчивых
+' наклонах множителя и нормированного поля неизвестных решателя.
+Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
+    If left.HistoryIndex <> current.HistoryIndex - 1 Then Exit Function
+    Dim spacing As Double: spacing = current.Coordinate - left.Coordinate
+    If spacing <= 0# Or trial.Lambda <= 0# Then Exit Function
+    Dim ratio As Double: ratio = (trial.Coordinate - current.Coordinate) / spacing
+    Dim loadChange As Double: loadChange = ratio * (current.Lambda - left.Lambda)
+    If loadChange >= -LoadResolution(current.Lambda) Then Exit Function
+    If Abs(trial.Lambda - current.Lambda - loadChange) > Abs(loadChange) * POST_PEAK_SECANT_TOLERANCE Then Exit Function
+
+    Dim previous() As Double, accepted() As Double, field() As Double, resultants() As Double
+    previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
+    mSolver.CopyTrial field, resultants
+    Dim i As Long, delta As Double, expectedDelta As Double, stepScale As Double, deviation As Double
+    For i = 1 To UBound(field)
+        delta = field(i) - accepted(i)
+        expectedDelta = ratio * (accepted(i) - previous(i))
+        stepScale = GeomMax(stepScale, Abs(expectedDelta))
+        deviation = GeomMax(deviation, Abs(delta - expectedDelta))
+    Next i
+    FitsPostPeakSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
 End Function
 
 ' Проверяет продвижение по выбранной мере на фактических полях.
@@ -591,6 +638,7 @@ Private Function Details() As String
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
+    If mPostPeakWidePoints > 0 Then Details = Details & "; принято увеличенных шагов: " & CStr(mPostPeakWidePoints)
     If mLocalPeak > 0# Then
         Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
             "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _
