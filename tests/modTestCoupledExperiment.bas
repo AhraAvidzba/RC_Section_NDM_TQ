@@ -14,6 +14,8 @@ Private Const TBU3_MEASURED_HOOP_SPACING As Double = 76# ' Схема TBU по R
 Private Const TBU3_REFERENCE_BOTTOM_Y As Double = -154# ' Оценка положения нижнего ряда, мм.
 Private Const TBU3_PUBLISHED_HOOP_COVER As Double = 6.35 ' Слой до поверхности по Kuan и соавторам, рис. 9, мм.
 Private Const TBU3_PUBLISHED_BOTTOM_Y As Double = -173# ' Приведённая глубина оси 378 мм от верхней грани.
+Private Const TBU3_REFERENCE_PEAK_COMPRESSION As Double = 0.0045 ' Калибровка Yamamoto с учётом остановок нагружения.
+Private Const TBU3_PUBLISHED_PEAK_COMPRESSION As Double = 0.0031 ' Значение Kagermanov и Ceresa, табл. 2.
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Прослеживает чистый Qy с заданием среднего инженерного сдвига yz.
@@ -489,12 +491,37 @@ Public Function RunTestCoupledTBU3PublishedAxes(ByVal caseText As String, ByVal 
         Case "coverandbottom": bottomY = TBU3_PUBLISHED_BOTTOM_Y
         Case Else: Err.Raise 5, , "Задайте вариант Cover или CoverAndBottom."
     End Select
-    RunTestCoupledTBU3PublishedAxes = TraceTBU3Test("2", maximumStageText, True, spatialHistory:=True, _
-        measureHoop:=True, cellsPerSpan:=6, hoopSpacing:=TBU3_MEASURED_HOOP_SPACING, _
-        commonHoopQuadrature:=True, bottomY:=bottomY, publishedCover:=True)
+    RunTestCoupledTBU3PublishedAxes = TraceTBU3PublishedAxesTest(maximumStageText, bottomY, TBU3_REFERENCE_PEAK_COMPRESSION)
     Exit Function
 Failed:
     RunTestCoupledTBU3PublishedAxes = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает две деформации пика на одной модели бетона и одной геометрии TBU3.
+' Значение из табл. 2 меняет калибровку НДМ, остальные законы опыта сохраняются.
+Public Function RunTestCoupledTBU3CompressionPeak(ByVal caseText As String, ByVal maximumStageText As String) As String
+    On Error GoTo Failed
+    Dim peakCompression As Double
+    Select Case LCase$(Trim$(caseText))
+        Case "reference": peakCompression = TBU3_REFERENCE_PEAK_COMPRESSION
+        Case "published": peakCompression = TBU3_PUBLISHED_PEAK_COMPRESSION
+        Case Else: Err.Raise 5, , "Задайте вариант Reference или Published."
+    End Select
+    RunTestCoupledTBU3CompressionPeak = TraceTBU3PublishedAxesTest(maximumStageText, TBU3_PUBLISHED_BOTTOM_Y, peakCompression)
+    Exit Function
+Failed:
+    RunTestCoupledTBU3CompressionPeak = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проводит сравнение TBU3 при слое хомута 6,35 мм и заданной оси нижнего ряда.
+' Бетонная сетка, базис 2x6, шаг хомута 76 мм и порядок нагружения одинаковы.
+Private Function TraceTBU3PublishedAxesTest(ByVal maximumStageText As String, ByVal bottomY As Double, _
+        ByVal peakCompression As Double) As String
+    TraceTBU3PublishedAxesTest = TraceTBU3Test("2", maximumStageText, True, spatialHistory:=True, _
+        measureHoop:=True, cellsPerSpan:=6, hoopSpacing:=TBU3_MEASURED_HOOP_SPACING, _
+        commonHoopQuadrature:=True, bottomY:=bottomY, publishedCover:=True, peakCompression:=peakCompression)
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -521,7 +548,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         Optional ByVal measureHoop As Boolean = False, Optional ByVal cellsPerSpan As Long = 5, _
         Optional ByVal hoopSpacing As Double = TBU3_REFERENCE_HOOP_SPACING, _
         Optional ByVal commonHoopQuadrature As Boolean = False, _
-        Optional ByVal bottomY As Double = TBU3_REFERENCE_BOTTOM_Y, Optional ByVal publishedCover As Boolean = False) As String
+        Optional ByVal bottomY As Double = TBU3_REFERENCE_BOTTOM_Y, Optional ByVal publishedCover As Boolean = False, _
+        Optional ByVal peakCompression As Double = TBU3_REFERENCE_PEAK_COMPRESSION) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -556,6 +584,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
             AddExperimentTraceTest report, tracePath, "TBU3_LONG_BOTTOM_Y_MM;" & ExperimentNumberTest(bottomY)
             AddExperimentTraceTest report, tracePath, "TBU3_HOOP_CLEAR_COVER_MM;" & _
                 ExperimentNumberTest(TBU3_HALF_WIDTH - gaugeRightX - layout.Diameter(1) / 2#)
+            AddExperimentTraceTest report, tracePath, "TBU3_COMPRESSION_PEAK_STRAIN;" & ExperimentNumberTest(peakCompression)
         End If
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_BASE_MM;" & ExperimentNumberTest(-TBU3_MEASUREMENT_HALF_HEIGHT) & _
             ";" & ExperimentNumberTest(TBU3_MEASUREMENT_HALF_HEIGHT)
@@ -565,7 +594,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     End If
     If commonHoopQuadrature Then RecordTBU3QuadratureTest operators, report, tracePath
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
-    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, FC, FT, 0.0045, 0.12, 80#, spatialHistory
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, FC, FT, peakCompression, 0.12, 80#, spatialHistory
     path.Initialize 0#, 0#, MX_OFFSET, DELTA_MX, 0#, 0#, 0#, DELTA_T
     branch.Initialize solver, path, 1, 12, 24, 0.0000005, 0.00000002, saveAcceptedFields:=confirmPeak
 
