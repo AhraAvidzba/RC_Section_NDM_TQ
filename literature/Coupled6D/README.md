@@ -42,6 +42,8 @@ PDF в этой папке — неизменённые копии из архи
 
 Для [карточки A2](LopesA2TorsionBenchmark.md) использованы табл. 4.1–4.2 диссертации T. F. C. S. Martins, *Pré-esforço Transversal em Vigas em Caixão Sujeitas à Torção*, Universidade da Beira Interior, 2012. Архив университета не ответил на загрузку локальной копии. [Диссертация UBI](https://ubibliorum.ubi.pt/bitstreams/c660cc5d-d900-4fed-a379-bb7ff13113e4/download).
 
+Для диагностического продолжения TBU3 проверен секущий прогноз и коррекция по поперечной плоскости по § 3.3 статьи E. Riks, *An incremental approach to the solution of snapping and buckling problems*, International Journal of Solids and Structures 15(7), 529–551, 1979. Раздел сверён по доступной копии. Прямая загрузка PDF на рабочий компьютер завершилась тайм-аутом. Русскоязычное изложение секущего прогноза доступно в сохранённой статье Кузнецова, § 3. [DOI Riks](https://doi.org/10.1016/0020-7683(79)90081-7) · [Копия PDF](https://electronicsandbooks.com/edt/manual/Magazine/I/International%20Journal%20of%20Solidstate%20Structures/IJSS_Papers/Vol.01-15/06071111172402763.pdf) · [Кузнецов, Math-Net](https://www.mathnet.ru/rus/zvmmf773).
+
 ## Локальное восстановление PDF
 
 Из корня проекта:
