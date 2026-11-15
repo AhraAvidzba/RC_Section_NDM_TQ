@@ -39,6 +39,9 @@ Private Const MAX_LOCAL_DIVISIONS As Long = 16
 
 Private mHistory() As TConcreteHistory
 Private mCommitted As Long, mTrial As Long, mPointCount As Long
+Private mTrialEpoch As Long ' Меняется при каждом принятии истории.
+Private mCachedEpoch() As Long, mCachedMode() As ECoupledTangentMode
+Private mCachedTangent() As Double ' Столбцы касательной последней нелинейной пробы каждой точки.
 Private mElastic(1 To 6, 1 To 6) As Double
 Private mReturn As CCoupledConcreteReturn
 Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEnvelope
@@ -86,10 +89,19 @@ End Sub
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, _
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
-    Dim updated As TConcreteHistory, scratch As TConcreteHistory, virginElastic As Boolean
-    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
+    Dim updated As TConcreteHistory, virginElastic As Boolean, cachedMode As ECoupledTangentMode
+    Dim sameTrial As Boolean, i As Long, j As Long
+    cachedMode = ctmStressOnly
+    sameTrial = MatchesNonlinearTrial(point, strain)
+    If sameTrial Then
+        updated = mHistory(point, mTrial)
+        For i = 1 To N_COMPONENTS: stress(i) = updated.Stress(i): Next i
+        cachedMode = mCachedMode(point)
+    Else
+        mCachedEpoch(point) = 0
+        If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
+    End If
     If tangentMode = ctmStressOnly Then GoTo StoreTrial
-    Dim i As Long, j As Long
     If virginElastic Then
         For j = 1 To N_COMPONENTS
             If tangentMode = ctmFull Or j = 3 Or j >= 5 Then
@@ -97,11 +109,45 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
             End If
         Next j
     Else
-        Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
-        Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
-        For i = 1 To N_COMPONENTS: perturbed(i) = strain(i): Next i
-        For j = 1 To N_COMPONENTS
-            If tangentMode = ctmFull Or j = 3 Or j >= 5 Then ' Продольный градиент деформаций имеет только компоненты zz, xz, yz.
+        If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode) Then GoTo Failure
+    End If
+StoreTrial:
+    mHistory(point, mTrial) = updated
+    If Not virginElastic Then
+        mCachedEpoch(point) = mTrialEpoch
+        If tangentMode < cachedMode Then cachedMode = tangentMode
+        mCachedMode(point) = cachedMode
+    End If
+    Exit Function
+Failure:
+    ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+End Function
+
+' Сравнивает все шесть деформаций точно. Номер принятой истории исключает
+' повторное использование после перестановки буферов или восстановления.
+Private Function MatchesNonlinearTrial(ByVal point As Long, ByRef strain() As Double) As Boolean
+    If mCachedEpoch(point) <> mTrialEpoch Then Exit Function
+    Dim i As Long
+    For i = 1 To N_COMPONENTS
+        If strain(i) <> mHistory(point, mTrial).Strain(i) Then Exit Function
+    Next i
+    MatchesNonlinearTrial = True
+End Function
+
+' Сохраняет готовые столбцы при переходе от невязки к полной касательной.
+' Все недостающие разности вычисляются от той же принятой истории.
+Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double, _
+        ByRef tangent() As Double, ByVal mode As ECoupledTangentMode, ByVal cachedMode As ECoupledTangentMode) As Boolean
+    Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
+    Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
+    Dim scratch As TConcreteHistory, i As Long, j As Long, gradientColumn As Boolean
+    For i = 1 To N_COMPONENTS: perturbed(i) = strain(i): Next i
+    For j = 1 To N_COMPONENTS
+        gradientColumn = (j = 3 Or j >= 5) ' Продольный градиент имеет компоненты zz, xz, yz.
+        If mode = ctmFull Or gradientColumn Then
+            If cachedMode = ctmFull Or (cachedMode = ctmAxialGradient And gradientColumn) Then
+                For i = 1 To N_COMPONENTS: tangent(i, j) = mCachedTangent(i, j, point): Next i
+            Else
                 delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
                 For attempt = 1 To 3
                     perturbed(j) = strain(j) + delta
@@ -112,7 +158,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
                     delta = delta * 0.25 ' На границе ветвей уменьшаем только численное возмущение.
                 Next attempt
                 perturbed(j) = strain(j)
-                If Not plusOk And Not minusOk Then GoTo Failure
+                If Not plusOk And Not minusOk Then Exit Function
                 For i = 1 To N_COMPONENTS
                     If plusOk And minusOk Then
                         tangent(i, j) = (plus(i) - minus(i)) / (2# * delta)
@@ -121,15 +167,12 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
                     Else
                         tangent(i, j) = (stress(i) - minus(i)) / delta
                     End If
+                    mCachedTangent(i, j, point) = tangent(i, j)
                 Next i
             End If
-        Next j
-    End If
-StoreTrial:
-    mHistory(point, mTrial) = updated
-    Exit Function
-Failure:
-    ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+        End If
+    Next j
+    NonlinearTangent = True
 End Function
 
 ' Восстанавливает напряжения и историю точки вывода на известном принятом
@@ -138,6 +181,7 @@ Friend Function EvaluateOutputPoint(ByVal point As Long, ByRef strain() As Doubl
     Dim updated As TConcreteHistory, virginElastic As Boolean
     If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then Exit Function
     mHistory(point, mTrial) = updated
+    mCachedEpoch(point) = 0
     EvaluateOutputPoint = True
 End Function
 
@@ -212,12 +256,16 @@ End Sub
 ' Меняет владение готовыми массивами без покомпонентной записи истории.
 Private Sub ICoupledPointResponse_AcceptTrial()
     mCommitted = mTrial: mTrial = 3 - mCommitted
+    mTrialEpoch = mTrialEpoch + 1
 End Sub
 
 ' Выделяет пустые истории всех бетонных, включая замещённые, точек.
 Private Sub ICoupledPointResponse_ClearHistory()
     ReDim mHistory(1 To mPointCount, 1 To 2)
+    ReDim mCachedEpoch(1 To mPointCount): ReDim mCachedMode(1 To mPointCount)
+    ReDim mCachedTangent(1 To N_COMPONENTS, 1 To N_COMPONENTS, 1 To mPointCount)
     mCommitted = 1: mTrial = 2
+    mTrialEpoch = 1
     Dim point As Long
     For point = 1 To mPointCount: mHistory(point, mCommitted).ElasticTangentExact = True: Next point
 End Sub

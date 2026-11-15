@@ -113,10 +113,10 @@ End Sub
 ' после численного отказа. Техническая конечная граница уже является исходом.
 Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupledDeformationContinuation
     If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
-    If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or mPreviousLambda >= mLambda Then Exit Function
+    If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
     controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
-        mPreviousLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
+        PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
     Set ContinueByDeformation = controlled
 End Function
 
@@ -201,6 +201,12 @@ End Sub
 ' Возвращает достигнутый множитель переменной части.
 Friend Property Get AcceptedLambda() As Double
     AcceptedLambda = mLambda
+End Property
+
+' Возвращает множитель предыдущей принятой точки переменной части.
+' До двух принятых точек возвращает -1.
+Friend Property Get PreviousAcceptedLambda() As Double
+    PreviousAcceptedLambda = mPreviousLambda
 End Property
 
 ' Возвращает долю подтверждённой постоянной части при первом нагружении.

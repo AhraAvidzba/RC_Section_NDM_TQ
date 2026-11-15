@@ -1013,6 +1013,22 @@ Public Function RunTestCoupledConcreteResponse() As String
     TestRecord status = sfcNone And trialTangent(6, 6) = 456# And stress(6) = base(6), _
         "stress-only probe has identical stress with no tangent calculation", passed, failed, report
 
+    strain(6) = 0.00091
+    status = response.EvaluatePoint(1, strain, stress, trialTangent, ctmStressOnly)
+    TestRecord status = sfcNone, "nearby rejected probe uses its own concrete strain", passed, failed, report
+    strain(6) = 0.0009
+    status = response.EvaluatePoint(1, strain, stress, trialTangent, ctmAxialGradient)
+    TestRecord status = sfcNone, "axial columns evaluate again after a different trial", passed, failed, report
+    status = response.EvaluatePoint(1, strain, stress, trialTangent)
+    Dim j As Long, identical As Boolean: identical = (status = sfcNone)
+    For i = 1 To 6
+        If stress(i) <> base(i) Then identical = False
+        For j = 1 To 6
+            If tangent(i, j) <> trialTangent(i, j) Then identical = False
+        Next j
+    Next i
+    TestRecord identical, "partial-to-full trial reuse preserves all stresses and tangent entries exactly", passed, failed, report
+
     Const DELTA As Double = 0.00000006
     strain(6) = 0.0009 + DELTA
     status = response.EvaluatePoint(1, strain, stress, tangent)

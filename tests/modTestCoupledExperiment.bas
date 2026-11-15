@@ -14,14 +14,23 @@ Public Function RunTestCoupledTBU3(ByVal spansText As String, ByVal maximumStage
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Отбивает ту же начальную траекторию и затем управляет закручиванием.
+' До пятой стадии задаёт усилия, затем управляет закручиванием до
+' запрошенной стадии либо до явно зафиксированной остановки.
 Public Function RunTestCoupledTBU3Twist(ByVal spansText As String, ByVal maximumStageText As String) As String
     RunTestCoupledTBU3Twist = TraceTBU3Test(spansText, maximumStageText, True)
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Передаёт начальную траекторию TBU3 рабочему алгоритму подтверждения
+' первого максимума с повторным прохождением обоих плеч.
+Public Function RunTestCoupledTBU3Peak(ByVal spansText As String, ByVal maximumStageText As String) As String
+    RunTestCoupledTBU3Peak = TraceTBU3Test(spansText, maximumStageText, True, True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Записывает принятые точки силового и деформационного контроля отдельно.
-Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean) As String
+Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean, _
+        Optional ByVal confirmPeak As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -34,6 +43,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Dim spans As Long: spans = CLng(spansText)
     Dim maximumStage As Long: maximumStage = CLng(maximumStageText)
     If spans < 1 Or spans > 3 Or maximumStage < 1 Or maximumStage > 21 Then Err.Raise 5, , "Тестовые границы: базис 1–3, стадия 1–21."
+    Dim forceStage As Long: forceStage = maximumStage
+    If followTwist And forceStage > 5 Then forceStage = 5
     If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then tracePath = ThisWorkbook.Path & "\TBU3_Trace.csv"
     AddTBU3TraceTest report, tracePath, "stage;actual_stage;Mx_kNm;T_kNm;kappa_per_m;twist_rad_per_m;hoop_utilization;steel_utilization;stress_residual_MPa;elapsed_s;status"
 
@@ -46,12 +57,12 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
     solver.Initialize operators, response, EC
     path.Initialize 0#, 0#, MX_OFFSET, DELTA_MX, 0#, 0#, 0#, DELTA_T
-    branch.Initialize solver, path, 1, 12, 24, 0.0000005, 0.00000002
+    branch.Initialize solver, path, 1, 12, 24, 0.0000005, 0.00000002, saveAcceptedFields:=confirmPeak
 
     Dim stage As Long, solved As Boolean, started As Double, reached As Double, meta As CResultMeta
     Dim field() As Double, achieved() As Double, target() As Double, errorNorm As Double
     Dim eps0 As Double, kx As Double, ky As Double, twist As Double, row As String
-    For stage = 0 To maximumStage
+    For stage = 0 To forceStage
         started = Timer
         solved = branch.Advance(CDbl(stage))
         Set meta = branch.ResultMeta
@@ -80,8 +91,13 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         End If
     Next stage
     AddTBU3TraceTest report, tracePath, "LAST_REQUESTED_STAGE_ACCEPTED: " & CStr(solved)
-    If followTwist And branch.HasAcceptedVariableState Then _
-        ContinueTBU3ByTwistTest operators, solver, path, branch, response, report, tracePath, passed, failures
+    If followTwist And branch.HasAcceptedVariableState And reached < maximumStage Then
+        If confirmPeak Then
+            ConfirmTBU3PeakTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures
+        Else
+            ContinueTBU3ByTwistTest operators, solver, path, branch, response, maximumStage, report, tracePath, passed, failures
+        End If
+    End If
     If passed = 0 Then failures = failures + 1
     TraceTBU3Test = report & "TOTAL_TBU3_FORCE_EQUILIBRIUM: passed=" & passed & "; failed=" & failures
     Exit Function
@@ -90,24 +106,70 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет рабочий критерий максимума отдельно от наблюдаемого падения
+' в диагностических точках. Сохраняет статус, точность и интегралы пика.
+Private Sub ConfirmTBU3PeakTest(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
+        ByVal path As CLoadPathVector, ByVal branch As CCoupledLoadContinuation, ByVal response As CCoupledReinforcedResponse, _
+        ByVal requestedStage As Long, ByRef report As String, ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
+    Const STAGE_TOLERANCE As Double = 0.005 ' 0,052 кН·м на траектории кручения TBU3.
+    Dim baseLoad() As Double, direction() As Double, accepted() As Double, resultants() As Double
+    path.Components baseLoad, direction
+    branch.CopyAccepted accepted, resultants
+    Dim controlled As New CCoupledDeformationContinuation
+    AddTBU3TraceTest report, tracePath, "PEAK_SEARCH_STARTED: " & TBU3NumberTest(branch.AcceptedLambda)
+    controlled.Trace solver, response, baseLoad, direction, branch.AcceptedFields, branch.PreviousAcceptedLambda, _
+        branch.AcceptedLambda, resultants, CDbl(requestedStage), STAGE_TOLERANCE, 24, 0.0000005, 0.00000002
+
+    Dim meta As CResultMeta: Set meta = controlled.ResultMeta
+    AddTBU3TraceTest report, tracePath, "PEAK_DIAGNOSTICS: " & meta.ResultComment & " | " & meta.DiagnosticDetails
+    AddTBU3TraceTest report, tracePath, "PEAK_BEST_ADMISSIBLE_STAGE: " & TBU3NumberTest(controlled.BestAdmissibleLambda)
+    Dim peak As Double, accuracy As Double, designVerified As Boolean
+    If Not controlled.CopyPeak(peak, accuracy, designVerified) Then
+        AddTBU3TraceTest report, tracePath, "PEAK_CONFIRMED: False"
+        Exit Sub
+    End If
+    AddTBU3TraceTest report, tracePath, "PEAK_CONFIRMED: True"
+    Dim fields As Collection
+    If Not controlled.CopyLimitState(fields, resultants) Then
+        failures = failures + 1
+        Exit Sub
+    End If
+    Dim target() As Double, eps0 As Double, kx As Double, ky As Double, twist As Double, errorNorm As Double
+    path.TargetSix peak, target
+    accepted = fields(fields.Count)
+    operators.GeneralizedDeformation accepted, eps0, kx, ky, twist
+    errorNorm = TBU3ForceErrorTest(resultants, target)
+    AddTBU3TraceTest report, tracePath, "PEAK_STAGE_M_T_TWIST_ERROR_ACCURACY;" & TBU3NumberTest(peak) & ";" & _
+        TBU3NumberTest(-resultants(2) / 1E+6) & ";" & TBU3NumberTest(resultants(4) / 1E+6) & ";" & _
+        TBU3NumberTest(twist * 1000#) & ";" & TBU3NumberTest(errorNorm) & ";" & TBU3NumberTest(accuracy)
+    If errorNorm < 0.000005 And accuracy <= STAGE_TOLERANCE Then passed = passed + 1 Else failures = failures + 1
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет переход через отказ силового шага по управляемому углу,
 ' сохраняя постоянный момент, отношение приращений и принятую историю.
 Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
         ByVal path As CLoadPathVector, ByVal branch As CCoupledLoadContinuation, ByVal response As CCoupledReinforcedResponse, _
-        ByRef report As String, ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
+        ByVal requestedStage As Long, ByRef report As String, ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
+    Const MAX_ATTEMPTS As Long = 200 ' Лимит опытного прогона, включая уменьшения шага.
     Dim baseLoad() As Double, direction() As Double, projection() As Double
     path.Components baseLoad, direction
     ReDim projection(1 To operators.DegreeCount): projection(4) = 1#
     Dim field() As Double, achieved() As Double, target() As Double, eps0 As Double, kx As Double, ky As Double, twist As Double
     branch.CopyAccepted field, achieved
     operators.GeneralizedDeformation field, eps0, kx, ky, twist
-    If twist <= 0# Then Exit Sub
+    If twist <= 0# Then
+        AddTBU3TraceTest report, tracePath, "TWIST_STOP: NonpositiveInitialTwist"
+        Exit Sub
+    End If
     Dim increment As Double, initialIncrement As Double, length As Double, reached As Double, coordinate As Double
     length = field(4) / twist ' Обобщённая координата равна относительному углу, умноженному на длину масштаба.
     initialIncrement = 0.0002 * length / 1000#
     increment = initialIncrement: reached = branch.AcceptedLambda: coordinate = field(4)
-    Dim attempt As Long, trialLambda As Double, errorNorm As Double, row As String, started As Double
-    For attempt = 1 To 32
+    Dim attempt As Long, trialLambda As Double, errorNorm As Double, row As String, started As Double, stopReason As String
+    stopReason = "AttemptLimit"
+    AddTBU3TraceTest report, tracePath, "TWIST_REQUESTED_STAGE: " & CStr(requestedStage)
+    For attempt = 1 To MAX_ATTEMPTS
         started = Timer
         If solver.TryDeformationStep(baseLoad, direction, projection, coordinate + increment, reached, trialLambda, _
                 0.0000005, 0.00000002, 24) Then
@@ -122,16 +184,24 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
                 ";" & TBU3NumberTest(errorNorm) & ";" & TBU3NumberTest(Timer - started) & ";Accepted"
             AddTBU3TraceTest report, tracePath, row
             If errorNorm < 0.000005 Then passed = passed + 1 Else failures = failures + 1
-            If reached >= 7# Then Exit For
+            If reached >= requestedStage Then
+                stopReason = "TargetReached"
+                Exit For
+            End If
             If increment < initialIncrement Then increment = increment * 1.25
+            If increment > initialIncrement Then increment = initialIncrement
         Else
             AddTBU3TraceTest report, tracePath, "TWIST_REJECTED: " & CStr(attempt) & " | " & TBU3NumberTest(Timer - started) & _
                 " | " & solver.ResultMeta.ResultComment & " | " & solver.ResultMeta.DiagnosticDetails
             increment = increment * 0.5
-            If increment < initialIncrement / 32# Then Exit For
+            If increment < initialIncrement / 32# Then
+                stopReason = "MinimumTwistIncrement"
+                Exit For
+            End If
         End If
     Next attempt
     AddTBU3TraceTest report, tracePath, "TWIST_CONTROL_REACHED_STAGE: " & TBU3NumberTest(reached)
+    AddTBU3TraceTest report, tracePath, "TWIST_STOP: " & stopReason
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
