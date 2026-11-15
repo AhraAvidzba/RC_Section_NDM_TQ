@@ -21,6 +21,7 @@ Private Const PLANE_DOF As Long = 4
 Private Const STRESS_COMPONENTS As Long = 6
 Private Const SHAPE_COUNT As Long = 16
 Private Const GAUGES As Long = 4
+Private Const LOCAL_DOF As Long = PLANE_DOF + 3 * SHAPE_COUNT
 
 Private mQuadrature As CCoupledSectionQuadrature
 Private mDof As Long
@@ -34,7 +35,8 @@ Private mTransverseGroup() As Long ' Номер группы в блоке Trans
 Private mSupport() As Long
 Private mSectionDof() As Long
 Private mX() As Double, mY() As Double, mWeight() As Double
-Private mOperators() As Double ' A(компонента, локальная степень свободы, точка).
+Private mFirstComponent(1 To LOCAL_DOF) As Long, mSecondComponent(1 To LOCAL_DOF) As Long
+Private mOperators() As Double ' Не более двух ненулевых коэффициентов B на локальную степень свободы.
 Private mShape() As Double ' Значение функции перемещений для правой части межволоконного равновесия.
 Private mElastic(1 To 6, 1 To 6) As Double
 Private mMatrix() As Double
@@ -244,12 +246,19 @@ Private Sub PrepareOperators(ByRef indices() As Long, ByRef dx() As Double, ByRe
     mGaugeBase = mGradientBase + PLANE_DOF
     mDof = mGaugeBase + GAUGES
 
-    Dim localCount As Long
-    localCount = PLANE_DOF + 3 * SHAPE_COUNT
-    ReDim mSectionDof(1 To localCount, 1 To mPointCount)
-    ReDim mOperators(1 To STRESS_COMPONENTS, 1 To localCount, 1 To mPointCount)
+    ReDim mSectionDof(1 To LOCAL_DOF, 1 To mPointCount)
+    ReDim mOperators(1 To 2, 1 To LOCAL_DOF, 1 To mPointCount)
     Dim u As Long, v As Long, w As Long
     Dim gX As Double, gY As Double
+    For k = 1 To 3
+        mFirstComponent(k) = 3: mSecondComponent(k) = 4 ' Продольная деформация. Второй коэффициент равен нулю.
+    Next k
+    mFirstComponent(4) = 5: mSecondComponent(4) = 6 ' Кручение входит в два продольных сдвига.
+    For u = PLANE_DOF + 1 To LOCAL_DOF Step 3
+        mFirstComponent(u) = 1: mSecondComponent(u) = 4
+        mFirstComponent(u + 1) = 2: mSecondComponent(u + 1) = 4
+        mFirstComponent(u + 2) = 5: mSecondComponent(u + 2) = 6
+    Next u
     For i = 1 To mPointCount
         mWeight(i) = mWeight(i) / mArea
         mX(i) = mX(i) / mLength
@@ -257,11 +266,11 @@ Private Sub PrepareOperators(ByRef indices() As Long, ByRef dx() As Double, ByRe
         For k = 1 To 4
             mSectionDof(k, i) = k
         Next k
-        mOperators(3, 1, i) = 1#
-        mOperators(3, 2, i) = mY(i)
-        mOperators(3, 3, i) = mX(i)
-        mOperators(5, 4, i) = -mY(i)
-        mOperators(6, 4, i) = mX(i)
+        mOperators(1, 1, i) = 1#
+        mOperators(1, 2, i) = mY(i)
+        mOperators(1, 3, i) = mX(i)
+        mOperators(1, 4, i) = -mY(i)
+        mOperators(2, 4, i) = mX(i)
         For k = 1 To SHAPE_COUNT
             globalIndex = mSupport(indices(k, i))
             If globalIndex > 0 Then
@@ -271,9 +280,9 @@ Private Sub PrepareOperators(ByRef indices() As Long, ByRef dx() As Double, ByRe
                 mSectionDof(v, i) = mSectionDof(u, i) + 1
                 mSectionDof(w, i) = mSectionDof(u, i) + 2
                 gX = dx(k, i) * mLength: gY = dy(k, i) * mLength
-                mOperators(1, u, i) = gX: mOperators(4, u, i) = gY
-                mOperators(2, v, i) = gY: mOperators(4, v, i) = gX
-                mOperators(5, w, i) = gX: mOperators(6, w, i) = gY
+                mOperators(1, u, i) = gX: mOperators(2, u, i) = gY
+                mOperators(1, v, i) = gY: mOperators(2, v, i) = gX
+                mOperators(1, w, i) = gX: mOperators(2, w, i) = gY
             End If
         Next k
     Next i
@@ -400,11 +409,11 @@ Friend Sub MeanShearProjections(ByRef alongX() As Double, ByRef alongY() As Doub
     Dim point As Long, localIndex As Long, degree As Long, weight As Double
     For point = 1 To mConcreteCount
         weight = mWeight(point)
-        For localIndex = 1 To UBound(mSectionDof, 1)
+        For localIndex = PLANE_DOF To LOCAL_DOF Step 3 ' Кручение и продольные перемещения w.
             degree = mSectionDof(localIndex, point)
             If degree > 0 Then
-                alongX(degree) = alongX(degree) + weight * mOperators(5, localIndex, point)
-                alongY(degree) = alongY(degree) + weight * mOperators(6, localIndex, point)
+                alongX(degree) = alongX(degree) + weight * mOperators(1, localIndex, point)
+                alongY(degree) = alongY(degree) + weight * mOperators(2, localIndex, point)
             End If
         Next localIndex
     Next point
@@ -413,17 +422,17 @@ End Sub
 ' Деформации материальной точки от общих деформаций и внутренних полей.
 ' Порядок εxx, εyy, εzz, γxy, γxz, γyz. Вызывающий переиспользует массив.
 Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strain() As Double)
-    Dim localIndex As Long, degree As Long, j As Long, coefficient As Double
+    Dim localIndex As Long, degree As Long, j As Long, first As Long, second As Long, coefficient As Double
     For j = 1 To STRESS_COMPONENTS
         strain(j) = 0#
     Next j
-    For localIndex = 1 To UBound(mSectionDof, 1)
+    For localIndex = 1 To LOCAL_DOF
         degree = mSectionDof(localIndex, point)
         If degree > 0 Then
             coefficient = field(degree)
-            For j = 1 To STRESS_COMPONENTS
-                strain(j) = strain(j) + mOperators(j, localIndex, point) * coefficient
-            Next j
+            first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
+            strain(first) = strain(first) + mOperators(1, localIndex, point) * coefficient
+            strain(second) = strain(second) + mOperators(2, localIndex, point) * coefficient
         End If
     Next localIndex
 End Sub
@@ -520,8 +529,9 @@ Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
     Dim axialGradient(1 To STRESS_COMPONENTS) As Double
     Dim weightedGradient(1 To STRESS_COMPONENTS) As Double
     Dim weightedStress(1 To STRESS_COMPONENTS) As Double
-    Dim a As Long, j As Long, row As Long
+    Dim a As Long, j As Long, row As Long, first As Long, second As Long
     Dim weight As Double, value As Double, traction As Long, shapeValue As Double
+    Dim coeffFirst As Double, coeffSecond As Double
     weight = mWeight(point)
     If useAxialGradient Then AxialGradientAtPoint point, field, axialGradient
     For j = 1 To STRESS_COMPONENTS
@@ -530,20 +540,15 @@ Friend Sub AddPointEquilibrium(ByVal point As Long, ByRef field() As Double, _
             weightedGradient(j) = weight * (tangent(j, 3) * axialGradient(3) + tangent(j, 5) * axialGradient(5) + tangent(j, 6) * axialGradient(6))
     Next j
 
-    Dim count As Long
-    count = UBound(mSectionDof, 1)
-    For a = 1 To count
+    For a = 1 To LOCAL_DOF
         row = mSectionDof(a, point)
         If row > 0 Then
-            value = 0#
-            For j = 1 To STRESS_COMPONENTS
-                value = value + mOperators(j, a, point) * weightedStress(j)
-            Next j
+            first = mFirstComponent(a): second = mSecondComponent(a)
+            coeffFirst = mOperators(1, a, point): coeffSecond = mOperators(2, a, point)
+            value = coeffFirst * weightedStress(first) + coeffSecond * weightedStress(second)
             If a <= PLANE_DOF Then
-                For j = 1 To STRESS_COMPONENTS
-                    residual(mGradientBase + a) = residual(mGradientBase + a) + _
-                        mOperators(j, a, point) * weightedGradient(j)
-                Next j
+                residual(mGradientBase + a) = residual(mGradientBase + a) + _
+                    coeffFirst * weightedGradient(first) + coeffSecond * weightedGradient(second)
             Else
                 traction = TractionComponent(a)
                 shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
@@ -561,40 +566,28 @@ End Sub
 ' градиента напряжений, включая слабое равновесие внутренних перемещений.
 Friend Sub AddPointGradientTangent(ByVal point As Long, ByRef stressGradientDerivative() As Double, _
         ByRef linearized() As Double)
-    Dim weighted(1 To STRESS_COMPONENTS, 1 To PLANE_DOF + 3 * SHAPE_COUNT) As Double
-    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long, count As Long
-    Dim value As Double, shapeValue As Double, traction As Long, weight As Double
-    weight = mWeight(point): count = UBound(mSectionDof, 1)
-    For b = 1 To count
-        If mSectionDof(b, point) > 0 Then
-            For j = 1 To STRESS_COMPONENTS
-                value = 0#
-                For k = 1 To STRESS_COMPONENTS
-                    value = value + stressGradientDerivative(j, k) * mOperators(k, b, point)
-                Next k
-                weighted(j, b) = weight * value
-            Next j
-        End If
-    Next b
-    For a = 1 To count
+    Dim weighted(1 To STRESS_COMPONENTS, 1 To LOCAL_DOF) As Double
+    Dim a As Long, b As Long, row As Long, col As Long, first As Long, second As Long
+    Dim value As Double, shapeValue As Double, traction As Long, coeffFirst As Double, coeffSecond As Double
+    WeightTangentColumns point, stressGradientDerivative, weighted
+    For a = 1 To LOCAL_DOF
         row = mSectionDof(a, point)
         If row > 0 Then
             If a <= PLANE_DOF Then
                 row = mGradientBase + a
-                For b = 1 To count
+                first = mFirstComponent(a): second = mSecondComponent(a)
+                coeffFirst = mOperators(1, a, point): coeffSecond = mOperators(2, a, point)
+                For b = 1 To LOCAL_DOF
                     col = mSectionDof(b, point)
                     If col > 0 Then
-                        value = 0#
-                        For j = 1 To STRESS_COMPONENTS
-                            value = value + mOperators(j, a, point) * weighted(j, b)
-                        Next j
+                        value = coeffFirst * weighted(first, b) + coeffSecond * weighted(second, b)
                         linearized(col, row) = linearized(col, row) + value
                     End If
                 Next b
             Else
                 traction = TractionComponent(a)
                 shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point)
-                For b = 1 To count
+                For b = 1 To LOCAL_DOF
                     col = mSectionDof(b, point)
                     If col > 0 Then linearized(col, row) = linearized(col, row) - shapeValue * weighted(traction, b)
                 Next b
@@ -606,32 +599,19 @@ End Sub
 ' Добавляет блоки Bᵀ D B и производные правой части по градиенту деформации.
 ' Производные D по деформации при необходимости добавляет AddPointGradientTangent.
 Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRef linearized() As Double)
-    Dim count As Long, weighted() As Double
-    count = UBound(mSectionDof, 1)
-    ReDim weighted(1 To STRESS_COMPONENTS, 1 To count)
-    Dim a As Long, b As Long, j As Long, k As Long, row As Long, col As Long, traction As Long
-    Dim value As Double, shapeValue As Double
-    For b = 1 To count
-        If mSectionDof(b, point) > 0 Then
-            For j = 1 To STRESS_COMPONENTS
-                value = 0#
-                For k = 1 To STRESS_COMPONENTS
-                    value = value + tangent(j, k) * mOperators(k, b, point)
-                Next k
-                weighted(j, b) = value * mWeight(point)
-            Next j
-        End If
-    Next b
-    For a = 1 To count
+    Dim weighted(1 To STRESS_COMPONENTS, 1 To LOCAL_DOF) As Double
+    Dim a As Long, b As Long, row As Long, col As Long, traction As Long, first As Long, second As Long
+    Dim value As Double, shapeValue As Double, coeffFirst As Double, coeffSecond As Double
+    WeightTangentColumns point, tangent, weighted
+    For a = 1 To LOCAL_DOF
         row = mSectionDof(a, point)
         If row > 0 Then
-            For b = 1 To count
+            first = mFirstComponent(a): second = mSecondComponent(a)
+            coeffFirst = mOperators(1, a, point): coeffSecond = mOperators(2, a, point)
+            For b = 1 To LOCAL_DOF
                 col = mSectionDof(b, point)
                 If col > 0 Then
-                    value = 0#
-                    For j = 1 To STRESS_COMPONENTS
-                        value = value + mOperators(j, a, point) * weighted(j, b)
-                    Next j
+                    value = coeffFirst * weighted(first, b) + coeffSecond * weighted(second, b)
                     linearized(col, row) = linearized(col, row) + value
                     If a <= PLANE_DOF And b <= PLANE_DOF Then
                         linearized(mGradientBase + b, mGradientBase + a) = _
@@ -649,6 +629,23 @@ Private Sub AddPointTangent(ByVal point As Long, ByRef tangent() As Double, ByRe
             End If
         End If
     Next a
+End Sub
+
+' Умножает D на два сохранённых коэффициента каждой колонки B и вес точки.
+' Порядок слагаемых совпадает с порядком компонент тензора напряжений.
+Private Sub WeightTangentColumns(ByVal point As Long, ByRef tangent() As Double, ByRef weighted() As Double)
+    Dim b As Long, j As Long, first As Long, second As Long
+    Dim weight As Double, coeffFirst As Double, coeffSecond As Double
+    weight = mWeight(point)
+    For b = 1 To LOCAL_DOF
+        If mSectionDof(b, point) > 0 Then
+            first = mFirstComponent(b): second = mSecondComponent(b)
+            coeffFirst = mOperators(1, b, point): coeffSecond = mOperators(2, b, point)
+            For j = 1 To STRESS_COMPONENTS
+                weighted(j, b) = (tangent(j, first) * coeffFirst + tangent(j, second) * coeffSecond) * weight
+            Next j
+        End If
+    Next b
 End Sub
 
 ' Возвращает компоненту вектора напряжений на продольной площадке.

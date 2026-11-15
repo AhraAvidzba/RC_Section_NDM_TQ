@@ -26,6 +26,12 @@ Private Type TConcreteHistory
     Tension As Double
     Compression As Double
     ElasticTangentExact As Boolean
+    TensionCohesion As Double ' Значения огибающих при тех же Tension и Compression.
+    CompressionCohesion As Double
+    TensionDamage As Double
+    CompressionDamage As Double
+    TensionEnergy As Double
+    CompressionEnergy As Double
 End Type
 
 Private Const N_COMPONENTS As Long = 6
@@ -270,8 +276,11 @@ Private Sub ICoupledPointResponse_ClearHistory()
     ReDim mCachedTangent(1 To N_COMPONENTS, 1 To N_COMPONENTS, 1 To mPointCount)
     mCommitted = 1: mTrial = 2
     mTrialEpoch = 1
-    Dim point As Long
-    For point = 1 To mPointCount: mHistory(point, mCommitted).ElasticTangentExact = True: Next point
+    Dim point As Long, initial As TConcreteHistory, unusedStress As Double
+    initial.ElasticTangentExact = True
+    mTension.Evaluate 0#, unusedStress, initial.TensionCohesion, initial.TensionDamage, initial.TensionEnergy
+    mCompression.Evaluate 0#, unusedStress, initial.CompressionCohesion, initial.CompressionDamage, initial.CompressionEnergy
+    For point = 1 To mPointCount: mHistory(point, mCommitted) = initial: Next point
 End Sub
 
 ' Читает напряжения принятой точки квадратуры без повторного решения материала.
@@ -293,9 +302,8 @@ End Sub
 
 ' Возвращает физические меры повреждения принятой точки для диагностики.
 Friend Sub AcceptedPointDamage(ByVal point As Long, ByRef tensionEnergy As Double, ByRef compressionEnergy As Double)
-    Dim unusedStress As Double, unusedCohesion As Double, unusedDamage As Double
-    mTension.Evaluate mHistory(point, mCommitted).Tension, unusedStress, unusedCohesion, unusedDamage, tensionEnergy
-    mCompression.Evaluate mHistory(point, mCommitted).Compression, unusedStress, unusedCohesion, unusedDamage, compressionEnergy
+    tensionEnergy = mHistory(point, mCommitted).TensionEnergy
+    compressionEnergy = mHistory(point, mCommitted).CompressionEnergy
 End Sub
 
 ' Находит совместную пробу пластического возврата, энергий и дилатансии.
@@ -304,13 +312,17 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         ByRef updated As TConcreteHistory, ByRef apparent() As Double, ByRef virginElastic As Boolean) As Boolean
     Dim elastic(1 To N_COMPONENTS) As Double, effective(1 To N_COMPONENTS) As Double
     Dim increment(1 To N_COMPONENTS) As Double
-    Dim i As Long, j As Long, elasticComponent As Double
-    For j = 1 To N_COMPONENTS
-        elasticComponent = strain(j) - committed.Plastic(j)
-        For i = 1 To N_COMPONENTS
-            elastic(i) = elastic(i) + mElastic(i, j) * elasticComponent
-        Next i
-    Next j
+    Dim i As Long, j As Long, strainX As Double, strainY As Double, strainZ As Double
+    strainX = strain(1) - committed.Plastic(1)
+    strainY = strain(2) - committed.Plastic(2)
+    strainZ = strain(3) - committed.Plastic(3)
+    ' Изотропная упругость разделяет нормальный блок и независимые сдвиги. Порядок сложения нормальных вкладов сохранён.
+    elastic(1) = mElastic(1, 1) * strainX + mElastic(1, 2) * strainY + mElastic(1, 3) * strainZ
+    elastic(2) = mElastic(2, 1) * strainX + mElastic(2, 2) * strainY + mElastic(2, 3) * strainZ
+    elastic(3) = mElastic(3, 1) * strainX + mElastic(3, 2) * strainY + mElastic(3, 3) * strainZ
+    elastic(4) = mElastic(4, 4) * (strain(4) - committed.Plastic(4))
+    elastic(5) = mElastic(5, 5) * (strain(5) - committed.Plastic(5))
+    elastic(6) = mElastic(6, 6) * (strain(6) - committed.Plastic(6))
     Dim tension As Double, compression As Double, dilationRate As Double
     Dim nextTension As Double, nextCompression As Double, nextDilation As Double
     Dim plasticMultiplier As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
@@ -321,8 +333,9 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     tension = committed.Tension: compression = committed.Compression
     virginElastic = False
     updated = committed
-    mTension.Evaluate tension, unusedStress, ct, dt, kt
-    mCompression.Evaluate compression, unusedStress, cc, dc, kc
+    ct = committed.TensionCohesion: cc = committed.CompressionCohesion
+    dt = committed.TensionDamage: dc = committed.CompressionDamage
+    kt = committed.TensionEnergy: kc = committed.CompressionEnergy
     CoupledStressInvariants elastic, trialTrace, trialQ, trialHigh, trialMid, trialLow
     r = PositiveStressFraction(trialHigh, trialMid, trialLow)
     residual = CoupledBarcelonaYield(trialTrace, trialQ, trialHigh, cc, ct, mAlpha, mGamma)
@@ -391,6 +404,9 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         apparent(i) = fraction * effective(i)
     Next i
     updated.Tension = nextTension: updated.Compression = nextCompression
+    updated.TensionCohesion = ct: updated.CompressionCohesion = cc
+    updated.TensionDamage = dt: updated.CompressionDamage = dc
+    updated.TensionEnergy = kt: updated.CompressionEnergy = kc
     UpdatePoint = True
 End Function
 
