@@ -81,7 +81,10 @@ Friend Function Correct(ByRef elastic() As Double, ByVal cc As Double, ByVal ct 
             If Abs(value) <= tolerance Then Exit For
             If value > 0# Then upper = factor Else lower = factor
         Next i
-        If Abs(value) > tolerance Then Exit Function
+        If Abs(value) > tolerance Then
+            If Not SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
+                    factor, newTrace, stepMultiplier) Then Exit Function
+        End If
     End If
 
     Dim correctedMean As Double, volumetric As Double
@@ -94,6 +97,54 @@ Friend Function Correct(ByRef elastic() As Double, ByVal cc As Double, ByVal ct 
         plasticIncrement(k + 3) = 2# * (1# - factor) * elastic(k + 3) / mTwiceShear
     Next k
     Correct = True
+End Function
+
+' У растягивающей вершины q/qElastic пропорционально квадрату дилатансии.
+' Поиск в масштабе этого квадрата сохраняет точность даже при f ниже диапазона Double.
+Private Function SolveScaledApex(ByVal trace As Double, ByVal q As Double, ByVal largestDev As Double, _
+        ByVal cc As Double, ByVal ct As Double, ByVal beta As Double, ByVal ft0 As Double, _
+        ByVal dilation As Double, ByVal tolerance As Double, ByRef factor As Double, _
+        ByRef newTrace As Double, ByRef stepMultiplier As Double) As Boolean
+    If dilation <= 0# Then Exit Function
+    Dim slope As Double: slope = mAlpha + beta / 3#
+    If slope <= 0# Then Exit Function
+    Dim apexDistance As Double: apexDistance = trace - cc * (1# - mAlpha) / slope
+    If apexDistance <= 0# Then Exit Function
+
+    Dim offsetPerDilation As Double: offsetPerDilation = mEccentricity * ft0
+    Dim bulkToShear As Double: bulkToShear = 9# * mBulk / mTwiceShear
+    Dim factorScale As Double: factorScale = bulkToShear * offsetPerDilation / apexDistance
+    Dim lower As Double, upper As Double, ratio As Double, bracketed As Boolean, i As Long
+    Dim scaledFactor As Double, radius As Double, value As Double, scaledVolume As Double
+    ratio = 1#
+    For i = 1 To MAX_ITERATIONS
+        scaledFactor = (ratio * factorScale) * dilation ' f/dilation конечен и после потери самого f при округлении.
+        factor = scaledFactor * dilation
+        If factor >= 1# Then
+            factor = 1#: scaledVolume = 0#: newTrace = trace
+        Else
+            radius = Sqr(offsetPerDilation * offsetPerDilation + (DEVIATORIC_NORM * q * scaledFactor) ^ 2)
+            scaledVolume = (1# - factor) * radius / (mTwiceShear * (ratio * factorScale)) ' Произведение λ·dilation в деформациях.
+            newTrace = trace - 9# * mBulk * scaledVolume
+        End If
+        value = CoupledBarcelonaYield(newTrace, q * factor, newTrace / 3# + largestDev * factor, cc, ct, mAlpha, mGamma)
+        If Abs(value) <= tolerance Then
+            stepMultiplier = scaledVolume / dilation
+            SolveScaledApex = True
+            Exit Function
+        End If
+        If value > 0# Then
+            upper = ratio: bracketed = True
+        Else
+            lower = ratio
+        End If
+        If bracketed Then
+            ratio = lower + (upper - lower) * 0.5
+            If ratio <= lower Or ratio >= upper Then Exit Function
+        Else
+            ratio = 2# * ratio
+        End If
+    Next i
 End Function
 
 ' Возвращает изотропную растягивающую пробу непосредственно на вершину.

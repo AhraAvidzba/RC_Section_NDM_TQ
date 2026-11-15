@@ -910,6 +910,24 @@ Public Function RunTestCoupledConcreteReturn() As String
     For i = 1 To 3: elastic(i) = 9#: elastic(i + 3) = 0#: Next i
     ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
     TestRecord Not ok, "hydrostatic tension without volumetric flow reports inability to return", passed, failed, report
+    For i = 1 To 3: elastic(i) = 4.5: Next i
+    elastic(6) = 0.025
+    Dim smallDilation As Variant, apexStress As Double, apexVolume As Double
+    apexStress = FC * (1# - ALPHA) / (3# * ALPHA + beta)
+    apexVolume = (elastic(1) - apexStress) / (E / (1# - 2# * NU))
+    For Each smallDilation In Array(0.000001, 1E-170)
+        dilation = CDbl(smallDilation)
+        ok = update.Correct(elastic, FC, FT, FT, dilation, corrected, increment, multiplier)
+        TestRecord ok And multiplier > 0#, "near-apex return for dilation " & CStr(dilation), passed, failed, report
+        If ok Then
+            TestExpectNear corrected(1), apexStress, 1E-9, "near-apex analytical pressure", passed, failed, report
+            TestExpectNear multiplier * dilation, apexVolume, 1E-12, "near-apex volumetric flow", passed, failed, report
+            TestExpectNear tensor(6, 6) * increment(6) + corrected(6), elastic(6), 1E-12, _
+                "near-apex engineering shear balance", passed, failed, report
+        End If
+    Next smallDilation
+    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    TestRecord Not ok, "near-apex deviator does not enable volumetric flow at zero dilation", passed, failed, report
     RunTestCoupledConcreteReturn = report & "TOTAL_COUPLED_CONCRETE_RETURN: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:

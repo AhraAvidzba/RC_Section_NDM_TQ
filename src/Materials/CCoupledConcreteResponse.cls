@@ -47,6 +47,7 @@ Private mReturn As CCoupledConcreteReturn
 Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEnvelope
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
 Private mFrictionMax As Double, mDilationMax As Double
+Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
 
 ' Готовит единственный набор параметров бетона для текущей секции.
 ' Прочности в МПа, G в Н/мм, характерная длина в мм, углы в градусах.
@@ -70,6 +71,7 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     Set mReturn = New CCoupledConcreteReturn
     mReturn.Initialize modulus, poisson, alpha, gamma, eccentricity
     CoupledElasticTensor modulus, poisson, mElastic
+    mPressureModulus = modulus / (1# - 2# * poisson)
     Set mTension = New CCoupledConcreteEnvelope: Set mCompression = New CCoupledConcreteEnvelope
     Dim halfTension As Double, compressDamage As Double, plasticPeak As Double
     halfTension = Log(2#) * gt / (ft * localizationLength)
@@ -309,7 +311,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     Next j
     Dim tension As Double, compression As Double, dilationRate As Double
     Dim nextTension As Double, nextCompression As Double, nextDilation As Double
-    Dim duration As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim plasticMultiplier As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
     Dim ct As Double, cc As Double, dt As Double, dc As Double, kt As Double, kc As Double
     Dim unusedStress As Double, r As Double, residual As Double
     Dim deltaTension As Double, deltaCompression As Double, deltaDilation As Double
@@ -332,12 +334,12 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
 
     dilationRate = CurrentDilation(kt, kc, r, trace, q)
     For j = 1 To MATERIAL_ITERATIONS
-        If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, duration) Then
+        If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, plasticMultiplier) Then
             If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
             ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
             ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
             dilationRate = Tan(mDilationMax)
-            If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, duration) Then Exit Function
+            If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, plasticMultiplier) Then Exit Function
         End If
         CoupledStressInvariants effective, trace, q, high, mid, low
         r = PositiveStressFraction(high, mid, low)
@@ -360,7 +362,10 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
         If Abs(deltaTension) <= STATE_TOLERANCE * (mFt / mElastic(3, 3) + nextTension) And _
                 Abs(deltaCompression) <= STATE_TOLERANCE * (mFc / mElastic(3, 3) + nextCompression) And _
-                Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= YIELD_TOLERANCE_RATIO * cc Then Exit For
+                Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= YIELD_TOLERANCE_RATIO * cc Then
+            ' У вершины даже малое изменение угла может вывести давление за допуск поверхности.
+            If Abs(deltaDilation) * plasticMultiplier <= YIELD_TOLERANCE_RATIO * cc / mPressureModulus Then Exit For
+        End If
         tension = tension + MAXIMUM_DAMPING * deltaTension
         compression = compression + MAXIMUM_DAMPING * deltaCompression
         dilationRate = dilationRate + MAXIMUM_DAMPING * deltaDilation
