@@ -92,13 +92,7 @@ End Function
 Private Sub TestAsymmetricSixComponents(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Const E_MODULUS As Double = 32000#
     Dim query As New CSectionGeometryQuery, region As CConcreteRegion
-    Dim outline As CGeometryPath
-    Set outline = query.AdjacentRectangles("AsymmetricSix", Array( _
-        Array(-100#, -80#, 200#, 100#), Array(-100#, 20#, 135#, 80#)))
-    Set region = query.SubtractContainedRegion(query.RegionFromPath(outline), query.CircleRegion(-40#, -24#, 21#))
-    Dim geometry As New CGeometryRegion, section As CSectionModel
-    geometry.Initialize region
-    Set section = TestBuildSection(geometry)
+    Dim section As CSectionModel: Set section = TestAsymmetricCoupledSection(region)
     Dim solver As New CCoupledElasticState
     solver.PrepareModel section, E_MODULUS, 0#, 3, 3, 9
 
@@ -144,6 +138,17 @@ Private Sub TestAsymmetricSixComponents(ByRef passed As Long, ByRef failed As Lo
     TestRecord fieldError <= 1E-10 * maximumStress, "asymmetric component superposition error=" & CStr(fieldError), _
         passed, failed, report
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Готовит единую невыпуклую область с эксцентричным круглым отверстием.
+Private Function TestAsymmetricCoupledSection(ByRef region As CConcreteRegion) As CSectionModel
+    Dim query As New CSectionGeometryQuery, outline As CGeometryPath, geometry As New CGeometryRegion
+    Set outline = query.AdjacentRectangles("AsymmetricSix", Array( _
+        Array(-100#, -80#, 200#, 100#), Array(-100#, 20#, 135#, 80#)))
+    Set region = query.SubtractContainedRegion(query.RegionFromPath(outline), query.CircleRegion(-40#, -24#, 21#))
+    geometry.Initialize region
+    Set TestAsymmetricCoupledSection = TestBuildSection(geometry)
+End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' При ν=0 связь осевого растяжения с поперечными деформациями отсутствует.
@@ -1469,6 +1474,264 @@ Public Function RunTestCoupledBatchRoute() As String
 Failed:
     RunTestCoupledBatchRoute = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет чистые и парные нагрузки с балансом всех усилий. Повторяет пакет
+' на том же расчётчике в обратном порядке и под другим профилем прочности.
+Public Function RunTestCoupledLoadMatrix() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim region As CConcreteRegion, section As CSectionModel
+    Set section = TestAsymmetricCoupledSection(region)
+    section.AddRebarElement -76#, -54#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 68#, -47#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement -55#, 65#, 10#, GEOM_PI * 25#, "A400"
+    Dim layout As New CTransverseRebarLayout, hoop As New CGeometryPath
+    hoop.Initialize "MatrixHoop"
+    hoop.AddLine "Bottom", -85#, -65#, 20#, -65#
+    hoop.AddLine "Right", 20#, -65#, 20#, 12#
+    hoop.AddLine "Top", 20#, 12#, -85#, 12#
+    hoop.AddLine "Left", -85#, 12#, -85#, -65#
+    hoop.Seal True
+    layout.AddGroup hoop, 8#, 100#, "A400"
+
+    Dim concrete As New CConcreteMaterialParameters, steel As New CSteelMaterialParameters, provider As New CMaterialModelProvider
+    concrete.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    steel.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#
+    provider.TestInitializeFromParameters concrete, steel
+    Dim analysis As New CCoupledSectionAnalysis, profiles As New CCalculationProfileCatalog, spec As New CMaterialModelSpec
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+    profiles.LoadFromWorkbook ThisWorkbook, False
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    Dim id As Variant, profile As CCalculationProfile
+    For Each id In Array("PR4", "PR1")
+        Set profile = profiles.ProfileById(CStr(id))
+        profile.Initialize CStr(id), "Контроль матрицы нагрузок", "", True, False, False, False
+        profile.SetStrengthSpec spec
+    Next id
+    Dim cases As Variant, components As Variant, amplitudes As Variant
+    components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    amplitudes = Array(28000#, 1300000#, -1700000#, 1800000#, 12500#, -10500#)
+    cases = Array(Array("N", 0), Array("Mx", 1), Array("My", 2), Array("T", 3), Array("Qx", 4), Array("Qy", 5), _
+        Array("Mx+T", 1, 3), Array("My+T", 2, 3), Array("Qx+T", 4, 3), Array("Qy+T", 5, 3), _
+        Array("N+Qx", 0, 4), Array("N+Qy", 0, 5), Array("Mx+Qx", 1, 4), Array("Mx+Qy", 1, 5), _
+        Array("My+Qx", 2, 4), Array("My+Qy", 2, 5), Array("AllSix", 0, 1, 2, 3, 4, 5))
+    Dim batch As New CBatchSectionCalculator, cx As Double, cy As Double, area As Double
+    Dim settings As New CSystemSettingsReader, units As New CUnitSystem
+    batch.Initialize section, provider
+    TestLoadMatrixSettings settings
+    units.LoadFromSettings settings
+    batch.ApplySettings settings, units
+    Set batch.ProfileCatalog = profiles
+    batch.ConfigureCoupledAnalysis analysis
+    section.ConcreteMeshCentroid cx, cy, area
+    Dim first() As CSectionStateResult: ReDim first(0 To UBound(cases))
+    Dim expected() As Double, actual() As Double, result As CCombinationResult, state As CSectionStateResult
+    Dim pass As Long, i As Long, row As Long, j As Long, caseData As Variant, spatial As Boolean
+    Dim suffix As String, profileID As String
+    For pass = 1 To 2
+        batch.ClearCombinations
+        If pass = 1 Then profileID = "PR4" Else profileID = "PR1"
+        For row = 0 To UBound(cases)
+            i = row
+            If pass = 2 Then i = UBound(cases) - row
+            caseData = cases(i)
+            TestMatrixVector caseData, amplitudes, expected
+            batch.AddCombination CStr(caseData(0)), expected(0), expected(1), expected(2), profileID, "", _
+                torque:=expected(3), qx:=expected(4), qy:=expected(5)
+        Next row
+        batch.ApplyLoadReference cx, cy, cx, cy
+        batch.Execute
+        For row = 0 To UBound(cases)
+            i = row
+            If pass = 2 Then i = UBound(cases) - row
+            caseData = cases(i): suffix = " | " & CStr(caseData(0)) & " | " & profileID
+            TestMatrixVector caseData, amplitudes, expected
+            spatial = (expected(3) <> 0# Or expected(4) <> 0# Or expected(5) <> 0#)
+            Set result = batch.ResultAt(row + 1)
+            Set state = result.StateRepository.FindState(sstStrengthState)
+            TestRecord result.DirectStateMeta.InternalStatus = rsSuccess, "converged" & suffix & " | " & _
+                result.DirectStateMeta.ResultComment, passed, failed, report
+            TestRecord batch.CombinationID(row + 1) = CStr(caseData(0)) And batch.HasSpatialLoads(row + 1) = spatial, _
+                "case identity and route" & suffix, passed, failed, report
+            If state Is Nothing Then
+                TestRecord False, "missing state" & suffix, passed, failed, report
+            ElseIf state.Converged Then
+                TestMatrixReadVector result, state, spatial, cx, cy, actual, suffix, passed, failed, report
+                For j = 0 To 5
+                    TestRecord Abs(actual(j) - expected(j)) <= 0.00005 * Abs(amplitudes(j)), _
+                        "equilibrium " & CStr(components(j)) & suffix & " = " & CStr(actual(j)), passed, failed, report
+                Next j
+                If pass = 1 Then
+                    Set first(i) = state
+                ElseIf Not first(i) Is Nothing Then
+                    TestRecord TestMatrixStatesMatch(first(i), state, section.ConcreteCount + section.RebarCount), _
+                        "reversed batch gives identical material fields and state" & suffix, passed, failed, report
+                End If
+            End If
+        Next row
+    Next pass
+    TestMatrixInteractions first, cases, section.ConcreteCount, passed, failed, report
+    TestPerforatedHoopLimit section, hoop, provider, spec, cx, cy, passed, failed, report
+    RunTestCoupledLoadMatrix = report & "TOTAL_COUPLED_LOAD_MATRIX: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledLoadMatrix = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' На той же геометрии проверяет предел хомута при шести ненулевых усилиях.
+' Для контрольной стали заданы малые деформации текучести и предела.
+Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop As CGeometryPath, _
+        ByVal provider As CMaterialModelProvider, ByVal spec As CMaterialModelSpec, ByVal cx As Double, ByVal cy As Double, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const STRAIN_LIMIT As Double = 0.000012
+    Const POISSON_RATIO As Double = 0.2
+    Const MODULUS As Double = 30000#
+    Const FORCE As Double = -100000#
+    Dim layout As New CTransverseRebarLayout: layout.AddGroup hoop, 8#, 100#, "TestMatrixHoopGrade"
+    Dim steel As New CCoupledSteelModel: steel.Initialize 200000#, 2#, 2#, 500#, 500#, STRAIN_LIMIT, STRAIN_LIMIT
+    Dim grades As Object, supplementary As Object
+    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "TestMatrixHoopGrade", steel
+    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
+    Dim analysis As New CCoupledSectionAnalysis, loads As New CSectionLoadState, capacity As CCapacityResult
+    analysis.Initialize section, layout, provider, POISSON_RATIO, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary
+    loads.Initialize FORCE, 120000#, -90000#, cx, cy
+    loads.SetSpatialComponents 200000#, 240#, -120#
+    Set capacity = analysis.SolveCapacity(loads, "Auto", spec, 1#, 1.5, 0.0001, 30)
+    Dim lambda As Double: lambda = capacity.LambdaCapacity
+    TestRecord capacity.HasUltimatePoint And capacity.IsTransverseLimit And capacity.Status = "FAIL", _
+        "perforated section reaches the hoop limit: " & capacity.ResultMeta.ResultComment, passed, failed, report
+    If Not capacity.HasUltimatePoint Then Exit Sub
+    Const AREA As Double = 30800# - 441# * GEOM_PI ' Точное сечение по двум прямоугольникам за вычетом круга.
+    Dim estimate As Double: estimate = STRAIN_LIMIT * MODULUS * AREA / (POISSON_RATIO * Abs(FORCE))
+    TestRecord Abs(lambda - estimate) < 0.2, "hoop reserve " & lambda & " near the axial Poisson estimate " & estimate, passed, failed, report
+    TestExpectNear capacity.NUltimate, lambda * FORCE, 1E-7, "perforated limit N", passed, failed, report
+    TestExpectNear capacity.MxUltimate, lambda * 120000#, 1E-7, "perforated limit Mx", passed, failed, report
+    TestExpectNear capacity.MyUltimate, -lambda * 90000#, 1E-7, "perforated limit My", passed, failed, report
+    TestExpectNear capacity.TUltimate, lambda * 200000#, 1E-7, "perforated limit T", passed, failed, report
+    TestExpectNear capacity.QxUltimate, lambda * 240#, 1E-7, "perforated limit Qx", passed, failed, report
+    TestExpectNear capacity.QyUltimate, -lambda * 120#, 1E-7, "perforated limit Qy", passed, failed, report
+    Dim state As CSectionStateResult: Set state = capacity.StateResult
+    Dim control As String, utilization As Double, stress As Double
+    If Not state Is Nothing Then
+        TestRecord state.Converged And state.CopyCoupledTransverseControl(control, utilization, stress) And _
+            InStr(control, "MatrixHoop (TestMatrixHoopGrade)") > 0 And utilization > 0.99 And utilization <= 1#, _
+            "saved perforated limit state equilibrates just below the hoop threshold", passed, failed, report
+    Else
+        TestRecord False, "missing perforated limit state", passed, failed, report
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Загружает настройки без инженерного обнуления моментов. Даже малая
+' добавка N·e нужна для точной проверки переноса чистой продольной силы.
+Private Sub TestLoadMatrixSettings(ByVal settings As CSystemSettingsReader)
+    Dim cell As Object, saved As Variant
+    Set cell = TestInputCell(ThisWorkbook.Names.Item("rngSystemSettings").RefersToRange, "Calculation.ZeroMomentPerDepth")
+    saved = cell.Formula
+    On Error GoTo Failed
+    cell.Value2 = 0#
+    settings.LoadFromWorkbook ThisWorkbook
+    cell.Formula = saved
+    Exit Sub
+Failed:
+    Dim failedNumber As Long, failedSource As String, failedDescription As String
+    failedNumber = Err.Number: failedSource = Err.Source: failedDescription = Err.Description
+    cell.Formula = saved
+    Err.Raise failedNumber, failedSource, failedDescription
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Заполняет независимый вектор в порядке N, Mx, My, T, Qx, Qy.
+Private Sub TestMatrixVector(ByVal caseData As Variant, ByVal amplitudes As Variant, ByRef vector() As Double)
+    Dim i As Long, j As Long
+    ReDim vector(0 To 5)
+    For i = 1 To UBound(caseData)
+        j = CLng(caseData(i)): vector(j) = CDbl(amplitudes(j))
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет усилия в центре бетонной сетки. Приводит к нему плоские моменты
+' и проверяет, что в плоском состоянии нет пространственных полей.
+Private Sub TestMatrixReadVector(ByVal result As CCombinationResult, ByVal state As CSectionStateResult, _
+        ByVal spatial As Boolean, ByVal cx As Double, ByVal cy As Double, ByRef actual() As Double, _
+        ByVal suffix As String, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim values() As Double, stored As Boolean, fields As CCoupledFieldSnapshot, j As Long
+    ReDim actual(0 To 5)
+    stored = result.CopyCoupledResultants(values)
+    Set fields = state.CoupledFields
+    TestRecord (stored = spatial) And ((Not fields Is Nothing) = spatial), _
+        "accepted field contract" & suffix, passed, failed, report
+    If stored Then
+        For j = 0 To 5: actual(j) = values(j + 1): Next j
+    Else
+        actual(0) = state.Nint: actual(1) = state.Mxint - state.Nint * cy: actual(2) = state.Myint - state.Nint * cx
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет четыре обобщённые деформации и все семь полей каждого элемента.
+Private Function TestMatrixStatesMatch(ByVal first As CSectionStateResult, ByVal second As CSectionStateResult, _
+        ByVal elementCount As Long) As Boolean
+    If first.InternalStatus <> second.InternalStatus Or first.Epsilon0 <> second.Epsilon0 Or _
+            first.KappaX <> second.KappaX Or first.KappaY <> second.KappaY Or first.Twist <> second.Twist Then Exit Function
+    Dim a As CCoupledFieldSnapshot, b As CCoupledFieldSnapshot
+    Set a = first.CoupledFields: Set b = second.CoupledFields
+    If a Is Nothing Or b Is Nothing Then
+        TestMatrixStatesMatch = (a Is Nothing) And (b Is Nothing)
+        Exit Function
+    End If
+    Dim i As Long, ax As Double, ay As Double, az As Double, av As Double, aw As Double
+    Dim bx As Double, by As Double, bz As Double, bv As Double, bw As Double
+    For i = 1 To elementCount
+        a.Axial i, ax, ay: b.Axial i, bx, by
+        If ax <> bx Or ay <> by Then Exit Function
+        a.Spatial i, ax, ay, az, av, aw: b.Spatial i, bx, by, bz, bv, bw
+        If ax <> bx Or ay <> by Or az <> bz Or av <> bv Or aw <> bw Then Exit Function
+    Next i
+    TestMatrixStatesMatch = True
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает касательные напряжения пары с суммой отдельных решений.
+' Чистый N или M не прикладывает сдвиг и не создаёт пространственного поля.
+Private Sub TestMatrixInteractions(ByRef states() As CSectionStateResult, ByVal cases As Variant, _
+        ByVal concreteCount As Long, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const MIN_INTERACTION As Double = 0.005 ' МПа: превышает допуск равновесия для этой задачи.
+    Dim i As Long, k As Long, data As Variant, first As Long, second As Long
+    Dim bendingTorsion As Double, shearTorsion As Double
+    For i = 6 To UBound(cases) - 1
+        data = cases(i): first = CLng(data(1)): second = CLng(data(2))
+        If Not states(i) Is Nothing And Not states(first) Is Nothing And Not states(second) Is Nothing Then
+            Dim difference As Double, qx As Double, qy As Double, ax As Double, ay As Double, bx As Double, by As Double
+            difference = 0#
+            For k = 1 To concreteCount
+                TestMatrixShear states(i), k, qx, qy
+                TestMatrixShear states(first), k, ax, ay
+                TestMatrixShear states(second), k, bx, by
+                difference = GeomMax(difference, GeomMax(Abs(qx - ax - bx), Abs(qy - ay - by)))
+            Next k
+            report = report & "INTERACTION: " & data(0) & " max shear difference, MPa = " & CStr(difference) & vbCrLf
+            Select Case CStr(data(0))
+                Case "Mx+T": bendingTorsion = difference
+                Case "Qx+T": shearTorsion = difference
+            End Select
+        End If
+    Next i
+    TestRecord bendingTorsion > MIN_INTERACTION, "Mx+T changes the shear field compared to the independent responses", passed, failed, report
+    TestRecord shearTorsion > MIN_INTERACTION, "Qx+T changes the shear field compared to the independent responses", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает касательные напряжения пространственного состояния.
+Private Sub TestMatrixShear(ByVal state As CSectionStateResult, ByVal i As Long, ByRef tx As Double, ByRef ty As Double)
+    Dim fields As CCoupledFieldSnapshot: Set fields = state.CoupledFields
+    Dim gx As Double, gy As Double, w As Double
+    tx = 0#: ty = 0#
+    If Not fields Is Nothing Then fields.Spatial i, tx, ty, gx, gy, w
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет, что замкнутый хомут с заданным малым пределом деформации
