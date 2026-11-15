@@ -207,7 +207,11 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Else
         low = -1#
         If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
-        If Not controlled Is Nothing Then low = controlled.BestAdmissibleLambda
+        If Not controlled Is Nothing Then
+            low = controlled.BestAdmissibleLambda
+            criticalPoint = controlled.SteelEventPoint
+            If criticalPoint > 0 Then meta.ResultComment = meta.ResultComment & " " & SteelControlDescription(criticalPoint) & "."
+        End If
         capacity.InitializeCoupledUnresolved meta, loadPath, low
     End If
 End Function

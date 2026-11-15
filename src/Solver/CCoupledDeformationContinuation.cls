@@ -25,6 +25,14 @@ Private Type TBranchPoint
     HistoryIndex As Long
 End Type
 
+Private Type TSteelCrossing
+    Admissible As TBranchPoint
+    Exceeded As TBranchPoint
+    AdmissibleRatio As Double
+    ExceededRatio As Double
+    CriticalPoint As Long
+End Type
+
 Private Const COMPONENT_COUNT As Long = 6
 Private Const STEP_LIMIT As Long = 32
 Private Const PROBE_LIMIT As Long = 96 ' Общий предел проб продолжения, деления и повторного прохождения плеч.
@@ -47,6 +55,7 @@ Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
 Private mReusedRightPoints As Long
 Private mShoulderProbes As Long
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
+Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mUsesYieldControl As Boolean
@@ -71,6 +80,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
@@ -333,12 +343,17 @@ Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As
     CopyLimitState = True
 End Function
 
-' Передаёт арматурный предел на восходящем деформационном участке.
+' Передаёт арматурное ограничение, определяющее достигнутую нагрузку.
 Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long) As Boolean
     If mSteelPoint = 0 Then Exit Function
     low = mSteelLow: high = mSteelHigh: criticalPoint = mSteelPoint
     CopySteelLimit = True
 End Function
+
+' Возвращает точку установленного арматурного события для пояснения в отчёте.
+Friend Property Get SteelEventPoint() As Long
+    SteelEventPoint = mSteelEventPoint
+End Property
 
 ' Возвращает независимый статус контролируемого участка.
 Friend Property Get ResultMeta() As CResultMeta
@@ -548,61 +563,124 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
     Next i
 End Function
 
-' Уточняет пересечение стального критерия от одного принятого поля.
-' Падение множителя внутри интервала оставляет порядок механизмов
-' неопределённым и требует сокращения внешнего шага.
+' Уточняет первое пересечение по возрастающей деформационной координате.
+' Позднее событие сохраняет как диагностику, если был достигнут больший
+' допустимый множитель или положение относительно единицы не определено.
 Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef right As TBranchPoint) As Boolean
-    Dim low As TBranchPoint, high As TBranchPoint, probePoint As TBranchPoint
-    Dim point As Long, attempt As Long, tolerance As Double
-    Dim field() As Double, resultants() As Double
-    low = left: high = right
-    point = mReinforcement.TrialSteelCriticalPoint
+    Dim eventState As TSteelCrossing, refined As New Collection, multipliers As New Collection
+    Dim actual() As Double: actual = mCurrentResultants
+    eventState.Admissible = left: eventState.Exceeded = right
+    If Not RefineSteelCrossing(eventState, refined, multipliers, actual) Then
+        mSolver.DiscardStep
+        If refined.Count = 0 Then Exit Function
+        If mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
+        StopSearch "Не удалось восстановить принятую историю после уточнения предела арматуры."
+        ResolveSteelCrossing = True
+        Exit Function
+    End If
+
+    Dim factor As Variant
+    For Each factor In multipliers
+        If factor > mBestLambda Then mBestLambda = factor
+    Next factor
+    Dim low As Double, high As Double, lowerBound As Double, upperBound As Double
+    low = eventState.Admissible.Lambda: high = eventState.Exceeded.Lambda
+    mSteelEventPoint = eventState.CriticalPoint
+    lowerBound = GeomMin(low - eventState.Admissible.Uncertainty, high - eventState.Exceeded.Uncertainty)
+    upperBound = GeomMax(low + eventState.Admissible.Uncertainty, high + eventState.Exceeded.Uncertainty)
+    mSteelEventDetails = "Арматурное событие: lambda до = " & CStr(low) & ", lambda после = " & CStr(high) & _
+        ". Координата деформации: [" & CStr(eventState.Admissible.Coordinate) & ", " & CStr(eventState.Exceeded.Coordinate) & _
+        "]. Точка арматуры: " & CStr(eventState.CriticalPoint) & "; отношения деформаций к пределам: " & _
+        CStr(eventState.AdmissibleRatio) & " и " & CStr(eventState.ExceededRatio) & _
+        "; оценка интервала lambda: [" & CStr(lowerBound) & ", " & CStr(upperBound) & "]"
+    Dim reason As String
+    If high <= low Or mFollowingLocalPeak Or low + LoadResolution(low) < mBestLambda Then
+        reason = "Достигнута предельная деформация арматуры после максимума или снижения нагрузки. Определяющий предел требует проверки."
+    ElseIf lowerBound <= 1# And upperBound >= 1# Then
+        reason = "Достигнута предельная деформация арматуры. Интервал её достижения охватывает расчётную нагрузку (lambda = 1)."
+    End If
+    If Len(reason) > 0 Then
+        If Not mTrace Is Nothing Then
+            For Each factor In multipliers: mTrace.Add 1#, factor: Next factor
+        End If
+        StopSearch reason
+    Else
+        mSteelLow = low: mSteelHigh = high: mSteelPoint = eventState.CriticalPoint
+        Set mLimitFields = New Collection
+        Dim i As Long
+        For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
+        For i = 1 To refined.Count: mLimitFields.Add refined.Item(i): Next i
+        If Not mTrace Is Nothing Then
+            Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
+            For Each factor In multipliers: mLimitTrace.Add 1#, factor: Next factor
+        End If
+        mLimitResultants = actual
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
+            "Достигнута предельная деформация арматуры на возрастающем участке.", Details()
+    End If
+    ResolveSteelCrossing = True
+End Function
+
+' Сохраняет только допустимые подшаги. После их принятия правое плечо
+' рассчитывается повторно, поскольку изменилось состояние материалов.
+Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal refined As Collection, _
+        ByVal multipliers As Collection, ByRef actual() As Double) As Boolean
+    Dim low As TBranchPoint, high As TBranchPoint, point As TBranchPoint
+    low = eventState.Admissible: high = eventState.Exceeded
+    If low.Lambda <= 0# Or high.Coordinate <= low.Coordinate Then Exit Function
+    eventState.AdmissibleRatio = mReinforcement.AcceptedSteelUtilization
+    If eventState.AdmissibleRatio > 1# Or Not ReadSteelTrialBound(high) Then Exit Function
+    eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
+    eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
+    If eventState.ExceededRatio <= 1# Or eventState.CriticalPoint = 0 Then Exit Function
     mSolver.DiscardStep
-    If high.Lambda <= low.Lambda Then Exit Function
+    low.Uncertainty = GeomMax(low.Uncertainty, LoadResolution(low.Lambda))
+    Dim tolerance As Double, coordinateTolerance As Double
     tolerance = mLambdaTolerance
-    If high.Lambda >= 0.95 And low.Lambda <= 1.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
+    If GeomMin(low.Lambda, high.Lambda) <= 1.05 And GeomMax(low.Lambda, high.Lambda) >= 0.95 Then _
+        tolerance = GeomMin(tolerance, NEAR_ONE_TOLERANCE)
+    coordinateTolerance = (high.Coordinate - low.Coordinate) * MIN_STEP_RATIO ' Плато lambda тоже требует локализации деформации.
+    Dim attempt As Long, field() As Double, ratio As Double
     For attempt = 1 To STEP_LIMIT
-        If high.Lambda - low.Lambda <= tolerance Then
-            If low.Lambda <= 0# Then Exit Function
-            If mLocalPeak > 0# And high.Lambda < mBestLambda - mLocalPeakAccuracy Then
-                StopSearch "Арматурный предел достигнут при нагрузке ниже ранее подтверждённого равновесия. Нужна оценка порядка предельных состояний."
-                ResolveSteelCrossing = True
-                Exit Function
-            End If
-            mSteelLow = low.Lambda: mSteelHigh = high.Lambda: mSteelPoint = point
-            Set mLimitFields = New Collection
-            Dim i As Long
-            For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
-            If Not mTrace Is Nothing Then Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
-            If low.Lambda > left.Lambda Then
-                mLimitFields.Add field
-                If Not mLimitTrace Is Nothing Then mLimitTrace.Add 1#, low.Lambda
-                mLimitResultants = resultants
-            Else
-                mLimitResultants = mCurrentResultants
-            End If
-            mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-                "Достигнута предельная деформация арматуры на возрастающем участке.", _
-                Details() & " | Интервал: [" & CStr(mSteelLow) & ", " & CStr(mSteelHigh) & "]"
-            ResolveSteelCrossing = True
+        If high.Coordinate - low.Coordinate <= coordinateTolerance And Abs(high.Lambda - low.Lambda) <= tolerance Then
+            eventState.Admissible = low: eventState.Exceeded = high
+            RefineSteelCrossing = True
             Exit Function
         End If
-        probePoint.Coordinate = (low.Coordinate + high.Coordinate) * 0.5
-        If probePoint.Coordinate <= low.Coordinate Or probePoint.Coordinate >= high.Coordinate Then Exit Function
-        If Not Probe(probePoint, low.Lambda, False) Then Exit Function
-        If probePoint.Lambda <= low.Lambda Or probePoint.Lambda >= high.Lambda Then
-            mSolver.DiscardStep
-            Exit Function
-        End If
-        If BeyondSteelLimit() Then
-            point = mReinforcement.TrialSteelCriticalPoint: high = probePoint
+        point.Coordinate = low.Coordinate + 0.5 * (high.Coordinate - low.Coordinate)
+        If point.Coordinate <= low.Coordinate Or point.Coordinate >= high.Coordinate Then Exit Function
+        If Not Probe(point, low.Lambda, False) Then Exit Function
+        If Not ReadSteelTrialBound(point) Then Exit Function
+        ratio = mReinforcement.TrialSteelUtilization
+        If ratio > 1# Then
+            high = point: eventState.ExceededRatio = ratio
+            eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
         Else
-            low = probePoint
-            mSolver.CopyTrial field, resultants
+            low = point: eventState.AdmissibleRatio = ratio
+            mSolver.CopyTrial field, actual
+            mSolver.AcceptStep
+            refined.Add field: multipliers.Add low.Lambda
+            If Not Probe(high, low.Lambda, False) Then Exit Function
+            If Not ReadSteelTrialBound(high) Then Exit Function
+            eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
+            eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
+            If eventState.ExceededRatio <= 1# Then Exit Function
         End If
         mSolver.DiscardStep
     Next attempt
+End Function
+
+' Проверяет область поиска и оценивает влияние невязки около единицы.
+Private Function ReadSteelTrialBound(ByRef point As TBranchPoint) As Boolean
+    If point.Lambda <= 0# Or point.Lambda > mMaximumLambda Then Exit Function
+    point.Uncertainty = LoadResolution(point.Lambda)
+    If Abs(point.Lambda - 1#) <= 0.05 Then
+        Dim uncertainty As Double
+        If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, uncertainty) Then Exit Function
+        point.Uncertainty = GeomMax(point.Uncertainty, uncertainty)
+    End If
+    ReadSteelTrialBound = True
 End Function
 
 ' Определяет превышение по пробной точке до фиксации истории.
@@ -646,5 +724,6 @@ Private Function Details() As String
         Details = Details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
         Details = Details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
+    If Len(mSteelEventDetails) > 0 Then Details = Details & " | " & mSteelEventDetails
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function

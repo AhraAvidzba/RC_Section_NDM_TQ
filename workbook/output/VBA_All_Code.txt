@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-15 23:42:23
+Date: 2026-11-16 00:31:21
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -26837,7 +26837,7 @@ End Property
 
 ' Задаёт один и тот же модуль предельной деформации для сжатия и растяжения арматуры.
 ' Для независимых пределов используются SteelCompressionLimit и SteelTensionLimit.
-Public Property Let SteelStrainLimit(ByVal value As Double)
+Public Property Let steelStrainLimit(ByVal value As Double)
     mSteelCompressionLimit = Abs(value)
     mSteelTensionLimit = Abs(value)
 End Property
@@ -26962,7 +26962,7 @@ End Property
 ====================================================================================================
 COMPONENT: CCoupledDeformationContinuation
 TYPE: 2
-LINES: 642
+LINES: 721
 ====================================================================================================
 Option Explicit
 
@@ -26980,6 +26980,14 @@ Private Type TBranchPoint
     lambda As Double
     uncertainty As Double
     HistoryIndex As Long
+End Type
+
+Private Type TSteelCrossing
+    Admissible As TBranchPoint
+    Exceeded As TBranchPoint
+    AdmissibleRatio As Double
+    ExceededRatio As Double
+    criticalPoint As Long
 End Type
 
 Private Const COMPONENT_COUNT As Long = 6
@@ -27004,6 +27012,7 @@ Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
 Private mReusedRightPoints As Long
 Private mShoulderProbes As Long
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
+Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mUsesYieldControl As Boolean
@@ -27028,6 +27037,7 @@ Friend Sub trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = LambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
@@ -27290,12 +27300,17 @@ Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As
     CopyLimitState = True
 End Function
 
-' Передаёт арматурный предел на восходящем деформационном участке.
+' Передаёт арматурное ограничение, определяющее достигнутую нагрузку.
 Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long) As Boolean
     If mSteelPoint = 0 Then Exit Function
     low = mSteelLow: high = mSteelHigh: criticalPoint = mSteelPoint
     CopySteelLimit = True
 End Function
+
+' Возвращает точку установленного арматурного события для пояснения в отчёте.
+Friend Property Get SteelEventPoint() As Long
+    SteelEventPoint = mSteelEventPoint
+End Property
 
 ' Возвращает независимый статус контролируемого участка.
 Friend Property Get ResultMeta() As CResultMeta
@@ -27505,61 +27520,124 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
     Next i
 End Function
 
-' Уточняет пересечение стального критерия от одного принятого поля.
-' Падение множителя внутри интервала оставляет порядок механизмов
-' неопределённым и требует сокращения внешнего шага.
+' Уточняет первое пересечение по возрастающей деформационной координате.
+' Позднее событие сохраняет как диагностику, если был достигнут больший
+' допустимый множитель или положение относительно единицы не определено.
 Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef right As TBranchPoint) As Boolean
-    Dim low As TBranchPoint, high As TBranchPoint, probePoint As TBranchPoint
-    Dim point As Long, attempt As Long, tolerance As Double
-    Dim field() As Double, resultants() As Double
-    low = left: high = right
-    point = mReinforcement.TrialSteelCriticalPoint
+    Dim eventState As TSteelCrossing, refined As New Collection, multipliers As New Collection
+    Dim actual() As Double: actual = mCurrentResultants
+    eventState.Admissible = left: eventState.Exceeded = right
+    If Not RefineSteelCrossing(eventState, refined, multipliers, actual) Then
+        mSolver.DiscardStep
+        If refined.count = 0 Then Exit Function
+        If mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
+        StopSearch "Не удалось восстановить принятую историю после уточнения предела арматуры."
+        ResolveSteelCrossing = True
+        Exit Function
+    End If
+
+    Dim factor As Variant
+    For Each factor In multipliers
+        If factor > mBestLambda Then mBestLambda = factor
+    Next factor
+    Dim low As Double, high As Double, lowerBound As Double, upperBound As Double
+    low = eventState.Admissible.lambda: high = eventState.Exceeded.lambda
+    mSteelEventPoint = eventState.criticalPoint
+    lowerBound = GeomMin(low - eventState.Admissible.uncertainty, high - eventState.Exceeded.uncertainty)
+    upperBound = GeomMax(low + eventState.Admissible.uncertainty, high + eventState.Exceeded.uncertainty)
+    mSteelEventDetails = "Арматурное событие: lambda до = " & CStr(low) & ", lambda после = " & CStr(high) & _
+        ". Координата деформации: [" & CStr(eventState.Admissible.coordinate) & ", " & CStr(eventState.Exceeded.coordinate) & _
+        "]. Точка арматуры: " & CStr(eventState.criticalPoint) & "; отношения деформаций к пределам: " & _
+        CStr(eventState.AdmissibleRatio) & " и " & CStr(eventState.ExceededRatio) & _
+        "; оценка интервала lambda: [" & CStr(lowerBound) & ", " & CStr(upperBound) & "]"
+    Dim reason As String
+    If high <= low Or mFollowingLocalPeak Or low + LoadResolution(low) < mBestLambda Then
+        reason = "Достигнута предельная деформация арматуры после максимума или снижения нагрузки. Определяющий предел требует проверки."
+    ElseIf lowerBound <= 1# And upperBound >= 1# Then
+        reason = "Достигнута предельная деформация арматуры. Интервал её достижения охватывает расчётную нагрузку (lambda = 1)."
+    End If
+    If Len(reason) > 0 Then
+        If Not mTrace Is Nothing Then
+            For Each factor In multipliers: mTrace.Add 1#, factor: Next factor
+        End If
+        StopSearch reason
+    Else
+        mSteelLow = low: mSteelHigh = high: mSteelPoint = eventState.criticalPoint
+        Set mLimitFields = New Collection
+        Dim i As Long
+        For i = 1 To left.HistoryIndex: mLimitFields.Add history.item(i): Next i
+        For i = 1 To refined.count: mLimitFields.Add refined.item(i): Next i
+        If Not mTrace Is Nothing Then
+            Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
+            For Each factor In multipliers: mLimitTrace.Add 1#, factor: Next factor
+        End If
+        mLimitResultants = actual
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
+            "Достигнута предельная деформация арматуры на возрастающем участке.", details()
+    End If
+    ResolveSteelCrossing = True
+End Function
+
+' Сохраняет только допустимые подшаги. После их принятия правое плечо
+' рассчитывается повторно, поскольку изменилось состояние материалов.
+Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal refined As Collection, _
+        ByVal multipliers As Collection, ByRef actual() As Double) As Boolean
+    Dim low As TBranchPoint, high As TBranchPoint, point As TBranchPoint
+    low = eventState.Admissible: high = eventState.Exceeded
+    If low.lambda <= 0# Or high.coordinate <= low.coordinate Then Exit Function
+    eventState.AdmissibleRatio = mReinforcement.AcceptedSteelUtilization
+    If eventState.AdmissibleRatio > 1# Or Not ReadSteelTrialBound(high) Then Exit Function
+    eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
+    eventState.criticalPoint = mReinforcement.TrialSteelCriticalPoint
+    If eventState.ExceededRatio <= 1# Or eventState.criticalPoint = 0 Then Exit Function
     mSolver.DiscardStep
-    If high.lambda <= low.lambda Then Exit Function
+    low.uncertainty = GeomMax(low.uncertainty, LoadResolution(low.lambda))
+    Dim tolerance As Double, coordinateTolerance As Double
     tolerance = mLambdaTolerance
-    If high.lambda >= 0.95 And low.lambda <= 1.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
+    If GeomMin(low.lambda, high.lambda) <= 1.05 And GeomMax(low.lambda, high.lambda) >= 0.95 Then _
+        tolerance = GeomMin(tolerance, NEAR_ONE_TOLERANCE)
+    coordinateTolerance = (high.coordinate - low.coordinate) * MIN_STEP_RATIO ' Плато lambda тоже требует локализации деформации.
+    Dim attempt As Long, field() As Double, ratio As Double
     For attempt = 1 To STEP_LIMIT
-        If high.lambda - low.lambda <= tolerance Then
-            If low.lambda <= 0# Then Exit Function
-            If mLocalPeak > 0# And high.lambda < mBestLambda - mLocalPeakAccuracy Then
-                StopSearch "Арматурный предел достигнут при нагрузке ниже ранее подтверждённого равновесия. Нужна оценка порядка предельных состояний."
-                ResolveSteelCrossing = True
-                Exit Function
-            End If
-            mSteelLow = low.lambda: mSteelHigh = high.lambda: mSteelPoint = point
-            Set mLimitFields = New Collection
-            Dim i As Long
-            For i = 1 To left.HistoryIndex: mLimitFields.Add history.item(i): Next i
-            If Not mTrace Is Nothing Then Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
-            If low.lambda > left.lambda Then
-                mLimitFields.Add field
-                If Not mLimitTrace Is Nothing Then mLimitTrace.Add 1#, low.lambda
-                mLimitResultants = resultants
-            Else
-                mLimitResultants = mCurrentResultants
-            End If
-            mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-                "Достигнута предельная деформация арматуры на возрастающем участке.", _
-                details() & " | Интервал: [" & CStr(mSteelLow) & ", " & CStr(mSteelHigh) & "]"
-            ResolveSteelCrossing = True
+        If high.coordinate - low.coordinate <= coordinateTolerance And Abs(high.lambda - low.lambda) <= tolerance Then
+            eventState.Admissible = low: eventState.Exceeded = high
+            RefineSteelCrossing = True
             Exit Function
         End If
-        probePoint.coordinate = (low.coordinate + high.coordinate) * 0.5
-        If probePoint.coordinate <= low.coordinate Or probePoint.coordinate >= high.coordinate Then Exit Function
-        If Not probe(probePoint, low.lambda, False) Then Exit Function
-        If probePoint.lambda <= low.lambda Or probePoint.lambda >= high.lambda Then
-            mSolver.DiscardStep
-            Exit Function
-        End If
-        If BeyondSteelLimit() Then
-            point = mReinforcement.TrialSteelCriticalPoint: high = probePoint
+        point.coordinate = low.coordinate + 0.5 * (high.coordinate - low.coordinate)
+        If point.coordinate <= low.coordinate Or point.coordinate >= high.coordinate Then Exit Function
+        If Not probe(point, low.lambda, False) Then Exit Function
+        If Not ReadSteelTrialBound(point) Then Exit Function
+        ratio = mReinforcement.TrialSteelUtilization
+        If ratio > 1# Then
+            high = point: eventState.ExceededRatio = ratio
+            eventState.criticalPoint = mReinforcement.TrialSteelCriticalPoint
         Else
-            low = probePoint
-            mSolver.CopyTrial field, resultants
+            low = point: eventState.AdmissibleRatio = ratio
+            mSolver.CopyTrial field, actual
+            mSolver.AcceptStep
+            refined.Add field: multipliers.Add low.lambda
+            If Not probe(high, low.lambda, False) Then Exit Function
+            If Not ReadSteelTrialBound(high) Then Exit Function
+            eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
+            eventState.criticalPoint = mReinforcement.TrialSteelCriticalPoint
+            If eventState.ExceededRatio <= 1# Then Exit Function
         End If
         mSolver.DiscardStep
     Next attempt
+End Function
+
+' Проверяет область поиска и оценивает влияние невязки около единицы.
+Private Function ReadSteelTrialBound(ByRef point As TBranchPoint) As Boolean
+    If point.lambda <= 0# Or point.lambda > mMaximumLambda Then Exit Function
+    point.uncertainty = LoadResolution(point.lambda)
+    If Abs(point.lambda - 1#) <= 0.05 Then
+        Dim uncertainty As Double
+        If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, uncertainty) Then Exit Function
+        point.uncertainty = GeomMax(point.uncertainty, uncertainty)
+    End If
+    ReadSteelTrialBound = True
 End Function
 
 ' Определяет превышение по пробной точке до фиксации истории.
@@ -27603,6 +27681,7 @@ Private Function details() As String
         details = details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
         details = details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
+    If Len(mSteelEventDetails) > 0 Then details = details & " | " & mSteelEventDetails
     If Len(mProbeDetails) > 0 Then details = details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
 
@@ -30240,7 +30319,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledSectionAnalysis
 TYPE: 2
-LINES: 537
+LINES: 541
 ====================================================================================================
 Option Explicit
 
@@ -30442,7 +30521,11 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Else
         low = -1#
         If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
-        If Not controlled Is Nothing Then low = controlled.BestAdmissibleLambda
+        If Not controlled Is Nothing Then
+            low = controlled.BestAdmissibleLambda
+            criticalPoint = controlled.SteelEventPoint
+            If criticalPoint > 0 Then meta.resultComment = meta.resultComment & " " & SteelControlDescription(criticalPoint) & "."
+        End If
         capacity.InitializeCoupledUnresolved meta, loadPath, low
     End If
 End Function
@@ -101967,7 +102050,7 @@ Private Sub TestUltimateMomentTranslationInvariant(ByRef stats As TCapacityTestS
             Set cap = New CCapacitySolver
             TestConfigureCapacity cap
             cap.ConcreteCompressionLimit = -0.0035
-            cap.SteelStrainLimit = 0.025
+            cap.steelStrainLimit = 0.025
             cap.SolveByUltimateLoadPath section, TestProvisionalConcrete(), TestProvisionalSteel(), _
                 targetN, 0#, targetN * props.centroidY, CDbl(loads(index)(0)), _
                 targetN * props.centroidX, CDbl(loads(index)(1))
@@ -102234,7 +102317,7 @@ Private Sub TestZeroAxialForce(ByRef stats As TCapacityTestStats)
     Set cap = New CCapacitySolver
     TestConfigureCapacity cap
     cap.ConcreteCompressionLimit = -0.0006
-    cap.SteelStrainLimit = 0.001
+    cap.steelStrainLimit = 0.001
     cap.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), TestLinearConcrete(), TestLinearSteel(), 0#, -5000000#, 0#
 
     TestAssertTrue stats, "capacity.zeroN.converged", cap.converged
@@ -102287,7 +102370,7 @@ Private Sub TestConcreteLimitState(ByRef stats As TCapacityTestStats)
     Set cap = New CCapacitySolver
     TestConfigureCapacity cap
     cap.ConcreteCompressionLimit = -0.0006
-    cap.SteelStrainLimit = 1#
+    cap.steelStrainLimit = 1#
     cap.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), TestLinearConcrete(), TestLinearSteel(), 0#, -10000000#, 0#
 
     TestAssertTrue stats, "capacity.concreteLimit.converged", cap.converged
@@ -102312,7 +102395,7 @@ Private Sub TestConcreteTensionLimitState(ByRef stats As TCapacityTestStats)
     cap.ConcreteCompressionLimit = -1#
     cap.ConcreteTensionLimit = 0.00000001
     cap.ConcreteTensionLimitEnabled = True
-    cap.SteelStrainLimit = 1#
+    cap.steelStrainLimit = 1#
     cap.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), concrete, TestProvisionalSteel(), -50000#, -5000000#, 0#
 
     TestAssertTrue stats, "capacity.concreteTensionLimit.converged", cap.converged
@@ -102337,7 +102420,7 @@ Private Sub TestConcreteTensionLimitIgnored(ByRef stats As TCapacityTestStats)
     cap.ConcreteCompressionLimit = -1#
     cap.ConcreteTensionLimit = 0.00000001
     cap.ConcreteTensionLimitEnabled = False
-    cap.SteelStrainLimit = 0.00000001
+    cap.steelStrainLimit = 0.00000001
     cap.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), concrete, TestProvisionalSteel(), -50000#, -5000000#, 0#
 
     TestAssertTrue stats, "capacity.concreteTensionLimit.ignore.notTension", cap.limitState <> "ConcreteTensionStrainLimit"
@@ -102356,7 +102439,7 @@ Private Sub TestSteelLimitState(ByRef stats As TCapacityTestStats)
     Set cap = New CCapacitySolver
     TestConfigureCapacity cap
     cap.ConcreteCompressionLimit = -1#
-    cap.SteelStrainLimit = 0.0005
+    cap.steelStrainLimit = 0.0005
     cap.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), TestLinearConcrete(), TestLinearSteel(), 0#, -10000000#, 0#
 
     TestAssertTrue stats, "capacity.steelLimit.converged", cap.converged
@@ -102526,7 +102609,7 @@ Private Sub TestCompareCapacitySolutionStrategys(ByRef stats As TCapacityTestSta
     TestConfigureCapacity loadMethod
     If tightLimits Then
         loadMethod.ConcreteCompressionLimit = -0.0006
-        loadMethod.SteelStrainLimit = 0.001
+        loadMethod.steelStrainLimit = 0.001
     End If
     t0 = Timer
     loadMethod.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), TestProvisionalConcrete(), TestProvisionalSteel(), nValue, mxBase, myBase
@@ -102536,7 +102619,7 @@ Private Sub TestCompareCapacitySolutionStrategys(ByRef stats As TCapacityTestSta
     TestConfigureCapacity strainMethod
     If tightLimits Then
         strainMethod.ConcreteCompressionLimit = -0.0006
-        strainMethod.SteelStrainLimit = 0.001
+        strainMethod.steelStrainLimit = 0.001
     End If
     t0 = Timer
     strainMethod.SolveByUltimateStrain TestBuildGeneratedSectionModel(mesh, rebars), TestProvisionalConcrete(), TestProvisionalSteel(), nValue, mxBase, myBase
@@ -102600,14 +102683,14 @@ Private Sub TestMethodStrainLimitState(ByRef stats As TCapacityTestStats)
     Set loadMethod = New CCapacitySolver
     TestConfigureCapacity loadMethod
     loadMethod.ConcreteCompressionLimit = -0.0006
-    loadMethod.SteelStrainLimit = 1#
+    loadMethod.steelStrainLimit = 1#
     loadMethod.SolveByLoadMultiplier TestBuildGeneratedSectionModel(mesh, rebars), TestLinearConcrete(), TestLinearSteel(), 0#, -10000000#, 0#
 
     Dim strainMethod As CCapacitySolver
     Set strainMethod = New CCapacitySolver
     TestConfigureCapacity strainMethod
     strainMethod.ConcreteCompressionLimit = -0.0006
-    strainMethod.SteelStrainLimit = 1#
+    strainMethod.steelStrainLimit = 1#
     strainMethod.SolveByUltimateStrain TestBuildGeneratedSectionModel(mesh, rebars), TestLinearConcrete(), TestLinearSteel(), 0#, -10000000#, 0#
 
     TestAssertTrue stats, "method.strain_limit.load.converged", loadMethod.converged
@@ -103511,7 +103594,7 @@ End Sub
 ' Это тестовые данные, а не нормативные значения по умолчанию рабочего расчёта.
 Private Sub TestConfigureCapacity(ByVal cap As CCapacitySolver)
     cap.ConcreteCompressionLimit = -0.0015
-    cap.SteelStrainLimit = 0.00175
+    cap.steelStrainLimit = 0.00175
     cap.LambdaTolerance = 0.01
     cap.maxLambda = 64#
     cap.InitialLambdaStep = 1#
@@ -103779,7 +103862,7 @@ Private Sub TestAudit02CapacitySearchBoundary(ByRef stats As TCapacityTestStats)
         Set cap = New CCapacitySolver
         TestConfigureCapacity cap
         cap.ConcreteCompressionLimit = -1#
-        cap.SteelStrainLimit = 0.001
+        cap.steelStrainLimit = 0.001
         cap.maxLambda = 6#
         cap.LambdaTolerance = 0.000001
         cap.SolverToleranceN = 0.01
@@ -103942,7 +104025,7 @@ Private Sub TestAudit02InitialOffsetBoundary(ByRef stats As TCapacityTestStats)
         Set cap = New CCapacitySolver
         TestConfigureCapacity cap
         cap.ConcreteCompressionLimit = -1#
-        cap.SteelStrainLimit = 0.001
+        cap.steelStrainLimit = 0.001
         cap.SolverToleranceN = 0.01
         Dim path As CLoadPathVector
         Set path = New CLoadPathVector
@@ -110065,7 +110148,7 @@ End Sub
 ====================================================================================================
 COMPONENT: modTestCoupledElasticState
 TYPE: 1
-LINES: 3749
+LINES: 3869
 ====================================================================================================
 Option Explicit
 
@@ -110855,6 +110938,126 @@ Public Function RunTestCoupledDeformationControl() As String
 Failed:
     RunTestCoupledDeformationControl = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет достижение предельной деформации арматуры до и после пика N.
+' На нисходящей ветви поздний предел не заменяет больший пройденный максимум.
+Public Function RunTestCoupledDeformationSteelCrossing() As String
+    Dim passed As Long, Failed As Long, report As String
+    On Error GoTo Failed
+    TestCoupledDeformationSteelCrossing 0.00125, 410000#, 396328.125, True, False, passed, Failed, report
+    TestCoupledDeformationSteelCrossing 0.0008, 450000#, 415920#, False, False, passed, Failed, report
+    TestCoupledDeformationSteelCrossing 0.0008, 415920#, 415920#, False, True, passed, Failed, report
+    RunTestCoupledDeformationSteelCrossing = report & "TOTAL_COUPLED_DEFORMATION_STEEL_CROSSING: passed=" & passed & "; failed=" & Failed
+    Exit Function
+Failed:
+    RunTestCoupledDeformationSteelCrossing = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Для прямоугольника 180?120 мм и центрального стержня 100 мм?
+' N = 21500·(30000·? ? 10??·??) + 100·min(200000·?, 100) в Н.
+' После начала текучести постоянное усилие в стержне не сдвигает
+' аналитический максимум N = 440000 Н при ? = 0,001.
+Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double, ByVal designForce As Double, _
+        ByVal crossingForce As Double, ByVal afterPeak As Boolean, ByVal atDesignLoad As Boolean, _
+        ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
+    Const STEEL_AREA As Double = 100#
+    Const NET_CONCRETE_AREA As Double = 21500#
+    Const STEEL_MODULUS As Double = 200000#
+    Const STEEL_YIELD As Double = 100#
+    Const LAMBDA_TOLERANCE As Double = 0.0001
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize STEEL_MODULUS, STEEL_YIELD, STEEL_YIELD, 0#, 0#, steelStrainLimit, steelStrainLimit
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
+    concrete.TestInitialize operators.pointCount
+    concrete.TestUseDescendingAxialLaw
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#: direction(1) = designForce
+    Dim strain As Variant, eps As Double, lambda As Double, previousLambda As Double, initialLambda As Double
+    Dim stress As Double, expected As Double
+    For Each strain In Array(0.0004, 0.0006)
+        eps = CDbl(strain)
+        If Not solver.TryDeformationStep(baseLoad, direction, control, eps, lambda, initialLambda, 0.00000001, 0.00000001, 30) Then _
+            Err.Raise 5, , "Could not seed the analytical branch. " & solver.ResultMeta.diagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        previousLambda = lambda: lambda = initialLambda
+        trace.Add 1#, lambda
+        stress = STEEL_MODULUS * eps
+        If stress > STEEL_YIELD Then stress = STEEL_YIELD
+        expected = (NET_CONCRETE_AREA * (30000# * eps - 10000000000# * eps ^ 3) + STEEL_AREA * stress) / designForce
+        TestExpectNear lambda, expected, 0.00000001, "analytical seed at strain " & CStr(eps), passed, Failed, report
+    Next strain
+
+    Dim branch As New CCoupledDeformationContinuation, meta As CResultMeta
+    branch.trace solver, material, baseLoad, direction, history, previousLambda, lambda, resultants, _
+        1.45, LAMBDA_TOLERANCE, 30, 0.00000001, 0.00000001, trace
+    Set meta = branch.ResultMeta
+    Dim low As Double, high As Double, point As Long, limitFields As Collection
+    expected = crossingForce / designForce
+    TestRecord branch.SteelEventPoint = operators.ConcretePointCount + 1, "central bar controls the localized event", passed, Failed, report
+    If afterPeak Then
+        TestRecord meta.InternalStatus = rsNumericalFailure And meta.resultCode = rcNumericalFailure, _
+            "steel limit after a larger equilibrium keeps the capacity unresolved", passed, Failed, report
+        TestExpectNear branch.BestAdmissibleLambda, 440000# / designForce, 0.001, _
+            "confirmed lower bound agrees with the earlier peak", passed, Failed, report
+        TestRecord Not branch.CopySteelLimit(low, high, point) And Not branch.CopyLimitState(limitFields, resultants), _
+            "late steel limit supplies no governing capacity state", passed, Failed, report
+        TestRecord InStr(1, meta.resultComment, "Достигнута предельная деформация арматуры", vbTextCompare) > 0, _
+            "comment identifies the late steel event: " & meta.resultComment, passed, Failed, report
+        TestRecord InStr(1, meta.diagnosticDetails, "Арматурное событие: lambda до = ", vbTextCompare) > 0 And _
+            InStr(1, meta.diagnosticDetails, "Координата деформации", vbTextCompare) > 0, _
+            "diagnostics resolve the late steel event in deformation coordinates", passed, Failed, report
+    ElseIf atDesignLoad Then
+        TestRecord meta.InternalStatus = rsNumericalFailure And meta.resultCode = rcNumericalFailure, _
+            "event interval containing exact design load stays unresolved", passed, Failed, report
+        TestRecord Not branch.CopySteelLimit(low, high, point) And Not branch.CopyLimitState(limitFields, resultants), _
+            "uncertainty at design load supplies no governing capacity state", passed, Failed, report
+        TestRecord InStr(1, meta.resultComment, "охватывает расчётную нагрузку", vbTextCompare) > 0, _
+            "comment identifies the event near the design load: " & meta.resultComment, passed, Failed, report
+    Else
+        TestRecord meta.InternalStatus = rsCheckFailed And meta.resultCode = rcPhysicalLimitExceeded, _
+            "steel limit before the peak gives a physical failure", passed, Failed, report
+        TestRecord branch.CopySteelLimit(low, high, point), "rising steel limit has a bracket", passed, Failed, report
+        TestRecord low <= expected + 0.00000001 And high >= expected - 0.00000001 And high - low <= LAMBDA_TOLERANCE, _
+            "rising steel bracket contains the independent analytical load", passed, Failed, report
+        TestRecord point = operators.ConcretePointCount + 1, "central bar controls the rising steel limit", passed, Failed, report
+        If branch.CopyLimitState(limitFields, resultants) Then
+            field = limitFields(limitFields.count)
+            TestExpectNear resultants(1), low * designForce, 0.01, "saved rising-limit equilibrium", passed, Failed, report
+            TestRecord field(1) <= steelStrainLimit + 0.0000000001 And field(1) >= steelStrainLimit - 0.000001, _
+                "saved field is within the admissible side of the strain interval", passed, Failed, report
+        Else
+            TestRecord False, "rising steel limit has no saved state", passed, Failed, report
+        End If
+    End If
+    Dim saved As CCoupledLoadTrace, offsetFraction As Double, tracedLambda As Double
+    Set saved = branch.SavedTrace
+    If saved Is Nothing Then
+        TestRecord False, "traced branch is missing", passed, Failed, report
+    ElseIf saved.count <= 2 Then
+        TestRecord False, "traced branch contains only the seed fields", passed, Failed, report
+    Else
+        saved.ReadPoint saved.count, offsetFraction, tracedLambda
+        TestExpectNear tracedLambda, expected, LAMBDA_TOLERANCE + 0.00000001, "trace ends at the refined crossing", passed, Failed, report
+        TestRecord offsetFraction = 1# And (afterPeak And tracedLambda >= expected - 0.00000001 Or _
+            Not afterPeak And tracedLambda <= expected + 0.00000001), "trace retains the admissible side of the crossing", passed, Failed, report
+    End If
+    TestRecord material.AcceptedSteelUtilization <= 1# + 0.0000000001, "no inadmissible material state committed", passed, Failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет направленное замещение бетона, выбор разных классов и откат стали.
@@ -142484,7 +142687,7 @@ Private Sub TestConfigureBaselineCapacity(ByVal cap As CCapacitySolver)
     cap.SolverBaseLoadSteps = 1
     cap.SolverMaxIterations = 60
     cap.ConcreteCompressionLimit = -0.0035
-    cap.SteelStrainLimit = 0.025
+    cap.steelStrainLimit = 0.025
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

@@ -789,6 +789,126 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет достижение предельной деформации арматуры до и после пика N.
+' На нисходящей ветви поздний предел не заменяет больший пройденный максимум.
+Public Function RunTestCoupledDeformationSteelCrossing() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    TestCoupledDeformationSteelCrossing 0.00125, 410000#, 396328.125, True, False, passed, failed, report
+    TestCoupledDeformationSteelCrossing 0.0008, 450000#, 415920#, False, False, passed, failed, report
+    TestCoupledDeformationSteelCrossing 0.0008, 415920#, 415920#, False, True, passed, failed, report
+    RunTestCoupledDeformationSteelCrossing = report & "TOTAL_COUPLED_DEFORMATION_STEEL_CROSSING: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledDeformationSteelCrossing = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Для прямоугольника 180×120 мм и центрального стержня 100 мм²
+' N = 21500·(30000·ε − 10¹⁰·ε³) + 100·min(200000·ε, 100) в Н.
+' После начала текучести постоянное усилие в стержне не сдвигает
+' аналитический максимум N = 440000 Н при ε = 0,001.
+Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double, ByVal designForce As Double, _
+        ByVal crossingForce As Double, ByVal afterPeak As Boolean, ByVal atDesignLoad As Boolean, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const STEEL_AREA As Double = 100#
+    Const NET_CONCRETE_AREA As Double = 21500#
+    Const STEEL_MODULUS As Double = 200000#
+    Const STEEL_YIELD As Double = 100#
+    Const LAMBDA_TOLERANCE As Double = 0.0001
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize STEEL_MODULUS, STEEL_YIELD, STEEL_YIELD, 0#, 0#, steelStrainLimit, steelStrainLimit
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    concrete.TestInitialize operators.PointCount
+    concrete.TestUseDescendingAxialLaw
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#: direction(1) = designForce
+    Dim strain As Variant, eps As Double, lambda As Double, previousLambda As Double, initialLambda As Double
+    Dim stress As Double, expected As Double
+    For Each strain In Array(0.0004, 0.0006)
+        eps = CDbl(strain)
+        If Not solver.TryDeformationStep(baseLoad, direction, control, eps, lambda, initialLambda, 1E-8, 1E-8, 30) Then _
+            Err.Raise 5, , "Could not seed the analytical branch. " & solver.ResultMeta.DiagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        previousLambda = lambda: lambda = initialLambda
+        trace.Add 1#, lambda
+        stress = STEEL_MODULUS * eps
+        If stress > STEEL_YIELD Then stress = STEEL_YIELD
+        expected = (NET_CONCRETE_AREA * (30000# * eps - 1E+10# * eps ^ 3) + STEEL_AREA * stress) / designForce
+        TestExpectNear lambda, expected, 1E-8, "analytical seed at strain " & CStr(eps), passed, failed, report
+    Next strain
+
+    Dim branch As New CCoupledDeformationContinuation, meta As CResultMeta
+    branch.Trace solver, material, baseLoad, direction, history, previousLambda, lambda, resultants, _
+        1.45, LAMBDA_TOLERANCE, 30, 1E-8, 1E-8, trace
+    Set meta = branch.ResultMeta
+    Dim low As Double, high As Double, point As Long, limitFields As Collection
+    expected = crossingForce / designForce
+    TestRecord branch.SteelEventPoint = operators.ConcretePointCount + 1, "central bar controls the localized event", passed, failed, report
+    If afterPeak Then
+        TestRecord meta.InternalStatus = rsNumericalFailure And meta.ResultCode = rcNumericalFailure, _
+            "steel limit after a larger equilibrium keeps the capacity unresolved", passed, failed, report
+        TestExpectNear branch.BestAdmissibleLambda, 440000# / designForce, 0.001, _
+            "confirmed lower bound agrees with the earlier peak", passed, failed, report
+        TestRecord Not branch.CopySteelLimit(low, high, point) And Not branch.CopyLimitState(limitFields, resultants), _
+            "late steel limit supplies no governing capacity state", passed, failed, report
+        TestRecord InStr(1, meta.ResultComment, "Достигнута предельная деформация арматуры", vbTextCompare) > 0, _
+            "comment identifies the late steel event: " & meta.ResultComment, passed, failed, report
+        TestRecord InStr(1, meta.DiagnosticDetails, "Арматурное событие: lambda до = ", vbTextCompare) > 0 And _
+            InStr(1, meta.DiagnosticDetails, "Координата деформации", vbTextCompare) > 0, _
+            "diagnostics resolve the late steel event in deformation coordinates", passed, failed, report
+    ElseIf atDesignLoad Then
+        TestRecord meta.InternalStatus = rsNumericalFailure And meta.ResultCode = rcNumericalFailure, _
+            "event interval containing exact design load stays unresolved", passed, failed, report
+        TestRecord Not branch.CopySteelLimit(low, high, point) And Not branch.CopyLimitState(limitFields, resultants), _
+            "uncertainty at design load supplies no governing capacity state", passed, failed, report
+        TestRecord InStr(1, meta.ResultComment, "охватывает расчётную нагрузку", vbTextCompare) > 0, _
+            "comment identifies the event near the design load: " & meta.ResultComment, passed, failed, report
+    Else
+        TestRecord meta.InternalStatus = rsCheckFailed And meta.ResultCode = rcPhysicalLimitExceeded, _
+            "steel limit before the peak gives a physical failure", passed, failed, report
+        TestRecord branch.CopySteelLimit(low, high, point), "rising steel limit has a bracket", passed, failed, report
+        TestRecord low <= expected + 1E-8 And high >= expected - 1E-8 And high - low <= LAMBDA_TOLERANCE, _
+            "rising steel bracket contains the independent analytical load", passed, failed, report
+        TestRecord point = operators.ConcretePointCount + 1, "central bar controls the rising steel limit", passed, failed, report
+        If branch.CopyLimitState(limitFields, resultants) Then
+            field = limitFields(limitFields.Count)
+            TestExpectNear resultants(1), low * designForce, 0.01, "saved rising-limit equilibrium", passed, failed, report
+            TestRecord field(1) <= steelStrainLimit + 1E-10 And field(1) >= steelStrainLimit - 0.000001, _
+                "saved field is within the admissible side of the strain interval", passed, failed, report
+        Else
+            TestRecord False, "rising steel limit has no saved state", passed, failed, report
+        End If
+    End If
+    Dim saved As CCoupledLoadTrace, offsetFraction As Double, tracedLambda As Double
+    Set saved = branch.SavedTrace
+    If saved Is Nothing Then
+        TestRecord False, "traced branch is missing", passed, failed, report
+    ElseIf saved.Count <= 2 Then
+        TestRecord False, "traced branch contains only the seed fields", passed, failed, report
+    Else
+        saved.ReadPoint saved.Count, offsetFraction, tracedLambda
+        TestExpectNear tracedLambda, expected, LAMBDA_TOLERANCE + 1E-8, "trace ends at the refined crossing", passed, failed, report
+        TestRecord offsetFraction = 1# And (afterPeak And tracedLambda >= expected - 1E-8 Or _
+            Not afterPeak And tracedLambda <= expected + 1E-8), "trace retains the admissible side of the crossing", passed, failed, report
+    End If
+    TestRecord material.AcceptedSteelUtilization <= 1# + 1E-10, "no inadmissible material state committed", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет направленное замещение бетона, выбор разных классов и откат стали.
 ' Бетон здесь аналитический, чтобы независимо вычислить поправки.
 Public Function RunTestCoupledReinforcedResponse() As String
