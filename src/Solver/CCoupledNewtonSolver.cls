@@ -510,7 +510,7 @@ Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, 
 End Function
 
 ' При неизменной принятой истории берёт две пробные касательные вдоль Bp·d.
-' Базовая проба пересчитывается после возмущений и сохраняет полную историю.
+' Возмущения сохраняют отклик и готовые столбцы базовой деформации.
 Private Sub TakeGradientProbes(ByVal point As Long, ByRef field() As Double, _
         ByRef differenceScale As Double, ByRef plusOk As Boolean, ByRef minusOk As Boolean)
     Dim gradient(1 To COMPONENT_COUNT) As Double, perturbed(1 To COMPONENT_COUNT) As Double
@@ -524,11 +524,11 @@ Private Sub TakeGradientProbes(ByVal point As Long, ByRef field() As Double, _
     For i = 1 To COMPONENT_COUNT
         perturbed(i) = mPointStrain(i) + (gradient(i) / magnitude) * GRADIENT_DIFFERENCE_STEP
     Next i
-    plusOk = mResponse.EvaluatePoint(point, perturbed, perturbedStress, mPlusTangent) = sfcNone
+    plusOk = mResponse.EvaluatePoint(point, perturbed, perturbedStress, mPlusTangent, recordTrial:=False) = sfcNone
     For i = 1 To COMPONENT_COUNT
         perturbed(i) = mPointStrain(i) - (gradient(i) / magnitude) * GRADIENT_DIFFERENCE_STEP
     Next i
-    minusOk = mResponse.EvaluatePoint(point, perturbed, perturbedStress, mMinusTangent) = sfcNone
+    minusOk = mResponse.EvaluatePoint(point, perturbed, perturbedStress, mMinusTangent, recordTrial:=False) = sfcNone
 End Sub
 
 ' На гладком материальном участке смешанные производные напряжений

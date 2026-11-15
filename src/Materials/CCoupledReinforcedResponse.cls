@@ -110,28 +110,32 @@ End Property
 ' берётся у геометрических операторов и здесь не учитывается повторно.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, _
-        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
-    If point = 1 Then
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
+        Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
+    If point = 1 And recordTrial Then
         mTrialSteelUtilization = 0#: mTrialSteelPoint = 0
         mTrialTransverseUtilization = 0#: mTrialTransversePoint = 0
     End If
-    ICoupledPointResponse_EvaluatePoint = mConcrete.EvaluatePoint(point, strain, stress, tangent, tangentMode)
+    ICoupledPointResponse_EvaluatePoint = mConcrete.EvaluatePoint(point, strain, stress, tangent, tangentMode, recordTrial)
     If ICoupledPointResponse_EvaluatePoint <> sfcNone Or point < mFirstSteel Then Exit Function
     Dim j As Long, k As Long, axialStrain As Double, axialStress As Double, axialTangent As Double
-    Dim utilization As Double
+    Dim utilization As Double, plastic As Double, backstress As Double
     For j = 1 To COMPONENT_COUNT
         axialStrain = axialStrain + mDirection(j, point) * strain(j)
     Next j
     mSteel(point).EvaluateTrial axialStrain, mPlastic(point, mAcceptedBuffer), mBackstress(point, mAcceptedBuffer), _
-        axialStress, axialTangent, mPlastic(point, mTrialBuffer), mBackstress(point, mTrialBuffer)
-    mAxialStress(point, mTrialBuffer) = axialStress
-    utilization = mSteel(point).StrainUtilization(axialStrain)
-    If utilization > mTrialSteelUtilization Then
-        mTrialSteelUtilization = utilization: mTrialSteelPoint = point
-    End If
-    If point >= mFirstTransverse Then
-        If utilization > mTrialTransverseUtilization Or mTrialTransversePoint = 0 Then
-            mTrialTransverseUtilization = utilization: mTrialTransversePoint = point
+        axialStress, axialTangent, plastic, backstress
+    If recordTrial Then
+        mPlastic(point, mTrialBuffer) = plastic: mBackstress(point, mTrialBuffer) = backstress
+        mAxialStress(point, mTrialBuffer) = axialStress
+        utilization = mSteel(point).StrainUtilization(axialStrain)
+        If utilization > mTrialSteelUtilization Then
+            mTrialSteelUtilization = utilization: mTrialSteelPoint = point
+        End If
+        If point >= mFirstTransverse Then
+            If utilization > mTrialTransverseUtilization Or mTrialTransversePoint = 0 Then
+                mTrialTransverseUtilization = utilization: mTrialTransversePoint = point
+            End If
         End If
     End If
     For j = 1 To COMPONENT_COUNT

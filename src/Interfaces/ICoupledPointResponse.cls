@@ -20,9 +20,11 @@ Option Explicit
 ' Напряжения в МПа, вектор и матрица в порядке xx, yy, zz, xy, xz, yz.
 ' Неуспешная материальная проба не меняет принятое состояние.
 ' При ограниченном режиме вызывающий использует только запрошенные столбцы.
+' При recordTrial = False возмущение не заменяет базовую пробу и её касательную.
 Public Function EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, _
-        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
+        Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
 End Function
 
 ' Принимает полностью вычисленный пробный массив. Реализация публикует

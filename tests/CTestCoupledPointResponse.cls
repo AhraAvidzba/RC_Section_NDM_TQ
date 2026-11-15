@@ -64,7 +64,8 @@ End Property
 ' Отрицательные параметры для провокации отказа в закон не вводятся.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, _
-        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
+        Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
     Const MODULUS As Double = 30000#
     Dim j As Long, k As Long, e As Double
     For j = 1 To 6
@@ -76,10 +77,11 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     e = strain(3)
     stress(3) = stress(3) + mCubic * e ^ 3
     tangent(3, 3) = tangent(3, 3) + 3# * mCubic * e ^ 2
-    mTrialPeak(point) = mAcceptedPeak(point)
-    If Abs(e) > mTrialPeak(point) Then mTrialPeak(point) = Abs(e)
+    Dim peak As Double: peak = mAcceptedPeak(point)
+    If Abs(e) > peak Then peak = Abs(e)
+    If recordTrial Then mTrialPeak(point) = peak
     If mFail And point = 2 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
-    If mMaximumIncrement > 0# And mTrialPeak(point) - mAcceptedPeak(point) > mMaximumIncrement Then _
+    If mMaximumIncrement > 0# And peak - mAcceptedPeak(point) > mMaximumIncrement Then _
         ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
 End Function
 

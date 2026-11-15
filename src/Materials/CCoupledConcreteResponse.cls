@@ -98,7 +98,8 @@ End Sub
 ' того же принятого состояния, без изменения пробной истории.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
         ByRef stress() As Double, ByRef tangent() As Double, _
-        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull) As ESolverFailureCode
+        Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
+        Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
     Dim updated As TConcreteHistory, virginElastic As Boolean, cachedMode As ECoupledTangentMode
     Dim sameTrial As Boolean, i As Long, j As Long
     cachedMode = ctmStressOnly
@@ -108,7 +109,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         For i = 1 To N_COMPONENTS: stress(i) = updated.Stress(i): Next i
         cachedMode = mCachedMode(point)
     Else
-        mCachedEpoch(point) = 0
+        If recordTrial Then mCachedEpoch(point) = 0 ' Касательная базового поля остаётся пригодной после возмущения.
         If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
     End If
     If tangentMode = ctmStressOnly Then GoTo StoreTrial
@@ -119,9 +120,10 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
             End If
         Next j
     Else
-        If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode) Then GoTo Failure
+        If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode, recordTrial) Then GoTo Failure
     End If
 StoreTrial:
+    If Not recordTrial Then Exit Function
     mHistory(point, mTrial) = updated
     If Not virginElastic Then
         mCachedEpoch(point) = mTrialEpoch
@@ -145,9 +147,11 @@ Private Function MatchesNonlinearTrial(ByVal point As Long, ByRef strain() As Do
 End Function
 
 ' Сохраняет готовые столбцы при переходе от невязки к полной касательной.
-' Все недостающие разности вычисляются от той же принятой истории.
+' Все недостающие разности вычисляются от той же принятой истории. При
+' возмущении найденные столбцы не заменяют столбцы базовой деформации.
 Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double, _
-        ByRef tangent() As Double, ByVal mode As ECoupledTangentMode, ByVal cachedMode As ECoupledTangentMode) As Boolean
+        ByRef tangent() As Double, ByVal mode As ECoupledTangentMode, ByVal cachedMode As ECoupledTangentMode, _
+        ByVal recordTrial As Boolean) As Boolean
     Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
     Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
     Dim scratch As TConcreteHistory, i As Long, j As Long, gradientColumn As Boolean
@@ -177,7 +181,7 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
                     Else
                         tangent(i, j) = (stress(i) - minus(i)) / delta
                     End If
-                    mCachedTangent(i, j, point) = tangent(i, j)
+                    If recordTrial Then mCachedTangent(i, j, point) = tangent(i, j)
                 Next i
             End If
         End If

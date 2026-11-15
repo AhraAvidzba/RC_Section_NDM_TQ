@@ -835,8 +835,14 @@ Public Function RunTestCoupledReinforcedResponse() As String
     Next point
     TestExpectNear material.TrialSteelUtilization, 0.004 / 0.025, 1E-10, "maximum steel trial utilization", passed, failed, report
     TestRecord material.AcceptedSteelUtilization = 0#, "trial leaves accepted utilization untouched", passed, failed, report
+    strain(1) = 0.03 ' Возмущение с превышением поперечного предела не записывается в базовое состояние.
+    resultCode = response.EvaluatePoint(firstHoop, strain, stress, tangent, recordTrial:=False)
+    TestRecord resultCode = sfcNone And material.TrialSteelCriticalPoint = firstRebar And _
+        material.TrialSteelUtilization = 0.004 / 0.025, "directional probe leaves the base steel limit intact", passed, failed, report
+    strain(1) = 0.003
     response.AcceptTrial
     TestExpectNear material.AcceptedSteelUtilization, 0.004 / 0.025, 1E-10, "accepted utilization", passed, failed, report
+    TestExpectNear material.AcceptedSteelStress(firstHoop), 243.6, 1E-10, "accepted hoop stress belongs to the base trial", passed, failed, report
 
     strain(3) = 0#: resultCode = response.EvaluatePoint(firstRebar, strain, stress, tangent)
     TestRecord resultCode = sfcNone And Abs(stress(3)) > 300#, "unloading remembers accepted plastic history", passed, failed, report
@@ -1142,7 +1148,15 @@ Public Function RunTestCoupledConcreteResponse() As String
     strain(6) = 0#
     status = response.EvaluatePoint(2, strain, stress, tangent)
     TestRecord status = sfcNone, "other concrete location remains elastic", passed, failed, report
+    strain(6) = 0.00091
+    status = response.EvaluatePoint(1, strain, stress, tangent, recordTrial:=False)
+    TestRecord status = sfcNone And stress(6) <> base(6), "directional probe returns the tensile-shear perturbation", passed, failed, report
     response.AcceptTrial
+    material.CopyAcceptedStress 1, stress
+    For i = 1 To 6
+        If stress(i) <> base(i) Then Exit For
+    Next i
+    TestRecord i = 7, "accepted concrete stress is unchanged by the directional probe", passed, failed, report
     material.AcceptedPointDamage 1, et, ec
     TestRecord et > 0# And et < 1# And ec > 0# And ec < 1#, _
         "both histories advance in shear " & CStr(et) & " " & CStr(ec), passed, failed, report
