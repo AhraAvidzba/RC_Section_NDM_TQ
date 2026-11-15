@@ -21,6 +21,8 @@ Private Const GAUGE_COUNT As Long = 4
 Private Const MIN_FRACTION As Double = 0.0078125
 Private Const MIN_PROGRESS As Double = 0.0001
 Private Const GRADIENT_DIFFERENCE_STEP As Double = 0.0000006 ' Амплитуда возмущения максимальной компоненты деформации.
+Private Const LOCAL_GRADIENT_DIFFERENCE_STEP As Double = 0.00000000025 ' Амплитуда пробы внутри перехода разностной материальной касательной.
+Private Const GRADIENT_TANGENT_CHANGE_RATIO As Double = 0.1 ' Изменение касательной в долях опорного модуля для выбора линеаризации.
 
 Private mSection As CCoupledElasticState
 Private mResponse As ICoupledPointResponse
@@ -44,6 +46,7 @@ Private mDegreeCount As Long, mPointCount As Long, mGaugeStart As Long
 Private mIterations As Long, mEvaluations As Long, mMaterialPoint As Long
 Private mMaterialFailures As Long, mLastFailedPoint As Long
 Private mGradientBuilds As Long
+Private mLocalGradientBuilds As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
 
@@ -170,6 +173,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mMeta.Clear
     mCandidateReady = False
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
+    mLocalGradientBuilds = 0
     mMaterialFailures = 0: mLastFailedPoint = 0
     mLastNorm = 0#: mMinimumPivot = 0#
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
@@ -502,11 +506,63 @@ Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, 
                 mMaterialFailures = mMaterialFailures + 1: mLastFailedPoint = point
                 Exit Function
             End If
-            AddGradientDerivative point, differenceScale, plusOk, minusOk
+            If TryLocalGradientDerivative(point, field, plusOk, minusOk) Then
+                mLocalGradientBuilds = mLocalGradientBuilds + 1
+                mSection.AddPointGradientTangent point, mGradientTangent, mMatrix
+            Else
+                AddGradientDerivative point, differenceScale, plusOk, minusOk
+            End If
         End If
     Next point
     mMaterialPoint = 0
     Evaluate = True
+End Function
+
+' При резком изменении касательной бетона на деформационном шаге уточняет
+' производную фактического Dg по деформации. В g входят zz, xz и yz.
+' Каждая проба читает ту же принятую историю и сохраняет базовый отклик.
+Private Function TryLocalGradientDerivative(ByVal point As Long, ByRef field() As Double, _
+        ByVal plusOk As Boolean, ByVal minusOk As Boolean) As Boolean
+    If Not mControlActive Or point > mSection.ConcretePointCount Then Exit Function
+    If Not plusOk Or Not minusOk Then Exit Function
+    If Not HasLargeGradientTangentChange() Then Exit Function
+
+    Dim gradient(1 To COMPONENT_COUNT) As Double, strain(1 To COMPONENT_COUNT) As Double
+    Dim plusTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
+    Dim minusTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
+    Dim stress(1 To COMPONENT_COUNT) As Double, perturbation As Double
+    Dim row As Long, column As Long
+    mSection.AxialGradientAtPoint point, field, gradient
+    For column = 1 To COMPONENT_COUNT: strain(column) = mPointStrain(column): Next column
+    For column = 1 To COMPONENT_COUNT
+        perturbation = LOCAL_GRADIENT_DIFFERENCE_STEP * (1# + Abs(strain(column)))
+        strain(column) = mPointStrain(column) + perturbation
+        If mResponse.EvaluatePoint(point, strain, stress, plusTangent, ctmAxialGradient, recordTrial:=False) <> sfcNone Then Exit Function
+        strain(column) = mPointStrain(column) - perturbation
+        If mResponse.EvaluatePoint(point, strain, stress, minusTangent, ctmAxialGradient, recordTrial:=False) <> sfcNone Then Exit Function
+        strain(column) = mPointStrain(column)
+        For row = 1 To COMPONENT_COUNT
+            mGradientTangent(row, column) = ((plusTangent(row, 3) - minusTangent(row, 3)) * gradient(3) + _
+                (plusTangent(row, 5) - minusTangent(row, 5)) * gradient(5) + _
+                (plusTangent(row, 6) - minusTangent(row, 6)) * gradient(6)) / (2# * perturbation)
+        Next row
+    Next column
+    TryLocalGradientDerivative = True
+End Function
+
+' Сравнивает успешные касательные широкой пробы вдоль Bp·d. Порог
+' применяется при сборке поправки Ньютона.
+Private Function HasLargeGradientTangentChange() As Boolean
+    Dim row As Long, column As Long, threshold As Double
+    threshold = GRADIENT_TANGENT_CHANGE_RATIO * mReferenceModulus
+    For column = 1 To COMPONENT_COUNT
+        For row = 1 To COMPONENT_COUNT
+            If Abs(mPlusTangent(row, column) - mMinusTangent(row, column)) > threshold Then
+                HasLargeGradientTangentChange = True
+                Exit Function
+            End If
+        Next row
+    Next column
 End Function
 
 ' При неизменной принятой истории берёт две пробные касательные вдоль Bp·d.
@@ -619,4 +675,6 @@ Private Function DiagnosticSummary() As String
     If mMaterialFailures > 0 Then DiagnosticSummary = DiagnosticSummary & "; отказов материала: " & CStr(mMaterialFailures) & _
         "; последняя точка отказа: " & CStr(mLastFailedPoint)
     If mGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & "; уточнений касательной: " & CStr(mGradientBuilds)
+    If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
+        "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)
 End Function
