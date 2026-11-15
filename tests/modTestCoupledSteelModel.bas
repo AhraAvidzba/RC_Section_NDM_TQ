@@ -49,6 +49,52 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Публикует напряжения двух классов при одной предписанной истории.
+' Строки проб после отказа сохраняют историю последнего принятого шага.
+' Эталон Steel01 применим к симметричному кинематическому упрочнению.
+Public Function RunTestCoupledSteelOpenSees() As String
+    On Error GoTo Failed
+    Dim report As String
+    report = TestSteelOpenSeesHistory("L500", 500#) & TestSteelOpenSeesHistory("H240", 240#)
+    RunTestCoupledSteelOpenSees = report & "TOTAL_COUPLED_STEEL_OPENSEES: passed=2; failed=0"
+    Exit Function
+Failed:
+    RunTestCoupledSteelOpenSees = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Применяет чередование принятия и проб на начальной и обратной ветвях.
+' Строки на границе текучести исключены для однозначного сравнения касательной.
+Private Function TestSteelOpenSeesHistory(ByVal grade As String, ByVal yieldStress As Double) As String
+    Const ELASTIC_MODULUS As Double = 200000#
+    Const HARDENING_SLOPE As Double = 2000#
+    Dim steel As New CCoupledSteelModel
+    steel.Initialize ELASTIC_MODULUS, yieldStress, yieldStress, HARDENING_SLOPE, HARDENING_SLOPE, 0.05, 0.05
+
+    Dim strains As Variant
+    strains = Array(0#, 0.0006, 0.0016, 0.0032, 0.0085, 0.0074, 0.025, 0.0074, 0.0057, 0.001, _
+                    -0.0023, -0.0058, -0.0095, -0.0088, -0.026, -0.0088, -0.0047, 0.0009, _
+                    0.0042, 0.0101, 0.027, 0.0063, -0.0067)
+    Dim lines As String
+    lines = "STEEL_LAW|" & grade & "|" & Trim$(Str$(ELASTIC_MODULUS)) & "|" & Trim$(Str$(yieldStress)) & _
+        "|" & Trim$(Str$(HARDENING_SLOPE)) & vbCrLf
+    Dim stepIndex As Long, accepted As Boolean, acceptance As String, strain As Double
+    Dim plastic As Double, backstress As Double, stress As Double, tangent As Double
+    Dim trialPlastic As Double, trialBackstress As Double
+    For stepIndex = LBound(strains) To UBound(strains)
+        accepted = Not (stepIndex >= 5 And stepIndex <= 7 Or stepIndex >= 13 And stepIndex <= 15 Or stepIndex = 20)
+        acceptance = "Probe": If accepted Then acceptance = "Commit"
+        strain = CDbl(strains(stepIndex))
+        steel.EvaluateTrial strain, plastic, backstress, stress, tangent, trialPlastic, trialBackstress
+        lines = lines & "STEEL_STEP|" & grade & "|" & CStr(stepIndex) & "|" & acceptance & "|" & _
+            Trim$(Str$(strain)) & "|" & Trim$(Str$(stress)) & "|" & Trim$(Str$(tangent)) & "|" & _
+            Trim$(Str$(trialPlastic)) & "|" & Trim$(Str$(trialBackstress)) & vbCrLf
+        If accepted Then plastic = trialPlastic: backstress = trialBackstress
+    Next stepIndex
+    TestSteelOpenSeesHistory = lines
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Возвращает понятное имя и счётчики для каждого сравнения.
 Private Sub TestRecord(ByVal ok As Boolean, ByVal name As String, _
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)
