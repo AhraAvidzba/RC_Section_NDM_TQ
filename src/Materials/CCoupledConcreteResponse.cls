@@ -42,6 +42,7 @@ Private Const STRAIN_PERTURBATION As Double = 0.000000002
 Private Const MIXED_DAMAGE_WEIGHT As Double = 20#
 Private Const MAXIMUM_DAMPING As Double = 0.5
 Private Const MAX_LOCAL_DIVISIONS As Long = 16
+Private Const TENSILE_AXIS_BAND_RATIO As Double = 1E-12 ' Непрерывное сопряжение внутри численной полосы q/fc.
 
 Private mHistory() As TConcreteHistory
 Private mCommitted As Long, mTrial As Long, mPointCount As Long
@@ -54,6 +55,7 @@ Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEn
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
 Private mFrictionMax As Double, mDilationMax As Double
 Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
+Private mApexPotentialOffset As Double ' Эксцентриситет потенциала, умноженный на ft, МПа.
 Private mDeviatorCompliance As Double ' 1/(2G): перевод девиатора напряжений в тензорные деформации.
 
 ' Готовит единственный набор параметров бетона для текущей секции.
@@ -89,6 +91,7 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     mCompression.Initialize fc0, fc, plasticPeak, gc, localizationLength, compressDamage, plasticPeak
     mAlpha = alpha: mGamma = gamma
     mFt = ft: mFc = fc
+    mApexPotentialOffset = eccentricity * ft
     mFrictionMax = friction * GEOM_PI / 180#: mDilationMax = dilation * GEOM_PI / 180#
     mPointCount = pointCount
     ICoupledPointResponse_ClearHistory
@@ -499,8 +502,14 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     highDev = trialHigh - trialMean: midDev = trialMid - trialMean: lowDev = trialLow - trialMean
     Dim mean As Double, plasticMean As Double, plasticFactor As Double
     Dim eHigh As Double, eLow As Double
-    For j = 1 To MATERIAL_ITERATIONS
-        If j > 1 Or Not firstReturnReady Then
+    Dim apexTransition As Boolean
+    For j = 1 To MATERIAL_ITERATIONS + 1 ' После штатного цикла допускается один скалярный возврат.
+        apexTransition = (j > MATERIAL_ITERATIONS)
+        If apexTransition Then
+            If Not TryTensileApexTransition(elastic, committed, trialTrace, trialQ, highDev, lowDev, _
+                    effective, increment, dilationRate, plasticMultiplier, deviatorFactor) Then Exit Function
+            multiplierDivisor = 1#
+        ElseIf j > 1 Or Not firstReturnReady Then
             If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
                     effective, increment, plasticMultiplier, deviatorFactor, multiplierDivisor) Then
                 If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
@@ -532,6 +541,16 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         deltaCompression = nextCompression - compression
         deltaDilation = nextDilation - dilationRate
         residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
+        If apexTransition Then
+            If r <> 1# Or nextCompression <> committed.Compression Then Exit Function
+            If (1# + MIXED_DAMAGE_WEIGHT) * kt < 1# Then Exit Function
+            ' Пластические координаты выведены непосредственно из найденного поля.
+            ' Проверяются заново поверхность и закон с обновлённой историей.
+            If Abs(residual) > YIELD_TOLERANCE_RATIO * cc Or Abs(deltaDilation) > STATE_TOLERANCE Then Exit Function
+            If Not DilationConsistent(Abs(deltaDilation), plasticMultiplier, multiplierDivisor, _
+                    YIELD_TOLERANCE_RATIO * cc / mPressureModulus) Then Exit Function
+            Exit For
+        End If
         If Abs(deltaTension) <= STATE_TOLERANCE * (mFt / mElastic(3, 3) + nextTension) And _
                 Abs(deltaCompression) <= STATE_TOLERANCE * (mFc / mElastic(3, 3) + nextCompression) And _
                 Abs(deltaDilation) <= STATE_TOLERANCE And Abs(residual) <= YIELD_TOLERANCE_RATIO * cc Then
@@ -545,7 +564,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         mTension.Evaluate tension, unusedStress, ct, dt, kt
         mCompression.Evaluate compression, unusedStress, cc, dc, kc
     Next j
-    If j > MATERIAL_ITERATIONS Then Exit Function
+
     fraction = (1# - r * dt) * (1# - dc)
     For i = 1 To N_COMPONENTS
         updated.Plastic(i) = committed.Plastic(i) + increment(i)
@@ -595,7 +614,11 @@ Private Function CurrentDilation(ByVal kt As Double, ByVal kc As Double, ByVal r
     If mixed <= 0# Then Exit Function
     If mixed > 1# Then mixed = 1#
     confine = 1#
-    If q > 1E-12 * mFc Then
+    If q <= 0# Then
+        confine = 1#
+    ElseIf trace > 0# And q < TENSILE_AXIS_BAND_RATIO * mFc Then
+        confine = TensileApexConfinement(trace, q)
+    ElseIf q > TENSILE_AXIS_BAND_RATIO * mFc Or (trace > 0# And q >= TENSILE_AXIS_BAND_RATIO * mFc) Then
         exponent = -(1# + trace / q) * trace / mFc
         If exponent < 0# Then confine = Exp(exponent)
     End If
@@ -609,6 +632,95 @@ Private Function CurrentDilation(ByVal kt As Double, ByVal kc As Double, ByVal r
     sinDilation = (sinCurrentFriction - sinConstantVolume) / (1# - sinCurrentFriction * sinConstantVolume)
     CurrentDilation = sinDilation / Sqr((1# - sinDilation) * (1# + sinDilation))
 End Function
+
+' Сопрягает гидростатическое значение и направленный закон в узкой полосе q.
+' Вес (1-s)^3(1+3s+6s²) имеет нулевые первую и вторую производные на концах.
+' Непрерывное сопряжение — численное допущение модели около оси растяжения.
+Private Function TensileApexConfinement(ByVal trace As Double, ByVal q As Double) As Double
+    Dim s As Double: s = q / (TENSILE_AXIS_BAND_RATIO * mFc)
+    Dim remainder As Double: remainder = 1# - s
+    Dim weight As Double: weight = GeomMin(1#, remainder * remainder * remainder * (1# + s * (3# + 6# * s))) ' Ограничивает ошибку округления веса около s = 0.
+    Dim pressureRatio As Double: pressureRatio = trace / mFc
+    Dim directional As Double
+    If pressureRatio < 1# Then
+        Dim intensityRatio As Double: intensityRatio = q / mFc
+        Dim pressureSquared As Double: pressureSquared = pressureRatio * pressureRatio
+        If pressureSquared < (745# - pressureRatio) * intensityRatio Then _
+            directional = Exp(-pressureRatio - pressureSquared / intensityRatio)
+    End If
+    TensileApexConfinement = weight + (1# - weight) * directional
+End Function
+
+' Ищет локальный возврат внутри полосы после исчерпания обычных итераций.
+' Использует только полностью растянутую ветвь с насыщенной энергией.
+' Защита нижней оценки следа исключает ненулевой направленный член
+' в полосе и сохраняет однозначность скобки для этой ветви.
+Private Function TryTensileApexTransition(ByRef elastic() As Double, ByRef committed As TConcreteHistory, _
+        ByVal trialTrace As Double, ByVal trialQ As Double, ByVal highDeviator As Double, _
+        ByVal lowDeviator As Double, ByRef effective() As Double, ByRef increment() As Double, _
+        ByRef dilation As Double, ByRef multiplier As Double, ByRef factor As Double) As Boolean
+    If trialTrace <= 0# Or trialQ <= TENSILE_AXIS_BAND_RATIO * mFc Or mDilationMax = 0# Then Exit Function
+    If (1# + MIXED_DAMAGE_WEIGHT) * committed.TensionEnergy < 1# Then Exit Function
+    Dim cc As Double: cc = committed.CompressionCohesion
+    Dim beta As Double: beta = cc / committed.TensionCohesion * (1# - mAlpha) - (1# + mAlpha)
+    If beta < 0# Then Exit Function
+    Dim pressureSlope As Double: pressureSlope = mAlpha + beta / 3#
+    If pressureSlope <= 0# Then Exit Function
+    Dim apexTrace As Double: apexTrace = cc * (1# - mAlpha) / pressureSlope
+    Dim traceExcess As Double: traceExcess = trialTrace - apexTrace
+    Dim deviatorSlope As Double: deviatorSlope = (trialQ + beta * highDeviator) / pressureSlope
+    If deviatorSlope <= 0# Then Exit Function
+    Dim bandWidth As Double: bandWidth = TENSILE_AXIS_BAND_RATIO * mFc
+    Dim bandFactor As Double: bandFactor = bandWidth / trialQ
+    If bandFactor <= 0# Or bandFactor >= 1# Then Exit Function
+    Dim minTrace As Double: minTrace = apexTrace - deviatorSlope * bandFactor
+    If minTrace / 3# + bandFactor * lowDeviator <= 7.105427357601E-15 * apexTrace Then Exit Function
+    If minTrace <= mFc * Sqr(746# * TENSILE_AXIS_BAND_RATIO) Then Exit Function ' Направленный множитель должен округляться к нулю во всей скобке.
+    Dim lower As Double
+    If traceExcess < 0# Then lower = -traceExcess / deviatorSlope ' След возврата не должен превысить пробный след.
+    If lower >= bandFactor Then Exit Function
+    Dim trace As Double, volume As Double, requiredFlow As Double, potentialFlow As Double
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, lower, trace, volume, dilation, requiredFlow, potentialFlow
+    If requiredFlow >= potentialFlow Then Exit Function
+    Dim upper As Double: upper = bandFactor
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, upper, trace, volume, dilation, requiredFlow, potentialFlow
+    If requiredFlow <= potentialFlow Then Exit Function
+    Dim iteration As Long
+    For iteration = 1 To 52
+        factor = lower + (upper - lower) * 0.5
+        If factor <= lower Or factor >= upper Then Exit For
+        ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, trace, volume, dilation, requiredFlow, potentialFlow
+        If requiredFlow > potentialFlow Then upper = factor Else lower = factor
+    Next iteration
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, trace, volume, dilation, requiredFlow, potentialFlow
+    If factor <= 0# Or factor >= bandFactor Or volume <= 0# Or dilation <= 0# Then Exit Function
+    Dim returnedQ As Double: returnedQ = factor * trialQ
+    If returnedQ <= 0# Or returnedQ >= bandWidth Then Exit Function
+    If dilation < 1# Then
+        If volume > 1E+308 * dilation Then Exit Function
+    End If
+    multiplier = volume / dilation
+    ' Контроль объёмного приращения по решённому гиперболическому потоку.
+    If Abs(requiredFlow - potentialFlow) * mDeviatorCompliance / factor > YIELD_TOLERANCE_RATIO * cc / mPressureModulus Then Exit Function
+    mReturn.AssembleCorrection elastic, trialTrace, trace, factor, effective, increment
+    TryTensileApexTransition = True
+End Function
+
+' Вычисляет обе стороны уравнения гиперболического потока в масштабе f=q/qtrial.
+' След задаётся растянутой ветвью поверхности, объём — потерей следа.
+Private Sub ApexTransitionFlow(ByRef committed As TConcreteHistory, ByVal trialQ As Double, ByVal apexTrace As Double, _
+        ByVal traceExcess As Double, ByVal deviatorSlope As Double, ByVal factor As Double, ByRef trace As Double, _
+        ByRef volume As Double, ByRef dilation As Double, ByRef requiredFlow As Double, ByRef potentialFlow As Double)
+    Dim traceLoss As Double: traceLoss = deviatorSlope * factor
+    trace = apexTrace - traceLoss
+    volume = (traceExcess + traceLoss) / (3# * mPressureModulus)
+    Dim q As Double: q = trialQ * factor
+    dilation = CurrentDilation(committed.TensionEnergy, committed.CompressionEnergy, 1#, trace, q)
+    Dim offset As Double: offset = dilation * mApexPotentialOffset
+    Dim dev As Double: dev = 0.816496580927726 * q ' Норма девиатора из второго инварианта.
+    requiredFlow = volume * factor / mDeviatorCompliance
+    potentialFlow = (1# - factor) * dilation * Sqr(offset * offset + dev * dev)
+End Sub
 
 ' Проверяет диапазон углов до перевода в радианы.
 Private Function InvalidDilationAngles(ByVal friction As Double, ByVal dilation As Double) As Boolean

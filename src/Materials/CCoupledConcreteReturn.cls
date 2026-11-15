@@ -136,7 +136,17 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
         End If
     End If
 
-    Dim correctedMean As Double, volumetric As Double
+    AssembleCorrection elastic, trace, newTrace, factor, corrected, plasticIncrement
+    deviatorFactor = factor
+    Correct = True
+End Function
+
+' Восстанавливает тензор поправки из следа и доли пробного девиатора.
+' Деформации сдвига инженерные, модуль сдвига задан через 2G.
+Friend Sub AssembleCorrection(ByRef elastic() As Double, ByVal trace As Double, ByVal newTrace As Double, _
+        ByVal factor As Double, ByRef corrected() As Double, ByRef plasticIncrement() As Double)
+    Dim trialMean As Double: trialMean = trace / 3#
+    Dim k As Long, correctedMean As Double, volumetric As Double
     correctedMean = newTrace / 3#
     volumetric = (trace - newTrace) / (9# * mBulk) ' Приращение каждой из трёх нормальных компонент от дилатансии.
     For k = 1 To 3
@@ -145,9 +155,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal 
         plasticIncrement(k) = volumetric + (1# - factor) * (elastic(k) - trialMean) / mTwiceShear
         plasticIncrement(k + 3) = 2# * (1# - factor) * elastic(k + 3) / mTwiceShear
     Next k
-    deviatorFactor = factor
-    Correct = True
-End Function
+End Sub
 
 ' Возвращает малую положительную пробу точно на F=0 на одной гладкой
 ' меридиональной ветви. При вершине, смене знака sigma1 или неопределённом
