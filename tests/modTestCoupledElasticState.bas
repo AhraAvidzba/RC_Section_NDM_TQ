@@ -869,11 +869,11 @@ Public Function RunTestCoupledConcreteReturn() As String
     Dim beta As Double: beta = FC / FT * (1# - ALPHA) - (1# + ALPHA)
     Dim ok As Boolean
     elastic(3) = 1#
-    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
     TestRecord ok And corrected(3) = 1# And multiplier = 0# And increment(3) = 0#, _
         "elastic trial stays unchanged", passed, failed, report
     CoupledElasticTensor E, NU, tensor
-    For caseNo = 1 To 5
+    For caseNo = 1 To 6
         For i = 1 To 6: elastic(i) = 0#: Next i
         dilation = 0.3
         Select Case caseNo
@@ -882,8 +882,10 @@ Public Function RunTestCoupledConcreteReturn() As String
             Case 3: elastic(6) = 10#: dilation = 0#
             Case 4: elastic(1) = 9#: elastic(2) = 9#: elastic(3) = 9#
             Case 5: elastic(1) = -48#: elastic(2) = 5#: elastic(3) = -13#: elastic(4) = 8#: elastic(5) = -11#
+            Case 6
+                elastic(1) = -28#: elastic(2) = -28#: elastic(3) = -28#: elastic(6) = 35#: dilation = 0#
         End Select
-        ok = update.Correct(elastic, FC, FT, FT, dilation, corrected, increment, multiplier)
+        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier)
         TestRecord ok And multiplier > 0#, "return " & CStr(caseNo), passed, failed, report
         If ok Then
             CoupledStressInvariants corrected, trace, q, high, mid, low
@@ -905,10 +907,12 @@ Public Function RunTestCoupledConcreteReturn() As String
                 1E-9, "pure shear analytical return", passed, failed, report
             If caseNo = 4 Then TestExpectNear corrected(1), FC * (1# - ALPHA) / (3# * ALPHA + beta), _
                 1E-9, "hydrostatic analytical return", passed, failed, report
+            If caseNo = 6 Then TestExpectNear corrected(6), (FC * (1# - ALPHA) + 28# * (3# * ALPHA + GAMMA)) / _
+                (Sqr(3#) + GAMMA), 1E-9, "closed-form return crosses to compressive principal branch", passed, failed, report
         End If
     Next caseNo
     For i = 1 To 3: elastic(i) = 9#: elastic(i + 3) = 0#: Next i
-    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
     TestRecord Not ok, "hydrostatic tension without volumetric flow reports inability to return", passed, failed, report
     For i = 1 To 3: elastic(i) = 4.5: Next i
     elastic(6) = 0.025
@@ -917,7 +921,7 @@ Public Function RunTestCoupledConcreteReturn() As String
     apexVolume = (elastic(1) - apexStress) / (E / (1# - 2# * NU))
     For Each smallDilation In Array(0.000001, 1E-170)
         dilation = CDbl(smallDilation)
-        ok = update.Correct(elastic, FC, FT, FT, dilation, corrected, increment, multiplier)
+        ok = TestConcreteReturn(update, elastic, FC, FT, dilation, corrected, increment, multiplier)
         TestRecord ok And multiplier > 0#, "near-apex return for dilation " & CStr(dilation), passed, failed, report
         If ok Then
             TestExpectNear corrected(1), apexStress, 1E-9, "near-apex analytical pressure", passed, failed, report
@@ -926,12 +930,23 @@ Public Function RunTestCoupledConcreteReturn() As String
                 "near-apex engineering shear balance", passed, failed, report
         End If
     Next smallDilation
-    ok = update.Correct(elastic, FC, FT, FT, 0#, corrected, increment, multiplier)
+    ok = TestConcreteReturn(update, elastic, FC, FT, 0#, corrected, increment, multiplier)
     TestRecord Not ok, "near-apex deviator does not enable volumetric flow at zero dilation", passed, failed, report
     RunTestCoupledConcreteReturn = report & "TOTAL_COUPLED_CONCRETE_RETURN: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledConcreteReturn = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Готовит известный тензор упругой пробы для изолированной проверки возврата.
+Private Function TestConcreteReturn(ByVal update As CCoupledConcreteReturn, ByRef elastic() As Double, _
+        ByVal fc As Double, ByVal ft As Double, ByVal dilation As Double, ByRef corrected() As Double, _
+        ByRef increment() As Double, ByRef multiplier As Double) As Boolean
+    Dim trace As Double, q As Double, maximum As Double, middle As Double, minimum As Double, deviatorFactor As Double
+    CoupledStressInvariants elastic, trace, q, maximum, middle, minimum
+    TestConcreteReturn = update.Correct(elastic, trace, q, maximum, fc, ft, ft, dilation, _
+        corrected, increment, multiplier, deviatorFactor)
 End Function
 
 

@@ -18,6 +18,8 @@ Option Explicit
 
 Private Const DEVIATORIC_NORM As Double = 0.816496580927726
 Private Const MAX_ITERATIONS As Long = 64
+Private Const NEWTON_ITERATIONS As Long = 10
+Private Const SCALED_APEX_FACTOR As Double = 0.00000001
 Private Const RELATIVE_YIELD_TOLERANCE As Double = 0.0000000001
 Private mTwiceShear As Double
 Private mBulk As Double
@@ -35,24 +37,25 @@ Friend Sub Initialize(ByVal modulus As Double, ByVal poisson As Double, _
 End Sub
 
 ' Возвращает эффективные напряжения и приращение пластической деформации.
-' Вход elastic уже учитывает ранее принятую пластическую деформацию.
+' Вход elastic учитывает ранее принятую пластическую деформацию.
+' Инварианты этого тензора одинаковы на всех итерациях локальной истории.
 ' Неудача оставляет вызывающему право уменьшить материальный шаг.
-Friend Function Correct(ByRef elastic() As Double, ByVal cc As Double, ByVal ct As Double, _
+Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal q As Double, ByVal principalMax As Double, _
+        ByVal cc As Double, ByVal ct As Double, _
         ByVal ft0 As Double, ByVal dilation As Double, ByRef corrected() As Double, _
-        ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double) As Boolean
+        ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double) As Boolean
     If mBulk <= 0# Or cc <= 0# Or ct <= 0# Or ft0 <= 0# Or dilation < 0# Then _
         Err.Raise 5, "CCoupledConcreteReturn", "Не заданы параметры текущей поверхности бетона."
     Dim beta As Double
     beta = cc / ct * (1# - mAlpha) - (1# + mAlpha)
     If beta < 0# Then Exit Function ' Монотонная скобка требует допустимой геометрии поверхности.
-    Dim trace As Double, q As Double, principalMax As Double, principalMid As Double, principalMin As Double
-    CoupledStressInvariants elastic, trace, q, principalMax, principalMid, principalMin
     Dim tolerance As Double, value As Double, k As Long
     tolerance = RELATIVE_YIELD_TOLERANCE * cc
     value = CoupledBarcelonaYield(trace, q, principalMax, cc, ct, mAlpha, mGamma)
     stepMultiplier = 0#
     If value <= tolerance Then
         For k = 1 To 6: corrected(k) = elastic(k): plasticIncrement(k) = 0#: Next k
+        deviatorFactor = 1#
         Correct = True
         Exit Function
     End If
@@ -71,17 +74,47 @@ Friend Function Correct(ByRef elastic() As Double, ByVal cc As Double, ByVal ct 
             apexPressure = trace
             If CoupledBarcelonaYield(apexPressure, 0#, apexPressure / 3#, cc, ct, mAlpha, mGamma) > tolerance Then Exit Function
         End If
-        For i = 1 To MAX_ITERATIONS
-            factor = (lower + upper) * 0.5
-            Dim radius As Double
-            radius = Sqr(offset * offset + (devLength * factor) ^ 2)
+        Dim radius As Double, offsetSquared As Double, devSquared As Double, traceScale As Double
+        Dim maxPrincipal As Double, branchSlope As Double, traceSlope As Double, yieldSlope As Double, nextFactor As Double
+        Dim scaledOffset As Double, proposed As Double, triedScaledApex As Boolean, solvedScaledApex As Boolean
+        offsetSquared = offset * offset: devSquared = devLength * devLength
+        traceScale = 9# * mBulk * dilation
+        factor = 0.5
+        For i = 1 To NEWTON_ITERATIONS + MAX_ITERATIONS
+            If factor < SCALED_APEX_FACTOR And Not triedScaledApex And offset > 0# Then
+                triedScaledApex = True
+                solvedScaledApex = SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
+                    factor, newTrace, stepMultiplier)
+                If solvedScaledApex Then Exit For
+            End If
+            radius = Sqr(offsetSquared + devSquared * factor * factor)
             stepMultiplier = (1# - factor) / factor * radius / mTwiceShear
-            newTrace = trace - 9# * mBulk * dilation * stepMultiplier
-            value = CoupledBarcelonaYield(newTrace, q * factor, newTrace / 3# + largestDev * factor, cc, ct, mAlpha, mGamma)
+            newTrace = trace - traceScale * stepMultiplier
+            maxPrincipal = newTrace / 3# + largestDev * factor
+            value = CoupledBarcelonaYield(newTrace, q * factor, maxPrincipal, cc, ct, mAlpha, mGamma)
             If Abs(value) <= tolerance Then Exit For
             If value > 0# Then upper = factor Else lower = factor
+            nextFactor = (lower + upper) * 0.5
+            If i <= NEWTON_ITERATIONS Then
+                branchSlope = mGamma
+                If maxPrincipal > 0# Then branchSlope = beta
+                traceSlope = 0#
+                If traceScale > 0# And radius > 0# Then
+                    scaledOffset = offset / factor
+                    traceSlope = (traceScale / mTwiceShear) * (scaledOffset * scaledOffset + devSquared * factor) / radius
+                End If
+                ' Производная числителя F вдоль f = q/qtrial; знак главного напряжения задаёт ветвь.
+                yieldSlope = q + branchSlope * largestDev + (mAlpha + branchSlope / 3#) * traceSlope
+                If yieldSlope > 0# Then
+                    proposed = factor - value * (1# - mAlpha) / yieldSlope
+                    If proposed > lower And proposed < upper Then nextFactor = proposed
+                End If
+            End If
+            If nextFactor <= lower Or nextFactor >= upper Then Exit For
+            factor = nextFactor
         Next i
-        If Abs(value) > tolerance Then
+        If Not solvedScaledApex And Abs(value) > tolerance Then
+            If triedScaledApex Then Exit Function
             If Not SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
                     factor, newTrace, stepMultiplier) Then Exit Function
         End If
@@ -96,6 +129,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal cc As Double, ByVal ct 
         plasticIncrement(k) = volumetric + (1# - factor) * (elastic(k) - trialMean) / mTwiceShear
         plasticIncrement(k + 3) = 2# * (1# - factor) * elastic(k + 3) / mTwiceShear
     Next k
+    deviatorFactor = factor
     Correct = True
 End Function
 
@@ -115,20 +149,22 @@ Private Function SolveScaledApex(ByVal trace As Double, ByVal q As Double, ByVal
     Dim bulkToShear As Double: bulkToShear = 9# * mBulk / mTwiceShear
     Dim factorScale As Double: factorScale = bulkToShear * offsetPerDilation / apexDistance
     Dim lower As Double, upper As Double, ratio As Double, bracketed As Boolean, i As Long
-    Dim scaledFactor As Double, radius As Double, value As Double, scaledVolume As Double
+    Dim scaledFactor As Double, trialFactor As Double, trialTrace As Double, radius As Double
+    Dim value As Double, scaledVolume As Double
     ratio = 1#
     For i = 1 To MAX_ITERATIONS
         scaledFactor = (ratio * factorScale) * dilation ' f/dilation конечен и после потери самого f при округлении.
-        factor = scaledFactor * dilation
-        If factor >= 1# Then
-            factor = 1#: scaledVolume = 0#: newTrace = trace
+        trialFactor = scaledFactor * dilation
+        If trialFactor >= 1# Then
+            trialFactor = 1#: scaledVolume = 0#: trialTrace = trace
         Else
             radius = Sqr(offsetPerDilation * offsetPerDilation + (DEVIATORIC_NORM * q * scaledFactor) ^ 2)
-            scaledVolume = (1# - factor) * radius / (mTwiceShear * (ratio * factorScale)) ' Произведение λ·dilation в деформациях.
-            newTrace = trace - 9# * mBulk * scaledVolume
+            scaledVolume = (1# - trialFactor) * radius / (mTwiceShear * (ratio * factorScale)) ' Произведение λ·dilation в деформациях.
+            trialTrace = trace - 9# * mBulk * scaledVolume
         End If
-        value = CoupledBarcelonaYield(newTrace, q * factor, newTrace / 3# + largestDev * factor, cc, ct, mAlpha, mGamma)
+        value = CoupledBarcelonaYield(trialTrace, q * trialFactor, trialTrace / 3# + largestDev * trialFactor, cc, ct, mAlpha, mGamma)
         If Abs(value) <= tolerance Then
+            factor = trialFactor: newTrace = trialTrace
             stepMultiplier = scaledVolume / dilation
             SolveScaledApex = True
             Exit Function

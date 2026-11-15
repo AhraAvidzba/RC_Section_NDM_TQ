@@ -48,6 +48,7 @@ Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEn
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
 Private mFrictionMax As Double, mDilationMax As Double
 Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
+Private mDeviatorCompliance As Double ' 1/(2G): перевод девиатора напряжений в тензорные деформации.
 
 ' Готовит единственный набор параметров бетона для текущей секции.
 ' Прочности в МПа, G в Н/мм, характерная длина в мм, углы в градусах.
@@ -72,6 +73,7 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     mReturn.Initialize modulus, poisson, alpha, gamma, eccentricity
     CoupledElasticTensor modulus, poisson, mElastic
     mPressureModulus = modulus / (1# - 2# * poisson)
+    mDeviatorCompliance = 1# / (2# * mElastic(4, 4))
     Set mTension = New CCoupledConcreteEnvelope: Set mCompression = New CCoupledConcreteEnvelope
     Dim halfTension As Double, compressDamage As Double, plasticPeak As Double
     halfTension = Log(2#) * gt / (ft * localizationLength)
@@ -301,7 +303,7 @@ End Sub
 Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
         ByRef updated As TConcreteHistory, ByRef apparent() As Double, ByRef virginElastic As Boolean) As Boolean
     Dim elastic(1 To N_COMPONENTS) As Double, effective(1 To N_COMPONENTS) As Double
-    Dim increment(1 To N_COMPONENTS) As Double, tensorIncrement(1 To N_COMPONENTS) As Double
+    Dim increment(1 To N_COMPONENTS) As Double
     Dim i As Long, j As Long, elasticComponent As Double
     For j = 1 To N_COMPONENTS
         elasticComponent = strain(j) - committed.Plastic(j)
@@ -312,6 +314,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     Dim tension As Double, compression As Double, dilationRate As Double
     Dim nextTension As Double, nextCompression As Double, nextDilation As Double
     Dim plasticMultiplier As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim trialTrace As Double, trialQ As Double, trialHigh As Double, trialMid As Double, trialLow As Double
     Dim ct As Double, cc As Double, dt As Double, dc As Double, kt As Double, kc As Double
     Dim unusedStress As Double, r As Double, residual As Double
     Dim deltaTension As Double, deltaCompression As Double, deltaDilation As Double
@@ -320,9 +323,9 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     updated = committed
     mTension.Evaluate tension, unusedStress, ct, dt, kt
     mCompression.Evaluate compression, unusedStress, cc, dc, kc
-    CoupledStressInvariants elastic, trace, q, high, mid, low
-    r = PositiveStressFraction(high, mid, low)
-    residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
+    CoupledStressInvariants elastic, trialTrace, trialQ, trialHigh, trialMid, trialLow
+    r = PositiveStressFraction(trialHigh, trialMid, trialLow)
+    residual = CoupledBarcelonaYield(trialTrace, trialQ, trialHigh, cc, ct, mAlpha, mGamma)
     If residual <= YIELD_TOLERANCE_RATIO * cc Then
         Dim fraction As Double
         fraction = (1# - r * dt) * (1# - dc)
@@ -332,23 +335,32 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         Exit Function
     End If
 
-    dilationRate = CurrentDilation(kt, kc, r, trace, q)
+    dilationRate = CurrentDilation(kt, kc, r, trialTrace, trialQ)
+    Dim trialMean As Double, highDev As Double, midDev As Double, lowDev As Double
+    trialMean = trialTrace / 3#
+    highDev = trialHigh - trialMean: midDev = trialMid - trialMean: lowDev = trialLow - trialMean
+    Dim deviatorFactor As Double, mean As Double, plasticMean As Double, plasticFactor As Double
+    Dim eHigh As Double, eLow As Double
     For j = 1 To MATERIAL_ITERATIONS
-        If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, plasticMultiplier) Then
+        If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
+                effective, increment, plasticMultiplier, deviatorFactor) Then
             If j <> 1 Or dilationRate <> 0# Or mDilationMax = 0# Then Exit Function
             ' Нулевая начальная дилатансия не позволяет уменьшить давление в растягивающей пробе.
             ' Начальное значение можно взять положительным, но принять только корень всех исходных условий ниже.
             dilationRate = Tan(mDilationMax)
-            If Not mReturn.Correct(elastic, cc, ct, mFt, dilationRate, effective, increment, plasticMultiplier) Then Exit Function
+            If Not mReturn.Correct(elastic, trialTrace, trialQ, trialHigh, cc, ct, mFt, dilationRate, _
+                    effective, increment, plasticMultiplier, deviatorFactor) Then Exit Function
         End If
-        CoupledStressInvariants effective, trace, q, high, mid, low
+        ' Изотропный возврат меняет среднее и масштаб девиатора, сохраняя его главные оси.
+        trace = effective(1) + effective(2) + effective(3)
+        mean = trace / 3#: q = deviatorFactor * trialQ
+        high = mean + deviatorFactor * highDev
+        mid = mean + deviatorFactor * midDev
+        low = mean + deviatorFactor * lowDev
         r = PositiveStressFraction(high, mid, low)
-        For i = 1 To 3
-            tensorIncrement(i) = increment(i)
-            tensorIncrement(i + 3) = increment(i + 3) * 0.5 ' Главные пластические деформации используют тензорные сдвиги.
-        Next i
-        Dim eTrace As Double, eQ As Double, eHigh As Double, eMid As Double, eLow As Double
-        CoupledStressInvariants tensorIncrement, eTrace, eQ, eHigh, eMid, eLow
+        plasticMean = (increment(1) + increment(2) + increment(3)) / 3#
+        plasticFactor = (1# - deviatorFactor) * mDeviatorCompliance
+        eHigh = plasticMean + plasticFactor * highDev: eLow = plasticMean + plasticFactor * lowDev
         nextTension = committed.Tension
         nextCompression = committed.Compression
         If eHigh > 0# Then nextTension = nextTension + r * eHigh
