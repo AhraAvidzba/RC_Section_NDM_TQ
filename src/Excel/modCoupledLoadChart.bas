@@ -72,6 +72,8 @@ Private Function PrepareCoupledLoadChart(ByVal workbook As Object, ByVal combina
         Set container = anchor.Worksheet.ChartObjects.Add(anchor.Left, anchor.Top, 470#, 240#)
         container.Name = TRACE_CHART
         container.Placement = 3 ' xlFreeFloating.
+    ElseIf container.Left < anchor.Left Then
+        container.Left = anchor.Left ' После расширения таблицы сохранённый график может перекрывать новые столбцы.
     End If
     Set chart = container.Chart
     Do While chart.SeriesCollection.Count > 0: chart.SeriesCollection(1).Delete: Loop

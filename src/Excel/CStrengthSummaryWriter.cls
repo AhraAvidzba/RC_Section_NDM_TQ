@@ -85,11 +85,16 @@ Private Const COL_CAP_STATUS As Long = 49 ' Столбец таблицы: пр�
 Private Const COL_SEPARATOR3 As Long = 50 ' Пустой столбец перед поперечной арматурой.
 Private Const COL_TRANSVERSE_POINT As Long = 51 ' Контрольная точка поперечной арматуры при заданных усилиях.
 Private Const COL_TRANSVERSE_STRESS As Long = 52 ' Знаковое напряжение в той же точке.
-Private Const COL_TRANSVERSE_UTIL As Long = 53 ' Максимальное отношение деформации к пределу своего знака.
-Private Const COL_TRANSVERSE_STATUS As Long = 54 ' Статус критерия деформации поперечной арматуры.
-Private Const COL_TRANSVERSE_RESERVE As Long = 55 ' Коэффициент запаса, когда поперечная арматура определяет предел.
-Private Const COL_TRANSVERSE_LIMIT As Long = 56 ' Определяющая точка поперечной арматуры на пределе.
-Private Const COL_TRANSVERSE_LIMIT_STATUS As Long = 57 ' Статус хомута при определении предельного множителя.
+Private Const COL_TRANSVERSE_STRAIN As Long = 53 ' Знаковая деформация при заданных усилиях.
+Private Const COL_TRANSVERSE_STRAIN_LIMIT As Long = 54 ' Предел деформации класса стали и её знака.
+Private Const COL_TRANSVERSE_UTIL As Long = 55 ' Отношение деформации к пределу своего знака.
+Private Const COL_TRANSVERSE_STATUS As Long = 56 ' Статус критерия деформации поперечной арматуры.
+Private Const COL_TRANSVERSE_RESERVE As Long = 57 ' Коэффициент запаса, когда поперечная арматура определяет предел.
+Private Const COL_TRANSVERSE_LIMIT As Long = 58 ' Определяющая точка и причина арматурного предела.
+Private Const COL_TRANSVERSE_LIMIT_STRESS As Long = 59 ' Напряжение в сохранённом предельном НДС хомута.
+Private Const COL_TRANSVERSE_LIMIT_STRAIN As Long = 60 ' Деформация в сохранённом предельном НДС хомута.
+Private Const COL_TRANSVERSE_LIMIT_STRAIN_LIMIT As Long = 61 ' Знаковый предел деформации класса стали в предельном НДС.
+Private Const COL_TRANSVERSE_LIMIT_STATUS As Long = 62 ' Статус хомута при определении предельного множителя.
 
 Private Const HEADER_COLOR As Long = &HD9D9D9 ' Серый фон шапки, как в остальных подробных блоках.
 Private Const SMALL_VALUE As Double = 0.000000001 ' Порог для определения отсутствующего численного поля при выводе таблицы.
@@ -268,7 +273,6 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(1, COL_LIM_EBC) = "Общие данные"
     headers(1, COL_STATE_EPS0) = "НДС от заданного сочетания нагрузок (по модели прочности)"
     headers(1, COL_CAP_EPS0) = "Расчет предельной несущей способности по выбранной " & ChrW$(&H3BB) & "-траектории (по модели прочности)"
-    headers(1, COL_TRANSVERSE_POINT) = "Поперечная арматура — хомуты и ветви"
 
     headers(2, COL_STATE_EPS0) = "плоскость деформации"
     headers(2, COL_STATE_EBC) = "фактические макс. деформации"
@@ -279,21 +283,9 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(2, COL_CAP_LAMBDA) = "предельные компоненты"
     headers(2, COL_CAP_EBC) = "фактические макс. деформации"
     headers(2, COL_CAP_H) = "параметры сечения при " & ChrW$(&H3BB) & "ult и статус"
-    headers(2, COL_TRANSVERSE_POINT) = "Проверка при заданной нагрузке"
-    headers(2, COL_TRANSVERSE_RESERVE) = "Запас на выбранной траектории"
-
     PutHeaderNotes headers
     PutColumnLabels headers, units
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_POINT) = "Группа и точка"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS) = ChrW$(&H3C3) & ", " & OutputStressUnit(units)
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_UTIL) = "Использование"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус НДС"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = "Запас " & ChrW$(&H3BB)
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Точка и причина предела"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус запаса"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка наибольшего использования"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "Доля предела |" & ChrW$(&H3B5) & "|"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_RESERVE) = "Если предел определяет хомут или ветвь"
+    PutTransverseHeaders headers, ChrW$(&H3C3) & ", " & OutputStressUnit(units)
     If Not mCapturedSnapshot Is Nothing Then
         mCapturedSnapshot.AddTable "Strength.Headers", headers
         Exit Sub
@@ -305,6 +297,30 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     End If
     target.Resize(HEADER_ROWS, TOTAL_COLUMNS).Value2 = headers
     MergeHeaders target
+End Sub
+
+' Задаёт две группы столбцов хомута. Подпись напряжения содержит единицу
+' исходного расчёта, в том числе при восстановлении снимка.
+Private Sub PutTransverseHeaders(ByRef headers() As Variant, ByVal stressLabel As String)
+    Dim epsilon As String: epsilon = ChrW$(&H3B5)
+    headers(1, COL_TRANSVERSE_POINT) = "Хомуты и поперечные ветви"
+    headers(2, COL_TRANSVERSE_POINT) = "При заданных усилиях"
+    headers(2, COL_TRANSVERSE_RESERVE) = "На пределе поперечной арматуры"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка наибольшего использования"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "|" & epsilon & " / " & epsilon & "lim|"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_LIMIT) = "Если предел определяет хомут или ветвь"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_POINT) = "Группа, класс и точка"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS) = stressLabel
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRAIN) = epsilon
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRAIN_LIMIT) = epsilon & "lim"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_UTIL) = "Использование"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус НДС"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = "Запас " & ChrW$(&H3BB)
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Точка и причина предела"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRESS) = stressLabel
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRAIN) = epsilon
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRAIN_LIMIT) = epsilon & "lim"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус запаса"
 End Sub
 
 ' Заполняет строку обычных пояснений над нижним ярусом обозначений.
@@ -504,11 +520,13 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
     Dim result As CCombinationResult: Set result = batch.ResultAt(index)
     data(row, COL_TRANSVERSE_STATUS) = TransverseUnavailableStatus(result.DirectStateMeta, policy)
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
+    Dim description As String, utilization As Double, stress As Double, strain As Double, strainLimit As Double
     If Not state Is Nothing Then
-        Dim description As String, utilization As Double, stress As Double
-        If state.CopyCoupledTransverseControl(description, utilization, stress) Then
+        If state.CopyCoupledTransverseControl(description, utilization, stress, strain, strainLimit) Then
             data(row, COL_TRANSVERSE_POINT) = description
             data(row, COL_TRANSVERSE_STRESS) = OutputStress(stress, units)
+            data(row, COL_TRANSVERSE_STRAIN) = strain
+            data(row, COL_TRANSVERSE_STRAIN_LIMIT) = strainLimit
             data(row, COL_TRANSVERSE_UTIL) = utilization
             data(row, COL_TRANSVERSE_STATUS) = state.CoupledTransverseStatus
         End If
@@ -518,9 +536,17 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
         data(row, COL_TRANSVERSE_LIMIT_STATUS) = TransverseUnavailableStatus(result.CapacityMeta, policy)
         Exit Sub
     End If
-    If capacity.HasUltimatePoint Then data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
     data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
     data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.TransverseLimitStatus
+    If Not capacity.HasUltimatePoint Then Exit Sub ' При отказе на постоянной части множителя переменной нагрузки нет.
+    data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
+    Set state = capacity.StateResult
+    If state Is Nothing Then Exit Sub
+    If state.CopyCoupledTransverseControl(description, utilization, stress, strain, strainLimit) Then
+        data(row, COL_TRANSVERSE_LIMIT_STRESS) = OutputStress(stress, units)
+        data(row, COL_TRANSVERSE_LIMIT_STRAIN) = strain
+        data(row, COL_TRANSVERSE_LIMIT_STRAIN_LIMIT) = strainLimit
+    End If
 End Sub
 
 ' Ошибки общего этапа мешают проверить хомут. Успех или физический отказ
@@ -718,8 +744,14 @@ Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalc
         target.Offset(HEADER_ROWS, COL_CAP_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_TRANSVERSE_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
-        target.Offset(HEADER_ROWS, COL_TRANSVERSE_POINT - 1).Resize(dataRows, 1).HorizontalAlignment = -4131
-        target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT - 1).Resize(dataRows, 1).HorizontalAlignment = -4131
+        With target.Offset(HEADER_ROWS, COL_TRANSVERSE_POINT - 1).Resize(dataRows, 1)
+            .HorizontalAlignment = -4131
+            .ShrinkToFit = True ' Длинное имя группы и координаты остаются в одной строке.
+        End With
+        With target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT - 1).Resize(dataRows, 1)
+            .HorizontalAlignment = -4131
+            .ShrinkToFit = True
+        End With
         ApplyStrainNumberFormat target, dataRows
         ApplyStatusCells target, batch, dataRows, preparedValues
     End If
@@ -735,6 +767,9 @@ Private Sub ApplyStrainNumberFormat(ByVal target As Object, ByVal dataRows As Lo
     target.Offset(HEADER_ROWS, COL_CAP_EPS0 - 1).Resize(dataRows, 1).NumberFormat = "0.0000"
     target.Offset(HEADER_ROWS, COL_CAP_KX - 1).Resize(dataRows, 2).NumberFormat = "0.000000"
     target.Offset(HEADER_ROWS, COL_CAP_EBC - 1).Resize(dataRows, COL_CAP_EST - COL_CAP_EBC + 1).NumberFormat = "0.0000"
+    target.Offset(HEADER_ROWS, COL_TRANSVERSE_STRAIN - 1).Resize(dataRows, 2).NumberFormat = "0.000E+00"
+    target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT_STRAIN - 1).Resize(dataRows, 2).NumberFormat = "0.000E+00"
+    target.Offset(HEADER_ROWS, COL_TRANSVERSE_RESERVE - 1).Resize(dataRows, 1).NumberFormat = "0.000000"
 End Sub
 
 ' Оформляет непрерывный блок таблицы, не затрагивая пустые разделители.
@@ -798,6 +833,8 @@ Private Sub ApplyHeaderSubscripts(ByVal target As Object)
     ApplySubscriptToken labels, headers, COL_CAP_EPS0, "0"
     ApplySubscriptToken labels, headers, COL_CAP_KX, "x"
     ApplySubscriptToken labels, headers, COL_CAP_KY, "y"
+    ApplySubscriptToken labels, headers, COL_TRANSVERSE_STRAIN_LIMIT, "lim"
+    ApplySubscriptToken labels, headers, COL_TRANSVERSE_LIMIT_STRAIN_LIMIT, "lim"
 End Sub
 
 ' Ставит нижний индекс найденному текстовому токену внутри одной ячейки.
@@ -935,10 +972,7 @@ Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Obj
     Dim headers As Variant: headers = snapshot.Table("Strength.Headers")
     If UBound(headers, 2) <> UBound(data, 2) Then Err.Raise 5, "CStrengthSummaryWriter", _
         "В снимке не совпадает число столбцов подписей и данных таблицы прочности."
-    If UBound(headers, 2) = LEGACY_STRENGTH_SNAPSHOT_COLUMNS Then
-        headers = AddBlankTransverseColumns(headers)
-        data = AddBlankTransverseColumns(data)
-    End If
+    If UBound(headers, 2) <> TOTAL_COLUMNS Then ExpandStrengthSnapshot headers, data
     If mMinimalFormatting Then mMinimalFormatting = CStr(target.Cells(target.Rows.Count, 1).NumberFormat) = "@" And ResultHeaderMatches(target, headers, merges:=HeaderMergeBlocks())
     PrepareTarget target
     If Not mMinimalFormatting Then
@@ -950,9 +984,27 @@ Private Sub RestoreSummaryTables(ByVal workbook As Object, ByVal snapshot As Obj
     FormatTable target, Nothing, data
 End Sub
 
-' Расширяет сохранённую 49-колоночную таблицу пустым блоком поперечной
-' арматуры. У такого снимка нет данных для новых столбцов.
-Private Function AddBlankTransverseColumns(ByRef values As Variant) As Variant
+' Приводит снятые версии к текущей ширине. Из снимка 57 столбцов переносит
+' использование и статусы в их текущие позиции. Новые величины без измерений пусты.
+Private Sub ExpandStrengthSnapshot(ByRef headers As Variant, ByRef data As Variant)
+    Dim newHeaders() As Variant, row As Long, column As Long
+    ReDim newHeaders(1 To HEADER_ROWS, 1 To TOTAL_COLUMNS)
+    For row = 1 To HEADER_ROWS
+        For column = 1 To LEGACY_STRENGTH_SNAPSHOT_COLUMNS
+            newHeaders(row, column) = headers(row, column)
+        Next column
+    Next row
+    Dim stressLabel As String: stressLabel = ChrW$(&H3C3)
+    If UBound(headers, 2) = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then _
+        stressLabel = CStr(headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS)) ' Восстанавливаем именно сохранённые единицы.
+    PutTransverseHeaders newHeaders, stressLabel
+    headers = newHeaders
+    data = ExpandStrengthSnapshotData(data)
+End Sub
+
+' Сохраняет значения первых 49 столбцов и явно переносит известные данные
+' хомута из 57-колоночного снимка. Числа читаются без пересчёта.
+Private Function ExpandStrengthSnapshotData(ByRef values As Variant) As Variant
     Dim expanded() As Variant, row As Long, column As Long
     ReDim expanded(1 To UBound(values, 1), 1 To TOTAL_COLUMNS)
     For row = 1 To UBound(values, 1)
@@ -960,5 +1012,15 @@ Private Function AddBlankTransverseColumns(ByRef values As Variant) As Variant
             expanded(row, column) = values(row, column)
         Next column
     Next row
-    AddBlankTransverseColumns = expanded
+    If UBound(values, 2) = LEGACY_HOOP_STRENGTH_SNAPSHOT_COLUMNS Then
+        Dim destination As Variant
+        destination = Array(COL_TRANSVERSE_POINT, COL_TRANSVERSE_STRESS, COL_TRANSVERSE_UTIL, COL_TRANSVERSE_STATUS, _
+            COL_TRANSVERSE_RESERVE, COL_TRANSVERSE_LIMIT, COL_TRANSVERSE_LIMIT_STATUS)
+        For row = 1 To UBound(values, 1)
+            For column = LBound(destination) To UBound(destination)
+                expanded(row, CLng(destination(column))) = values(row, 51 + column)
+            Next column
+        Next row
+    End If
+    ExpandStrengthSnapshotData = expanded
 End Function

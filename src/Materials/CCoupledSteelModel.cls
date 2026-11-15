@@ -100,6 +100,16 @@ Friend Function StrainUtilization(ByVal strain As Double) As Double
     End If
 End Function
 
+' Возвращает предельную деформацию со знаком принятой ветви.
+Friend Function SignedStrainLimit(ByVal strain As Double) As Double
+    If mElasticModulus = 0# Then InputError "Модель арматуры не подготовлена."
+    If strain >= 0# Then
+        SignedStrainLimit = mTensionLimit
+    Else
+        SignedStrainLimit = -mCompressionLimit
+    End If
+End Function
+
 ' Сообщает проблему исходных характеристик арматуры с единым источником.
 Private Sub InputError(ByVal reason As String)
     Err.Raise vbObjectError + 1780, "CCoupledSteelModel", reason

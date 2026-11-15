@@ -998,7 +998,8 @@ End Sub
 ' показывает запас хомута и фактические значения на допустимой стороне предела.
 Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal capacity As CCapacityResult)
     Dim control As String, utilization As Double, stress As Double, hasState As Boolean, hasLimit As Boolean
-    If Not state Is Nothing Then hasState = state.CopyCoupledTransverseControl(control, utilization, stress)
+    Dim strain As Double, strainLimit As Double
+    If Not state Is Nothing Then hasState = state.CopyCoupledTransverseControl(control, utilization, stress, strain, strainLimit)
     If Not capacity Is Nothing Then hasLimit = capacity.IsTransverseLimit
     If Not hasState And Not hasLimit Then Exit Sub
     ReportSection "Поперечная арматура — хомуты и ветви"
@@ -1006,6 +1007,8 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
         ReportValue "Статус по деформации при заданной нагрузке", state.CoupledTransverseStatus
         ReportValue "Контрольная точка", control
         ReportValue "Напряжение вдоль стержня, МПа", FormatNumberInvariant(stress)
+        ReportValue "Деформация вдоль стержня", FormatNumberInvariant(strain)
+        ReportValue "Предельная деформация своего знака", FormatNumberInvariant(strainLimit)
         ReportValue "Отношение деформации к пределу", FormatNumberInvariant(utilization)
     End If
     If hasLimit Then
@@ -1015,9 +1018,11 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
             ReportValue "Коэффициент запаса хомута на выбранной траектории", FormatNumberInvariant(capacity.CoupledLimitLambda)
             Dim limitState As CSectionStateResult: Set limitState = capacity.StateResult
             If Not limitState Is Nothing Then
-                If limitState.CopyCoupledTransverseControl(control, utilization, stress) Then
+                If limitState.CopyCoupledTransverseControl(control, utilization, stress, strain, strainLimit) Then
                     ReportValue "Контрольная точка при предельной нагрузке", control
                     ReportValue "Напряжение вдоль стержня при предельной нагрузке, МПа", FormatNumberInvariant(stress)
+                    ReportValue "Деформация вдоль стержня при предельной нагрузке", FormatNumberInvariant(strain)
+                    ReportValue "Предельная деформация своего знака", FormatNumberInvariant(strainLimit)
                     ReportValue "Отношение деформации к пределу при предельной нагрузке", FormatNumberInvariant(utilization)
                 End If
             End If

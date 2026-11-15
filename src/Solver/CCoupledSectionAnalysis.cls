@@ -113,8 +113,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
             Dim target() As Double, warning As String
             path.TargetSix 1#, target
             Set acceptedState = CaptureAcceptedState(sstStrengthState, spec, continuation.AcceptedFields, _
-                concrete, response, target, resultants, fc, ft, meta, warning)
-            SetStateMaterials acceptedState, spec, concrete, response, models
+                concrete, response, models, target, resultants, fc, ft, meta, warning)
             If Len(warning) > 0 Then AppendStateWarning meta, warning
         End If
     Else
@@ -196,7 +195,8 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
             Else
                 controlled.CopyLimitState limitHistory, actual
             End If
-            SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft
+            If Not transverseLimit Then criticalPoint = 0
+            SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft, criticalPoint
         End If
     Else
         low = -1#
@@ -211,7 +211,7 @@ End Function
 Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver As CCoupledNewtonSolver, _
         ByVal spec As CMaterialModelSpec, ByVal history As Collection, ByVal reinforcement As CCoupledReinforcedResponse, _
         ByVal concrete As CCoupledConcreteResponse, ByVal models As Object, ByRef target() As Double, _
-        ByRef actual() As Double, ByVal fc As Double, ByVal ft As Double)
+        ByRef actual() As Double, ByVal fc As Double, ByVal ft As Double, Optional ByVal governingTransversePoint As Long = 0)
     Dim warning As String, state As CSectionStateResult
     If history Is Nothing Then
         warning = "История предельной точки недоступна для вывода полей."
@@ -221,8 +221,8 @@ Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver A
         Dim stateMeta As New CResultMeta, capacityMeta As CResultMeta
         Set capacityMeta = capacity.ResultMeta
         stateMeta.SetResult rsSuccess, rcNone, rkCapacity, "Предельное равновесие подтверждено.", capacityMeta.DiagnosticDetails
-        Set state = CaptureAcceptedState(sstCapacityState, spec, history, concrete, reinforcement, target, actual, fc, ft, stateMeta, warning)
-        SetStateMaterials state, spec, concrete, reinforcement, models
+        Set state = CaptureAcceptedState(sstCapacityState, spec, history, concrete, reinforcement, models, _
+            target, actual, fc, ft, stateMeta, warning, governingTransversePoint)
     End If
     capacity.AttachCoupledState state, warning
 End Sub
@@ -312,8 +312,8 @@ End Function
 ' отдельной точки вывода сохраняет подтверждённое интегральное равновесие.
 Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVal spec As CMaterialModelSpec, _
         ByVal history As Collection, ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, _
-        ByRef target() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
-        ByVal meta As CResultMeta, ByRef warning As String) As CSectionStateResult
+        ByVal models As Object, ByRef target() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
+        ByVal meta As CResultMeta, ByRef warning As String, Optional ByVal governingTransversePoint As Long = 0) As CSectionStateResult
     Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot
     observer.Initialize mSection.ConcreteCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
     fields.Capture mSection, mOperators, history, observer, concrete, reinforcement, warning
@@ -324,17 +324,27 @@ Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVa
     mOperators.GeneralizedDeformation field, eps0, kx, ky, twist
     state.InitializeFromCoupled stateType, mSection, spec, target, resultants, eps0, kx, ky, twist, fields, fieldMeta, _
         (reinforcement.AcceptedSteelUtilization <= 1#)
+    state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
+    SetTransverseControl state, reinforcement, models, field, governingTransversePoint
     Set CaptureAcceptedState = state
 End Function
 
-' Дополняет готовое состояние его диаграммами и фактической контрольной
-' точкой поперечной арматуры, если она входит в модель сечения.
-Private Sub SetStateMaterials(ByVal state As CSectionStateResult, ByVal spec As CMaterialModelSpec, _
-        ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, ByVal models As Object)
-    state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
-    Dim point As Long: point = reinforcement.AcceptedTransverseCriticalPoint
-    If point > 0 Then state.SetCoupledTransverseControl SteelControlDescription(point), _
-        reinforcement.AcceptedTransverseSteelUtilization, reinforcement.AcceptedSteelStress(point)
+' Считывает напряжение и вычисляет проекцию деформации для одной точки
+' принятого поля. При пределе использует точку, определившую арматурный критерий.
+Private Sub SetTransverseControl(ByVal state As CSectionStateResult, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByVal models As Object, ByRef field() As Double, ByVal point As Long)
+    If point = 0 Then point = reinforcement.AcceptedTransverseCriticalPoint
+    If point = 0 Then Exit Sub
+    Dim tensor(1 To 6) As Double, direction(1 To 6) As Double, strain As Double, strainLimit As Double, i As Long
+    mOperators.PointStrain point, field, tensor
+    mOperators.SteelProjection point, direction
+    For i = 1 To 6
+        strain = strain + tensor(i) * direction(i) ' Тензорная проекция на ось стержня.
+    Next i
+    Dim steel As CCoupledSteelModel: Set steel = models.Item(mOperators.SteelClassAt(point))
+    strainLimit = steel.SignedStrainLimit(strain)
+    state.SetCoupledTransverseControl SteelControlDescription(point), _
+        steel.StrainUtilization(strain), reinforcement.AcceptedSteelStress(point), strain, strainLimit
 End Sub
 
 ' Добавляет предупреждение о поле, сохраняя статус физической проверки.

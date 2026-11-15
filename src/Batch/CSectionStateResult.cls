@@ -65,6 +65,7 @@ Private mCoupledFields As CCoupledFieldSnapshot ' Напряжения по пр
 Private mCoupledMaterialCurves As CCoupledMaterialSnapshot ' Одноосные точки фактически применённых законов.
 Private mCoupledTransverseControl As String ' Группа и точка наибольшего использования поперечной арматуры.
 Private mCoupledTransverseUtilization As Double, mCoupledTransverseStress As Double
+Private mCoupledTransverseStrain As Double, mCoupledTransverseStrainLimit As Double
 Private mTwist As Double ' Закручивание на единицу длины, рад/мм.
 Private Const ELEMENT_ZERO_TOLERANCE As Double = 0.000000001 ' Порог деформации для определения физического состояния элемента при выводе результатов.
 
@@ -176,20 +177,26 @@ Friend Property Get CoupledMaterialCurves() As CCoupledMaterialSnapshot
     Set CoupledMaterialCurves = mCoupledMaterialCurves
 End Property
 
-' Сохраняет контрольную точку принятого НДС: использование в долях и
-' соответствующее знаковое напряжение вдоль стержня в МПа.
-Friend Sub SetCoupledTransverseControl(ByVal description As String, ByVal utilization As Double, ByVal stress As Double)
+' Сохраняет контрольную точку принятого НДС: напряжение в МПа, знаковые
+' деформацию и предел своей ветви, использование в долях.
+Friend Sub SetCoupledTransverseControl(ByVal description As String, ByVal utilization As Double, ByVal stress As Double, _
+        ByVal strain As Double, ByVal strainLimit As Double)
     AssertWritable
     mCoupledTransverseControl = description
     mCoupledTransverseUtilization = utilization
     mCoupledTransverseStress = stress
+    mCoupledTransverseStrain = strain
+    mCoupledTransverseStrainLimit = strainLimit
 End Sub
 
 ' Возвращает сводку по контрольной точке, если в сечении задана поперечная арматура.
-Friend Function CopyCoupledTransverseControl(ByRef description As String, ByRef utilization As Double, ByRef stress As Double) As Boolean
+Friend Function CopyCoupledTransverseControl(ByRef description As String, ByRef utilization As Double, ByRef stress As Double, _
+        Optional ByRef strain As Double, Optional ByRef strainLimit As Double) As Boolean
     description = mCoupledTransverseControl
     utilization = mCoupledTransverseUtilization
     stress = mCoupledTransverseStress
+    strain = mCoupledTransverseStrain
+    strainLimit = mCoupledTransverseStrainLimit
     CopyCoupledTransverseControl = (Len(description) > 0)
 End Function
 
@@ -236,6 +243,7 @@ Private Sub ClearSnapshot()
     Set mSnapshotSteel = Nothing
     Set mCoupledFields = Nothing: Set mCoupledMaterialCurves = Nothing: mTwist = 0#
     mCoupledTransverseControl = vbNullString: mCoupledTransverseUtilization = 0#: mCoupledTransverseStress = 0#
+    mCoupledTransverseStrain = 0#: mCoupledTransverseStrainLimit = 0#
     mSnapshotRevision = 0
     Set mMaterialSpec = Nothing
     Set mResultMeta = Nothing

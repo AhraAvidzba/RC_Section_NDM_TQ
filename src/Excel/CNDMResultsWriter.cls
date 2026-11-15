@@ -41,7 +41,7 @@ Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и прина
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
 Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 27 ' Пространственное НДС, предельный вектор и сведения о поперечной арматуре.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 37 ' Пространственное НДС, предельный вектор и контроль хомута в двух состояниях.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 14 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -882,15 +882,26 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
     If Not state Is Nothing Then
         PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
-        Dim control As String, utilization As Double, steelStress As Double
-        If state.CopyCoupledTransverseControl(control, utilization, steelStress) Then
-            PutProperty data, row, runID, id, "Coupled.Transverse.Control", control, "-", "Точка максимального использования хомута или отдельной ветви."
-            PutProperty data, row, runID, id, "Coupled.Transverse.Utilization", utilization, "-", "Отношение деформации к пределу своего знака."
-            PutProperty data, row, runID, id, "Coupled.Transverse.Stress", OutputStress(steelStress, units), OutputStressUnit(units), "Напряжение вдоль стержня в контрольной точке."
+        If PutCoupledTransverseProperties(data, row, runID, id, state, units, "Coupled.Transverse.") Then
             PutProperty data, row, runID, id, "Coupled.Transverse.Status", state.CoupledTransverseStatus, "-", "Статус по достижению предельной деформации при заданных нагрузках."
         End If
     End If
 End Sub
+
+' Записывает данные одной контрольной точки поперечной арматуры. Префикс
+' отличает заданную нагрузку от достигнутого арматурного предела.
+Private Function PutCoupledTransverseProperties(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal id As String, ByVal state As CSectionStateResult, ByVal units As CUnitSystem, ByVal prefix As String) As Boolean
+    If state Is Nothing Then Exit Function
+    Dim control As String, utilization As Double, stress As Double, strain As Double, strainLimit As Double
+    If Not state.CopyCoupledTransverseControl(control, utilization, stress, strain, strainLimit) Then Exit Function
+    PutProperty data, row, runID, id, prefix & "Control", control, "-", "Точка максимального использования хомута или отдельной ветви."
+    PutProperty data, row, runID, id, prefix & "Utilization", utilization, "-", "Отношение деформации к пределу своего знака."
+    PutProperty data, row, runID, id, prefix & "Stress", OutputStress(stress, units), OutputStressUnit(units), "Напряжение вдоль стержня в контрольной точке."
+    PutProperty data, row, runID, id, prefix & "Strain", strain, "-", "Знаковая продольная деформация стержня в контрольной точке."
+    PutProperty data, row, runID, id, prefix & "StrainLimit", strainLimit, "-", "Предельная деформация класса стержня со знаком фактической ветви."
+    PutCoupledTransverseProperties = True
+End Function
 
 ' Записывает принятые точки как числовые свойства сочетания. Раздельные
 ' ключи сохраняют порядок точек и два независимых параметра нагружения.
@@ -915,6 +926,13 @@ Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As L
     PutProperty data, row, runID, id, "Coupled.Capacity.LimitState", capacity.LimitState, "-", "Определяющий механизм или причина остановки поиска."
     If capacity.HasConfirmedLowerBound Then _
         PutProperty data, row, runID, id, "Coupled.Capacity.LowerLambda", capacity.ConfirmedLowerLambda, "-", "Последнее подтверждённое равновесие без превышения арматурного критерия."
+    If capacity.IsTransverseLimit Then
+        PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Status", capacity.TransverseLimitStatus, "-", "Статус по предельному множителю поперечной арматуры."
+        If capacity.HasUltimatePoint Then
+            PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Lambda", capacity.CoupledLimitLambda, "-", "Предельный множитель, определяемый поперечной арматурой."
+            PutCoupledTransverseProperties data, row, runID, id, capacity.StateResult, units, "Coupled.Transverse.Limit."
+        End If
+    End If
     If Not capacity.HasUltimatePoint Then Exit Sub
     Dim torque As Double, qx As Double, qy As Double
     torque = capacity.TUltimate: qx = capacity.QxUltimate: qy = capacity.QyUltimate
