@@ -150,7 +150,7 @@ function Get-ResultsStatusStyleHash([object]$Book) {
     $records = New-Object 'System.Collections.Generic.List[object]'
     $blocks = @(
         @{name='rngBatchSummary'; offset=12; columns=@(4,6,7,8,9,10,11,12,13,14,15)},
-        @{name='rngStrengthSummaryAnchor'; offset=0; columns=@(3,30,49)},
+        @{name='rngStrengthSummaryAnchor'; offset=0; columns=@(3,30,49,54,57)},
         @{name='rngCrackSummaryAnchor'; offset=0; columns=@(3,21,24,25,29,44,67,72)},
         @{name='rngStabilitySummaryAnchor'; offset=0; columns=@(3,44,50,59,65,78,90)}
     )

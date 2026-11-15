@@ -1601,7 +1601,8 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Сверяет по ElementID и ключу состояния предельные поля обоих носителей.
+' Сверяет подраздел хомута при выводе на лист и восстановлении из файла,
+' а также предельные поля обоих носителей по ElementID и ключу состояния.
 Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As CSectionModel, _
         ByVal provider As CMaterialModelProvider, ByVal batch As CBatchSectionCalculator, _
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)
@@ -1616,11 +1617,25 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
     snap.AddTable "Calculation.Profiles", book.Names.Item("rngCalculationProfiles").RefersToRange.Value2
     TestInputCell(settings, "Results.SnapshotStorage").Value2 = "File"
     store.SaveFile book, snap
+    Dim anchor As Object: Set anchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+    Dim reserve As Double: reserve = CDbl(anchor.Offset(0, 54).Value2)
     Dim mode As Variant, values As Variant, n As Long, shear As Object, runId As Double
     n = section.ConcreteCount + section.RebarCount
     For Each mode In Array("Excel", "File")
         TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
-        If mode = "Excel" Then UpdateSectionResultsForWorkbook book, snap
+        anchor.Offset(0, 50).Resize(1, 7).ClearContents ' Проверяем вывод заново, без значений от другого носителя.
+        If mode = "Excel" Then
+            UpdateSectionResultsForWorkbook book, snap
+        Else
+            UpdateSectionResultsForWorkbook book
+        End If
+        TestRecord anchor.Offset(0, 53).Value2 = "FAIL" And anchor.Offset(0, 56).Value2 = "FAIL", _
+            CStr(mode) & " restores both independent hoop statuses on Results", passed, failed, report
+        TestExpectNear CDbl(anchor.Offset(0, 54).Value2), reserve, 1E-10, _
+            CStr(mode) & " restores the hoop reserve on Results", passed, failed, report
+        TestRecord InStr(CStr(anchor.Offset(0, 50).Value2), "TestWeakHoop (TestHoopGrade)") = 1 And _
+            InStr(CStr(anchor.Offset(0, 55).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
+            CStr(mode) & " restores the hoop and its grade in both checks", passed, failed, report
         values = ReadElementResultTable(book, "Hoop", "CapacityState")
         If HasResultTableRows(values) Then
             runId = CDbl(values(2, ResultColumn(values, "RunID")))
