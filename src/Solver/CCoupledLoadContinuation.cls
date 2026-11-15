@@ -18,6 +18,7 @@ Option Explicit
 Private Const COMPONENT_COUNT As Long = 6
 Private Const MIN_STEP_RATIO As Double = 0.015625 ' Не менее 1/64 начального приращения.
 Private Const STEP_GROWTH As Double = 1.5 ' Возвращает начальный шаг за несколько удачных подшагов.
+Private Const DOUBLE_RELATIVE_ROUNDING As Double = 2.22044604925031E-16 ' Относительный шаг представления Double около единицы.
 
 Private mSolver As CCoupledNewtonSolver
 Private mOffset() As Double, mDirection() As Double
@@ -251,6 +252,8 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             candidate = target ' Последняя проба должна получить нагрузку в запрошенной точке точно.
         Else
             candidate = reached + increment
+            If candidate > reached And target - candidate <= target * DOUBLE_RELATIVE_ROUNDING Then _
+                candidate = target ' Точная конечная нагрузка проверяется вместо отдельной пробы на остатке округления.
         End If
         If candidate <= reached Then
             mMeta.SetSolverFailure sfcNumericalFailure, rkDirectState, "Шаг нагружения меньше точности представления множителя.", True

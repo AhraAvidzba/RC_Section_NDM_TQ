@@ -507,18 +507,21 @@ End Sub
 
 ' Отдельно показывает максимальное использование хомута при заданных усилиях
 ' и предельный множитель сочетания, если предел определила поперечная арматура.
-' При наличии стержней переносит ошибку этапа, если оценку критерия получить не удалось.
+' Если подготовка не завершилась, показывает ошибку запрошенного этапа.
 Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
         ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem, _
         ByVal policy As CResultStatusPolicy)
     data(row, COL_TRANSVERSE_STATUS) = policy.NotApplicable
     data(row, COL_TRANSVERSE_LIMIT_STATUS) = policy.NotApplicable
     Dim layout As CTransverseRebarLayout: Set layout = batch.CoupledTransverseLayout
-    If layout Is Nothing Then Exit Sub
-    If layout.Count = 0 Then Exit Sub
+    If Not layout Is Nothing Then
+        If layout.Count = 0 Then Exit Sub ' Подтверждено, что поперечные стержни отсутствуют.
+    End If
 
     Dim result As CCombinationResult: Set result = batch.ResultAt(index)
     data(row, COL_TRANSVERSE_STATUS) = TransverseUnavailableStatus(result.DirectStateMeta, policy)
+    data(row, COL_TRANSVERSE_LIMIT_STATUS) = TransverseUnavailableStatus(result.CapacityMeta, policy)
+    If layout Is Nothing Then Exit Sub ' Ошибка подготовки помешала получить проверенную раскладку.
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
     Dim description As String, utilization As Double, stress As Double, strain As Double, strainLimit As Double
     If Not state Is Nothing Then
@@ -532,10 +535,7 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
         End If
     End If
     Dim capacity As CCapacityResult: Set capacity = result.StrengthResult.Capacity
-    If Not capacity.IsTransverseLimit Then
-        data(row, COL_TRANSVERSE_LIMIT_STATUS) = TransverseUnavailableStatus(result.CapacityMeta, policy)
-        Exit Sub
-    End If
+    If Not capacity.IsTransverseLimit Then Exit Sub
     data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
     data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.TransverseLimitStatus
     If Not capacity.HasUltimatePoint Then Exit Sub ' При отказе на постоянной части множителя переменной нагрузки нет.

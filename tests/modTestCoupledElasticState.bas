@@ -545,12 +545,40 @@ Public Function RunTestCoupledContinuation() As String
     branch.CopyAccepted field, resultants
     TestRecord field(1) = 0# And resultants(1) = 0# And material.TestAcceptedPeak = 0#, _
         "independent zero load starts with a virgin history", passed, failed, report
+    TestExactSegmentEndpoints solver, passed, failed, report
 Done:
     RunTestCoupledContinuation = report & "TOTAL_COUPLED_CONTINUATION: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledContinuation = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет остаток порядка округления Double в четвёртом переменном
+' и десятом постоянном шаге. Целевое усилие решается на штатном шаге.
+Private Sub TestExactSegmentEndpoints(ByVal solver As CCoupledNewtonSolver, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation, trace As CCoupledLoadTrace
+    path.Initialize 0#, 100000#, 0#, 200000#, 0#, 100000#
+    branch.Initialize solver, path, 4, 100, 20, 1E-8, 1E-8, True
+    TestRecord branch.Advance(0.5), "exact endpoint fixture first segment", passed, failed, report
+    Set trace = branch.SavedTrace
+    Dim before As Long: before = trace.Count
+    Dim fraction As Double, lambda As Double, solved As Boolean
+    solved = branch.Advance(0.65)
+    trace.ReadPoint trace.Count, fraction, lambda
+    TestRecord solved And lambda = 0.65 And trace.Count = before + 4, _
+        "binary rounding does not cause a fifth variable substep", passed, failed, report
+
+    path.Initialize 100000#, 0#, 200000#, 0#, 100000#, 0#
+    branch.Initialize solver, path, 10, 10, 20, 1E-8, 1E-8, True
+    solved = branch.Advance(0#)
+    Set trace = branch.SavedTrace
+    trace.ReadPoint trace.Count, fraction, lambda
+    TestRecord solved And fraction = 1# And lambda = 0# And trace.Count = 10, _
+        "rounded offset accumulation reaches the target within ten probes", passed, failed, report
+End Sub
 
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -2396,12 +2424,17 @@ Public Function RunTestCoupledWorkbookInput() As String
         transverse.Offset(0, 6).Value2 = CStr((cx - 10#) / lengthFactor) & ";" & CStr(cy / lengthFactor) & ";" & _
             CStr((cx + 10#) / lengthFactor) & ";" & CStr(cy / lengthFactor)
         TestInputCell(settings, "Geometry.Type").Value2 = "Circle" ' Изменение выбора следующей геометрии не меняет уже построенное сечение.
+        Dim hoopAnchor As Object: Set hoopAnchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+        TestInputCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "Yes"
         gt.ClearContents
         ignored = RunSectionCalculationForWorkbook(book)
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing Gt is an input error", passed, failed, report
+        TestRecord hoopAnchor.Offset(0, 55).Value2 = "InputErr" And hoopAnchor.Offset(0, 61).Value2 = "InputErr" And _
+            Len(hoopAnchor.Offset(0, 56).Value2) = 0, CStr(mode) & " hoop subdivision reports failed preparation for both requested checks", passed, failed, report
         TestRecord InStr(1, ignored, gt.Worksheet.Name & "!" & gt.Address(False, False), vbTextCompare) > 0, CStr(mode) & " missing Gt names its cell", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "Plane", "DirectStateStatus") = "OK", CStr(mode) & " planar case unaffected by calibration", passed, failed, report
 
+        TestInputCell(profiles, "Calculation.Strength.Capacity", 2, pr4).Value2 = "No"
         gt.Value2 = 0.12
         TestInputCell(calibration, "Coupled.Gc").Value2 = 80#
         TestInputCell(calibration, "Coupled.Localization").Value2 = 125#
@@ -2417,6 +2450,8 @@ Public Function RunTestCoupledWorkbookInput() As String
         grades.Cells(2, 7).Value2 = 0.018
         ignored = RunSectionCalculationForWorkbook(book)
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing hoop modulus is an input error", passed, failed, report
+        TestRecord hoopAnchor.Offset(0, 55).Value2 = "InputErr" And hoopAnchor.Offset(0, 61).Value2 = "N/A", _
+            CStr(mode) & " invalid hoop steel keeps its input error in the hoop subdivision", passed, failed, report
         TestRecord InStr(1, ignored, grades.Worksheet.Name & "!" & grades.Cells(2, 3).Address(False, False), vbTextCompare) > 0, _
             CStr(mode) & " invalid class value names its cell", passed, failed, report
         grades.Cells(2, 3).Value2 = 180000#
@@ -2428,7 +2463,6 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK", CStr(mode) & " produces linked equilibrium " & ignored, passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "Coupled.StateSolver") = "SplineNewton", CStr(mode) & " saves actual solver", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "ALL", "Geometry.RecipeType") = "Rectangles", CStr(mode) & " same saved recipe after repeated calculation", passed, failed, report
-        Dim hoopAnchor As Object: Set hoopAnchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
         TestRecord hoopAnchor.Offset(-4, 50).Value2 = "Хомуты и поперечные ветви", _
             CStr(mode) & " has separate hoop heading", passed, failed, report
         TestRecord hoopAnchor.Offset(0, 55).Value2 = "OK" And Len(hoopAnchor.Offset(1, 55).Value2) = 0, _
