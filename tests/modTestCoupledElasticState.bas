@@ -2138,6 +2138,48 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
             TestRecord False, CStr(mode) & " has no elements in the hoop capacity state", passed, failed, report
         End If
     Next mode
+    TestTraceWithoutElementResults book, snap, passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет автоматический вывод сохранённой истории без подробного НДС.
+' Схема сечения и выбор носителя не определяют доступность графика.
+Private Sub TestTraceWithoutElementResults(ByVal book As Object, ByVal source As CCalculationSnapshot, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim traceOnly As New CCalculationSnapshot, key As Variant
+    traceOnly.RunID = source.RunID
+    For Each key In source.Keys
+        If key = "rngNDMElementResults" Or key = COUPLED_FIELD_TABLE Then
+            traceOnly.AddTable CStr(key), source.TableHeader(CStr(key))
+        Else
+            traceOnly.AddTable CStr(key), source.Table(CStr(key))
+        End If
+    Next key
+    Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
+    Dim selectedName As Object: Set selectedName = TestInputCell(settings, "Results.SnapshotName")
+    Dim enabled As Object: Set enabled = TestInputCell(settings, "Plot.Enabled")
+    Dim autoUpdate As Object: Set autoUpdate = TestInputCell(settings, "Plot.AutoUpdateAfterCalculation")
+    Dim savedName As Variant, savedMode As Variant, savedEnabled As Variant, savedAuto As Variant
+    savedName = selectedName.Value2: savedEnabled = enabled.Value2: savedAuto = autoUpdate.Value2
+    Dim storage As Object: Set storage = TestInputCell(settings, "Results.SnapshotStorage")
+    savedMode = storage.Value2
+    selectedName.Value2 = "TestTraceWithoutElementResults"
+    Dim mode As Variant, plotMode As Variant, note As String, warning As Boolean
+    For Each mode In Array("Excel", "File")
+        storage.Value2 = mode
+        For Each plotMode In Array(Array("Yes", "Yes"), Array("No", "Yes"), Array("Yes", "No"))
+            enabled.Value2 = plotMode(0): autoUpdate.Value2 = plotMode(1)
+            ClearCoupledLoadChart book
+            note = SaveAndDisplayCalculationSnapshot(book, traceOnly, warning)
+            TestRecord Not HasResultTableRows(ReadElementResultTable(book, "Hoop", "StrengthState")), _
+                CStr(mode) & ", Plot.Enabled=" & plotMode(0) & ", Plot.AutoUpdateAfterCalculation=" & plotMode(1) & _
+                    " has no saved element state", passed, failed, report
+            TestLoadTraceChart book, "Hoop", True, True, True, passed, failed, report
+        Next plotMode
+    Next mode
+    selectedName.Value2 = savedName: storage.Value2 = savedMode
+    enabled.Value2 = savedEnabled: autoUpdate.Value2 = savedAuto
+    note = SaveAndDisplayCalculationSnapshot(book, source, warning)
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -2854,7 +2896,8 @@ Public Function RunTestCoupledWorkbookTiming(ByVal calculation As String, ByVal 
             Next i
         End If
     End If
-    TestLoadTraceChart book, CASE_ID, calculation <> "Capacity", calculation <> "Direct", IsNumeric(limit), passed, failed, report
+    TestLoadTraceChart book, CASE_ID, calculation <> "Capacity", calculation <> "Direct", IsNumeric(limit), passed, failed, report, _
+        (directStatus = "OK" Or directStatus = "FAIL")
     RunTestCoupledWorkbookTiming = report & "TOTAL_COUPLED_WORKBOOK_TIMING: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
@@ -2865,7 +2908,7 @@ End Function
 ' Сверяет значения нативных рядов с последовательностью из активного
 ' носителя и различает маркер предела от последнего успешного шага.
 Private Sub TestLoadTraceChart(ByVal book As Object, ByVal combination As String, ByVal wantDirect As Boolean, ByVal wantCapacity As Boolean, _
-        ByVal wantLimit As Boolean, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+        ByVal wantLimit As Boolean, ByRef passed As Long, ByRef failed As Long, ByRef report As String, Optional ByVal targetReached As Boolean = True)
     Dim container As Object, chart As Object
     On Error Resume Next
     Set container = book.Worksheets("Results").ChartObjects("chtNDMCoupledLoadTrace")
@@ -2890,7 +2933,7 @@ Private Sub TestLoadTraceChart(ByVal book As Object, ByVal combination As String
         End Select
     Next series
     Dim directMatches As Boolean
-    directMatches = ((Not direct Is Nothing) = wantDirect And hasTarget = wantDirect)
+    directMatches = ((Not direct Is Nothing) = wantDirect And hasTarget = (wantDirect And targetReached))
     TestRecord directMatches, "native target marker belongs to the direct branch", passed, failed, report
     If Not direct Is Nothing Then
         TestRecord TestTraceSeriesPoints(direct, data, combination, "Coupled.Trace.Direct."), _

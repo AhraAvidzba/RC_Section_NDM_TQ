@@ -244,24 +244,26 @@ Public Function SaveAndDisplayCalculationSnapshot(ByVal workbook As Object, ByVa
     SaveAndDisplayCalculationSnapshot = warning
 End Function
 
-' Ошибка оформления не отменяет сохранённый расчёт и заполненные подробные таблицы.
-' Ручное обновление возвращает исходную ошибку; автоматическое завершение — предупреждение.
+' Обновляет историю нагружения с таблицами Results. Схема НДС зависит от
+' настроек и наличия результатов элементов. Ошибка вывода оставляет расчёт сохранённым.
 Private Function TryUpdateCalculatedSnapshotPlot(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, _
         ByRef plotHasWarning As Boolean) As String
     plotHasWarning = False
     On Error GoTo Failed
     Dim settings As CSystemSettingsReader: Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook workbook
-    If Not settings.GetRequiredBoolean("Plot.Enabled") Then Exit Function
-    If Not settings.GetRequiredBoolean("Plot.AutoUpdateAfterCalculation") Then Exit Function
+    Dim updateScheme As Boolean: updateScheme = settings.GetRequiredBoolean("Plot.Enabled")
+    If updateScheme Then updateScheme = settings.GetRequiredBoolean("Plot.AutoUpdateAfterCalculation")
     Dim containerNotice As String
-    If snapshot.TableRowCount("rngNDMElementResults") <= 1 Then
-        Dim plotter As CSectionPlotter: Set plotter = New CSectionPlotter
-        plotter.ClearExisting workbook, "Схема не обновлена: нет доступных расчётных состояний LC.", containerNotice
-        plotHasWarning = (Len(containerNotice) > 0)
-        TryUpdateCalculatedSnapshotPlot = containerNotice
-        Exit Function
+    If updateScheme And snapshot.TableRowCount("rngNDMElementResults") > 1 Then
+        UpdateSectionPlotForWorkbook workbook, False, containerNotice
+    Else
+        Dim traceNotice As String: traceNotice = TryUpdateCoupledLoadChart(workbook, settings)
+        If updateScheme Then
+            Dim plotter As CSectionPlotter: Set plotter = New CSectionPlotter
+            plotter.ClearExisting workbook, "Схема не обновлена: нет доступных расчётных состояний LC.", containerNotice
+        End If
+        containerNotice = WorkbookMessageParagraph(containerNotice, traceNotice)
     End If
-    UpdateSectionPlotForWorkbook workbook, False, containerNotice
     plotHasWarning = (Len(containerNotice) > 0)
     TryUpdateCalculatedSnapshotPlot = containerNotice
     Exit Function
