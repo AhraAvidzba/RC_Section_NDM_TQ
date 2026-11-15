@@ -28,6 +28,7 @@ Private mCrackResult As CCrackResult ' Результаты образовани
 Private mStabilityResult As CStabilityResult ' Проверка устойчивости.
 Private mCoupledResultants() As Double ' Усилия подтверждённого связанного равновесия в численном центре, Н и Н·мм.
 Private mHasCoupledResultants As Boolean ' Целевая точка траектории подтверждена.
+Private mDirectTrace As CCoupledLoadTrace, mCapacityTrace As CCoupledLoadTrace
 Private mWorkflowMeta As CResultMeta ' Ошибка общей проверки исходных данных или остановка выполнения сочетания до получения инженерного результата.
 
 ' Создаёт пустые результаты отдельных проверок. Несуществующее НДС при этом не подставляется.
@@ -46,6 +47,7 @@ Public Sub Clear(ByVal defaultCapacityPath As String)
     Set mWorkflowMeta = New CResultMeta
     Erase mCoupledResultants
     mHasCoupledResultants = False
+    Set mDirectTrace = Nothing: Set mCapacityTrace = Nothing
     mWorkflowMeta.SetNotRequested rkGeneric
     mProfileId = vbNullString
     mDiagramExtensionEnabled = False
@@ -66,6 +68,17 @@ Friend Function CopyCoupledResultants(ByRef resultants() As Double) As Boolean
     If Not mHasCoupledResultants Then Exit Function
     resultants = mCoupledResultants
     CopyCoupledResultants = True
+End Function
+
+' Сохраняет принятую траекторию одного из двух независимых расчётов.
+Friend Sub StoreCoupledTrace(ByVal isCapacity As Boolean, ByVal trace As CCoupledLoadTrace)
+    AssertWritable
+    If isCapacity Then Set mCapacityTrace = trace Else Set mDirectTrace = trace
+End Sub
+
+' Возвращает готовую траекторию выбранной проверки, если был принят шаг.
+Friend Function CoupledTrace(ByVal isCapacity As Boolean) As CCoupledLoadTrace
+    If isCapacity Then Set CoupledTrace = mCapacityTrace Else Set CoupledTrace = mDirectTrace
 End Function
 
 ' Возвращает внешний статус сочетания по сохранённым статусам отдельных проверок.

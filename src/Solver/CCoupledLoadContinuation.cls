@@ -31,6 +31,7 @@ Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
 Private mMeta As CResultMeta
 Private mAcceptedFields As Collection ' Копии полей принятых шагов для восстановления истории в точках вывода.
+Private mAcceptedTrace As CCoupledLoadTrace
 Private mReinforcement As CCoupledReinforcedResponse ' Контроль предельных деформаций включается при поиске.
 Private mLimitTolerance As Double
 Private mHasSteelLimit As Boolean, mSteelLimitOnOffset As Boolean
@@ -38,6 +39,7 @@ Private mSteelLimitLow As Double, mSteelLimitHigh As Double
 Private mSteelLimitPoint As Long ' Материальная точка, определившая численно уточнённую верхнюю границу.
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
+Private mLimitTrace As CCoupledLoadTrace
 
 ' Начинает новое независимое сочетание. Копирует траекторию и обнуляет
 ' материалы, чтобы результат не зависел от предыдущей строки таблицы.
@@ -65,8 +67,11 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mSteelLimitPoint = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
     Erase mField: Erase mResultants
-    Set mAcceptedFields = Nothing
-    If saveAcceptedFields Then Set mAcceptedFields = New Collection
+    Set mAcceptedFields = Nothing: Set mAcceptedTrace = Nothing: Set mLimitTrace = Nothing
+    If saveAcceptedFields Then
+        Set mAcceptedFields = New Collection
+        Set mAcceptedTrace = New CCoupledLoadTrace
+    End If
     Set mMeta = New CResultMeta
     mSolver.ResetHistory
 End Sub
@@ -116,7 +121,7 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupled
     If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
     controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
-        PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance
+        PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, mAcceptedTrace
     Set ContinueByDeformation = controlled
 End Function
 
@@ -149,6 +154,11 @@ End Sub
 ' Получатель читает готовую последовательность без изменения.
 Friend Property Get AcceptedFields() As Collection
     Set AcceptedFields = mAcceptedFields
+End Property
+
+' Возвращает параметры ветви до предельной точки либо последнего принятого шага.
+Friend Property Get SavedTrace() As CCoupledLoadTrace
+    If mLimitTrace Is Nothing Then Set SavedTrace = mAcceptedTrace Else Set SavedTrace = mLimitTrace
 End Property
 
 ' Передаёт историю и усилия допустимого плеча стального предела.
@@ -284,7 +294,7 @@ Private Function SolveAndAccept(ByVal parameter As Double, ByVal offsetStage As 
             Exit Function
         End If
     End If
-    SaveCandidate
+    SaveCandidate parameter, offsetStage
     SolveAndAccept = True
 End Function
 
@@ -308,12 +318,15 @@ Private Function TryEquilibrium(ByVal parameter As Double, ByVal offsetStage As 
 End Function
 
 ' Принимает равновесную пробу целиком и при необходимости копирует поле.
-Private Sub SaveCandidate()
+Private Sub SaveCandidate(ByVal parameter As Double, ByVal offsetStage As Boolean)
     If mHasAccepted Then mPreviousLambda = mLambda
     mSolver.CopyTrial mField, mResultants
     mSolver.AcceptStep
     mHasAccepted = True: mAccepted = mAccepted + 1
-    If Not mAcceptedFields Is Nothing Then mAcceptedFields.Add mField
+    If Not mAcceptedFields Is Nothing Then
+        mAcceptedFields.Add mField
+        If offsetStage Then mAcceptedTrace.Add parameter, 0# Else mAcceptedTrace.Add mOffsetFraction, parameter
+    End If
 End Sub
 
 ' Уточняет пересечение с откатом каждой пробы к одному принятому состоянию.
@@ -358,10 +371,12 @@ Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
     mHasSteelLimit = True
     If keepFields And (mHasAccepted Or low > mLambda) Then
         Set mLimitFields = New Collection
+        Set mLimitTrace = mAcceptedTrace.CopyPrefix(mAcceptedTrace.Count)
         Dim i As Long
         For i = 1 To mAcceptedFields.Count: mLimitFields.Add mAcceptedFields.Item(i): Next i
         If low > mLambda Then
             mLimitFields.Add finalField
+            mLimitTrace.Add 1#, low
             mLimitResultants = finalResultants
         Else
             mLimitResultants = mResultants

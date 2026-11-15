@@ -496,7 +496,7 @@ Public Function RunTestCoupledContinuation() As String
     solver.Initialize operators, material, 30000#
     Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
     path.Initialize FORCE0, FORCE1 - FORCE0, 0#, 200000#, 0#, 100000#, 0#, 300000#, 0#, 2000#, 0#, -1000#
-    branch.Initialize solver, path, 1, 100, 20, 1E-8, 1E-8
+    branch.Initialize solver, path, 1, 100, 20, 1E-8, 1E-8, True
     Dim field() As Double, resultants() As Double, expected() As Double, ok As Boolean
     ok = branch.Advance(0#)
     TestRecord ok, "constant part reached " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
@@ -505,6 +505,10 @@ Public Function RunTestCoupledContinuation() As String
     TestExpectNear resultants(1), FORCE0, 1E-7, "preload resultant", passed, failed, report
     TestRecord branch.AcceptedOffsetFraction = 1# And branch.AcceptedLambda = 0# And branch.RejectedAttempts > 0, _
         "preload reduced an unsafe increment and reached its exact target", passed, failed, report
+    Dim trace As CCoupledLoadTrace, traceCount As Long, fraction As Double, lambda As Double
+    Set trace = branch.SavedTrace
+    trace.ReadPoint 1, fraction, lambda
+    TestRecord fraction > 0# And fraction < 1# And lambda = 0#, "trace records only accepted offset fraction", passed, failed, report
 
     ok = branch.Advance(1#)
     TestRecord ok, "direction reached " & branch.ResultMeta.DiagnosticDetails, passed, failed, report
@@ -520,13 +524,17 @@ Public Function RunTestCoupledContinuation() As String
 
     Dim acceptedBefore As Long, firstDegree As Double
     acceptedBefore = material.TestAcceptedSteps: firstDegree = field(1)
+    traceCount = trace.Count
+    trace.ReadPoint traceCount, fraction, lambda
+    TestRecord traceCount = branch.SavedFieldCount And fraction = 1# And lambda = 1#, _
+        "trace and material history end at the same target", passed, failed, report
     material.TestFail = True
     ok = branch.Advance(1.1)
     TestRecord Not ok And branch.ResultMeta.InternalStatus = rsNumericalFailure And branch.AcceptedLambda = 1#, _
         "minimum step failure stays numerical at last accepted lambda", passed, failed, report
     branch.CopyAccepted field, resultants
-    TestRecord firstDegree = field(1) And acceptedBefore = material.TestAcceptedSteps, _
-        "failed increments leave accepted section and history unchanged", passed, failed, report
+    TestRecord firstDegree = field(1) And acceptedBefore = material.TestAcceptedSteps And trace.Count = traceCount, _
+        "failed increments leave accepted section, history and trace unchanged", passed, failed, report
     material.TestFail = False
     TestRecord branch.Advance(1.1), "recovered path can continue", passed, failed, report
     ok = branch.Advance(1#)
@@ -2103,6 +2111,7 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
             CStr(mode) & " restores both independent hoop statuses on Results", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 54).Value2), reserve, 1E-10, _
             CStr(mode) & " restores the hoop reserve on Results", passed, failed, report
+        TestLoadTraceChart book, "Hoop", True, True, True, passed, failed, report
         TestRecord InStr(CStr(anchor.Offset(0, 50).Value2), "TestWeakHoop (TestHoopGrade)") = 1 And _
             InStr(CStr(anchor.Offset(0, 55).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
             CStr(mode) & " restores the hoop and its grade in both checks", passed, failed, report
@@ -2375,6 +2384,8 @@ Public Function RunTestCoupledWorkbookInput() As String
         Next i
         TestSavedCoupledFields book, CStr(mode), section.ConcreteCount + section.RebarCount, passed, failed, report
         TestSavedCoupledMaterialCurves book, CStr(mode), grades.Cells(2, 3), units, passed, failed, report
+        TestLoadChartSelection book, settings, TestInputCell(profiles, "Visualization.Quantity", 2, pr4), _
+            CStr(mode), passed, failed, report
     Next mode
     TestSavedAutoCADTransverse book, settings, units, passed, failed, report
     TestSavedCurvedTransversePaths book, units, passed, failed, report
@@ -2383,6 +2394,30 @@ Public Function RunTestCoupledWorkbookInput() As String
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Нативное обновление сначала убирает график для плоской строки, затем
+' восстанавливает его для пространственной строки из того же снимка.
+Private Sub TestLoadChartSelection(ByVal book As Object, ByVal settings As Object, ByVal quantity As Object, ByVal mode As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim selector As Object, combination As Object, oldMode As Variant, oldID As Variant, oldQuantity As Variant
+    Set selector = TestInputCell(settings, "Output.CombinationMode")
+    Set combination = TestInputCell(settings, "Output.CombinationID")
+    oldMode = selector.Formula: oldID = combination.Formula: oldQuantity = quantity.Formula
+    quantity.Value2 = "Stress"
+    selector.Value2 = "User": combination.Value2 = "Plane"
+    UpdateSectionResultsForWorkbook book
+    Dim chart As Object, hasChart As Boolean
+    For Each chart In book.Worksheets("Results").ChartObjects
+        If chart.Name = "chtNDMCoupledLoadTrace" Then hasChart = True: Exit For
+    Next chart
+    TestRecord Not hasChart, mode & " planar selection clears the load trace", passed, failed, report
+    combination.Value2 = "Spatial"
+    UpdateSectionResultsForWorkbook book
+    TestLoadTraceChart book, "Spatial", True, False, False, passed, failed, report
+    selector.Formula = oldMode: combination.Formula = oldID: quantity.Formula = oldQuantity
+    UpdateSectionResultsForWorkbook book
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет сохранённые кривые с аналитическими длинами дуги и окружности.
@@ -2770,10 +2805,87 @@ Public Function RunTestCoupledWorkbookTiming(ByVal calculation As String, ByVal 
             Next i
         End If
     End If
+    TestLoadTraceChart book, CASE_ID, calculation <> "Capacity", calculation <> "Direct", IsNumeric(limit), passed, failed, report
     RunTestCoupledWorkbookTiming = report & "TOTAL_COUPLED_WORKBOOK_TIMING: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledWorkbookTiming = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет значения нативных рядов с последовательностью из активного
+' носителя и различает маркер предела от последнего успешного шага.
+Private Sub TestLoadTraceChart(ByVal book As Object, ByVal combination As String, ByVal wantDirect As Boolean, ByVal wantCapacity As Boolean, _
+        ByVal wantLimit As Boolean, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim container As Object, chart As Object
+    On Error Resume Next
+    Set container = book.Worksheets("Results").ChartObjects("chtNDMCoupledLoadTrace")
+    On Error GoTo 0
+    TestRecord Not container Is Nothing, "native load trace for " & combination, passed, failed, report
+    If container Is Nothing Then Exit Sub
+    Set chart = container.Chart
+    Dim data As Variant, source As CResultReadSource
+    Set source = CurrentResultSource(book)
+    If source Is Nothing Then
+        data = ReadPhysicalResultTable(book, "rngNDMSectionProperties")
+    Else
+        data = source.Table("LoadCase.Properties")
+    End If
+    Dim direct As Object, capacity As Object, series As Object, marker As String, hasTarget As Boolean
+    For Each series In chart.SeriesCollection
+        Select Case CStr(series.Name)
+            Case "Заданные усилия": Set direct = series
+            Case "Поиск предела": Set capacity = series
+            Case "Заданная точка": hasTarget = True
+            Case "Подтверждённый максимум", "Предельная деформация арматуры", "Последняя точка поиска": marker = CStr(series.Name)
+        End Select
+    Next series
+    Dim directMatches As Boolean
+    directMatches = ((Not direct Is Nothing) = wantDirect And hasTarget = wantDirect)
+    TestRecord directMatches, "native target marker belongs to the direct branch", passed, failed, report
+    If Not direct Is Nothing Then
+        TestRecord TestTraceSeriesPoints(direct, data, combination, "Coupled.Trace.Direct."), _
+            "native direct series matches accepted trace", passed, failed, report
+    End If
+    If wantCapacity Then
+        TestRecord Not capacity Is Nothing, "native capacity branch is shown independently", passed, failed, report
+        If Not capacity Is Nothing Then TestRecord TestTraceSeriesPoints(capacity, data, combination, "Coupled.Trace.Capacity."), _
+            "native capacity series matches accepted trace", passed, failed, report
+        If wantLimit Then
+            TestRecord marker = "Подтверждённый максимум" Or marker = "Предельная деформация арматуры", _
+                "native marker identifies the confirmed limit", passed, failed, report
+        Else
+            TestRecord marker = "Последняя точка поиска", "native marker does not claim a limit for NumFail", passed, failed, report
+        End If
+    Else
+        TestRecord capacity Is Nothing And Len(marker) = 0, "direct-only chart has no capacity branch", passed, failed, report
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет фактический порядок, значения и отсутствие сглаживания.
+Private Function TestTraceSeriesPoints(ByVal series As Object, ByRef data As Variant, ByVal combination As String, _
+        ByVal prefix As String) As Boolean
+    Dim x As Variant, y As Variant, row As Long, point As Long, key As String, stem As String, index As Long
+    x = series.XValues: y = series.Values
+    If Not IsArray(x) Or Not IsArray(y) Or series.Smooth Then Exit Function
+    For row = 2 To UBound(data, 1) - 1
+        If CStr(data(row, 2)) = combination Then
+            key = CStr(data(row, 3))
+            If Left$(key, Len(prefix)) = prefix And Right$(key, 7) = ".Lambda" Then
+                stem = Left$(key, Len(key) - 7)
+                If CStr(data(row + 1, 3)) <> stem & ".Offset" Then Exit Function
+                If CDbl(data(row + 1, 4)) = 1# Then
+                    index = LBound(x) + point
+                    If index > UBound(x) Then Exit Function
+                    If CDbl(x(index)) <> CDbl(Mid$(stem, Len(prefix) + 1)) Then Exit Function
+                    If Abs(CDbl(y(LBound(y) + point)) - CDbl(data(row, 4))) > 1E-12 Then Exit Function
+                    point = point + 1
+                End If
+            End If
+        End If
+    Next row
+    TestTraceSeriesPoints = point = UBound(x) - LBound(x) + 1
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

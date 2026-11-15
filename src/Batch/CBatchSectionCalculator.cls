@@ -930,7 +930,7 @@ End Sub
 ' запрошенной проверки в штатных результатах профиля.
 Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile)
     Dim combined As CCombinationResult: Set combined = mResults(index)
-    Dim meta As CResultMeta, field() As Double, resultants() As Double
+    Dim meta As CResultMeta, field() As Double, resultants() As Double, trace As CCoupledLoadTrace
     If profile.StabilityEnabled Then
         ReportSection "Продольный изгиб и устойчивость по N, Mx и My"
         RunStabilityFilter index, profile.StabilityValueSet
@@ -952,7 +952,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
         ReportStep reason
     ElseIf profile.StrengthDirectStateEnabled Then
         Dim acceptedState As CSectionStateResult
-        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants, True, acceptedState)
+        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants, True, acceptedState, trace)
+        combined.StoreCoupledTrace False, trace
         combined.SetDirectStateMeta meta
         If Not acceptedState Is Nothing Then combined.AddState acceptedState
         If meta.InternalStatus = rsSuccess Or meta.InternalStatus = rsSuccessWithWarning Or meta.InternalStatus = rsCheckFailed Then _
@@ -966,7 +967,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
             ReportSection "Предельная нагрузка для связанного сечения"
             Dim capacity As CCapacityResult
             Set capacity = mCoupledAnalysis.SolveCapacity(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, _
-                mCapacityInitialLambda, mCapacityMaxLambda, mCapacityToleranceLambda, mCapacitySolverMaxIterations)
+                mCapacityInitialLambda, mCapacityMaxLambda, mCapacityToleranceLambda, mCapacitySolverMaxIterations, trace)
+            combined.StoreCoupledTrace True, trace
             combined.StoreCapacityResult capacity
             Set meta = capacity.ResultMeta
             ReportStep meta.ResultComment

@@ -102,7 +102,8 @@ Public Sub UpdateSectionPlotForWorkbook(ByVal workbook As Object, Optional ByVal
         summary.SavedWorstExcelID workbook, settings, True
     End If
 
-    If Not settings.GetRequiredBoolean("Plot.Enabled") Then Exit Sub
+    Dim traceNotice As String: traceNotice = TryUpdateCoupledLoadChart(workbook, settings)
+    If Not settings.GetRequiredBoolean("Plot.Enabled") Then containerNotice = traceNotice: Exit Sub
 
     Dim reader As CSectionPlotDataReader
     Set reader = New CSectionPlotDataReader
@@ -135,6 +136,7 @@ Public Sub UpdateSectionPlotForWorkbook(ByVal workbook As Object, Optional ByVal
     Dim plotter As CSectionPlotter
     Set plotter = New CSectionPlotter
     plotter.Draw workbook, reader, settings, containerNotice
+    containerNotice = WorkbookMessageParagraph(containerNotice, traceNotice)
     CompleteWorkbookDrawing workbook
 End Sub
 
@@ -194,6 +196,7 @@ Public Sub UpdateSectionGeometryPreviewForWorkbook(ByVal workbook As Object, Opt
         Optional ByVal runSettings As CSystemSettingsReader = Nothing)
     containerNotice = vbNullString
     If workbook Is Nothing Then Err.Raise vbObjectError + 4141, "UpdateSectionGeometryPreviewForWorkbook", "Книга Excel не передана."
+    ClearCoupledLoadChart workbook
 
     Dim settings As CSystemSettingsReader
     If runSettings Is Nothing Then
@@ -1290,6 +1293,7 @@ Public Sub ClearSectionResultsForWorkbook(ByVal workbook As Object)
     Dim ndmWriter As CNDMResultsWriter
     Set ndmWriter = New CNDMResultsWriter
     ndmWriter.ClearResults workbook
+    ClearCoupledLoadChart workbook
 End Sub
 
 ' Читает зарегистрированные таблицы выбранного рецепта и создаёт единое описание сечения.

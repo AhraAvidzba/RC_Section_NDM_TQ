@@ -863,6 +863,8 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
 
     Dim resultants() As Double, result As CCombinationResult
     Set result = batch.ResultAt(index)
+    PutCoupledTrace data, row, runID, id, COUPLED_TRACE_DIRECT, result.CoupledTrace(False)
+    PutCoupledTrace data, row, runID, id, COUPLED_TRACE_CAPACITY, result.CoupledTrace(True)
     If batch.StrengthCapacityRequested(index) Then _
         PutCoupledCapacityProperties data, row, runID, id, result.StrengthResult.Capacity, units
     If Not result.CopyCoupledResultants(resultants) Then Exit Sub
@@ -888,6 +890,20 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
             PutProperty data, row, runID, id, "Coupled.Transverse.Status", state.CoupledTransverseStatus, "-", "Статус по достижению предельной деформации при заданных нагрузках."
         End If
     End If
+End Sub
+
+' Записывает принятые точки как числовые свойства сочетания. Раздельные
+' ключи сохраняют порядок точек и два независимых параметра нагружения.
+Private Sub PutCoupledTrace(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal id As String, ByVal prefix As String, ByVal trace As CCoupledLoadTrace)
+    If trace Is Nothing Then Exit Sub
+    Dim i As Long, offsetFraction As Double, lambda As Double, key As String
+    For i = 1 To trace.Count
+        trace.ReadPoint i, offsetFraction, lambda
+        key = prefix & CStr(i)
+        PutProperty data, row, runID, id, key & ".Lambda", lambda, "-", "Множитель переменной части на принятом шаге."
+        PutProperty data, row, runID, id, key & ".Offset", offsetFraction, "-", "Доля постоянной части на принятом шаге."
+    Next i
 End Sub
 
 ' Сохраняет механизм и подтверждённый вектор физического предела
@@ -1440,9 +1456,17 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
 
     Dim combinationIndex As Long, stateIndex As Long
     Dim repository As CStateRepository, state As CSectionStateResult, curves As CCoupledMaterialSnapshot
+    Dim result As CCombinationResult, trace As CCoupledLoadTrace
     For combinationIndex = 1 To batch.Count
-        If batch.HasSpatialLoads(combinationIndex) Then rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
-        Set repository = batch.ResultAt(combinationIndex).StateRepository
+        Set result = batch.ResultAt(combinationIndex)
+        If batch.HasSpatialLoads(combinationIndex) Then
+            rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
+            Set trace = result.CoupledTrace(False)
+            If Not trace Is Nothing Then rowCount = rowCount + 2 * trace.Count
+            Set trace = result.CoupledTrace(True)
+            If Not trace Is Nothing Then rowCount = rowCount + 2 * trace.Count
+        End If
+        Set repository = result.StateRepository
         rowCount = rowCount + repository.StateCount * STATE_SECTION_PROPERTY_ROWS
         For stateIndex = 1 To repository.StateCount
             Set state = repository.StateAt(stateIndex)

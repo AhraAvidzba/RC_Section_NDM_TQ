@@ -80,9 +80,11 @@ End Property
 ' состояние заданных усилий. Численный отказ не публикует итоги промежуточной ступени.
 Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
         ByVal spec As CMaterialModelSpec, ByRef field() As Double, ByRef resultants() As Double, _
-        Optional ByVal captureFields As Boolean = False, Optional ByRef acceptedState As CSectionStateResult = Nothing) As CResultMeta
+        Optional ByVal captureFields As Boolean = False, Optional ByRef acceptedState As CSectionStateResult = Nothing, _
+        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing) As CResultMeta
     Erase field: Erase resultants
     Set acceptedState = Nothing
+    Set acceptedTrace = Nothing
     Dim concrete As New CCoupledConcreteResponse, fc As Double, ft As Double
     Dim meta As CResultMeta, response As New CCoupledReinforcedResponse, models As Object
     Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
@@ -118,6 +120,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Else
         Set meta = continuation.ResultMeta
     End If
+    Set acceptedTrace = continuation.SavedTrace
     Set SolveTarget = meta
 End Function
 
@@ -125,9 +128,11 @@ End Function
 ' деформацией. Вектор относится к пользовательской точке приложения.
 Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
         ByVal spec As CMaterialModelSpec, ByVal initialLambda As Double, ByVal maximumLambda As Double, _
-        ByVal lambdaTolerance As Double, ByVal maxIterations As Long) As CCapacityResult
+        ByVal lambdaTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing) As CCapacityResult
     Dim capacity As New CCapacityResult, meta As CResultMeta, reason As String
     Set SolveCapacity = capacity
+    Set acceptedTrace = Nothing
     If initialLambda <= 0# Then reason = "Capacity.InitialLambda"
     If maximumLambda <= 0# Then reason = "Capacity.MaxLambda"
     If lambdaTolerance <= 0# Then reason = "Capacity.ToleranceLambda"
@@ -150,6 +155,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     solver.Initialize mOperators, response, mEb
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
     branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
+    Set acceptedTrace = branch.SavedTrace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
     Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
@@ -158,6 +164,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     If Not hasSteel Then
         Set controlled = branch.ContinueByDeformation(maximumLambda)
         If Not controlled Is Nothing Then
+            Set acceptedTrace = controlled.SavedTrace
             Dim forceDetails As String: forceDetails = meta.DiagnosticDetails
             Set meta = controlled.ResultMeta
             If Len(forceDetails) > 0 Then meta.DiagnosticDetails = forceDetails & " | " & meta.DiagnosticDetails

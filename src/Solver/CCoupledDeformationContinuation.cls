@@ -47,6 +47,7 @@ Private mProbeCount As Long
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
+Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -55,7 +56,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         ByRef offset() As Double, ByRef direction() As Double, ByVal history As Collection, _
         ByVal previousLambda As Double, ByVal currentLambda As Double, ByRef initialResultants() As Double, _
         ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, ByVal maximumIterations As Long, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double)
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, Optional ByVal loadTrace As CCoupledLoadTrace = Nothing)
     Set mSolver = solver: Set mReinforcement = reinforcement
     mOffset = offset: mDirection = direction
     mMaxIterations = maximumIterations: mMaximumLambda = maximumLambda
@@ -67,6 +68,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mReusedRightPoints = 0
     mShoulderProbes = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
+    Set mTrace = Nothing: Set mLimitTrace = Nothing
+    If Not loadTrace Is Nothing Then Set mTrace = loadTrace.CopyPrefix(loadTrace.Count)
     mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
     Set mMeta = New CResultMeta
@@ -164,6 +167,7 @@ Private Sub ResumeAfterLocalPeak(ByRef history As Collection, ByRef current As T
     mLocalPeak = mPeak.Lambda: mLocalPeakAccuracy = mPeakAccuracy
     mHasPeak = False: mFollowingLocalPeak = True
     Set history = mLimitFields
+    Set mTrace = mLimitTrace: Set mLimitTrace = Nothing
     mCurrentResultants = mLimitResultants
     Set mLimitFields = Nothing: Erase mLimitResultants
     current = right
@@ -182,6 +186,11 @@ End Sub
 ' допустимой ветви, даже если общий предел остался неопределённым.
 Friend Property Get BestAdmissibleLambda() As Double
     BestAdmissibleLambda = mBestLambda
+End Property
+
+' Возвращает историю выбранной ветви, исключая отменённые пробы плеч.
+Friend Property Get SavedTrace() As CCoupledLoadTrace
+    If mHasPeak Or mSteelPoint > 0 Then Set SavedTrace = mLimitTrace Else Set SavedTrace = mTrace
 End Property
 
 ' Передаёт подтверждённый максимум ветви без арматуры и оценку точности.
@@ -239,6 +248,7 @@ Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint
     mSolver.CopyTrial field, mCurrentResultants
     mSolver.AcceptStep
     history.Add field
+    If Not mTrace Is Nothing Then mTrace.Add 1#, point.Lambda
     point.HistoryIndex = history.Count
 End Sub
 
@@ -366,6 +376,10 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
                 End If
                 For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
                 For j = 1 To fieldCount: limitFields.Add refined.Item(j): Next j
+                If Not mTrace Is Nothing Then
+                    Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
+                    For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).Lambda: Next j
+                End If
                 limitResultants = integrated.Item(fieldCount)
             End If
             ReplayShoulders = True
@@ -400,8 +414,10 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
             Set mLimitFields = New Collection
             Dim i As Long
             For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
+            If Not mTrace Is Nothing Then Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
             If low.Lambda > left.Lambda Then
                 mLimitFields.Add field
+                If Not mLimitTrace Is Nothing Then mLimitTrace.Add 1#, low.Lambda
                 mLimitResultants = resultants
             Else
                 mLimitResultants = mCurrentResultants
