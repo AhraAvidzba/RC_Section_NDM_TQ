@@ -268,7 +268,7 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(1, COL_LIM_EBC) = "Общие данные"
     headers(1, COL_STATE_EPS0) = "НДС от заданного сочетания нагрузок (по модели прочности)"
     headers(1, COL_CAP_EPS0) = "Расчет предельной несущей способности по выбранной " & ChrW$(&H3BB) & "-траектории (по модели прочности)"
-    headers(1, COL_TRANSVERSE_POINT) = "Поперечная арматура"
+    headers(1, COL_TRANSVERSE_POINT) = "Поперечная арматура — хомуты и ветви"
 
     headers(2, COL_STATE_EPS0) = "плоскость деформации"
     headers(2, COL_STATE_EBC) = "фактические макс. деформации"
@@ -279,21 +279,21 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     headers(2, COL_CAP_LAMBDA) = "предельные компоненты"
     headers(2, COL_CAP_EBC) = "фактические макс. деформации"
     headers(2, COL_CAP_H) = "параметры сечения при " & ChrW$(&H3BB) & "ult и статус"
-    headers(2, COL_TRANSVERSE_POINT) = "при заданной нагрузке"
-    headers(2, COL_TRANSVERSE_RESERVE) = "предел на выбранной траектории"
+    headers(2, COL_TRANSVERSE_POINT) = "Проверка при заданной нагрузке"
+    headers(2, COL_TRANSVERSE_RESERVE) = "Запас на выбранной траектории"
 
     PutHeaderNotes headers
     PutColumnLabels headers, units
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_POINT) = "Группа и точка"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS) = ChrW$(&H3C3) & ", " & OutputStressUnit(units)
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_UTIL) = "Использование"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус НДС"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = "Запас " & ChrW$(&H3BB)
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Причина и точка предела"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Точка и причина предела"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус запаса"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка максимального использования по абсолютной деформации стержня"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "Отношение к пределу своего знака"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_RESERVE) = "Запас по определяющей поперечной арматуре"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка наибольшего использования"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "Доля предела |" & ChrW$(&H3B5) & "|"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_RESERVE) = "Если предел определяет хомут или ветвь"
     If Not mCapturedSnapshot Is Nothing Then
         mCapturedSnapshot.AddTable "Strength.Headers", headers
         Exit Sub
@@ -318,19 +318,19 @@ Private Sub PutHeaderNotes(ByRef headers() As Variant)
     headers(HEADER_NOTES_ROW, COL_LOAD_MY) = "момент My, переданный в расчёт прочности, в пользовательской точке приложения нагрузки. Продольный изгиб учтён, если он включён для сочетания."
     headers(HEADER_NOTES_ROW, COL_LIM_EBC) = "предельная деформация бетона при сжатии"
     headers(HEADER_NOTES_ROW, COL_LIM_EBT) = "предельная деформация бетона при растяжении; пусто, если растянутый бетон не работает"
-    headers(HEADER_NOTES_ROW, COL_LIM_ESC) = "предельная деформация арматуры при сжатии"
-    headers(HEADER_NOTES_ROW, COL_LIM_EST) = "предельная деформация арматуры при растяжении"
+    headers(HEADER_NOTES_ROW, COL_LIM_ESC) = "предельная деформация продольной арматуры при сжатии"
+    headers(HEADER_NOTES_ROW, COL_LIM_EST) = "предельная деформация продольной арматуры при растяжении"
     headers(HEADER_NOTES_ROW, COL_STATE_EPS0) = ChrW$(&H3B5) & "0 в точке (0;0) внутренней системы координат модели; от этой точки заданы координаты всех элементов сечения"
     headers(HEADER_NOTES_ROW, COL_STATE_KX) = "кривизна kx при координате y во внутренней системе координат модели"
     headers(HEADER_NOTES_ROW, COL_STATE_KY) = "кривизна ky при координате x во внутренней системе координат модели"
     headers(HEADER_NOTES_ROW, COL_STATE_EBC) = "максимальная сжимающая деформация бетона, если такая зона есть"
     headers(HEADER_NOTES_ROW, COL_STATE_EBT) = "максимальная растягивающая деформация бетона, если такая зона есть"
-    headers(HEADER_NOTES_ROW, COL_STATE_ESC) = "максимальная сжимающая деформация арматуры, если такая зона есть"
-    headers(HEADER_NOTES_ROW, COL_STATE_EST) = "максимальная растягивающая деформация арматуры, если такая зона есть"
+    headers(HEADER_NOTES_ROW, COL_STATE_ESC) = "максимальная сжимающая деформация продольной арматуры, если такая зона есть"
+    headers(HEADER_NOTES_ROW, COL_STATE_EST) = "максимальная растягивающая деформация продольной арматуры, если такая зона есть"
     headers(HEADER_NOTES_ROW, COL_STATE_SBC) = "максимальное сжатие бетона"
     headers(HEADER_NOTES_ROW, COL_STATE_SBT) = "максимальное растяжение бетона; пусто, если диаграмма не несет растяжение"
-    headers(HEADER_NOTES_ROW, COL_STATE_SSC) = "максимальное сжатие арматуры"
-    headers(HEADER_NOTES_ROW, COL_STATE_SST) = "максимальное растяжение арматуры"
+    headers(HEADER_NOTES_ROW, COL_STATE_SSC) = "максимальное сжатие продольной арматуры"
+    headers(HEADER_NOTES_ROW, COL_STATE_SST) = "максимальное растяжение продольной арматуры"
     headers(HEADER_NOTES_ROW, COL_STATE_H) = "полная высота сечения по нормали к нейтральной линии"
     headers(HEADER_NOTES_ROW, COL_STATE_X) = "высота сжатой зоны по нормали к нейтральной линии"
     headers(HEADER_NOTES_ROW, COL_STATE_DIAGEXT) = "yes - равновесие найдено через продолжение диаграммы; no - продолжение было разрешено, но не понадобилось; - - продолжение выключено"
@@ -348,8 +348,8 @@ Private Sub PutHeaderNotes(ByRef headers() As Variant)
     headers(HEADER_NOTES_ROW, COL_CAP_MY) = "полный My при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
     headers(HEADER_NOTES_ROW, COL_CAP_EBC) = "сжатая деформация бетона в CapacityState, если зона есть"
     headers(HEADER_NOTES_ROW, COL_CAP_EBT) = "растянутая деформация бетона в CapacityState, если зона есть"
-    headers(HEADER_NOTES_ROW, COL_CAP_ESC) = "сжатая деформация арматуры в CapacityState, если зона есть"
-    headers(HEADER_NOTES_ROW, COL_CAP_EST) = "растянутая деформация арматуры в CapacityState, если зона есть"
+    headers(HEADER_NOTES_ROW, COL_CAP_ESC) = "сжатая деформация продольной арматуры в CapacityState, если зона есть"
+    headers(HEADER_NOTES_ROW, COL_CAP_EST) = "растянутая деформация продольной арматуры в CapacityState, если зона есть"
     headers(HEADER_NOTES_ROW, COL_CAP_H) = "полная высота по нормали к нейтральной линии CapacityState"
     headers(HEADER_NOTES_ROW, COL_CAP_X) = "высота сжатой зоны CapacityState"
     headers(HEADER_NOTES_ROW, COL_CAP_RESERVE) = "запас по найденному множителю " & ChrW$(&H3BB)
@@ -486,13 +486,23 @@ Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
     PutStrengthLimits data, rowIndex, batch, index, units
     PutStrengthState data, rowIndex, batch, index, units, section, policy
     PutCapacityState data, rowIndex, batch, index, units, section, policy
-    If batch.HasSpatialLoads(index) Then PutTransverseState data, rowIndex, batch.ResultAt(index), units
+    If batch.HasSpatialLoads(index) Then PutTransverseState data, rowIndex, batch, index, units, policy
 End Sub
 
 ' Отдельно показывает максимальное использование хомута при заданных усилиях
 ' и предельный множитель сочетания, если предел определила поперечная арматура.
+' При наличии стержней переносит ошибку этапа, если оценку критерия получить не удалось.
 Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
-        ByVal result As CCombinationResult, ByVal units As CUnitSystem)
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem, _
+        ByVal policy As CResultStatusPolicy)
+    data(row, COL_TRANSVERSE_STATUS) = policy.NotApplicable
+    data(row, COL_TRANSVERSE_LIMIT_STATUS) = policy.NotApplicable
+    Dim layout As CTransverseRebarLayout: Set layout = batch.CoupledTransverseLayout
+    If layout Is Nothing Then Exit Sub
+    If layout.Count = 0 Then Exit Sub
+
+    Dim result As CCombinationResult: Set result = batch.ResultAt(index)
+    data(row, COL_TRANSVERSE_STATUS) = TransverseUnavailableStatus(result.DirectStateMeta, policy)
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
     If Not state Is Nothing Then
         Dim description As String, utilization As Double, stress As Double
@@ -504,11 +514,25 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
         End If
     End If
     Dim capacity As CCapacityResult: Set capacity = result.StrengthResult.Capacity
-    If Not capacity.IsTransverseLimit Then Exit Sub
+    If Not capacity.IsTransverseLimit Then
+        data(row, COL_TRANSVERSE_LIMIT_STATUS) = TransverseUnavailableStatus(result.CapacityMeta, policy)
+        Exit Sub
+    End If
     If capacity.HasUltimatePoint Then data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
     data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
     data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.TransverseLimitStatus
 End Sub
+
+' Ошибки общего этапа мешают проверить хомут. Успех или физический отказ
+' по другому механизму сам по себе не задаёт отдельный результат для хомута.
+Private Function TransverseUnavailableStatus(ByVal meta As CResultMeta, ByVal policy As CResultStatusPolicy) As String
+    Select Case meta.InternalStatus
+        Case rsNumericalFailure, rsInvalidInput, rsInvalidConfiguration, rsInternalError
+            TransverseUnavailableStatus = policy.ExternalStatus(meta)
+        Case Else
+            TransverseUnavailableStatus = policy.NotApplicable
+    End Select
+End Function
 
 ' Возвращает позицию LC внутри data-части подробной таблицы.
 ' Основной поток читает offset из rngLoadCombinations; прямые тесты без offset продолжают выводиться компактно.

@@ -999,7 +999,7 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
     If Not state Is Nothing Then hasState = state.CopyCoupledTransverseControl(control, utilization, stress)
     If Not capacity Is Nothing Then hasLimit = capacity.IsTransverseLimit
     If Not hasState And Not hasLimit Then Exit Sub
-    ReportSection "Поперечная арматура"
+    ReportSection "Поперечная арматура — хомуты и ветви"
     If hasState Then
         ReportValue "Статус по деформации при заданной нагрузке", state.CoupledTransverseStatus
         ReportValue "Контрольная точка", control

@@ -1464,8 +1464,9 @@ Public Function RunTestCoupledHoopCapacity() As String
         Set fso = CreateObject("Scripting.FileSystemObject")
         Set stream = fso.OpenTextFile(execution.FilePath, 1, False, -1)
         reportText = stream.ReadAll: stream.Close
-        heading = InStr(reportText, vbCrLf & "Поперечная арматура" & vbCrLf)
-        If heading > 0 Then ending = InStr(heading + Len(vbCrLf & "Поперечная арматура" & vbCrLf & String$(72, "-")), _
+        Dim transverseHeading As String: transverseHeading = "Поперечная арматура — хомуты и ветви"
+        heading = InStr(reportText, vbCrLf & transverseHeading & vbCrLf)
+        If heading > 0 Then ending = InStr(heading + Len(vbCrLf & transverseHeading & vbCrLf & String$(72, "-")), _
             reportText, vbCrLf & String$(72, "-") & vbCrLf)
         If ending > heading Then detail = Mid$(reportText, heading, ending - heading)
         TestRecord InStr(detail, "Статус по деформации при заданной нагрузке: FAIL") > 0 And _
@@ -1478,11 +1479,16 @@ Public Function RunTestCoupledHoopCapacity() As String
         Dim writer As New CStrengthSummaryWriter, anchor As Object
         writer.WriteSummary ThisWorkbook, batch, section:=section
         Set anchor = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-        TestRecord anchor.Offset(-4, 50).Value2 = "Поперечная арматура", "separate Results heading", passed, failed, report
+        TestRecord anchor.Offset(-4, 50).Value2 = transverseHeading And anchor.Offset(-4, 50).MergeArea.Columns.Count = 7 And _
+            anchor.Offset(-4, 50).Resize(5, 7).Borders.Item(10).LineStyle <> -4142, _
+            "separate Results heading spans the fully framed hoop subsection", passed, failed, report
         TestRecord anchor.Offset(0, 53).Value2 = "FAIL" And anchor.Offset(0, 56).Value2 = "FAIL", _
             "separate current and reserve statuses are written", passed, failed, report
-        TestRecord InStr(anchor.Offset(0, 50).Value2, "TestWeakHoop") > 0 And InStr(anchor.Offset(0, 55).Value2, "TestWeakHoop") > 0, _
-            "Results names the governing hoop in each check", passed, failed, report
+        TestRecord anchor.Offset(0, 53).Interior.Color = StatusFillColor("FAIL") And _
+            anchor.Offset(0, 56).Interior.Color = StatusFillColor("FAIL"), "both hoop statuses use the standard failure fill", passed, failed, report
+        TestRecord InStr(anchor.Offset(0, 50).Value2, "TestWeakHoop (TestHoopGrade)") = 1 And _
+            InStr(anchor.Offset(0, 55).Value2, "TestWeakHoop (TestHoopGrade)") = 1, _
+            "Results starts with the governing hoop and its grade in each check", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 54).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
         TestSavedHoopCapacityFields ThisWorkbook, section, provider, batch, passed, failed, report
     End If
@@ -1755,7 +1761,8 @@ Public Function RunTestCoupledWorkbookInput() As String
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "Coupled.StateSolver") = "SplineNewton", CStr(mode) & " saves actual solver", passed, failed, report
         TestRecord ReadLoadCasePropertyText(book, "ALL", "Geometry.RecipeType") = "Rectangles", CStr(mode) & " same saved recipe after repeated calculation", passed, failed, report
         Dim hoopAnchor As Object: Set hoopAnchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
-        TestRecord hoopAnchor.Offset(-4, 50).Value2 = "Поперечная арматура", CStr(mode) & " has separate hoop heading", passed, failed, report
+        TestRecord hoopAnchor.Offset(-4, 50).Value2 = "Поперечная арматура — хомуты и ветви", _
+            CStr(mode) & " has separate hoop heading", passed, failed, report
         TestRecord hoopAnchor.Offset(0, 53).Value2 = "OK" And Len(hoopAnchor.Offset(1, 53).Value2) = 0, _
             CStr(mode) & " writes hoop status only for spatial case", passed, failed, report
         If CStr(mode) = "File" Then
@@ -1883,6 +1890,9 @@ Private Sub TestSavedAutoCADTransverse(ByVal book As Object, ByVal settings As O
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "DirectStateStatus") = "OK" And _
             Len(ReadLoadCasePropertyText(book, "Spatial", "Coupled.Transverse.Status")) = 0, _
             label & "accepts explicit absence", passed, failed, report
+        Dim hoopSummary As Object: Set hoopSummary = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+        TestRecord hoopSummary.Value2 = "Spatial" And hoopSummary.Offset(0, 53).Value2 = "N/A" And _
+            hoopSummary.Offset(0, 56).Value2 = "N/A", label & "reports the hoop checks as inapplicable for explicit None", passed, failed, report
         kind.Value2 = "Контур"
         kind.Offset(0, 1).Value2 = 8# / lengthFactor: kind.Offset(0, 2).Value2 = 120# / lengthFactor
         kind.Offset(0, 3).Value2 = 10# / lengthFactor: kind.Offset(0, 4).Value2 = "TestHoop"

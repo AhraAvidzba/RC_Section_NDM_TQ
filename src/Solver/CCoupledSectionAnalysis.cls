@@ -220,26 +220,33 @@ Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver A
     capacity.AttachCoupledState state, warning
 End Sub
 
-' Формулирует проверяемый механизм и привязывает его к точке арматуры.
+' Формулирует проверяемый механизм. Для поперечной арматуры группа и класс
+' стоят в начале строки, чтобы их было видно в однострочной таблице.
 Private Function SteelLimitComment(ByVal point As Long) As String
-    SteelLimitComment = "Достигнута предельная деформация арматуры. " & SteelControlDescription(point)
+    If mOperators.TransverseGroupAt(point) > 0 Then
+        SteelLimitComment = SteelControlDescription(point, True)
+    Else
+        SteelLimitComment = "Достигнута предельная деформация арматуры. " & SteelControlDescription(point)
+    End If
 End Function
 
 ' Показывает группу или стержень, класс всей ветви и координаты расчётной
-' точки в осях сечения относительно центра бетонной сетки, мм.
-Private Function SteelControlDescription(ByVal point As Long) As String
+' точки в осях сечения относительно центра бетонной сетки, мм. Для
+' предельной точки поперечной арматуры добавляет причину после класса.
+Private Function SteelControlDescription(ByVal point As Long, Optional ByVal atTransverseLimit As Boolean = False) As String
     Dim group As Long, x As Double, y As Double, weight As Double, rebarIndex As Long
     group = mOperators.TransverseGroupAt(point)
     If group = 0 Then
         rebarIndex = point - mOperators.ConcretePointCount
-        SteelControlDescription = "Продольный стержень " & mSection.RebarID(rebarIndex)
+        SteelControlDescription = "Продольный стержень " & mSection.RebarID(rebarIndex) & ", класс " & mOperators.SteelClassAt(point)
     Else
         Dim path As CGeometryPath: Set path = mTransverse.Path(group)
-        SteelControlDescription = "Поперечная арматура " & path.ID
+        SteelControlDescription = path.ID & " (" & mOperators.SteelClassAt(point) & ")"
+        If atTransverseLimit Then SteelControlDescription = SteelControlDescription & " — предел деформации"
     End If
     mOperators.Point point, x, y, weight
-    SteelControlDescription = SteelControlDescription & ", класс " & mOperators.SteelClassAt(point) & _
-        ", x = " & Format$(x - mCenterX, "0.00") & " мм, y = " & Format$(y - mCenterY, "0.00") & " мм"
+    SteelControlDescription = SteelControlDescription & ", x = " & Format$(x - mCenterX, "0.00") & _
+        " мм, y = " & Format$(y - mCenterY, "0.00") & " мм"
 End Function
 
 ' Готовит независимую историю расчёта и переиспользует неизменяемые
