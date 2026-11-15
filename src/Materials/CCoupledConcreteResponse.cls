@@ -101,26 +101,33 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
     Dim updated As TConcreteHistory, virginElastic As Boolean, cachedMode As ECoupledTangentMode
-    Dim sameTrial As Boolean, i As Long, j As Long
+    Dim sameTrial As Boolean, i As Long, j As Long, baseSubsteps As Long
+    Dim branchConsistent As Boolean
+    branchConsistent = (tangentMode = ctmFullBranchConsistent)
+    If branchConsistent And recordTrial Then
+        ICoupledPointResponse_EvaluatePoint = sfcInvalidConfiguration
+        Exit Function
+    End If
     cachedMode = ctmStressOnly
-    sameTrial = MatchesNonlinearTrial(point, strain)
+    If Not branchConsistent Then sameTrial = MatchesNonlinearTrial(point, strain)
     If sameTrial Then
         updated = mHistory(point, mTrial)
         For i = 1 To N_COMPONENTS: stress(i) = updated.Stress(i): Next i
         cachedMode = mCachedMode(point)
     Else
         If recordTrial Then mCachedEpoch(point) = 0 ' Касательная базового поля остаётся пригодной после возмущения.
-        If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic) Then GoTo Failure
+        If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic, baseSubsteps) Then GoTo Failure
     End If
     If tangentMode = ctmStressOnly Then GoTo StoreTrial
     If virginElastic Then
         For j = 1 To N_COMPONENTS
-            If tangentMode = ctmFull Or j = 3 Or j >= 5 Then
+            If tangentMode <> ctmAxialGradient Or j = 3 Or j >= 5 Then
                 For i = 1 To N_COMPONENTS: tangent(i, j) = mElastic(i, j): Next i
             End If
         Next j
     Else
-        If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode, recordTrial) Then GoTo Failure
+        If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode, recordTrial, _
+                updated, baseSubsteps) Then GoTo Failure
     End If
 StoreTrial:
     If Not recordTrial Then Exit Function
@@ -149,26 +156,57 @@ End Function
 ' Сохраняет готовые столбцы при переходе от невязки к полной касательной.
 ' Все недостающие разности вычисляются от той же принятой истории. При
 ' возмущении найденные столбцы не заменяют столбцы базовой деформации.
+' При заданной материальной ветви предпочтительны те же признаки
+' приращения и число подшагов. У точно принятого поля на границе может
+' существовать только односторонняя производная соседней ветви.
 Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double, _
         ByRef tangent() As Double, ByVal mode As ECoupledTangentMode, ByVal cachedMode As ECoupledTangentMode, _
-        ByVal recordTrial As Boolean) As Boolean
+        ByVal recordTrial As Boolean, ByRef baseHistory As TConcreteHistory, ByVal baseSubsteps As Long) As Boolean
     Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
     Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
     Dim scratch As TConcreteHistory, i As Long, j As Long, gradientColumn As Boolean
+    Dim branchConsistent As Boolean, basePlastic As Boolean, basePrincipalSign As Long, sideSubsteps As Long
+    Dim atAcceptedPosition As Boolean, plusAdjacent As Boolean, minusAdjacent As Boolean
+    branchConsistent = (mode = ctmFullBranchConsistent)
+    If branchConsistent Then
+        ReadBranchSigns baseHistory, mHistory(point, mCommitted), basePlastic, basePrincipalSign
+        atAcceptedPosition = (baseSubsteps = 0)
+        If atAcceptedPosition Then baseSubsteps = 1 ' Нулевая проба возвращает принятое поле; соседняя проба входит через один возврат.
+    End If
     For i = 1 To N_COMPONENTS: perturbed(i) = strain(i): Next i
     For j = 1 To N_COMPONENTS
         gradientColumn = (j = 3 Or j >= 5) ' Продольный градиент имеет компоненты zz, xz, yz.
-        If mode = ctmFull Or gradientColumn Then
+        If mode <> ctmAxialGradient Or gradientColumn Then
             If cachedMode = ctmFull Or (cachedMode = ctmAxialGradient And gradientColumn) Then
                 For i = 1 To N_COMPONENTS: tangent(i, j) = mCachedTangent(i, j, point): Next i
             Else
                 delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
                 For attempt = 1 To 3
                     perturbed(j) = strain(j) + delta
-                    plusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, plus, unused)
+                    plusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, plus, unused, sideSubsteps)
+                    If plusOk And branchConsistent Then
+                        plusOk = (sideSubsteps = baseSubsteps)
+                        plusAdjacent = plusOk
+                        If plusOk Then _
+                            plusOk = MatchesBranchSigns(scratch, mHistory(point, mCommitted), basePlastic, basePrincipalSign)
+                    Else
+                        plusAdjacent = False
+                    End If
                     perturbed(j) = strain(j) - delta
-                    minusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, minus, unused)
+                    minusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, minus, unused, sideSubsteps)
+                    If minusOk And branchConsistent Then
+                        minusOk = (sideSubsteps = baseSubsteps)
+                        minusAdjacent = minusOk
+                        If minusOk Then _
+                            minusOk = MatchesBranchSigns(scratch, mHistory(point, mCommitted), basePlastic, basePrincipalSign)
+                    Else
+                        minusAdjacent = False
+                    End If
                     If plusOk Or minusOk Then Exit For
+                    If attempt = 3 And atAcceptedPosition Then
+                        plusOk = plusAdjacent: minusOk = (minusAdjacent And Not plusAdjacent)
+                        If plusOk Or minusOk Then Exit For
+                    End If
                     delta = delta * 0.25 ' На границе ветвей уменьшаем только численное возмущение.
                 Next attempt
                 perturbed(j) = strain(j)
@@ -187,6 +225,97 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
         End If
     Next j
     NonlinearTangent = True
+End Function
+
+' Читает значение пробной поверхности Барселоны в МПа от принятой
+' истории. Производная в инженерных деформациях определена при ненулевом
+' девиаторе и простом старшем главном напряжении вне границы знака.
+Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double, ByRef value As Double, _
+        ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If point < 1 Or point > mPointCount Then Exit Function
+    Dim c As TConcreteHistory: c = mHistory(point, mCommitted)
+    Dim effective(1 To N_COMPONENTS) As Double, i As Long, j As Long
+    Dim ex As Double, ey As Double, ez As Double
+    ex = strain(1) - c.Plastic(1): ey = strain(2) - c.Plastic(2): ez = strain(3) - c.Plastic(3)
+    For i = 1 To 3
+        effective(i) = mElastic(i, 1) * ex + mElastic(i, 2) * ey + mElastic(i, 3) * ez
+        effective(i + 3) = mElastic(i + 3, i + 3) * (strain(i + 3) - c.Plastic(i + 3))
+    Next i
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double
+    CoupledStressInvariants effective, trace, q, high, middle, low
+    value = CoupledBarcelonaYield(trace, q, high, c.CompressionCohesion, c.TensionCohesion, mAlpha, mGamma)
+    If Not needGradient Then TryReadTrialYield = True: Exit Function
+    Dim stressScale As Double
+    stressScale = GeomMax(1#, GeomMax(Abs(high), Abs(low)))
+    If q <= 0.000000000001 * stressScale Or Abs(high) <= 0.000000000001 * stressScale Or _
+            high - middle <= 0.000000000001 * stressScale Then Exit Function
+    Dim tensor(1 To 3, 1 To 3) As Double, highProjector(1 To 3, 1 To 3) As Double
+    For i = 1 To 3: tensor(i, i) = effective(i): Next i
+    tensor(1, 2) = effective(4): tensor(2, 1) = effective(4)
+    tensor(1, 3) = effective(5): tensor(3, 1) = effective(5)
+    tensor(2, 3) = effective(6): tensor(3, 2) = effective(6)
+    Dim k As Long, divisor As Double, x As Double, branchSlope As Double
+    divisor = (high - middle) * (high - low)
+    For i = 1 To 3
+        For j = 1 To 3
+            x = -(middle + low) * tensor(i, j)
+            For k = 1 To 3: x = x + tensor(i, k) * tensor(k, j): Next k
+            If i = j Then x = x + middle * low
+            highProjector(i, j) = x / divisor
+        Next j
+    Next i
+    branchSlope = mGamma
+    If high > 0# Then _
+        branchSlope = (c.CompressionCohesion / c.TensionCohesion) * (1# - mAlpha) - (1# + mAlpha)
+    Dim derivative(1 To N_COMPONENTS) As Double
+    For i = 1 To 3
+        derivative(i) = (mAlpha + 1.5 * (effective(i) - trace / 3#) / q + branchSlope * highProjector(i, i)) / (1# - mAlpha)
+    Next i
+    derivative(4) = (3# * effective(4) / q + 2# * branchSlope * highProjector(1, 2)) / (1# - mAlpha)
+    derivative(5) = (3# * effective(5) / q + 2# * branchSlope * highProjector(1, 3)) / (1# - mAlpha)
+    derivative(6) = (3# * effective(6) / q + 2# * branchSlope * highProjector(2, 3)) / (1# - mAlpha)
+    For j = 1 To N_COMPONENTS
+        gradient(j) = 0#
+        For i = 1 To N_COMPONENTS: gradient(j) = gradient(j) + derivative(i) * mElastic(i, j): Next i
+    Next j
+    TryReadTrialYield = True
+End Function
+
+' Возвращает признаки фактически вычисленной пробы от принятой истории:
+' пластическое приращение, знак старшего главного напряжения и подшаги.
+' Ноль подшагов означает точное совпадение с принятой деформацией.
+Friend Function TryReadConcreteBranch(ByVal point As Long, ByRef strain() As Double, _
+        ByRef plasticIncrement As Boolean, ByRef principalSign As Long, ByRef substeps As Long) As Boolean
+    If point < 1 Or point > mPointCount Then Exit Function
+    Dim updated As TConcreteHistory, stress(1 To N_COMPONENTS) As Double, virginElastic As Boolean
+    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, virginElastic, substeps) Then Exit Function
+    ReadBranchSigns updated, mHistory(point, mCommitted), plasticIncrement, principalSign
+    TryReadConcreteBranch = True
+End Function
+
+' Сравнивает с принятой пластической деформацией. Знак старшего
+' номинального напряжения совпадает со знаком эффективного при
+' положительном множителе повреждения.
+Private Sub ReadBranchSigns(ByRef updated As TConcreteHistory, ByRef committed As TConcreteHistory, _
+        ByRef plasticIncrement As Boolean, ByRef principalSign As Long)
+    Dim stress(1 To N_COMPONENTS) As Double, i As Long
+    plasticIncrement = False
+    For i = 1 To N_COMPONENTS
+        If updated.Plastic(i) <> committed.Plastic(i) Then plasticIncrement = True
+        stress(i) = updated.Stress(i)
+    Next i
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double
+    CoupledStressInvariants stress, trace, q, high, middle, low
+    principalSign = Sgn(high)
+End Sub
+
+' Проверяет сохранение знаковых признаков материального возврата
+' при одном возмущении касательной.
+Private Function MatchesBranchSigns(ByRef updated As TConcreteHistory, ByRef committed As TConcreteHistory, _
+        ByVal basePlastic As Boolean, ByVal basePrincipalSign As Long) As Boolean
+    Dim plasticIncrement As Boolean, principalSign As Long
+    ReadBranchSigns updated, committed, plasticIncrement, principalSign
+    MatchesBranchSigns = (plasticIncrement = basePlastic And principalSign = basePrincipalSign)
 End Function
 
 ' Восстанавливает напряжения и историю точки вывода на известном принятом
@@ -208,8 +337,10 @@ End Sub
 ' попытки начинают от того же материала. Промежуточные подшаги не
 ' переходят в принятое состояние до приёмки всего сечения.
 Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
-        ByRef updated As TConcreteHistory, ByRef stress() As Double, ByRef virginElastic As Boolean) As Boolean
+        ByRef updated As TConcreteHistory, ByRef stress() As Double, ByRef virginElastic As Boolean, _
+        Optional ByRef substeps As Long = 0) As Boolean
     Dim i As Long, moved As Boolean
+    substeps = 0
     For i = 1 To N_COMPONENTS
         If strain(i) <> committed.Strain(i) Then
             moved = True
@@ -225,6 +356,7 @@ Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As
     End If
     If UpdatePoint(strain, committed, updated, stress, virginElastic) Then
         StoreStatePosition updated, strain, stress
+        substeps = 1
         updated.ElasticTangentExact = virginElastic
         UpdateWithSubsteps = True
         Exit Function
@@ -248,6 +380,7 @@ Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As
             history = updated
         Next stepIndex
         If succeeded Then
+            substeps = divisions
             StoreStatePosition updated, strain, stress
             virginElastic = False
             updated.ElasticTangentExact = False

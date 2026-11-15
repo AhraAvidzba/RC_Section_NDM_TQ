@@ -28,6 +28,7 @@ End Type
 Private Const COMPONENT_COUNT As Long = 6
 Private Const STEP_LIMIT As Long = 32
 Private Const PROBE_LIMIT As Long = 96 ' Общий предел проб продолжения, деления и повторного прохождения плеч.
+Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Дорогие пробы с выбором другой меры при остановке.
 Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
 
@@ -44,6 +45,8 @@ Private mReusedRightPoints As Long
 Private mShoulderProbes As Long
 Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mProbeCount As Long
+Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
+Private mUsesYieldControl As Boolean
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
@@ -63,6 +66,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
+    mUsesYieldControl = False
     mLocalPeak = 0#: mLocalPeakAccuracy = 0#
     mFollowingLocalPeak = False: mRecoveredPeaks = 0
     mReusedRightPoints = 0
@@ -95,14 +100,24 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     increment = nominal * 0.5
     minimum = increment * MIN_STEP_RATIO
 
-    Dim attempt As Long, reinforced As Boolean
+    Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
+    Dim recoveryProjection() As Double
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If attempt > STEP_LIMIT And mLocalPeak = 0# Then Exit For
         trial.Coordinate = current.Coordinate + increment
         If increment < minimum Or trial.Coordinate <= current.Coordinate Then Exit For
-        If Not Probe(trial, current.Lambda, False) Then
+        probed = Probe(trial, current.Lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        changedControl = False
+        If probed Then
+            If mSolver.CopyRecoveredControl(recoveryProjection) Then
+                probed = TryAdoptRecoveredControl(history, current, trial, recoveryProjection, nominal, increment, minimum)
+                changedControl = probed
+                If Not probed Then mSolver.DiscardStep
+            End If
+        End If
+        If Not probed Then
             increment = increment * 0.5
         ElseIf trial.Lambda > maximumLambda Then
             mSolver.DiscardStep
@@ -131,6 +146,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 End If
             End If
             AcceptPoint history, trial
+            If changedControl Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
             left = current: current = trial
             If current.Lambda > mBestLambda Then mBestLambda = current.Lambda
             If mFollowingLocalPeak Then CheckRecovery current.Lambda
@@ -223,12 +239,15 @@ End Property
 
 ' Решает пробу при заданной мере и по запросу оценивает влияние невязки.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
-        ByVal estimateUncertainty As Boolean) As Boolean
+        ByVal estimateUncertainty As Boolean, Optional ByVal recoverYieldControl As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     point.Uncertainty = 0#
-    If Not mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
-            point.Lambda, mAbsTol, mRelTol, mMaxIterations) Then
+    Dim solved As Boolean
+    solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
+        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl)
+    If mSolver.YieldRecoveryTried Then mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+    If Not solved Then
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
         Exit Function
     End If
@@ -240,6 +259,39 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         End If
     End If
     Probe = True
+End Function
+
+' Принимает новую координату на возрастающем участке. Последнее
+' принятое и найденное поля образуют пару в одной мере. Проверки
+' плеч и предела арматуры продолжают использовать эту же меру.
+Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef current As TBranchPoint, _
+        ByRef trial As TBranchPoint, ByRef projection() As Double, ByRef nominal As Double, _
+        ByRef increment As Double, ByRef minimum As Double) As Boolean
+    If trial.Lambda <= current.Lambda + LoadResolution(current.Lambda) Or trial.Lambda > mMaximumLambda Then Exit Function
+    If BeyondSteelLimit() Then Exit Function
+    Dim previousField() As Double, acceptedField() As Double, field() As Double, resultants() As Double
+    previousField = history(current.HistoryIndex - 1)
+    acceptedField = history(current.HistoryIndex)
+    mSolver.CopyTrial field, resultants
+    Dim i As Long, previousCoordinate As Double, oldCoordinate As Double, newCoordinate As Double
+    For i = 1 To UBound(projection)
+        previousCoordinate = previousCoordinate + projection(i) * previousField(i)
+        oldCoordinate = oldCoordinate + projection(i) * acceptedField(i)
+        newCoordinate = newCoordinate + projection(i) * field(i)
+    Next i
+    Dim difference As Double: difference = Abs(newCoordinate - oldCoordinate)
+    If difference <= 0.000000000001 Then Exit Function
+    If (oldCoordinate - previousCoordinate) * (newCoordinate - oldCoordinate) <= 0# Then Exit Function
+    nominal = difference
+    If newCoordinate < oldCoordinate Then
+        For i = 1 To UBound(projection): projection(i) = -projection(i): Next i
+        oldCoordinate = -oldCoordinate: newCoordinate = -newCoordinate
+    End If
+    mProjection = projection: mControlName = "мера деформации у перехода бетона"
+    mUsesYieldControl = True
+    current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
+    increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
+    TryAdoptRecoveredControl = True
 End Function
 
 ' Продвигает принятую материальную историю и фиксирует индекс её поля.
@@ -474,6 +526,8 @@ End Sub
 Private Function Details() As String
     Details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
         "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignVerified) & "; проб: " & CStr(mProbeCount)
+    If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
+        "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mLocalPeak > 0# Then
         Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
             "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _

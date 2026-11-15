@@ -112,6 +112,10 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         ByRef stress() As Double, ByRef tangent() As Double, _
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
+    If tangentMode = ctmFullBranchConsistent And recordTrial Then
+        ICoupledPointResponse_EvaluatePoint = sfcInvalidConfiguration
+        Exit Function
+    End If
     If point = 1 And recordTrial Then
         mTrialSteelUtilization = 0#: mTrialSteelPoint = 0
         mTrialTransverseUtilization = 0#: mTrialTransversePoint = 0
@@ -142,11 +146,29 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         stress(j) = axialStress * mDirection(j, point) - stress(j)
         If tangentMode <> ctmStressOnly Then
             For k = 1 To COMPONENT_COUNT
-                If tangentMode = ctmFull Or k = 3 Or k >= 5 Then _
+                If tangentMode <> ctmAxialGradient Or k = 3 Or k >= 5 Then _
                     tangent(j, k) = axialTangent * mDirection(j, point) * mDirection(k, point) - tangent(j, k)
             Next k
         End If
     Next j
+End Function
+
+' Читает пробный критерий вытесненного или обычного бетона.
+' Коэффициенты знака замещения учитываются в уравнениях, а не здесь.
+Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double, ByRef value As Double, _
+        ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If Not TypeOf mConcrete Is CCoupledConcreteResponse Then Exit Function
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    TryReadTrialYield = concrete.TryReadTrialYield(point, strain, value, gradient, needGradient)
+End Function
+
+' Читает фактическую ветвь бетонной составляющей от принятой истории
+' без записи отклика бетона или стали в пробные буферы.
+Friend Function TryReadConcreteBranch(ByVal point As Long, ByRef strain() As Double, _
+        ByRef plasticIncrement As Boolean, ByRef principalSign As Long, ByRef substeps As Long) As Boolean
+    If Not TypeOf mConcrete Is CCoupledConcreteResponse Then Exit Function
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    TryReadConcreteBranch = concrete.TryReadConcreteBranch(point, strain, plasticIncrement, principalSign, substeps)
 End Function
 
 ' Публикует новый буфер после принятия бетонных проб, без копирования массивов.

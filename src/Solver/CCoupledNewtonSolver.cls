@@ -24,6 +24,16 @@ Private Const SPATIAL_HALF_STEP As Double = 0.001 ' Полушаг секуще�
 Private Const GRADIENT_DIFFERENCE_STEP As Double = 0.0000006 ' Амплитуда возмущения максимальной компоненты деформации.
 Private Const LOCAL_GRADIENT_DIFFERENCE_STEP As Double = 0.00000000025 ' Амплитуда пробы внутри перехода разностной материальной касательной.
 Private Const GRADIENT_TANGENT_CHANGE_RATIO As Double = 0.1 ' Изменение касательной в долях опорного модуля для выбора линеаризации.
+Private Const YIELD_TRACE_ITERATIONS As Long = 3
+Private Const YIELD_DAMPING_STEPS As Long = 8
+Private Const YIELD_ROOT_TOLERANCE As Double = 0.000000000002 ' МПа в пробном критерии бетона.
+
+Private Type TYieldStation
+    Point As Long
+    Side As Long
+    FromValue As Double
+    ToValue As Double
+End Type
 
 Private mSection As CCoupledElasticState
 Private mResponse As ICoupledPointResponse
@@ -45,6 +55,9 @@ Private mPlusStrain(1 To COMPONENT_COUNT) As Double, mMinusStrain(1 To COMPONENT
 Private mPlusStress(1 To COMPONENT_COUNT) As Double, mMinusStress(1 To COMPONENT_COUNT) As Double
 Private mMatrix() As Double, mExternal() As Double, mResidual() As Double
 Private mCandidateReady As Boolean
+Private mYieldRecoveryTried As Boolean
+Private mRecoveredProjection() As Double
+Private mConsistentControl As Boolean
 Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
 Private mBaseLoad() As Double, mLoadDirection() As Double
@@ -107,6 +120,7 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
     load(1) = force: load(2) = mx: load(3) = my
     load(4) = torque: load(5) = qx: load(6) = qy
     mControlActive = False
+    mConsistentControl = False
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
     TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations)
 End Function
@@ -117,7 +131,8 @@ End Function
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
-        ByVal maxIterations As Long) As Boolean
+        ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
+        Optional ByVal consistentControl As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -137,10 +152,23 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     mSection.LoadEquations direction(1), direction(2), direction(3), direction(4), direction(5), direction(6), mDirectionEquations
     ReDim mExternal(1 To mDegreeCount)
     mControlActive = True
+    mConsistentControl = consistentControl And mUseSpatialHistory
     Dim load(1 To COMPONENT_COUNT) As Double
-    TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations)
+    TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, recoverYieldControl)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
+
+' Возвращает новую линейную меру только для подтверждённой пробы восстановления.
+Friend Function CopyRecoveredControl(ByRef projection() As Double) As Boolean
+    If Not mCandidateReady Or Not mYieldRecoveryTried Then Exit Function
+    projection = mRecoveredProjection
+    CopyRecoveredControl = True
+End Function
+
+' Сообщает, что после действительной смены ветви собиралось аварийное направление.
+Friend Property Get YieldRecoveryTried() As Boolean
+    YieldRecoveryTried = mYieldRecoveryTried
+End Property
 
 ' Выбирает уверенно меняющуюся меру по двум последовательным равновесиям.
 ' Кривизны и закручивание уже приведены к габариту сечения. Средние
@@ -191,9 +219,11 @@ End Function
 ' Решает одну силовую или деформационно управляемую пробу с общей
 ' невязкой, ограничителями поправок и фиксацией материальных состояний.
 Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long) As Boolean
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByVal recoverYieldControl As Boolean = False) As Boolean
     mMeta.Clear
     mCandidateReady = False
+    mYieldRecoveryTried = False: Erase mRecoveredProjection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
     mLocalGradientBuilds = 0
     mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
@@ -207,7 +237,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Dim candidateNorm As Double, fraction As Double, i As Long, accepted As Boolean
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
-    Dim useGradientTangent As Boolean
+    Dim useGradientTangent As Boolean, built As Boolean
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
     If mControlActive Then SetControlledLoad currentLambda, load
@@ -216,12 +246,26 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Do
 RecomputeTangent:
         If mControlActive Then SetControlledLoad currentLambda, load
-        If Not Evaluate(current, True, useGradientTangent) Then
+        built = Evaluate(current, True, useGradientTangent, Not mConsistentControl, mConsistentControl)
+        If Not built And mConsistentControl And mFailureCode = sfcNumericalFailure Then
+            built = Evaluate(current, True, useGradientTangent, recordTrial:=False) ' Например, при вырождении односторонних разностей в другой точке.
+        End If
+        If Not built Then
             RecordFailure mFailureCode, "Не удалось получить материальный отклик для равновесия связанного сечения."
             Exit Function
         End If
         norm = EquilibriumNorm(load, current)
         If norm <= tolerance Then
+            If mConsistentControl Then
+                If Not Evaluate(current, False) Then
+                    RecordFailure mFailureCode, "Не удалось записать пробу подтверждённого равновесия."
+                    Exit Function
+                End If
+                If EquilibriumNorm(load, current) > tolerance Then
+                    RecordFailure sfcNumericalFailure, "Невязка изменилась при повторе принятой пробы."
+                    Exit Function
+                End If
+            End If
             If Not GaugesVerified(tolerance) Then
                 RecordFailure sfcNumericalFailure, "Уравновешенное поле нарушает условия однозначности перемещений."
                 Exit Function
@@ -278,16 +322,23 @@ RecomputeTangent:
                 GoTo RecomputeTangent
             End If
             RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
-            Dim details As String: details = mMeta.DiagnosticDetails
+            Dim details As String, mismatch As String
+            details = mMeta.DiagnosticDetails
             If hasValidTrial Then
                 details = details & "; невязка перед демпфированием, МПа: " & CStr(norm) & _
                     "; лучшая невязка проб, МПа: " & CStr(bestTrialNorm)
-                If governingRow > 0 Then details = details & DirectionMismatchDetails(governingRow, baseEquation, _
-                    (trialEquation - baseEquation) / trialFraction, correction)
+                If governingRow > 0 Then
+                    mismatch = DirectionMismatchDetails(governingRow, baseEquation, _
+                        (trialEquation - baseEquation) / trialFraction, correction)
+                    details = details & mismatch
+                End If
             Else
                 details = details & "; ни одна уменьшенная поправка не дала материального отклика"
             End If
             mMeta.DiagnosticDetails = details
+            If recoverYieldControl And Len(mismatch) > 0 And mUseSpatialHistory Then
+                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance)
+            End If
             Exit Function
         End If
         mIterations = mIterations + 1
@@ -338,6 +389,322 @@ Private Function DirectionMismatchDetails(ByVal row As Long, ByVal baseEquation 
         "; фактическое изменение на единицу доли поправки, МПа: " & CStr(measured)
 End Function
 
+
+' Ищет соседнюю траекторию только после наблюдаемой смены ветви на
+' отклонённой поправке. Принятые буферы материала остаются исходными.
+Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Double, ByRef correction() As Double, _
+        ByVal fraction As Double, ByVal tolerance As Double) As Boolean
+    If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
+            TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
+    Dim ends() As Double, i As Long
+    ReDim ends(1 To mDegreeCount)
+    For i = 1 To mDegreeCount: ends(i) = field(i) + fraction * correction(i): Next i
+    Dim station As TYieldStation
+    If Not FirstYieldCrossing(field, ends, station) Then Exit Function
+    mYieldRecoveryTried = True
+
+    Dim previousProjection() As Double, previousTarget As Double
+    previousProjection = mControlProjection: previousTarget = mTargetControl
+    Dim result() As Double, trialLambda As Double, newProjection() As Double
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    On Error GoTo Failed
+    mControlActive = False
+    If TraceYieldCrossing(station, field, ends, lambda, lambda + fraction * correction(mDegreeCount + 1), _
+            tolerance, True, result, trialLambda, newProjection) Then
+        Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double
+        For i = 1 To mGaugeStart - 1: coordinate = coordinate + newProjection(i) * result(i): Next i
+        mControlProjection = newProjection: mTargetControl = coordinate
+        mControlActive = True
+        SetControlledLoad trialLambda, load
+        If Evaluate(result, False) Then
+            If EquilibriumNorm(load, result) <= tolerance And GaugesVerified(tolerance) Then
+                mRecoveredProjection = newProjection
+                mCandidate = result
+                mConsistentControl = True
+                PublishCandidate trialLambda
+                mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие восстановлено после смены ветви бетона"
+                RecoverYieldStep = True
+                Exit Function
+            End If
+        End If
+    End If
+Restore:
+    mControlActive = True
+    mControlProjection = previousProjection: mTargetControl = previousTarget
+    On Error GoTo 0
+    If errorNumber <> 0 Then Err.Raise errorNumber, errorSource, errorText
+    Exit Function
+Failed:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    Resume Restore
+End Function
+
+' Выбирает ближайшее пересечение на действительной отклонённой поправке.
+' Ftrial служит для скобки; фактические упругая и пластическая ветви
+' подтверждаются локальным возвратом без материального дробления.
+Private Function FirstYieldCrossing(ByRef field() As Double, ByRef ends() As Double, ByRef first As TYieldStation) As Boolean
+    Dim probe As TYieldStation, fraction As Double, nearest As Double
+    Dim point As Long, side As Long
+    nearest = 1#
+    For point = 1 To mPointCount
+        For side = -1 To 1
+            If ReadYieldCrossing(point, side, field, ends, probe) Then
+                If LocateYieldCoordinate(probe, field, ends, 0#, fraction) Then
+                    If Not FirstYieldCrossing Or fraction < nearest Then
+                        nearest = fraction: first = probe: FirstYieldCrossing = True
+                    End If
+                End If
+            End If
+        Next side
+    Next point
+End Function
+
+' Проверяет пересечение и сохраняет исходные значения в МПа.
+Private Function ReadYieldCrossing(ByVal point As Long, ByVal side As Long, ByRef field() As Double, _
+        ByRef ends() As Double, ByRef station As TYieldStation) As Boolean
+    Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(side)
+    Dim leftStrain(1 To COMPONENT_COUNT) As Double, rightStrain(1 To COMPONENT_COUNT) As Double
+    Dim unused(1 To COMPONENT_COUNT) As Double, leftF As Double, rightF As Double
+    YieldStrain point, side, field, leftStrain
+    YieldStrain point, side, ends, rightStrain
+    If Not response.TryReadTrialYield(point, leftStrain, leftF, unused, False) Then Exit Function
+    If Not response.TryReadTrialYield(point, rightStrain, rightF, unused, False) Then Exit Function
+    If (leftF < 0#) = (rightF < 0#) Or leftF = 0# Or rightF = 0# Then Exit Function
+    Dim leftPlastic As Boolean, rightPlastic As Boolean, principal As Long, leftSteps As Long, rightSteps As Long
+    If Not response.TryReadConcreteBranch(point, leftStrain, leftPlastic, principal, leftSteps) Then Exit Function
+    If Not response.TryReadConcreteBranch(point, rightStrain, rightPlastic, principal, rightSteps) Then Exit Function
+    If leftSteps > 1 Or rightSteps > 1 Or leftPlastic = rightPlastic Then Exit Function
+    If leftPlastic <> (leftF > 0#) Or rightPlastic <> (rightF > 0#) Then Exit Function
+    station.Point = point: station.Side = side
+    station.FromValue = leftF: station.ToValue = rightF
+    ReadYieldCrossing = True
+End Function
+
+' Передаёт бетон за центральной или боковой материальной историей.
+Private Function YieldResponse(ByVal side As Long) As CCoupledReinforcedResponse
+    Select Case side
+        Case -1: Set YieldResponse = mMinusResponse
+        Case 0: Set YieldResponse = mResponse
+        Case 1: Set YieldResponse = mPlusResponse
+    End Select
+End Function
+
+' Вычисляет деформацию или её направленное приращение на станции z/L.
+Private Sub YieldStrain(ByVal point As Long, ByVal side As Long, ByRef field() As Double, ByRef strain() As Double)
+    mSection.PointStrain point, field, strain
+    If side = 0 Then Exit Sub
+    Dim slope(1 To COMPONENT_COUNT) As Double, i As Long
+    mSection.AxialGradientAtPoint point, field, slope
+    For i = 1 To COMPONENT_COUNT: strain(i) = strain(i) + side * SPATIAL_HALF_STEP * slope(i): Next i
+End Sub
+
+' Делит фактический отрезок до заданного Ftrial, лежащего между концами.
+Private Function LocateYieldCoordinate(ByRef station As TYieldStation, ByRef field() As Double, _
+        ByRef ends() As Double, ByVal target As Double, ByRef fraction As Double) As Boolean
+    Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
+    Dim leftStrain(1 To COMPONENT_COUNT) As Double, rightStrain(1 To COMPONENT_COUNT) As Double
+    Dim strain(1 To COMPONENT_COUNT) As Double, unused(1 To COMPONENT_COUNT) As Double
+    YieldStrain station.Point, station.Side, field, leftStrain
+    YieldStrain station.Point, station.Side, ends, rightStrain
+    Dim low As Double, high As Double, value As Double, j As Long, i As Long
+    high = 1#
+    For j = 1 To 40
+        fraction = 0.5 * (low + high)
+        For i = 1 To COMPONENT_COUNT: strain(i) = leftStrain(i) + fraction * (rightStrain(i) - leftStrain(i)): Next i
+        If Not response.TryReadTrialYield(station.Point, strain, value, unused, False) Then Exit Function
+        If Abs(value - target) <= YIELD_ROOT_TOLERANCE Then
+            LocateYieldCoordinate = True
+            Exit Function
+        End If
+        If (value < target) = (station.FromValue < target) Then low = fraction Else high = fraction
+    Next j
+End Function
+
+' Начинает на стороне исходного поля и при необходимости повторяет с
+' другой стороны. Малый отступ отделяет пробу от границы округления.
+Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field() As Double, ByRef ends() As Double, _
+        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByRef result() As Double, ByRef lambda As Double, ByRef projection() As Double) As Boolean
+    Dim target As Double, fraction As Double, trial As Long, i As Long, anchor() As Double
+    target = Sgn(station.FromValue) * GeomMin(0.125 * tolerance, _
+        0.25 * GeomMin(Abs(station.FromValue), Abs(station.ToValue)))
+    ReDim anchor(1 To mDegreeCount)
+    For trial = 1 To 2
+        If LocateYieldCoordinate(station, field, ends, target, fraction) Then
+            For i = 1 To mDegreeCount: anchor(i) = field(i) + fraction * (ends(i) - field(i)): Next i
+            If FollowYieldCoordinate(station, anchor, fromLambda + fraction * (toLambda - fromLambda), _
+                    target, tolerance, allowSuccessor, result, lambda, projection) Then
+                TraceYieldCrossing = True
+                Exit Function
+            End If
+        End If
+        target = -target
+    Next trial
+End Function
+
+' Ведёт короткую серию читающих проб при заданном Ftrial. Две правые
+' части одной факторизации задают поправку и направление вдоль Ftrial.
+' Следующая станция допускается по фактической ошибке текущего шага.
+Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef startField() As Double, _
+        ByVal lambda As Double, ByVal target As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByRef result() As Double, ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
+    Dim field() As Double, trial() As Double, load(1 To COMPONENT_COUNT) As Double
+    Dim correction() As Double, nullDirection() As Double, eventRow() As Double, nextStation As TYieldStation
+    Dim strainRate(1 To COMPONENT_COUNT) As Double, i As Long, iteration As Long, damping As Long
+    Dim baseNorm As Double, norm As Double, value As Double, beta As Double, fraction As Double, trialLambda As Double
+    Dim row As Long, baseRow As Double, expected As Double, previousTrySuccessor As Boolean, accepted As Boolean
+    field = startField
+    ReDim trial(1 To mDegreeCount)
+    For iteration = 1 To YIELD_TRACE_ITERATIONS
+        SetControlledLoad lambda, load
+        If Not Evaluate(field, True, recordTrial:=False, consistentBranch:=True) Then Exit Function
+        baseNorm = EquilibriumNorm(load, field)
+        row = LargestEquilibriumResidualRow(): baseRow = mResidual(row)
+        If Not YieldDirections(station, field, target, value, eventRow, correction, nullDirection) Then Exit Function
+        baseNorm = GeomMax(baseNorm, Abs(value - target))
+        YieldStrain station.Point, station.Side, nullDirection, strainRate
+        fraction = 1#: accepted = False
+        For damping = 0 To YIELD_DAMPING_STEPS
+            If ProjectYieldTrial(station, target, field, correction, nullDirection, strainRate, fraction, trial, beta) Then
+                trialLambda = lambda + fraction * correction(mDegreeCount + 1) + beta * nullDirection(mDegreeCount + 1)
+                SetControlledLoad trialLambda, load
+                If Evaluate(trial, False, recordTrial:=False) Then
+                    norm = EquilibriumNorm(load, trial)
+                    If GaugesVerified(tolerance) Then
+                        If norm <= tolerance And trialLambda > 0# Then
+                            ReDim projection(1 To mDegreeCount)
+                            For i = 1 To mGaugeStart - 1: projection(i) = eventRow(i) / mReferenceModulus: Next i
+                            result = trial: resultLambda = trialLambda
+                            FollowYieldCoordinate = True
+                            Exit Function
+                        End If
+                        accepted = (norm < baseNorm * (1# - MIN_PROGRESS * fraction))
+                    End If
+                    If accepted Then Exit For
+                    If allowSuccessor And Not previousTrySuccessor And damping = 0 Then
+                        expected = -mDirectionEquations(row) * (trialLambda - lambda)
+                        For i = 1 To mDegreeCount: expected = expected + mMatrix(i, row) * (trial(i) - field(i)): Next i
+                        If FindYieldDeparture(station, field, trial, row, mResidual(row) - baseRow - expected, nextStation) Then
+                            previousTrySuccessor = True
+                            If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, tolerance, False, _
+                                    result, resultLambda, projection) Then
+                                FollowYieldCoordinate = True
+                                Exit Function
+                            End If
+                            ' Пробы другой ветви заменили рабочую касательную. Данное направление уже рассчитано.
+                        End If
+                    End If
+                End If
+            End If
+            fraction = fraction * 0.5
+        Next damping
+        If Not accepted Then Exit Function
+        field = trial: lambda = trialLambda
+        mIterations = mIterations + 1
+    Next iteration
+End Function
+
+' Заменяет одно уравнение управления градиентом Ftrial по полю.
+' Четыре уравнения однозначности и столбец нагрузки сохраняются.
+Private Function YieldDirections(ByRef station As TYieldStation, ByRef field() As Double, ByVal target As Double, _
+        ByRef value As Double, ByRef eventRow() As Double, ByRef correction() As Double, ByRef nullDirection() As Double) As Boolean
+    Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
+    Dim strain(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
+    YieldStrain station.Point, station.Side, field, strain
+    If Not response.TryReadTrialYield(station.Point, strain, value, gradient) Then Exit Function
+    Dim size As Long, i As Long, j As Long, basis() As Double, augmented() As Double
+    size = mDegreeCount + 1
+    BuildControlledMatrix augmented, size
+    ReDim basis(1 To mDegreeCount), correction(1 To size), nullDirection(1 To size), eventRow(1 To size)
+    For i = 1 To mGaugeStart - 1
+        basis(i) = 1#
+        YieldStrain station.Point, station.Side, basis, strain
+        For j = 1 To COMPONENT_COUNT: eventRow(i) = eventRow(i) + gradient(j) * strain(j): Next j
+        basis(i) = 0#
+        augmented(i, size) = eventRow(i)
+    Next i
+    For i = 1 To mDegreeCount: correction(i) = -mResidual(i): Next i
+    correction(size) = target - value
+    nullDirection(size) = 1#
+    If Not mSystem.Solve(augmented, correction, size) Then Exit Function
+    YieldDirections = mSystem.SolveFactored(nullDirection)
+End Function
+
+' Удерживает фактический Ftrial на каждой доле поправки. Скалярная
+' доводка вдоль нулевого направления сохраняет линейные силовые строки.
+Private Function ProjectYieldTrial(ByRef station As TYieldStation, ByVal target As Double, ByRef field() As Double, _
+        ByRef correction() As Double, ByRef nullDirection() As Double, ByRef strainRate() As Double, _
+        ByVal fraction As Double, ByRef trial() As Double, ByRef beta As Double) As Boolean
+    Const MAX_NULL_SHIFT As Double = 0.002 ' МПа по координате Ftrial, а не масштаб нагрузки.
+    Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
+    Dim strain(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
+    Dim i As Long, iteration As Long, slope As Double, value As Double
+    beta = 0#
+    For iteration = 1 To 7
+        For i = 1 To mDegreeCount: trial(i) = field(i) + fraction * correction(i) + beta * nullDirection(i): Next i
+        YieldStrain station.Point, station.Side, trial, strain
+        If Not response.TryReadTrialYield(station.Point, strain, value, gradient) Then Exit Function
+        If Abs(value - target) <= YIELD_ROOT_TOLERANCE Then
+            ProjectYieldTrial = True
+            Exit Function
+        End If
+        slope = 0#
+        For i = 1 To COMPONENT_COUNT: slope = slope + gradient(i) * strainRate(i): Next i
+        If slope < 0.5 Or slope > 1.5 Then Exit Function
+        beta = beta + (target - value) / slope
+        If Abs(beta) > MAX_NULL_SHIFT Then Exit Function
+    Next iteration
+End Function
+
+' Выбирает станцию, на которой фактический переход объясняет рост
+' определяющего уравнения. Станции без пересечения не меняют координату.
+Private Function FindYieldDeparture(ByRef held As TYieldStation, ByRef field() As Double, ByRef trial() As Double, _
+        ByVal row As Long, ByVal mismatch As Double, ByRef selected As TYieldStation) As Boolean
+    If mismatch = 0# Then Exit Function
+    Dim point As Long, side As Long, crossing As TYieldStation
+    Dim departure As Double, largest As Double
+    For point = 1 To mPointCount
+        For side = -1 To 1
+            If point <> held.Point Or side <> held.Side Then
+                If ReadYieldCrossing(point, side, field, trial, crossing) Then
+                    If YieldPointDeviation(crossing, field, trial, row, departure) Then
+                        If Sgn(departure) = Sgn(mismatch) And Abs(departure) > largest Then
+                            largest = Abs(departure): selected = crossing
+                            FindYieldDeparture = True
+                        End If
+                    End If
+                End If
+            End If
+        Next side
+    Next point
+End Function
+
+' Проецирует поправку к действию касательной тем же оператором, что и
+' сборка. Для стержня используется уже собранный отклик стали и бетона.
+Private Function YieldPointDeviation(ByRef station As TYieldStation, ByRef field() As Double, _
+        ByRef trial() As Double, ByVal row As Long, ByRef departure As Double) As Boolean
+    Dim response As ICoupledPointResponse: Set response = YieldResponse(station.Side)
+    Dim beforeStrain(1 To COMPONENT_COUNT) As Double, afterStrain(1 To COMPONENT_COUNT) As Double
+    Dim beforeStress(1 To COMPONENT_COUNT) As Double, afterStress(1 To COMPONENT_COUNT) As Double
+    Dim tangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
+    YieldStrain station.Point, station.Side, field, beforeStrain
+    YieldStrain station.Point, station.Side, trial, afterStrain
+    If response.EvaluatePoint(station.Point, beforeStrain, beforeStress, tangent, ctmFullBranchConsistent, False) <> sfcNone Then Exit Function
+    If response.EvaluatePoint(station.Point, afterStrain, afterStress, tangent, ctmStressOnly, False) <> sfcNone Then Exit Function
+    Dim center(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
+    Dim resultants(1 To COMPONENT_COUNT) As Double, residual() As Double, unused() As Double
+    Dim j As Long, i As Long, value As Double
+    For i = 1 To COMPONENT_COUNT
+        value = afterStress(i) - beforeStress(i)
+        For j = 1 To COMPONENT_COUNT: value = value - tangent(i, j) * (afterStrain(j) - beforeStrain(j)): Next j
+        If station.Side = 0 Then center(i) = value Else gradient(i) = station.Side * value / (2# * SPATIAL_HALF_STEP)
+    Next i
+    ReDim residual(1 To mDegreeCount)
+    mSection.AddSpatialPointEquilibrium station.Point, center, mTangent, gradient, mGradientTangent, _
+        mSlopeTangent, residual, unused, False, resultants
+    departure = residual(row)
+    YieldPointDeviation = True
+End Function
 
 ' Публикует только пробное поле, чья невязка проверена по всей системе.
 Private Sub PublishCandidate(ByVal lambda As Double)
@@ -396,7 +763,7 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
         ByRef uncertainty As Double) As Boolean
     RequireCandidate
     If Not mControlActive Then Exit Function
-    If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory) Then
+    If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory, consistentBranch:=mConsistentControl) Then
         mCandidateReady = False
         Exit Function
     End If
@@ -511,12 +878,14 @@ End Property
 ' При демпфировании собирает только невязку и интегралы. Читающая проба
 ' касательной сохраняет материальные буферы ранее подтверждённого поля.
 Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, _
-        Optional ByVal useGradientTangent As Boolean = False, Optional ByVal recordTrial As Boolean = True) As Boolean
+        Optional ByVal useGradientTangent As Boolean = False, Optional ByVal recordTrial As Boolean = True, _
+        Optional ByVal consistentBranch As Boolean = False) As Boolean
     mEvaluations = mEvaluations + 1
     mSection.StartEquations field, mExternal, mResidual, mMatrix, withMatrix
     Dim point As Long, useAxialGradient As Boolean, tangentMode As ECoupledTangentMode
     If Not mUseSpatialHistory Then useAxialGradient = mSection.HasAxialGradient(field)
     tangentMode = ctmFull
+    If withMatrix And consistentBranch Then tangentMode = ctmFullBranchConsistent
     If Not withMatrix Then
         If useAxialGradient Then tangentMode = ctmAxialGradient Else tangentMode = ctmStressOnly
     End If

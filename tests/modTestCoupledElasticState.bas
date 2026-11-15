@@ -3116,6 +3116,22 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет продвижение штатного поиска HardShear через переходы бетона.
+' Точное значение конечного предела этим порогом не предписывается.
+Public Function RunTestHardShearYieldRecovery() As String
+    Dim report As String, passed As Long, failed As Long, lower As String, crossed As Boolean
+    report = RunTestCoupledWorkbookTiming("Both", "Excel") & vbCrLf
+    If InStr(1, report, "RUNTIME ERROR:", vbBinaryCompare) > 0 Then
+        RunTestHardShearYieldRecovery = report
+        Exit Function
+    End If
+    lower = ReadLoadCasePropertyText(ThisWorkbook, "HardShear", "Coupled.Capacity.LowerLambda")
+    If IsNumeric(lower) Then crossed = (CDbl(lower) >= 1.1029)
+    TestRecord crossed, "штатный поиск HardShear сохраняет равновесие после двух переходов бетона", passed, failed, report
+    RunTestHardShearYieldRecovery = report & "TOTAL_HARD_SHEAR_YIELD_RECOVERY: passed=" & CStr(passed) & "; failed=" & CStr(failed)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет значения нативных рядов с последовательностью из активного
 ' носителя и различает маркер предела от последнего успешного шага.
 Private Sub TestLoadTraceChart(ByVal book As Object, ByVal combination As String, ByVal wantDirect As Boolean, ByVal wantCapacity As Boolean, _
@@ -3478,11 +3494,76 @@ Public Function RunTestRegularYieldOnset() As String
             TestRegularOnsetReturn projection, tensor, tau(point), CC, FT, ALPHA, GAMMA, ECC, CDbl(dilation), point, passed, failed, report
         Next point
     Next dilation
+    TestYieldBranchReadTransaction material, response, E, NU, FT, passed, failed, report
     RunTestRegularYieldOnset = report & "TOTAL_REGULAR_YIELD_ONSET: passed=" & CStr(passed) & "; failed=" & CStr(failed)
     Exit Function
 Failed:
     RunTestRegularYieldOnset = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет одностороннюю касательную у начала растягивающего возврата
+' и готовый буфер, оставшийся после читающих проб другой деформации.
+Private Sub TestYieldBranchReadTransaction(ByVal material As CCoupledConcreteResponse, ByVal response As ICoupledPointResponse, _
+        ByVal modulus As Double, ByVal poisson As Double, ByVal tensileStrength As Double, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    Dim saved(1 To 2) As Double, point As Long, status As ESolverFailureCode
+    For point = 1 To 2
+        strain(1) = point * 0.25 * tensileStrength / modulus
+        strain(2) = -poisson * strain(1): strain(3) = strain(2)
+        status = response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly)
+        If status <> sfcNone Then Err.Raise 5, , "Не создано пробное поле для проверки буфера бетона."
+        saved(point) = stress(1)
+    Next point
+
+    strain(1) = (1# - 0.00000008) * tensileStrength / modulus
+    strain(2) = -poisson * strain(1): strain(3) = strain(2)
+    Dim gradient(1 To 6) As Double, centerF As Double, leftF As Double, rightF As Double, delta As Double
+    Dim centerX As Double, leftStress As Double, slope As Double, hadPlastic As Boolean, principalSign As Long, substeps As Long
+    centerX = strain(1): delta = 0.000000002 * (1# + Abs(centerX))
+    If Not material.TryReadTrialYield(1, strain, centerF, gradient) Then Err.Raise 5, , "Не прочитан исходный критерий."
+    strain(1) = centerX + delta
+    If Not material.TryReadTrialYield(1, strain, rightF, gradient, False) Then Err.Raise 5, , "Не прочитана правая оценка критерия."
+    strain(1) = centerX - delta
+    If Not material.TryReadTrialYield(1, strain, leftF, gradient, False) Then Err.Raise 5, , "Не прочитана левая оценка критерия."
+    TestRecord leftF < centerF And centerF < 0# And rightF > 0#, _
+        "численное возмущение пересекает поверхность текучести", passed, failed, report
+    TestRecord Abs((rightF - leftF) / (2# * delta) - gradient(1)) < 0.01, _
+        "градиент Ftrial согласуется с разностью упругой пробы", passed, failed, report
+    status = response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly, False)
+    If status <> sfcNone Then Err.Raise 5, , "Не получено напряжение левой пробы."
+    leftStress = stress(1)
+    strain(1) = centerX
+    Dim validBranch As Boolean: validBranch = material.TryReadConcreteBranch(1, strain, hadPlastic, principalSign, substeps)
+    TestRecord validBranch And Not hadPlastic And principalSign = 1 And substeps = 1, _
+        "исходная станция остаётся на упругой ветви", passed, failed, report
+    status = response.EvaluatePoint(1, strain, stress, tangent, ctmFullBranchConsistent, False)
+    If status <> sfcNone Then Err.Raise 5, , "Не построена касательная согласованной ветви."
+    slope = (stress(1) - leftStress) / delta
+    TestRecord Abs(tangent(1, 1) - slope) < 0.001, _
+        "касательная использует возмущение своей ветви", passed, failed, report
+    status = response.EvaluatePoint(1, strain, stress, tangent, ctmFullBranchConsistent, True)
+    TestRecord status = sfcInvalidConfiguration, "режим касательной ветви отклоняет запись", passed, failed, report
+    response.AcceptTrial
+    For point = 1 To 2
+        material.CopyAcceptedStress point, stress
+        TestRecord stress(1) = saved(point), "сохранена ранее записанная проба " & CStr(point), passed, failed, report
+    Next point
+
+    strain(1) = 1.02 * tensileStrength / modulus
+    strain(2) = -poisson * strain(1): strain(3) = strain(2)
+    For point = 1 To 2
+        status = response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly)
+        If status <> sfcNone Then Err.Raise 5, , "Не создано принятых напряжений после растягивающего возврата."
+    Next point
+    response.AcceptTrial
+    material.CopyAcceptedStress 1, stress
+    Dim acceptedStress As Double: acceptedStress = stress(1)
+    status = response.EvaluatePoint(1, strain, stress, tangent, ctmFullBranchConsistent, False)
+    TestRecord status = sfcNone And stress(1) = acceptedStress, _
+        "касательная построена при точно принятой деформации", passed, failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Восстанавливает поверхность и уравнения обратного Эйлера из возвращённых
@@ -3526,3 +3607,89 @@ End Sub
 Private Function TestOnsetNumber(ByVal value As Double) As String
     TestOnsetNumber = Trim$(Str$(value))
 End Function
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет запись всех трёх фактических историй при равновесии без
+' поправки после двух разных пространственных шагов.
+Public Function RunTestCoupledConsistentZeroStep() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim center As New CCoupledConcreteResponse, plusSide As New CCoupledConcreteResponse, minusSide As New CCoupledConcreteResponse
+    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5
+    center.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    plusSide.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    minusSide.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    solver.Initialize operators, center, 30000#, plusSide, minusSide
+
+    If Not solver.TryStep(-9000#, 1000#, -1200#, 900#, 650#, -520#, 1E-8, 1E-8, 25) Then _
+        Err.Raise 5, , "Не найдено первое пространственное равновесие. " & solver.ResultMeta.ResultComment
+    solver.AcceptStep
+    Dim first(1 To 6, 1 To 3) As Double, second(1 To 6, 1 To 3) As Double, last(1 To 6, 1 To 3) As Double
+    TestCopyConcreteTriplet center, plusSide, minusSide, first
+    If Not solver.TryStep(-14000#, 2000#, -3200#, 1500#, 970#, -850#, 1E-8, 1E-8, 25) Then _
+        Err.Raise 5, , "Не найдено второе пространственное равновесие. " & solver.ResultMeta.ResultComment
+    solver.AcceptStep
+    TestCopyConcreteTriplet center, plusSide, minusSide, second
+
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, projection() As Double
+    Dim acceptedField() As Double, trialField() As Double, resultants() As Double, lambda As Double
+    baseLoad(1) = -14000#: baseLoad(2) = 2000#: baseLoad(3) = -3200#
+    baseLoad(4) = 1500#: baseLoad(5) = 970#: baseLoad(6) = -850#
+    direction(1) = 10000#
+    ReDim projection(1 To operators.DegreeCount)
+    projection(1) = 1#
+    solver.CopyAccepted acceptedField
+    If Not solver.TryDeformationStep(baseLoad, direction, projection, acceptedField(1), 0#, lambda, 1E-8, 1E-8, 25, _
+            consistentControl:=True) Then _
+        Err.Raise 5, , "Не подтверждена нулевая поправка. " & solver.ResultMeta.ResultComment
+
+    solver.CopyTrial trialField, resultants
+    Dim d As Long, fieldError As Double
+    For d = 1 To UBound(acceptedField)
+        fieldError = GeomMax(fieldError, Abs(trialField(d) - acceptedField(d)))
+    Next d
+    TestRecord fieldError = 0# And lambda = 0#, "поле и множитель совпадают точно при нулевой поправке", passed, failed, report
+    TestCopyConcreteTriplet center, plusSide, minusSide, last
+    Dim side As Long, component As Long, difference As Double
+    Dim acceptedDifference As Double, stationsChanged As Long, priorMaterialPreserved As Boolean
+    priorMaterialPreserved = True
+    For side = 1 To 3
+        difference = 0#
+        For component = 1 To 6
+            difference = GeomMax(difference, Abs(first(component, side) - second(component, side)))
+            If second(component, side) <> last(component, side) Then priorMaterialPreserved = False
+        Next component
+        If difference > 1E-7 Then stationsChanged = stationsChanged + 1
+    Next side
+    TestRecord stationsChanged = 3, "первое и второе поля дают разные напряжения на каждой станции", passed, failed, report
+    TestRecord priorMaterialPreserved, "подтверждённая проба пока сохраняет принятую историю", passed, failed, report
+
+    solver.AcceptStep
+    TestCopyConcreteTriplet center, plusSide, minusSide, last
+    For side = 1 To 3
+        For component = 1 To 6
+            acceptedDifference = GeomMax(acceptedDifference, Abs(last(component, side) - second(component, side)))
+        Next component
+    Next side
+    TestRecord acceptedDifference = 0#, "принятие нулевой поправки публикует три совпадающие материальные истории", passed, failed, report
+    RunTestCoupledConsistentZeroStep = report & "TOTAL_COUPLED_CONSISTENT_ZERO_STEP: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledConsistentZeroStep = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает шесть принятых напряжений первой бетонной точки на каждой станции.
+Private Sub TestCopyConcreteTriplet(ByVal center As CCoupledConcreteResponse, ByVal plusSide As CCoupledConcreteResponse, _
+        ByVal minusSide As CCoupledConcreteResponse, ByRef values() As Double)
+    Dim stress(1 To 6) As Double, i As Long
+    center.CopyAcceptedStress 1, stress
+    For i = 1 To 6: values(i, 1) = stress(i): Next i
+    plusSide.CopyAcceptedStress 1, stress
+    For i = 1 To 6: values(i, 2) = stress(i): Next i
+    minusSide.CopyAcceptedStress 1, stress
+    For i = 1 To 6: values(i, 3) = stress(i): Next i
+End Sub
