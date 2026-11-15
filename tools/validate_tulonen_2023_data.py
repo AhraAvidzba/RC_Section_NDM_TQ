@@ -89,5 +89,5 @@ def verify(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pdf", type=Path, default=Path("literature") / "Coupled6D" / PDF_NAME)
+    parser.add_argument("--pdf", type=Path, default=Path("literature") / "Coupled6D" / "Tulonen2023" / PDF_NAME)
     verify(parser.parse_args().pdf)

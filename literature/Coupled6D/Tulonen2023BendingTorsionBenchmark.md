@@ -1,6 +1,6 @@
 # Изгиб и кручение балок P1–P4
 
-J. Tulonen и A. Laaksonen, *Variable compression panel thickness for concrete members under bending and torsion: Experimental study*, Engineering Structures 279, 115606 (2023). [DOI](https://doi.org/10.1016/j.engstruct.2023.115606) · [Карточка и открытый PDF](https://researchportal.tuni.fi/en/publications/variable-compression-panel-thickness-for-concrete-members-under-b/) · [Локальная копия](Tulonen-Laaksonen-2023-Bending-Torsion-Tests.pdf).
+J. Tulonen и A. Laaksonen, *Variable compression panel thickness for concrete members under bending and torsion: Experimental study*, Engineering Structures 279, 115606 (2023). [DOI](https://doi.org/10.1016/j.engstruct.2023.115606) · [Карточка и открытый PDF](https://researchportal.tuni.fi/en/publications/variable-compression-panel-thickness-for-concrete-members-under-b/) · [Локальная копия](Tulonen2023/Tulonen-Laaksonen-2023-Bending-Torsion-Tests.pdf).
 
 ## Нагрузка и измерения
 
