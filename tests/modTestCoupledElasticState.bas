@@ -2149,6 +2149,9 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
             InStr(CStr(anchor.Offset(0, 57).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
             CStr(mode) & " restores the hoop and its grade in both checks", passed, failed, report
         TestHoopStrainDetails book, anchor, CStr(mode), passed, failed, report
+        Dim expected As Variant
+        expected = Array(-216000# * reserve, 306000# * reserve, -472000# * reserve, 249960# * reserve, 120# * reserve, -80# * reserve)
+        TestSavedCoupledEquilibrium book, "Hoop", "CapacityState", expected, Nothing, CStr(mode), passed, failed, report
         values = ReadElementResultTable(book, "Hoop", "CapacityState")
         If HasResultTableRows(values) Then
             runId = CDbl(values(2, ResultColumn(values, "RunID")))
@@ -2368,8 +2371,6 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestRecord grades.Borders.Item(10).LineStyle <> -4142, "steel class catalog has right border", passed, failed, report
 
     TestInputCell(settings, "Geometry.Source").Value2 = "Generated"
-    TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = 0#
-    TestInputCell(settings, "Load.ReferenceOffsetY").Value2 = 0#
     TestInputCell(settings, "Output.CombinationMode").Value2 = "Worst"
     TestInputCell(settings, "Results.SnapshotName").Value2 = "TestCoupledWorkbookInput"
     Dim pr4 As Long
@@ -2395,13 +2396,17 @@ Public Function RunTestCoupledWorkbookInput() As String
 
     Dim unitSettings As New CSystemSettingsReader, units As New CUnitSystem
     unitSettings.LoadFromWorkbook book: units.LoadFromSettings unitSettings
-    Dim expected As Variant
-    expected = Array(units.InternalForceToOutput(units.InputForceToInternal(firstCase(1, 2))), _
-        units.InternalMomentMxToOutput(units.InputMomentMxToInternal(firstCase(1, 3))), _
-        units.InternalMomentMyToOutput(units.InputMomentMyToInternal(firstCase(1, 4))), _
-        units.InternalTorqueToOutput(units.InputTorqueToInternal(firstCase(1, 8))), _
-        units.InternalShearToOutput(units.InputShearToInternal(firstCase(1, 9))), _
-        units.InternalShearToOutput(units.InputShearToInternal(firstCase(1, 10))))
+    Const LOAD_OFFSET_X_MM As Double = 5#, LOAD_OFFSET_Y_MM As Double = -3#
+    TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = LOAD_OFFSET_X_MM / units.InputLengthToInternal(1#)
+    TestInputCell(settings, "Load.ReferenceOffsetY").Value2 = LOAD_OFFSET_Y_MM / units.InputLengthToInternal(1#)
+    Dim expected As Variant, loadN As Double, loadQx As Double, loadQy As Double
+    loadN = units.InputForceToInternal(firstCase(1, 2))
+    loadQx = units.InputShearToInternal(firstCase(1, 9)): loadQy = units.InputShearToInternal(firstCase(1, 10))
+    expected = Array(units.InternalForceToOutput(loadN), _
+        units.InternalMomentMxToOutput(units.InputMomentMxToInternal(firstCase(1, 3)) + LOAD_OFFSET_Y_MM * loadN), _
+        units.InternalMomentMyToOutput(units.InputMomentMyToInternal(firstCase(1, 4)) + LOAD_OFFSET_X_MM * loadN), _
+        units.InternalTorqueToOutput(units.InputTorqueToInternal(firstCase(1, 8)) + LOAD_OFFSET_X_MM * loadQy - LOAD_OFFSET_Y_MM * loadQx), _
+        units.InternalShearToOutput(loadQx), units.InternalShearToOutput(loadQy))
 
     Dim geometry As Object: Set geometry = book.Names.Item("rngRectanglesGeometry").RefersToRange
     Dim transverse As Object: Set transverse = TestInputCell(geometry, "Group1")
@@ -2429,6 +2434,9 @@ Public Function RunTestCoupledWorkbookInput() As String
         gt.ClearContents
         ignored = RunSectionCalculationForWorkbook(book)
         TestRecord ReadLoadCasePropertyText(book, "Spatial", "OverallStatus") = "InputErr", CStr(mode) & " missing Gt is an input error", passed, failed, report
+        TestRecord Len(ReadLoadCasePropertyText(book, "Spatial", "State.StrengthState.Equilibrium.Reference")) = 0 And _
+            Len(ReadLoadCasePropertyText(book, "Spatial", "State.CapacityState.Equilibrium.Reference")) = 0, _
+            CStr(mode) & " input failure saves no stale equilibrium", passed, failed, report
         TestRecord hoopAnchor.Offset(0, 55).Value2 = "InputErr" And hoopAnchor.Offset(0, 61).Value2 = "InputErr" And _
             Len(hoopAnchor.Offset(0, 56).Value2) = 0, CStr(mode) & " hoop subdivision reports failed preparation for both requested checks", passed, failed, report
         TestRecord InStr(1, ignored, gt.Worksheet.Name & "!" & gt.Address(False, False), vbTextCompare) > 0, CStr(mode) & " missing Gt names its cell", passed, failed, report
@@ -2490,11 +2498,17 @@ Public Function RunTestCoupledWorkbookInput() As String
                 TestRecord False, CStr(mode) & " has no numerical value for " & components(i), passed, failed, report
             End If
         Next i
+        TestSavedCoupledEquilibrium book, "Spatial", "StrengthState", expected, units, CStr(mode), passed, failed, report
+        TestRecord Len(ReadLoadCasePropertyText(book, "Plane", "State.StrengthState.Equilibrium.Reference")) = 0 And _
+            Len(ReadLoadCasePropertyText(book, "Spatial", "State.CapacityState.Equilibrium.Reference")) = 0, _
+            CStr(mode) & " equilibrium output distinguishes planar and disabled states", passed, failed, report
         TestSavedCoupledFields book, CStr(mode), section.ConcreteCount + section.RebarCount, passed, failed, report
         TestSavedCoupledMaterialCurves book, CStr(mode), grades.Cells(2, 3), units, passed, failed, report
         TestLoadChartSelection book, settings, TestInputCell(profiles, "Visualization.Quantity", 2, pr4), _
             CStr(mode), passed, failed, report
     Next mode
+    TestInputCell(settings, "Load.ReferenceOffsetX").Value2 = 0#
+    TestInputCell(settings, "Load.ReferenceOffsetY").Value2 = 0#
     TestSavedAutoCADTransverse book, settings, units, passed, failed, report
     TestSavedCurvedTransversePaths book, units, passed, failed, report
     RunTestCoupledWorkbookInput = report & "TOTAL_COUPLED_WORKBOOK_INPUT: passed=" & passed & "; failed=" & failed
@@ -2502,6 +2516,83 @@ Public Function RunTestCoupledWorkbookInput() As String
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет шесть усилий в центре бетонной сетки и приведённые невязки.
+' Переданный ожидаемый вектор получен отдельно из внешних нагрузок.
+Private Sub TestSavedCoupledEquilibrium(ByVal book As Object, ByVal id As String, ByVal state As String, _
+        ByVal expected As Variant, ByVal units As CUnitSystem, ByVal mode As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim data As Variant, prefix As String, label As String
+    data = ReadAnchoredResultTable(book, "rngNDMSectionProperties")
+    prefix = "State." & state & ".Equilibrium."
+    label = mode & " " & state
+    TestRecord HasResultTableRows(data), label & " has a properties table", passed, failed, report
+    If Not HasResultTableRows(data) Then Exit Sub
+
+    Dim dataRow As Long, idCol As Long, keyCol As Long, valueCol As Long, key As String
+    idCol = ResultColumn(data, "LoadCase"): keyCol = ResultColumn(data, "Parameter"): valueCol = ResultColumn(data, "Value")
+    Dim values As Object: Set values = CreateObject("Scripting.Dictionary")
+    For dataRow = 2 To UBound(data, 1)
+        If SafeText(data(dataRow, idCol)) = id Then
+            key = SafeText(data(dataRow, keyCol))
+            If Left$(key, Len(prefix)) = prefix Then values.Add Mid$(key, Len(prefix) + 1), data(dataRow, valueCol)
+        End If
+    Next dataRow
+    TestRecord values.Count = 29, label & " saves the complete equilibrium block", passed, failed, report
+    TestRecord values("Reference") = "ConcreteMeshCentroid" And Len(SafeText(values("Diagnostic"))) > 0, _
+        label & " identifies moment reference and convergence diagnostics", passed, failed, report
+    Dim hasScales As Boolean: hasScales = IsNumeric(values("ResidualArea")) And IsNumeric(values("ResidualLength"))
+    TestRecord hasScales, label & " saves numerical normalization scales", passed, failed, report
+    If Not hasScales Then Exit Sub
+
+    Dim residualArea As Double, residualLength As Double, forceUnitScale As Double, momentUnitScale As Double
+    Dim stressUnitScale As Double
+    residualArea = CDbl(values("ResidualArea")): residualLength = CDbl(values("ResidualLength"))
+    forceUnitScale = 1#: momentUnitScale = 1#: stressUnitScale = 1#
+    If Not units Is Nothing Then
+        residualArea = units.OutputAreaToInternal(residualArea)
+        residualLength = units.OutputLengthToInternal(residualLength)
+        forceUnitScale = units.InternalShearToOutput(1#)
+        momentUnitScale = units.InternalTorqueToOutput(1#)
+        stressUnitScale = units.InternalStressToOutput(1#)
+    End If
+    TestRecord residualArea > 0# And residualLength > 0#, label & " saves the physical normalization scales", passed, failed, report
+    If residualArea <= 0# Or residualLength <= 0# Then Exit Sub
+
+    Dim components As Variant, component As String, i As Long, target As Variant, restored As Variant
+    Dim absolute As Variant, normalized As Variant, expectedNormalized As Double, maxNormalized As Double
+    components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    For i = 0 To 5
+        component = components(i)
+        target = values("Target." & component): restored = values("Restored." & component)
+        absolute = values("AbsoluteResidual." & component): normalized = values("NormalizedResidual." & component)
+        If IsNumeric(target) And IsNumeric(restored) And IsNumeric(absolute) And IsNumeric(normalized) Then
+            TestRecord Abs(CDbl(target) - CDbl(expected(i))) <= 1E-10 * GeomMax(1#, Abs(CDbl(expected(i)))), _
+                label & " saves the correct centered target " & component & " actual=" & target & " expected=" & expected(i), _
+                passed, failed, report
+            TestRecord Abs(CDbl(absolute) - Abs(CDbl(restored) - CDbl(target))) <= 8E-15 * GeomMax(1#, Abs(CDbl(target))), _
+                label & " reports the absolute residual " & component, passed, failed, report
+            If i >= 1 And i <= 3 Then
+                expectedNormalized = CDbl(absolute) / momentUnitScale / residualArea / residualLength
+            Else
+                expectedNormalized = CDbl(absolute) / forceUnitScale / residualArea
+            End If
+            TestRecord Abs(CDbl(normalized) / stressUnitScale - expectedNormalized) <= 1E-15, _
+                label & " uses the documented stress scale " & component, passed, failed, report
+            maxNormalized = GeomMax(maxNormalized, CDbl(normalized))
+        Else
+            TestRecord False, label & " lacks numerical equilibrium values for " & component, passed, failed, report
+        End If
+    Next i
+    If IsNumeric(values("MaxNormalizedResidual")) Then
+        TestRecord Abs(CDbl(values("MaxNormalizedResidual")) - maxNormalized) <= 1E-15 * stressUnitScale, _
+            label & " saves the worst integrated residual", passed, failed, report
+        TestRecord maxNormalized / stressUnitScale < 0.0001, label & " has a small integrated residual", passed, failed, report
+    Else
+        TestRecord False, label & " lacks the worst integrated residual", passed, failed, report
+    End If
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Нативное обновление сначала убирает график для плоской строки, затем

@@ -790,7 +790,7 @@ Private Sub ValidateSnapshotOutputLayout(ByVal issues As Collection, ByVal workb
     If fileMode Then rows(1) = 1 ' Полные состояния и собственные границы сохраняются только в файле; общие таблицы остаются на листе.
     rows(2) = 1 + elementCount
     rows(3) = 1 + contourCount
-    rows(4) = ndmWriter.EstimatedSectionPropertyRows(combinationCount, estimatedStateCount) + coupledPropertyRows
+    rows(4) = ndmWriter.EstimatedSectionPropertyRows(combinationCount, estimatedStateCount, coupledStates) + coupledPropertyRows
     If fileMode Then rows(4) = ndmWriter.EstimatedSectionPropertyRows(0, 0) ' LC-свойства находятся в файле; общие свойства сечения остаются на Results.
     rows(5) = 1 + MaxLong(1, estimatedStateCount) * 14 + coupledDiagramRows
     rows(6) = 1 + MaxLong(2, annotationCount)

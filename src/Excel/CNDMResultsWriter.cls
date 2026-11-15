@@ -43,6 +43,7 @@ Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общи�
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
 Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 37 ' Пространственное НДС, предельный вектор и контроль хомута в двух состояниях.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 14 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
+Private Const COUPLED_EQUILIBRIUM_PROPERTY_ROWS As Long = 29 ' Пять свойств контроля и по четыре значения на каждое из шести усилий.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
 ' Возвращает фактическое число столбцов выбранной таблицы сохраняемых результатов.
@@ -90,11 +91,13 @@ Public Function EstimatedElementGeometryRows(ByVal section As CSectionModel) As 
 End Function
 
 ' До расчёта оценивает размер rngNDMSectionProperties по наибольшему числу сохраняемых НДС.
-Public Function EstimatedSectionPropertyRows(ByVal combinationCount As Long, ByVal namedStateCount As Long) As Long
+Public Function EstimatedSectionPropertyRows(ByVal combinationCount As Long, ByVal namedStateCount As Long, _
+        Optional ByVal coupledStateCount As Long = 0) As Long
     If combinationCount < 0 Then combinationCount = 0
     If namedStateCount < 0 Then namedStateCount = 0
     EstimatedSectionPropertyRows = 1 + COMMON_SECTION_PROPERTY_ROWS + _
-        combinationCount * (LC_SECTION_PROPERTY_ROWS + COUPLED_SECTION_PROPERTY_ROWS) + namedStateCount * STATE_SECTION_PROPERTY_ROWS
+        combinationCount * (LC_SECTION_PROPERTY_ROWS + COUPLED_SECTION_PROPERTY_ROWS) + _
+        namedStateCount * STATE_SECTION_PROPERTY_ROWS + coupledStateCount * COUPLED_EQUILIBRIUM_PROPERTY_ROWS
 End Function
 
 ' ------------------------------
@@ -868,17 +871,16 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
     If batch.StrengthCapacityRequested(index) Then _
         PutCoupledCapacityProperties data, row, runID, id, result.StrengthResult.Capacity, units
     If Not result.CopyCoupledResultants(resultants) Then Exit Sub
-    If Not units Is Nothing Then
-        resultants(4) = units.InternalTorqueToOutput(resultants(4))
-        resultants(5) = units.InternalShearToOutput(resultants(5)): resultants(6) = units.InternalShearToOutput(resultants(6))
-    End If
     PutProperty data, row, runID, id, "Coupled.StateSolver", "SplineNewton", "-", "Связанное пространственное равновесие, сплайн-поля и упругопластический бетон с повреждением."
     PutProperty data, row, runID, id, "Coupled.Internal.N", OutputForce(resultants(1), units), OutputForceUnit(units), "Подтверждённая продольная сила."
     PutProperty data, row, runID, id, "Coupled.Internal.Mx", OutputMx(resultants(2), units), OutputMomentUnit(units), "Подтверждённый Mx относительно центра бетонной сетки."
     PutProperty data, row, runID, id, "Coupled.Internal.My", OutputMy(resultants(3), units), OutputMomentUnit(units), "Подтверждённый My относительно центра бетонной сетки."
-    PutProperty data, row, runID, id, "Coupled.Internal.T", resultants(4), OutputMomentUnit(units), "Подтверждённый T относительно центра бетонной сетки."
-    PutProperty data, row, runID, id, "Coupled.Internal.Qx", resultants(5), OutputForceUnit(units), "Подтверждённая сила вдоль X."
-    PutProperty data, row, runID, id, "Coupled.Internal.Qy", resultants(6), OutputForceUnit(units), "Подтверждённая сила вдоль Y."
+    PutProperty data, row, runID, id, "Coupled.Internal.T", OutputCoupledResultant(resultants(4), 4, units), _
+        OutputMomentUnit(units), "Подтверждённый T относительно центра бетонной сетки."
+    PutProperty data, row, runID, id, "Coupled.Internal.Qx", OutputCoupledResultant(resultants(5), 5, units), _
+        OutputForceUnit(units), "Подтверждённая сила вдоль X."
+    PutProperty data, row, runID, id, "Coupled.Internal.Qy", OutputCoupledResultant(resultants(6), 6, units), _
+        OutputForceUnit(units), "Подтверждённая сила вдоль Y."
     Dim state As CSectionStateResult: Set state = result.StateRepository.FindState(sstStrengthState)
     If Not state Is Nothing Then
         PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
@@ -1360,6 +1362,8 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
                     CoupledMaterialSpecKey(stateResult), "-", _
                     "Фактические модели бетона с повреждением и двухлинейной стали по классам."
                 PutCoupledMaterialLinks data, rowIndex, runID, batch, combinationIndex, stateResult, prefix
+                PutCoupledEquilibrium data, rowIndex, runID, batch.CombinationID(combinationIndex), _
+                    prefix & "Equilibrium.", stateResult, units
                 PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Twist", _
                     stateResult.Twist, "rad/mm", "Относительный угол закручивания сечения по длине элемента."
             End If
@@ -1386,6 +1390,56 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
         End If
     Next stateIndex
 End Sub
+
+' Сохраняет пары усилий относительно одного центра и их невязки.
+' Приведение к МПа использует площадь и плечо интегрального критерия решателя.
+Private Sub PutCoupledEquilibrium(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
+        ByVal id As String, ByVal prefix As String, ByVal state As CSectionStateResult, ByVal units As CUnitSystem)
+    Dim target() As Double, actual() As Double, residualArea As Double, residualLength As Double
+    state.CopyCoupledEquilibrium target, actual, residualArea, residualLength
+    PutProperty data, row, runID, id, prefix & "Reference", "ConcreteMeshCentroid", "-", "Центр бетонной сетки."
+    PutProperty data, row, runID, id, prefix & "ResidualArea", OutputArea(residualArea, units), OutputAreaUnit(units), _
+        "Площадь бетона по квадратуре для приведения всех невязок."
+    PutProperty data, row, runID, id, prefix & "ResidualLength", OutputLength(residualLength, units), OutputLengthUnit(units), _
+        "Характерное плечо для приведения моментных невязок."
+
+    Dim names As Variant, i As Long, component As String, unitText As String
+    Dim difference As Double, normalized As Double, maxNormalized As Double
+    names = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    For i = 1 To 6
+        component = names(i - 1)
+        unitText = OutputForceUnit(units)
+        If i >= 2 And i <= 4 Then unitText = OutputMomentUnit(units)
+        difference = actual(i) - target(i)
+        normalized = Abs(difference) / residualArea
+        If i >= 2 And i <= 4 Then normalized = normalized / residualLength
+        If normalized > maxNormalized Then maxNormalized = normalized
+        PutProperty data, row, runID, id, prefix & "Target." & component, _
+            OutputCoupledResultant(target(i), i, units), unitText, "Заданное усилие в центре бетонной сетки."
+        PutProperty data, row, runID, id, prefix & "Restored." & component, _
+            OutputCoupledResultant(actual(i), i, units), unitText, "Усилие, восстановленное интегрированием напряжений."
+        PutProperty data, row, runID, id, prefix & "AbsoluteResidual." & component, _
+            Abs(OutputCoupledResultant(difference, i, units)), unitText, "Модуль разности восстановленного и заданного усилий."
+        PutProperty data, row, runID, id, prefix & "NormalizedResidual." & component, OutputStress(normalized, units), _
+            OutputStressUnit(units), "Модуль невязки, делённый на площадь бетона, для момента также на характерное плечо."
+    Next i
+    PutProperty data, row, runID, id, prefix & "MaxNormalizedResidual", OutputStress(maxNormalized, units), _
+        OutputStressUnit(units), "Максимальная приведённая невязка интегрирования усилий."
+    PutProperty data, row, runID, id, prefix & "Diagnostic", state.DiagnosticLog, "-", "Сохранённые сведения о сходимости траектории."
+End Sub
+
+' Переводит одну компоненту в действующие единицы и знаки Results.
+Private Function OutputCoupledResultant(ByVal value As Double, ByVal component As Long, ByVal units As CUnitSystem) As Double
+    OutputCoupledResultant = value
+    If units Is Nothing Then Exit Function
+    Select Case component
+        Case 1: OutputCoupledResultant = units.InternalForceToOutput(value)
+        Case 2: OutputCoupledResultant = units.InternalMomentMxToOutput(value)
+        Case 3: OutputCoupledResultant = units.InternalMomentMyToOutput(value)
+        Case 4: OutputCoupledResultant = units.InternalTorqueToOutput(value)
+        Case 5, 6: OutputCoupledResultant = units.InternalShearToOutput(value)
+    End Select
+End Function
 
 ' Связывает именованное НДС с бетоном и каждым фактически применённым классом.
 Private Sub PutCoupledMaterialLinks(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
@@ -1488,6 +1542,7 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
         rowCount = rowCount + repository.StateCount * STATE_SECTION_PROPERTY_ROWS
         For stateIndex = 1 To repository.StateCount
             Set state = repository.StateAt(stateIndex)
+            If Not state.CoupledFields Is Nothing Then rowCount = rowCount + COUPLED_EQUILIBRIUM_PROPERTY_ROWS
             Set curves = state.CoupledMaterialCurves
             If Not curves Is Nothing Then
                 If curves.SeriesCount > 2 Then rowCount = rowCount + curves.SeriesCount - 2

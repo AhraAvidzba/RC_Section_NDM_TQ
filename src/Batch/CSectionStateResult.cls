@@ -62,6 +62,8 @@ Private mSnapshotRevision As Long ' Ревизия геометрии при ф�
 Private mSnapshotConcrete As CMaterialDiagram ' Неизменяемая фактическая диаграмма бетона.
 Private mSnapshotSteel As CMaterialDiagram ' Неизменяемая фактическая диаграмма арматуры.
 Private mCoupledFields As CCoupledFieldSnapshot ' Напряжения по принятой пространственной истории и поле деформаций.
+Private mCoupledTarget() As Double, mCoupledResultants() As Double ' N, Mx, My, T, Qx, Qy в центре бетонной сетки, Н и Н·мм.
+Private mCoupledResidualArea As Double, mCoupledResidualLength As Double ' Масштабы интегральной проверки: мм² и мм.
 Private mCoupledMaterialCurves As CCoupledMaterialSnapshot ' Одноосные точки фактически применённых законов.
 Private mCoupledTransverseControl As String ' Группа и точка наибольшего использования поперечной арматуры.
 Private mCoupledTransverseUtilization As Double, mCoupledTransverseStress As Double
@@ -112,18 +114,22 @@ Public Sub InitializeFromSolver(ByVal stateType As ESectionStateType, _
     If Not mSnapshotSection Is Nothing Then mSnapshotRevision = mSnapshotSection.Revision
 End Sub
 
-' Сохраняет прямое или предельное связанное НДС с фактическим полем. Усилия
-' переводятся из центра бетонной сетки в исходные оси CSectionModel.
+' Сохраняет прямое или предельное связанное НДС с фактическим полем.
+' Для отчёта по шести усилиям используется центр бетонной сетки. Проекция
+' N, Mx, My для общих потребителей состояния относится к осям CSectionModel.
 Friend Sub InitializeFromCoupled(ByVal stateType As ESectionStateType, ByVal section As CSectionModel, _
         ByVal spec As CMaterialModelSpec, ByRef target() As Double, ByRef resultants() As Double, ByVal epsilon0 As Double, _
         ByVal kappaX As Double, ByVal kappaY As Double, ByVal twist As Double, _
-        ByVal fields As CCoupledFieldSnapshot, ByVal meta As CResultMeta, ByVal withinPhysicalRange As Boolean)
+        ByVal fields As CCoupledFieldSnapshot, ByVal meta As CResultMeta, ByVal withinPhysicalRange As Boolean, _
+        ByVal residualArea As Double, ByVal residualLength As Double)
     AssertWritable
     ClearSnapshot
     mStateType = stateType: mMaterialModelRole = cpStrength
     Set mMaterialSpec = spec.Clone: Set mResultMeta = meta.Clone
     Set mSnapshotSection = section: mSnapshotRevision = section.Revision
     Set mCoupledFields = fields
+    mCoupledTarget = target: mCoupledResultants = resultants
+    mCoupledResidualArea = residualArea: mCoupledResidualLength = residualLength
     mEpsilon0 = epsilon0: mKappaX = kappaX: mKappaY = kappaY: mTwist = twist
     Dim cx As Double, cy As Double, area As Double
     section.ConcreteMeshCentroid cx, cy, area
@@ -158,6 +164,17 @@ Private Sub UpdateCoupledExtrema(ByVal section As CSectionModel)
     Next i
     mHasConcreteCompression = (mMinConcreteStress < 0#): mHasConcreteTension = (mMaxConcreteStress > 0#)
     mHasSteelCompression = (mMinSteelStress < 0#): mHasSteelTension = (mMaxSteelStress > 0#)
+End Sub
+
+' Копирует заданные и восстановленные усилия в центре бетонной сетки.
+' Размеры от связанной квадратуры приводят ошибки в силах и моментах к МПа.
+Friend Sub CopyCoupledEquilibrium(ByRef target() As Double, ByRef resultants() As Double, _
+        ByRef residualArea As Double, ByRef residualLength As Double)
+    If mCoupledFields Is Nothing Then Err.Raise 5, "CSectionStateResult", "В состоянии нет подтверждённого равновесия по шести усилиям."
+    target = mCoupledTarget
+    resultants = mCoupledResultants
+    residualArea = mCoupledResidualArea
+    residualLength = mCoupledResidualLength
 End Sub
 
 ' Возвращает неизменённые дополнительные поля принятого связанного состояния.
@@ -242,6 +259,8 @@ Private Sub ClearSnapshot()
     Set mSnapshotConcrete = Nothing
     Set mSnapshotSteel = Nothing
     Set mCoupledFields = Nothing: Set mCoupledMaterialCurves = Nothing: mTwist = 0#
+    Erase mCoupledTarget: Erase mCoupledResultants
+    mCoupledResidualArea = 0#: mCoupledResidualLength = 0#
     mCoupledTransverseControl = vbNullString: mCoupledTransverseUtilization = 0#: mCoupledTransverseStress = 0#
     mCoupledTransverseStrain = 0#: mCoupledTransverseStrainLimit = 0#
     mSnapshotRevision = 0

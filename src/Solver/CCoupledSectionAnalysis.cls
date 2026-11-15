@@ -322,8 +322,10 @@ Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVa
     Dim eps0 As Double, kx As Double, ky As Double, twist As Double, state As New CSectionStateResult, field() As Double
     field = history.Item(history.Count)
     mOperators.GeneralizedDeformation field, eps0, kx, ky, twist
+    Dim residualArea As Double, residualLength As Double
+    mOperators.CopyResultantResidualScales residualArea, residualLength
     state.InitializeFromCoupled stateType, mSection, spec, target, resultants, eps0, kx, ky, twist, fields, fieldMeta, _
-        (reinforcement.AcceptedSteelUtilization <= 1#)
+        (reinforcement.AcceptedSteelUtilization <= 1#), residualArea, residualLength
     state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
     SetTransverseControl state, reinforcement, models, field, governingTransversePoint
     Set CaptureAcceptedState = state

@@ -709,6 +709,13 @@ Private Function ResultantsVerified(ByRef recovered() As Double, ByVal n As Doub
         Abs(recovered(5) - qx) <= forceScale And Abs(recovered(6) - qy) <= forceScale
 End Function
 
+' Возвращает площадь квадратуры бетона, мм², и характерное плечо, мм,
+' приводящие силовые и моментные невязки к одному масштабу МПа.
+Friend Sub CopyResultantResidualScales(ByRef area As Double, ByRef lengthScale As Double)
+    area = mArea
+    lengthScale = mLength
+End Sub
+
 ' Проверяет независимые интегралы всех шести напряжений в масштабе МПа.
 ' Моменты делятся на характерное плечо, все компоненты на бетонную площадь.
 Friend Function ResultantResidualNorm(ByRef actual() As Double, ByRef expected() As Double) As Double
