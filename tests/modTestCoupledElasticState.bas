@@ -1622,6 +1622,78 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет нелинейную связь в точках интегрирования на двух нагрузках,
+' при которых бетон выходит из упругой области равновесного решения.
+Public Function RunTestCoupledIntegratedInteraction() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim section As CSectionModel, hoop As CGeometryPath, layout As New CTransverseRebarLayout
+    Set section = TestReinforcedAsymmetricSection(hoop)
+    layout.AddGroup hoop, 8#, 100#, "A400"
+    Dim provider As CMaterialModelProvider: Set provider = TestMatrixMaterials()
+    Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+
+    Dim cx As Double, cy As Double, area As Double
+    section.ConcreteMeshCentroid cx, cy, area
+    TestIntegratedShearPair analysis, spec, cx, cy, "Mx+T", 1300000#, 0#, 1.35, passed, failed, report
+    TestIntegratedShearPair analysis, spec, cx, cy, "Qx+T", 0#, 12500#, 1.25, passed, failed, report
+    RunTestCoupledIntegratedInteraction = report & "TOTAL_COUPLED_INTEGRATED_INTERACTION: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledIntegratedInteraction = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сопоставляет касательные напряжения бетона в одних и тех же точках.
+' Чистые части проходят тот же связанный решатель и начинают с нулевой истории.
+Private Sub TestIntegratedShearPair(ByVal analysis As CCoupledSectionAnalysis, ByVal spec As CMaterialModelSpec, _
+        ByVal cx As Double, ByVal cy As Double, ByVal name As String, ByVal mx As Double, ByVal qx As Double, _
+        ByVal factor As Double, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const TORQUE As Double = 1800000# ' Н·мм до умножения нагрузки на factor.
+    Const MIN_INTERACTION As Double = 0.005 ' МПа: разрешимое изменение касательного напряжения.
+    Dim combined() As Double, first() As Double, torsion() As Double, activeCombined As Long, activePart As Long
+    TestIntegratedShearCase analysis, spec, cx, cy, name & " | пара", mx, TORQUE, qx, factor, _
+        combined, activeCombined, passed, failed, report
+    TestIntegratedShearCase analysis, spec, cx, cy, name & " | первая часть", mx, 0#, qx, factor, _
+        first, activePart, passed, failed, report
+    TestIntegratedShearCase analysis, spec, cx, cy, name & " | T", 0#, TORQUE, 0#, factor, _
+        torsion, activePart, passed, failed, report
+
+    TestRecord activeCombined > 0, "пластическая энергия бетона | " & name & " | точек=" & activeCombined, passed, failed, report
+    Dim point As Long, component As Long, difference As Double
+    For point = 1 To UBound(combined, 2)
+        For component = 1 To 2
+            difference = GeomMax(difference, Abs(combined(component, point) - first(component, point) - torsion(component, point)))
+        Next component
+    Next point
+    TestRecord difference > MIN_INTERACTION, "нелинейное изменение касательных напряжений, МПа | " & name & " | " & _
+        CStr(difference), passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет шесть независимо просуммированных усилий в точке задания нагрузки.
+' Абсолютные допуски контролируют также компоненты с нулевой нагрузкой.
+Private Sub TestIntegratedShearCase(ByVal analysis As CCoupledSectionAnalysis, ByVal spec As CMaterialModelSpec, _
+        ByVal cx As Double, ByVal cy As Double, ByVal name As String, ByVal mx As Double, ByVal torque As Double, _
+        ByVal qx As Double, ByVal factor As Double, ByRef shear() As Double, ByRef activePoints As Long, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim loads As New CSectionLoadState, resultants() As Double
+    loads.Initialize 0#, mx, 0#, cx, cy
+    loads.SetSpatialComponents torque, qx, 0#
+    analysis.TestIntegratedState loads, spec, factor, resultants, shear, activePoints
+    Dim components As Variant, expected As Variant, tolerance As Variant, i As Long
+    components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    expected = Array(0#, factor * mx, 0#, factor * torque, factor * qx, 0#)
+    tolerance = Array(0.1, 15#, 15#, 15#, 0.1, 0.1) ' Н и Н·мм, порядок совпадает с вектором усилий.
+    For i = LBound(components) To UBound(components)
+        TestRecord Abs(resultants(i + 1) - CDbl(expected(i))) <= CDbl(tolerance(i)), _
+            "равновесие " & CStr(components(i)) & " | " & name & " | " & CStr(resultants(i + 1)), passed, failed, report
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Готовит три продольных стержня и хомут в стенке сечения. Все части
 ' преобразуются вместе, включая замкнутый путь поперечной арматуры.
 Private Function TestReinforcedAsymmetricSection(ByRef hoop As CGeometryPath, Optional ByVal shiftX As Double = 0#, _

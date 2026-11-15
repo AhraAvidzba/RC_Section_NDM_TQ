@@ -457,3 +457,52 @@ Private Function ConfigurationError(ByVal reason As String) As CResultMeta
     meta.SetResult rsInvalidConfiguration, rcInvalidConfiguration, rkDirectState, reason
     Set ConfigurationError = meta
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Ведёт отдельную траекторию от нулевой истории и интегрирует принятые
+' напряжения относительно точки приложения нагрузки, в Н и Н·мм.
+Friend Sub TestIntegratedState(ByVal loads As CSectionLoadState, ByVal spec As CMaterialModelSpec, _
+        ByVal factor As Double, ByRef resultants() As Double, ByRef shear() As Double, ByRef activePoints As Long)
+    Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
+    Dim fc As Double, ft As Double, meta As CResultMeta, models As Object
+    Set meta = PrepareResponse(spec, concrete, response, fc, ft, models)
+    If meta.InternalStatus <> rsUnset Then Err.Raise 5, "TestIntegratedState", meta.ResultComment
+
+    Dim solver As New CCoupledNewtonSolver, continuation As New CCoupledLoadContinuation, path As CLoadPathVector
+    Set path = BuildPath(loads, "Auto")
+    solver.Initialize mOperators, response, mEb
+    continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE
+    If Not continuation.Advance(factor) Then
+        Set meta = continuation.ResultMeta
+        Err.Raise 5, "TestIntegratedState", meta.ResultComment & " " & meta.DiagnosticDetails
+    End If
+    If continuation.AcceptedLambda <> factor Or response.AcceptedSteelUtilization > 1# Then _
+        Err.Raise 5, "TestIntegratedState", "Целевая нагрузка не подтверждена при допустимой деформации арматуры."
+
+    Dim bulkCount As Long: bulkCount = mOperators.ConcretePointCount
+    ReDim resultants(1 To 6): ReDim shear(1 To 2, 1 To bulkCount): activePoints = 0
+    Dim point As Long, x As Double, y As Double, weight As Double, normal As Double, tx As Double, ty As Double
+    Dim stress(1 To 6) As Double, projection(1 To 6) As Double, steel As Double, tension As Double, compression As Double
+    For point = 1 To mOperators.PointCount
+        mOperators.Point point, x, y, weight
+        concrete.CopyAcceptedStress point, stress
+        normal = stress(3): tx = stress(5): ty = stress(6)
+        If point <= bulkCount Then
+            shear(1, point) = tx: shear(2, point) = ty
+            concrete.AcceptedPointDamage point, tension, compression
+            If tension > 0# Or compression > 0# Then activePoints = activePoints + 1
+        Else
+            mOperators.SteelProjection point, projection
+            steel = response.AcceptedSteelStress(point)
+            normal = steel * projection(3) - normal ' Арматура заменяет бетон в этой точке.
+            tx = steel * projection(5) - tx: ty = steel * projection(6) - ty
+        End If
+        x = x - loads.LoadReferenceX: y = y - loads.LoadReferenceY
+        resultants(1) = resultants(1) + weight * normal
+        resultants(2) = resultants(2) + weight * y * normal
+        resultants(3) = resultants(3) + weight * x * normal ' Рабочий знак My соответствует +x·σz.
+        resultants(4) = resultants(4) + weight * (x * ty - y * tx)
+        resultants(5) = resultants(5) + weight * tx
+        resultants(6) = resultants(6) + weight * ty
+    Next point
+End Sub
