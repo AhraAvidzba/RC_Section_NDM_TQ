@@ -50,19 +50,31 @@ Public Function CurrentResultSource(ByVal workbook As Object) As CResultReadSour
         If mReadViewResolved Then Set CurrentResultSource = mReadView: Exit Function
     End If
     Dim source As CResultReadSource, store As New CCalculationSnapshotStore
+    Dim readingFile As Boolean
+    On Error GoTo Failed
     If workbook Is mReadWorkbook And Not mReadSnapshot Is Nothing Then
         Set source = New CResultReadSource: source.UsePrepared mReadSnapshot
     ElseIf store.StorageMode(workbook) = "File" Then
+        readingFile = True
         Set source = New CResultReadSource: source.OpenWorkbook workbook, store
     End If
     If mReadDepth > 0 And workbook Is mReadWorkbook Then Set mReadView = source: mReadViewResolved = True
     Set CurrentResultSource = source
+    Exit Function
+Failed:
+    Dim number As Long, reason As String, origin As String
+    number = Err.Number: reason = Err.Description: origin = Err.Source
+    On Error Resume Next
+    If readingFile And number <> 18 Then MarkResultSourceReadFailed workbook
+    On Error GoTo 0
+    Err.Raise number, origin, reason
 End Function
 
 ' Выводит готовый расчёт из памяти; ручной File читает общие блоки и выбранное НДС.
 ' Ручное обновление Excel читает схему с листа и не восстанавливает верхние сводки.
 Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional ByVal prepared As CCalculationSnapshot = Nothing, _
-        Optional ByRef plotWarning As String = "", Optional ByRef plotHasWarning As Boolean = False)
+        Optional ByRef plotWarning As String = "", Optional ByRef plotHasWarning As Boolean = False, _
+        Optional ByRef publicationStarted As Boolean = False)
     plotHasWarning = False: plotWarning = vbNullString
     Dim guard As CExcelAppStateGuard: Set guard = New CExcelAppStateGuard
     Dim entered As Boolean
@@ -79,7 +91,9 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
             Exit Sub
         Else
             store.ClearReference workbook ' Источник Excel — только лист; служебная файловая привязка не участвует в чтении.
+            RequireCompleteExcelResultDisplay workbook
             UpdateSectionPlotForWorkbook workbook, True, plotWarning, True
+            RefreshVisibleResultFreshness workbook, True
             plotHasWarning = (Len(plotWarning) > 0)
             guard.Restore True
     CompleteWorkbookDrawing workbook
@@ -93,6 +107,7 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
     Dim summary As CBatchResultWriter: Set summary = New CBatchResultWriter
     Dim settings As CSystemSettingsReader: Set settings = New CSystemSettingsReader: settings.LoadFromWorkbook workbook
     Dim fullFormatting As Boolean: fullFormatting = settings.GetRequiredBoolean("General.ReformatResultsEnabled")
+    publicationStarted = True ' До этого места проверены снимок, раскладка и параметры вывода.
     writer.RestoreSnapshotBase workbook, snapshot, fullFormatting, mode = "Excel"
     If snapshot.IsGeometryPreview Then
         summary.ClearSummary workbook, fullFormatting
@@ -113,6 +128,7 @@ Public Sub UpdateSectionResultsForWorkbook(ByVal workbook As Object, Optional By
     Else
         plotWarning = TryUpdateCalculatedSnapshotPlot(workbook, snapshot, plotHasWarning)
     End If
+    RefreshPublishedResultFreshness workbook, snapshot
     EndCalculationSnapshotRead
     entered = False
     guard.Restore True
@@ -231,16 +247,17 @@ End Function
 ' Сохраняет полный снимок только в File; оба режима выводят результаты из памяти.
 ' Excel оставляет обычные читаемые таблицы без второго архива подробных сводок.
 Public Function SaveAndDisplayCalculationSnapshot(ByVal workbook As Object, ByVal snapshot As CCalculationSnapshot, _
-        Optional ByRef plotHasWarning As Boolean = False) As String
+        Optional ByRef plotHasWarning As Boolean = False, Optional ByRef publicationStarted As Boolean = False) As String
     plotHasWarning = False
     snapshot.Validate
     Dim store As CCalculationSnapshotStore: Set store = New CCalculationSnapshotStore
     ValidateRestoredSnapshotLayout workbook, snapshot, store.StorageMode(workbook) = "Excel"
     If store.StorageMode(workbook) = "File" Then
         store.SaveFile workbook, snapshot
+        publicationStarted = True ' Теперь выбранный файл уже содержит новый сохранённый результат.
     End If
     Dim warning As String
-    UpdateSectionResultsForWorkbook workbook, snapshot, warning, plotHasWarning
+    UpdateSectionResultsForWorkbook workbook, snapshot, warning, plotHasWarning, publicationStarted
     SaveAndDisplayCalculationSnapshot = warning
 End Function
 
@@ -363,18 +380,23 @@ End Function
 ' Ручное обновление File восстанавливает общие таблицы и выбранную схему без всех НДС.
 ' Источник сначала проверяет обязательные общие блоки, затем допускает изменение Results.
 Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plotWarning As String, ByRef plotHasWarning As Boolean)
-    Dim entered As Boolean
+    Dim entered As Boolean, sourceVerified As Boolean, displayStarted As Boolean, displayFinished As Boolean
     On Error GoTo Failed
     BeginCalculationSnapshotRead workbook: entered = True
     Dim source As CResultReadSource: Set source = CurrentResultSource(workbook)
     source.ValidateForDisplay
+    sourceVerified = True
     ValidateRestoredSnapshotLayout workbook, source, False
     Dim writer As New CNDMResultsWriter, summary As New CBatchResultWriter, store As New CCalculationSnapshotStore
     Dim settings As New CSystemSettingsReader: settings.LoadFromWorkbook workbook
     Dim fullFormatting As Boolean: fullFormatting = settings.GetRequiredBoolean("General.ReformatResultsEnabled")
     Dim preview As Boolean: preview = source.IsGeometryPreview
-    Dim worstCriterion As String
-    If Not preview Then worstCriterion = summary.SavedWorstCriterion(settings)
+    Dim worstCriterion As String, priorAttempt As String
+    If Not preview Then
+        worstCriterion = summary.SavedWorstCriterion(settings)
+        priorAttempt = PriorAttemptNoticeForSnapshot(workbook, source)
+    End If
+    displayStarted = True
     writer.RestoreIndexedBase workbook, source, fullFormatting
     If preview Then
         summary.ClearSummary workbook, fullFormatting
@@ -382,6 +404,8 @@ Private Sub UpdateIndexedResultsForWorkbook(ByVal workbook As Object, ByRef plot
         summary.RestoreIndexedSummary workbook, source, fullFormatting, worstCriterion
     End If
     store.LinkFile workbook
+    RefreshPublishedResultFreshness workbook, source, priorAttempt
+    displayFinished = True
     If preview Then UpdateSectionGeometryPreviewForWorkbook workbook, plotWarning Else UpdateSectionPlotForWorkbook workbook, False, plotWarning
     plotHasWarning = (Len(plotWarning) > 0)
     EndCalculationSnapshotRead
@@ -391,5 +415,9 @@ Failed:
     Dim number As Long, reason As String, origin As String
     number = Err.Number: reason = Err.Description: origin = Err.Source
     If entered Then EndCalculationSnapshotRead
+    On Error Resume Next
+    If displayStarted And Not displayFinished Then MarkResultAttemptStopped workbook, False, True
+    If Not sourceVerified And number <> 18 Then MarkResultSourceReadFailed workbook
+    On Error GoTo 0
     Err.Raise number, origin, reason
 End Sub

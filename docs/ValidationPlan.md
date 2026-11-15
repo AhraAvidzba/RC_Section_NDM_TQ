@@ -120,6 +120,13 @@ RunID, значения сводок и подробных таблиц. В File
 `RunTestCoupledGradientLinearization` сохраняет проверку линеаризации
 интерфейса, который получает одну материальную историю.
 
+Актуальность и неполную публикацию проверяют
+`modTestCoupledCancellation.RunTestResultFreshness` с аргументом
+`Excel` или `File` и `Run-CoupledCancellationTests.ps1 -Verification PublicationFailure`.
+Частная сборка для этих проверок импортирует обработчики книги через
+`Update-PrivateWorkbookCode.ps1 -WorkbookEvents`. Постановка охватывает
+реальные события ввода и принудительный сбой между записями листа.
+
 ## Команды
 
 Сохранённое расположение и оформление книги, 19.10.2026:

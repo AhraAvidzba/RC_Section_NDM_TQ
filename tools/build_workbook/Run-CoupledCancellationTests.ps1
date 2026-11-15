@@ -2,7 +2,8 @@
 # Системные клавиши, рабочая книга и её исходный код не изменяются.
 param(
     [Parameter(Mandatory=$true)][string]$SourceWorkbook,
-    [Parameter(Mandatory=$true)][string]$EvidenceDirectory
+    [Parameter(Mandatory=$true)][string]$EvidenceDirectory,
+    [ValidateSet('Cancellation','PublicationFailure')][string]$Verification = 'Cancellation'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,7 +26,7 @@ if ($memory.AvailableMBytes -lt 4096 -or ([double]$memory.CommitLimit-[double]$m
 }
 
 # Добавляет проверку в единственную подтверждённую строку модуля.
-function Add-TestCancellationTrigger([object]$Project, [string]$Name, [string]$Anchor, [string]$Code) {
+function Add-TestCancellationTrigger([object]$Project, [string]$Name, [string]$Anchor, [string]$Code, [bool]$After = $false) {
     $module = $Project.VBComponents.Item($Name).CodeModule
     try {
         $lines = [string]($module.Lines(1, $module.CountOfLines)) -split '\r\n|\n|\r'
@@ -33,7 +34,7 @@ function Add-TestCancellationTrigger([object]$Project, [string]$Name, [string]$A
             if ($lines[$i].Trim() -ieq $Anchor) { $i + 1 } # Редактор VBA может изменить регистр имени.
         })
         if ($positions.Count -ne 1) { throw "Найдено строк для источника отмены в ${Name}: $($positions.Count)." }
-        $module.InsertLines($positions[0], $Code)
+        $module.InsertLines($positions[0] + [int]$After, $Code)
     } finally {
         [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($module)
     }
@@ -63,17 +64,28 @@ try {
     if ($book.ReadOnly) { throw 'Книга проверки открыта только для чтения.' }
     $project = $book.VBProject
     $null = $project.VBComponents.Item('modTestCoupledCancellation')
-    Add-TestCancellationTrigger $project 'modCoupledWorkbookInput' 'settings.LoadCoupledSettings workbook' @'
+    if ($Verification -eq 'Cancellation') {
+        Add-TestCancellationTrigger $project 'modCoupledWorkbookInput' 'settings.LoadCoupledSettings workbook' @'
     If CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2) = "TEST_SPATIAL_CANCEL_PREP" Then _
         Err.Raise 18, "TestCancellationPreparation", "Interruption at coupled input"
 '@
-    Add-TestCancellationTrigger $project 'CBatchSectionCalculator' 'Dim combined As CCombinationResult: Set combined = mResults(index)' @'
+        Add-TestCancellationTrigger $project 'CBatchSectionCalculator' 'Dim combined As CCombinationResult: Set combined = mResults(index)' @'
     If mInputs(index).CombinationID = "TEST_SPATIAL_CANCEL_SECOND" Then
         If index <> 2 Or mResults(1).StrengthResult.DirectState.Status <> "OK" Then _
             Err.Raise 5, "TestCancellationSecond", "The preceding combination did not finish"
         Err.Raise 18, "TestCancellationSecond", "Interruption at the second combination"
     End If
 '@
+    } else {
+        $trigger = @'
+    If Not prepared Is Nothing Then
+        If CStr(workbook.Names("rngLoadCombinations").RefersToRange.Cells(2, 1).Value2) = "TEST_PUBLICATION_WRITE_FAILURE" Then _
+            Err.Raise 5, "TestPublicationAfterBase", "TestPublicationAfterBase: injected after worksheet base write"
+    End If
+'@
+        Add-TestCancellationTrigger $project 'modCalculationSnapshot' `
+            'writer.RestoreSnapshotBase workbook, snapshot, fullFormatting, mode = "Excel"' $trigger $true
+    }
     $excel.VBE.ActiveVBProject = $project
     $compile = $excel.VBE.CommandBars.FindControl(1, 578)
     if ($null -eq $compile) { throw 'Команда компиляции VBA недоступна.' }
@@ -101,18 +113,22 @@ if ($sourceHash -cne (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash)
 
 $windowsPowerShell = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
 $runner = Join-Path $PSScriptRoot 'Run-Audit03Watchdog.ps1'
+$macro = if ($Verification -eq 'PublicationFailure') { 'RunTestResultPublicationFailure' } else { 'RunTestCoupledCancellation' }
+$total = if ($Verification -eq 'PublicationFailure') { 'TOTAL_RESULT_PUBLICATION' } else { 'TOTAL_COUPLED_CANCELLATION' }
 $failed = @()
 foreach ($storage in @('Excel','File')) {
     $report = Join-Path $relativeDirectory ($storage+'.txt')
     & $windowsPowerShell -NoProfile -ExecutionPolicy Bypass -File $runner -SourceWorkbook $target `
-        -Mode No -ReportPath $report -Macro 'modTestCoupledCancellation.RunTestCoupledCancellation' -MacroArgument1 $storage
+        -Mode No -ReportPath $report -Macro ('modTestCoupledCancellation.'+$macro) -MacroArgument1 $storage
     $code = $LASTEXITCODE
     $closure = Get-Content -LiteralPath (Join-Path $root ($report+'.ProcessClosure.json')) -Raw -Encoding UTF8 | ConvertFrom-Json
     if (-not $closure.Passed) { throw "Закрытие собственного экземпляра Excel после $storage не подтверждено." }
-    $expected = if ($storage -eq 'File') { 16 } else { 13 }
+    $expected = if ($Verification -eq 'PublicationFailure') {
+        if ($storage -eq 'File') { 7 } else { 6 }
+    } elseif ($storage -eq 'File') { 16 } else { 13 }
     if ($code -ne 0 -or (Get-Content -LiteralPath (Join-Path $root $report) -Encoding UTF8) `
-            -cnotcontains "TOTAL_COUPLED_CANCELLATION: passed=$expected; failed=0") {
+            -cnotcontains "${total}: passed=$expected; failed=0") {
         $failed += $storage
     }
 }
-if ($failed.Count) { throw "Проверка отмены не пройдена в режимах $($failed -join ', ')." }
+if ($failed.Count) { throw "Проверка $Verification не пройдена в режимах $($failed -join ', ')." }

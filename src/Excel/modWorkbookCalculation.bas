@@ -463,6 +463,7 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
 
     If batch.Count = 0 Then
         CalculateSectionCore = "Расчёт не запускался: нет сочетаний с заполненным CombinationID и ненулевыми нагрузками. Прежние результаты сохранены."
+        MarkResultAttemptStopped workbook, False, False
         report.AddStep CalculateSectionCore
         report.Save CalculateSectionCore
         excelGuard.Restore True
@@ -495,6 +496,11 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
 
     report.AddSection "Расчет сочетаний"
     Dim savedProfileValues As Variant: savedProfileValues = workbook.Names.Item("rngCalculationProfiles").RefersToRange.Value2 ' Замораживает исходный профиль до вычислений, без чтения Config при подготовке файла.
+    Dim inputStamp As String, hasStability As Boolean, slot As Long
+    For slot = 1 To batch.Count
+        If batch.StabilityRequested(slot) Then hasStability = True: Exit For
+    Next slot
+    inputStamp = CaptureCalculationInputStamp(workbook, section.SourceType, section.RecipeType, hasCoupled, hasStability)
     batch.Execute
     report.AddValue "Время batch-расчета", FormatReportNumber(batch.ElapsedSeconds) & " с"
     report.AddValue "Количество стартов UltimateStrain", CStr(batch.UltimateStrainStartCount)
@@ -508,14 +514,15 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     Set summaryWriter.CaptureSnapshot = savedSnapshot
     summaryWriter.WriteSummary workbook, batch, units, section, fullFormatting
     Set ndmWriter.CaptureSnapshot = savedSnapshot
+    ndmWriter.SetCalculationFreshnessMetadata inputStamp, IncompleteCalculationCount(batch)
     ndmWriter.WriteResults workbook, section, PrepareSectionSnapshot(section, materialProvider), batch, units, True, fullFormatting
     savedSnapshot.AddTable "Calculation.Profiles", savedProfileValues
     savedSnapshot.Validate
     report.AddStep "Результаты подготовлены; сохранение в выбранном режиме и вывод из памяти."
-    Dim plotWarning As String, plotHasWarning As Boolean, publicationStarted As Boolean
+    Dim plotWarning As String, plotHasWarning As Boolean, publicationStarted As Boolean, publicationFinished As Boolean
     If hasCoupled Then workbook.Application.EnableCancelKey = xlDisabled ' Единая публикация файла и листа. Исходный режим вернёт excelGuard.
-    publicationStarted = True
-    plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning)
+    plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning, publicationStarted)
+    publicationFinished = True
     report.AddStep "Подробные таблицы и схема заполнены из готовых данных без повторного решения. Полный файл снимка сохраняется только в режиме File."
 
     Dim totalElapsedSeconds As Double
@@ -555,6 +562,7 @@ Failed:
     End If
     If Not excelGuard Is Nothing Then excelGuard.Restore ' Интерфейс возвращаем до записи отчёта: недоступный каталог отчёта не должен оставлять события и экран выключенными или подменять ошибку.
     On Error Resume Next
+    If Not publicationFinished And Not workbook Is Nothing Then MarkResultAttemptStopped workbook, errorNumber = 18, publicationStarted
     If Not report Is Nothing Then
         report.AddError "Расчет остановлен", errorDescription
         report.Save "Расчет не выполнен: " & errorDescription

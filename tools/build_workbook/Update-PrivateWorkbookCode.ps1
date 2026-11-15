@@ -6,7 +6,8 @@ param(
     [string[]]$EntryPointNames = @(),
     [string[]]$ExampleFiles = @(),
     [string[]]$RecipeRegistration = @(),
-    [switch]$TraceGeometry
+    [switch]$TraceGeometry,
+    [switch]$WorkbookEvents
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
@@ -127,6 +128,16 @@ End Function
         $updated += $file.BaseName
     }
     if ($ModuleNames.Count -and @($ModuleNames | Where-Object {$_ -notin $updated}).Count) {throw 'Requested source module was not found.'}
+    if ($WorkbookEvents) {
+        # Обработчики из исходника полной сборки принадлежат документному модулю книги.
+        $documentName=[string]$book.CodeName
+        if ([string]::IsNullOrWhiteSpace($documentName)) {$documentName='ThisWorkbook'}
+        $module=$book.VBProject.VBComponents.Item($documentName).CodeModule
+        $events=[IO.File]::ReadAllText((Join-Path $PSScriptRoot 'WorkbookHelpEvents.vba'),[Text.Encoding]::UTF8)
+        if ($module.CountOfLines) {$module.DeleteLines(1,$module.CountOfLines)}
+        $module.AddFromString(($events -split '\r?\n') -join "`r`n")
+        $updated += $documentName
+    }
     $excel.VBE.ActiveVBProject=$book.VBProject
     $compile=$excel.VBE.CommandBars.FindControl(1,578)
     if ($null -eq $compile) {throw 'Compile command unavailable.'}

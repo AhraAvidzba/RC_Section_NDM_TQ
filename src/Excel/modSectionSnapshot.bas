@@ -1030,6 +1030,7 @@ Public Function ReadElementResultTable(ByVal workbook As Object, Optional ByVal 
         Optional ByVal stateType As String = "", Optional ByVal indexOnly As Boolean = False, Optional ByVal profileID As String = "") As Variant
     Dim snapshot As CResultReadSource: Set snapshot = CurrentResultSource(workbook)
     If Not snapshot Is Nothing Then ReadElementResultTable = snapshot.SelectElementResults(combinationID, stateType, indexOnly, profileID): Exit Function
+    RequireCompleteExcelResultDisplay workbook
     ReadElementResultTable = ReadIndexedExcelElementResults(workbook, combinationID, stateType, indexOnly, profileID)
 End Function
 

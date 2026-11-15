@@ -39,7 +39,9 @@ Private Const ELEMENT_GEOMETRY_COLUMNS As Long = 18 ' Собственные г�
 Private Const SECTION_PROPERTY_COLUMNS As Long = 6 ' Общие свойства сечения и LC-свойства уровня всего сечения.
 Private Const ANNOTATION_COLUMNS As Long = 24 ' Аннотации и принадлежность готовой области трещин; поля 1..13 имеют единый совместимый порядок.
 Private Const MATERIAL_DIAGRAM_COLUMNS As Long = 11 ' Список точек всех различных диаграмм, фактически использованных в расчётах.
-Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 73 ' Строки общих свойств сечения до LC-зависимых блоков.
+Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 75 ' Строки общих свойств сечения до LC-зависимых блоков.
+Private mCalculationInputStamp As String ' Подпись входных данных до запуска решателя.
+Private mIncompleteCalculationCount As Long ' Сочетания с недоступными инженерными проверками.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
 Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 37 ' Пространственное НДС, предельный вектор и контроль хомута в двух состояниях.
 Private Const STATE_SECTION_PROPERTY_ROWS As Long = 14 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
@@ -103,6 +105,12 @@ End Function
 ' ------------------------------
 ' Полная запись Results
 ' ------------------------------
+' Привязывает метаданные фактического запуска к общим свойствам его RunID.
+Friend Sub SetCalculationFreshnessMetadata(ByVal inputStamp As String, ByVal incompleteCount As Long)
+    mCalculationInputStamp = inputStamp
+    mIncompleteCalculationCount = incompleteCount
+End Sub
+
 ' Очищает вычисленные данные текущего расчёта и записывает согласованные таблицы:
 ' геометрию, результаты элементов, свойства сечения, диаграммы материалов и аннотации.
 Public Sub WriteResults(ByVal workbook As Object, ByVal section As CSectionModel, _
@@ -777,6 +785,8 @@ Private Sub WriteSectionProperties(ByVal workbook As Object, ByVal section As CS
     PutProperty data, rowIndex, runID, "ALL", "Bounds.MaxY", OutputLength(maxY, units), OutputLengthUnit(units), "Максимальный Y бетонной расчетной модели в координатах модели."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Source", section.SourceType, "-", "Источник геометрии расчетной модели."
     If Len(section.RecipeType) > 0 Then PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeType", section.RecipeType, "-", "Тип рецепта сформированного сечения."
+    If Len(mCalculationInputStamp) > 0 Then PutProperty data, rowIndex, runID, "ALL", RESULT_INPUT_STAMP, mCalculationInputStamp, "-", "Подпись расчётных входов, прочитанных до решения."
+    If mIncompleteCalculationCount > 0 Then PutProperty data, rowIndex, runID, "ALL", RESULT_INCOMPLETE_COUNT, mIncompleteCalculationCount, "шт", "Число сочетаний с недоступными проверками."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.ConcreteMeshSource", section.ConcreteMeshSource, "-", "Источник бетонной сетки: Generated, AutoCADRegions или AutoCADContours."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.Revision", section.Revision, "-", "Версия геометрии, к которой относятся состояния и расчетные области этого снимка."
     PutProperty data, rowIndex, runID, "ALL", "Geometry.RecipeDiagnostics", previousDiagnostics & section.GeometryDiagnosticsText, "-", "Запрошенные/созданные позиции, совпадения, пропуски и конфликты. StationStep и CenterStep в мм; для связанного ряда StationStep относится к исходному пути."

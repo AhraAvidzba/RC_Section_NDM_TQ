@@ -22,6 +22,7 @@ Private mMinimalFormatting As Boolean ' Сохраняет готовое офо
 
 Private Const TARGET_COLUMNS As Long = 33 ' Сводка, один пустой столбец и шесть нагрузок в пользовательской точке.
 Private Const META_ROWS As Long = 4 ' Верхние строки с общими сведениями о запуске.
+Private Const FRESHNESS_ROW As Long = 5 ' Локальная отметка состояния показанного вывода.
 Private Const GROUP_HEADER_ROW As Long = 6 ' Первая строка шестистрочной шапки основной таблицы.
 Private Const SUBGROUP_HEADER_ROW As Long = 7 ' Строка внутренних подзаголовков расчетных блоков.
 Private Const COLUMN_HEADER_ROW As Long = 8 ' Верх строки с обозначениями конкретных параметров.
@@ -104,6 +105,37 @@ End Function
 ' Возвращает ширину собственно rngBatchSummary.
 Public Function RequiredSummaryColumns() As Long
     RequiredSummaryColumns = TARGET_COLUMNS
+End Function
+
+' Читает локальную надпись над шапкой, независимо от режима хранения снимка.
+Friend Function FreshnessNotice(ByVal workbook As Object) As String
+    Dim value As Variant: value = FreshnessNoticeCell(workbook).Value2
+    If Not IsError(value) Then FreshnessNotice = CStr(value)
+End Function
+
+' Обновляет только строку актуальности, не переписывая вычисленные результаты.
+Friend Sub SetFreshnessNotice(ByVal workbook As Object, ByVal notice As String)
+    If FreshnessNotice(workbook) = notice Then Exit Sub
+    PrepareIndexedResultsWrite workbook
+    Dim target As Object: Set target = FreshnessNoticeCell(workbook)
+    target.Value2 = notice
+    target.Font.Bold = True
+    target.Font.Color = RGB(156, 87, 0)
+    target.HorizontalAlignment = -4131 ' xlLeft.
+    target.WrapText = False
+End Sub
+
+' Отличает рассчитанную сводку от сформированной геометрии без сочетаний.
+Friend Function HasDisplayedCombinations(ByVal workbook As Object) As Boolean
+    Dim target As Object: Set target = SummaryTargetRange(workbook)
+    Dim lastRow As Long: lastRow = RequiredSummaryRowsForWorkbook(workbook, 0)
+    HasDisplayedCombinations = (workbook.Application.WorksheetFunction.CountA( _
+        target.Cells(FIRST_DATA_ROW, SUM_COL_ID).Resize(lastRow - FIRST_DATA_ROW + 1, 1)) > 0)
+End Function
+
+' Возвращает строку объявления относительно текущей привязки общей сводки.
+Private Function FreshnessNoticeCell(ByVal workbook As Object) As Object
+    Set FreshnessNoticeCell = SummaryTargetRange(workbook).Cells(FRESHNESS_ROW, 1)
 End Function
 
 ' Возвращает число столбцов Results, занимаемых общей сводкой.
@@ -279,6 +311,7 @@ End Sub
 Private Sub ClearSummaryBody(ByVal target As Object)
     If mMinimalFormatting Then
         target.Cells(1, 1).Resize(META_ROWS, 1).ClearContents
+        target.Cells(FRESHNESS_ROW, 1).ClearContents
         target.Cells(1, 7).Resize(3, 1).ClearContents
         target.Offset(WORST_HEADER_ROW - 1, 0).Resize(target.Rows.Count - WORST_HEADER_ROW + 1, TARGET_COLUMNS).ClearContents
         If target.Rows.Count >= FIRST_DATA_ROW Then target.Offset(FIRST_DATA_ROW - 1, 0).Resize(target.Rows.Count - FIRST_DATA_ROW + 1, TARGET_COLUMNS).Interior.ColorIndex = -4142

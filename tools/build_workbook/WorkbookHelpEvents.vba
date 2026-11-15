@@ -10,16 +10,35 @@ Private mLastWorkbookFolder As String ' Последняя папка книги
 Private Sub Workbook_Open()
     mLastWorkbookFolder = ThisWorkbook.Path
     ApplyHelpDefaults
+    RefreshResultsNotice
 End Sub
 
-' Только выбор справочной картинки: расчётные настройки и таблицы не читаются.
+' Обновляет отметку изменённого ввода и обрабатывает текущий выбор иллюстрации.
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
+    RefreshResultsNoticeAfterEdit Sh, Target
     If Not modSectionIllustrations.IsSectionIllustrationSelectorChange(Target) Then Exit Sub
     On Error GoTo Failed
     modSectionIllustrations.SwitchSectionPicture
     Exit Sub
 Failed:
     ShowWorkbookMessage "Иллюстрация не обновлена." & vbCrLf & vbCrLf & Err.Description, vbExclamation, "Выбор сечения"
+End Sub
+
+' Перепроверяет показанный снимок после изменений, не вызвавших SheetChange.
+Private Sub Workbook_SheetActivate(ByVal Sh As Object)
+    If Sh.Name = "Results" Then RefreshResultsNotice
+End Sub
+
+' Проверка актуальности не вмешивается в открытие книги и навигацию.
+Private Sub RefreshResultsNotice()
+    On Error Resume Next
+    RefreshVisibleResultFreshness ThisWorkbook
+End Sub
+
+' Проверяет только пользовательский ввод, не запуская пересчёт и восстановление.
+Private Sub RefreshResultsNoticeAfterEdit(ByVal sheet As Object, ByVal target As Range)
+    On Error Resume Next
+    CheckResultFreshnessAfterEdit ThisWorkbook, sheet, target
 End Sub
 
 ' После Save As переносит файл того же снимка рядом с новой книгой.
