@@ -449,16 +449,25 @@ End Function
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Снимает деформацию обеих вертикальных ветвей в середине стенки
 ' на принятых полях с тремя пространственными историями.
+' Первый аргумент принимает число интервалов или «интервалы x деления».
 Public Function RunTestCoupledTBU3HoopGauge(ByVal spansText As String, ByVal maximumStageText As String) As String
-    RunTestCoupledTBU3HoopGauge = TraceTBU3Test(spansText, maximumStageText, True, _
-        spatialHistory:=True, measureHoop:=True)
+    On Error GoTo Failed
+    Dim resolution() As String: resolution = Split(spansText, "x")
+    Dim cellsPerSpan As Long: cellsPerSpan = 5
+    If UBound(resolution) > 1 Then Err.Raise 5, , "Задайте число интервалов или «интервалы x деления»."
+    If UBound(resolution) = 1 Then cellsPerSpan = CLng(Trim$(resolution(1)))
+    RunTestCoupledTBU3HoopGauge = TraceTBU3Test(Trim$(resolution(0)), maximumStageText, True, _
+        spatialHistory:=True, measureHoop:=True, cellsPerSpan:=cellsPerSpan)
+    Exit Function
+Failed:
+    RunTestCoupledTBU3HoopGauge = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Записывает принятые точки силового и деформационного контроля отдельно.
 Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean, _
         Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False, _
-        Optional ByVal measureHoop As Boolean = False) As String
+        Optional ByVal measureHoop As Boolean = False, Optional ByVal cellsPerSpan As Long = 5) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -471,6 +480,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Dim spans As Long: spans = CLng(spansText)
     Dim maximumStage As Long: maximumStage = CLng(maximumStageText)
     If spans < 1 Or spans > 3 Or maximumStage < 1 Or maximumStage > 21 Then Err.Raise 5, , "Тестовые границы: базис 1–3, стадия 1–21."
+    If cellsPerSpan < 4 Or cellsPerSpan > 16 Then Err.Raise 5, , "Задайте от 4 до 16 делений на интервал базиса."
     Dim forceStage As Long: forceStage = maximumStage
     If followTwist And forceStage > 5 Then forceStage = 5
     If InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) > 0 Then tracePath = ThisWorkbook.Path & "\TBU3_Trace.csv"
@@ -479,15 +489,17 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Dim layout As CTransverseRebarLayout, steel As Object, section As CSectionModel
     Set section = BuildTBU3SectionTest(layout, steel)
     Dim gaugeLeftX As Double, gaugeRightX As Double
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
+    operators.PrepareModel section, EC, NU, spans, spans, cellsPerSpan, layout, steelModels:=steel
     If measureHoop Then
        Dim hoopPath As CGeometryPath: Set hoopPath = layout.Path(1)
         hoopPath.ProjectionBounds 1#, 0#, gaugeLeftX, gaugeRightX
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_X_MM;" & ExperimentNumberTest(gaugeLeftX) & ";" & _
             ExperimentNumberTest(gaugeRightX)
+        AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_RESOLUTION;" & CStr(spans) & ";" & CStr(cellsPerSpan) & ";" & _
+            CStr(operators.ConcretePointCount) & ";" & CStr(operators.PointCount) & ";" & CStr(operators.DegreeCount)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_COLUMNS;stage;Mx_kNm;T_kNm;strain_left;strain_right"
     End If
-    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
-    operators.PrepareModel section, EC, NU, spans, spans, 5, layout, steelModels:=steel
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, FC, FT, 0.0045, 0.12, 80#, spatialHistory
     path.Initialize 0#, 0#, MX_OFFSET, DELTA_MX, 0#, 0#, 0#, DELTA_T
