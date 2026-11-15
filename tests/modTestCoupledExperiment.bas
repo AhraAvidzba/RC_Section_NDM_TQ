@@ -21,8 +21,15 @@ Public Function RunTestCoupledKaniPublishedEnergy(ByVal spansText As String, ByV
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет траекторию Kani с тремя историями и теми же оценками энергий.
+Public Function RunTestCoupledKaniSpatial(ByVal spansText As String, ByVal shearText As String) As String
+    RunTestCoupledKaniSpatial = TraceKaniShearTest(spansText, shearText, True, spatialHistory:=True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сохраняет точки равновесия и причины уменьшения шага при заданном сдвиге.
-Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText As String, ByVal publishedEnergies As Boolean) As String
+Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText As String, ByVal publishedEnergies As Boolean, _
+        Optional ByVal spatialHistory As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 25600#
     Const FC As Double = 28.2
@@ -49,10 +56,8 @@ Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText A
     Set section = BuildKaniSectionTest(layout, steel)
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
     operators.PrepareModel section, EC, 0.2, spans, spans, 5, layout, steelModels:=steel
-    concrete.Initialize operators.PointCount, EC, 0.2, 0.6 * FC, FC, FT, 0.0022, gt, gc, 125#
-    response.Initialize operators, concrete, steel
     Dim solver As New CCoupledNewtonSolver, shearX() As Double, shearY() As Double
-    solver.Initialize operators, response, EC
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, 0.2, FC, FT, 0.0022, gt, gc, spatialHistory
     operators.MeanShearProjections shearX, shearY
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
     direction(6) = FORCE_SCALE
@@ -145,6 +150,12 @@ Public Function RunTestCoupledLopesA2RefinedInputs(ByVal spansText As String, By
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Прослеживает ту же траекторию чистого кручения A2 с тремя историями.
+Public Function RunTestCoupledLopesA2Spatial(ByVal spansText As String, ByVal twistText As String) As String
+    RunTestCoupledLopesA2Spatial = TraceLopesA2Test(spansText, twistText, True, spatialHistory:=True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Воспроизводит сжатие 1279,1 кН из таблицы 3 Bernardo и Taborda
 ' до увеличения кручения. Продольная сила затем остаётся постоянной.
 Public Function RunTestCoupledLopesA2Compression(ByVal spansText As String, ByVal twistText As String) As String
@@ -160,7 +171,8 @@ End Function
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сравнивает упругое сечение и последующую нелинейную ветвь с армированием.
 Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As String, ByVal refinedInputs As Boolean, _
-        Optional ByVal normalForce As Double = 0#, Optional ByVal strengthMaximum As Double = 0#) As String
+        Optional ByVal normalForce As Double = 0#, Optional ByVal strengthMaximum As Double = 0#, _
+        Optional ByVal spatialHistory As Boolean = False) As String
     On Error GoTo Failed
     Const NU As Double = 0.2
     Const FC As Double = 47.3
@@ -204,9 +216,7 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
         " | fy longitudinal " & ExperimentNumberTest(longitudinalYield)
     AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.DegreeCount)
     Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
-    concrete.Initialize operators.PointCount, ec, NU, 0.6 * FC, FC, ft, peakStrain, gt, gc, 125#
-    response.Initialize operators, concrete, steel
-    solver.Initialize operators, response, ec
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, ec, NU, FC, ft, peakStrain, gt, gc, spatialHistory
     If strengthMaximum > 0# Then
         TraceLopesA2Test = SearchLopesA2StrengthTest(operators, solver, response, strengthMaximum, report, tracePath)
         Exit Function
@@ -431,9 +441,15 @@ Public Function RunTestCoupledTBU3Peak(ByVal spansText As String, ByVal maximumS
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет силовое и деформационное продолжение TBU3 с тремя историями.
+Public Function RunTestCoupledTBU3SpatialPeak(ByVal spansText As String, ByVal maximumStageText As String) As String
+    RunTestCoupledTBU3SpatialPeak = TraceTBU3Test(spansText, maximumStageText, True, True, spatialHistory:=True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Записывает принятые точки силового и деформационного контроля отдельно.
 Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText As String, ByVal followTwist As Boolean, _
-        Optional ByVal confirmPeak As Boolean = False) As String
+        Optional ByVal confirmPeak As Boolean = False, Optional ByVal spatialHistory As Boolean = False) As String
     On Error GoTo Failed
     Const EC As Double = 30000#
     Const NU As Double = 0.2
@@ -455,10 +471,8 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     Set section = BuildTBU3SectionTest(layout, steel)
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
     operators.PrepareModel section, EC, NU, spans, spans, 5, layout, steelModels:=steel
-    concrete.Initialize operators.PointCount, EC, NU, FC * 0.6, FC, FT, 0.0045, 0.12, 80#, 125#
-    response.Initialize operators, concrete, steel
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
-    solver.Initialize operators, response, EC
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, FC, FT, 0.0045, 0.12, 80#, spatialHistory
     path.Initialize 0#, 0#, MX_OFFSET, DELTA_MX, 0#, 0#, 0#, DELTA_T
     branch.Initialize solver, path, 1, 12, 24, 0.0000005, 0.00000002, saveAcceptedFields:=confirmPeak
 
@@ -507,6 +521,31 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
 Failed:
     TraceTBU3Test = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Подключает одну или три истории к одним операторам и параметрам опыта.
+' Центральная история используется для наблюдений в протоколах.
+Private Sub InitializeExperimentSolverTest(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal center As CCoupledReinforcedResponse, ByVal steel As Object, _
+        ByVal ec As Double, ByVal nu As Double, ByVal fc As Double, ByVal ft As Double, ByVal peakStrain As Double, _
+        ByVal gt As Double, ByVal gc As Double, ByVal spatialHistory As Boolean)
+    Const LOCALIZATION_LENGTH As Double = 125# ' мм, принятое значение во всех трёх сопоставлениях.
+    Dim pointCount As Long: pointCount = operators.PointCount
+    Dim fc0 As Double: fc0 = 0.6 * fc ' Начальная прочность сжатия в материальной модели.
+    concrete.Initialize pointCount, ec, nu, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    center.Initialize operators, concrete, steel
+    If Not spatialHistory Then
+        solver.Initialize operators, center, ec
+        Exit Sub
+    End If
+    Dim plusConcrete As New CCoupledConcreteResponse, minusConcrete As New CCoupledConcreteResponse
+    Dim plusSide As New CCoupledReinforcedResponse, minusSide As New CCoupledReinforcedResponse
+    plusConcrete.Initialize pointCount, ec, nu, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    minusConcrete.Initialize pointCount, ec, nu, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    plusSide.Initialize operators, plusConcrete, steel
+    minusSide.Initialize operators, minusConcrete, steel
+    solver.Initialize operators, center, ec, plusSide, minusSide
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет рабочий критерий максимума отдельно от наблюдаемого падения
