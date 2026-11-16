@@ -13,6 +13,7 @@ Public Enum ECoupledTangentMode
     ctmAxialGradient = 1   ' Только zz, xz, yz для продольного градиента напряжений.
     ctmStressOnly = 2      ' Проба без матрицы и с нулевым продольным градиентом.
     ctmFullBranchConsistent = 3    ' Все столбцы на той же материальной ветви, только без записи пробы.
+    ctmRefinedBranchConsistent = 4 ' Согласованная касательная с малым шагом возмущения.
 End Enum
 
 ' Готовит тензор изотропной упругости в инженерных компонентах.

@@ -51,6 +51,14 @@ Friend Property Get Count() As Long
     Count = mSpanCount + DEGREE
 End Property
 
+' Возвращает коэффициент точного воспроизведения координаты в кубическом базисе.
+' Индекс функции начинается с единицы, три внутренних узла задают абсциссу Гревилля.
+Friend Function CoordinateCoefficient(ByVal basisIndex As Long) As Double
+    Dim parameter As Double
+    parameter = (mKnots(basisIndex) + mKnots(basisIndex + 1) + mKnots(basisIndex + 2)) / DEGREE
+    CoordinateCoefficient = mMinimum + mLength * parameter
+End Function
+
 ' Возвращает начало блока из четырёх активных функций и их значения.
 ' Вызывающий передаёт два заранее выделенных массива с границами 1..4.
 Friend Sub Evaluate(ByVal coordinate As Double, ByRef firstIndex As Long, _

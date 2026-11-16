@@ -112,7 +112,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         ByRef stress() As Double, ByRef tangent() As Double, _
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
-    If tangentMode = ctmFullBranchConsistent And recordTrial Then
+    If (tangentMode = ctmFullBranchConsistent Or tangentMode = ctmRefinedBranchConsistent) And recordTrial Then
         ICoupledPointResponse_EvaluatePoint = sfcInvalidConfiguration
         Exit Function
     End If

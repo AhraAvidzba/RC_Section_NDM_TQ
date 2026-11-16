@@ -464,6 +464,50 @@ Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strai
     Next localIndex
 End Sub
 
+' Возвращает оператор максимального приращения деформации по трём станциям.
+' Для точки идут εxx, εyy, γxy, затем пары −/+ для εzz, γxz и γyz.
+' Центральные значения трёх пар лежат между крайними; связи и lambda не входят в деформации.
+Friend Sub CopySpatialStrainCoefficients(ByVal axialHalfStep As Double, ByRef coefficients() As Double)
+    Const ROWS_PER_POINT As Long = 9
+    ReDim coefficients(1 To mDof + 1, 1 To ROWS_PER_POINT * mPointCount)
+    Dim lower(1 To STRESS_COMPONENTS) As Long, upper(1 To STRESS_COMPONENTS) As Long
+    lower(1) = 1: upper(1) = 1
+    lower(2) = 2: upper(2) = 2
+    lower(4) = 3: upper(4) = 3
+    lower(3) = 4: upper(3) = 5
+    lower(5) = 6: upper(5) = 7
+    lower(6) = 8: upper(6) = 9
+    Dim point As Long, rowOffset As Long, localIndex As Long, degree As Long
+    Dim first As Long, second As Long, firstValue As Double, secondValue As Double
+    For point = 1 To mPointCount
+        rowOffset = ROWS_PER_POINT * (point - 1)
+        For localIndex = 1 To LOCAL_DOF
+            degree = mSectionDof(localIndex, point)
+            If degree > 0 Then
+                first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
+                firstValue = mOperators(1, localIndex, point)
+                secondValue = mOperators(2, localIndex, point)
+                coefficients(degree, rowOffset + lower(first)) = firstValue
+                coefficients(degree, rowOffset + upper(first)) = firstValue
+                coefficients(degree, rowOffset + lower(second)) = secondValue
+                coefficients(degree, rowOffset + upper(second)) = secondValue
+            End If
+        Next localIndex
+        For localIndex = 1 To PLANE_DOF ' Первые четыре оператора также задают кинематику продольного градиента.
+            degree = mGradientBase + localIndex
+            first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
+            firstValue = axialHalfStep * mOperators(1, localIndex, point)
+            secondValue = axialHalfStep * mOperators(2, localIndex, point)
+            coefficients(degree, rowOffset + lower(first)) = -firstValue
+            coefficients(degree, rowOffset + upper(first)) = firstValue
+            If lower(second) <> upper(second) Then
+                coefficients(degree, rowOffset + lower(second)) = -secondValue
+                coefficients(degree, rowOffset + upper(second)) = secondValue
+            End If
+        Next localIndex
+    Next point
+End Sub
+
 ' Снимает продольное перемещение w в мм в исходных координатах сечения.
 ' В поле передаются общие, внутренние и служебные степени свободы этой сетки.
 Friend Function WarpingAt(ByVal x As Double, ByVal y As Double, ByRef field() As Double) As Double
@@ -745,6 +789,41 @@ Private Function ResultantsVerified(ByRef recovered() As Double, ByVal n As Doub
         Abs(recovered(3) - my) <= momentScale And Abs(recovered(4) - torque) <= momentScale And _
         Abs(recovered(5) - qx) <= forceScale And Abs(recovered(6) - qy) <= forceScale
 End Function
+
+' Приводит слабые строки к шести знаковым невязкам усилий в МПа.
+' Столбцы соответствуют слабым уравнениям, строки идут в порядке N, Mx, My, T, Qx, Qy.
+' Линейные пробы w берутся от центра бетонной квадратуры, который может отличаться от численного начала.
+Friend Sub CopyResultantResidualProjection(ByRef projection() As Double)
+    ReDim projection(1 To mGaugeBase, 1 To STRESS_COMPONENTS)
+    Dim row As Long, basis As Long, warp As Long, warpGauge As Long
+    For row = 1 To PLANE_DOF
+        projection(row, row) = 1#
+    Next row
+    Dim alongX() As Double, alongY() As Double
+    mQuadrature.CopyCoordinateCoefficients alongX, alongY
+    warpGauge = mGaugeBase + 3 ' Закрепление среднего продольного перемещения использует только бетон.
+    Dim weight As Double, weightSum As Double, centerX As Double, centerY As Double
+    For basis = 1 To UBound(mSupport)
+        If mSupport(basis) > 0 Then
+            warp = PLANE_DOF + 3 * mSupport(basis)
+            projection(warp, 5) = alongX(basis)
+            projection(warp, 6) = alongY(basis)
+            weight = mMatrix(warpGauge, warp)
+            weightSum = weightSum + weight
+            centerX = centerX + weight * alongX(basis)
+            centerY = centerY + weight * alongY(basis)
+        End If
+    Next basis
+    centerX = centerX / weightSum: centerY = centerY / weightSum
+    For warp = PLANE_DOF + 3 To mGradientBase Step 3
+        projection(warp, 5) = projection(warp, 5) - centerX
+        projection(warp, 6) = projection(warp, 6) - centerY
+    Next warp
+    projection(mGradientBase + 3, 5) = 1# ' Градиент My добавляет заданное Qx и компенсирует производную σzz.
+    projection(mGradientBase + 2, 6) = 1# ' Для Qy используется градиент Mx.
+    projection(mGradientBase + 1, 5) = -centerX ' Учитываем перенос линейного поля от начала к центру квадратуры.
+    projection(mGradientBase + 1, 6) = -centerY
+End Sub
 
 ' Возвращает площадь квадратуры бетона, мм², и характерное плечо, мм,
 ' приводящие силовые и моментные невязки к одному масштабу МПа.

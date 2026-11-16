@@ -106,7 +106,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     Dim updated As TConcreteHistory, virginElastic As Boolean, cachedMode As ECoupledTangentMode
     Dim sameTrial As Boolean, i As Long, j As Long, baseSubsteps As Long
     Dim branchConsistent As Boolean
-    branchConsistent = (tangentMode = ctmFullBranchConsistent)
+    branchConsistent = (tangentMode = ctmFullBranchConsistent Or tangentMode = ctmRefinedBranchConsistent)
     If branchConsistent And recordTrial Then
         ICoupledPointResponse_EvaluatePoint = sfcInvalidConfiguration
         Exit Function
@@ -170,7 +170,7 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
     Dim scratch As TConcreteHistory, i As Long, j As Long, gradientColumn As Boolean
     Dim branchConsistent As Boolean, basePlastic As Boolean, basePrincipalSign As Long, sideSubsteps As Long
     Dim atAcceptedPosition As Boolean, plusAdjacent As Boolean, minusAdjacent As Boolean
-    branchConsistent = (mode = ctmFullBranchConsistent)
+    branchConsistent = (mode = ctmFullBranchConsistent Or mode = ctmRefinedBranchConsistent)
     If branchConsistent Then
         ReadBranchSigns baseHistory, mHistory(point, mCommitted), basePlastic, basePrincipalSign
         atAcceptedPosition = (baseSubsteps = 0)
@@ -184,6 +184,7 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
                 For i = 1 To N_COMPONENTS: tangent(i, j) = mCachedTangent(i, j, point): Next i
             Else
                 delta = STRAIN_PERTURBATION * (1# + Abs(strain(j)))
+                If mode = ctmRefinedBranchConsistent Then delta = delta / 64#
                 For attempt = 1 To 3
                     perturbed(j) = strain(j) + delta
                     plusOk = UpdateWithSubsteps(perturbed, mHistory(point, mCommitted), scratch, plus, unused, sideSubsteps)

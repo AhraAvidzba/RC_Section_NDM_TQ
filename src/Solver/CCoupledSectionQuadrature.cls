@@ -119,6 +119,27 @@ Friend Sub EvaluateShape(ByVal x As Double, ByVal y As Double, ByRef indices() A
     Next iy
 End Sub
 
+' Возвращает коэффициенты x/L и y/L в полном базисе численного начала.
+' Порядок функций совпадает с EvaluateShape до исключения неактивных опор.
+Friend Sub CopyCoordinateCoefficients(ByRef alongX() As Double, ByRef alongY() As Double)
+    ReDim alongX(1 To BasisCount), alongY(1 To BasisCount)
+    Dim ix As Long, iy As Long, index As Long
+    Dim lengthScale As Double, ordinate As Double, abscissae() As Double
+    lengthScale = mFrame.LengthScale
+    ReDim abscissae(1 To mSplineX.Count)
+    For ix = 1 To mSplineX.Count
+        abscissae(ix) = mSplineX.CoordinateCoefficient(ix) / lengthScale
+    Next ix
+    For iy = 1 To mSplineY.Count
+        ordinate = mSplineY.CoordinateCoefficient(iy) / lengthScale
+        For ix = 1 To mSplineX.Count
+            index = index + 1
+            alongX(index) = abscissae(ix)
+            alongY(index) = ordinate
+        Next ix
+    Next iy
+End Sub
+
 ' Возвращает отсортированные параметры деления аналитического сегмента
 ' линиями внутренних узлов обеих осей квадратуры.
 Friend Sub PathCuts(ByRef edge As TRegionEdge, ByRef cuts() As Double, ByRef count As Long)

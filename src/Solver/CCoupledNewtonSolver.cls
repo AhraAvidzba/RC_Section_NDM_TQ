@@ -20,6 +20,9 @@ Private Const COMPONENT_COUNT As Long = 6
 Private Const GAUGE_COUNT As Long = 4
 Private Const MIN_FRACTION As Double = 0.0078125
 Private Const MIN_PROGRESS As Double = 0.0001
+Private Const SMALL_STRAIN_MAX_NORM As Double = 2# ' Локальная поправка завершает состояние вблизи допуска.
+Private Const SMALL_STRAIN_RADIUS As Double = 2.5 ' Радиус через силовую невязку в масштабированных столбцах.
+Private Const SMALL_STRAIN_FORCE_FRACTION As Double = 0.92 ' Запас до допуска для нелинейной пробы.
 Private Const SPATIAL_HALF_STEP As Double = 0.001 ' Полушаг секущей по безразмерной координате z/L.
 Private Const GRADIENT_DIFFERENCE_STEP As Double = 0.0000006 ' Амплитуда возмущения максимальной компоненты деформации.
 Private Const LOCAL_GRADIENT_DIFFERENCE_STEP As Double = 0.00000000025 ' Амплитуда пробы внутри перехода разностной материальной касательной.
@@ -334,6 +337,31 @@ RecomputeTangent:
             If Not mUseSpatialHistory And Not useGradientTangent And mSection.HasAxialGradient(current) Then
                 useGradientTangent = True
                 GoTo RecomputeTangent
+            End If
+            If mControlActive And mConsistentControl And norm <= SMALL_STRAIN_MAX_NORM * tolerance Then
+                Dim rejectedNorm As Double, rejectedCode As ESolverFailureCode
+                Dim rejectedPoint As Long, rejectedLastPoint As Long, rejectedSide As Long, rejectedFailures As Long
+                Dim rejectedLoad(1 To COMPONENT_COUNT) As Double, rejectedExternal() As Double
+                Dim rejectedResidual() As Double, rejectedResultants() As Double, rejectedMatrix() As Double
+                rejectedNorm = mLastNorm: rejectedCode = mFailureCode
+                rejectedPoint = mMaterialPoint: rejectedLastPoint = mLastFailedPoint: rejectedSide = mLastFailedSide
+                rejectedFailures = mMaterialFailures
+                rejectedExternal = mExternal: rejectedResidual = mResidual: rejectedResultants = mTrialResultants
+                rejectedMatrix = mMatrix
+                For i = 1 To COMPONENT_COUNT: rejectedLoad(i) = load(i): Next i
+                If TrySmallStrainEquilibrium(current, currentLambda, load, norm, tolerance, candidateLambda) Then
+                    mIterations = mIterations + 1
+                    PublishCandidate candidateLambda
+                    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; поправка с ограниченным приращением деформации"
+                    SolveStep = True
+                    Exit Function
+                End If
+                mLastNorm = rejectedNorm: mFailureCode = rejectedCode
+                mMaterialPoint = rejectedPoint: mLastFailedPoint = rejectedLastPoint: mLastFailedSide = rejectedSide
+                mMaterialFailures = rejectedFailures
+                mExternal = rejectedExternal: mResidual = rejectedResidual: mTrialResultants = rejectedResultants
+                mMatrix = rejectedMatrix
+                For i = 1 To COMPONENT_COUNT: load(i) = rejectedLoad(i): Next i
             End If
             RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
             Dim details As String, mismatch As String
@@ -759,6 +787,137 @@ Private Function SolveCorrection(ByRef field() As Double, ByRef correction() As 
     SolveCorrection = mSystem.Solve(augmented, correction, size)
 End Function
 
+' Завершает близкую к равновесию пространственную пробу при том же
+' управлении. Малая поправка нужна там, где демпфирование Ньютона
+' не уменьшает действительный остаток после возврата материалов.
+Private Function TrySmallStrainEquilibrium(ByRef field() As Double, ByVal lambda As Double, _
+        ByRef load() As Double, ByVal norm As Double, ByVal tolerance As Double, _
+        ByRef trialLambda As Double) As Boolean
+    Dim force() As Double, forceResidual() As Double, equality() As Double, equalityResidual() As Double
+    Dim scales() As Double, strain() As Double, correction() As Double, trial() As Double
+    Dim optimizer As New CCoupledStepOptimizer, i As Long, row As Long, fraction As Double, radius As Double
+    On Error GoTo UnavailableCorrection
+    SetControlledLoad lambda, load
+    If Not Evaluate(field, True, recordTrial:=False, refinedBranch:=True) Then Exit Function
+    If Not BuildSmallStrainSystem(field, load, tolerance, force, forceResidual, equality, equalityResidual, scales) Then Exit Function
+    mSection.CopySpatialStrainCoefficients SPATIAL_HALF_STEP, strain
+    For row = 1 To UBound(strain, 2)
+        For i = 1 To UBound(scales)
+            strain(i, row) = strain(i, row) / scales(i)
+        Next i
+    Next row
+    radius = SMALL_STRAIN_RADIUS * norm ' Столбцы касательной приведены к единичному максимуму.
+    If Not optimizer.TryMinimizeStrain(force, forceResidual, equality, equalityResidual, strain, _
+            radius, SMALL_STRAIN_FORCE_FRACTION * tolerance, correction) Then Exit Function
+
+    For i = 1 To UBound(scales)
+        correction(i) = correction(i) / scales(i)
+    Next i
+    ReDim trial(1 To mDegreeCount)
+    fraction = 1#
+    Do While fraction >= 0.125
+        For i = 1 To mDegreeCount
+            trial(i) = field(i) + fraction * correction(i)
+        Next i
+        trialLambda = lambda + fraction * correction(mDegreeCount + 1)
+        SetControlledLoad trialLambda, load
+        If Evaluate(trial, False, recordTrial:=False) Then
+            If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+                If Evaluate(trial, False) Then
+                    If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+                        mCandidate = trial
+                        TrySmallStrainEquilibrium = True
+                        Exit Function
+                    End If
+                ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+                    Exit Function
+                End If
+            End If
+        ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+            Exit Function
+        End If
+        fraction = fraction * 0.5
+    Loop
+    Exit Function
+
+UnavailableCorrection:
+    If Err.Number <> 6 And Err.Number <> 7 And Err.Number <> 11 Then Err.Raise Err.Number, Err.Source, Err.Description
+End Function
+
+' Приводит касательную и правую часть к общей шкале координат.
+' Шесть усилий проверяются как отдельные силовые строки, а связи
+' и уравнение управления задаются точными равенствами.
+Private Function BuildSmallStrainSystem(ByRef field() As Double, ByRef load() As Double, ByVal tolerance As Double, _
+        ByRef force() As Double, ByRef forceResidual() As Double, ByRef equality() As Double, _
+        ByRef equalityResidual() As Double, ByRef scales() As Double) As Boolean
+    Dim matrix() As Double, residual() As Double, projection() As Double
+    Dim size As Long, weakRows As Long, i As Long, j As Long, k As Long, row As Long
+    Dim maximum As Double, factor As Double, normalized As Double, direct As Double, area As Double, lengthScale As Double
+    size = mDegreeCount + 1: weakRows = mGaugeStart - 1
+    BuildControlledMatrix matrix, size
+    ReDim residual(1 To size), scales(1 To size)
+    For i = 1 To mDegreeCount
+        residual(i) = mResidual(i)
+    Next i
+    residual(size) = ControlResidual(field)
+    For i = mGaugeStart To mDegreeCount
+        residual(i) = residual(i) * mReferenceModulus
+        For j = 1 To size
+            matrix(j, i) = matrix(j, i) * mReferenceModulus
+        Next j
+    Next i
+    For j = 1 To size
+        maximum = 0#
+        For i = 1 To size
+            maximum = GeomMax(maximum, Abs(matrix(j, i)))
+        Next i
+        If maximum = 0# Then Exit Function
+        scales(j) = maximum
+        For i = 1 To size
+            matrix(j, i) = matrix(j, i) / maximum
+        Next i
+    Next j
+    ReDim force(1 To size, 1 To weakRows + COMPONENT_COUNT), forceResidual(1 To weakRows + COMPONENT_COUNT)
+    ReDim equality(1 To size, 1 To GAUGE_COUNT + 1), equalityResidual(1 To GAUGE_COUNT + 1)
+    For i = 1 To weakRows
+        forceResidual(i) = residual(i)
+        For j = 1 To size
+            force(j, i) = matrix(j, i)
+        Next j
+    Next i
+    For i = mGaugeStart To size
+        row = i - weakRows: maximum = 0#
+        For j = 1 To size
+            maximum = GeomMax(maximum, Abs(matrix(j, i)))
+        Next j
+        If maximum = 0# Then Exit Function
+        equalityResidual(row) = residual(i) / maximum
+        For j = 1 To size
+            equality(j, row) = matrix(j, i) / maximum
+        Next j
+    Next i
+
+    mSection.CopyResultantResidualProjection projection
+    mSection.CopyResultantResidualScales area, lengthScale
+    For k = 1 To COMPONENT_COUNT
+        row = weakRows + k: normalized = 0#
+        For i = 1 To weakRows
+            factor = projection(i, k)
+            If factor <> 0# Then
+                normalized = normalized + factor * residual(i)
+                For j = 1 To size
+                    force(j, row) = force(j, row) + factor * matrix(j, i)
+                Next j
+            End If
+        Next i
+        direct = (mTrialResultants(k) - load(k)) / area
+        If k >= 2 And k <= 4 Then direct = direct / lengthScale
+        If Abs(normalized - direct) > 0.001 * tolerance Then Exit Function ' Проверяем замыкание проекции на исходном поле.
+        forceResidual(row) = direct
+    Next k
+    BuildSmallStrainSystem = True
+End Function
+
 ' Добавляет неизвестный множитель и уравнение управления деформацией.
 Private Sub BuildControlledMatrix(ByRef augmented() As Double, ByVal size As Long)
     Dim i As Long, j As Long
@@ -893,13 +1052,14 @@ End Property
 ' касательной сохраняет материальные буферы ранее подтверждённого поля.
 Private Function Evaluate(ByRef field() As Double, ByVal withMatrix As Boolean, _
         Optional ByVal useGradientTangent As Boolean = False, Optional ByVal recordTrial As Boolean = True, _
-        Optional ByVal consistentBranch As Boolean = False) As Boolean
+        Optional ByVal consistentBranch As Boolean = False, Optional ByVal refinedBranch As Boolean = False) As Boolean
     mEvaluations = mEvaluations + 1
     mSection.StartEquations field, mExternal, mResidual, mMatrix, withMatrix
     Dim point As Long, useAxialGradient As Boolean, tangentMode As ECoupledTangentMode
     If Not mUseSpatialHistory Then useAxialGradient = mSection.HasAxialGradient(field)
     tangentMode = ctmFull
     If withMatrix And consistentBranch Then tangentMode = ctmFullBranchConsistent
+    If withMatrix And refinedBranch Then tangentMode = ctmRefinedBranchConsistent
     If Not withMatrix Then
         If useAxialGradient Then tangentMode = ctmAxialGradient Else tangentMode = ctmStressOnly
     End If
