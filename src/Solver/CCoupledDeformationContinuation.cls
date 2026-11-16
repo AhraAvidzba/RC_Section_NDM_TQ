@@ -448,6 +448,7 @@ End Sub
 Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal keepRight As Boolean) As Boolean
     If middle.Lambda <= left.Lambda + LoadResolution(middle.Lambda) Then Exit Function
+    Dim shoulderStart As Double: shoulderStart = left.Coordinate ' Левая граница проверки до замены пары уточнёнными точками.
     Dim first As TBranchPoint, second As TBranchPoint, tolerance As Double
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
@@ -479,12 +480,13 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     If second.Lambda > mBestLambda Then mBestLambda = second.Lambda
     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
         "Подтверждён первый максимум прослеженной ветви.", Details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
-        " | Координаты плеч: " & CStr(left.Coordinate) & ", " & CStr(right.Coordinate)
+        " | Координаты плеч: " & CStr(shoulderStart) & ", " & CStr(right.Coordinate)
     VerifyPeak = True
 End Function
 
 ' Воспроизводит левые принятые поля, затем рассчитывает более мелкие
 ' шаги только вперёд. Сравнивает пик с обоими концами с учётом невязки.
+' При сохранении спада передаёт последнюю пару точек уточнённой истории.
 Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
@@ -545,10 +547,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
                 Set limitFields = New Collection
                 Dim j As Long, fieldCount As Long
                 fieldCount = i
-                If keepRight Then
-                    fieldCount = index
-                    right = samples(index)
-                End If
+                If keepRight Then fieldCount = index
                 For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
                 For j = 1 To fieldCount: limitFields.Add refined.Item(j): Next j
                 If Not mTrace Is Nothing Then
@@ -556,6 +555,10 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
                     For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).Lambda: Next j
                 End If
                 limitResultants = integrated.Item(fieldCount)
+                If keepRight Then
+                    left = samples(index - 1) ' Предшественник нужен при смене меры до принятия следующего шага.
+                    right = samples(index)
+                End If
             End If
             ReplayShoulders = True
             Exit Function
