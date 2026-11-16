@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-16 14:14:15
+Date: 2026-11-16 14:41:50
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -27002,7 +27002,7 @@ End Property
 ====================================================================================================
 COMPONENT: CCoupledDeformationContinuation
 TYPE: 2
-LINES: 725
+LINES: 732
 ====================================================================================================
 Option Explicit
 
@@ -27271,7 +27271,7 @@ End Function
 
 ' Сравнивает приращения на двух соседних шагах одной нисходящей ветви.
 ' Не меняет ни поля, ни историю. Рост шага возможен при устойчивых
-' наклонах множителя и нормированного поля неизвестных решателя.
+' наклонах нагрузки и механического поля.
 Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
     If left.HistoryIndex <> current.HistoryIndex - 1 Then Exit Function
@@ -27285,14 +27285,21 @@ Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As T
     Dim previous() As Double, accepted() As Double, field() As Double, resultants() As Double
     previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
     mSolver.CopyTrial field, resultants
+    FitsPostPeakSecant = FitsMechanicalSecant(previous, accepted, field, mSolver.PhysicalDegreeCount, ratio)
+End Function
+
+' Проверяет относительное отклонение механических приращений от секущей.
+' Множители кинематических связей лежат за границей mechanicalCount.
+Friend Function FitsMechanicalSecant(ByRef previous() As Double, ByRef accepted() As Double, _
+        ByRef field() As Double, ByVal mechanicalCount As Long, ByVal ratio As Double) As Boolean
     Dim i As Long, delta As Double, expectedDelta As Double, stepScale As Double, deviation As Double
-    For i = 1 To UBound(field)
+    For i = 1 To mechanicalCount
         delta = field(i) - accepted(i)
         expectedDelta = ratio * (accepted(i) - previous(i))
         stepScale = GeomMax(stepScale, Abs(expectedDelta))
         deviation = GeomMax(deviation, Abs(delta - expectedDelta))
     Next i
-    FitsPostPeakSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
+    FitsMechanicalSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
 End Function
 
 ' Проверяет продвижение по выбранной мере на фактических полях.
@@ -27733,7 +27740,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledElasticState
 TYPE: 2
-LINES: 837
+LINES: 873
 ====================================================================================================
 Option Explicit
 
@@ -27749,6 +27756,7 @@ Private Const PLANE_DOF As Long = 4
 Private Const STRESS_COMPONENTS As Long = 6
 Private Const SHAPE_COUNT As Long = 16
 Private Const GAUGES As Long = 4
+Private Const WARP_GAUGE_OFFSET As Long = 3
 Private Const LOCAL_DOF As Long = PLANE_DOF + 3 * SHAPE_COUNT
 
 Private mQuadrature As CCoupledSectionQuadrature
@@ -27777,7 +27785,7 @@ Private mMeta As CResultMeta
 Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double, ByVal poisson As Double, _
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
-        Optional ByVal steelModulus As Double = 0#, Optional ByVal SteelModels As Object = Nothing, _
+        Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing, _
         Optional ByVal importedGrade As String = vbNullString)
     Set mMeta = New CResultMeta
     mArea = 0#
@@ -27793,7 +27801,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     mQuadrature.Prepare pointsPerSpan, mx, my, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
     mPointCount = mConcreteCount
-    PrepareReinforcement section, transverse, steelModulus, SteelModels, importedGrade, indices, dx, dy
+    PrepareReinforcement section, transverse, steelModulus, steelModels, importedGrade, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
     Set mSystem = New CCoupledLinearSystem
@@ -27863,7 +27871,7 @@ End Property
 ' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
-        ByVal steelModulus As Double, ByVal SteelModels As Object, ByVal importedGrade As String, _
+        ByVal steelModulus As Double, ByVal steelModels As Object, ByVal importedGrade As String, _
         ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
     Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass: Erase mTransverseGroup
     Dim bars As New CTransverseRebarQuadrature
@@ -27871,7 +27879,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
     Dim last As Long, i As Long, point As Long, k As Long
     last = mConcreteCount + section.rebarCount + bars.count
     If last = mConcreteCount Then Exit Sub
-    If SteelModels Is Nothing And steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+    If steelModels Is Nothing And steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
         "Для упругой проверки армированного сечения задайте положительный модуль стали."
     ReDim Preserve mx(1 To last): ReDim Preserve my(1 To last): ReDim Preserve mWeight(1 To last)
     ReDim Preserve indices(1 To SHAPE_COUNT, 1 To last): ReDim Preserve mShape(1 To SHAPE_COUNT, 1 To last)
@@ -27910,12 +27918,12 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             mTransverseGroup(point) = group
         End If
         mx(point) = x: my(point) = y: mWeight(point) = area
-        If SteelModels Is Nothing Then
+        If steelModels Is Nothing Then
             mSteelModulus(point) = steelModulus
         Else
-            If Not SteelModels.Exists(mSteelClass(point)) Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+            If Not steelModels.Exists(mSteelClass(point)) Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
                 "Для класса «" & mSteelClass(point) & "» не назначена модель арматуры."
-            Set gradeModel = SteelModels.item(mSteelClass(point))
+            Set gradeModel = steelModels.item(mSteelClass(point))
             mSteelModulus(point) = gradeModel.elasticModulus
             If mSteelModulus(point) <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
                 "Для класса «" & mSteelClass(point) & "» не задан положительный модуль Es."
@@ -28020,20 +28028,20 @@ End Sub
 ' ортогональности. Члены ?'zx, ?'zy, ?'zz берутся из D Bp d, где d = L dq/dz.
 Private Sub Assemble()
     ReDim mMatrix(1 To mDof, 1 To mDof)
-    Dim point As Long, a As Long, DEGREE As Long, axis As Long, shapeValue As Double
+    Dim point As Long, a As Long, degree As Long, axis As Long, shapeValue As Double
     Dim tangent(1 To STRESS_COMPONENTS, 1 To STRESS_COMPONENTS) As Double
     For point = 1 To mPointCount
         PointTangent point, tangent
         AddPointTangent point, tangent, mMatrix
         If point <= mConcreteCount Then
             For a = PLANE_DOF + 1 To UBound(mSectionDof, 1)
-                DEGREE = mSectionDof(a, point)
-                If DEGREE > 0 Then
+                degree = mSectionDof(a, point)
+                If degree > 0 Then
                     axis = (a - PLANE_DOF - 1) Mod 3 + 1
                     shapeValue = mShape((a - PLANE_DOF - 1) \ 3 + 1, point) * mWeight(point)
-                    AddGauge DEGREE, mGaugeBase + axis, shapeValue
-                    If axis = 1 Then AddGauge DEGREE, mGaugeBase + 4, -my(point) * shapeValue
-                    If axis = 2 Then AddGauge DEGREE, mGaugeBase + 4, mx(point) * shapeValue
+                    AddGauge degree, mGaugeBase + axis, shapeValue
+                    If axis = 1 Then AddGauge degree, mGaugeBase + 4, -my(point) * shapeValue
+                    If axis = 2 Then AddGauge degree, mGaugeBase + 4, mx(point) * shapeValue
                 End If
             Next a
         End If
@@ -28083,8 +28091,8 @@ Private Sub RecoverFields(ByRef solution() As Double, ByRef recovered() As Doubl
 End Sub
 
 ' Возвращает полную размерность уравнений до конденсации.
-Friend Property Get DegreeCount() As Long
-    DegreeCount = mDof
+Friend Property Get degreeCount() As Long
+    degreeCount = mDof
 End Property
 
 ' Возвращает число точек интегрирования бетона и поправок от стали.
@@ -28161,14 +28169,14 @@ End Sub
 ' Вес бетона относится к полной области, включая места расположения стержней.
 Friend Sub MeanShearProjections(ByRef alongX() As Double, ByRef alongY() As Double)
     ReDim alongX(1 To mDof), alongY(1 To mDof)
-    Dim point As Long, localIndex As Long, DEGREE As Long, weight As Double
+    Dim point As Long, localIndex As Long, degree As Long, weight As Double
     For point = 1 To mConcreteCount
         weight = mWeight(point)
         For localIndex = PLANE_DOF To LOCAL_DOF Step 3 ' Кручение и продольные перемещения w.
-            DEGREE = mSectionDof(localIndex, point)
-            If DEGREE > 0 Then
-                alongX(DEGREE) = alongX(DEGREE) + weight * mOperators(1, localIndex, point)
-                alongY(DEGREE) = alongY(DEGREE) + weight * mOperators(2, localIndex, point)
+            degree = mSectionDof(localIndex, point)
+            If degree > 0 Then
+                alongX(degree) = alongX(degree) + weight * mOperators(1, localIndex, point)
+                alongY(degree) = alongY(degree) + weight * mOperators(2, localIndex, point)
             End If
         Next localIndex
     Next point
@@ -28177,14 +28185,14 @@ End Sub
 ' Деформации материальной точки от общих деформаций и внутренних полей.
 ' Порядок ?xx, ?yy, ?zz, ?xy, ?xz, ?yz. Вызывающий переиспользует массив.
 Friend Sub PointStrain(ByVal point As Long, ByRef field() As Double, ByRef strain() As Double)
-    Dim localIndex As Long, DEGREE As Long, j As Long, first As Long, second As Long, coefficient As Double
+    Dim localIndex As Long, degree As Long, j As Long, first As Long, second As Long, coefficient As Double
     For j = 1 To STRESS_COMPONENTS
         strain(j) = 0#
     Next j
     For localIndex = 1 To LOCAL_DOF
-        DEGREE = mSectionDof(localIndex, point)
-        If DEGREE > 0 Then
-            coefficient = field(DEGREE)
+        degree = mSectionDof(localIndex, point)
+        If degree > 0 Then
+            coefficient = field(degree)
             first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
             strain(first) = strain(first) + mOperators(1, localIndex, point) * coefficient
             strain(second) = strain(second) + mOperators(2, localIndex, point) * coefficient
@@ -28205,32 +28213,32 @@ Friend Sub CopySpatialStrainCoefficients(ByVal axialHalfStep As Double, ByRef co
     lower(3) = 4: upper(3) = 5
     lower(5) = 6: upper(5) = 7
     lower(6) = 8: upper(6) = 9
-    Dim point As Long, rowOffset As Long, localIndex As Long, DEGREE As Long
+    Dim point As Long, rowOffset As Long, localIndex As Long, degree As Long
     Dim first As Long, second As Long, firstValue As Double, secondValue As Double
     For point = 1 To mPointCount
         rowOffset = ROWS_PER_POINT * (point - 1)
         For localIndex = 1 To LOCAL_DOF
-            DEGREE = mSectionDof(localIndex, point)
-            If DEGREE > 0 Then
+            degree = mSectionDof(localIndex, point)
+            If degree > 0 Then
                 first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
                 firstValue = mOperators(1, localIndex, point)
                 secondValue = mOperators(2, localIndex, point)
-                coefficients(DEGREE, rowOffset + lower(first)) = firstValue
-                coefficients(DEGREE, rowOffset + upper(first)) = firstValue
-                coefficients(DEGREE, rowOffset + lower(second)) = secondValue
-                coefficients(DEGREE, rowOffset + upper(second)) = secondValue
+                coefficients(degree, rowOffset + lower(first)) = firstValue
+                coefficients(degree, rowOffset + upper(first)) = firstValue
+                coefficients(degree, rowOffset + lower(second)) = secondValue
+                coefficients(degree, rowOffset + upper(second)) = secondValue
             End If
         Next localIndex
         For localIndex = 1 To PLANE_DOF ' Первые четыре оператора также задают кинематику продольного градиента.
-            DEGREE = mGradientBase + localIndex
+            degree = mGradientBase + localIndex
             first = mFirstComponent(localIndex): second = mSecondComponent(localIndex)
             firstValue = axialHalfStep * mOperators(1, localIndex, point)
             secondValue = axialHalfStep * mOperators(2, localIndex, point)
-            coefficients(DEGREE, rowOffset + lower(first)) = -firstValue
-            coefficients(DEGREE, rowOffset + upper(first)) = firstValue
+            coefficients(degree, rowOffset + lower(first)) = -firstValue
+            coefficients(degree, rowOffset + upper(first)) = firstValue
             If lower(second) <> upper(second) Then
-                coefficients(DEGREE, rowOffset + lower(second)) = -secondValue
-                coefficients(DEGREE, rowOffset + upper(second)) = secondValue
+                coefficients(degree, rowOffset + lower(second)) = -secondValue
+                coefficients(degree, rowOffset + upper(second)) = secondValue
             End If
         Next localIndex
     Next point
@@ -28292,6 +28300,41 @@ Friend Sub SteelProjection(ByVal point As Long, ByRef direction() As Double)
         direction(j) = mSteelDirection(j, point)
     Next j
 End Sub
+
+' Подбирает поправку множителя среднего продольного перемещения при заданной невязке.
+' Пересекает интервалы допустимых поправок по слабым уравнениям, не меняя поле и нагрузку.
+Friend Function TryWarpGaugeCorrection(ByRef residual() As Double, ByVal tolerance As Double, _
+        ByRef gauge As Long, ByRef change As Double) As Boolean
+    If tolerance <= 0# Then Exit Function
+    Dim row As Long, gaugeIndex As Long, weight As Double, value As Double
+    Dim lower As Double, upper As Double, rowLower As Double, rowUpper As Double, bounded As Boolean
+    gaugeIndex = mGaugeBase + WARP_GAUGE_OFFSET
+    On Error GoTo Unavailable
+    For row = 1 To mGaugeBase
+        weight = mMatrix(gaugeIndex, row): value = residual(row)
+        If weight = 0# Then
+            If Abs(value) > tolerance Then Exit Function
+        Else
+            If weight < 0# Then Exit Function ' Интегралы функций среднего перемещения неотрицательны.
+            rowLower = (-tolerance - value) / weight: rowUpper = (tolerance - value) / weight
+            If bounded Then
+                lower = GeomMax(lower, rowLower): upper = GeomMin(upper, rowUpper)
+                If lower > upper Then Exit Function
+            Else
+                lower = rowLower: upper = rowUpper: bounded = True
+            End If
+        End If
+    Next row
+    If Not bounded Then Exit Function
+    Dim midpoint As Double: midpoint = 0.5 * lower + 0.5 * upper
+    If midpoint = 0# Then Exit Function
+    gauge = gaugeIndex: change = midpoint
+    TryWarpGaugeCorrection = True
+    Exit Function
+
+Unavailable:
+    If Err.number <> 6 And Err.number <> 11 Then Err.Raise Err.number, Err.source, Err.description
+End Function
 
 ' Готовит буфер нелинейных уравнений и добавляет четыре точных ограничения.
 ' Материальные вклады накапливаются вызовами AddPointEquilibrium.
@@ -28529,7 +28572,7 @@ Friend Sub CopyResultantResidualProjection(ByRef projection() As Double)
     Next row
     Dim alongX() As Double, alongY() As Double
     mQuadrature.CopyCoordinateCoefficients alongX, alongY
-    warpGauge = mGaugeBase + 3 ' Закрепление среднего продольного перемещения использует только бетон.
+    warpGauge = mGaugeBase + WARP_GAUGE_OFFSET ' Закрепление среднего продольного перемещения использует только бетон.
     Dim weight As Double, weightSum As Double, centerX As Double, centerY As Double
     For basis = 1 To UBound(mSupport)
         If mSupport(basis) > 0 Then
@@ -29444,7 +29487,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledNewtonSolver
 TYPE: 2
-LINES: 1307
+LINES: 1358
 ====================================================================================================
 Option Explicit
 
@@ -29527,7 +29570,7 @@ Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As I
         If (plusSide Is minusSide) Or (plusSide Is response) Or (minusSide Is response) Then _
             Err.Raise 5, "CCoupledNewtonSolver", "Для секущего градиента требуются три независимые материальные истории."
     End If
-    mDegreeCount = section.DegreeCount
+    mDegreeCount = section.degreeCount
     mPointCount = section.PointCount
     If mDegreeCount <= GAUGE_COUNT Or mPointCount < 1 Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Геометрические операторы связанного сечения не подготовлены."
@@ -29571,6 +29614,11 @@ End Function
 ' Сообщает, доступна ли согласованная касательная для пространственной истории материалов.
 Friend Property Get UsesSpatialHistory() As Boolean
     UsesSpatialHistory = mUseSpatialHistory
+End Property
+
+' Возвращает число механических координат поля перед множителями связей.
+Friend Property Get PhysicalDegreeCount() As Long
+    PhysicalDegreeCount = mGaugeStart - 1
 End Property
 
 ' Решает равновесие при управлении одной линейной мерой деформации.
@@ -29711,6 +29759,9 @@ RecomputeTangent:
             Exit Function
         End If
         norm = EquilibriumNorm(load, current)
+        If mConsistentControl And norm > tolerance And norm <= SMALL_STRAIN_MAX_NORM * tolerance Then
+            If TryWarpGaugeEquilibrium(current, load, tolerance) Then norm = mLastNorm
+        End If
         If norm <= tolerance Then
             If mConsistentControl Then
                 If Not Evaluate(current, False) Then
@@ -29843,6 +29894,49 @@ EvaluationFailed:
     Else
         RecordFailure sfcInternalError, "Ошибка сборки связанного равновесия. " & description
     End If
+End Function
+
+' Проверяет поправку служебного множителя без записи материальной пробы.
+' Поле передаётся штатной ветви принятия только после полной проверки равновесия.
+Private Function TryWarpGaugeEquilibrium(ByRef field() As Double, ByRef load() As Double, _
+        ByVal tolerance As Double) As Boolean
+    If Not GaugesVerified(tolerance) Or Abs(ControlResidual(field)) > tolerance Then Exit Function
+    If mSection.ResultantResidualNorm(mTrialResultants, load) > tolerance Then Exit Function
+    Dim gauge As Long, change As Double
+    If Not mSection.TryWarpGaugeCorrection(mResidual, tolerance, gauge, change) Then Exit Function
+
+    Dim savedGauge As Double, savedNorm As Double, savedResidual() As Double, savedResultants() As Double
+    Dim savedCode As ESolverFailureCode, savedPoint As Long, savedLastPoint As Long
+    Dim savedSide As Long, savedFailures As Long
+    Dim failureNumber As Long, failureSource As String, failureDescription As String
+    savedGauge = field(gauge): savedNorm = mLastNorm
+    savedResidual = mResidual: savedResultants = mTrialResultants
+    savedCode = mFailureCode: savedPoint = mMaterialPoint: savedLastPoint = mLastFailedPoint
+    savedSide = mLastFailedSide: savedFailures = mMaterialFailures
+    On Error GoTo ProbeFailed
+    field(gauge) = savedGauge + change
+    If field(gauge) = savedGauge Then Exit Function ' Поправка меньше точности представления координаты.
+    If Evaluate(field, False, recordTrial:=False) Then
+        If EquilibriumNorm(load, field) <= tolerance And GaugesVerified(tolerance) Then
+            TryWarpGaugeEquilibrium = True
+            Exit Function
+        End If
+    End If
+
+RestoreProbe:
+    On Error GoTo 0
+    field(gauge) = savedGauge
+    mResidual = savedResidual: mTrialResultants = savedResultants: mLastNorm = savedNorm
+    mFailureCode = savedCode: mMaterialPoint = savedPoint: mLastFailedPoint = savedLastPoint
+    mLastFailedSide = savedSide: mMaterialFailures = savedFailures
+    If failureNumber <> 0 Then Err.Raise failureNumber, failureSource, failureDescription
+    Exit Function
+
+ProbeFailed:
+    If Err.number <> 6 And Err.number <> 11 Then
+        failureNumber = Err.number: failureSource = Err.source: failureDescription = Err.description
+    End If
+    Resume RestoreProbe
 End Function
 
 ' Находит наибольшую невязку уравнений равновесия в МПа без уравнений закрепления.
@@ -31041,7 +31135,7 @@ Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concret
 
     On Error GoTo InvalidMaterialOrGeometry
     Dim meta As CResultMeta
-    Set models = SteelModels(spec)
+    Set models = steelModels(spec)
     PrepareOperators spec, models
     Set meta = mOperators.ResultMeta
     Set PrepareResponse = meta
@@ -31156,7 +31250,7 @@ Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As O
         Set mOperators = mOperatorCache(key)
     Else
         Dim prepared As New CCoupledElasticState
-        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, SteelModels:=models, importedGrade:=mSteelClass
+        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models, importedGrade:=mSteelClass
         mOperatorCache.Add key, prepared
         Set mOperators = prepared
     End If
@@ -31171,9 +31265,9 @@ End Sub
 
 ' Возвращает только применённые классы для набора характеристик профиля.
 ' Ошибка строки одного набора не мешает использованию другого набора.
-Private Function SteelModels(ByVal spec As CMaterialModelSpec) As Object
+Private Function steelModels(ByVal spec As CMaterialModelSpec) As Object
     Dim key As String: key = spec.valueSetText
-    If mSteelCache.Exists(key) Then Set SteelModels = mSteelCache(key): Exit Function
+    If mSteelCache.Exists(key) Then Set steelModels = mSteelCache(key): Exit Function
 
     Dim available As Object
     If Not mSupplementarySteel Is Nothing Then
@@ -31191,7 +31285,7 @@ Private Function SteelModels(ByVal spec As CMaterialModelSpec) As Object
         models.Add grade, model
     Next grade
     mSteelCache.Add key, models
-    Set SteelModels = models
+    Set steelModels = models
 End Function
 
 ' Использует штатную двухлинейную диаграмму для явно сопоставленного класса.
@@ -31950,7 +32044,7 @@ Option Explicit
 ' координаты. Производная вычисляется по физической координате, 1/мм.
 ' Значения и производные сохраняет подготовщик операторов сечения.
 
-Private Const DEGREE As Long = 3
+Private Const degree As Long = 3
 Private Const ENDPOINT_TOLERANCE As Double = 0.000000000001
 
 Private mMinimum As Double
@@ -31969,26 +32063,26 @@ Friend Sub Initialize(ByVal minimum As Double, ByVal maximum As Double, ByVal sp
     mMinimum = minimum
     mLength = maximum - minimum
     mSpanCount = spanCount
-    ReDim mKnots(0 To spanCount + 2 * DEGREE)
+    ReDim mKnots(0 To spanCount + 2 * degree)
     Dim i As Long
     For i = 1 To spanCount - 1
-        mKnots(DEGREE + i) = i / spanCount
+        mKnots(degree + i) = i / spanCount
     Next i
-    For i = DEGREE + spanCount To UBound(mKnots)
+    For i = degree + spanCount To UBound(mKnots)
         mKnots(i) = 1#
     Next i
 End Sub
 
 ' Возвращает число функций; их индексы начинаются с единицы.
 Friend Property Get count() As Long
-    count = mSpanCount + DEGREE
+    count = mSpanCount + degree
 End Property
 
 ' Возвращает коэффициент точного воспроизведения координаты в кубическом базисе.
 ' Индекс функции начинается с единицы, три внутренних узла задают абсциссу Гревилля.
 Friend Function CoordinateCoefficient(ByVal basisIndex As Long) As Double
     Dim parameter As Double
-    parameter = (mKnots(basisIndex) + mKnots(basisIndex + 1) + mKnots(basisIndex + 2)) / DEGREE
+    parameter = (mKnots(basisIndex) + mKnots(basisIndex + 1) + mKnots(basisIndex + 2)) / degree
     CoordinateCoefficient = mMinimum + mLength * parameter
 End Function
 
@@ -32009,13 +32103,13 @@ Friend Sub Evaluate(ByVal coordinate As Double, ByRef firstIndex As Long, _
     If parameter > 1# Then parameter = 1#
 
     Dim span As Long
-    span = CLng(Int(parameter * mSpanCount)) + DEGREE
-    If parameter = 1# Then span = mSpanCount + DEGREE - 1
-    firstIndex = span - DEGREE + 1
+    span = CLng(Int(parameter * mSpanCount)) + degree
+    If parameter = 1# Then span = mSpanCount + degree - 1
+    firstIndex = span - degree + 1
 
-    Dim basis(0 To DEGREE) As Double
-    Dim leftDistance(1 To DEGREE) As Double
-    Dim rightDistance(1 To DEGREE) As Double
+    Dim basis(0 To degree) As Double
+    Dim leftDistance(1 To degree) As Double
+    Dim rightDistance(1 To degree) As Double
     Dim saved As Double
     Dim term As Double
     Dim denominator As Double
@@ -32027,7 +32121,7 @@ Friend Sub Evaluate(ByVal coordinate As Double, ByRef firstIndex As Long, _
     Dim outgoing As Double
 
     basis(0) = 1#
-    For order = 1 To DEGREE
+    For order = 1 To degree
         leftDistance(order) = parameter - mKnots(span + 1 - order)
         rightDistance(order) = mKnots(span + order) - parameter
         saved = 0#
@@ -32039,19 +32133,19 @@ Friend Sub Evaluate(ByVal coordinate As Double, ByRef firstIndex As Long, _
         Next j
         basis(order) = saved
 
-        If order = DEGREE - 1 Then
+        If order = degree - 1 Then
             ' Производная кубических функций выражается через уже рассчитанные квадратичные.
-            For k = 0 To DEGREE
-                node = span - DEGREE + k
+            For k = 0 To degree
+                node = span - degree + k
                 incoming = 0#
                 outgoing = 0#
-                If k > 0 Then incoming = basis(k - 1) / (mKnots(node + DEGREE) - mKnots(node))
-                If k < DEGREE Then outgoing = basis(k) / (mKnots(node + DEGREE + 1) - mKnots(node + 1))
-                derivatives(k + 1) = (DEGREE / mLength) * (incoming - outgoing)
+                If k > 0 Then incoming = basis(k - 1) / (mKnots(node + degree) - mKnots(node))
+                If k < degree Then outgoing = basis(k) / (mKnots(node + degree + 1) - mKnots(node + 1))
+                derivatives(k + 1) = (degree / mLength) * (incoming - outgoing)
             Next k
         End If
     Next order
-    For k = 0 To DEGREE
+    For k = 0 To degree
         values(k + 1) = basis(k)
     Next k
 End Sub
@@ -110691,7 +110785,7 @@ End Sub
 ====================================================================================================
 COMPONENT: modTestCoupledElasticState
 TYPE: 1
-LINES: 4170
+LINES: 4274
 ====================================================================================================
 Option Explicit
 
@@ -110931,9 +111025,9 @@ Public Function RunCoupledEquationAssemblyTests() As String
     TestRecord solver.EquilibriumEquationDescription(4) = "равновесие по T" And _
         solver.EquilibriumEquationDescription(7) = "внутреннее равновесие по депланации w", _
         "equation diagnostics distinguish torsion and local warping", passed, Failed, report
-    TestRecord solver.EquilibriumEquationDescription(solver.DegreeCount - 7) = "продольный градиент N" And _
-        solver.EquilibriumEquationDescription(solver.DegreeCount - 5) = "продольный градиент My" And _
-        Len(solver.EquilibriumEquationDescription(solver.DegreeCount - 3)) = 0, _
+    TestRecord solver.EquilibriumEquationDescription(solver.degreeCount - 7) = "продольный градиент N" And _
+        solver.EquilibriumEquationDescription(solver.degreeCount - 5) = "продольный градиент My" And _
+        Len(solver.EquilibriumEquationDescription(solver.degreeCount - 3)) = 0, _
         "equation diagnostics identify gradients and exclude gauge constraints", passed, Failed, report
     Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double, strain(1 To 6) As Double
     Dim forces(1 To 6) As Double, trialForces(1 To 6) As Double
@@ -110944,8 +111038,8 @@ Public Function RunCoupledEquationAssemblyTests() As String
     forces(1) = 30000#: forces(2) = 1900000#: forces(3) = -1100000#
     forces(4) = 1400000#: forces(5) = 3200#: forces(6) = -1800#
     solver.LoadEquations forces(1), forces(2), forces(3), forces(4), forces(5), forces(6), external
-    ReDim state(1 To solver.DegreeCount)
-    For i = 1 To solver.DegreeCount
+    ReDim state(1 To solver.degreeCount)
+    For i = 1 To solver.degreeCount
         state(i) = Sin(i) * 0.0000001
     Next i
     solver.StartEquations state, external, residual, linearized, True
@@ -110960,7 +111054,7 @@ Public Function RunCoupledEquationAssemblyTests() As String
     For i = 1 To UBound(residual)
         residual(i) = -residual(i)
     Next i
-    ok = system.Solve(linearized, residual, solver.DegreeCount)
+    ok = system.Solve(linearized, residual, solver.degreeCount)
     TestRecord ok, "linearization solves mixed equations", passed, Failed, report
     If Not ok Then GoTo ReportResult
     For i = 1 To UBound(state)
@@ -111421,7 +111515,7 @@ Public Function RunTestCoupledGradientLinearization() As String
     Dim plus() As Double, minus() As Double, scratch() As Double, column As Long, row As Long, dof As Long
     Dim frozenError As Double, correctedError As Double, saved As Double, expected As Double
     Const STEP_SIZE As Double = 0.00000008
-    dof = operators.DegreeCount
+    dof = operators.degreeCount
     ReDim field(1 To dof)
     field(1) = 0.0004: field(2) = 0.00015: field(3) = 0.0001: field(4) = 0.0002
     field(dof - 7) = 0.001: field(dof - 6) = 0.002: field(dof - 5) = -0.001
@@ -111475,7 +111569,7 @@ Public Function RunTestCoupledDeformationControl() As String
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
     baseLoad(1) = 4# * area: baseLoad(4) = 30000#
     direction(1) = 20# * area: direction(4) = 200000#
-    ReDim control(1 To operators.DegreeCount)
+    ReDim control(1 To operators.degreeCount)
     control(1) = 1#
     If Not solver.TryStep(baseLoad(1), 0#, 0#, baseLoad(4), 0#, 0#, 0.00000001, 0.00000001, 30) Then _
         Err.Raise 5, , "Independent preload failed."
@@ -111545,6 +111639,110 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет поправку множителя закрепления и выбор шага по механическому полю.
+Public Function RunTestCoupledKinematicGauge() As String
+    Dim passed As Long, Failed As Long, report As String
+    On Error GoTo Failed
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    center.TestInitialize operators.PointCount
+    plusSide.TestInitialize operators.PointCount
+    minusSide.TestInitialize operators.PointCount
+    solver.Initialize operators, center, 30000#, plusSide, minusSide
+    TestRecord operators.degreeCount - solver.PhysicalDegreeCount = 4, "четыре множителя отделены от механики", passed, Failed, report
+    TestMechanicalSecant solver.PhysicalDegreeCount, operators.degreeCount, passed, Failed, report
+    TestWarpGaugeCorrection operators, solver, passed, Failed, report
+    RunTestCoupledKinematicGauge = report & "TOTAL_COUPLED_KINEMATIC_GAUGE: passed=" & passed & "; failed=" & Failed
+    Exit Function
+Failed:
+    RunTestCoupledKinematicGauge = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает точную механическую секущую, отклонённое поле и чистое приращение множителя связи.
+Private Sub TestMechanicalSecant(ByVal mechanicalCount As Long, ByVal degreeCount As Long, _
+        ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
+    Dim branch As New CCoupledDeformationContinuation
+    Dim left() As Double, current() As Double, trial() As Double
+    ReDim left(1 To degreeCount): ReDim current(1 To degreeCount): ReDim trial(1 To degreeCount)
+    current(1) = 0.000001: trial(1) = 0.0000015
+    TestRecord branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "точная механическая секущая", passed, Failed, report
+    trial(mechanicalCount + 3) = -5.66313495971864E-07
+    TestRecord branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "поправка множителя не меняет секущую", passed, Failed, report
+    trial(1) = 0.00000152
+    TestRecord Not branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "четыре процента отклонения механики превышают допуск", passed, Failed, report
+    current(1) = 0#: trial(1) = 0#
+    TestRecord Not branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "чистый шаг множителя не продолжает механическую ветвь", passed, Failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет линейную поправку, фактическую пересборку и штатное принятие нулевого поля НДС.
+Private Sub TestWarpGaugeCorrection(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
+        ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
+    Const tolerance As Double = 0.0000001
+    Dim field() As Double, external() As Double, residual() As Double, tangent() As Double, control() As Double
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
+    Dim i As Long, count As Long, warpGauge As Long, gauge As Long, first As Long, second As Long
+    Dim weight As Double, maximumWeight As Double, initialValue As Double, change As Double, norm As Double
+    count = operators.degreeCount: warpGauge = solver.PhysicalDegreeCount + 3
+    ReDim field(1 To count): ReDim external(1 To count): ReDim control(1 To count)
+    operators.StartEquations field, external, residual, tangent, True
+    For i = 1 To solver.PhysicalDegreeCount
+        weight = tangent(i, warpGauge)
+        If weight > 0# Then
+            If first = 0 Then first = i Else second = i
+            maximumWeight = GeomMax(maximumWeight, weight)
+        End If
+    Next i
+    If second = 0 Then Err.Raise 5, , "Для проверки нужны две ненулевые связи продольного перемещения."
+    initialValue = 1.5 * tolerance / maximumWeight
+    field(warpGauge) = initialValue
+    operators.StartEquations field, external, residual, tangent, False
+    If Not operators.TryWarpGaugeCorrection(residual, tolerance, gauge, change) Then _
+        Err.Raise 5, , "Допустимый интервал поправки не найден."
+    TestRecord gauge = warpGauge And change < 0#, "поправка адресована продольному множителю", passed, Failed, report
+    field(gauge) = field(gauge) + change
+    operators.StartEquations field, external, residual, tangent, False
+    For i = 1 To count: norm = GeomMax(norm, Abs(residual(i))): Next i
+    TestRecord norm <= tolerance, "пересборка проходит силовые уравнения и связи", passed, Failed, report
+
+    residual(1) = 1.1 * tolerance
+    TestRecord Not operators.TryWarpGaugeCorrection(residual, tolerance, gauge, change), _
+        "множитель не исправляет независимое уравнение", passed, Failed, report
+    residual(1) = 0#: residual(first) = 1.5 * tolerance: residual(second) = -1.5 * tolerance
+    TestRecord Not operators.TryWarpGaugeCorrection(residual, tolerance, gauge, change), _
+        "несовместимые поправки к одному множителю отклоняются", passed, Failed, report
+
+    Dim history As New Collection, trial() As Double, forces() As Double, stored() As Double, factor As Double
+    field(warpGauge) = initialValue: history.Add field
+    If Not solver.ReplayAcceptedFields(history, 1) Then Err.Raise 5, , "Не воспроизведено поле для пробы решателя."
+    direction(1) = 21600#: control(1) = 1#
+    If Not solver.TryDeformationStep(baseLoad, direction, control, 0#, 0#, factor, tolerance, 0.00000001, 1, consistentControl:=True) Then _
+        Err.Raise 5, , "Штатный решатель не принял поправку. " & solver.ResultMeta.diagnosticDetails
+    TestRecord InStr(1, solver.ResultMeta.diagnosticDetails, "Итерации: 0", vbBinaryCompare) > 0, _
+        "поправка принята до шага Ньютона", passed, Failed, report
+    solver.CopyTrial trial, forces
+    Dim changed As Long
+    For i = 1 To count
+        If trial(i) <> field(i) Then changed = changed + 1
+    Next i
+    TestRecord changed = 1 And trial(warpGauge) <> initialValue, "изменён только продольный множитель", passed, Failed, report
+    norm = 0#
+    For i = 1 To 6: norm = GeomMax(norm, Abs(forces(i))): Next i
+    TestRecord norm = 0# And factor = 0#, "шесть усилий и множитель нагрузки сохранены", passed, Failed, report
+    solver.CopyAccepted stored
+    TestRecord stored(warpGauge) = initialValue, "проба сохраняет принятую историю", passed, Failed, report
+    solver.AcceptStep
+    solver.CopyAccepted stored
+    TestRecord stored(warpGauge) = trial(warpGauge), "принятое значение совпадает с проверенной пробой", passed, Failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет достижение предельной деформации арматуры до и после пика N.
 ' На нисходящей ветви поздний предел не заменяет больший пройденный максимум.
 Public Function RunTestCoupledDeformationSteelCrossing() As String
@@ -111579,7 +111777,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
-    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
     concrete.TestInitialize operators.PointCount
     concrete.TestUseDescendingAxialLaw
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
@@ -111588,7 +111786,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
 
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
     Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
-    ReDim control(1 To operators.DegreeCount)
+    ReDim control(1 To operators.degreeCount)
     control(1) = 1#: direction(1) = designForce
     Dim strain As Variant, eps As Double, lambda As Double, previousLambda As Double, initialLambda As Double
     Dim stress As Double, expected As Double
@@ -114807,7 +115005,7 @@ Public Function RunTestCoupledConsistentZeroStep() As String
     baseLoad(1) = -14000#: baseLoad(2) = 2000#: baseLoad(3) = -3200#
     baseLoad(4) = 1500#: baseLoad(5) = 970#: baseLoad(6) = -850#
     direction(1) = 10000#
-    ReDim projection(1 To operators.DegreeCount)
+    ReDim projection(1 To operators.degreeCount)
     projection(1) = 1#
     solver.CopyAccepted acceptedField
     If Not solver.TryDeformationStep(baseLoad, direction, projection, acceptedField(1), 0#, lambda, 0.00000001, 0.00000001, 25, _
@@ -114936,13 +115134,13 @@ Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText A
     Dim section As CSectionModel, layout As CTransverseRebarLayout, steel As Object
     Set section = BuildKaniSectionTest(layout, steel)
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
-    operators.PrepareModel section, ec, 0.2, spans, spans, 5, layout, SteelModels:=steel
+    operators.PrepareModel section, ec, 0.2, spans, spans, 5, layout, steelModels:=steel
     Dim solver As New CCoupledNewtonSolver, shearX() As Double, shearY() As Double
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, ec, 0.2, fc, ft, 0.0022, gt, gc, spatialHistory
     operators.MeanShearProjections shearX, shearY
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
     direction(6) = FORCE_SCALE
-    AddExperimentTraceTest report, tracePath, "KANI_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.DegreeCount)
+    AddExperimentTraceTest report, tracePath, "KANI_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.degreeCount)
 
     Dim coordinate As Double, increment As Double, candidate As Double, trialLambda As Double, reached As Double
     Dim field() As Double, actual() As Double, attempt As Long, i As Long, errorNorm As Double, difference As Double
@@ -114955,7 +115153,7 @@ Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText A
         If solver.TryDeformationStep(baseLoad, direction, shearY, candidate, reached, trialLambda, 0.0000005, 0.00000002, 24) Then
             solver.CopyTrial field, actual: solver.AcceptStep
             reached = trialLambda: coordinate = candidate: errorNorm = 0#: gamma = 0#
-            For i = 1 To operators.DegreeCount: gamma = gamma + shearY(i) * field(i): Next i
+            For i = 1 To operators.degreeCount: gamma = gamma + shearY(i) * field(i): Next i
             For i = 1 To 6
                 expected = reached * direction(i)
                 difference = Abs(actual(i) - expected) / area
@@ -115090,12 +115288,12 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
     Set steel = CreateObject("Scripting.Dictionary")
     steel.Add "A2_LONG", ExperimentBilinearSteelTest(200000#, longitudinalYield, 0#)
     steel.Add "A2_HOOP", ExperimentBilinearSteelTest(200000#, hoopYield, 0#)
-    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, SteelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
     AddExperimentTraceTest report, tracePath, "A2_PARAMETERS: Ec " & ExperimentNumberTest(ec) & " | Ft " & _
         ExperimentNumberTest(ft) & " | Gt " & ExperimentNumberTest(gt) & " | Gc " & ExperimentNumberTest(gc) & _
         " | wall " & ExperimentNumberTest(wall) & " | fy hoop " & ExperimentNumberTest(hoopYield) & _
         " | fy longitudinal " & ExperimentNumberTest(longitudinalYield)
-    AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.DegreeCount)
+    AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.degreeCount)
     Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, ec, NU, fc, ft, peakStrain, gt, gc, spatialHistory
     If strengthMaximum > 0# Then
@@ -115111,7 +115309,7 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
         AddExperimentTraceTest report, tracePath, "A2_PRELOAD_N_KN: " & ExperimentNumberTest(actual(1) / 1000#)
     End If
     Dim projection() As Double, baseLoad(1 To 6) As Double, direction(1 To 6) As Double, target(1 To 6) As Double
-    ReDim projection(1 To operators.DegreeCount): projection(4) = 1#
+    ReDim projection(1 To operators.degreeCount): projection(4) = 1#
     baseLoad(1) = normalForce: target(1) = normalForce
     direction(4) = 100000000# ' Множитель в долях 100 кН·м.
     Dim eps0 As Double, kx As Double, ky As Double, twist As Double, coordinatePerRadPerM As Double
@@ -115443,7 +115641,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     If commonHoopQuadrature Then Set layout = CommonTBU3HoopLayoutTest(section, layout)
     Dim gaugeLeftX As Double, gaugeRightX As Double
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
-    operators.PrepareModel section, ec, NU, spans, spans, cellsPerSpan, layout, SteelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, cellsPerSpan, layout, steelModels:=steel
     If measureHoop Then
        Dim hoopPath As CGeometryPath: Set hoopPath = layout.path(1)
         hoopPath.ProjectionBounds 1#, 0#, gaugeLeftX, gaugeRightX
@@ -115459,7 +115657,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_BASE_MM;" & ExperimentNumberTest(-TBU3_MEASUREMENT_HALF_HEIGHT) & _
             ";" & ExperimentNumberTest(TBU3_MEASUREMENT_HALF_HEIGHT)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_RESOLUTION;" & CStr(spans) & ";" & CStr(cellsPerSpan) & ";" & _
-            CStr(operators.ConcretePointCount) & ";" & CStr(operators.PointCount) & ";" & CStr(operators.DegreeCount)
+            CStr(operators.ConcretePointCount) & ";" & CStr(operators.PointCount) & ";" & CStr(operators.degreeCount)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_COLUMNS;stage;Mx_kNm;T_kNm;strain_left;strain_right"
     End If
     If commonHoopQuadrature Then RecordTBU3QuadratureTest operators, report, tracePath
@@ -115690,7 +115888,7 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
     Const MAX_ATTEMPTS As Long = 200 ' Лимит опытного прогона, включая уменьшения шага.
     Dim baseLoad() As Double, direction() As Double, projection() As Double
     path.components baseLoad, direction
-    ReDim projection(1 To operators.DegreeCount): projection(4) = 1#
+    ReDim projection(1 To operators.degreeCount): projection(4) = 1#
     Dim field() As Double, achieved() As Double, target() As Double, eps0 As Double, kx As Double, ky As Double, twist As Double
     branch.CopyAccepted field, achieved
     operators.GeneralizedDeformation field, eps0, kx, ky, twist
@@ -116324,7 +116522,7 @@ Private Function TestReplayPrismHistory(ByVal inputPath As String, ByVal spansTe
     Set section = TestPrismSection(layout, steel)
     Dim operators As New CCoupledElasticState, frame As New CSectionNumericalFrame
     frame.Initialize section
-    operators.PrepareModel section, CONCRETE_E, CONCRETE_NU, spans, spans, POINTS_PER_SPAN, layout, SteelModels:=steel
+    operators.PrepareModel section, CONCRETE_E, CONCRETE_NU, spans, spans, POINTS_PER_SPAN, layout, steelModels:=steel
     Dim center As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     TestInitializePrismResponse operators, steel, center, response, solver
     Dim shearX() As Double, shearY() As Double
@@ -116493,7 +116691,7 @@ Private Sub TestWritePrismStep(ByVal stream As Object, ByVal stage As Long, ByVa
         ByRef actual() As Double, ByVal response As CCoupledReinforcedResponse)
     Dim eps0 As Double, kx As Double, ky As Double, twist As Double, gx As Double, gy As Double, i As Long
     operators.GeneralizedDeformation field, eps0, kx, ky, twist
-    For i = 1 To operators.DegreeCount
+    For i = 1 To operators.degreeCount
         gx = gx + shearX(i) * field(i): gy = gy + shearY(i) * field(i)
     Next i
     stream.WriteLine "STEP;" & CStr(stage) & ";" & TestPrismNumber(factor) & TestPrismVector(actual) & _
@@ -150929,7 +151127,7 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, reinforcement As New CCoupledReinforcedResponse
     Dim gt As Double, gc As Double
     gt = 0.073 * fc ^ 0.18: gc = (fc / ft) ^ 2 * gt ' Оценки Poliotti и Bairan (2019), а не опытные энергии.
-    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, SteelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
     concrete.Initialize operators.PointCount, ec, NU, 0.6 * fc, fc, ft, PEAK_STRAIN, gt, gc, LOCALIZATION
     reinforcement.Initialize operators, concrete, steel
 
@@ -150942,7 +151140,7 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
         ";spans=" & CStr(spans) & _
         ";hoop_axis_from_face_mm=22;steel_limit=0.05;Ec_MPa=43000;localization_mm=125" & vbCrLf
     report = report & "MESH;concrete_points=" & CStr(operators.ConcretePointCount) & _
-        ";all_points=" & CStr(operators.PointCount) & ";DOF=" & CStr(operators.DegreeCount) & vbCrLf
+        ";all_points=" & CStr(operators.PointCount) & ";DOF=" & CStr(operators.degreeCount) & vbCrLf
     report = report & "EXPERIMENT_CRACK;R_sup_kN=13.3;lambda_nominal=" & TravushNumberTest(SUPPORT_CRACK / SUPPORT_STAGE) & vbCrLf
     report = report & "stage;lambda;R_sup_kN;N_kN;Mx_kNm;My_kNm;T_kNm;Qx_kN;Qy_kN;" & _
         "twist_rad_per_m;curvature_x_per_m;tension_indicator;compression_indicator;" & _
