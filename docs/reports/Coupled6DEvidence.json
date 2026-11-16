@@ -91,7 +91,11 @@
     "A2LaneAResumeNative20261116": "ACF2D94715C705AC9FCFC99788B5F3F4ECB8A76A557254E29E227FDB831DE076",
     "KaniH45GuardedCorrectionPortable": "10FB6242D6A1CFF30A74EE7E51949D7A39E14F18CA32C5CDE65E0AB82C53A990",
     "MVT2JointCenterGradientNative20261116": "47B975208823EF5563F76CB759F4FAED557529D0BCEA90CE4F503BCC1BE2029C",
-    "DirectSteelTrialVerification20261116": "1C8A12D4CADA66CDEB3629D929A29E18EC71F84AB4AF14A5228C63ED2BD811A8"
+    "DirectSteelTrialVerification20261116": "1C8A12D4CADA66CDEB3629D929A29E18EC71F84AB4AF14A5228C63ED2BD811A8",
+    "A2ScalarSeedPairPortable": "AA5C7A495DB3B9342ED4C0623FA8F2C4F696C464A81C5A014CC1673873756D08",
+    "MVT2HalfJointFeasibility20261116": "A7D5240795949893042B1671159255623F6B1524491EEB67BFB55D2029A8D8A6",
+    "HardShearDirectBenchmark20261116": "C127D21925239289B3CF3F6BF793099F1F4A9E8ACC7A9C0646A579A2C428ABFA",
+    "RetainedCoupledDirectState20261116": "BC717D9A1C32AE48CF494C78561C0DAE2F5FB14C4BDDE4665A9D163A66F19AC5"
   },
   "cases": [
     {
@@ -1076,6 +1080,59 @@
         "{repo}"
       ],
       "stdout_contains": "DIRECT STEEL CANDIDATE EVIDENCE PASS 6D1871B308FC6690DC44BD74F5C193DD6A1B521C9373181E756AB9FE49251148"
+    },
+    {
+      "id": "a2-scalar-load-seed-native-pair",
+      "journal_section": 396,
+      "archive": "A2ScalarSeedPairPortable",
+      "script": "Replay-Seed.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-A2SeedVerification.json": "5657630AABEF0AC4FF1EEB00C1EFC128A091583AAA0D6E340276DED500CA73C8"
+      }
+    },
+    {
+      "id": "mvt2-half-joint-measured-span-feasibility",
+      "journal_section": 397,
+      "archive": "MVT2HalfJointFeasibility20261116",
+      "script": "ReplayFeasibility.py",
+      "arguments": [
+        "--archive-dir",
+        "{evidence}"
+      ],
+      "stdout_contains": "PASS HalfJoint decision replay",
+      "outputs": {
+        "ReplayEvidence.json": "08741B62CB6229654191C08EA849BFF9CE499C5463BC3D1C91BA3D6CD2102BD1",
+        "ReplayStudy.json": "086DB01D62EB263A0565266292220301E55247CA53F14AFFD02E8ECDC2F31ACD",
+        "ReplayComplementScreen.json": "AE301B673E2B2C5ADCF311A89018DF75D0F247C2F418A75469FBB0352010BF2F"
+      }
+    },
+    {
+      "id": "hardshear-direct-isolated-workbook-benchmark",
+      "journal_section": 398,
+      "archive": "HardShearDirectBenchmark20261116",
+      "script": "Verify-DirectBenchmark.py",
+      "arguments": [
+        "--reference",
+        "{DirectSteelTrialVerification20261116}"
+      ],
+      "outputs": {
+        "Replay.json": "741E4F4CD281D883B3A5144DC5DFE5D32F29E6B9844017BF966FCEDBFB2EAE4F"
+      }
+    },
+    {
+      "id": "retained-direct-equilibrium-excel-file",
+      "journal_section": 399,
+      "archive": "RetainedCoupledDirectState20261116",
+      "script": "Verify-Archive.py",
+      "arguments": [
+        "--repo",
+        "{repo}"
+      ],
+      "stdout_contains": "RETAINED DIRECT EQUILIBRIUM AND SNAPSHOT EVIDENCE PASS"
     }
   ],
   "frozen_repositories": {

@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "26299D02524C28454651B91CF1874485621A13D4F92B1AB0B95F79345B1101FD",
+  "manifest_sha256": "82FCE62BD9417C81077AEBAFCB5D967AB4A90D0BC09ACB4172244D61BC3092AA",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 87,
+  "passed": 91,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -778,6 +778,42 @@
       "archive": "DirectSteelTrialVerification20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "DIRECT STEEL CANDIDATE EVIDENCE PASS 6D1871B308FC6690DC44BD74F5C193DD6A1B521C9373181E756AB9FE49251148"
+    },
+    {
+      "id": "a2-scalar-load-seed-native-pair",
+      "journal_section": 396,
+      "archive": "A2ScalarSeedPairPortable",
+      "verified_outputs_sha256": {
+        "Replay-A2SeedVerification.json": "5657630AABEF0AC4FF1EEB00C1EFC128A091583AAA0D6E340276DED500CA73C8"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-half-joint-measured-span-feasibility",
+      "journal_section": 397,
+      "archive": "MVT2HalfJointFeasibility20261116",
+      "verified_outputs_sha256": {
+        "ReplayEvidence.json": "08741B62CB6229654191C08EA849BFF9CE499C5463BC3D1C91BA3D6CD2102BD1",
+        "ReplayStudy.json": "086DB01D62EB263A0565266292220301E55247CA53F14AFFD02E8ECDC2F31ACD",
+        "ReplayComplementScreen.json": "AE301B673E2B2C5ADCF311A89018DF75D0F247C2F418A75469FBB0352010BF2F"
+      },
+      "verified_stdout": "PASS HalfJoint decision replay"
+    },
+    {
+      "id": "hardshear-direct-isolated-workbook-benchmark",
+      "journal_section": 398,
+      "archive": "HardShearDirectBenchmark20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "741E4F4CD281D883B3A5144DC5DFE5D32F29E6B9844017BF966FCEDBFB2EAE4F"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "retained-direct-equilibrium-excel-file",
+      "journal_section": 399,
+      "archive": "RetainedCoupledDirectState20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "RETAINED DIRECT EQUILIBRIUM AND SNAPSHOT EVIDENCE PASS"
     }
   ]
 }
