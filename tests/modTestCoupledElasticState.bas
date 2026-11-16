@@ -2548,8 +2548,8 @@ Private Sub TestHoopStrainDetails(ByVal book As Object, ByVal anchor As Object, 
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
-' Сверяет действующие проверки СП в плоском и пространственном сочетаниях
-' при одинаковых N, Mx, My. В профиле отсутствует запрос связанного НДС.
+' Сверяет проверки СП в плоском и пространственном сочетаниях при одинаковых
+' N, Mx, My и при их нулевой проекции. Профиль не запрашивает связанное НДС.
 Public Function RunTestCoupledTraditionalChecks() As String
     Dim passed As Long, failed As Long, report As String
     On Error GoTo Failed
@@ -2585,6 +2585,10 @@ Public Function RunTestCoupledTraditionalChecks() As String
     batch.SetSP35Table721 sp35, sp35Error
     batch.AddCombination "PlanarChecks", -10000#, 55000000#, 0#, "PR4", ""
     batch.AddCombination "SpatialChecks", -10000#, 55000000#, 0#, "PR4", "", torque:=1000000#, qx:=700#
+    Dim path As Variant
+    For Each path In Array("Auto", "LambdaAll6", "LambdaT", "LambdaNMxy")
+        batch.AddCombination "ZeroNormal" & CStr(path), 0#, 0#, 0#, "PR4", "", CStr(path), torque:=1000000#, qx:=700#
+    Next path
     batch.Execute
 
     Dim planar As CCombinationResult, spatial As CCombinationResult
@@ -2599,6 +2603,22 @@ Public Function RunTestCoupledTraditionalChecks() As String
     TestRecord spatial.CrackWidthMeta.InternalStatus = planar.CrackWidthMeta.InternalStatus And _
         spatial.CrackResult.Width.CrackWidth = planar.CrackResult.Width.CrackWidth, "identical normal crack width after projection", passed, failed, report
     TestRecord InStr(spatial.CrackSummaryMeta.ResultComment, "наклонных") > 0, "summary discloses absent diagonal crack width", passed, failed, report
+    Dim i As Long, result As CCombinationResult, caseId As String
+    For i = 3 To 5
+        Set result = batch.ResultAt(i)
+        caseId = batch.CombinationID(i)
+        TestRecord result.CrackResult.Formation.ConfirmedNotCracked And _
+            result.CrackFormationMeta.ResultCode = rcCriterionNotReached And _
+            result.NormalCrackStatus = "OK", caseId & " confirms zero N, Mx, My without input error", passed, failed, report
+        TestRecord result.CrackWidthMeta.ResultCode = rcCrackNotFormed And Not result.CrackWidthMeta.Calculated, _
+            caseId & " skips normal width", passed, failed, report
+        TestRecord result.LongitudinalCrackMeta.InternalStatus = rsNotApplicable And _
+            InStr(result.LongitudinalCrackMeta.ResultComment, "Сжатого бетона") > 0, _
+            caseId & " independently checks whether concrete is in compression", passed, failed, report
+    Next i
+    Set result = batch.ResultAt(6)
+    TestRecord result.CrackFormationMeta.InternalStatus = rsInvalidInput And result.NormalCrackStatus = "InputErr", _
+        "explicit NMxy with no normal component remains invalid", passed, failed, report
     RunTestCoupledTraditionalChecks = report & "TOTAL_COUPLED_TRADITIONAL: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:

@@ -1406,8 +1406,10 @@ Private Sub RunCrackWidth(ByVal index As Long, ByVal profile As CCalculationProf
     Set crack = New CCrackWidthCalculator
     ConfigureCrackCalculator crack
     ReportStep "Запускается проверка образования нормальной трещины."
+    Dim loadState As CSectionLoadState
+    Set loadState = LoadStateForCombination(index)
     Dim pathDescriptor As New CLoadPathDescriptor, normalPath As String
-    normalPath = pathDescriptor.NormalCrackKey(mWorkingPaths(index))
+    normalPath = pathDescriptor.NormalCrackKey(mWorkingPaths(index), loadState)
     If normalPath <> mWorkingPaths(index) Then _
         ReportStep "Для образования нормальных трещин используются N, Mx и My. Путь " & _
             pathDescriptor.DisplayNameForKey(mWorkingPaths(index)) & " соответствует " & pathDescriptor.DisplayNameForKey(normalPath) & "."
@@ -1418,9 +1420,6 @@ Private Sub RunCrackWidth(ByVal index As Long, ByVal profile As CCalculationProf
     Dim crackReferenceX As Double
     Dim crackReferenceY As Double
     CrackCentralReferencePoint profile, crackReferenceX, crackReferenceY
-
-    Dim loadState As CSectionLoadState
-    Set loadState = LoadStateForCombination(index)
 
     ' Центральная ветка трещин проверяется относительно центра тяжести
     ' приведенного сечения той материальной модели, по которой определяется

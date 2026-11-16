@@ -131,13 +131,18 @@ Friend Function IsSingleSpatialKey(ByVal normalizedKey As String) As Boolean
 End Function
 
 ' Оставляет явные плоские пути. При выборе T или Q нормальные трещины
-' используют свой Auto по N/Mx/My, а All6 сохраняет пропорцию N/Mx/My.
-Friend Function NormalCrackKey(ByVal rawPath As String) As String
+' используют Auto по N/Mx/My. All6 сохраняет пропорцию N/Mx/My, если она
+' задана. Для чисто пространственной нагрузки Auto определяет нулевую проекцию.
+Friend Function NormalCrackKey(ByVal rawPath As String, ByVal loadState As CSectionLoadState) As String
     NormalCrackKey = NormalizeKey(rawPath)
     If IsSingleSpatialKey(NormalCrackKey) Then
         NormalCrackKey = KEY_AUTO
     ElseIf NormalCrackKey = KEY_ALL6 Then
         NormalCrackKey = KEY_NMXY
+        If Not loadState Is Nothing Then
+            If loadState.HasSpatialComponents And loadState.N = 0# And _
+                    loadState.LoadPointMx = 0# And loadState.LoadPointMy = 0# Then NormalCrackKey = KEY_AUTO
+        End If
     End If
 End Function
 
