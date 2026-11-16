@@ -20,6 +20,7 @@ Implements ICoupledPointResponse
 Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
+Private mMinimumAxialStrain As Double
 Private mCubic As Double
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -47,6 +48,13 @@ End Property
 Friend Property Let TestMaximumIncrement(ByVal value As Double)
     mMaximumIncrement = value
 End Property
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' При положительном пороге отклоняет пробы с меньшей осевой деформацией.
+Friend Property Let TestMinimumAxialStrain(ByVal value As Double)
+    mMinimumAxialStrain = value
+End Property
+
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Возвращает принятый максимум деформации первой контрольной точки.
 Friend Property Get TestAcceptedPeak() As Double
@@ -82,6 +90,8 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     If recordTrial Then mTrialPeak(point) = peak
     If mFail And point = 2 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
     If mMaximumIncrement > 0# And peak - mAcceptedPeak(point) > mMaximumIncrement Then _
+        ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+    If mMinimumAxialStrain > 0# And e < mMinimumAxialStrain Then _
         ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
 End Function
 

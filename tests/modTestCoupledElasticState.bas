@@ -546,6 +546,7 @@ Public Function RunTestCoupledContinuation() As String
     TestRecord field(1) = 0# And resultants(1) = 0# And material.TestAcceptedPeak = 0#, _
         "independent zero load starts with a virgin history", passed, failed, report
     TestExactSegmentEndpoints solver, passed, failed, report
+    TestLoadSecantRetry passed, failed, report
 Done:
     RunTestCoupledContinuation = report & "TOTAL_COUPLED_CONTINUATION: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -578,6 +579,67 @@ Private Sub TestExactSegmentEndpoints(ByVal solver As CCoupledNewtonSolver, _
     trace.ReadPoint trace.Count, fraction, lambda
     TestRecord solved And fraction = 1# And lambda = 0# And trace.Count = 10, _
         "rounded offset accumulation reaches the target within ten probes", passed, failed, report
+End Sub
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет повтор целевой нагрузки и ограничения на длину прогноза и число проб.
+Private Sub TestLoadSecantRetry(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim operators As New CCoupledElasticState
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    Dim path As New CLoadPathVector
+    path.Initialize 0#, 648000#, 0#, 200000#, 0#, -100000#, 0#, 300000#, 0#, 2000#, 0#, -1000#
+
+    TestLoadSecantRetryCase operators, path, 0.75, 2, True, "bounded secant", passed, failed, report
+    TestLoadSecantRetryCase operators, path, 1#, 2, False, "excessive secant span", passed, failed, report
+    TestLoadSecantRetryCase operators, path, 0.75, 1, False, "exhausted trial budget", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Последнее принятое поле не проходит порог, а прогноз на штатном шаге проходит.
+' Все варианты начинают с одной пары физических состояний и одной истории.
+Private Sub TestLoadSecantRetryCase(ByVal operators As CCoupledElasticState, ByVal path As CLoadPathVector, _
+        ByVal target As Double, ByVal attempts As Long, ByVal expectSuccess As Boolean, ByVal name As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    Dim branch As New CCoupledLoadContinuation
+    material.TestInitialize operators.PointCount
+    solver.Initialize operators, material, 30000#
+    branch.Initialize solver, path, 1, attempts, 20, 1E-8, 1E-8, True
+    Dim ok As Boolean: ok = branch.Advance(0.25)
+    If ok Then ok = branch.Advance(0.5)
+    TestRecord ok, name & " establishes both predecessor fields", passed, failed, report
+    If Not ok Then Exit Sub
+
+    Dim trace As CCoupledLoadTrace: Set trace = branch.SavedTrace
+    Dim field() As Double, resultants() As Double, expected() As Double
+    Dim strainBefore As Double, peakBefore As Double, fraction As Double, lambda As Double
+    branch.CopyAccepted field, resultants
+    strainBefore = field(1): peakBefore = material.TestAcceptedPeak
+    material.TestMinimumAxialStrain = 0.0006 ' Разделяет исходное поле и прогноз без изменения закона напряжений.
+    ok = branch.Advance(target)
+    Dim meta As CResultMeta: Set meta = branch.ResultMeta
+    branch.CopyAccepted field, resultants
+    trace.ReadPoint trace.Count, fraction, lambda
+    TestRecord ok = expectSuccess, name & " returns expected outcome", passed, failed, report
+    TestRecord fraction = 1# And trace.Count = branch.SavedFieldCount, _
+        name & " preserves the accepted load trace", passed, failed, report
+    If expectSuccess Then
+        path.TargetSix target, expected
+        TestRecord operators.ResultantResidualNorm(resultants, expected) <= 0.0000005, _
+            name & " balances all six requested forces", passed, failed, report
+        TestRecord lambda = target And branch.AcceptedLambda = target And branch.PreviousAcceptedLambda = 0.5, _
+            name & " accepts the exact target after its original predecessor", passed, failed, report
+        TestRecord trace.Count = 3 And material.TestAcceptedSteps = 3 And material.TestAcceptedPeak > peakBefore, _
+            name & " commits one material state and one trace entry", passed, failed, report
+        TestRecord InStr(1, meta.DiagnosticDetails, "секущим прогнозом", vbTextCompare) > 0, _
+            name & " records the recovery mechanism", passed, failed, report
+    Else
+        TestRecord meta.InternalStatus = rsNumericalFailure And lambda = 0.5 And branch.AcceptedLambda = 0.5, _
+            name & " retains numerical status and the last accepted load", passed, failed, report
+        TestRecord trace.Count = 2 And material.TestAcceptedSteps = 2 And field(1) = strainBefore And _
+            material.TestAcceptedPeak = peakBefore, name & " does not commit a rejected trial", passed, failed, report
+    End If
 End Sub
 
 

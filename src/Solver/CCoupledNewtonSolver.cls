@@ -110,19 +110,20 @@ Friend Sub ResetHistory()
     mMeta.Clear
 End Sub
 
-' Ищет пробное равновесие от последнего принятого поля. Моменты относятся
+' Ищет пробное равновесие от принятого поля или заданного прогноза. Моменты относятся
 ' к численному началу сечения; силы в Н, моменты в Н·мм.
 ' Само решение не публикует материальную историю.
 Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As Double, _
         ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long) As Boolean
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByRef initialField As Variant) As Boolean
     Dim load(1 To COMPONENT_COUNT) As Double
     load(1) = force: load(2) = mx: load(3) = my
     load(4) = torque: load(5) = qx: load(6) = qy
     mControlActive = False
     mConsistentControl = False
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
-    TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations)
+    TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, initialField:=initialField)
 End Function
 
 ' Решает равновесие при управлении одной линейной мерой деформации.
@@ -220,7 +221,7 @@ End Function
 ' невязкой, ограничителями поправок и фиксацией материальных состояний.
 Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByVal recoverYieldControl As Boolean = False) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant) As Boolean
     mMeta.Clear
     mCandidateReady = False
     mYieldRecoveryTried = False: Erase mRecoveredProjection
@@ -242,7 +243,15 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
     If mControlActive Then SetControlledLoad currentLambda, load
     tolerance = absoluteTolerance + relativeTolerance * StressScale(mExternal)
-    current = mAccepted
+    If IsMissing(initialField) Then
+        current = mAccepted
+    Else
+        current = initialField ' Прогноз меняет только первое поле итераций, материалы читают принятую историю.
+        If LBound(current) <> 1 Or UBound(current) <> mDegreeCount Then
+            RecordFailure sfcInvalidInput, "Размер начального поля не совпадает с решателем."
+            Exit Function
+        End If
+    End If
     Do
 RecomputeTangent:
         If mControlActive Then SetControlledLoad currentLambda, load

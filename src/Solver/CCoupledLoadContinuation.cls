@@ -22,12 +22,13 @@ Private Const DOUBLE_RELATIVE_ROUNDING As Double = 2.22044604925031E-16 ' Отн
 
 Private mSolver As CCoupledNewtonSolver
 Private mOffset() As Double, mDirection() As Double
-Private mField() As Double, mResultants() As Double
+Private mField() As Double, mResultants() As Double, mPreviousField() As Double
 Private mHasOffset As Boolean, mHasDirection As Boolean, mHasAccepted As Boolean
 Private mOffsetFraction As Double, mLambda As Double
 Private mPreviousLambda As Double
 Private mPreferDeformationOnStall As Boolean
-Private mExactTargetRecovered As Boolean ' Последняя точная проба восстановила прямой расчёт.
+Private mExactTargetRecovery As String ' Способ подтверждения точной конечной нагрузки после численного отказа.
+Private mSecantFailure As String ' Причина отказа прогноза для диагностики всей запрошенной ветви.
 Private mInitialSteps As Long, mMaxAttempts As Long, mMaxIterations As Long
 Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
@@ -68,7 +69,7 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mHasSteelLimit = False: mSteelLimitOnOffset = False
     mSteelLimitPoint = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
-    Erase mField: Erase mResultants
+    Erase mField: Erase mResultants: Erase mPreviousField
     Set mAcceptedFields = Nothing: Set mAcceptedTrace = Nothing: Set mLimitTrace = Nothing
     If saveAcceptedFields Then
         Set mAcceptedFields = New Collection
@@ -179,7 +180,8 @@ End Function
 Friend Function Advance(ByVal targetLambda As Double) As Boolean
     mMeta.Clear
     mRejected = 0: mAccepted = 0: mAttempts = 0
-    mExactTargetRecovered = False
+    mExactTargetRecovery = vbNullString
+    mSecantFailure = vbNullString
     If targetLambda < mLambda Then
         mMeta.SetSolverFailure sfcInvalidInput, rkDirectState, _
             "Целевой множитель ниже достигнутого. Начните траекторию заново.", False
@@ -238,10 +240,10 @@ Friend Property Get ResultMeta() As CResultMeta
 End Property
 
 ' Проходит отрезок, уменьшая приращение после численного отказа.
-' При остановке прямого расчёта возможна одна проба точной конечной нагрузки.
+' Точную нагрузку прямого расчёта можно один раз проверить с секущим прогнозом.
 Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, ByVal offsetStage As Boolean) As Boolean
     Dim nominal As Double, minimum As Double, increment As Double, candidate As Double
-    Dim segmentStart As Double, triedExactTarget As Boolean
+    Dim segmentStart As Double, triedExactTarget As Boolean, triedSecant As Boolean
     segmentStart = reached
     nominal = (target - segmentStart) / mInitialSteps
     minimum = nominal * MIN_STEP_RATIO
@@ -276,6 +278,13 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
         Else
             If mHasSteelLimit Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
             mRejected = mRejected + 1
+            If candidate = target And Not offsetStage Then
+                If TryRecoverTargetWithSecant(target, triedSecant) Then
+                    reached = target
+                    FollowSegment = True
+                    Exit Function
+                End If
+            End If
             If mPreferDeformationOnStall And Not offsetStage And mRejected >= 2 Then
                 If SavedFieldCount >= 2 And mPreviousLambda < mLambda Then
                     mMeta.DiagnosticDetails = ProgressDetails() & " | " & mMeta.DiagnosticDetails
@@ -286,7 +295,7 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             If increment < minimum Then
                 If Not offsetStage And Not triedExactTarget And mReinforcement Is Nothing And _
                         reached > segmentStart And target - reached <= nominal And mAttempts < mMaxAttempts Then
-                    If TryRecoverExactTarget(target) Then
+                    If TryRecoverExactTarget(target, triedSecant) Then
                         reached = target
                         FollowSegment = True
                         Exit Function
@@ -303,16 +312,58 @@ End Function
 
 ' Проверяет конечную нагрузку от последнего принятого поля. При отказе
 ' сохраняет причину остановки на минимальном подшаге и историю ветви.
-Private Function TryRecoverExactTarget(ByVal target As Double) As Boolean
+Private Function TryRecoverExactTarget(ByVal target As Double, ByRef triedSecant As Boolean) As Boolean
     Dim stall As CResultMeta: Set stall = mMeta
     If SolveAndAccept(target, False) Then
-        mExactTargetRecovered = True
+        mExactTargetRecovery = "точной конечной пробой."
         TryRecoverExactTarget = True
     Else
         mRejected = mRejected + 1
+        Dim canPredict As Boolean: canPredict = (mMeta.InternalStatus = rsNumericalFailure)
         stall.DiagnosticDetails = stall.DiagnosticDetails & " | Точная конечная проба: " & mMeta.ResultComment
         Set mMeta = stall
+        If canPredict Then TryRecoverExactTarget = TryRecoverTargetWithSecant(target, triedSecant)
     End If
+End Function
+
+' Повторяет ту же конечную нагрузку от секущего прогноза двух принятых полей.
+' Допускается только в прямом расчёте с завершённой постоянной частью.
+Private Function TryRecoverTargetWithSecant(ByVal target As Double, ByRef triedSecant As Boolean) As Boolean
+    If triedSecant Or mAttempts >= mMaxAttempts Or Not mReinforcement Is Nothing Then Exit Function
+    If mOffsetFraction <> 1# Or mPreviousLambda <= 0# Then Exit Function
+    Dim previousSpan As Double: previousSpan = mLambda - mPreviousLambda
+    Dim remaining As Double: remaining = target - mLambda
+    If previousSpan <= mLambda * DOUBLE_RELATIVE_ROUNDING Or remaining <= 0# Or remaining > previousSpan Then Exit Function
+    Dim initialField As Variant
+    If Not BuildSecantField(remaining / previousSpan, initialField) Then Exit Function
+
+    Dim failure As CResultMeta: Set failure = mMeta
+    triedSecant = True
+    If TryEquilibrium(target, False, initialField) Then
+        SaveCandidate target, False
+        mExactTargetRecovery = "точной конечной пробой с секущим прогнозом."
+        TryRecoverTargetWithSecant = True
+    Else
+        mRejected = mRejected + 1
+        mSecantFailure = mMeta.ResultComment
+        Set mMeta = failure
+    End If
+End Function
+
+' Возвращает отдельный прогноз только при конечных коэффициентах и приращении поля.
+Private Function BuildSecantField(ByVal ratio As Double, ByRef initialField As Variant) As Boolean
+    Dim field() As Double: field = mField
+    Dim i As Long, changed As Boolean, previousValue As Double
+    For i = LBound(field) To UBound(field)
+        previousValue = mPreviousField(i)
+        If field(i) <> field(i) Or previousValue <> previousValue Then Exit Function
+        If Abs(field(i)) > 1E+100 Or Abs(previousValue) > 1E+100 Then Exit Function ' Защита арифметики экстраполяции.
+        field(i) = field(i) + ratio * (field(i) - previousValue)
+        If field(i) <> mField(i) Then changed = True
+    Next i
+    If Not changed Then Exit Function
+    initialField = field
+    BuildSecantField = True
 End Function
 
 ' Подставляет усилия этапа и принимает только сошедшееся состояние полностью.
@@ -330,7 +381,8 @@ Private Function SolveAndAccept(ByVal parameter As Double, ByVal offsetStage As 
 End Function
 
 ' Ищет равновесие одной пробы без принятия истории материалов.
-Private Function TryEquilibrium(ByVal parameter As Double, ByVal offsetStage As Boolean) As Boolean
+Private Function TryEquilibrium(ByVal parameter As Double, ByVal offsetStage As Boolean, _
+        Optional ByRef initialField As Variant) As Boolean
     Dim load(1 To COMPONENT_COUNT) As Double, i As Long
     For i = 1 To COMPONENT_COUNT
         If offsetStage Then
@@ -341,7 +393,7 @@ Private Function TryEquilibrium(ByVal parameter As Double, ByVal offsetStage As 
     Next i
     mAttempts = mAttempts + 1
     If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
-            mAbsoluteTolerance, mRelativeTolerance, mMaxIterations) Then
+            mAbsoluteTolerance, mRelativeTolerance, mMaxIterations, initialField) Then
         Set mMeta = mSolver.ResultMeta
         Exit Function
     End If
@@ -351,6 +403,7 @@ End Function
 ' Принимает равновесную пробу целиком и при необходимости копирует поле.
 Private Sub SaveCandidate(ByVal parameter As Double, ByVal offsetStage As Boolean)
     If mHasAccepted Then mPreviousLambda = mLambda
+    If Not offsetStage And mLambda > 0# And mReinforcement Is Nothing Then mPreviousField = mField
     mSolver.CopyTrial mField, mResultants
     mSolver.AcceptStep
     mHasAccepted = True: mAccepted = mAccepted + 1
@@ -429,5 +482,6 @@ End Function
 Private Function ProgressDetails() As String
     ProgressDetails = "Доля постоянной части: " & CStr(mOffsetFraction) & "; lambda: " & CStr(mLambda) & _
         "; принято: " & CStr(mAccepted) & "; отклонено: " & CStr(mRejected) & "; проб: " & CStr(mAttempts)
-    If mExactTargetRecovered Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено точной конечной пробой."
+    If Len(mExactTargetRecovery) > 0 Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено " & mExactTargetRecovery
+    If Len(mSecantFailure) > 0 Then ProgressDetails = ProgressDetails & " | Секущий прогноз: " & mSecantFailure
 End Function
