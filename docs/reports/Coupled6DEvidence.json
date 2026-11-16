@@ -1,12 +1,13 @@
 {
-  "source_checkpoint": "3fd1763",
+  "source_checkpoint": "38f476e",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
     "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
   },
   "python_packages": [
     "numpy",
-    "scipy"
+    "scipy",
+    "PyMuPDF"
   ],
   "archives": {
     "CoupledGaugeHardShearNative": "EE0EEF921D2E1FF01663CBE6D93185E15690DD856FC5C3E3E8B628F52EE66DD2",
@@ -38,7 +39,14 @@
     "MVT2GradientCorrection20261116": "FA407B0A7625E2CC09C240470D205A5C70CE86BDC67AE04443C3B5306B323CA9",
     "KaniApexSectionPartition20261116": "00A0DF715175D14BC47BB908B8F569C2624B63FCE99C4A5D86336A115ACB8D2A",
     "KaniH45Plus18Portable": "D34B8511FA133F1D4F146199F66C2A406DE9E790AB0F19E9B5D7B2AE099B975F",
-    "MVT2RepeatedFixed20261116": "2A4127B75031E56AA35AD06FC2C6CA52EF4DF51E9E69EE3BCC75358B4401A1A2"
+    "MVT2RepeatedFixed20261116": "2A4127B75031E56AA35AD06FC2C6CA52EF4DF51E9E69EE3BCC75358B4401A1A2",
+    "KaniH45Plus18NativePortable": "10FFDC956D9F6D74F6A50A79DF2E50B3C5F7EFE810AEB18A4415D8584E1C5F48",
+    "A2TubeCapacity20261116": "0B99A41DF6005EA129DBE7B2466AB47D5305F6221AD94B88057E5E24908ADA99",
+    "PhysicalEndpointAudit20261116": "D99ADF7C96067DA3361FED43E40DE358E71D6BDADC2EE50F9D2AE129A0569A17",
+    "MVT2MeasuredAction20261116": "D32C52853477FD9BBF5DD35988F77117170238D880EFA30EB396A847DBC33897",
+    "MVT2MeasuredNative20261116": "0D19814EB74BA458E56B40BF7E5D2E58CE057FDC724CB79A610DC6D56A77BA5E",
+    "KaniSecondDirectionNativePortable": "66068CCC3E3744B75D8877F635B0FFC1C2D0B6AB65CC1B5819731D8326758DC4",
+    "MVT2AxialWorkItem20261116": "1C42AA22A2F23F1EB633292EBDD81CC8852DE3C2AD9FED4ADE73BFF298ECB5D5"
   },
   "cases": [
     {
@@ -405,6 +413,100 @@
       "script": "Verify-Repeated.py",
       "outputs": {
         "Verification.json": "E7F7B3F1F40865529F562BC962E6B7662C1D470CE96C4483CF4A49D0816325B0"
+      }
+    },
+    {
+      "id": "kani-h45-signed-native",
+      "journal_section": 330,
+      "archive": "KaniH45Plus18NativePortable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "ReplayedPlus18Verification.json": "982D826223C8EC5B6EF6E8F72F4C1A4ABFE1E6AE24B6FDFC118D75E8AF2D82FD"
+      }
+    },
+    {
+      "id": "lopes-a2-tube-benchmark",
+      "journal_section": 331,
+      "archive": "A2TubeCapacity20261116",
+      "script": "Verify-A2Tube.py",
+      "arguments": [
+        "{repo}"
+      ],
+      "outputs": {
+        "Verification.json": "477A82D373A44362284FCAD96B591DF71560F831734C1CDE4466DC81E8318150"
+      }
+    },
+    {
+      "id": "sk3-mvt2-endpoint-audit",
+      "journal_section": 332,
+      "archive": "PhysicalEndpointAudit20261116",
+      "script": "Verify-PhysicalEndpoint.py",
+      "arguments": [
+        "{repo}"
+      ],
+      "outputs": {
+        "PhysicalEndpointChecks.json": "64977DA43823E519453905DCE564E1121A8A1C9ACF1670FE7ED7FDB955170F67"
+      }
+    },
+    {
+      "id": "mvt2-measured-action-predictor",
+      "journal_section": 333,
+      "archive": "MVT2MeasuredAction20261116",
+      "script": "MeasuredAction.py",
+      "arguments": [
+        "{evidence}",
+        "MeasuredAction.json",
+        "--candidate-output",
+        "CandidateFields.csv"
+      ],
+      "outputs": {
+        "MeasuredAction.json": "A133A678E6D06A79C79E821637F7BED64AFF36B75A79823DD6AA103F83902ED3",
+        "CandidateFields.csv": "EF96102A7BBBAB9349192F8E1EFF3CEF91C2C7802E506F8529F78C79F0D6ECDB"
+      }
+    },
+    {
+      "id": "mvt2-measured-action-native",
+      "journal_section": 334,
+      "archive": "MVT2MeasuredNative20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "48C6DBE5E23D8B4B27D3AFE0F7F689256A6E9A6E4FC8323A56837D8692AA0851"
+      }
+    },
+    {
+      "id": "kani-h45-second-direction-native",
+      "journal_section": 335,
+      "archive": "KaniSecondDirectionNativePortable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}",
+        "--donor-zip",
+        "{evidence}/KaniH45Plus18NativePortable.zip"
+      ],
+      "outputs": {
+        "ReplayedSecondNativeVerification.json": "7A263C9CD71FB3132C7BAC71E7FCC6E6518E8C8D4CD12EFE25E05AF20EFC1040"
+      }
+    },
+    {
+      "id": "mvt2-axial-work-item",
+      "journal_section": 336,
+      "archive": "MVT2AxialWorkItem20261116",
+      "script": "Replay-AxialWorkItem.py",
+      "arguments": [
+        "{evidence}",
+        "replay"
+      ],
+      "outputs": {
+        "replay/WorkItem.json": "2C3A0508375C4760205F45F0B7F652A0C499E0ADA69EA3E7BDEF34E21BE08C0F",
+        "replay/Fields.csv": "FC94654219AAF4ED7E5994F070DEB7CB08830335D2E3FAE41EAFFB97BFA37530"
       }
     }
   ]
