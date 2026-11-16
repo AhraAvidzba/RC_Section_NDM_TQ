@@ -78,7 +78,9 @@
     "KaniH45ElasticDamageNativePortable": "751CC8385ADDA61CFBC422B2F93C7EB4150A70964A4F294DD1CBE06B4F98F0FA",
     "CoupledActualDeformationProgress20261116": "EED10254B2EEC0B0EE31AC6D1114ADAA0BF849769CCCAC154202D4BF3E8F858B",
     "HardShearActualDeformationProgress20261116": "70559BBE5E093D533BF30BF423018E1725879D8720ECE734700F5CBF9F65F489",
-    "MVT2BranchLockedNative20261116": "42648C93E2A03D55A09F8E9688357D062D3E4210F98FA4B7507CF3FB5820FFF5"
+    "MVT2BranchLockedNative20261116": "42648C93E2A03D55A09F8E9688357D062D3E4210F98FA4B7507CF3FB5820FFF5",
+    "KaniH45ElasticDamageSectionPortable": "E4F57928BA1FEAA08E737642FB340F2B9A547B7A938A9D59FD60013B52911C51",
+    "MVT2Force15Native20261116": "AAF97ABED8510F390488F2A5C515E57431BED7ED56694181D2CD763F35A8900F"
   },
   "cases": [
     {
@@ -932,6 +934,26 @@
       "arguments": ["--decision", "--output", "ReplayedReport.json"],
       "outputs": {
         "ReplayedReport.json": "146F4565ACA08F8AC13843070BDA72C0F60EF2B28A42E2E05B7FD7DCE9A45E7C"
+      }
+    },
+    {
+      "id": "kani-h45-native-analytical-elastic-full-section",
+      "journal_section": 379,
+      "archive": "KaniH45ElasticDamageSectionPortable",
+      "script": "Replay-Section.py",
+      "arguments": ["--repo-root", "{repo}"],
+      "outputs": {
+        "Replay-SectionComparison.json": "E8CEBDDDAABD5437CF386FE5A4024A57E8A736C400C4A94CB2E2179EC87A26BC"
+      }
+    },
+    {
+      "id": "mvt2-native-force-partition-released-point-15",
+      "journal_section": 380,
+      "archive": "MVT2Force15Native20261116",
+      "script": "ReplayProof.py",
+      "arguments": ["--decision"],
+      "outputs": {
+        "PortableReport.json": "14062D2ED157F1D016ADD5521922B53CA6BC0A32E4D9D8D7BE144DC47C611263"
       }
     }
   ],

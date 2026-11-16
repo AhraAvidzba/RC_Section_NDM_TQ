@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "B7E761C5D725E78D540BA5E2BC27BC3F6F0E2924DA0A507E2CE2360A5DD46E20",
+  "manifest_sha256": "E0D108B40765D02A7EA45C2A48738952B3BEB24BD53CABB03B4BA1AA7A35F6FB",
   "source_checkpoint": "6d42af5",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 74,
+  "passed": 76,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -664,6 +664,24 @@
       "archive": "MVT2BranchLockedNative20261116",
       "verified_outputs_sha256": {
         "ReplayedReport.json": "146F4565ACA08F8AC13843070BDA72C0F60EF2B28A42E2E05B7FD7DCE9A45E7C"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-native-analytical-elastic-full-section",
+      "journal_section": 379,
+      "archive": "KaniH45ElasticDamageSectionPortable",
+      "verified_outputs_sha256": {
+        "Replay-SectionComparison.json": "E8CEBDDDAABD5437CF386FE5A4024A57E8A736C400C4A94CB2E2179EC87A26BC"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-native-force-partition-released-point-15",
+      "journal_section": 380,
+      "archive": "MVT2Force15Native20261116",
+      "verified_outputs_sha256": {
+        "PortableReport.json": "14062D2ED157F1D016ADD5521922B53CA6BC0A32E4D9D8D7BE144DC47C611263"
       },
       "verified_stdout": null
     }
