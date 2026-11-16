@@ -139,7 +139,10 @@
     "MVT2H26YieldGuideOriginalPlaneNative20261117": "8B5402E9D61B2C058DF2FA3033E81767C8AFF70CB82810B5807AAFFADBA2883F",
     "HardShearMaterialSwitchNative20261117": "CF482DA9F7A9DCE0AE93EE4E49EAC86B021B5DBB2582D27C67C59B5BB406B48F",
     "MVT2OpenSeesDistributedElastic20261117": "807E5B0B7EAEEB11D2159C10B0EA2D07C18FFF6A6E72616FFBE2324678271E89",
-    "MVT2H26FixedControlGuideComparisonNative20261117": "D9A524928E9189711CA835181691899B1CDAA7D38507F260817DC7BC3CEFD7DB"
+    "MVT2H26FixedControlGuideComparisonNative20261117": "D9A524928E9189711CA835181691899B1CDAA7D38507F260817DC7BC3CEFD7DB",
+    "HardShearShort8H21Native20261117": "A5006CBF785382725457AB31166BB9608E9BD5D2115853C09640371BD31279AD",
+    "MVT2H26OwnFixedRecoveryNative20261117": "F8EA8EDD58F668CDADA94D84BC09BA25FE2CA060561D40E1F0D1F3B28AB6562B",
+    "MVT2OpenSeesDistributedStartup20261117": "57C87DEE79BF7626C39D67393726FFE3873695946D2CD53718136F6D72EE429B"
   },
   "cases": [
     {
@@ -1615,6 +1618,41 @@
         "{evidence}"
       ],
       "stdout_contains": "FIXED CONTROL 4DB67D74AE025BAD266EAC590F718B8B8955A24B1198319EA60185FB099F5F36 INDEPENDENT ANALYSIS B5426B1B5E2848B18301D99B740110A28AF911ECD6CA15A1135974C16A49D430"
+    },
+    {
+      "id": "hardshear-short8-h21-original-control-native",
+      "journal_section": 447,
+      "archive": "HardShearShort8H21Native20261117",
+      "script": "HardShearShort8H21Native/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "HARDSHEAR H21 PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-h26-own-fixed-newton-ray-native",
+      "journal_section": 448,
+      "archive": "MVT2H26OwnFixedRecoveryNative20261117",
+      "script": "ReplayOwnPortable.py",
+      "arguments": [
+        "--archives",
+        "{evidence}"
+      ],
+      "stdout_contains": "OWN NEWTON RAY C2D9D0F0C0A4678B966BD85D999D5D05FE6F86A616DBED7CD169B4324AF0A9A4 ROW 46"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-startup-native",
+      "journal_section": 449,
+      "archive": "MVT2OpenSeesDistributedStartup20261117",
+      "script": "Verify-StartupPads.py",
+      "arguments": [
+        "{evidence}/MVT2OpenSeesStartup20261117.zip",
+        "{evidence}/MVT2OpenSeesDistributedElastic20261117.zip",
+        "--out",
+        "Replayed.json"
+      ],
+      "outputs": {
+        "Replayed.json": "E95B93CAD828EFEEC6C4801EE5E778B794257E68E05AE464E5951C78415F3F9F"
+      },
+      "stdout_contains": "MVT2_DISTRIBUTED_STARTUP_DETACHED_PASS 3 2"
     }
   ],
   "frozen_repositories": {
