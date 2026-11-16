@@ -116,7 +116,14 @@
     "DirectSteelStaleTangent20261116": "38BE984CC8DCC3F1C9E6A4228E18EE1F97DC7E34AE33A62507C47BB038163141",
     "MVT2CoordinateYieldAudit20261116": "A5DDD0F97CA16616FCFF6B9A13FC18F3DFEB338A5562B6769A793A570D112311",
     "MVT2SameRayDerivativeNative20261116": "E6FCD67D16C2637EF7992AB67CE6DB71AA7E63EE41F15CD33E8CB198A586304D",
-    "CoupledDirectSteelPublication20261116": "C698C4F195FF62777B91737FF3828599376A0A5DB0F7F0ACAB87D8B163E9A1E9"
+    "CoupledDirectSteelPublication20261116": "C698C4F195FF62777B91737FF3828599376A0A5DB0F7F0ACAB87D8B163E9A1E9",
+    "MVT2LocalBranchTangentNative20261116": "9C99F2F0480B28652DB631F1AB5E33F7D1959F662ABF54C1E22923F9A5E2EC24",
+    "MVT2StockBranchArcNative20261116": "F6C9A1F7276320EA91F70022E171FAD35A61D457584BDE3242821C90328CA422",
+    "MVT2FullBranchTangentNative20261116": "3FDAC0F85B7BC2FE227283098EB08D9A5C99B3B4921EAABE875F7150FDE7D6A2",
+    "HardShearTerminalBudgetAudit20261116": "EC0E74852D1FD83E788A1C3EDB8E2C50381F9BE9054E8A3638953A69FCD5D98B",
+    "MVT2FirstBoundedBranchCorrectionNative20261116": "A2ED199D5EE0699206ADD65F0D89DE1DC3007A027B64F5B466E605A6646DB135",
+    "ConcreteBaseResponseCacheNative20261116": "7D2F85735E07EC8A883119B5B696D0A20529495AF1F1BEAACFEC4DAE2063A2DD",
+    "MVT2SecondBoundedEquilibriumNative20261116": "07F9AA915BEE7D1DEA7E9854FE594B7F6D9D8740D2A15BAEEA4B8E83B6DDBFE8"
   },
   "cases": [
     {
@@ -1364,6 +1371,62 @@
       "script": "CoupledDirectSteelPublication/Verify-PublicationArchive.py",
       "arguments": ["--installed", "{repo}"],
       "stdout_contains": "PASS DIRECTED RELEASE ARCHIVE 7D5052B4A305D2D27EA4B4C2BF0B43D69B2ECBCBEDA16DFD36017C85A40146DF"
+    },
+    {
+      "id": "mvt2-local-consistent-tangent-held-direction-native",
+      "journal_section": 423,
+      "archive": "MVT2LocalBranchTangentNative20261116",
+      "script": "ReplayBranchPortable.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2SafeguardedTangentShift20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip"],
+      "stdout_contains": "CANONICAL LOCAL MATCHED ACTION 7CF0F089F3A9BF97279E43F764BCD84ABC428DA3E4AF4413F18E7FD2D1CE3DBD"
+    },
+    {
+      "id": "mvt2-stock-versus-branch-consistent-pseudo-arclength-native",
+      "journal_section": 424,
+      "archive": "MVT2StockBranchArcNative20261116",
+      "script": "ReplayPortable.py",
+      "arguments": [],
+      "stdout_contains": "MVT2 STOCK AND BRANCH NATIVE PASS 2FA20A8E01119EC497963A34FDC6597110C42761A08353493826A348CEA3B980"
+    },
+    {
+      "id": "mvt2-complete-branch-matched-tensors-native",
+      "journal_section": 425,
+      "archive": "MVT2FullBranchTangentNative20261116",
+      "script": "ReplayTensorPortable.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2SafeguardedTangentShift20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip"],
+      "stdout_contains": "CANONICAL COMPLETE MATCHED ACTION 7CDA42FD0EE58CDF0494B53198A63169A26DA9B298DEA36A13C83CFD5106ECDC"
+    },
+    {
+      "id": "hardshear-historical-positive-ray-terminal-wrench",
+      "journal_section": 426,
+      "archive": "HardShearTerminalBudgetAudit20261116",
+      "script": "HardShearTerminalBudgetAudit/Verify-Archive.py",
+      "arguments": ["--publication", "{evidence}/CoupledDirectSteelPublication20261116.zip"],
+      "stdout_contains": "PASS HARD SHEAR TERMINAL ARCHIVE 024D3AE67455294188FC2E10500B3D889E5AC50C9F57EEBAC2A87878C1394F2B"
+    },
+    {
+      "id": "mvt2-first-bounded-branch-matched-correction-native",
+      "journal_section": 427,
+      "archive": "MVT2FirstBoundedBranchCorrectionNative20261116",
+      "script": "ReplayCorrectionPortable.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip"],
+      "stdout_contains": "CANONICAL NATIVE BOUNDED CORRECTION D0E1E82AF4072FE0A1E402B65B45493FECBB340B937710D912A0E115B210D4A7"
+    },
+    {
+      "id": "concrete-exact-base-response-cache-native-pair",
+      "journal_section": 429,
+      "archive": "ConcreteBaseResponseCacheNative20261116",
+      "script": "ConcreteBaseResponseCacheNative/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "PASS NONLINEAR CONCRETE BASE CACHE Candidate DBC1454B5DAAC940DD4DF4F360A495F619F6249F2DE72932E1764917F649497F 3"
+    },
+    {
+      "id": "mvt2-second-bounded-correction-private-exact-acceptance",
+      "journal_section": 428,
+      "archive": "MVT2SecondBoundedEquilibriumNative20261116",
+      "script": "ReplaySecondPortable.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip", "{evidence}/MVT2FirstBoundedBranchCorrectionNative20261116.zip"],
+      "stdout_contains": "PRIVATE EXACT ACCEPTANCE REPRODUCED 04F899F1943CDB65F2DD022F0AD63A51DB254F321D77AF919D5D97ECF6D917DB"
     }
   ],
   "frozen_repositories": {

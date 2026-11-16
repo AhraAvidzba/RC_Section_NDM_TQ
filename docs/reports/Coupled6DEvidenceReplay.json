@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "10B8A81AC7B78374E5567D3CD62AD6FA472C82051EE6998AD263EE9A3AB45453",
+  "manifest_sha256": "52151AE1ADE246A909612641EA34E18DA84DE47410AD6B54B3D56A2C6CC73B31",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 113,
+  "passed": 120,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -986,6 +986,55 @@
       "archive": "CoupledDirectSteelPublication20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "PASS DIRECTED RELEASE ARCHIVE 7D5052B4A305D2D27EA4B4C2BF0B43D69B2ECBCBEDA16DFD36017C85A40146DF"
+    },
+    {
+      "id": "mvt2-local-consistent-tangent-held-direction-native",
+      "journal_section": 423,
+      "archive": "MVT2LocalBranchTangentNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL LOCAL MATCHED ACTION 7CF0F089F3A9BF97279E43F764BCD84ABC428DA3E4AF4413F18E7FD2D1CE3DBD"
+    },
+    {
+      "id": "mvt2-stock-versus-branch-consistent-pseudo-arclength-native",
+      "journal_section": 424,
+      "archive": "MVT2StockBranchArcNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 STOCK AND BRANCH NATIVE PASS 2FA20A8E01119EC497963A34FDC6597110C42761A08353493826A348CEA3B980"
+    },
+    {
+      "id": "mvt2-complete-branch-matched-tensors-native",
+      "journal_section": 425,
+      "archive": "MVT2FullBranchTangentNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL COMPLETE MATCHED ACTION 7CDA42FD0EE58CDF0494B53198A63169A26DA9B298DEA36A13C83CFD5106ECDC"
+    },
+    {
+      "id": "hardshear-historical-positive-ray-terminal-wrench",
+      "journal_section": 426,
+      "archive": "HardShearTerminalBudgetAudit20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS HARD SHEAR TERMINAL ARCHIVE 024D3AE67455294188FC2E10500B3D889E5AC50C9F57EEBAC2A87878C1394F2B"
+    },
+    {
+      "id": "mvt2-first-bounded-branch-matched-correction-native",
+      "journal_section": 427,
+      "archive": "MVT2FirstBoundedBranchCorrectionNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL NATIVE BOUNDED CORRECTION D0E1E82AF4072FE0A1E402B65B45493FECBB340B937710D912A0E115B210D4A7"
+    },
+    {
+      "id": "concrete-exact-base-response-cache-native-pair",
+      "journal_section": 429,
+      "archive": "ConcreteBaseResponseCacheNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS NONLINEAR CONCRETE BASE CACHE Candidate DBC1454B5DAAC940DD4DF4F360A495F619F6249F2DE72932E1764917F649497F 3"
+    },
+    {
+      "id": "mvt2-second-bounded-correction-private-exact-acceptance",
+      "journal_section": 428,
+      "archive": "MVT2SecondBoundedEquilibriumNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PRIVATE EXACT ACCEPTANCE REPRODUCED 04F899F1943CDB65F2DD022F0AD63A51DB254F321D77AF919D5D97ECF6D917DB"
     }
   ]
 }
