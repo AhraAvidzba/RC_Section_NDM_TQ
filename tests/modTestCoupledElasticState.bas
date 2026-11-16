@@ -2017,7 +2017,7 @@ Private Sub TestCenteredLoadPathComponents(ByVal analysis As CCoupledSectionAnal
         expected(5) = SHEAR_X: expected(6) = SHEAR_Y
         path.TargetSix CDbl(factor), actual
         For index = 1 To 6
-            TestRecord Abs(actual(index) - expected(index)) <= 0.000000001, label & " | λ=" & CStr(factor) & _
+            TestRecord Abs(actual(index) - expected(index)) <= 0.000000001, label & " | lambda=" & CStr(factor) & _
                 " | компонента " & CStr(index) & " | " & CStr(actual(index)) & " / " & CStr(expected(index)), passed, failed, report
         Next index
     Next factor
@@ -2025,7 +2025,7 @@ End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Подтверждает статус неприменимого поиска после решения постоянной части
-' нагрузки для λ*Mx при нулевом заданном Mx и ненулевых N, T, Qx, Qy.
+' нагрузки для LambdaMx при нулевом заданном Mx и ненулевых N, T, Qx, Qy.
 Private Sub TestCenteredLoadPathCapacity(ByVal provider As CMaterialModelProvider, _
         ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Dim section As CSectionModel, hoop As CGeometryPath, layout As New CTransverseRebarLayout
@@ -2041,11 +2041,11 @@ Private Sub TestCenteredLoadPathCapacity(ByVal provider As CMaterialModelProvide
     Dim capacity As CCapacityResult
     Set capacity = analysis.SolveCapacity(loads, "LambdaMx", spec, 1#, 2#, 0.0001, 30)
     TestRecord capacity.ResultMeta.InternalStatus = rsNotApplicable And capacity.ResultMeta.ResultCode = rcNotApplicable, _
-        "Нулевой λ*Mx: статус поиска после решения постоянной нагрузки | " & capacity.ResultMeta.ResultComment, passed, failed, report
+        "Нулевой LambdaMx: статус поиска после решения постоянной нагрузки | " & capacity.ResultMeta.ResultComment, passed, failed, report
     TestRecord capacity.Status = "N/A" And InStr(1, capacity.ResultMeta.ResultComment, "ненулевой переменной частью", vbTextCompare) > 0, _
-        "Нулевой λ*Mx: внешний статус и причина неприменимости", passed, failed, report
+        "Нулевой LambdaMx: внешний статус и причина неприменимости", passed, failed, report
     TestRecord Not capacity.HasUltimatePoint And Not capacity.HasConfirmedLowerBound And capacity.ReserveFactor = 0#, _
-        "Нулевой λ*Mx: предельная точка и запас отсутствуют", passed, failed, report
+        "Нулевой LambdaMx: предельная точка и запас отсутствуют", passed, failed, report
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
