@@ -153,7 +153,8 @@
     "HardShearPureTCurrentDirectTiming20261117": "1F566AD6A21EE7262FE6D162078AE57250AB8929B678D0F5096E2418914E8E2C",
     "MVT2OpenSeesDamageReplay20261117": "DD6FA6FA923F2FB1A2DBBFAD772A146201566B31614F14DFBF03F5234D3D54BE",
     "MVT2BridgeScalingNative20261117": "94C2373FFDE9EA0E0E359E0A325CE813BFA91B90E00AE88A75FBEDE4429853A1",
-    "MVT2OpenSeesHeldTSmallSteps20261117": "49972528D7D4F8E8006BECB54489FA6FD7F4C5A7952811C1D9E36E41C55484EC"
+    "MVT2OpenSeesHeldTSmallSteps20261117": "49972528D7D4F8E8006BECB54489FA6FD7F4C5A7952811C1D9E36E41C55484EC",
+    "MVT2CurrentHistoryStop20261117": "D20FBC4293FF59A36D4DF50B93E8AAA8C3DB6449345A3A7C7FAFC8803A5092F7"
   },
   "cases": [
     {
@@ -1763,6 +1764,17 @@
         "Replayed.json": "173B5724218357528D5882D6B9AC3CA6D9982FC890C8350F6F8B4DDA9722BDED"
       },
       "stdout_contains": "MVT2_SMALL_SHEAR_PROOF_PASS 11.25 first_small_step_rejected_engine_discarded"
+    },
+    {
+      "id": "mvt2-current-book-history-replay-stops-before-new-corrector",
+      "journal_section": 461,
+      "archive": "MVT2CurrentHistoryStop20261117",
+      "script": "Verify-CurrentHistoryStop.py",
+      "arguments": ["{evidence}/MVT2BridgeScalingNative20261117.zip", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "3DEE8523DF1C407F694ED5F6771BE3A9F31B00CA362DFB37D7B081BE7EE35252"
+      },
+      "stdout_contains": "MVT2_CURRENT_API_FIXTURE_STOP_PASS 24"
     }
   ],
   "frozen_repositories": {
