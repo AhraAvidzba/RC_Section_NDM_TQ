@@ -273,7 +273,22 @@ RecomputeTangent:
             built = Evaluate(current, True, useGradientTangent, recordTrial:=False) ' Например, при вырождении односторонних разностей в другой точке.
         End If
         If Not built Then
-            RecordFailure mFailureCode, "Не удалось получить материальный отклик для равновесия связанного сечения."
+            Dim assemblyFailure As ESolverFailureCode, tangentPoint As Long
+            assemblyFailure = mFailureCode: tangentPoint = mMaterialPoint
+            If assemblyFailure = sfcNumericalFailure Or assemblyFailure = sfcSingularTangent Then
+                If Evaluate(current, False) Then ' В точном равновесии поправка и её касательная не нужны.
+                    If EquilibriumNorm(load, current) <= tolerance And GaugesVerified(tolerance) Then
+                        mCandidate = current
+                        PublishCandidate currentLambda
+                        SolveStep = True
+                        Exit Function
+                    End If
+                    mMaterialPoint = tangentPoint ' Сохраняем точку отказа касательной после проверки невязки.
+                Else
+                    assemblyFailure = mFailureCode
+                End If
+            End If
+            RecordFailure assemblyFailure, "Не удалось получить материальный отклик для равновесия связанного сечения."
             Exit Function
         End If
         norm = EquilibriumNorm(load, current)

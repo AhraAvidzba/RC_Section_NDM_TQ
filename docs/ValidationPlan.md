@@ -121,6 +121,7 @@ LC-сводок и расчётных профилей, чтение после 
 $macros = @(
     'modTestCoupledElasticState.RunCoupledElasticStateTests'
     'modTestCoupledElasticState.RunCoupledNewtonTests'
+    'modTestCoupledElasticState.RunTestCoupledTangentProof'
     'modTestCoupledElasticState.RunTestCoupledGradientLinearization'
     'modTestCoupledElasticState.RunTestCoupledHoopCapacity'
     'modTestCoupledElasticState.RunTestCoupledDeformationControl'

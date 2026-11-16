@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "9245074",
+  "source_checkpoint": "0e6618a",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "9A99BF072D67536CBCCA525A75E049F510C5242D46CB4EA3ADA7BC4C726088F8",
-    "workbook/output/VBA_All_Code.txt": "DA8E76A50A4917DCF66AEC162F51D98D75E03DC3595D8506E920CEF98B3145C9"
+    "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
+    "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
   },
   "python_packages": [
     "numpy",
@@ -58,7 +58,11 @@
     "CoupledRetainedBoundsResults20261116": "36F37977DFBB1559198139842425ED15C4304ABFD4CAB35D0FE07D14D84B1A80",
     "MVT2Step3Native20261116": "FDCB0C512B54989A19793F0A1B449ADB743779C406AA1A6A49972C6E5E789CB7",
     "KaniH45AlternateControlPortable": "4A9CADBD73726D133E99B5EA1D58F1DB8DB574C45BC189470F8EEC856C911BD4",
-    "HardShearRetainedBounds20261116": "6B5806F03B1F9999BAF014738C0F45322AD7875E9484A4A0FCB88738F9C39FD8"
+    "HardShearRetainedBounds20261116": "6B5806F03B1F9999BAF014738C0F45322AD7875E9484A4A0FCB88738F9C39FD8",
+    "MVT2PureTwistNative20261116": "4920B773CAF518ABDC3B7B553472C66B815E1E203C6FAF8A6577916C01F87962",
+    "CoupledEquilibriumTangentFallback20261116": "22B7BA3CD39C77ED473B55C75472B32EE0D110984FE252658F6ABAD1C7D66EBA",
+    "MVT2MeasuredTwistFeasibility20261116": "46A2CB10379A4B5C33FA5296356C60EF99925B17A21E27938B0CEF3EC981B626",
+    "HardShearTangentFallback20261116": "6746A8DB022A0B5EA4309678A1074180D0FE1968F27B37EC8E18A9111ADEC1C3"
   },
   "cases": [
     {
@@ -653,6 +657,52 @@
       "script": "Verify.py",
       "outputs": {
         "Replay.json": "24F9B79624DBDF2E6330E610B0D4E3EA32AEE6E5B9971EC3FE8C9B4817A85F32"
+      }
+    },
+    {
+      "id": "mvt2-native-pure-twist",
+      "journal_section": 354,
+      "archive": "MVT2PureTwistNative20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "AA3003F36FBBD57F003137F44803DB90835B2B2A82B9B4A162AC7E1595A7E6D8"
+      }
+    },
+    {
+      "id": "coupled-equilibrium-tangent-fallback-release",
+      "journal_section": 355,
+      "archive": "CoupledEquilibriumTangentFallback20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "BDB0D0EA71106B097C869B0C7405CA76308F42EC314E15B5B09758B593302D67"
+      }
+    },
+    {
+      "id": "mvt2-measured-twist-affine-feasibility",
+      "journal_section": 356,
+      "archive": "MVT2MeasuredTwistFeasibility20261116",
+      "script": "TwistFeasibility.py",
+      "arguments": [
+        "{evidence}",
+        "{evidence}/MVT2PureTwistNative20261116.zip",
+        "TwistFeasibility.json",
+        "CandidateFields.csv"
+      ],
+      "outputs": {
+        "TwistFeasibility.json": "5A32D055F10B6E7B272C3D1274EE335E331BD34F7204BBD6C56F4C6745CCE380",
+        "CandidateFields.csv": "C61469CEAFE4BB966DDC638328D27DB70678E9E5967DBBFC76DF998DD2D95302"
+      }
+    },
+    {
+      "id": "hardshear-tangent-fallback-release",
+      "journal_section": 357,
+      "archive": "HardShearTangentFallback20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "41A62A7E028F5C4C2605E9399C1AF88AE83273B055C2A70ACFDDEF6100F18D1D"
       }
     }
   ],

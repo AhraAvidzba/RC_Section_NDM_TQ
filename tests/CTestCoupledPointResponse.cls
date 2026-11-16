@@ -23,6 +23,7 @@ Private mMaximumIncrement As Double
 Private mMinimumAxialStrain As Double
 Private mCubic As Double, mTwinPeaks As Boolean, mBlocksRefinedDesign As Boolean
 Private mCoarseShoulderBump As Boolean
+Private mTangentFailure As ESolverFailureCode, mStressOnlyProbes As Long
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
@@ -30,6 +31,7 @@ Friend Sub TestInitialize(ByVal pointCount As Long)
     mCount = pointCount
     mCubic = 1E+10#: mTwinPeaks = False: mBlocksRefinedDesign = False
     mCoarseShoulderBump = False
+    mTangentFailure = sfcNone: mStressOnlyProbes = 0
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -124,6 +126,18 @@ Friend Property Get TestAcceptedSteps() As Long
 End Property
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт отказ вычисления касательной, сохраняя доступность отклика.
+Friend Property Let TestTangentFailure(ByVal value As ESolverFailureCode)
+    mTangentFailure = value
+End Property
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Считает проверки напряжений без сборки касательной.
+Friend Property Get TestStressOnlyProbes() As Long
+    TestStressOnlyProbes = mStressOnlyProbes
+End Property
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Считает диагональный отклик с нелинейным упрочнением в направлении z.
 ' Отрицательные параметры для провокации отказа в закон не вводятся.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
@@ -131,6 +145,12 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
     Const MODULUS As Double = 30000#
+    If tangentMode = ctmStressOnly Then
+        mStressOnlyProbes = mStressOnlyProbes + 1
+    ElseIf mTangentFailure <> sfcNone Then
+        ICoupledPointResponse_EvaluatePoint = mTangentFailure
+        Exit Function
+    End If
     Dim j As Long, k As Long, e As Double
     For j = 1 To 6
         For k = 1 To 6: tangent(j, k) = 0#: Next k

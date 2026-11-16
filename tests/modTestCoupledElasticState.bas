@@ -4619,3 +4619,130 @@ Public Function RunTestCoupledDiscardedShoulder() As String
 Failed:
     RunTestCoupledDiscardedShoulder = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Подтверждает равновесное поле при отказе касательной в одной из боковых историй.
+' Проверка использует шесть интегралов, меру деформации и данные трёх принятых буферов.
+Public Function RunTestCoupledTangentProof() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#, STRAIN As Double = 0.0004
+    Const FORCE As Double = AREA * (30000# * STRAIN + 1E+10# * STRAIN ^ 3)
+    Const ABS_TOL As Double = 1E-10, REL_TOL As Double = 1E-9
+    Const TARGET_LAMBDA As Double = 0.6
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    center.TestInitialize operators.PointCount
+    plusSide.TestInitialize operators.PointCount
+    minusSide.TestInitialize operators.PointCount
+    solver.Initialize operators, center, 30000#, plusSide, minusSide
+    If Not solver.TryStep(FORCE, 0#, 0#, 0#, 0#, 0#, ABS_TOL, REL_TOL, 30) Then _
+        Err.Raise 5, , "Не получено исходное равновесие. " & solver.ResultMeta.DiagnosticDetails
+    solver.AcceptStep
+    Dim original() As Double, peaks(1 To 3) As Double
+    solver.CopyAccepted original
+    peaks(1) = center.TestAcceptedPeak: peaks(2) = plusSide.TestAcceptedPeak: peaks(3) = minusSide.TestAcceptedPeak
+
+    Dim target(1 To 6) As Double, baseLoad(1 To 6) As Double, direction(1 To 6) As Double, projection() As Double
+    target(1) = FORCE: baseLoad(1) = (1# - TARGET_LAMBDA) * FORCE: direction(1) = FORCE
+    ReDim projection(1 To operators.DegreeCount)
+    projection(1) = 1#
+    plusSide.TestTangentFailure = sfcNumericalFailure
+    Dim ok As Boolean, before As Long, trialLambda As Double
+    before = plusSide.TestStressOnlyProbes
+    ok = solver.TryStep(FORCE, 0#, 0#, 0#, 0#, 0#, ABS_TOL, REL_TOL, 30)
+    TestRecord TestTangentProofWrench(ok, solver, operators, original, target), _
+        "силовой повтор подтверждает исходное поле и шесть усилий", passed, failed, report
+    TestRecord plusSide.TestStressOnlyProbes > before, "силовой повтор проверяет отклик без касательной", passed, failed, report
+    solver.DiscardStep
+    TestRecord Not TestTangentProofHasCandidate(solver), "отклонённая силовая проба не доступна к принятию", passed, failed, report
+    TestRecord TestTangentProofHistory(solver, center, plusSide, minusSide, original, peaks), _
+        "после силовой пробы неизменны три принятые истории", passed, failed, report
+
+    before = plusSide.TestStressOnlyProbes
+    ok = solver.TryDeformationStep(baseLoad, direction, projection, original(1), TARGET_LAMBDA, trialLambda, _
+        ABS_TOL, REL_TOL, 30, consistentControl:=True)
+    TestRecord TestTangentProofWrench(ok, solver, operators, original, target) And _
+        Abs(trialLambda - TARGET_LAMBDA) < 1E-12, "деформационный повтор подтверждает ту же меру, множитель и шесть усилий", passed, failed, report
+    TestRecord plusSide.TestStressOnlyProbes > before, "деформационный повтор проверяет отклик без касательной", passed, failed, report
+    solver.DiscardStep
+    TestRecord Not TestTangentProofHasCandidate(solver), "отклонённая деформационная проба не доступна к принятию", passed, failed, report
+    TestRecord TestTangentProofHistory(solver, center, plusSide, minusSide, original, peaks), _
+        "после деформационной пробы неизменны три принятые истории", passed, failed, report
+
+    ok = solver.TryStep(1.1 * FORCE, 0#, 0#, 0#, 0#, 0#, ABS_TOL, REL_TOL, 30)
+    TestRecord Not ok And solver.ResultMeta.InternalStatus = rsNumericalFailure And Not TestTangentProofHasCandidate(solver), _
+        "поле при другой продольной силе не принимается", passed, failed, report
+    ok = solver.TryDeformationStep(baseLoad, direction, projection, original(1) + 0.00005, TARGET_LAMBDA, trialLambda, _
+        ABS_TOL, REL_TOL, 30, consistentControl:=True)
+    TestRecord Not ok And solver.ResultMeta.InternalStatus = rsNumericalFailure And Not TestTangentProofHasCandidate(solver), _
+        "поле при другой управляемой деформации не принимается", passed, failed, report
+    TestRecord TestTangentProofHistory(solver, center, plusSide, minusSide, original, peaks), _
+        "две отклонённые пробы не изменяют принятые буферы", passed, failed, report
+
+    plusSide.TestTangentFailure = sfcInvalidInput
+    before = plusSide.TestStressOnlyProbes
+    ok = solver.TryStep(FORCE, 0#, 0#, 0#, 0#, 0#, ABS_TOL, REL_TOL, 30)
+    Dim policy As New CResultStatusPolicy
+    TestRecord Not ok And policy.ExternalStatus(solver.ResultMeta) = "InputErr" And Not TestTangentProofHasCandidate(solver), _
+        "прерывающая ошибка ввода сохраняет статус InputErr", passed, failed, report
+    TestRecord plusSide.TestStressOnlyProbes = before, "ошибка ввода не запускает повтор без касательной", passed, failed, report
+    TestRecord TestTangentProofHistory(solver, center, plusSide, minusSide, original, peaks), _
+        "после ошибки ввода неизменны три принятые истории", passed, failed, report
+
+    plusSide.TestTangentFailure = sfcNone
+    If Not solver.TryStep(1.1 * FORCE, 0#, 0#, 0#, 0#, 0#, ABS_TOL, REL_TOL, 30) Then _
+        Err.Raise 5, , "Нормальный расчёт после отката не восстановился. " & solver.ResultMeta.DiagnosticDetails
+    solver.AcceptStep
+    TestRecord center.TestAcceptedSteps = 2 And plusSide.TestAcceptedSteps = 2 And minusSide.TestAcceptedSteps = 2, _
+        "следующая допустимая проба закрепляет три истории по одному разу", passed, failed, report
+    RunTestCoupledTangentProof = report & "TOTAL_COUPLED_TANGENT_PROOF: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledTangentProof = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет подтверждённый винт в масштабе МПа и совпадение всех координат.
+Private Function TestTangentProofWrench(ByVal solved As Boolean, ByVal solver As CCoupledNewtonSolver, _
+        ByVal operators As CCoupledElasticState, ByRef original() As Double, ByRef target() As Double) As Boolean
+    If Not solved Then Exit Function
+    If solver.ResultMeta.InternalStatus <> rsSuccess Then Exit Function
+    Dim field() As Double, actual() As Double, i As Long
+    solver.CopyTrial field, actual
+    For i = LBound(original) To UBound(original)
+        If field(i) <> original(i) Then Exit Function
+    Next i
+    TestTangentProofWrench = (operators.ResultantResidualNorm(actual, target) <= 0.00000002)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет принятое поле, максимум деформации и число фиксаций каждой истории.
+Private Function TestTangentProofHistory(ByVal solver As CCoupledNewtonSolver, ByVal center As CTestCoupledPointResponse, _
+        ByVal plusSide As CTestCoupledPointResponse, ByVal minusSide As CTestCoupledPointResponse, _
+        ByRef original() As Double, ByRef peaks() As Double) As Boolean
+    If center.TestAcceptedSteps <> 1 Or plusSide.TestAcceptedSteps <> 1 Or minusSide.TestAcceptedSteps <> 1 Then Exit Function
+    If center.TestAcceptedPeak <> peaks(1) Or plusSide.TestAcceptedPeak <> peaks(2) Or minusSide.TestAcceptedPeak <> peaks(3) Then Exit Function
+    Dim field() As Double, i As Long
+    solver.CopyAccepted field
+    For i = LBound(original) To UBound(original)
+        If field(i) <> original(i) Then Exit Function
+    Next i
+    TestTangentProofHistory = True
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Определяет доступность пробного поля через штатную проверку готовности.
+Private Function TestTangentProofHasCandidate(ByVal solver As CCoupledNewtonSolver) As Boolean
+    Dim field() As Double, actual() As Double
+    On Error GoTo ReadFailed
+    solver.CopyTrial field, actual
+    TestTangentProofHasCandidate = True
+    Exit Function
+ReadFailed:
+    Dim number As Long, source As String, description As String
+    number = Err.Number: source = Err.Source: description = Err.Description
+    On Error GoTo 0
+    If number <> 5 Or source <> "CCoupledNewtonSolver" Then Err.Raise number, source, description
+End Function
