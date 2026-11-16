@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "84606DCD9830BF9E64E3CACB79D954EDEB859C1F3FC9AD9DC97C7FCAA056D8B1",
+  "manifest_sha256": "962DF0F95F47DEA0F1F175903E13D978890B8EFDFB0C81D28EE35C899C805154",
   "source_checkpoint": "77c3c7f09ad85ea75ecef7e916f830b5f8c2f983",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "C603E41639484DB313C5390930BC52F1AC3CC42ED4CE01BC1946BC01ED84FA95",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 151,
+  "passed": 153,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1273,6 +1273,22 @@
         "Replayed.json": "3DEE8523DF1C407F694ED5F6771BE3A9F31B00CA362DFB37D7B081BE7EE35252"
       },
       "verified_stdout": "MVT2_CURRENT_API_FIXTURE_STOP_PASS 24"
+    },
+    {
+      "id": "mvt2-h26-short-arc-current-book-solver-api-native",
+      "journal_section": 462,
+      "archive": "MVT2H26BridgeCurrentApiNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 H26 BRIDGE API PORTABLE VERIFIED 3D1DDCABACCE72EC2940CE3E6B531D9F10F7653D1BDA53D9D6FBE326F6870656"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-quarter-shear-step",
+      "journal_section": 463,
+      "archive": "MVT2OpenSeesHeldTFinerNewton20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "1E1338E7014CAC33841B1F7BE41EE2540B2964D0FA57BC868C11F2C66B6715CE"
+      },
+      "verified_stdout": "MVT2 HELD-T FINER PROOF PASS 11.25 first_finer_step_rejected_engine_discarded"
     }
   ]
 }

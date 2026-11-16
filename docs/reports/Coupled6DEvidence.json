@@ -154,7 +154,9 @@
     "MVT2OpenSeesDamageReplay20261117": "DD6FA6FA923F2FB1A2DBBFAD772A146201566B31614F14DFBF03F5234D3D54BE",
     "MVT2BridgeScalingNative20261117": "94C2373FFDE9EA0E0E359E0A325CE813BFA91B90E00AE88A75FBEDE4429853A1",
     "MVT2OpenSeesHeldTSmallSteps20261117": "49972528D7D4F8E8006BECB54489FA6FD7F4C5A7952811C1D9E36E41C55484EC",
-    "MVT2CurrentHistoryStop20261117": "D20FBC4293FF59A36D4DF50B93E8AAA8C3DB6449345A3A7C7FAFC8803A5092F7"
+    "MVT2CurrentHistoryStop20261117": "D20FBC4293FF59A36D4DF50B93E8AAA8C3DB6449345A3A7C7FAFC8803A5092F7",
+    "MVT2H26BridgeCurrentApiNative20261117": "470AA53EC03696A25A651F9FF739B6063B80C05F6FA1A8B91D81B4E7F5C2CD0D",
+    "MVT2OpenSeesHeldTFinerNewton20261117": "33E7D256CC31228934BC4C58811CF1B62824CAD21D9AB4B98FB2FA72BB3D7766"
   },
   "cases": [
     {
@@ -1775,6 +1777,24 @@
         "Replayed.json": "3DEE8523DF1C407F694ED5F6771BE3A9F31B00CA362DFB37D7B081BE7EE35252"
       },
       "stdout_contains": "MVT2_CURRENT_API_FIXTURE_STOP_PASS 24"
+    },
+    {
+      "id": "mvt2-h26-short-arc-current-book-solver-api-native",
+      "journal_section": 462,
+      "archive": "MVT2H26BridgeCurrentApiNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "MVT2 H26 BRIDGE API PORTABLE VERIFIED 3D1DDCABACCE72EC2940CE3E6B531D9F10F7653D1BDA53D9D6FBE326F6870656"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-quarter-shear-step",
+      "journal_section": 463,
+      "archive": "MVT2OpenSeesHeldTFinerNewton20261117",
+      "script": "Verify-FinerHeldT.py",
+      "arguments": ["--archives", "{evidence}", "--upstream", "Upstream", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "1E1338E7014CAC33841B1F7BE41EE2540B2964D0FA57BC868C11F2C66B6715CE"
+      },
+      "stdout_contains": "MVT2 HELD-T FINER PROOF PASS 11.25 first_finer_step_rejected_engine_discarded"
     }
   ],
   "frozen_repositories": {
