@@ -11488,6 +11488,12 @@ $\tau=5,59191\cdot10^{-7}$ МПа.
 - KaniV4Step2_38/ThirdCorrection/LocalWideProof.json — 9EBC4A2FBA935CE7F367F4D7B9134B8D3CB26BC64A0CA8D53B82713539487359.
 - KaniV4Step2_38/ThirdCorrection/LambdaSensitivity.json — 567CE34E195B8536428DCF99B27A01601E0975E1A735F5C96D23A601E06D986F.
 
+[Переносимый комплект](../regression/Coupled6D/KaniV4-Reserve-Feasibility.zip)
+восстанавливает 89 силовых строк, пять связей, исходный радиус
+и обе двойственные оценки. Повтор после распаковки прошёл
+с Python 3.12, NumPy и SciPy без Excel.
+SHA-256 архива 6940DB3327034075ABF981BAF4F03523E9A9F26A0E690ED17C805DDE89A88540.
+
 ## 283. Поведение материала и управляющая координата в Kani
 
 По сохранённым пробам §280 и §282 вычислена чётная разность
