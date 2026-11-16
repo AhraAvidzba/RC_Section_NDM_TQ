@@ -66,6 +66,8 @@ Private mRecoveredProjection() As Double
 Private mConsistentControl As Boolean
 Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
+Private mArcLoadProjection As Double, mCurrentControlLambda As Double
+Private mWrongControlDirection As Boolean
 Private mBaseLoad() As Double, mLoadDirection() As Double
 Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
@@ -128,6 +130,7 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
     load(4) = torque: load(5) = qx: load(6) = qy
     mControlActive = False
     mConsistentControl = False
+    mArcLoadProjection = 0#
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
     TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, _
         initialField:=initialField, retainDirectProof:=retainDirectProof)
@@ -150,7 +153,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
-        Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False) As Boolean
+        Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
+        Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -164,7 +168,10 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     Next i
     If Not hasDirection Or Not hasControl Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Для управления деформацией задайте ненулевую нагрузку и меру деформации."
+    If loadProjection <> 0# And (recoverYieldControl Or recoverSameControl) Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Псевдодуга не использует восстановление со сменой ветви."
     mBaseLoad = baseLoad: mLoadDirection = direction
+    mArcLoadProjection = loadProjection
     mControlProjection = controlProjection: mTargetControl = targetControl
     mSection.LoadEquations baseLoad(1), baseLoad(2), baseLoad(3), baseLoad(4), baseLoad(5), baseLoad(6), mBaseEquations
     mSection.LoadEquations direction(1), direction(2), direction(3), direction(4), direction(5), direction(6), mDirectionEquations
@@ -173,8 +180,242 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     mConsistentControl = consistentControl And mUseSpatialHistory
     Dim load(1 To COMPONENT_COUNT) As Double
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
-        recoverYieldControl, recoverSameControl:=recoverSameControl)
+        recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl)
     If TryDeformationStep Then trialLambda = mTrialLambda
+End Function
+
+' Проверяет короткую псевдодугу после измеренного расхождения касательной.
+' Обе пробы используют принятую историю. Публикуется только проба при исходной мере.
+Friend Function TryRecoverDeformationByArc(ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByVal acceptedLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maxIterations As Long, ByRef trialLambda As Double, ByRef extraProbes As Long) As Boolean
+    extraProbes = 0
+    If mCandidateReady Or Not mControlActive Or Not mUseSpatialHistory Or mConsistentControl Then Exit Function
+    If mYieldRecoveryTried Or mSameControlRecoveryTried Or Not mWrongControlDirection Then Exit Function
+    If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode <> rcNumericalFailure Then Exit Function
+    If maxIterations - mIterations <= 1 Then Exit Function
+
+    Dim coefficients() As Double, projection() As Double, predicted() As Double
+    Dim target As Double, loadProjection As Double, loadMetric As Double, radius As Double, factor As Double
+    If Not PrepareArcMeasure(fields, trace, acceptedLambda, coefficients, projection, predicted, target, _
+            loadProjection, loadMetric, radius, factor) Then Exit Function
+
+    Dim originalMeta As CResultMeta, originalProjection() As Double, originalTarget As Double
+    Dim base() As Double, direction() As Double, external() As Double, residual() As Double
+    Dim originalResultants() As Double, resultants() As Double, matrix() As Double, field() As Double
+    Dim originalFactor As Double, norm As Double, pivot As Double, failureCode As ESolverFailureCode
+    Dim materialPoint As Long, lastPoint As Long, lastSide As Long
+    Set originalMeta = mMeta.Clone
+    originalProjection = mControlProjection: originalTarget = mTargetControl
+    base = mBaseLoad: direction = mLoadDirection
+    external = mExternal: residual = mResidual: originalResultants = mTrialResultants: matrix = mMatrix
+    originalFactor = mCurrentControlLambda
+    norm = mLastNorm: pivot = mMinimumPivot: failureCode = mFailureCode
+    materialPoint = mMaterialPoint: lastPoint = mLastFailedPoint: lastSide = mLastFailedSide
+
+    Dim initialIterations As Long, initialEvaluations As Long, materialFailures As Long
+    Dim gradientBuilds As Long, localGradientBuilds As Long, guideIterations As Long, guideEvaluations As Long
+    initialIterations = mIterations: initialEvaluations = mEvaluations: materialFailures = mMaterialFailures
+    gradientBuilds = mGradientBuilds: localGradientBuilds = mLocalGradientBuilds
+    Dim seed As Variant, guideFactor As Double, solved As Boolean, label As String, phaseDetails As String
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    label = "псевдодуга"
+    seed = predicted
+    On Error GoTo InterruptedArc
+    extraProbes = 1
+    solved = TryDeformationStep(base, direction, projection, target, factor, guideFactor, _
+        absoluteTolerance, relativeTolerance, maxIterations - initialIterations, initialField:=seed, loadProjection:=loadProjection)
+    If Not solved Then GoTo RejectArc
+    CopyTrial field, resultants
+    If Not ArcFieldIsLocal(coefficients, projection, loadProjection, loadMetric, radius, field, acceptedLambda, guideFactor) Then
+        label = label & " вне локальной окрестности"
+        GoTo RejectArc
+    End If
+    If maxIterations - initialIterations - mIterations < 1 Then
+        label = label & " исчерпала остаток итераций"
+        GoTo RejectArc
+    End If
+
+    guideIterations = mIterations: guideEvaluations = mEvaluations
+    materialFailures = materialFailures + mMaterialFailures
+    gradientBuilds = gradientBuilds + mGradientBuilds: localGradientBuilds = localGradientBuilds + mLocalGradientBuilds
+    DiscardStep ' Боковые и центральная истории остаются в одном исходном принятом поле.
+    seed = field: label = "повтор при исходной мере"
+    extraProbes = 2
+    solved = TryDeformationStep(base, direction, originalProjection, originalTarget, guideFactor, factor, _
+        absoluteTolerance, relativeTolerance, maxIterations - initialIterations - guideIterations, initialField:=seed)
+    If Not solved Then GoTo RejectArc
+    CopyTrial field, resultants
+    If Not ArcFieldIsLocal(coefficients, projection, loadProjection, loadMetric, radius, field, acceptedLambda, factor) Then
+        label = label & " вне локальной окрестности"
+        GoTo RejectArc
+    End If
+    phaseDetails = mMeta.DiagnosticDetails
+    trialLambda = factor
+    TryRecoverDeformationByArc = True
+    GoTo CountArc
+
+RejectArc:
+    phaseDetails = mMeta.DiagnosticDetails
+    DiscardStep
+    mControlProjection = originalProjection: mTargetControl = originalTarget: mArcLoadProjection = 0#
+    mCurrentControlLambda = originalFactor
+    mExternal = external: mResidual = residual: mTrialResultants = originalResultants: mMatrix = matrix
+    If solved Or mMeta.InternalStatus = rsNumericalFailure Then
+        Set mMeta = originalMeta
+        mLastNorm = norm: mMinimumPivot = pivot: mFailureCode = failureCode
+        mMaterialPoint = materialPoint: mLastFailedPoint = lastPoint: mLastFailedSide = lastSide
+    End If
+CountArc:
+    mWrongControlDirection = False
+    Dim arcIterations As Long, fixedIterations As Long
+    If extraProbes = 1 Then
+        arcIterations = mIterations
+    Else
+        arcIterations = guideIterations: fixedIterations = mIterations
+    End If
+    mIterations = initialIterations + guideIterations + mIterations
+    mEvaluations = initialEvaluations + guideEvaluations + mEvaluations
+    mMaterialFailures = materialFailures + mMaterialFailures
+    mGradientBuilds = gradientBuilds + mGradientBuilds
+    mLocalGradientBuilds = localGradientBuilds + mLocalGradientBuilds
+    mMeta.DiagnosticDetails = DiagnosticSummary() & "; проверено вспомогательных проб: " & CStr(extraProbes) & _
+        "; итерации исходной пробы / дуги / повтора: " & CStr(initialIterations) & " / " & _
+        CStr(arcIterations) & " / " & CStr(fixedIterations) & "; общий лимит: " & CStr(maxIterations) & _
+        "; последняя проба: " & label & " | Исходный отказ: " & originalMeta.DiagnosticDetails
+    If Len(phaseDetails) > 0 Then mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & " | Проверка: " & phaseDetails
+    If errorNumber <> 0 Then
+        On Error GoTo 0
+        Err.Raise errorNumber, errorSource, errorText
+    End If
+    Exit Function
+InterruptedArc:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    Resume RejectArc
+End Function
+
+' Строит нормаль к принятой секущей. Масштаб нагрузки берётся по медиане трёх
+' секущих на полной постоянной нагрузке. Неполную или расходящуюся историю не использует.
+Private Function PrepareArcMeasure(ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByVal acceptedLambda As Double, ByRef coefficients() As Double, ByRef projection() As Double, _
+        ByRef predicted() As Double, ByRef target As Double, ByRef loadProjection As Double, _
+        ByRef loadMetric As Double, ByRef radius As Double, ByRef predictedLambda As Double) As Boolean
+    If fields Is Nothing Or trace Is Nothing Then Exit Function
+    If fields.Count < 4 Or trace.Count <> fields.Count Then Exit Function
+    Dim factor(1 To 4) As Double, fraction As Double, i As Long, index As Long
+    For i = 1 To 4
+        trace.ReadPoint fields.Count - 4 + i, fraction, factor(i)
+        If fraction <> 1# Or factor(i) <= 0# Then Exit Function
+        If i > 1 Then
+            If factor(i) <= factor(i - 1) Then Exit Function
+        End If
+    Next i
+    If factor(4) <> acceptedLambda Then Exit Function
+
+    Dim old() As Double, field() As Double, movement() As Double, physicalSquare As Double
+    Dim slopes(1 To 3) As Double, lambdaMove As Double, fixedMove As Double, fixedDistance As Double
+    ReDim movement(1 To mDegreeCount)
+    field = fields.Item(fields.Count)
+    If LBound(field) <> 1 Or UBound(field) <> mDegreeCount Then Exit Function
+    For i = 1 To mDegreeCount
+        If field(i) <> mAccepted(i) Then Exit Function
+    Next i
+    mSection.CopySpatialStrainCoefficients SPATIAL_HALF_STEP, coefficients
+    For index = 1 To 3
+        old = fields.Item(fields.Count - 4 + index): field = fields.Item(fields.Count - 3 + index)
+        If LBound(old) <> 1 Or UBound(old) <> mDegreeCount Then Exit Function
+        If LBound(field) <> 1 Or UBound(field) <> mDegreeCount Then Exit Function
+        For i = 1 To mGaugeStart - 1: movement(i) = field(i) - old(i): Next i
+        lambdaMove = factor(index + 1) - factor(index)
+        physicalSquare = ArcPhysicalSquare(coefficients, movement, projection, index = 3)
+        If physicalSquare <= 0# Then Exit Function
+        slopes(index) = Sqr(physicalSquare) / lambdaMove
+    Next index
+    Dim median As Double, secant As Double, ratio As Double
+    median = GeomMax(GeomMin(slopes(1), slopes(2)), GeomMin(GeomMax(slopes(1), slopes(2)), slopes(3)))
+    loadMetric = median * median
+    secant = Sqr(physicalSquare + loadMetric * lambdaMove ^ 2)
+    If secant <= 0# Then Exit Function
+    fixedDistance = mTargetControl
+    For i = 1 To mGaugeStart - 1
+        fixedMove = fixedMove + mControlProjection(i) * movement(i)
+        fixedDistance = fixedDistance - mControlProjection(i) * mAccepted(i)
+    Next i
+    If fixedMove <= 0# Or fixedDistance <= 0# Then Exit Function
+    ratio = 0.5 * GeomMin(1#, fixedDistance / fixedMove)
+    radius = ratio * secant
+    If radius <= 0# Then Exit Function
+    loadProjection = loadMetric * lambdaMove / secant
+    target = loadProjection * acceptedLambda + radius
+    predictedLambda = acceptedLambda + ratio * lambdaMove
+    predicted = mAccepted
+    For i = 1 To mGaugeStart - 1
+        projection(i) = projection(i) / secant
+        target = target + projection(i) * mAccepted(i)
+        predicted(i) = predicted(i) + ratio * movement(i)
+    Next i
+    PrepareArcMeasure = True
+End Function
+
+' Применяет физическую метрику к приращению поля. Девять строк оператора
+' хранят три неизменные по z/L компоненты и три пары концов. Середина
+' каждой пары равна среднему. Вес инженерного сдвига в тензорной норме равен 1/2.
+Private Function ArcPhysicalSquare(ByRef coefficients() As Double, ByRef movement() As Double, _
+        ByRef projection() As Double, Optional ByVal project As Boolean = False) As Double
+    Dim strain(1 To 9) As Double, dual(1 To 9) As Double
+    Dim point As Long, row As Long, first As Long, i As Long, x As Double, y As Double, area As Double
+    Dim areaSum As Double, value As Double, middle As Double, weight As Double
+    If project Then ReDim projection(1 To mDegreeCount)
+    For point = 1 To mPointCount
+        first = 9 * (point - 1)
+        mSection.Point point, x, y, area
+        areaSum = areaSum + 3# * area
+        For row = 1 To 9
+            value = 0#
+            For i = 1 To mGaugeStart - 1
+                value = value + coefficients(i, first + row) * movement(i)
+            Next i
+            strain(row) = value
+        Next row
+        dual(1) = 3# * strain(1): dual(2) = 3# * strain(2): dual(3) = 1.5 * strain(3)
+        For row = 4 To 8 Step 2
+            weight = 0.5
+            If row = 4 Then weight = 1#
+            middle = 0.25 * (strain(row) + strain(row + 1))
+            dual(row) = weight * (strain(row) + middle)
+            dual(row + 1) = weight * (strain(row + 1) + middle)
+        Next row
+        For row = 1 To 9
+            value = area * dual(row)
+            ArcPhysicalSquare = ArcPhysicalSquare + strain(row) * value
+            If project Then
+                For i = 1 To mGaugeStart - 1
+                    projection(i) = projection(i) + coefficients(i, first + row) * value
+                Next i
+            End If
+        Next row
+    Next point
+    ArcPhysicalSquare = ArcPhysicalSquare / areaSum
+    If Not project Then Exit Function
+    For i = 1 To mGaugeStart - 1: projection(i) = projection(i) / areaSum: Next i
+End Function
+
+' Проверяет положительный ход в малой окрестности принятого поля.
+' Равновесие, исходная мера и связи уже проверены штатным решателем.
+Private Function ArcFieldIsLocal(ByRef coefficients() As Double, ByRef projection() As Double, ByVal loadProjection As Double, _
+        ByVal loadMetric As Double, ByVal radius As Double, ByRef field() As Double, ByVal acceptedLambda As Double, _
+        ByVal factor As Double) As Boolean
+    If factor <= 0# Then Exit Function
+    Dim movement() As Double, unused() As Double, i As Long, progress As Double, distanceSquare As Double
+    ReDim movement(1 To mDegreeCount)
+    progress = loadProjection * (factor - acceptedLambda)
+    For i = 1 To mGaugeStart - 1
+        movement(i) = field(i) - mAccepted(i)
+        progress = progress + projection(i) * movement(i)
+    Next i
+    If progress <= 0# Then Exit Function
+    distanceSquare = ArcPhysicalSquare(coefficients, movement, unused) + loadMetric * (factor - acceptedLambda) ^ 2
+    ArcFieldIsLocal = (distanceSquare <= 9# * radius ^ 2)
 End Function
 
 ' Возвращает новую линейную меру только для подтверждённой пробы восстановления.
@@ -251,6 +492,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mMeta.Clear
     mCandidateReady = False
     mYieldRecoveryTried = False: mSameControlRecoveryTried = False
+    mWrongControlDirection = False
     mSameControlInitialFailure = vbNullString
     mRecoveredControlReady = False: Erase mRecoveredProjection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
@@ -421,6 +663,7 @@ RecomputeTangent:
             End If
             mMeta.DiagnosticDetails = details
             If Len(mismatch) > 0 And mUseSpatialHistory Then
+                mWrongControlDirection = True
                 If recoverYieldControl Then
                     SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
                         absoluteTolerance, relativeTolerance)
@@ -888,6 +1131,7 @@ End Sub
 
 ' Обновляет шесть внешних усилий и их заранее нормированные уравнения.
 Private Sub SetControlledLoad(ByVal lambda As Double, ByRef load() As Double)
+    mCurrentControlLambda = lambda
     Dim i As Long
     For i = 1 To COMPONENT_COUNT
         load(i) = mBaseLoad(i) + lambda * mLoadDirection(i)
@@ -1060,6 +1304,7 @@ Private Sub BuildControlledMatrix(ByRef augmented() As Double, ByVal size As Lon
         augmented(size, i) = -mDirectionEquations(i)
         If i < mGaugeStart Then augmented(i, size) = mControlProjection(i) * mReferenceModulus
     Next i
+    If mArcLoadProjection <> 0# Then augmented(size, size) = mArcLoadProjection * mReferenceModulus
 End Sub
 
 ' Оценивает чувствительность множителя к невязке при том же принятом
@@ -1108,6 +1353,7 @@ End Function
 Private Function ControlResidual(ByRef field() As Double) As Double
     Dim i As Long, value As Double
     value = -mTargetControl
+    If mArcLoadProjection <> 0# Then value = value + mArcLoadProjection * mCurrentControlLambda
     For i = 1 To mGaugeStart - 1
         value = value + field(i) * mControlProjection(i)
     Next i

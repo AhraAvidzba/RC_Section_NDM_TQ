@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-17 01:07:54
+Date: 2026-11-17 02:47:42
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -20089,9 +20089,9 @@ Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double,
         effective(i) = mElastic(i, 1) * ex + mElastic(i, 2) * ey + mElastic(i, 3) * ez
         effective(i + 3) = mElastic(i + 3, i + 3) * (strain(i + 3) - c.plastic(i + 3))
     Next i
-    Dim Trace As Double, q As Double, high As Double, middle As Double, low As Double
-    CoupledStressInvariants effective, Trace, q, high, middle, low
-    value = CoupledBarcelonaYield(Trace, q, high, c.CompressionCohesion, c.TensionCohesion, mAlpha, mGamma)
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double
+    CoupledStressInvariants effective, trace, q, high, middle, low
+    value = CoupledBarcelonaYield(trace, q, high, c.CompressionCohesion, c.TensionCohesion, mAlpha, mGamma)
     If Not needGradient Then TryReadTrialYield = True: Exit Function
     Dim StressScale As Double
     StressScale = GeomMax(1#, GeomMax(Abs(high), Abs(low)))
@@ -20117,7 +20117,7 @@ Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double,
         branchSlope = (c.CompressionCohesion / c.TensionCohesion) * (1# - mAlpha) - (1# + mAlpha)
     Dim derivative(1 To N_COMPONENTS) As Double
     For i = 1 To 3
-        derivative(i) = (mAlpha + 1.5 * (effective(i) - Trace / 3#) / q + branchSlope * highProjector(i, i)) / (1# - mAlpha)
+        derivative(i) = (mAlpha + 1.5 * (effective(i) - trace / 3#) / q + branchSlope * highProjector(i, i)) / (1# - mAlpha)
     Next i
     derivative(4) = (3# * effective(4) / q + 2# * branchSlope * highProjector(1, 2)) / (1# - mAlpha)
     derivative(5) = (3# * effective(5) / q + 2# * branchSlope * highProjector(1, 3)) / (1# - mAlpha)
@@ -20152,8 +20152,8 @@ Private Sub ReadBranchSigns(ByRef updated As TConcreteHistory, ByRef committed A
         If updated.plastic(i) <> committed.plastic(i) Then plasticIncrement = True
         stress(i) = updated.stress(i)
     Next i
-    Dim Trace As Double, q As Double, high As Double, middle As Double, low As Double
-    CoupledStressInvariants stress, Trace, q, high, middle, low
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double
+    CoupledStressInvariants stress, trace, q, high, middle, low
     principalSign = Sgn(high)
 End Sub
 
@@ -20310,7 +20310,7 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     elastic(6) = mElastic(6, 6) * (strain(6) - committed.plastic(6))
     Dim tension As Double, compression As Double, dilationRate As Double
     Dim nextTension As Double, nextCompression As Double, nextDilation As Double
-    Dim plasticMultiplier As Double, multiplierDivisor As Double, Trace As Double, q As Double
+    Dim plasticMultiplier As Double, multiplierDivisor As Double, trace As Double, q As Double
     Dim high As Double, mid As Double, low As Double
     Dim trialTrace As Double, trialQ As Double, trialHigh As Double, trialMid As Double, trialLow As Double
     Dim ct As Double, cc As Double, dt As Double, dc As Double, kt As Double, kc As Double
@@ -20366,8 +20366,8 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
             End If
         End If
         ' Изотропный возврат меняет среднее и масштаб девиатора, сохраняя его главные оси.
-        Trace = effective(1) + effective(2) + effective(3)
-        mean = Trace / 3#: q = deviatorFactor * trialQ
+        trace = effective(1) + effective(2) + effective(3)
+        mean = trace / 3#: q = deviatorFactor * trialQ
         high = mean + deviatorFactor * highDev
         mid = mean + deviatorFactor * midDev
         low = mean + deviatorFactor * lowDev
@@ -20381,11 +20381,11 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
         If eLow < 0# Then nextCompression = nextCompression - (1# - r) * eLow
         mTension.Evaluate nextTension, unusedStress, ct, dt, kt
         mCompression.Evaluate nextCompression, unusedStress, cc, dc, kc
-        nextDilation = CurrentDilation(kt, kc, r, Trace, q)
+        nextDilation = CurrentDilation(kt, kc, r, trace, q)
         deltaTension = nextTension - tension
         deltaCompression = nextCompression - compression
         deltaDilation = nextDilation - dilationRate
-        residual = CoupledBarcelonaYield(Trace, q, high, cc, ct, mAlpha, mGamma)
+        residual = CoupledBarcelonaYield(trace, q, high, cc, ct, mAlpha, mGamma)
         If apexTransition Then
             If r <> 1# Or nextCompression <> committed.compression Then Exit Function
             If (1# + MIXED_DAMAGE_WEIGHT) * kt < 1# Then Exit Function
@@ -20458,7 +20458,7 @@ End Function
 ' Верхняя граница углов действует при сдвиге и при гидростатическом
 ' растяжении. После полного повреждения углы достигают своего предела.
 Private Function CurrentDilation(ByVal kt As Double, ByVal kc As Double, ByVal r As Double, _
-        ByVal Trace As Double, ByVal q As Double) As Double
+        ByVal trace As Double, ByVal q As Double) As Double
     Dim mixed As Double, confine As Double, exponent As Double
     mixed = 1# - (1# - (1# + MIXED_DAMAGE_WEIGHT * r) * kt) * (1# - (1# - r) * kc)
     If mixed <= 0# Then Exit Function
@@ -20466,10 +20466,10 @@ Private Function CurrentDilation(ByVal kt As Double, ByVal kc As Double, ByVal r
     confine = 1#
     If q <= 0# Then
         confine = 1#
-    ElseIf Trace > 0# And q < TENSILE_AXIS_BAND_RATIO * mFc Then
-        confine = TensileApexConfinement(Trace, q)
-    ElseIf q > TENSILE_AXIS_BAND_RATIO * mFc Or (Trace > 0# And q >= TENSILE_AXIS_BAND_RATIO * mFc) Then
-        exponent = -(1# + Trace / q) * Trace / mFc
+    ElseIf trace > 0# And q < TENSILE_AXIS_BAND_RATIO * mFc Then
+        confine = TensileApexConfinement(trace, q)
+    ElseIf q > TENSILE_AXIS_BAND_RATIO * mFc Or (trace > 0# And q >= TENSILE_AXIS_BAND_RATIO * mFc) Then
+        exponent = -(1# + trace / q) * trace / mFc
         If exponent < 0# Then confine = Exp(exponent)
     End If
     Dim sinFriction As Double, sinPeakDilation As Double, sinConstantVolume As Double, sinCurrentFriction As Double
@@ -20486,11 +20486,11 @@ End Function
 ' Сопрягает гидростатическое значение и направленный закон в узкой полосе q.
 ' Вес (1-s)^3(1+3s+6s?) имеет нулевые первую и вторую производные на концах.
 ' Непрерывное сопряжение — численное допущение модели около оси растяжения.
-Private Function TensileApexConfinement(ByVal Trace As Double, ByVal q As Double) As Double
+Private Function TensileApexConfinement(ByVal trace As Double, ByVal q As Double) As Double
     Dim s As Double: s = q / (TENSILE_AXIS_BAND_RATIO * mFc)
     Dim remainder As Double: remainder = 1# - s
     Dim weight As Double: weight = GeomMin(1#, remainder * remainder * remainder * (1# + s * (3# + 6# * s))) ' Ограничивает ошибку округления веса около s = 0.
-    Dim pressureRatio As Double: pressureRatio = Trace / mFc
+    Dim pressureRatio As Double: pressureRatio = trace / mFc
     Dim directional As Double
     If pressureRatio < 1# Then
         Dim intensityRatio As Double: intensityRatio = q / mFc
@@ -20529,20 +20529,20 @@ Private Function TryTensileApexTransition(ByRef elastic() As Double, ByRef commi
     Dim lower As Double
     If traceExcess < 0# Then lower = -traceExcess / deviatorSlope ' След возврата не должен превысить пробный след.
     If lower >= bandFactor Then Exit Function
-    Dim Trace As Double, volume As Double, requiredFlow As Double, potentialFlow As Double
-    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, lower, Trace, volume, dilation, requiredFlow, potentialFlow
+    Dim trace As Double, volume As Double, requiredFlow As Double, potentialFlow As Double
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, lower, trace, volume, dilation, requiredFlow, potentialFlow
     If requiredFlow >= potentialFlow Then Exit Function
     Dim upper As Double: upper = bandFactor
-    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, upper, Trace, volume, dilation, requiredFlow, potentialFlow
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, upper, trace, volume, dilation, requiredFlow, potentialFlow
     If requiredFlow <= potentialFlow Then Exit Function
     Dim iteration As Long
     For iteration = 1 To 52
         factor = lower + (upper - lower) * 0.5
         If factor <= lower Or factor >= upper Then Exit For
-        ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, Trace, volume, dilation, requiredFlow, potentialFlow
+        ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, trace, volume, dilation, requiredFlow, potentialFlow
         If requiredFlow > potentialFlow Then upper = factor Else lower = factor
     Next iteration
-    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, Trace, volume, dilation, requiredFlow, potentialFlow
+    ApexTransitionFlow committed, trialQ, apexTrace, traceExcess, deviatorSlope, factor, trace, volume, dilation, requiredFlow, potentialFlow
     If factor <= 0# Or factor >= bandFactor Or volume <= 0# Or dilation <= 0# Then Exit Function
     Dim returnedQ As Double: returnedQ = factor * trialQ
     If returnedQ <= 0# Or returnedQ >= bandWidth Then Exit Function
@@ -20552,20 +20552,20 @@ Private Function TryTensileApexTransition(ByRef elastic() As Double, ByRef commi
     multiplier = volume / dilation
     ' Контроль объёмного приращения по решённому гиперболическому потоку.
     If Abs(requiredFlow - potentialFlow) * mDeviatorCompliance / factor > YIELD_TOLERANCE_RATIO * cc / mPressureModulus Then Exit Function
-    mReturn.AssembleCorrection elastic, trialTrace, Trace, factor, effective, increment
+    mReturn.AssembleCorrection elastic, trialTrace, trace, factor, effective, increment
     TryTensileApexTransition = True
 End Function
 
 ' Вычисляет обе стороны уравнения гиперболического потока в масштабе f=q/qtrial.
 ' След задаётся растянутой ветвью поверхности, объём — потерей следа.
 Private Sub ApexTransitionFlow(ByRef committed As TConcreteHistory, ByVal trialQ As Double, ByVal apexTrace As Double, _
-        ByVal traceExcess As Double, ByVal deviatorSlope As Double, ByVal factor As Double, ByRef Trace As Double, _
+        ByVal traceExcess As Double, ByVal deviatorSlope As Double, ByVal factor As Double, ByRef trace As Double, _
         ByRef volume As Double, ByRef dilation As Double, ByRef requiredFlow As Double, ByRef potentialFlow As Double)
     Dim traceLoss As Double: traceLoss = deviatorSlope * factor
-    Trace = apexTrace - traceLoss
+    trace = apexTrace - traceLoss
     volume = (traceExcess + traceLoss) / (3# * mPressureModulus)
     Dim q As Double: q = trialQ * factor
-    dilation = CurrentDilation(committed.tensionEnergy, committed.compressionEnergy, 1#, Trace, q)
+    dilation = CurrentDilation(committed.tensionEnergy, committed.compressionEnergy, 1#, trace, q)
     Dim offset As Double: offset = dilation * mApexPotentialOffset
     Dim dev As Double: dev = 0.816496580927726 * q ' Норма девиатора из второго инварианта.
     requiredFlow = volume * factor / mDeviatorCompliance
@@ -20629,7 +20629,7 @@ End Sub
 ' Множитель равен stepMultiplier / multiplierDivisor. Обычно делитель 1.
 ' У вершины конечный объёмный поток может соответствовать множителю вне Double.
 ' Неудача оставляет вызывающему право уменьшить материальный шаг.
-Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal q As Double, ByVal principalMax As Double, _
+Friend Function Correct(ByRef elastic() As Double, ByVal trace As Double, ByVal q As Double, ByVal principalMax As Double, _
         ByVal cc As Double, ByVal ct As Double, _
         ByVal ft0 As Double, ByVal dilation As Double, ByRef corrected() As Double, _
         ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double, _
@@ -20642,9 +20642,9 @@ Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal 
     If beta < 0# Then Exit Function ' Монотонная скобка требует допустимой геометрии поверхности.
     Dim tolerance As Double, value As Double, k As Long
     tolerance = RELATIVE_YIELD_TOLERANCE * cc
-    value = CoupledBarcelonaYield(Trace, q, principalMax, cc, ct, mAlpha, mGamma)
+    value = CoupledBarcelonaYield(trace, q, principalMax, cc, ct, mAlpha, mGamma)
     If value > 0# And value <= NEAR_YIELD_RANGE_RATIO * cc Then
-        If TryRegularNearYield(elastic, Trace, q, principalMax, cc, ct, ft0, dilation, value, _
+        If TryRegularNearYield(elastic, trace, q, principalMax, cc, ct, ft0, dilation, value, _
                 corrected, plasticIncrement, stepMultiplier, deviatorFactor) Then
             Correct = True
             Exit Function
@@ -20659,9 +20659,9 @@ Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal 
     End If
 
     Dim factor As Double, newTrace As Double, devLength As Double, offset As Double
-    Dim trialMean As Double: trialMean = Trace / 3#
+    Dim trialMean As Double: trialMean = trace / 3#
     If q <= 0.00000000000001 * cc Then
-        If Not TensileApex(Trace, dilation, beta, cc, newTrace, stepMultiplier, multiplierDivisor) Then Exit Function
+        If Not TensileApex(trace, dilation, beta, cc, newTrace, stepMultiplier, multiplierDivisor) Then Exit Function
     Else
         devLength = DEVIATORIC_NORM * q
         offset = mEccentricity * dilation * ft0
@@ -20669,7 +20669,7 @@ Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal 
         Dim largestDev As Double: largestDev = principalMax - trialMean
         upper = 1#
         If offset = 0# Then
-            apexPressure = Trace
+            apexPressure = trace
             If CoupledBarcelonaYield(apexPressure, 0#, apexPressure / 3#, cc, ct, mAlpha, mGamma) > tolerance Then Exit Function
         End If
         Dim radius As Double, offsetSquared As Double, devSquared As Double, traceScale As Double
@@ -20681,13 +20681,13 @@ Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal 
         For i = 1 To NEWTON_ITERATIONS + MAX_ITERATIONS
             If factor < SCALED_APEX_FACTOR And Not triedScaledApex And offset > 0# Then
                 triedScaledApex = True
-                solvedScaledApex = SolveScaledApex(Trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
+                solvedScaledApex = SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
                     factor, newTrace, stepMultiplier, multiplierDivisor)
                 If solvedScaledApex Then Exit For
             End If
             radius = Sqr(offsetSquared + devSquared * factor * factor)
             stepMultiplier = (1# - factor) / factor * radius / mTwiceShear
-            newTrace = Trace - traceScale * stepMultiplier
+            newTrace = trace - traceScale * stepMultiplier
             maxPrincipal = newTrace / 3# + largestDev * factor
             value = CoupledBarcelonaYield(newTrace, q * factor, maxPrincipal, cc, ct, mAlpha, mGamma)
             If Abs(value) <= tolerance Then Exit For
@@ -20713,24 +20713,24 @@ Friend Function Correct(ByRef elastic() As Double, ByVal Trace As Double, ByVal 
         Next i
         If Not solvedScaledApex And Abs(value) > tolerance Then
             If triedScaledApex Then Exit Function
-            If Not SolveScaledApex(Trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
+            If Not SolveScaledApex(trace, q, largestDev, cc, ct, beta, ft0, dilation, tolerance, _
                     factor, newTrace, stepMultiplier, multiplierDivisor) Then Exit Function
         End If
     End If
 
-    AssembleCorrection elastic, Trace, newTrace, factor, corrected, plasticIncrement
+    AssembleCorrection elastic, trace, newTrace, factor, corrected, plasticIncrement
     deviatorFactor = factor
     Correct = True
 End Function
 
 ' Восстанавливает тензор поправки из следа и доли пробного девиатора.
 ' Деформации сдвига инженерные, модуль сдвига задан через 2G.
-Friend Sub AssembleCorrection(ByRef elastic() As Double, ByVal Trace As Double, ByVal newTrace As Double, _
+Friend Sub AssembleCorrection(ByRef elastic() As Double, ByVal trace As Double, ByVal newTrace As Double, _
         ByVal factor As Double, ByRef corrected() As Double, ByRef plasticIncrement() As Double)
-    Dim trialMean As Double: trialMean = Trace / 3#
+    Dim trialMean As Double: trialMean = trace / 3#
     Dim k As Long, correctedMean As Double, volumetric As Double
     correctedMean = newTrace / 3#
-    volumetric = (Trace - newTrace) / (9# * mBulk) ' Приращение каждой из трёх нормальных компонент от дилатансии.
+    volumetric = (trace - newTrace) / (9# * mBulk) ' Приращение каждой из трёх нормальных компонент от дилатансии.
     For k = 1 To 3
         corrected(k) = correctedMean + factor * (elastic(k) - trialMean)
         corrected(k + 3) = factor * elastic(k + 3)
@@ -20742,7 +20742,7 @@ End Sub
 ' Возвращает малую положительную пробу точно на F=0 на одной гладкой
 ' меридиональной ветви. При вершине, смене знака sigma1 или неопределённом
 ' знаке F по точности Double решение оставляет общему пути.
-Friend Function TryRegularNearYield(ByRef elastic() As Double, ByVal Trace As Double, ByVal q As Double, _
+Friend Function TryRegularNearYield(ByRef elastic() As Double, ByVal trace As Double, ByVal q As Double, _
         ByVal principalMax As Double, ByVal cc As Double, ByVal ct As Double, ByVal ft0 As Double, _
         ByVal dilation As Double, ByVal trialYield As Double, ByRef corrected() As Double, _
         ByRef plasticIncrement() As Double, ByRef stepMultiplier As Double, ByRef deviatorFactor As Double) As Boolean
@@ -20751,7 +20751,7 @@ Friend Function TryRegularNearYield(ByRef elastic() As Double, ByVal Trace As Do
 
     Dim largestDev As Double, trialMean As Double, branchSlope As Double, elasticPart As Double, beta As Double
     Dim pressurePart As Double, initialNumerator As Double, inputScale As Double
-    trialMean = Trace / 3#
+    trialMean = trace / 3#
     largestDev = principalMax - trialMean
     If largestDev < 0# Then Exit Function ' Для верхнего главного напряжения требуется неотрицательный девиатор.
     beta = cc / ct * (1# - mAlpha) - (1# + mAlpha)
@@ -20759,7 +20759,7 @@ Friend Function TryRegularNearYield(ByRef elastic() As Double, ByVal Trace As Do
     branchSlope = mGamma
     If principalMax > 0# Then branchSlope = beta
     initialNumerator = trialYield * (1# - mAlpha)
-    inputScale = Abs(mAlpha * Trace) + q + Abs(branchSlope * principalMax) + cc * (1# - mAlpha)
+    inputScale = Abs(mAlpha * trace) + q + Abs(branchSlope * principalMax) + cc * (1# - mAlpha)
     If initialNumerator <= ROUNDING_LIMIT * inputScale Then Exit Function
 
     elasticPart = q + branchSlope * largestDev
@@ -20820,14 +20820,14 @@ End Function
 
 ' У растягивающей вершины q/qElastic пропорционально квадрату дилатансии.
 ' Поиск в масштабе этого квадрата сохраняет точность даже при f ниже диапазона Double.
-Private Function SolveScaledApex(ByVal Trace As Double, ByVal q As Double, ByVal largestDev As Double, _
+Private Function SolveScaledApex(ByVal trace As Double, ByVal q As Double, ByVal largestDev As Double, _
         ByVal cc As Double, ByVal ct As Double, ByVal beta As Double, ByVal ft0 As Double, _
         ByVal dilation As Double, ByVal tolerance As Double, ByRef factor As Double, _
         ByRef newTrace As Double, ByRef stepMultiplier As Double, ByRef multiplierDivisor As Double) As Boolean
     If dilation <= 0# Then Exit Function
     Dim slope As Double: slope = mAlpha + beta / 3#
     If slope <= 0# Then Exit Function
-    Dim apexDistance As Double: apexDistance = Trace - cc * (1# - mAlpha) / slope
+    Dim apexDistance As Double: apexDistance = trace - cc * (1# - mAlpha) / slope
     If apexDistance <= 0# Then Exit Function
 
     Dim offsetPerDilation As Double: offsetPerDilation = mEccentricity * ft0
@@ -20841,11 +20841,11 @@ Private Function SolveScaledApex(ByVal Trace As Double, ByVal q As Double, ByVal
         scaledFactor = (ratio * factorScale) * dilation ' f/dilation конечен и после потери самого f при округлении.
         trialFactor = scaledFactor * dilation
         If trialFactor >= 1# Then
-            trialFactor = 1#: scaledVolume = 0#: trialTrace = Trace
+            trialFactor = 1#: scaledVolume = 0#: trialTrace = trace
         Else
             radius = Sqr(offsetPerDilation * offsetPerDilation + (DEVIATORIC_NORM * q * scaledFactor) ^ 2)
             scaledVolume = (1# - trialFactor) * radius / (mTwiceShear * (ratio * factorScale)) ' Произведение ?·dilation в деформациях.
-            trialTrace = Trace - 9# * mBulk * scaledVolume
+            trialTrace = trace - 9# * mBulk * scaledVolume
         End If
         value = CoupledBarcelonaYield(trialTrace, q * trialFactor, trialTrace / 3# + largestDev * trialFactor, cc, ct, mAlpha, mGamma)
         If Abs(value) <= tolerance Then
@@ -20874,12 +20874,12 @@ End Function
 
 ' Возвращает изотропную растягивающую пробу непосредственно на вершину.
 ' При нулевом объёмном потоке вершина недостижима из внешней точки.
-Private Function TensileApex(ByVal Trace As Double, ByVal dilation As Double, ByVal beta As Double, ByVal cc As Double, _
+Private Function TensileApex(ByVal trace As Double, ByVal dilation As Double, ByVal beta As Double, ByVal cc As Double, _
         ByRef newTrace As Double, ByRef stepMultiplier As Double, ByRef multiplierDivisor As Double) As Boolean
     Dim slope As Double: slope = mAlpha + beta / 3#
     If dilation <= 0# Or slope <= 0# Then Exit Function
     newTrace = cc * (1# - mAlpha) / slope
-    Dim traceDrop As Double: traceDrop = Trace - newTrace
+    Dim traceDrop As Double: traceDrop = trace - newTrace
     If traceDrop <= 0# Then Exit Function
     Dim bulkScale As Double: bulkScale = 9# * mBulk
     Dim traceScale As Double: traceScale = bulkScale * dilation
@@ -23335,11 +23335,11 @@ End Sub
 
 ' Возвращает след, эквивалентное напряжение q = sqrt(3 J2) и главные
 ' напряжения по убыванию. Гидростатика обрабатывается без деления на q.
-Public Sub CoupledStressInvariants(ByRef stress() As Double, ByRef Trace As Double, ByRef q As Double, _
+Public Sub CoupledStressInvariants(ByRef stress() As Double, ByRef trace As Double, ByRef q As Double, _
         ByRef maxPrincipal As Double, ByRef midPrincipal As Double, ByRef minPrincipal As Double)
     Dim mean As Double, sx As Double, sy As Double, sz As Double, xy As Double, xz As Double, yz As Double
-    Trace = stress(1) + stress(2) + stress(3)
-    mean = Trace / 3#
+    trace = stress(1) + stress(2) + stress(3)
+    mean = trace / 3#
     sx = stress(1) - mean: sy = stress(2) - mean: sz = stress(3) - mean
     xy = stress(4): xz = stress(5): yz = stress(6)
     Dim p As Double, determinant As Double, theta As Double
@@ -23355,7 +23355,7 @@ Public Sub CoupledStressInvariants(ByRef stress() As Double, ByRef Trace As Doub
     theta = ThirdAcos(determinant * 0.5)
     maxPrincipal = mean + 2# * p * Cos(theta)
     minPrincipal = mean + 2# * p * Cos(theta + 2# * GEOM_PI / 3#)
-    midPrincipal = Trace - maxPrincipal - minPrincipal
+    midPrincipal = trace - maxPrincipal - minPrincipal
 End Sub
 
 ' Вычисляет acos(x)/3 для спектральной формулы, ограничивая погрешность det.
@@ -23375,7 +23375,7 @@ End Function
 
 ' Вычисляет поверхность Барселоны в эффективных напряжениях.
 ' Знак F проверяется с заданным сжатием cc и растяжением ct в МПа.
-Public Function CoupledBarcelonaYield(ByVal Trace As Double, ByVal q As Double, ByVal maxPrincipal As Double, _
+Public Function CoupledBarcelonaYield(ByVal trace As Double, ByVal q As Double, ByVal maxPrincipal As Double, _
         ByVal cc As Double, ByVal ct As Double, ByVal alpha As Double, ByVal gamma As Double) As Double
     Dim principalTerm As Double
     If maxPrincipal > 0# Then
@@ -23383,20 +23383,20 @@ Public Function CoupledBarcelonaYield(ByVal Trace As Double, ByVal q As Double, 
     Else
         principalTerm = gamma * maxPrincipal
     End If
-    CoupledBarcelonaYield = (alpha * Trace + q + principalTerm) / (1# - alpha) - cc
+    CoupledBarcelonaYield = (alpha * trace + q + principalTerm) / (1# - alpha) - cc
 End Function
 
 ' Возвращает гиперболический потенциал и его градиент по напряжениям.
 ' Нормируемое скалярное произведение с инженерной деформацией даёт работу.
 ' Нулевая дилатансия и hydrostatic apex имеют нулевой градиент по пределу
 ' изотропной пробы; вызывающий отдельно проверяет возможность возврата.
-Public Function CoupledConcretePotential(ByRef stress() As Double, ByVal Trace As Double, _
+Public Function CoupledConcretePotential(ByRef stress() As Double, ByVal trace As Double, _
         ByVal q As Double, ByVal dilation As Double, ByVal ft0 As Double, ByVal eccentricity As Double, _
         ByRef flow() As Double) As Double
     Dim offset As Double, radius As Double, mean As Double, i As Long
     offset = eccentricity * dilation * ft0
     radius = Sqr(offset * offset + (2# / 3#) * q * q)
-    mean = Trace / 3#
+    mean = trace / 3#
     If radius > 0# Then
         For i = 1 To 3
             flow(i) = (stress(i) - mean) / radius + dilation
@@ -23408,7 +23408,7 @@ Public Function CoupledConcretePotential(ByRef stress() As Double, ByVal Trace A
             flow(i + 3) = 0#
         Next i
     End If
-    CoupledConcretePotential = radius + dilation * Trace
+    CoupledConcretePotential = radius + dilation * trace
 End Function
 
 
@@ -27118,7 +27118,7 @@ End Property
 ====================================================================================================
 COMPONENT: CCoupledDeformationContinuation
 TYPE: 2
-LINES: 873
+LINES: 891
 ====================================================================================================
 Option Explicit
 
@@ -27175,6 +27175,7 @@ Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mFixedYieldRecoveryProbes As Long
+Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
 Private mUsesYieldControl As Boolean
 Private mPostPeakControlName As String, mPostPeakControlPoints As Long
 Private mPostPeakWidePoints As Long
@@ -27186,7 +27187,7 @@ Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
 ' точек принадлежит той же траектории, что и текущий решатель.
-Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CCoupledReinforcedResponse, _
+Friend Sub trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CCoupledReinforcedResponse, _
         ByRef offset() As Double, ByRef direction() As Double, ByVal history As Collection, _
         ByVal previousLambda As Double, ByVal currentLambda As Double, ByRef initialResultants() As Double, _
         ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, ByVal maximumIterations As Long, _
@@ -27200,6 +27201,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
+    mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -27247,6 +27249,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean
     Dim recoveryProjection() As Double
+    Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.hasSteel
     For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
@@ -27258,7 +27261,11 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         targetCoordinate = current.coordinate + increment
         If targetCoordinate <= current.coordinate Then Exit For
         trial.coordinate = targetCoordinate
-        probed = probe(trial, current.lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        Set arcFields = Nothing
+        If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
+            Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
+        probed = probe(trial, current.lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+            arcFields:=arcFields)
         lastProbeFailed = Not probed
         lastNoProgress = False
         changedControl = False: smoothTrial = False
@@ -27490,7 +27497,8 @@ End Property
 ' Решает пробу при заданной мере. Проверки продвижения и касательной
 ' выполняются после выбора действующей проекции.
 Private Function probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
-        Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False, _
+        Optional ByVal arcFields As Collection = Nothing) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     point.uncertainty = 0#
@@ -27502,6 +27510,15 @@ Private Function probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
         mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+    End If
+    If Not solved And Not arcFields Is Nothing And mProbeCount + 2 <= PROBE_LIMIT Then
+        Dim extraProbes As Long
+        solved = mSolver.TryRecoverDeformationByArc(arcFields, mTrace, initialLambda, mAbsTol, mRelTol, _
+            mMaxIterations, point.lambda, extraProbes)
+        If extraProbes > 0 Then
+            mArcRecoveryTried = True: mArcRecoveryProbes = extraProbes
+            mProbeCount = mProbeCount + extraProbes
+        End If
     End If
     If Not solved Then
         mProbeDetails = mSolver.ResultMeta.diagnosticDetails
@@ -27988,6 +28005,7 @@ Private Function details() As String
         details = details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
         details = details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
+    If mArcRecoveryTried Then details = details & "; вспомогательных проб псевдодуги и повтора: " & CStr(mArcRecoveryProbes)
     If Len(mSteelEventDetails) > 0 Then details = details & " | " & mSteelEventDetails
     If Len(mProbeDetails) > 0 Then details = details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
@@ -29296,7 +29314,7 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupled
     If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
     If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
-    controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
+    controlled.trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
         PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, mAcceptedTrace
     Set ContinueByDeformation = controlled
 End Function
@@ -29396,8 +29414,8 @@ Friend Sub CopyAccepted(ByRef field() As Double, ByRef resultants() As Double)
 End Sub
 
 ' Возвращает достигнутый множитель переменной части.
-Friend Property Get AcceptedLambda() As Double
-    AcceptedLambda = mLambda
+Friend Property Get acceptedLambda() As Double
+    acceptedLambda = mLambda
 End Property
 
 ' Возвращает множитель предыдущей принятой точки переменной части.
@@ -29797,7 +29815,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledNewtonSolver
 TYPE: 2
-LINES: 1602
+LINES: 1848
 ====================================================================================================
 Option Explicit
 
@@ -29858,6 +29876,8 @@ Private mRecoveredProjection() As Double
 Private mConsistentControl As Boolean
 Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
+Private mArcLoadProjection As Double, mCurrentControlLambda As Double
+Private mWrongControlDirection As Boolean
 Private mBaseLoad() As Double, mLoadDirection() As Double
 Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
@@ -29920,6 +29940,7 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
     load(4) = torque: load(5) = qx: load(6) = qy
     mControlActive = False
     mConsistentControl = False
+    mArcLoadProjection = 0#
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
     TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, _
         initialField:=initialField, retainDirectProof:=retainDirectProof)
@@ -29942,7 +29963,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
-        Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False) As Boolean
+        Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
+        Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -29956,7 +29978,10 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     Next i
     If Not hasDirection Or Not hasControl Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Для управления деформацией задайте ненулевую нагрузку и меру деформации."
+    If loadProjection <> 0# And (recoverYieldControl Or recoverSameControl) Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Псевдодуга не использует восстановление со сменой ветви."
     mBaseLoad = baseLoad: mLoadDirection = direction
+    mArcLoadProjection = loadProjection
     mControlProjection = controlProjection: mTargetControl = targetControl
     mSection.LoadEquations baseLoad(1), baseLoad(2), baseLoad(3), baseLoad(4), baseLoad(5), baseLoad(6), mBaseEquations
     mSection.LoadEquations direction(1), direction(2), direction(3), direction(4), direction(5), direction(6), mDirectionEquations
@@ -29965,8 +29990,242 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     mConsistentControl = consistentControl And mUseSpatialHistory
     Dim load(1 To COMPONENT_COUNT) As Double
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
-        recoverYieldControl, recoverSameControl:=recoverSameControl)
+        recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl)
     If TryDeformationStep Then trialLambda = mTrialLambda
+End Function
+
+' Проверяет короткую псевдодугу после измеренного расхождения касательной.
+' Обе пробы используют принятую историю. Публикуется только проба при исходной мере.
+Friend Function TryRecoverDeformationByArc(ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByVal acceptedLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maxIterations As Long, ByRef trialLambda As Double, ByRef extraProbes As Long) As Boolean
+    extraProbes = 0
+    If mCandidateReady Or Not mControlActive Or Not mUseSpatialHistory Or mConsistentControl Then Exit Function
+    If mYieldRecoveryTried Or mSameControlRecoveryTried Or Not mWrongControlDirection Then Exit Function
+    If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode <> rcNumericalFailure Then Exit Function
+    If maxIterations - mIterations <= 1 Then Exit Function
+
+    Dim coefficients() As Double, projection() As Double, predicted() As Double
+    Dim target As Double, loadProjection As Double, loadMetric As Double, radius As Double, factor As Double
+    If Not PrepareArcMeasure(fields, trace, acceptedLambda, coefficients, projection, predicted, target, _
+            loadProjection, loadMetric, radius, factor) Then Exit Function
+
+    Dim originalMeta As CResultMeta, originalProjection() As Double, originalTarget As Double
+    Dim base() As Double, direction() As Double, external() As Double, residual() As Double
+    Dim originalResultants() As Double, resultants() As Double, matrix() As Double, field() As Double
+    Dim originalFactor As Double, norm As Double, pivot As Double, failureCode As ESolverFailureCode
+    Dim materialPoint As Long, lastPoint As Long, lastSide As Long
+    Set originalMeta = mMeta.clone
+    originalProjection = mControlProjection: originalTarget = mTargetControl
+    base = mBaseLoad: direction = mLoadDirection
+    external = mExternal: residual = mResidual: originalResultants = mTrialResultants: matrix = mMatrix
+    originalFactor = mCurrentControlLambda
+    norm = mLastNorm: pivot = mMinimumPivot: failureCode = mFailureCode
+    materialPoint = mMaterialPoint: lastPoint = mLastFailedPoint: lastSide = mLastFailedSide
+
+    Dim initialIterations As Long, initialEvaluations As Long, materialFailures As Long
+    Dim gradientBuilds As Long, localGradientBuilds As Long, guideIterations As Long, guideEvaluations As Long
+    initialIterations = mIterations: initialEvaluations = mEvaluations: materialFailures = mMaterialFailures
+    gradientBuilds = mGradientBuilds: localGradientBuilds = mLocalGradientBuilds
+    Dim seed As Variant, guideFactor As Double, solved As Boolean, label As String, phaseDetails As String
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    label = "псевдодуга"
+    seed = predicted
+    On Error GoTo InterruptedArc
+    extraProbes = 1
+    solved = TryDeformationStep(base, direction, projection, target, factor, guideFactor, _
+        absoluteTolerance, relativeTolerance, maxIterations - initialIterations, initialField:=seed, loadProjection:=loadProjection)
+    If Not solved Then GoTo RejectArc
+    CopyTrial field, resultants
+    If Not ArcFieldIsLocal(coefficients, projection, loadProjection, loadMetric, radius, field, acceptedLambda, guideFactor) Then
+        label = label & " вне локальной окрестности"
+        GoTo RejectArc
+    End If
+    If maxIterations - initialIterations - mIterations < 1 Then
+        label = label & " исчерпала остаток итераций"
+        GoTo RejectArc
+    End If
+
+    guideIterations = mIterations: guideEvaluations = mEvaluations
+    materialFailures = materialFailures + mMaterialFailures
+    gradientBuilds = gradientBuilds + mGradientBuilds: localGradientBuilds = localGradientBuilds + mLocalGradientBuilds
+    DiscardStep ' Боковые и центральная истории остаются в одном исходном принятом поле.
+    seed = field: label = "повтор при исходной мере"
+    extraProbes = 2
+    solved = TryDeformationStep(base, direction, originalProjection, originalTarget, guideFactor, factor, _
+        absoluteTolerance, relativeTolerance, maxIterations - initialIterations - guideIterations, initialField:=seed)
+    If Not solved Then GoTo RejectArc
+    CopyTrial field, resultants
+    If Not ArcFieldIsLocal(coefficients, projection, loadProjection, loadMetric, radius, field, acceptedLambda, factor) Then
+        label = label & " вне локальной окрестности"
+        GoTo RejectArc
+    End If
+    phaseDetails = mMeta.diagnosticDetails
+    trialLambda = factor
+    TryRecoverDeformationByArc = True
+    GoTo CountArc
+
+RejectArc:
+    phaseDetails = mMeta.diagnosticDetails
+    DiscardStep
+    mControlProjection = originalProjection: mTargetControl = originalTarget: mArcLoadProjection = 0#
+    mCurrentControlLambda = originalFactor
+    mExternal = external: mResidual = residual: mTrialResultants = originalResultants: mMatrix = matrix
+    If solved Or mMeta.InternalStatus = rsNumericalFailure Then
+        Set mMeta = originalMeta
+        mLastNorm = norm: mMinimumPivot = pivot: mFailureCode = failureCode
+        mMaterialPoint = materialPoint: mLastFailedPoint = lastPoint: mLastFailedSide = lastSide
+    End If
+CountArc:
+    mWrongControlDirection = False
+    Dim arcIterations As Long, fixedIterations As Long
+    If extraProbes = 1 Then
+        arcIterations = mIterations
+    Else
+        arcIterations = guideIterations: fixedIterations = mIterations
+    End If
+    mIterations = initialIterations + guideIterations + mIterations
+    mEvaluations = initialEvaluations + guideEvaluations + mEvaluations
+    mMaterialFailures = materialFailures + mMaterialFailures
+    mGradientBuilds = gradientBuilds + mGradientBuilds
+    mLocalGradientBuilds = localGradientBuilds + mLocalGradientBuilds
+    mMeta.diagnosticDetails = DiagnosticSummary() & "; проверено вспомогательных проб: " & CStr(extraProbes) & _
+        "; итерации исходной пробы / дуги / повтора: " & CStr(initialIterations) & " / " & _
+        CStr(arcIterations) & " / " & CStr(fixedIterations) & "; общий лимит: " & CStr(maxIterations) & _
+        "; последняя проба: " & label & " | Исходный отказ: " & originalMeta.diagnosticDetails
+    If Len(phaseDetails) > 0 Then mMeta.diagnosticDetails = mMeta.diagnosticDetails & " | Проверка: " & phaseDetails
+    If errorNumber <> 0 Then
+        On Error GoTo 0
+        Err.Raise errorNumber, errorSource, errorText
+    End If
+    Exit Function
+InterruptedArc:
+    errorNumber = Err.number: errorSource = Err.source: errorText = Err.description
+    Resume RejectArc
+End Function
+
+' Строит нормаль к принятой секущей. Масштаб нагрузки берётся по медиане трёх
+' секущих на полной постоянной нагрузке. Неполную или расходящуюся историю не использует.
+Private Function PrepareArcMeasure(ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByVal acceptedLambda As Double, ByRef coefficients() As Double, ByRef projection() As Double, _
+        ByRef predicted() As Double, ByRef target As Double, ByRef loadProjection As Double, _
+        ByRef loadMetric As Double, ByRef radius As Double, ByRef predictedLambda As Double) As Boolean
+    If fields Is Nothing Or trace Is Nothing Then Exit Function
+    If fields.count < 4 Or trace.count <> fields.count Then Exit Function
+    Dim factor(1 To 4) As Double, fraction As Double, i As Long, index As Long
+    For i = 1 To 4
+        trace.ReadPoint fields.count - 4 + i, fraction, factor(i)
+        If fraction <> 1# Or factor(i) <= 0# Then Exit Function
+        If i > 1 Then
+            If factor(i) <= factor(i - 1) Then Exit Function
+        End If
+    Next i
+    If factor(4) <> acceptedLambda Then Exit Function
+
+    Dim old() As Double, field() As Double, movement() As Double, physicalSquare As Double
+    Dim slopes(1 To 3) As Double, lambdaMove As Double, fixedMove As Double, fixedDistance As Double
+    ReDim movement(1 To mDegreeCount)
+    field = fields.item(fields.count)
+    If LBound(field) <> 1 Or UBound(field) <> mDegreeCount Then Exit Function
+    For i = 1 To mDegreeCount
+        If field(i) <> mAccepted(i) Then Exit Function
+    Next i
+    mSection.CopySpatialStrainCoefficients SPATIAL_HALF_STEP, coefficients
+    For index = 1 To 3
+        old = fields.item(fields.count - 4 + index): field = fields.item(fields.count - 3 + index)
+        If LBound(old) <> 1 Or UBound(old) <> mDegreeCount Then Exit Function
+        If LBound(field) <> 1 Or UBound(field) <> mDegreeCount Then Exit Function
+        For i = 1 To mGaugeStart - 1: movement(i) = field(i) - old(i): Next i
+        lambdaMove = factor(index + 1) - factor(index)
+        physicalSquare = ArcPhysicalSquare(coefficients, movement, projection, index = 3)
+        If physicalSquare <= 0# Then Exit Function
+        slopes(index) = Sqr(physicalSquare) / lambdaMove
+    Next index
+    Dim median As Double, secant As Double, ratio As Double
+    median = GeomMax(GeomMin(slopes(1), slopes(2)), GeomMin(GeomMax(slopes(1), slopes(2)), slopes(3)))
+    loadMetric = median * median
+    secant = Sqr(physicalSquare + loadMetric * lambdaMove ^ 2)
+    If secant <= 0# Then Exit Function
+    fixedDistance = mTargetControl
+    For i = 1 To mGaugeStart - 1
+        fixedMove = fixedMove + mControlProjection(i) * movement(i)
+        fixedDistance = fixedDistance - mControlProjection(i) * mAccepted(i)
+    Next i
+    If fixedMove <= 0# Or fixedDistance <= 0# Then Exit Function
+    ratio = 0.5 * GeomMin(1#, fixedDistance / fixedMove)
+    radius = ratio * secant
+    If radius <= 0# Then Exit Function
+    loadProjection = loadMetric * lambdaMove / secant
+    target = loadProjection * acceptedLambda + radius
+    predictedLambda = acceptedLambda + ratio * lambdaMove
+    predicted = mAccepted
+    For i = 1 To mGaugeStart - 1
+        projection(i) = projection(i) / secant
+        target = target + projection(i) * mAccepted(i)
+        predicted(i) = predicted(i) + ratio * movement(i)
+    Next i
+    PrepareArcMeasure = True
+End Function
+
+' Применяет физическую метрику к приращению поля. Девять строк оператора
+' хранят три неизменные по z/L компоненты и три пары концов. Середина
+' каждой пары равна среднему. Вес инженерного сдвига в тензорной норме равен 1/2.
+Private Function ArcPhysicalSquare(ByRef coefficients() As Double, ByRef movement() As Double, _
+        ByRef projection() As Double, Optional ByVal project As Boolean = False) As Double
+    Dim strain(1 To 9) As Double, dual(1 To 9) As Double
+    Dim point As Long, row As Long, first As Long, i As Long, x As Double, y As Double, area As Double
+    Dim areaSum As Double, value As Double, middle As Double, weight As Double
+    If project Then ReDim projection(1 To mDegreeCount)
+    For point = 1 To mPointCount
+        first = 9 * (point - 1)
+        mSection.point point, x, y, area
+        areaSum = areaSum + 3# * area
+        For row = 1 To 9
+            value = 0#
+            For i = 1 To mGaugeStart - 1
+                value = value + coefficients(i, first + row) * movement(i)
+            Next i
+            strain(row) = value
+        Next row
+        dual(1) = 3# * strain(1): dual(2) = 3# * strain(2): dual(3) = 1.5 * strain(3)
+        For row = 4 To 8 Step 2
+            weight = 0.5
+            If row = 4 Then weight = 1#
+            middle = 0.25 * (strain(row) + strain(row + 1))
+            dual(row) = weight * (strain(row) + middle)
+            dual(row + 1) = weight * (strain(row + 1) + middle)
+        Next row
+        For row = 1 To 9
+            value = area * dual(row)
+            ArcPhysicalSquare = ArcPhysicalSquare + strain(row) * value
+            If project Then
+                For i = 1 To mGaugeStart - 1
+                    projection(i) = projection(i) + coefficients(i, first + row) * value
+                Next i
+            End If
+        Next row
+    Next point
+    ArcPhysicalSquare = ArcPhysicalSquare / areaSum
+    If Not project Then Exit Function
+    For i = 1 To mGaugeStart - 1: projection(i) = projection(i) / areaSum: Next i
+End Function
+
+' Проверяет положительный ход в малой окрестности принятого поля.
+' Равновесие, исходная мера и связи уже проверены штатным решателем.
+Private Function ArcFieldIsLocal(ByRef coefficients() As Double, ByRef projection() As Double, ByVal loadProjection As Double, _
+        ByVal loadMetric As Double, ByVal radius As Double, ByRef field() As Double, ByVal acceptedLambda As Double, _
+        ByVal factor As Double) As Boolean
+    If factor <= 0# Then Exit Function
+    Dim movement() As Double, unused() As Double, i As Long, progress As Double, distanceSquare As Double
+    ReDim movement(1 To mDegreeCount)
+    progress = loadProjection * (factor - acceptedLambda)
+    For i = 1 To mGaugeStart - 1
+        movement(i) = field(i) - mAccepted(i)
+        progress = progress + projection(i) * movement(i)
+    Next i
+    If progress <= 0# Then Exit Function
+    distanceSquare = ArcPhysicalSquare(coefficients, movement, unused) + loadMetric * (factor - acceptedLambda) ^ 2
+    ArcFieldIsLocal = (distanceSquare <= 9# * radius ^ 2)
 End Function
 
 ' Возвращает новую линейную меру только для подтверждённой пробы восстановления.
@@ -30043,6 +30302,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mMeta.Clear
     mCandidateReady = False
     mYieldRecoveryTried = False: mSameControlRecoveryTried = False
+    mWrongControlDirection = False
     mSameControlInitialFailure = vbNullString
     mRecoveredControlReady = False: Erase mRecoveredProjection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
@@ -30213,6 +30473,7 @@ RecomputeTangent:
             End If
             mMeta.diagnosticDetails = details
             If Len(mismatch) > 0 And mUseSpatialHistory Then
+                mWrongControlDirection = True
                 If recoverYieldControl Then
                     SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
                         absoluteTolerance, relativeTolerance)
@@ -30680,6 +30941,7 @@ End Sub
 
 ' Обновляет шесть внешних усилий и их заранее нормированные уравнения.
 Private Sub SetControlledLoad(ByVal lambda As Double, ByRef load() As Double)
+    mCurrentControlLambda = lambda
     Dim i As Long
     For i = 1 To COMPONENT_COUNT
         load(i) = mBaseLoad(i) + lambda * mLoadDirection(i)
@@ -30852,6 +31114,7 @@ Private Sub BuildControlledMatrix(ByRef augmented() As Double, ByVal size As Lon
         augmented(size, i) = -mDirectionEquations(i)
         If i < mGaugeStart Then augmented(i, size) = mControlProjection(i) * mReferenceModulus
     Next i
+    If mArcLoadProjection <> 0# Then augmented(size, size) = mArcLoadProjection * mReferenceModulus
 End Sub
 
 ' Оценивает чувствительность множителя к невязке при том же принятом
@@ -30900,6 +31163,7 @@ End Function
 Private Function ControlResidual(ByRef field() As Double) As Double
     Dim i As Long, value As Double
     value = -mTargetControl
+    If mArcLoadProjection <> 0# Then value = value + mArcLoadProjection * mCurrentControlLambda
     For i = 1 To mGaugeStart - 1
         value = value + field(i) * mControlProjection(i)
     Next i
@@ -31617,7 +31881,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         End If
     Else
         low = -1#
-        If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
+        If branch.HasAcceptedVariableState Then low = branch.acceptedLambda
         If Not controlled Is Nothing Then
             low = controlled.BestAdmissibleLambda
             criticalPoint = controlled.SteelEventPoint
@@ -31980,7 +32244,7 @@ Friend Sub TestIntegratedState(ByVal loads As CSectionLoadState, ByVal spec As C
         Set meta = continuation.ResultMeta
         Err.Raise 5, "TestIntegratedState", meta.resultComment & " " & meta.diagnosticDetails
     End If
-    If continuation.AcceptedLambda <> factor Or response.AcceptedSteelUtilization > 1# Then _
+    If continuation.acceptedLambda <> factor Or response.AcceptedSteelUtilization > 1# Then _
         Err.Raise 5, "TestIntegratedState", "Целевая нагрузка не подтверждена при допустимой деформации арматуры."
 
     Dim bulkCount As Long: bulkCount = mOperators.ConcretePointCount
@@ -48397,7 +48661,7 @@ End Sub
 Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalculationProfile, ByVal capacitySkipped As Boolean)
     Dim combined As CCombinationResult: Set combined = mResults(index)
     Dim capacityRequested As Boolean: capacityRequested = profile.StrengthCapacityEnabled And Not capacitySkipped
-    Dim meta As CResultMeta, field() As Double, resultants() As Double, Trace As CCoupledLoadTrace
+    Dim meta As CResultMeta, field() As Double, resultants() As Double, trace As CCoupledLoadTrace
     If profile.StabilityEnabled Then
         ReportSection "Продольный изгиб и устойчивость по N, Mx и My"
         RunStabilityFilter index, profile.StabilityValueSet
@@ -48419,8 +48683,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
         ReportStep reason
     ElseIf profile.StrengthDirectStateEnabled Then
         Dim acceptedState As CSectionStateResult
-        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.strengthSpec, field, resultants, True, acceptedState, Trace)
-        combined.StoreCoupledTrace False, Trace
+        Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.strengthSpec, field, resultants, True, acceptedState, trace)
+        combined.StoreCoupledTrace False, trace
         If Not acceptedState Is Nothing Then
             combined.AddState acceptedState
             combined.StoreSectionStateResult acceptedState
@@ -48436,8 +48700,8 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
             ReportSection "Предельная нагрузка для связанного сечения"
             Dim capacity As CCapacityResult
             Set capacity = mCoupledAnalysis.SolveCapacity(mWorkingLoads(index), mWorkingPaths(index), profile.strengthSpec, _
-                mCapacityInitialLambda, mCapacityMaxLambda, mCapacityToleranceLambda, mCapacitySolverMaxIterations, Trace)
-            combined.StoreCoupledTrace True, Trace
+                mCapacityInitialLambda, mCapacityMaxLambda, mCapacityToleranceLambda, mCapacitySolverMaxIterations, trace)
+            combined.StoreCoupledTrace True, trace
             combined.StoreCapacityResult capacity
             Set meta = capacity.ResultMeta
             ReportStep meta.resultComment
@@ -50719,9 +50983,9 @@ Friend Function CopyCoupledResultants(ByRef resultants() As Double) As Boolean
 End Function
 
 ' Сохраняет принятую траекторию одного из двух независимых расчётов.
-Friend Sub StoreCoupledTrace(ByVal isCapacity As Boolean, ByVal Trace As CCoupledLoadTrace)
+Friend Sub StoreCoupledTrace(ByVal isCapacity As Boolean, ByVal trace As CCoupledLoadTrace)
     AssertWritable
-    If isCapacity Then Set mCapacityTrace = Trace Else Set mDirectTrace = Trace
+    If isCapacity Then Set mCapacityTrace = trace Else Set mDirectTrace = trace
 End Sub
 
 ' Возвращает готовую траекторию выбранной проверки, если был принят шаг.
@@ -60401,11 +60665,11 @@ End Function
 ' Записывает принятые точки как числовые свойства сочетания. Раздельные
 ' ключи сохраняют порядок точек и два независимых параметра нагружения.
 Private Sub PutCoupledTrace(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
-        ByVal id As String, ByVal prefix As String, ByVal Trace As CCoupledLoadTrace)
-    If Trace Is Nothing Then Exit Sub
+        ByVal id As String, ByVal prefix As String, ByVal trace As CCoupledLoadTrace)
+    If trace Is Nothing Then Exit Sub
     Dim i As Long, offsetFraction As Double, lambda As Double, key As String
-    For i = 1 To Trace.count
-        Trace.ReadPoint i, offsetFraction, lambda
+    For i = 1 To trace.count
+        trace.ReadPoint i, offsetFraction, lambda
         key = prefix & CStr(i)
         PutProperty data, row, runID, id, key & ".Lambda", lambda, "-", "Множитель переменной части на принятом шаге."
         PutProperty data, row, runID, id, key & ".Offset", offsetFraction, "-", "Доля постоянной части на принятом шаге."
@@ -61037,15 +61301,15 @@ Private Function SectionPropertyRowCount(ByVal batch As CBatchSectionCalculator)
 
     Dim combinationIndex As Long, stateIndex As Long
     Dim repository As CStateRepository, state As CSectionStateResult, curves As CCoupledMaterialSnapshot
-    Dim result As CCombinationResult, Trace As CCoupledLoadTrace
+    Dim result As CCombinationResult, trace As CCoupledLoadTrace
     For combinationIndex = 1 To batch.count
         Set result = batch.ResultAt(combinationIndex)
         If batch.HasSpatialLoads(combinationIndex) Then
             rowCount = rowCount + COUPLED_SECTION_PROPERTY_ROWS
-            Set Trace = result.CoupledTrace(False)
-            If Not Trace Is Nothing Then rowCount = rowCount + 2 * Trace.count
-            Set Trace = result.CoupledTrace(True)
-            If Not Trace Is Nothing Then rowCount = rowCount + 2 * Trace.count
+            Set trace = result.CoupledTrace(False)
+            If Not trace Is Nothing Then rowCount = rowCount + 2 * trace.count
+            Set trace = result.CoupledTrace(True)
+            If Not trace Is Nothing Then rowCount = rowCount + 2 * trace.count
         End If
         Set repository = result.StateRepository
         rowCount = rowCount + repository.stateCount * STATE_SECTION_PROPERTY_ROWS
@@ -112096,11 +112360,11 @@ Public Function RunTestCoupledContinuation() As String
     If Not ok Then GoTo Done
     branch.CopyAccepted field, resultants
     TestExpectNear resultants(1), FORCE0, 0.0000001, "preload resultant", passed, Failed, report
-    TestRecord branch.AcceptedOffsetFraction = 1# And branch.AcceptedLambda = 0# And branch.RejectedAttempts > 0, _
+    TestRecord branch.AcceptedOffsetFraction = 1# And branch.acceptedLambda = 0# And branch.RejectedAttempts > 0, _
         "preload reduced an unsafe increment and reached its exact target", passed, Failed, report
-    Dim Trace As CCoupledLoadTrace, traceCount As Long, fraction As Double, lambda As Double
-    Set Trace = branch.SavedTrace
-    Trace.ReadPoint 1, fraction, lambda
+    Dim trace As CCoupledLoadTrace, traceCount As Long, fraction As Double, lambda As Double
+    Set trace = branch.SavedTrace
+    trace.ReadPoint 1, fraction, lambda
     TestRecord fraction > 0# And fraction < 1# And lambda = 0#, "trace records only accepted offset fraction", passed, Failed, report
 
     ok = branch.Advance(1#)
@@ -112112,21 +112376,21 @@ Public Function RunTestCoupledContinuation() As String
     For i = 1 To 6
         TestExpectNear resultants(i), expected(i), 0.00002, "path component " & CStr(i), passed, Failed, report
     Next i
-    TestRecord branch.AcceptedLambda = 1# And branch.RejectedAttempts > 0, _
+    TestRecord branch.acceptedLambda = 1# And branch.RejectedAttempts > 0, _
         "direction reduced an unsafe increment and reached exact lambda", passed, Failed, report
 
     Dim acceptedBefore As Long, firstDegree As Double
     acceptedBefore = material.TestAcceptedSteps: firstDegree = field(1)
-    traceCount = Trace.count
-    Trace.ReadPoint traceCount, fraction, lambda
+    traceCount = trace.count
+    trace.ReadPoint traceCount, fraction, lambda
     TestRecord traceCount = branch.SavedFieldCount And fraction = 1# And lambda = 1#, _
         "trace and material history end at the same target", passed, Failed, report
     material.TestFail = True
     ok = branch.Advance(1.1)
-    TestRecord Not ok And branch.ResultMeta.InternalStatus = rsNumericalFailure And branch.AcceptedLambda = 1#, _
+    TestRecord Not ok And branch.ResultMeta.InternalStatus = rsNumericalFailure And branch.acceptedLambda = 1#, _
         "minimum step failure stays numerical at last accepted lambda", passed, Failed, report
     branch.CopyAccepted field, resultants
-    TestRecord firstDegree = field(1) And acceptedBefore = material.TestAcceptedSteps And Trace.count = traceCount, _
+    TestRecord firstDegree = field(1) And acceptedBefore = material.TestAcceptedSteps And trace.count = traceCount, _
         "failed increments leave accepted section, history and trace unchanged", passed, Failed, report
     material.TestFail = False
     TestRecord branch.Advance(1.1), "recovered path can continue", passed, Failed, report
@@ -112164,22 +112428,22 @@ Public Function RunTestCoupledMinimumLoadStep() As String
     branch.Initialize solver, path, 2, 7, 20, 0.00000001, 0.00000001, True
     If Not branch.Advance(start) Then Err.Raise 5, , "Не достигнуто исходное состояние контрольного шага."
 
-    Dim Trace As CCoupledLoadTrace, traceCount As Long, acceptedCount As Long, solved As Boolean
-    Set Trace = branch.SavedTrace
-    traceCount = Trace.count: acceptedCount = material.TestAcceptedSteps
+    Dim trace As CCoupledLoadTrace, traceCount As Long, acceptedCount As Long, solved As Boolean
+    Set trace = branch.SavedTrace
+    traceCount = trace.count: acceptedCount = material.TestAcceptedSteps
     material.TestFail = True
     solved = branch.Advance(finish)
     TestRecord Not solved And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
         "отказ на граничном подшаге остаётся численным", passed, Failed, report
     TestRecord branch.RejectedAttempts = 7, "проверены все семь проб вплоть до 1/64", passed, Failed, report
-    TestRecord branch.AcceptedLambda = start And Trace.count = traceCount And material.TestAcceptedSteps = acceptedCount, _
+    TestRecord branch.acceptedLambda = start And trace.count = traceCount And material.TestAcceptedSteps = acceptedCount, _
         "численный отказ сохраняет принятую нагрузку и историю", passed, Failed, report
 
     material.TestFail = False
     branch.Initialize solver, path, 2, 7, 20, 0.00000001, 0.00000001, True
     If Not branch.Advance(start) Then Err.Raise 5, , "Не восстановлено исходное состояние контрольного шага."
-    Set Trace = branch.SavedTrace
-    traceCount = Trace.count: acceptedCount = material.TestAcceptedSteps
+    Set trace = branch.SavedTrace
+    traceCount = trace.count: acceptedCount = material.TestAcceptedSteps
     Dim field() As Double, resultants() As Double, expected() As Double, minimum As Double
     branch.CopyAccepted field, resultants
     minimum = ((finish - start) / 2#) / 64#
@@ -112187,8 +112451,8 @@ Public Function RunTestCoupledMinimumLoadStep() As String
     solved = branch.Advance(finish)
     TestRecord Not solved And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
         "бюджет заканчивается после принятия, целевое усилие остаётся открытым", passed, Failed, report
-    TestRecord branch.AcceptedLambda = start + minimum, "граничный подшаг принят при прежнем нижнем пределе", passed, Failed, report
-    TestRecord branch.RejectedAttempts = 6 And Trace.count = traceCount + 1 And material.TestAcceptedSteps = acceptedCount + 1, _
+    TestRecord branch.acceptedLambda = start + minimum, "граничный подшаг принят при прежнем нижнем пределе", passed, Failed, report
+    TestRecord branch.RejectedAttempts = 6 And trace.count = traceCount + 1 And material.TestAcceptedSteps = acceptedCount + 1, _
         "шесть отказов сохраняют историю, граничная проба пишет ровно один шаг", passed, Failed, report
     branch.CopyAccepted field, resultants
     path.TargetSix start + minimum, expected
@@ -112206,24 +112470,24 @@ End Function
 ' и десятом постоянном шаге. Целевое усилие решается на штатном шаге.
 Private Sub TestExactSegmentEndpoints(ByVal solver As CCoupledNewtonSolver, _
         ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
-    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation, Trace As CCoupledLoadTrace
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation, trace As CCoupledLoadTrace
     path.Initialize 0#, 100000#, 0#, 200000#, 0#, 100000#
     branch.Initialize solver, path, 4, 100, 20, 0.00000001, 0.00000001, True
     TestRecord branch.Advance(0.5), "exact endpoint fixture first segment", passed, Failed, report
-    Set Trace = branch.SavedTrace
-    Dim before As Long: before = Trace.count
+    Set trace = branch.SavedTrace
+    Dim before As Long: before = trace.count
     Dim fraction As Double, lambda As Double, solved As Boolean
     solved = branch.Advance(0.65)
-    Trace.ReadPoint Trace.count, fraction, lambda
-    TestRecord solved And lambda = 0.65 And Trace.count = before + 4, _
+    trace.ReadPoint trace.count, fraction, lambda
+    TestRecord solved And lambda = 0.65 And trace.count = before + 4, _
         "binary rounding does not cause a fifth variable substep", passed, Failed, report
 
     path.Initialize 100000#, 0#, 200000#, 0#, 100000#, 0#
     branch.Initialize solver, path, 10, 10, 20, 0.00000001, 0.00000001, True
     solved = branch.Advance(0#)
-    Set Trace = branch.SavedTrace
-    Trace.ReadPoint Trace.count, fraction, lambda
-    TestRecord solved And fraction = 1# And lambda = 0# And Trace.count = 10, _
+    Set trace = branch.SavedTrace
+    trace.ReadPoint trace.count, fraction, lambda
+    TestRecord solved And fraction = 1# And lambda = 0# And trace.count = 10, _
         "rounded offset accumulation reaches the target within ten probes", passed, Failed, report
 End Sub
 
@@ -112257,7 +112521,7 @@ Private Sub TestLoadSecantRetryCase(ByVal operators As CCoupledElasticState, ByV
     TestRecord ok, name & " establishes both predecessor fields", passed, Failed, report
     If Not ok Then Exit Sub
 
-    Dim Trace As CCoupledLoadTrace: Set Trace = branch.SavedTrace
+    Dim trace As CCoupledLoadTrace: Set trace = branch.SavedTrace
     Dim field() As Double, resultants() As Double, expected() As Double
     Dim strainBefore As Double, peakBefore As Double, fraction As Double, lambda As Double
     branch.CopyAccepted field, resultants
@@ -112266,24 +112530,24 @@ Private Sub TestLoadSecantRetryCase(ByVal operators As CCoupledElasticState, ByV
     ok = branch.Advance(target)
     Dim meta As CResultMeta: Set meta = branch.ResultMeta
     branch.CopyAccepted field, resultants
-    Trace.ReadPoint Trace.count, fraction, lambda
+    trace.ReadPoint trace.count, fraction, lambda
     TestRecord ok = expectSuccess, name & " returns expected outcome", passed, Failed, report
-    TestRecord fraction = 1# And Trace.count = branch.SavedFieldCount, _
+    TestRecord fraction = 1# And trace.count = branch.SavedFieldCount, _
         name & " preserves the accepted load trace", passed, Failed, report
     If expectSuccess Then
         path.TargetSix target, expected
         TestRecord operators.ResultantResidualNorm(resultants, expected) <= 0.0000005, _
             name & " balances all six requested forces", passed, Failed, report
-        TestRecord lambda = target And branch.AcceptedLambda = target And branch.PreviousAcceptedLambda = 0.5, _
+        TestRecord lambda = target And branch.acceptedLambda = target And branch.PreviousAcceptedLambda = 0.5, _
             name & " accepts the exact target after its original predecessor", passed, Failed, report
-        TestRecord Trace.count = 3 And material.TestAcceptedSteps = 3 And material.TestAcceptedPeak > peakBefore, _
+        TestRecord trace.count = 3 And material.TestAcceptedSteps = 3 And material.TestAcceptedPeak > peakBefore, _
             name & " commits one material state and one trace entry", passed, Failed, report
         TestRecord InStr(1, meta.diagnosticDetails, "секущим прогнозом", vbTextCompare) > 0, _
             name & " records the recovery mechanism", passed, Failed, report
     Else
-        TestRecord meta.InternalStatus = rsNumericalFailure And lambda = 0.5 And branch.AcceptedLambda = 0.5, _
+        TestRecord meta.InternalStatus = rsNumericalFailure And lambda = 0.5 And branch.acceptedLambda = 0.5, _
             name & " retains numerical status and the last accepted load", passed, Failed, report
-        TestRecord Trace.count = 2 And material.TestAcceptedSteps = 2 And field(1) = strainBefore And _
+        TestRecord trace.count = 2 And material.TestAcceptedSteps = 2 And field(1) = strainBefore And _
             material.TestAcceptedPeak = peakBefore, name & " does not commit a rejected trial", passed, Failed, report
     End If
 End Sub
@@ -112325,7 +112589,7 @@ Public Function RunTestCoupledSteelLimit() As String
                 "steel limit is bracketed, steps=" & CStr(steps) & " " & branch.ResultMeta.diagnosticDetails, passed, Failed, report
             TestRecord low <= expected And high >= expected And high - low <= 0.0001 And Not onOffset, _
                 "analytic limit lies within the refined near-one bracket", passed, Failed, report
-            TestRecord branch.AcceptedLambda <= low And response.AcceptedSteelUtilization <= 1#, _
+            TestRecord branch.acceptedLambda <= low And response.AcceptedSteelUtilization <= 1#, _
                 "over-limit probes did not modify accepted history", passed, Failed, report
         Next steps
     Next trial
@@ -112342,7 +112606,7 @@ Public Function RunTestCoupledSteelLimit() As String
     branch.TraceSteelLimit response, 1#, 0.9, 0.0001
     TestRecord Not branch.CopySteelLimit(low, high, onOffset) And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
         "search bound is not a material limit", passed, Failed, report
-    TestRecord branch.HasAcceptedVariableState And branch.AcceptedLambda = 0.9, _
+    TestRecord branch.HasAcceptedVariableState And branch.acceptedLambda = 0.9, _
         "search bound retains last admissible step", passed, Failed, report
 
     material.TestFail = True
@@ -112460,7 +112724,7 @@ Public Function RunTestCoupledDeformationControl() As String
     For i = 1 To 3: prefix.Add history(i): Next i
     For i = 1 To 6: resultants(i) = baseLoad(i) + 0.592 * direction(i): Next i
     Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
-    branch.Trace solver, Nothing, baseLoad, direction, prefix, 0.096, 0.592, resultants, 1.5, 0.001, 30, 0.00000001, 0.00000001
+    branch.trace solver, Nothing, baseLoad, direction, prefix, 0.096, 0.592, resultants, 1.5, 0.001, 30, 0.00000001, 0.00000001
     TestRecord branch.CopyPeak(peak, accuracy, designVerified), _
         "confirms first peak across two independently replayed increments " & branch.ResultMeta.resultComment & _
         " " & branch.ResultMeta.diagnosticDetails, passed, Failed, report
@@ -112643,7 +112907,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     solver.Initialize operators, material, 30000#
 
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
-    Dim history As New Collection, Trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#: direction(1) = designForce
     Dim strain As Variant, eps As Double, lambda As Double, previousLambda As Double, initialLambda As Double
@@ -112656,7 +112920,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
         solver.AcceptStep
         history.Add field
         previousLambda = lambda: lambda = initialLambda
-        Trace.Add 1#, lambda
+        trace.Add 1#, lambda
         stress = STEEL_MODULUS * eps
         If stress > STEEL_YIELD Then stress = STEEL_YIELD
         expected = (NET_CONCRETE_AREA * (30000# * eps - 10000000000# * eps ^ 3) + STEEL_AREA * stress) / designForce
@@ -112664,8 +112928,8 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     Next strain
 
     Dim branch As New CCoupledDeformationContinuation, meta As CResultMeta
-    branch.Trace solver, material, baseLoad, direction, history, previousLambda, lambda, resultants, _
-        1.45, LAMBDA_TOLERANCE, 30, 0.00000001, 0.00000001, Trace
+    branch.trace solver, material, baseLoad, direction, history, previousLambda, lambda, resultants, _
+        1.45, LAMBDA_TOLERANCE, 30, 0.00000001, 0.00000001, trace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, point As Long, limitFields As Collection
     expected = crossingForce / designForce
@@ -112800,22 +113064,22 @@ Public Function RunTestCoupledConcreteTensor() As String
     Const E As Double = 30000#
     Const NU As Double = 0.2
     Dim tensor(1 To 6, 1 To 6) As Double, stress(1 To 6) As Double, flow(1 To 6) As Double
-    Dim Trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim trace As Double, q As Double, high As Double, mid As Double, low As Double
     CoupledElasticTensor E, NU, tensor
     TestExpectNear tensor(1, 1), 33333.3333333333, 0.000000000001, "isotropic normal stiffness", passed, Failed, report
     TestExpectNear tensor(1, 2), 8333.33333333333, 0.000000000001, "isotropic Poisson stiffness", passed, Failed, report
     TestExpectNear tensor(6, 6), 12500#, 0.000000000001, "engineering shear stiffness", passed, Failed, report
     stress(1) = -20#: stress(2) = -20#: stress(3) = -20#
-    CoupledStressInvariants stress, Trace, q, high, mid, low
-    TestRecord Trace = -60# And q = 0# And high = -20# And mid = -20# And low = -20#, _
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    TestRecord trace = -60# And q = 0# And high = -20# And mid = -20# And low = -20#, _
         "hydrostatic values exact", passed, Failed, report
     stress(1) = 0#: stress(2) = 0#: stress(3) = 0#: stress(6) = 9#
-    CoupledStressInvariants stress, Trace, q, high, mid, low
+    CoupledStressInvariants stress, trace, q, high, mid, low
     TestExpectNear q, Sqr(3#) * 9#, 0.000000000001, "physical shear contribution to invariant", passed, Failed, report
     TestRecord Abs(high - 9#) < 0.000000000001 And Abs(mid) < 0.000000000001 And Abs(low + 9#) < 0.000000000001, _
         "pure shear has opposite principal stresses", passed, Failed, report
     stress(1) = -4#: stress(2) = -4#: stress(3) = -2#: stress(4) = 6#: stress(6) = 0#
-    CoupledStressInvariants stress, Trace, q, high, mid, low
+    CoupledStressInvariants stress, trace, q, high, mid, low
     TestRecord Abs(high - 2#) < 0.000000000001 And Abs(mid + 2#) < 0.000000000001 And Abs(low + 10#) < 0.000000000001, _
         "rotated principal directions preserve spectrum", passed, Failed, report
     TestRecord Abs(CoupledBarcelonaYield(-30#, 30#, 0#, 30#, 3#, 0.12, 3#)) < 0.000000000001, _
@@ -112826,16 +113090,16 @@ Public Function RunTestCoupledConcreteTensor() As String
     Const delta As Double = 0.00001
     Dim otherFlow(1 To 6) As Double, original As Double, plus As Double, minus As Double, value As Double, i As Long
     stress(5) = 2.5: stress(6) = -1.25
-    CoupledStressInvariants stress, Trace, q, high, mid, low
-    value = CoupledConcretePotential(stress, Trace, q, 0.32, 3#, 0.1, flow)
+    CoupledStressInvariants stress, trace, q, high, mid, low
+    value = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, flow)
     For i = 1 To 6
         original = stress(i)
         stress(i) = original + delta
-        CoupledStressInvariants stress, Trace, q, high, mid, low
-        plus = CoupledConcretePotential(stress, Trace, q, 0.32, 3#, 0.1, otherFlow)
+        CoupledStressInvariants stress, trace, q, high, mid, low
+        plus = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, otherFlow)
         stress(i) = original - delta
-        CoupledStressInvariants stress, Trace, q, high, mid, low
-        minus = CoupledConcretePotential(stress, Trace, q, 0.32, 3#, 0.1, otherFlow)
+        CoupledStressInvariants stress, trace, q, high, mid, low
+        minus = CoupledConcretePotential(stress, trace, q, 0.32, 3#, 0.1, otherFlow)
         stress(i) = original
         TestRecord Abs(flow(i) - (plus - minus) / (2# * delta)) < 0.00000001, _
             "potential derivative " & CStr(i), passed, Failed, report
@@ -112863,7 +113127,7 @@ Public Function RunTestCoupledConcreteReturn() As String
     update.Initialize E, NU, alpha, gamma, 0.1
     Dim elastic(1 To 6) As Double, corrected(1 To 6) As Double, increment(1 To 6) As Double
     Dim tensor(1 To 6, 1 To 6) As Double, flow(1 To 6) As Double
-    Dim multiplier As Double, multiplierDivisor As Double, value As Double, Trace As Double, q As Double, high As Double, mid As Double, low As Double
+    Dim multiplier As Double, multiplierDivisor As Double, value As Double, trace As Double, q As Double, high As Double, mid As Double, low As Double
     Dim i As Long, j As Long, caseNo As Long, dilation As Double
     Dim beta As Double: beta = fc / ft * (1# - alpha) - (1# + alpha)
     Dim ok As Boolean
@@ -112887,10 +113151,10 @@ Public Function RunTestCoupledConcreteReturn() As String
         ok = TestConcreteReturn(update, elastic, fc, ft, dilation, corrected, increment, multiplier, multiplierDivisor)
         TestRecord ok And multiplier > 0# And multiplierDivisor = 1#, "return " & CStr(caseNo), passed, Failed, report
         If ok Then
-            CoupledStressInvariants corrected, Trace, q, high, mid, low
-            value = CoupledBarcelonaYield(Trace, q, high, fc, ft, alpha, gamma)
+            CoupledStressInvariants corrected, trace, q, high, mid, low
+            value = CoupledBarcelonaYield(trace, q, high, fc, ft, alpha, gamma)
             TestRecord Abs(value) < 0.000000004, "yield consistency " & CStr(caseNo), passed, Failed, report
-            value = CoupledConcretePotential(corrected, Trace, q, dilation, ft, 0.1, flow)
+            value = CoupledConcretePotential(corrected, trace, q, dilation, ft, 0.1, flow)
             Dim residual As Double, maxBackward As Double, maxFlow As Double
             maxBackward = 0#: maxFlow = 0#
             For i = 1 To 6
@@ -112940,7 +113204,7 @@ Public Function RunTestCoupledConcreteReturn() As String
         elastic(6) = CDbl(trialShear)
         apexTag = "hydrostatic apex"
         If elastic(6) <> 0# Then apexTag = "scaled deviator apex"
-        CoupledStressInvariants elastic, Trace, q, high, mid, low
+        CoupledStressInvariants elastic, trace, q, high, mid, low
         TestRecord Abs(q - Sqr(3#) * elastic(6)) < 0.00000000000001 And (q > 0#) = (elastic(6) > 0#), _
             apexTag & " starts in the intended branch", passed, Failed, report
         ok = TestConcreteReturn(update, elastic, fc, ft, dilation, corrected, increment, multiplier, multiplierDivisor)
@@ -112961,8 +113225,8 @@ Public Function RunTestCoupledConcreteReturn() As String
                 apexTag & " analytical pressure and normal increments", passed, Failed, report
             TestRecord maxShearStress < 0.000000000001 And maxShearIncrementError < 0.000000000001, _
                 apexTag & " constitutive engineering shears", passed, Failed, report
-            CoupledStressInvariants corrected, Trace, q, high, mid, low
-            value = CoupledBarcelonaYield(Trace, q, high, fc, ft, alpha, gamma)
+            CoupledStressInvariants corrected, trace, q, high, mid, low
+            value = CoupledBarcelonaYield(trace, q, high, fc, ft, alpha, gamma)
             TestRecord Abs(value) < 0.000000004 And q < 0.000000000001 And Abs(high - low) < 0.000000000001, _
                 apexTag & " yield and hydrostatic invariants", passed, Failed, report
         End If
@@ -112978,9 +113242,9 @@ End Function
 Private Function TestConcreteReturn(ByVal update As CCoupledConcreteReturn, ByRef elastic() As Double, _
         ByVal fc As Double, ByVal ft As Double, ByVal dilation As Double, ByRef corrected() As Double, _
         ByRef increment() As Double, ByRef multiplier As Double, ByRef multiplierDivisor As Double) As Boolean
-    Dim Trace As Double, q As Double, maximum As Double, middle As Double, minimum As Double, deviatorFactor As Double
-    CoupledStressInvariants elastic, Trace, q, maximum, middle, minimum
-    TestConcreteReturn = update.Correct(elastic, Trace, q, maximum, fc, ft, ft, dilation, _
+    Dim trace As Double, q As Double, maximum As Double, middle As Double, minimum As Double, deviatorFactor As Double
+    CoupledStressInvariants elastic, trace, q, maximum, middle, minimum
+    TestConcreteReturn = update.Correct(elastic, trace, q, maximum, fc, ft, ft, dilation, _
         corrected, increment, multiplier, deviatorFactor, multiplierDivisor)
 End Function
 
@@ -113256,12 +113520,12 @@ Public Function RunTestCoupledHardShear() As String
     Dim solved As Boolean: solved = branch.Advance(1#)
     report = report & "HARD_SHEAR_SOLVED: " & CStr(solved) & " | " & branch.ResultMeta.resultComment & " | " & _
         branch.ResultMeta.diagnosticDetails & vbCrLf & "HARD_SHEAR_SECONDS: " & CStr(Timer - started) & vbCrLf
-    TestRecord (solved And branch.AcceptedLambda = 1#) Or _
-        (Not solved And branch.AcceptedLambda >= 0.94 And branch.ResultMeta.InternalStatus = rsNumericalFailure), _
+    TestRecord (solved And branch.acceptedLambda = 1#) Or _
+        (Not solved And branch.acceptedLambda >= 0.94 And branch.ResultMeta.InternalStatus = rsNumericalFailure), _
         "resolved target or documented numerical limit without physical FAIL", passed, Failed, report
     Dim field() As Double, actual() As Double, expected() As Double, i As Long
     branch.CopyAccepted field, actual
-    path.TargetSix branch.AcceptedLambda, expected
+    path.TargetSix branch.acceptedLambda, expected
     For i = 1 To 6
         TestExpectNear actual(i), expected(i), 0.00005, "accepted harder case component " & CStr(i), passed, Failed, report
     Next i
@@ -113352,7 +113616,7 @@ Public Function RunTestCoupledConcreteControlledPath() As String
     branch.CopyAccepted previous, actual
     If Not branch.Advance(0.97) Then
         report = report & "FORCE_CONTROL_STOP: " & branch.ResultMeta.diagnosticDetails & vbCrLf
-        If branch.AcceptedLambda <= 0.94 Or branch.ResultMeta.InternalStatus <> rsNumericalFailure Then _
+        If branch.acceptedLambda <= 0.94 Or branch.ResultMeta.InternalStatus <> rsNumericalFailure Then _
             Err.Raise 5, , "No confirmed second point for the deformation-controlled probe."
     End If
     branch.CopyAccepted field, actual
@@ -113364,7 +113628,7 @@ Public Function RunTestCoupledConcreteControlledPath() As String
     Dim targetControl As Double, checkControl As Double, i As Long, stepIndex As Long
     Dim peak As Double, descending As Long, acceptedSteps As Long
     path.components base, direction
-    lastLambda = branch.AcceptedLambda: peak = lastLambda
+    lastLambda = branch.acceptedLambda: peak = lastLambda
     For stepIndex = 1 To 14
         targetControl = control + increment * stepIndex * 0.4
         If Not solver.TryDeformationStep(base, direction, projection, targetControl, lastLambda, lambda, _
@@ -115833,11 +116097,11 @@ Private Sub TestRegularOnsetReturn(ByVal projection As CCoupledConcreteReturn, B
          corrected, increment, multiplier, factor, multiplierDivisor)
     TestRecord ok And multiplier > 0# And factor < 1# And multiplierDivisor = 1#, "active local return " & tag, passed, Failed, report
     If Not ok Then Exit Sub
-    Dim Trace As Double, q As Double, high As Double, middle As Double, low As Double, yieldValue As Double
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, yieldValue As Double
     Dim unused As Double, backward As Double, maxBackward As Double, maxFlow As Double, i As Long, j As Long
-    CoupledStressInvariants corrected, Trace, q, high, middle, low
-    yieldValue = CoupledBarcelonaYield(Trace, q, high, cc, ft, alpha, gamma)
-    unused = CoupledConcretePotential(corrected, Trace, q, dilation, ft, eccentricity, flow)
+    CoupledStressInvariants corrected, trace, q, high, middle, low
+    yieldValue = CoupledBarcelonaYield(trace, q, high, cc, ft, alpha, gamma)
+    unused = CoupledConcretePotential(corrected, trace, q, dilation, ft, eccentricity, flow)
     For i = 1 To 6
         backward = corrected(i) - elastic(i)
         For j = 1 To 6: backward = backward + tensor(i, j) * increment(j): Next j
@@ -115847,12 +116111,12 @@ Private Sub TestRegularOnsetReturn(ByVal projection As CCoupledConcreteReturn, B
     TestRecord Abs(yieldValue) <= 0.000000000002, "local F closes " & tag, passed, Failed, report
     TestRecord maxBackward < 0.000000000002 And maxFlow < 0.0000000000002, "local backward and flow equations close " & tag, passed, Failed, report
     If dilation > 0# Then
-        TestRecord Trace < 0#, "positive dilation reduces pressure trace " & tag, passed, Failed, report
+        TestRecord trace < 0#, "positive dilation reduces pressure trace " & tag, passed, Failed, report
     Else
-        TestRecord Trace = 0#, "zero dilation preserves pressure trace " & tag, passed, Failed, report
+        TestRecord trace = 0#, "zero dilation preserves pressure trace " & tag, passed, Failed, report
     End If
     report = report & "ONSET_RETURN;" & tag & ";" & TestOnsetNumber(yieldValue) & ";" & TestOnsetNumber(maxBackward) & _
-        ";" & TestOnsetNumber(maxFlow) & ";" & TestOnsetNumber(Trace) & ";" & TestOnsetNumber(multiplier) & vbCrLf
+        ";" & TestOnsetNumber(maxFlow) & ";" & TestOnsetNumber(trace) & ";" & TestOnsetNumber(multiplier) & vbCrLf
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -115971,7 +116235,7 @@ Public Function RunTestCoupledRetainedShoulders() As String
     direction(1) = DESIGN_FORCE
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#
-    Dim history As New Collection, Trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
     Dim coordinate As Variant, strain As Double, lambda As Double, previous As Double, factor As Double
     For Each coordinate In Array(0.0004, 0.0006)
         strain = CDbl(coordinate)
@@ -115980,14 +116244,14 @@ Public Function RunTestCoupledRetainedShoulders() As String
         solver.CopyTrial field, resultants
         solver.AcceptStep
         history.Add field
-        Trace.Add 1#, factor
+        trace.Add 1#, factor
         previous = lambda: lambda = factor
     Next coordinate
     TestExpectNear previous, 0.75, 0.00000001, "первое исходное поле", passed, Failed, report
     TestExpectNear lambda, 0.8, 0.00000001, "второе исходное поле", passed, Failed, report
 
     Dim branch As New CCoupledDeformationContinuation
-    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 0.00000001, 0.00000001, Trace
+    branch.trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 0.00000001, 0.00000001, trace
     Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
     TestRecord saved.count = 5, "уточнённые поля заменяют грубое плечо", passed, Failed, report
     Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
@@ -116052,7 +116316,7 @@ Private Sub TestDesignWitnessAfterRefinement(ByVal blocksRefined As Boolean, _
     offset(1) = 4# * area: direction(1) = 15# * area
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#
-    Dim history As New Collection, Trace As New CCoupledLoadTrace
+    Dim history As New Collection, trace As New CCoupledLoadTrace
     Dim field() As Double, resultants() As Double, trialResults() As Double
     Dim previous As Double, lambda As Double, prior As Double, eps As Variant
     For Each eps In Array(0.0003, LEFT_STRAIN)
@@ -116061,7 +116325,7 @@ Private Sub TestDesignWitnessAfterRefinement(ByVal blocksRefined As Boolean, _
         solver.CopyTrial field, resultants
         solver.AcceptStep
         history.Add field
-        Trace.Add 1#, prior
+        trace.Add 1#, prior
         previous = lambda: lambda = prior
     Next eps
     TestExpectNear lambda, (30000# * LEFT_STRAIN - 10000000000# * LEFT_STRAIN ^ 3 - 4#) / 15#, 0.00000001, _
@@ -116073,7 +116337,7 @@ Private Sub TestDesignWitnessAfterRefinement(ByVal blocksRefined As Boolean, _
     solver.DiscardStep
 
     Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
-    branch.Trace solver, Nothing, offset, direction, history, previous, lambda, resultants, 1.4, 0.0125, 30, 0.00000001, 0.00000001, Trace
+    branch.trace solver, Nothing, offset, direction, history, previous, lambda, resultants, 1.4, 0.0125, 30, 0.00000001, 0.00000001, trace
     If Not branch.CopyPeak(peak, accuracy, designVerified) Then _
         Err.Raise 5, , "Не подтверждён максимум: " & branch.ResultMeta.diagnosticDetails
     TestExpectNear peak, (30000# * 0.000975 - 10000000000# * 0.000975 ^ 3 - 4#) / 15#, 0.00000001, _
@@ -116122,21 +116386,21 @@ Private Sub TestDesignWitnessInPrefix(ByRef passed As Long, ByRef Failed As Long
     direction(1) = DESIGN_FORCE
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#
-    Dim history As New Collection, Trace As New CCoupledLoadTrace
+    Dim history As New Collection, trace As New CCoupledLoadTrace
     Dim field() As Double, actual() As Double, lambda As Double
     If Not solver.TryStep(DESIGN_FORCE, 0#, 0#, 0#, 0#, 0#, 0.00000001, 0.00000001, 30) Then _
         Err.Raise 5, , "Не подтверждена точная исходная сила."
     solver.CopyTrial field, actual
     solver.AcceptStep
-    history.Add field: Trace.Add 1#, 1#
+    history.Add field: trace.Add 1#, 1#
     If Not solver.TryDeformationStep(offset, direction, control, 0.0009, 1#, lambda, 0.00000001, 0.00000001, 30) Then _
         Err.Raise 5, , "Не подтверждён второй узел префикса."
     solver.CopyTrial field, actual
     solver.AcceptStep
-    history.Add field: Trace.Add 1#, lambda
+    history.Add field: trace.Add 1#, lambda
 
     Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
-    branch.Trace solver, Nothing, offset, direction, history, 1#, lambda, actual, 1.4, 0.005, 30, 0.00000001, 0.00000001, Trace
+    branch.trace solver, Nothing, offset, direction, history, 1#, lambda, actual, 1.4, 0.005, 30, 0.00000001, 0.00000001, trace
     TestRecord branch.CopyPeak(peak, accuracy, designVerified) And designVerified, _
         "точное сочетание из сохранённого префикса подтверждено", passed, Failed, report
 End Sub
@@ -116165,7 +116429,7 @@ Public Function RunTestCoupledDiscardedShoulder() As String
     direction(1) = DESIGN_FORCE
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#
-    Dim history As New Collection, Trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
     Dim coordinate As Variant, factor As Double, lambda As Double, previous As Double
     For Each coordinate In Array(0.0004, 0.0006)
         If Not solver.TryDeformationStep(offset, direction, control, CDbl(coordinate), lambda, factor, 0.00000001, 0.00000001, 30) Then _
@@ -116173,14 +116437,14 @@ Public Function RunTestCoupledDiscardedShoulder() As String
         solver.CopyTrial field, resultants
         solver.AcceptStep
         history.Add field
-        Trace.Add 1#, factor
+        trace.Add 1#, factor
         previous = lambda: lambda = factor
     Next coordinate
     TestExpectNear previous, 0.75, 0.00000001, "грубое левое поле", passed, Failed, report
     TestExpectNear lambda, 1.2, 0.00000001, "грубый максимум до уточнения", passed, Failed, report
 
     Dim branch As New CCoupledDeformationContinuation
-    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 0.00000001, 0.00000001, Trace
+    branch.trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 0.00000001, 0.00000001, trace
     Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
     TestRecord saved.count = 5, "итоговая история содержит четыре подшага", passed, Failed, report
     Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
@@ -116406,7 +116670,7 @@ Public Function RunTestCoupledControlProgress() As String
     direction(1) = DESIGN_FORCE
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#
-    Dim history As New Collection, Trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
     Dim coordinate As Variant, factor As Double, previous As Double, lambda As Double
     For Each coordinate In Array(0.0004, 0.0006)
         If Not solver.TryDeformationStep(offset, direction, control, CDbl(coordinate), lambda, factor, 0.00000001, REL_TOL, 30) Then _
@@ -116414,14 +116678,14 @@ Public Function RunTestCoupledControlProgress() As String
         solver.CopyTrial field, resultants
         solver.AcceptStep
         history.Add field
-        Trace.Add 1#, factor
+        trace.Add 1#, factor
         previous = lambda: lambda = factor
     Next coordinate
     TestExpectNear previous, 0.75, 0.00000001, "исходная первая нагрузка", passed, Failed, report
     TestExpectNear lambda, 0.8, 0.00000001, "исходная вторая нагрузка", passed, Failed, report
 
     Dim branch As New CCoupledDeformationContinuation
-    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, ABS_TOL, REL_TOL, Trace
+    branch.trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, ABS_TOL, REL_TOL, trace
     Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
     Dim status As CResultMeta: Set status = branch.ResultMeta
     TestRecord status.InternalStatus = rsNumericalFailure, "предел сечения остаётся неподтверждённым", passed, Failed, report
@@ -116510,7 +116774,7 @@ Public Function RunTestCoupledSteelAtDesign() As String
             Set meta = branch.ResultMeta
             report = report & "STEEL_NEAR: exact=" & CStr(expected) & "; initial=" & CStr(initialFactor) & _
                 "; directU-1=" & CStr(numericalRatio - 1#) & "; event=" & CStr(eventFound) & "; lo=" & CStr(low) & _
-                "; hi=" & CStr(high) & "; accepted=" & CStr(branch.AcceptedLambda) & "; code=" & CStr(meta.ResultCode) & vbCrLf
+                "; hi=" & CStr(high) & "; accepted=" & CStr(branch.acceptedLambda) & "; code=" & CStr(meta.ResultCode) & vbCrLf
             report = report & "STEEL_NEAR_DETAIL: " & meta.diagnosticDetails & vbCrLf
             If expected >= 1# Then
                 TestRecord meta.InternalStatus <> rsCheckFailed, "допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки", _
@@ -116855,7 +117119,7 @@ Private Function SearchLopesA2StrengthTest(ByVal operators As CCoupledElasticSta
     branch.Initialize solver, path, 4, 64, 24, 0.0000005, 0.0000005, True
     branch.TraceSteelLimit response, 0.25, maximum, 0.005, True
     Dim forceMeta As CResultMeta: Set forceMeta = branch.ResultMeta
-    AddExperimentTraceTest report, tracePath, "A2_STRENGTH_FORCE: " & ExperimentNumberTest(branch.AcceptedLambda) & " | " & _
+    AddExperimentTraceTest report, tracePath, "A2_STRENGTH_FORCE: " & ExperimentNumberTest(branch.acceptedLambda) & " | " & _
         forceMeta.resultComment & " | " & forceMeta.diagnosticDetails
     Dim controlled As CCoupledDeformationContinuation, best As Double, peak As Double, accuracy As Double, verified As Boolean
     Dim limitFields As Collection, actual() As Double, force() As Double, field() As Double
@@ -117143,7 +117407,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         started = Timer
         solved = branch.Advance(CDbl(stage))
         Set meta = branch.ResultMeta
-        reached = branch.AcceptedLambda
+        reached = branch.acceptedLambda
         row = CStr(stage) & ";" & ExperimentNumberTest(reached)
         If branch.HasAcceptedVariableState Or branch.AcceptedOffsetFraction = 1# And solved Then
             branch.CopyAccepted field, achieved
@@ -117319,9 +117583,9 @@ Private Sub ConfirmTBU3PeakTest(ByVal operators As CCoupledElasticState, ByVal s
     path.components baseLoad, direction
     branch.CopyAccepted accepted, resultants
     Dim controlled As New CCoupledDeformationContinuation
-    AddExperimentTraceTest report, tracePath, "PEAK_SEARCH_STARTED: " & ExperimentNumberTest(branch.AcceptedLambda)
-    controlled.Trace solver, response, baseLoad, direction, branch.AcceptedFields, branch.PreviousAcceptedLambda, _
-        branch.AcceptedLambda, resultants, CDbl(requestedStage), STAGE_TOLERANCE, 24, 0.0000005, 0.00000002
+    AddExperimentTraceTest report, tracePath, "PEAK_SEARCH_STARTED: " & ExperimentNumberTest(branch.acceptedLambda)
+    controlled.trace solver, response, baseLoad, direction, branch.AcceptedFields, branch.PreviousAcceptedLambda, _
+        branch.acceptedLambda, resultants, CDbl(requestedStage), STAGE_TOLERANCE, 24, 0.0000005, 0.00000002
 
     Dim meta As CResultMeta: Set meta = controlled.ResultMeta
     AddExperimentTraceTest report, tracePath, "PEAK_DIAGNOSTICS: " & meta.resultComment & " | " & meta.diagnosticDetails
@@ -117369,7 +117633,7 @@ Private Sub ContinueTBU3ByTwistTest(ByVal operators As CCoupledElasticState, ByV
     Dim increment As Double, initialIncrement As Double, LENGTH As Double, reached As Double, coordinate As Double
     LENGTH = field(4) / twist ' Обобщённая координата равна относительному углу, умноженному на длину масштаба.
     initialIncrement = 0.0002 * LENGTH / 1000#
-    increment = initialIncrement: reached = branch.AcceptedLambda: coordinate = field(4)
+    increment = initialIncrement: reached = branch.acceptedLambda: coordinate = field(4)
     Dim attempt As Long, trialLambda As Double, errorNorm As Double, row As String, started As Double, stopReason As String
     stopReason = "AttemptLimit"
     AddExperimentTraceTest report, tracePath, "TWIST_REQUESTED_STAGE: " & CStr(requestedStage)
@@ -130052,7 +130316,7 @@ Public Function RunPublishedBuildTests() As String
     Dim definition As CSectionDefinition, builder As CSectionBuilder, model As CSectionModel, meshOptions As TSectionMeshOptions
     Dim mesh As CFiberMeshBuilder, sameMesh As CFiberMeshBuilder, rebars As CRebarLayout, sameRebars As CRebarLayout
     Dim rules As CRebarRuleExecutor, sameRules As CRebarRuleExecutor, geometry As CGeometryRegion, unused As CRebarLayout
-    Dim before As String, Trace As String, errorCode As Long, count As Long, i As Long
+    Dim before As String, trace As String, errorCode As Long, count As Long, i As Long
     Set definition = TestLabelDefinition(1#): Set builder = New CSectionBuilder
     meshOptions.stepX = 100#: meshOptions.stepY = 100#: meshOptions.materialID = 1: meshOptions.boundarySubdivisions = 1
     Set model = builder.Build(definition, meshOptions)
@@ -130067,7 +130331,7 @@ Public Function RunPublishedBuildTests() As String
     For i = 1 To model.rebarCount
         TestCheck "published.bar." & CStr(i), model.RebarX(i) = rebars.x(i) And model.rebarY(i) = rebars.y(i) And model.RebarDiameter(i) = rebars.diameter(i)
     Next i
-    before = TestLayoutSnapshot(rebars): Trace = rules.DiagnosticsText
+    before = TestLayoutSnapshot(rebars): trace = rules.DiagnosticsText
     Set geometry = New CGeometryRegion: geometry.Initialize definition.ConcreteDomain
     On Error Resume Next
     mesh.BuildMesh geometry, 50#, 50#, 1, 1
@@ -130093,7 +130357,7 @@ Public Function RunPublishedBuildTests() As String
     Set unused = rules.Build(definition, geometry)
     errorCode = Err.number: Err.Clear
     On Error GoTo Failed
-    TestCheck "published.rules.reject.rebuild", errorCode <> 0 And rules.DiagnosticsText = Trace
+    TestCheck "published.rules.reject.rebuild", errorCode <> 0 And rules.DiagnosticsText = trace
     model.AddRebarElement 100#, 100#, 10#, 0#, "Rebar", 1, "AfterBuild"
     On Error Resume Next
     Set sameMesh = builder.mesh
@@ -147310,8 +147574,8 @@ Private Sub TestMinimumRebarArea()
     TestCheck "minimumArea.annotations.acceptedOnly", TestAnnotatedBarCount(model.annotations) = 6 And model.annotations.count = 2
     Dim lowX As Double, highX As Double, lowY As Double, highY As Double
     TestCheck "minimumArea.filteredBoundsAbsent", Not builder.rules.RuleBounds("Small", lowX, highX, lowY, highY)
-    Dim Trace As String: Trace = builder.rules.RuleTrace("Small")
-    TestCheck "minimumArea.ruleCounters", InStr(Trace, "Requested=3;") > 0 And InStr(Trace, "Skipped=3;") > 0 And InStr(Trace, "FilteredArea=3;") > 0
+    Dim trace As String: trace = builder.rules.RuleTrace("Small")
+    TestCheck "minimumArea.ruleCounters", InStr(trace, "Requested=3;") > 0 And InStr(trace, "Skipped=3;") > 0 And InStr(trace, "FilteredArea=3;") > 0
     TestCheck "minimumArea.totalDiagnostics", InStr(builder.rules.DiagnosticsText, "Requested=9;") > 0 And _
         InStr(builder.rules.DiagnosticsText, "Skipped=3;") > 0 And InStr(builder.rules.GeometryWarningText, "Mesh.MinElementArea") > 0
     TestCheck "minimumArea.diagnosticCodes", builder.rules.diagnosticCount = 3 And builder.rules.DiagnosticAt(1).code = "MIN_ELEMENT_AREA"
@@ -152624,11 +152888,11 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
         If Not branch.Advance(CDbl(requested)) Then
             Set meta = branch.ResultMeta
             report = report & "STOP;requested=" & TravushNumberTest(CDbl(requested)) & ";accepted=" & _
-                TravushNumberTest(branch.AcceptedLambda) & ";remaining=" & TravushNumberTest(CDbl(requested) - branch.AcceptedLambda) & _
+                TravushNumberTest(branch.acceptedLambda) & ";remaining=" & TravushNumberTest(CDbl(requested) - branch.acceptedLambda) & _
                 ";" & meta.resultComment & " " & meta.diagnosticDetails & vbCrLf
             Exit For
         End If
-        reached = branch.AcceptedLambda
+        reached = branch.acceptedLambda
         branch.CopyAccepted field, actual
         path.TargetSix reached, target
         operators.GeneralizedDeformation field, eps0, kx, ky, twist

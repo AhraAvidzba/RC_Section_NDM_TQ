@@ -62,6 +62,7 @@ Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mFixedYieldRecoveryProbes As Long
+Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
 Private mUsesYieldControl As Boolean
 Private mPostPeakControlName As String, mPostPeakControlPoints As Long
 Private mPostPeakWidePoints As Long
@@ -87,6 +88,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
+    mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -134,6 +136,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean
     Dim recoveryProjection() As Double
+    Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
@@ -145,7 +148,11 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         targetCoordinate = current.Coordinate + increment
         If targetCoordinate <= current.Coordinate Then Exit For
         trial.Coordinate = targetCoordinate
-        probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        Set arcFields = Nothing
+        If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
+            Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
+        probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+            arcFields:=arcFields)
         lastProbeFailed = Not probed
         lastNoProgress = False
         changedControl = False: smoothTrial = False
@@ -377,7 +384,8 @@ End Property
 ' Решает пробу при заданной мере. Проверки продвижения и касательной
 ' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
-        Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False, _
+        Optional ByVal arcFields As Collection = Nothing) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     point.Uncertainty = 0#
@@ -389,6 +397,15 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
         mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+    End If
+    If Not solved And Not arcFields Is Nothing And mProbeCount + 2 <= PROBE_LIMIT Then
+        Dim extraProbes As Long
+        solved = mSolver.TryRecoverDeformationByArc(arcFields, mTrace, initialLambda, mAbsTol, mRelTol, _
+            mMaxIterations, point.Lambda, extraProbes)
+        If extraProbes > 0 Then
+            mArcRecoveryTried = True: mArcRecoveryProbes = extraProbes
+            mProbeCount = mProbeCount + extraProbes
+        End If
     End If
     If Not solved Then
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
@@ -875,6 +892,7 @@ Private Function Details() As String
         Details = Details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
         Details = Details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
+    If mArcRecoveryTried Then Details = Details & "; вспомогательных проб псевдодуги и повтора: " & CStr(mArcRecoveryProbes)
     If Len(mSteelEventDetails) > 0 Then Details = Details & " | " & mSteelEventDetails
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
