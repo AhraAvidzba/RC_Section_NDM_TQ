@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "57BDC418F428D1E8C23C29B6E94A81DF8C5395452B5406F4DFDE211CD440F3EE",
+  "manifest_sha256": "E1307654399043EA58C59FDDA87F311FA1960D7756D979F5F04051527C24A5B2",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 125,
+  "passed": 126,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1070,6 +1070,13 @@
       "archive": "MVT2ProductionAffineCoreNative20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "MVT2_PRODUCTION_AFFINE_CORE_EXACT_WIRES"
+    },
+    {
+      "id": "mvt2-exact-h26-smaller-arcs-native",
+      "journal_section": 436,
+      "archive": "MVT2ExactH26SmallerArcNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "EXACT H26 REPLAY 89A3FFCE98A7FD8B76D9F7886D3983ADEA1E4CAE70A43A1BDE4B260A32F156CE H24 RESTORED True"
     }
   ]
 }

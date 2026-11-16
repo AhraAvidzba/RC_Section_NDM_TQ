@@ -128,7 +128,8 @@
     "HardShearCurrentDepthNative20261116": "41AC53AEF118CA7E0C14781E1AE03F874EBEC37E9BF793EA55329183E62AB43E",
     "MVT2AdaptiveBoundedContinuationNative20261116": "A5F4EABFE14F46544D6BA36934B050AED5C5F3655DC91D32D6E8C6408562E699",
     "MVT2ExactForceAffineSeedNative20261116": "AFA8504EE62B9FA39766A1AFDA088D62BFA15CAD7EB1501EEDEEE78F8079677E",
-    "MVT2ProductionAffineCoreNative20261116": "28D9F83C687CD501A1B8CCEF7616C659C82675E78CC26B63C94F9BF53C39B886"
+    "MVT2ProductionAffineCoreNative20261116": "28D9F83C687CD501A1B8CCEF7616C659C82675E78CC26B63C94F9BF53C39B886",
+    "MVT2ExactH26SmallerArcNative20261116": "B775E3D70EED7CC8239F905AC4E3779AA65CE8994BA1F045BED899B6235B4F07"
   },
   "cases": [
     {
@@ -1481,6 +1482,17 @@
         "{evidence}/MVT2StockBranchArcNative20261116.zip"
       ],
       "stdout_contains": "MVT2_PRODUCTION_AFFINE_CORE_EXACT_WIRES"
+    },
+    {
+      "id": "mvt2-exact-h26-smaller-arcs-native",
+      "journal_section": 436,
+      "archive": "MVT2ExactH26SmallerArcNative20261116",
+      "script": "ReplayResumePortable.py",
+      "arguments": [
+        "--archives",
+        "{evidence}"
+      ],
+      "stdout_contains": "EXACT H26 REPLAY 89A3FFCE98A7FD8B76D9F7886D3983ADEA1E4CAE70A43A1BDE4B260A32F156CE H24 RESTORED True"
     }
   ],
   "frozen_repositories": {
