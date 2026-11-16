@@ -132,6 +132,11 @@ Public Property Get NormalUtilization() As Double
     NormalUtilization = mNormalUtilization
 End Property
 
+' Показывает, получено ли достоверное поле для числовой проверки деформаций.
+Friend Property Get HasNormalState() As Boolean
+    HasNormalState = IsArray(mSteelTable)
+End Property
+
 ' Возвращает подробную таблицу продольных стержней во внутренних единицах.
 Public Property Get SteelTable() As Variant
     SteelTable = mSteelTable

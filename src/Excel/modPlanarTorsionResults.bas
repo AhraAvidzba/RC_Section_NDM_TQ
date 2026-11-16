@@ -141,7 +141,7 @@ Private Sub PutSummary(ByRef data As Variant, ByVal rowIndex As Long, ByVal comb
         data(rowIndex, 5) = outcome.HoopReserve
     End If
     data(rowIndex, 6) = policy.ExternalStatus(hoop)
-    If normal.Calculated Then data(rowIndex, 7) = outcome.NormalUtilization
+    If outcome.HasNormalState Then data(rowIndex, 7) = outcome.NormalUtilization
     data(rowIndex, 8) = policy.ExternalStatus(normal)
     If hoop.InternalStatus <> rsSuccess Then comment = Trim$(hoop.ResultComment)
     normalComment = Trim$(normal.ResultComment)

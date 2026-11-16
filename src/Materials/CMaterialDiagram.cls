@@ -467,7 +467,12 @@ End Function
 Friend Function TryInitialStrainForStress(ByVal stress As Double, ByRef strain As Double) As Boolean
     EnsureInitialized
     strain = 0#
-    If StressAtStrain(0#) <> 0# Then Exit Function
+    Dim origin As Long
+    For origin = 1 To mPointCount
+        If mStrains(origin) = 0# Then Exit For
+    Next origin
+    If origin > mPointCount Then Exit Function
+    If mStresses(origin) <> 0# Then Exit Function ' Нулевой узел берётся точно, без отмены близких слагаемых на соседнем участке.
     If stress = 0# Then
         TryInitialStrainForStress = True
         Exit Function
@@ -476,27 +481,28 @@ Friend Function TryInitialStrainForStress(ByVal stress As Double, ByRef strain A
     Dim first As Long, last As Long, limit As Double
     If direction > 0 Then
         If Not mHasPhysicalTensionLimit Then Exit Function
-        first = 1: last = mPointCount: limit = mPhysicalTensionStrain
+        first = origin + 1: last = mPointCount: limit = mPhysicalTensionStrain
     Else
-        first = mPointCount: last = 1: limit = mPhysicalCompressionStrain
+        first = origin - 1: last = 1: limit = mPhysicalCompressionStrain
     End If
 
     Dim i As Long, point As Double, magnitude As Double, previousStrain As Double, previousMagnitude As Double
     Dim required As Double: required = Abs(stress)
     For i = first To last Step direction
         point = mStrains(i)
-        If direction * point > 0# Then
-            If direction * (point - limit) > 0# Then point = limit
-            magnitude = direction * StressAtStrain(point)
-            If magnitude < previousMagnitude Then Exit Function
-            If magnitude >= required And magnitude > previousMagnitude Then
-                strain = previousStrain + (point - previousStrain) * ((required - previousMagnitude) / (magnitude - previousMagnitude))
-                TryInitialStrainForStress = True
-                Exit Function
-            End If
-            If point = limit Then Exit Function
-            previousStrain = point: previousMagnitude = magnitude
+        If direction * (point - limit) > 0# Then
+            point = limit: magnitude = direction * StressAtStrain(point)
+        Else
+            magnitude = direction * mStresses(i)
         End If
+        If magnitude < previousMagnitude Then Exit Function
+        If magnitude >= required And magnitude > previousMagnitude Then
+            strain = previousStrain + (point - previousStrain) * ((required - previousMagnitude) / (magnitude - previousMagnitude))
+            TryInitialStrainForStress = True
+            Exit Function
+        End If
+        If point = limit Then Exit Function
+        previousStrain = point: previousMagnitude = magnitude
     Next i
 End Function
 
