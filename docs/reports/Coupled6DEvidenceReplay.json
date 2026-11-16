@@ -1,6 +1,6 @@
 {
-  "manifest_sha256": "70702E52C4E3283F9932F45CCAA310CE0AA8C7C01F487474D196A31D965259EC",
-  "source_checkpoint": "876f4be",
+  "manifest_sha256": "8BEE18E74E08048D8D069E223035842E30F75BD7626E924CFF5A7FF874E55BE0",
+  "source_checkpoint": "032ec14",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
     "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
@@ -11,7 +11,7 @@
     "scipy": "1.18.1"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 24,
+  "passed": 29,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -214,6 +214,49 @@
       "archive": "KaniRefitNear47Portable",
       "verified_outputs_sha256": {},
       "verified_stdout": "\"outcome\": \"ADMITTED_EXACT_SAME_BRANCH\""
+    },
+    {
+      "id": "kani-h45-commit",
+      "journal_section": 320,
+      "archive": "KaniCommitNear48Portable",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "\"89rows5controls\": 10"
+    },
+    {
+      "id": "kani-vba-apex-guard",
+      "journal_section": 321,
+      "archive": "KaniApexGuardPortable20261116",
+      "verified_outputs_sha256": {
+        "NativeApexDirectionChecks.json": "C4564229FB7D4F723F6AE2F3078DE0C7C8E783C0A90D2CE8FB857AF3664AA027"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-fresh-tangent",
+      "journal_section": 322,
+      "archive": "MVT2FreshBounded20261116",
+      "verified_outputs_sha256": {
+        "VerificationA.json": "A6390D68B8002C032A7B2094BEDDB9CBC282FFF217733307033CC10D606045F6"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-fresh-correction",
+      "journal_section": 322,
+      "archive": "MVT2FreshBounded20261116",
+      "verified_outputs_sha256": {
+        "VerificationB.json": "C5632BF17C49887DF7A15AF77CC34A29466FB3EDDB528C1A2CED5CF707BE08E5"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-section-apex-actions",
+      "journal_section": 323,
+      "archive": "KaniApexSectionActions20261116",
+      "verified_outputs_sha256": {
+        "ApexSectionVerification.json": "ED408C571CE1A614E9287131B81C2BBB3CE2BFB143EC4798F5524D38AD7B4594"
+      },
+      "verified_stdout": null
     }
   ]
 }

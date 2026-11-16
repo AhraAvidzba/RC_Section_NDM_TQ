@@ -1,5 +1,5 @@
 {
-  "source_checkpoint": "876f4be",
+  "source_checkpoint": "032ec14",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
     "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
@@ -30,7 +30,11 @@
     "KaniHydrostaticApex46Portable": "B920F591EA6436DB65914CEF8582EA8EB42301679A15311A924253942FEAAEA5",
     "MVT2BoundedReplay20261116": "7E7E4274767518BA473007113F51DD0E27FC4CA792882B1B1D41BCCDC24772A2",
     "KaniApexConstitutiveReplay20261116": "7AC4030A1635FAFED411B69A6AB5AB23CEEC6A29EFA98D52C3D2DBEF5D496484",
-    "KaniRefitNear47Portable": "409609AC8C79261DF38EE37A1B450B2BBD5CCDAB50142398B5DF61F274834122"
+    "KaniRefitNear47Portable": "409609AC8C79261DF38EE37A1B450B2BBD5CCDAB50142398B5DF61F274834122",
+    "KaniCommitNear48Portable": "EA0A80006AF81D99799B53FDCB75B18CDDE7B7DF730AB16039902F12C6431488",
+    "KaniApexGuardPortable20261116": "89B6492D9BF44E7779BE3D9641BACDB891F9360C20BC2C23282B9E988D20651B",
+    "MVT2FreshBounded20261116": "48EAAC2597C4A5691072E698E56EEAE14F45B92B58BF85FF3515BEB451A2CA8C",
+    "KaniApexSectionActions20261116": "360D22C5847F1DF3D40ECAA11689AF2B8B68CF8C94A22E7ACC2B3D19A08486A6"
   },
   "cases": [
     {
@@ -285,6 +289,59 @@
       "archive": "KaniRefitNear47Portable",
       "script": "Verify.py",
       "stdout_contains": "\"outcome\": \"ADMITTED_EXACT_SAME_BRANCH\""
+    },
+    {
+      "id": "kani-h45-commit",
+      "journal_section": 320,
+      "archive": "KaniCommitNear48Portable",
+      "script": "Verify.py",
+      "stdout_contains": "\"89rows5controls\": 10"
+    },
+    {
+      "id": "kani-vba-apex-guard",
+      "journal_section": 321,
+      "archive": "KaniApexGuardPortable20261116",
+      "script": "Verify-KaniApexDirection.py",
+      "outputs": {
+        "NativeApexDirectionChecks.json": "C4564229FB7D4F723F6AE2F3078DE0C7C8E783C0A90D2CE8FB857AF3664AA027"
+      }
+    },
+    {
+      "id": "mvt2-fresh-tangent",
+      "journal_section": 322,
+      "archive": "MVT2FreshBounded20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline",
+        "--phase",
+        "A"
+      ],
+      "outputs": {
+        "VerificationA.json": "A6390D68B8002C032A7B2094BEDDB9CBC282FFF217733307033CC10D606045F6"
+      }
+    },
+    {
+      "id": "mvt2-fresh-correction",
+      "journal_section": 322,
+      "archive": "MVT2FreshBounded20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline",
+        "--phase",
+        "B"
+      ],
+      "outputs": {
+        "VerificationB.json": "C5632BF17C49887DF7A15AF77CC34A29466FB3EDDB528C1A2CED5CF707BE08E5"
+      }
+    },
+    {
+      "id": "kani-section-apex-actions",
+      "journal_section": 323,
+      "archive": "KaniApexSectionActions20261116",
+      "script": "Verify-ApexSectionPortable.py",
+      "outputs": {
+        "ApexSectionVerification.json": "ED408C571CE1A614E9287131B81C2BBB3CE2BFB143EC4798F5524D38AD7B4594"
+      }
     }
   ]
 }
