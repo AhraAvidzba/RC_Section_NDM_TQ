@@ -95,7 +95,10 @@
     "A2ScalarSeedPairPortable": "AA5C7A495DB3B9342ED4C0623FA8F2C4F696C464A81C5A014CC1673873756D08",
     "MVT2HalfJointFeasibility20261116": "A7D5240795949893042B1671159255623F6B1524491EEB67BFB55D2029A8D8A6",
     "HardShearDirectBenchmark20261116": "C127D21925239289B3CF3F6BF793099F1F4A9E8ACC7A9C0646A579A2C428ABFA",
-    "RetainedCoupledDirectState20261116": "BC717D9A1C32AE48CF494C78561C0DAE2F5FB14C4BDDE4665A9D163A66F19AC5"
+    "RetainedCoupledDirectState20261116": "BC717D9A1C32AE48CF494C78561C0DAE2F5FB14C4BDDE4665A9D163A66F19AC5",
+    "A2LaneABExactNative20261116": "CA2C750095DBB1F3DB62D5CC2EE046638E86D79D8CADCD3EF821EFF8DD31AF53",
+    "A2FieldSeedPairPortable": "229FC672AEC273083B544C7B8B47234C28EB1D7037CEDE905B7073A90B01E49D",
+    "MixedHoopDirectContact20261116": "E4B617D01445DD11B3753CF26F509546461D8125A9BC14AB59CB47141DB26A4C"
   },
   "cases": [
     {
@@ -1133,6 +1136,38 @@
         "{repo}"
       ],
       "stdout_contains": "RETAINED DIRECT EQUILIBRIUM AND SNAPSHOT EVIDENCE PASS"
+    },
+    {
+      "id": "a2-both-material-lanes-three-exact-torques",
+      "journal_section": 400,
+      "archive": "A2LaneABExactNative20261116",
+      "script": "ReplayPair.py",
+      "arguments": [],
+      "outputs": {
+        "PairReplay.json": "44318E99DBE0D038D5C8BA29AE2CF799B39C4FB4CCC78FD39E0967320CE98A3E"
+      }
+    },
+    {
+      "id": "a2-mechanical-field-seed-native-pair",
+      "journal_section": 401,
+      "archive": "A2FieldSeedPairPortable",
+      "script": "Replay-Field.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-A2FieldSeedVerification.json": "C241D09F9AA465E682763462C788B1A15DD650BBCBAA49DCC77CA67E0190B607",
+        "Replay-FieldBaseline.json": "9BE0D7AF6DC240AE0F0D9AB9ABEDD51AEE5AF1FF4458EA19C818ADD09FCFA71E"
+      }
+    },
+    {
+      "id": "coupled-mixed-hoop-exact-strain-contact",
+      "journal_section": 402,
+      "archive": "MixedHoopDirectContact20261116",
+      "script": "Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "MIXED HOOP EVIDENCE PASS 50D5A9437E7AB5086AC441AA16E15138D7DADE315EB335D49DAAA5B5F0864A3C"
     }
   ],
   "frozen_repositories": {

@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "82FCE62BD9417C81077AEBAFCB5D967AB4A90D0BC09ACB4172244D61BC3092AA",
+  "manifest_sha256": "6454238997065B6134C571CB7C41CE3A0F456F4C0CB45DFD886CF50C85EB91AE",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 91,
+  "passed": 94,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -814,6 +814,32 @@
       "archive": "RetainedCoupledDirectState20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "RETAINED DIRECT EQUILIBRIUM AND SNAPSHOT EVIDENCE PASS"
+    },
+    {
+      "id": "a2-both-material-lanes-three-exact-torques",
+      "journal_section": 400,
+      "archive": "A2LaneABExactNative20261116",
+      "verified_outputs_sha256": {
+        "PairReplay.json": "44318E99DBE0D038D5C8BA29AE2CF799B39C4FB4CCC78FD39E0967320CE98A3E"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "a2-mechanical-field-seed-native-pair",
+      "journal_section": 401,
+      "archive": "A2FieldSeedPairPortable",
+      "verified_outputs_sha256": {
+        "Replay-A2FieldSeedVerification.json": "C241D09F9AA465E682763462C788B1A15DD650BBCBAA49DCC77CA67E0190B607",
+        "Replay-FieldBaseline.json": "9BE0D7AF6DC240AE0F0D9AB9ABEDD51AEE5AF1FF4458EA19C818ADD09FCFA71E"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "coupled-mixed-hoop-exact-strain-contact",
+      "journal_section": 402,
+      "archive": "MixedHoopDirectContact20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MIXED HOOP EVIDENCE PASS 50D5A9437E7AB5086AC441AA16E15138D7DADE315EB335D49DAAA5B5F0864A3C"
     }
   ]
 }
