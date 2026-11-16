@@ -149,7 +149,9 @@
     "MVT2OpenSeesDistributedTorsion20261117": "E330C5999357A5E56847488315AE25384B507AEF2ED650071672938A1A5D32FB",
     "MVT2OpenSeesDistributedShear20261117": "BADC056B0CD7287D62441D19D9E242719485F6CBE92969B25C10C7AEF8329F8C",
     "HardShearSameControlWorkbookV220261117": "4AAC5838E65B216F635B35AF697277E6684F7C1FD7B0D832A2607EBFAB031109",
-    "MVT2H26PlainArcBridgeNative20261117": "5104E4EDBA0026BB449318361EE921D89AE62FC93F27490637B6D605AF5BB5DF"
+    "MVT2H26PlainArcBridgeNative20261117": "5104E4EDBA0026BB449318361EE921D89AE62FC93F27490637B6D605AF5BB5DF",
+    "HardShearPureTCurrentDirectTiming20261117": "1F566AD6A21EE7262FE6D162078AE57250AB8929B678D0F5096E2418914E8E2C",
+    "MVT2OpenSeesDamageReplay20261117": "DD6FA6FA923F2FB1A2DBBFAD772A146201566B31614F14DFBF03F5234D3D54BE"
   },
   "cases": [
     {
@@ -1719,6 +1721,24 @@
       "script": "ReplayBridgePortable.py",
       "arguments": ["--archives", "{evidence}"],
       "stdout_contains": "EXACT FIXED TARGET 18.5807648375649 ITERATIONS LEFT 6"
+    },
+    {
+      "id": "hardshear-current-pure-torsion-versus-mixed-direct-time",
+      "journal_section": 457,
+      "archive": "HardShearPureTCurrentDirectTiming20261117",
+      "script": "ReplayTorquePortable.py",
+      "stdout_contains": "CORRECTED NATIVE PAIR DB92B4224EC6A5F192B3174DE5587FF5487D737B7CA4F6EEB7FD0C8D05AA2888"
+    },
+    {
+      "id": "mvt2-opensees-material-field-after-rejected-shear-step",
+      "journal_section": 458,
+      "archive": "MVT2OpenSeesDamageReplay20261117",
+      "script": "Verify-DamageReplay.py",
+      "arguments": ["{evidence}/MVT2OpenSeesDistributedShear20261117.zip", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "55F6457445E763A5FD16FB3BAD7699290539D294E29C5563B3F06E8C1BC0B6F0"
+      },
+      "stdout_contains": "MVT2_DAMAGE_REPLAY_DETACHED_PASS -3 Q10_numeric_failure_material_trace_saved"
     }
   ],
   "frozen_repositories": {
