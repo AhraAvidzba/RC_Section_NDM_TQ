@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "84618845290FCCB017F099A6E31C95C918F54759568AF975A96557F6609ACD32",
+  "manifest_sha256": "C8DA11B7709E85DC4EF987E07C2EC0A3F799DEBD45F2A5A6D17FFE22556BA42B",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 135,
+  "passed": 136,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1146,6 +1146,13 @@
         "Replayed.json": "CBAF7D2BF605388D478798807A88F61EC6D28919F745E1045F64CCBFEFE05E67"
       },
       "verified_stdout": "MVT2_DISTRIBUTED_DETACHED_PASS 4 states"
+    },
+    {
+      "id": "mvt2-h26-stock-fixed-control-and-guide-native",
+      "journal_section": 446,
+      "archive": "MVT2H26FixedControlGuideComparisonNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "FIXED CONTROL 4DB67D74AE025BAD266EAC590F718B8B8955A24B1198319EA60185FB099F5F36 INDEPENDENT ANALYSIS B5426B1B5E2848B18301D99B740110A28AF911ECD6CA15A1135974C16A49D430"
     }
   ]
 }
