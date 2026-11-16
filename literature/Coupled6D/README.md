@@ -56,6 +56,8 @@ PDF в этой папке — неизменённые копии из архи
 
 Для диагностического продолжения TBU3 проверен секущий прогноз и коррекция по поперечной плоскости по § 3.3 статьи E. Riks, *An incremental approach to the solution of snapping and buckling problems*, International Journal of Solids and Structures 15(7), 529–551, 1979. Раздел сверён по доступной копии. Прямая загрузка PDF на рабочий компьютер завершилась тайм-аутом. Русскоязычное изложение секущего прогноза доступно в сохранённой статье Кузнецова, § 3. [DOI Riks](https://doi.org/10.1016/0020-7683(79)90081-7) · [Копия PDF](https://electronicsandbooks.com/edt/manual/Magazine/I/International%20Journal%20of%20Solidstate%20Structures/IJSS_Papers/Vol.01-15/06071111172402763.pdf) · [Кузнецов, Math-Net](https://www.mathnet.ru/rus/zvmmf773).
 
+Для материальной пробы §307 использована огибающая S. Popovics, *A numerical approach to the complete stress-strain curve of concrete*, Cement and Concrete Research 3(5), 583–599, 1973, уравнения (2) и (8). Формулы проверены по представлению первичного текста. Источник не предоставил доступный для сохранения PDF. Соотношение 1,16 при равном двуосном сжатии взято из опубликованной аннотации H. Kupfer, H. K. Hilsdorf и H. Rüsch, *Behavior of Concrete Under Biaxial Stresses*, ACI Journal 66(8), 656–666, 1969. [Popovics, издатель](https://www.sciencedirect.com/science/article/pii/0008884673900963) · [Попович, представление исходной статьи](https://studylib.net/doc/29018448/0008-8846-2873-2990096-3) · [Kupfer, Hilsdorf и Rüsch, аннотация ACI](https://doi.org/10.14359/7388).
+
 ## Локальное восстановление PDF
 
 Из корня проекта:
