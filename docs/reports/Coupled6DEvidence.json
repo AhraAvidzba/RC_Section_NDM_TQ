@@ -142,7 +142,12 @@
     "MVT2H26FixedControlGuideComparisonNative20261117": "D9A524928E9189711CA835181691899B1CDAA7D38507F260817DC7BC3CEFD7DB",
     "HardShearShort8H21Native20261117": "A5006CBF785382725457AB31166BB9608E9BD5D2115853C09640371BD31279AD",
     "MVT2H26OwnFixedRecoveryNative20261117": "F8EA8EDD58F668CDADA94D84BC09BA25FE2CA060561D40E1F0D1F3B28AB6562B",
-    "MVT2OpenSeesDistributedStartup20261117": "57C87DEE79BF7626C39D67393726FFE3873695946D2CD53718136F6D72EE429B"
+    "MVT2OpenSeesDistributedStartup20261117": "57C87DEE79BF7626C39D67393726FFE3873695946D2CD53718136F6D72EE429B",
+    "HardShearSameControlH21Native20261117": "8B8EC7CBCC7672B2B17808C745ABD8811AD246C4622085B92E0DAB47C3823C3E",
+    "HardShearSameControlWorkbookV120261117": "4FBED9B4B0FA6B0ECCD75DC8EA1F78F733F187629BEBFA5AC956A8E89F6B722F",
+    "MVT2H26OwnFullRayRecoveryNative20261117": "7B584C383D5A8F42CB1645389778359B157D3DFAA28631510F8505FB323DBA9D",
+    "MVT2OpenSeesDistributedTorsion20261117": "E330C5999357A5E56847488315AE25384B507AEF2ED650071672938A1A5D32FB",
+    "MVT2OpenSeesDistributedShear20261117": "BADC056B0CD7287D62441D19D9E242719485F6CBE92969B25C10C7AEF8329F8C"
   },
   "cases": [
     {
@@ -1653,6 +1658,50 @@
         "Replayed.json": "E95B93CAD828EFEEC6C4801EE5E778B794257E68E05AE464E5951C78415F3F9F"
       },
       "stdout_contains": "MVT2_DISTRIBUTED_STARTUP_DETACHED_PASS 3 2"
+    },
+    {
+      "id": "hardshear-h21-automatic-same-control-native",
+      "journal_section": 450,
+      "archive": "HardShearSameControlH21Native20261117",
+      "script": "HardShearSameControlH21Native/Verify-Archive.py",
+      "stdout_contains": "HARDSHEAR SAME CONTROL H21 PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-same-control-workbook-v1-native",
+      "journal_section": 451,
+      "archive": "HardShearSameControlWorkbookV120261117",
+      "script": "HardShearSameControlWorkbookV1/Verify-Archive.py",
+      "stdout_contains": "HARDSHEAR V1 WORKBOOK SMOKE PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-h26-own-full-ray-guide-original-target-native",
+      "journal_section": 452,
+      "archive": "MVT2H26OwnFullRayRecoveryNative20261117",
+      "script": "ReplayFullRayPortable.py",
+      "arguments": ["--archives", "{evidence}"],
+      "stdout_contains": "EXACT FIXED TARGET False"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-full-torsion-native",
+      "journal_section": 453,
+      "archive": "MVT2OpenSeesDistributedTorsion20261117",
+      "script": "Verify-Torsion.py",
+      "arguments": ["{evidence}/MVT2OpenSeesDistributedStartup20261117.zip", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "FEE99547040DA87CADA7B58CA39E006DA57B80A04A15AC7CD65865970808F3B5"
+      },
+      "stdout_contains": "MVT2_DISTRIBUTED_TORSION_DETACHED_PASS 7 10.51"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-shear-with-held-torsion-native",
+      "journal_section": 454,
+      "archive": "MVT2OpenSeesDistributedShear20261117",
+      "script": "Verify-Shear.py",
+      "arguments": ["{evidence}/MVT2OpenSeesDistributedTorsion20261117.zip", "{evidence}/MVT2ShearABOffline.zip", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "797452063F200A27F1BD86F86C983EC17F7449A0DF6BCA7DC4351A8C42DE0E1B"
+      },
+      "stdout_contains": "MVT2_DISTRIBUTED_SHEAR_DETACHED_PASS [5.0]"
     }
   ],
   "frozen_repositories": {

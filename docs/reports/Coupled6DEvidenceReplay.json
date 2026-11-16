@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "3B227DE5E1AEC7D317A4AEAF55DDF7C44D58FBC4FC4A7FB3423B9D08DAE5D577",
+  "manifest_sha256": "E44F38C35F0EFAFDF897C6CD9F25B21CB7B4E52262DFAC1B593D3D416D50C6F0",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 139,
+  "passed": 144,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1176,6 +1176,45 @@
         "Replayed.json": "E95B93CAD828EFEEC6C4801EE5E778B794257E68E05AE464E5951C78415F3F9F"
       },
       "verified_stdout": "MVT2_DISTRIBUTED_STARTUP_DETACHED_PASS 3 2"
+    },
+    {
+      "id": "hardshear-h21-automatic-same-control-native",
+      "journal_section": 450,
+      "archive": "HardShearSameControlH21Native20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR SAME CONTROL H21 PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-same-control-workbook-v1-native",
+      "journal_section": 451,
+      "archive": "HardShearSameControlWorkbookV120261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR V1 WORKBOOK SMOKE PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-h26-own-full-ray-guide-original-target-native",
+      "journal_section": 452,
+      "archive": "MVT2H26OwnFullRayRecoveryNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "EXACT FIXED TARGET False"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-full-torsion-native",
+      "journal_section": 453,
+      "archive": "MVT2OpenSeesDistributedTorsion20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "FEE99547040DA87CADA7B58CA39E006DA57B80A04A15AC7CD65865970808F3B5"
+      },
+      "verified_stdout": "MVT2_DISTRIBUTED_TORSION_DETACHED_PASS 7 10.51"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-shear-with-held-torsion-native",
+      "journal_section": 454,
+      "archive": "MVT2OpenSeesDistributedShear20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "797452063F200A27F1BD86F86C983EC17F7449A0DF6BCA7DC4351A8C42DE0E1B"
+      },
+      "verified_stdout": "MVT2_DISTRIBUTED_SHEAR_DETACHED_PASS [5.0]"
     }
   ]
 }
