@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "48C5F68FE3863F389790A725DD1C54C0E7CCC1745B8166530D4C4D9A036B202A",
+  "manifest_sha256": "90631F2B5B245F633DD4CEBAF557C13B5528FA1C04C6366C0B24A8B32E37E7D5",
   "source_checkpoint": "77c3c7f09ad85ea75ecef7e916f830b5f8c2f983",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "C603E41639484DB313C5390930BC52F1AC3CC42ED4CE01BC1946BC01ED84FA95",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 148,
+  "passed": 150,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1246,6 +1246,24 @@
         "Replayed.json": "55F6457445E763A5FD16FB3BAD7699290539D294E29C5563B3F06E8C1BC0B6F0"
       },
       "verified_stdout": "MVT2_DAMAGE_REPLAY_DETACHED_PASS -3 Q10_numeric_failure_material_trace_saved"
+    },
+    {
+      "id": "mvt2-h26-short-arc-load-scaling",
+      "journal_section": 459,
+      "archive": "MVT2BridgeScalingNative20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "106D8304BA9B0904E7B68CB2D74D30E32FD876E504BFF0F308D1927A98C245AF"
+      },
+      "verified_stdout": "VERIFIED DETACHED SHA-256 106D8304BA9B0904E7B68CB2D74D30E32FD876E504BFF0F308D1927A98C245AF"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-small-shear-steps",
+      "journal_section": 460,
+      "archive": "MVT2OpenSeesHeldTSmallSteps20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "173B5724218357528D5882D6B9AC3CA6D9982FC890C8350F6F8B4DDA9722BDED"
+      },
+      "verified_stdout": "MVT2_SMALL_SHEAR_PROOF_PASS 11.25 first_small_step_rejected_engine_discarded"
     }
   ]
 }

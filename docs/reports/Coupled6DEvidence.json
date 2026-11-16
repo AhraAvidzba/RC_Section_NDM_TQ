@@ -151,7 +151,9 @@
     "HardShearSameControlWorkbookV220261117": "4AAC5838E65B216F635B35AF697277E6684F7C1FD7B0D832A2607EBFAB031109",
     "MVT2H26PlainArcBridgeNative20261117": "5104E4EDBA0026BB449318361EE921D89AE62FC93F27490637B6D605AF5BB5DF",
     "HardShearPureTCurrentDirectTiming20261117": "1F566AD6A21EE7262FE6D162078AE57250AB8929B678D0F5096E2418914E8E2C",
-    "MVT2OpenSeesDamageReplay20261117": "DD6FA6FA923F2FB1A2DBBFAD772A146201566B31614F14DFBF03F5234D3D54BE"
+    "MVT2OpenSeesDamageReplay20261117": "DD6FA6FA923F2FB1A2DBBFAD772A146201566B31614F14DFBF03F5234D3D54BE",
+    "MVT2BridgeScalingNative20261117": "94C2373FFDE9EA0E0E359E0A325CE813BFA91B90E00AE88A75FBEDE4429853A1",
+    "MVT2OpenSeesHeldTSmallSteps20261117": "49972528D7D4F8E8006BECB54489FA6FD7F4C5A7952811C1D9E36E41C55484EC"
   },
   "cases": [
     {
@@ -1739,6 +1741,28 @@
         "Replayed.json": "55F6457445E763A5FD16FB3BAD7699290539D294E29C5563B3F06E8C1BC0B6F0"
       },
       "stdout_contains": "MVT2_DAMAGE_REPLAY_DETACHED_PASS -3 Q10_numeric_failure_material_trace_saved"
+    },
+    {
+      "id": "mvt2-h26-short-arc-load-scaling",
+      "journal_section": 459,
+      "archive": "MVT2BridgeScalingNative20261117",
+      "script": "ReplayBridgeScaling.py",
+      "arguments": ["{evidence}/MVT2BridgeScalingNative20261117.zip", "--output", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "106D8304BA9B0904E7B68CB2D74D30E32FD876E504BFF0F308D1927A98C245AF"
+      },
+      "stdout_contains": "VERIFIED DETACHED SHA-256 106D8304BA9B0904E7B68CB2D74D30E32FD876E504BFF0F308D1927A98C245AF"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-small-shear-steps",
+      "journal_section": 460,
+      "archive": "MVT2OpenSeesHeldTSmallSteps20261117",
+      "script": "Verify-HeldTSmallSteps.py",
+      "arguments": ["--archives", "{evidence}", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "173B5724218357528D5882D6B9AC3CA6D9982FC890C8350F6F8B4DDA9722BDED"
+      },
+      "stdout_contains": "MVT2_SMALL_SHEAR_PROOF_PASS 11.25 first_small_step_rejected_engine_discarded"
     }
   ],
   "frozen_repositories": {
