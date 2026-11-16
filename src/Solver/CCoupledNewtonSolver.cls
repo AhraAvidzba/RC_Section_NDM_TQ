@@ -59,7 +59,9 @@ Private mPlusStress(1 To COMPONENT_COUNT) As Double, mMinusStress(1 To COMPONENT
 Private mMatrix() As Double, mExternal() As Double, mResidual() As Double
 Private mDirectProofMatrix As Boolean ' Матрица собрана непосредственно в принятом силовом поле.
 Private mCandidateReady As Boolean
-Private mYieldRecoveryTried As Boolean
+Private mYieldRecoveryTried As Boolean, mSameControlRecoveryTried As Boolean
+Private mRecoveredControlReady As Boolean
+Private mSameControlInitialFailure As String
 Private mRecoveredProjection() As Double
 Private mConsistentControl As Boolean
 Private mControlActive As Boolean
@@ -148,7 +150,7 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
-        Optional ByVal consistentControl As Boolean = False) As Boolean
+        Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -170,13 +172,14 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     mControlActive = True
     mConsistentControl = consistentControl And mUseSpatialHistory
     Dim load(1 To COMPONENT_COUNT) As Double
-    TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, recoverYieldControl)
+    TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
+        recoverYieldControl, recoverSameControl:=recoverSameControl)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
 ' Возвращает новую линейную меру только для подтверждённой пробы восстановления.
 Friend Function CopyRecoveredControl(ByRef projection() As Double) As Boolean
-    If Not mCandidateReady Or Not mYieldRecoveryTried Then Exit Function
+    If Not mCandidateReady Or Not mRecoveredControlReady Then Exit Function
     projection = mRecoveredProjection
     CopyRecoveredControl = True
 End Function
@@ -184,6 +187,12 @@ End Function
 ' Сообщает, что после действительной смены ветви собиралось аварийное направление.
 Friend Property Get YieldRecoveryTried() As Boolean
     YieldRecoveryTried = mYieldRecoveryTried
+End Property
+
+' Сообщает о проверке перехода для повтора в той же мере. Эта проверка
+' расходует отдельный бюджет, даже если пересечение не найдено.
+Friend Property Get SameControlRecoveryTried() As Boolean
+    SameControlRecoveryTried = mSameControlRecoveryTried
 End Property
 
 ' Выбирает уверенно меняющуюся меру по двум последовательным равновесиям.
@@ -237,11 +246,13 @@ End Function
 Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
-        Optional ByVal retainDirectProof As Boolean = False) As Boolean
+        Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False) As Boolean
     mDirectProofMatrix = False
     mMeta.Clear
     mCandidateReady = False
-    mYieldRecoveryTried = False: Erase mRecoveredProjection
+    mYieldRecoveryTried = False: mSameControlRecoveryTried = False
+    mSameControlInitialFailure = vbNullString
+    mRecoveredControlReady = False: Erase mRecoveredProjection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
     mLocalGradientBuilds = 0
     mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
@@ -409,9 +420,24 @@ RecomputeTangent:
                 details = details & "; ни одна уменьшенная поправка не дала материального отклика"
             End If
             mMeta.DiagnosticDetails = details
-            If recoverYieldControl And Len(mismatch) > 0 And mUseSpatialHistory Then
-                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
-                    absoluteTolerance, relativeTolerance)
+            If Len(mismatch) > 0 And mUseSpatialHistory Then
+                If recoverYieldControl Then
+                    SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
+                        absoluteTolerance, relativeTolerance)
+                ElseIf recoverSameControl And mControlActive And mConsistentControl And Not mSameControlRecoveryTried Then
+                    If mIterations + 1 < maxIterations Then
+                        mSameControlRecoveryTried = True
+                        mSameControlInitialFailure = details
+                        If TrySameControlSeed(current, currentLambda, correction, trialFraction, tolerance, _
+                                absoluteTolerance, relativeTolerance, maxIterations - 1) Then
+                            mIterations = mIterations + 1 ' Заблокированное направление расходует одну итерацию этого шага.
+                            SetControlledLoad currentLambda, load
+                            tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+                            GoTo RecomputeTangent
+                        End If
+                        RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
+                    End If
+                End If
             End If
             Exit Function
         End If
@@ -508,11 +534,26 @@ Private Function DirectionMismatchDetails(ByVal row As Long, ByVal baseEquation 
 End Function
 
 
+' Использует равновесие у перехода только как первое приближение той же
+' пробы. Контроль и история исходные, промежуточное поле не принимается.
+Private Function TrySameControlSeed(ByRef field() As Double, ByRef lambda As Double, ByRef correction() As Double, _
+        ByVal fraction As Double, ByVal tolerance As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double, ByVal iterationLimit As Long) As Boolean
+    Dim originalProjection() As Double, originalTarget As Double
+    originalProjection = mControlProjection: originalTarget = mTargetControl
+    If Not RecoverYieldStep(field, lambda, correction, fraction, tolerance, absoluteTolerance, relativeTolerance, iterationLimit) Then Exit Function
+    field = mCandidate: lambda = mTrialLambda
+    mControlProjection = originalProjection: mTargetControl = originalTarget
+    DiscardStep
+    mRecoveredControlReady = False: Erase mRecoveredProjection
+    TrySameControlSeed = True
+End Function
+
 ' Ищет соседнюю траекторию только после наблюдаемой смены ветви на
 ' отклонённой поправке. Принятые буферы материала остаются исходными.
 Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Double, ByRef correction() As Double, _
         ByVal fraction As Double, ByVal tolerance As Double, ByVal absoluteTolerance As Double, _
-        ByVal relativeTolerance As Double) As Boolean
+        ByVal relativeTolerance As Double, Optional ByVal iterationLimit As Long = 0) As Boolean
     If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
             TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
     Dim ends() As Double, i As Long
@@ -529,7 +570,7 @@ Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Doubl
     On Error GoTo Failed
     mControlActive = False
     If TraceYieldCrossing(station, field, ends, lambda, lambda + fraction * correction(mDegreeCount + 1), _
-            tolerance, absoluteTolerance, relativeTolerance, True, result, trialLambda, newProjection) Then
+            tolerance, absoluteTolerance, relativeTolerance, True, result, trialLambda, newProjection, iterationLimit) Then
         Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double, trialTolerance As Double
         For i = 1 To mGaugeStart - 1: coordinate = coordinate + newProjection(i) * result(i): Next i
         mControlProjection = newProjection: mTargetControl = coordinate
@@ -538,7 +579,7 @@ Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Doubl
         trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
         If Evaluate(result, False) Then
             If EquilibriumNorm(load, result) <= trialTolerance And GaugesVerified(trialTolerance) Then
-                mRecoveredProjection = newProjection
+                mRecoveredProjection = newProjection: mRecoveredControlReady = True
                 mCandidate = result
                 mConsistentControl = True
                 PublishCandidate trialLambda
@@ -645,16 +686,18 @@ End Function
 Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field() As Double, ByRef ends() As Double, _
         ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
-        ByRef result() As Double, ByRef lambda As Double, ByRef projection() As Double) As Boolean
+        ByRef result() As Double, ByRef lambda As Double, ByRef projection() As Double, _
+        Optional ByVal iterationLimit As Long = 0) As Boolean
     Dim target As Double, fraction As Double, trial As Long, i As Long, anchor() As Double
     target = Sgn(station.FromValue) * GeomMin(0.125 * tolerance, _
         0.25 * GeomMin(Abs(station.FromValue), Abs(station.ToValue)))
     ReDim anchor(1 To mDegreeCount)
     For trial = 1 To 2
+        If iterationLimit > 0 And mIterations >= iterationLimit Then Exit Function
         If LocateYieldCoordinate(station, field, ends, target, fraction) Then
             For i = 1 To mDegreeCount: anchor(i) = field(i) + fraction * (ends(i) - field(i)): Next i
             If FollowYieldCoordinate(station, anchor, fromLambda + fraction * (toLambda - fromLambda), _
-                    target, absoluteTolerance, relativeTolerance, allowSuccessor, result, lambda, projection) Then
+                    target, absoluteTolerance, relativeTolerance, allowSuccessor, result, lambda, projection, iterationLimit) Then
                 TraceYieldCrossing = True
                 Exit Function
             End If
@@ -669,7 +712,8 @@ End Function
 Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef startField() As Double, _
         ByVal lambda As Double, ByVal target As Double, ByVal absoluteTolerance As Double, _
         ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
-        ByRef result() As Double, ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
+        ByRef result() As Double, ByRef resultLambda As Double, ByRef projection() As Double, _
+        Optional ByVal iterationLimit As Long = 0) As Boolean
     Dim field() As Double, trial() As Double, load(1 To COMPONENT_COUNT) As Double
     Dim correction() As Double, nullDirection() As Double, eventRow() As Double, nextStation As TYieldStation
     Dim strainRate(1 To COMPONENT_COUNT) As Double, i As Long, iteration As Long, damping As Long
@@ -679,6 +723,10 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
     field = startField
     ReDim trial(1 To mDegreeCount)
     For iteration = 1 To YIELD_TRACE_ITERATIONS
+        If iterationLimit > 0 Then
+            If mIterations >= iterationLimit Then Exit Function
+            mIterations = mIterations + 1 ' Направляющая итерация расходует общий остаток, даже при отказе.
+        End If
         SetControlledLoad lambda, load
         If Not Evaluate(field, True, recordTrial:=False, consistentBranch:=True) Then Exit Function
         baseNorm = EquilibriumNorm(load, field)
@@ -711,7 +759,7 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
                         If FindYieldDeparture(station, field, trial, row, mResidual(row) - baseRow - expected, nextStation) Then
                             previousTrySuccessor = True
                             If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, trialTolerance, _
-                                    absoluteTolerance, relativeTolerance, False, result, resultLambda, projection) Then
+                                    absoluteTolerance, relativeTolerance, False, result, resultLambda, projection, iterationLimit) Then
                                 FollowYieldCoordinate = True
                                 Exit Function
                             End If
@@ -724,7 +772,7 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
         Next damping
         If Not accepted Then Exit Function
         field = trial: lambda = trialLambda
-        mIterations = mIterations + 1
+        If iterationLimit = 0 Then mIterations = mIterations + 1
     Next iteration
 End Function
 
@@ -1541,6 +1589,8 @@ End Sub
 Private Sub RecordFailure(ByVal code As ESolverFailureCode, ByVal reason As String)
     mMeta.SetSolverFailure code, rkDirectState, reason, (mEvaluations > 0)
     mMeta.DiagnosticDetails = DiagnosticSummary()
+    If Len(mSameControlInitialFailure) > 0 Then _
+        mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & " | До восстанавливающей пробы: " & mSameControlInitialFailure
 End Sub
 
 ' Возвращает параметры последней итерации, необходимые для проверки отказа.
@@ -1553,6 +1603,7 @@ Private Function DiagnosticSummary() As String
     If mLastFailedSide <> 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; продольное положение последней точки отказа: " & Format$(mLastFailedSide * SPATIAL_HALF_STEP, "+0.000;-0.000") & " z/L"
     If mGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & "; уточнений касательной: " & CStr(mGradientBuilds)
+    If mSameControlRecoveryTried Then DiagnosticSummary = DiagnosticSummary & "; проверен переход для исходной меры"
     If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)
 End Function

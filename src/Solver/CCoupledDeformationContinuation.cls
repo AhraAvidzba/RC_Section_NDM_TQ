@@ -36,6 +36,7 @@ End Type
 Private Const COMPONENT_COUNT As Long = 6
 Private Const STEP_LIMIT As Long = 32
 Private Const PROBE_LIMIT As Long = 96 ' Общий предел проб продолжения, деления и повторного прохождения плеч.
+Private Const FIXED_YIELD_RECOVERY_LIMIT As Long = 4 ' Проверки перехода без смены меры за одно продолжение.
 Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Дорогие пробы с выбором другой меры при остановке.
 Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
@@ -60,6 +61,7 @@ Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
+Private mFixedYieldRecoveryProbes As Long
 Private mUsesYieldControl As Boolean
 Private mPostPeakControlName As String, mPostPeakControlPoints As Long
 Private mPostPeakWidePoints As Long
@@ -84,7 +86,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mDesignHistoryIndex = 0
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
-    mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
+    mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
     mUsesYieldControl = False
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -375,14 +377,19 @@ End Property
 ' Решает пробу при заданной мере. Проверки продвижения и касательной
 ' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
-        Optional ByVal recoverYieldControl As Boolean = False) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     point.Uncertainty = 0#
-    Dim solved As Boolean
+    Dim solved As Boolean, recoverSameControl As Boolean
+    recoverSameControl = keepYieldControl And mUsesYieldControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
-        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl)
-    If mSolver.YieldRecoveryTried Then mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl, recoverSameControl)
+    If mSolver.SameControlRecoveryTried Then
+        mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
+    ElseIf mSolver.YieldRecoveryTried Then
+        mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+    End If
     If Not solved Then
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
         Exit Function
@@ -442,7 +449,7 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
     Dim designCoordinate As Double
     designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate)
     trial.Coordinate = targetCoordinate
-    If Not Probe(trial, current.Lambda) Then
+    If Not Probe(trial, current.Lambda, keepYieldControl:=True) Then
         StopSearch "Не удалось повторить пробу после проверки заданных усилий."
         Exit Function
     End If
@@ -613,7 +620,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
                 Exit Function
             End If
             If mProbeCount < PROBE_LIMIT Then mShoulderProbes = mShoulderProbes + 1
-            If Not Probe(point, previousLambda) Then Exit Function
+            If Not Probe(point, previousLambda, keepYieldControl:=keepRight) Then Exit Function
             If Not UpdateTrialCoordinate(point, samples(index).Coordinate) Then Exit Function
             If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
                 mSolver.DiscardStep
@@ -777,7 +784,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
         End If
         point.Coordinate = low.Coordinate + 0.5 * (high.Coordinate - low.Coordinate)
         If point.Coordinate <= low.Coordinate Or point.Coordinate >= high.Coordinate Then Exit Function
-        If Not Probe(point, low.Lambda) Then Exit Function
+        If Not Probe(point, low.Lambda, keepYieldControl:=True) Then Exit Function
         If Not UpdateTrialCoordinate(point, low.Coordinate) Then Exit Function
         If point.Coordinate >= high.Coordinate Then
             mSolver.DiscardStep
@@ -794,7 +801,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
             mSolver.CopyTrial field, actual
             mSolver.AcceptStep
             refined.Add field: multipliers.Add low.Lambda
-            If Not Probe(high, low.Lambda) Then Exit Function
+            If Not Probe(high, low.Lambda, keepYieldControl:=True) Then Exit Function
             If Not UpdateTrialCoordinate(high, low.Coordinate) Then Exit Function
             If Not ReadSteelTrialBound(high) Then Exit Function
             eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
@@ -858,6 +865,8 @@ Private Function Details() As String
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
+    If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
+        "; проверок перехода в исходной мере: " & CStr(mFixedYieldRecoveryProbes)
     If mPostPeakWidePoints > 0 Then Details = Details & "; принято увеличенных шагов: " & CStr(mPostPeakWidePoints)
     If mLocalPeak > 0# Then
         Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
