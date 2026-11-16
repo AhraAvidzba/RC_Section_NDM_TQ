@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "1BC06BFDB584F36A9491F56372D1AF73814F32C8D04B52AEF3C5EBCF9CE2B7D0",
+  "manifest_sha256": "BEEF2BB9678E816BA7498C2C46CAAE505541BE751E6FC3D998F0ABF345940378",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 82,
+  "passed": 83,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -736,6 +736,13 @@
         "SpectralReplay.json": "728109EB104975F93DBE21871A0CDBC55CEA0B80AD456DCBD87625C8602974B5"
       },
       "verified_stdout": null
+    },
+    {
+      "id": "direct-steel-boundary-native-and-controlled",
+      "journal_section": 388,
+      "archive": "DirectSteelBoundary20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "DIRECT STEEL EVIDENCE PASS E8C200A5E4A8952DEFCF2B59138E4BCF146E855CED2BEC9BACDE4D7BD1CA9D7D"
     }
   ]
 }
