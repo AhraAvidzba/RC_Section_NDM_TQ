@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "77c3c7f09ad85ea75ecef7e916f830b5f8c2f983",
+  "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "C603E41639484DB313C5390930BC52F1AC3CC42ED4CE01BC1946BC01ED84FA95",
-    "workbook/output/VBA_All_Code.txt": "7C5D85EF5D7500E95541EDF1AAF1BEC9AF2177A3B65491356A6DFE16335E365E"
+    "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
+    "workbook/output/VBA_All_Code.txt": "815680F95BDB321D7DF5374EAC9F9B1BAD4F4D0A9E628F09EC0BA11EE70AD90D"
   },
   "python_packages": [
     "numpy",
@@ -156,7 +156,10 @@
     "MVT2OpenSeesHeldTSmallSteps20261117": "49972528D7D4F8E8006BECB54489FA6FD7F4C5A7952811C1D9E36E41C55484EC",
     "MVT2CurrentHistoryStop20261117": "D20FBC4293FF59A36D4DF50B93E8AAA8C3DB6449345A3A7C7FAFC8803A5092F7",
     "MVT2H26BridgeCurrentApiNative20261117": "470AA53EC03696A25A651F9FF739B6063B80C05F6FA1A8B91D81B4E7F5C2CD0D",
-    "MVT2OpenSeesHeldTFinerNewton20261117": "33E7D256CC31228934BC4C58811CF1B62824CAD21D9AB4B98FB2FA72BB3D7766"
+    "MVT2OpenSeesHeldTFinerNewton20261117": "33E7D256CC31228934BC4C58811CF1B62824CAD21D9AB4B98FB2FA72BB3D7766",
+    "MVT2H26BridgeNegativeNative20261117": "E74F3B7BB1CA92298B9139A6706BF414C2349440A24B30DEE84453EC90326073",
+    "MVT2H26BridgeTraceNative20261117": "B4AAD49712AFF7065005AE67133DDDD785AC53CE68E6647F5D50668F14F0B92D",
+    "MVT2OpenSeesHeldTLineSearch20261117": "F145B06B77BDF0D1261C595FCC0F812CDBCB613DC92F327EC67040A8DD788654"
   },
   "cases": [
     {
@@ -1795,6 +1798,31 @@
         "Replayed.json": "1E1338E7014CAC33841B1F7BE41EE2540B2964D0FA57BC868C11F2C66B6715CE"
       },
       "stdout_contains": "MVT2 HELD-T FINER PROOF PASS 11.25 first_finer_step_rejected_engine_discarded"
+    },
+    {
+      "id": "mvt2-h26-short-arc-numeric-and-configuration-rollback",
+      "journal_section": 464,
+      "archive": "MVT2H26BridgeNegativeNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "MVT2 H26 BRIDGE NEGATIVE PORTABLE VERIFIED F3E43BA2705CB0FC9C1295F766626C90B6939D52C6B29791DAE1AD923BCCD8B2"
+    },
+    {
+      "id": "mvt2-h26-short-arc-production-trace-accepts-only-fixed-point",
+      "journal_section": 465,
+      "archive": "MVT2H26BridgeTraceNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "MVT2 H26 BRIDGE TRACE PORTABLE VERIFIED 78B6BCD984EB24C8AB94A2F1E99E7CE6693ECEAF87A1F66DC7E6CB1C6AE35C09"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-same-load-newton-line-search",
+      "journal_section": 466,
+      "archive": "MVT2OpenSeesHeldTLineSearch20261117",
+      "script": "Verify-HeldTLineSearch.py",
+      "arguments": ["--archives", "{evidence}", "--base", "{MVT2OpenSeesHeldTFinerNewton20261117}", "--upstream", "{MVT2OpenSeesHeldTFinerNewton20261117}/Upstream", "--newton-proof", "{MVT2OpenSeesHeldTFinerNewton20261117}/Replayed.json", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "B048530CD3BBE1A76DC7A255ECD5D9BCACBADEB583CCB2A08C87837F5219D5A9"
+      },
+      "stdout_contains": "MATCHED LINE SEARCH PROOF PASS 11.25 299.5037267552907"
     }
   ],
   "frozen_repositories": {
