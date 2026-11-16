@@ -61,6 +61,7 @@ Private mSnapshotSection As CSectionModel ' Модель сечения, по к
 Private mSnapshotRevision As Long ' Ревизия геометрии при фиксации состояния.
 Private mSnapshotConcrete As CMaterialDiagram ' Неизменяемая фактическая диаграмма бетона.
 Private mSnapshotSteel As CMaterialDiagram ' Неизменяемая фактическая диаграмма арматуры.
+Private mInitialStrainField As CSectionInitialStrains ' Неизменяемые начальные деформации от T, если они применялись.
 Private Const ELEMENT_ZERO_TOLERANCE As Double = 0.000000001 ' Порог деформации для определения физического состояния элемента при выводе результатов.
 
 ' Сохраняет расчётное НДС по результату CSectionSolver.
@@ -103,6 +104,7 @@ Public Sub InitializeFromSolver(ByVal stateType As ESectionStateType, _
     mHasSteelCompression = solver.HasSteelCompression
     mHasSteelTension = solver.HasSteelTension
     solver.CopyMaterialContext mSnapshotSection, mSnapshotConcrete, mSnapshotSteel
+    Set mInitialStrainField = solver.InitialStrainField
     If Not mSnapshotSection Is Nothing Then mSnapshotRevision = mSnapshotSection.Revision
 End Sub
 
@@ -129,6 +131,7 @@ Private Sub ClearSnapshot()
     Set mSnapshotSection = Nothing
     Set mSnapshotConcrete = Nothing
     Set mSnapshotSteel = Nothing
+    Set mInitialStrainField = Nothing
     mSnapshotRevision = 0
     Set mMaterialSpec = Nothing
     Set mResultMeta = Nothing
@@ -183,9 +186,11 @@ End Sub
 ' Общая реализация обеспечивает точное совпадение пятиколоночной матрицы и прямой записи в таблицу.
 Private Sub FillElementSnapshot(ByVal section As CSectionModel, ByRef data() As Variant, ByVal firstRow As Long, ByVal firstColumn As Long)
     Dim i As Long, row As Long, strain As Double, stress As Double
+    Dim hasInitialStrains As Boolean: hasInitialStrains = Not mInitialStrainField Is Nothing
     row = firstRow
     For i = 1 To section.ConcreteCount
         strain = mEpsilon0 + mKappaX * section.ConcreteY(i) + mKappaY * section.ConcreteX(i)
+        If hasInitialStrains Then strain = strain + mInitialStrainField.ConcreteStrain(i)
         stress = mSnapshotConcrete.GetStress(strain)
         data(row, firstColumn) = section.ConcreteID(i): data(row, firstColumn + 1) = "Concrete"
         data(row, firstColumn + 2) = strain: data(row, firstColumn + 3) = stress: data(row, firstColumn + 4) = ElementPhysicalState("Concrete", strain, stress)
@@ -193,12 +198,18 @@ Private Sub FillElementSnapshot(ByVal section As CSectionModel, ByRef data() As 
     Next i
     For i = 1 To section.RebarCount
         strain = mEpsilon0 + mKappaX * section.RebarY(i) + mKappaY * section.RebarX(i)
+        If hasInitialStrains Then strain = strain + mInitialStrainField.SteelStrain(i)
         stress = mSnapshotSteel.GetStress(strain)
         data(row, firstColumn) = section.RebarID(i): data(row, firstColumn + 1) = "Rebar"
         data(row, firstColumn + 2) = strain: data(row, firstColumn + 3) = stress: data(row, firstColumn + 4) = ElementPhysicalState("Rebar", strain, stress)
         row = row + 1
     Next i
 End Sub
+
+' Возвращает исходные деформации для восстановления сохранённого уравнения равновесия.
+Friend Property Get InitialStrainField() As CSectionInitialStrains
+    Set InitialStrainField = mInitialStrainField
+End Property
 
 ' Определяет работу элемента по его деформации и напряжению.
 ' Это состояние материала, а не итоговый статус сочетания нагрузок.

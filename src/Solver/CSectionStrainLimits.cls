@@ -46,15 +46,18 @@ Public Sub Evaluate(ByVal section As CSectionModel, ByVal solver As CSectionSolv
     Dim cMinIndex As Long, cMaxIndex As Long, sMinIndex As Long, sMaxIndex As Long
     If Not solver.TryGetStrainExtrema(section, cMin, cMax, cMinIndex, cMaxIndex, _
             sMin, sMax, sMinIndex, sMaxIndex) Then
+        Dim field As CSectionInitialStrains: Set field = solver.InitialStrainField
         solver.NumericalStrainPlane epsilon, kx, ky, originX, originY ' Измененная модель или еще не оцененная плоскость требует обычного обхода. Чужие и устаревшие экстремумы никогда не используются.
         For i = 1 To section.ConcreteCount
             section.ConcreteElementForSolver i, x, y, area
             strain = epsilon + kx * (y - originY) + ky * (x - originX)
+            If Not field Is Nothing Then strain = strain + field.ConcreteStrain(i)
             EvaluateConcrete section, i, strain
         Next i
         For i = 1 To section.RebarCount
             section.RebarElementForSolver i, x, y, area
             strain = epsilon + kx * (y - originY) + ky * (x - originX)
+            If Not field Is Nothing Then strain = strain + field.SteelStrain(i)
             EvaluateSteel section, i, strain
         Next i
         Exit Sub

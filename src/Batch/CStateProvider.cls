@@ -60,7 +60,8 @@ End Sub
 ' Возвращает ранее найденное НДС для точно такого же запроса или решает равновесие заново.
 ' initialSolver задаёт только начальное приближение и не определяет совпадение запросов.
 Public Function GetOrSolve(ByVal request As CStateRequest, _
-        Optional ByVal initialSolver As CSectionSolver = Nothing) As CSectionStateResult
+        Optional ByVal initialSolver As CSectionSolver = Nothing, _
+        Optional ByVal initialField As CSectionInitialStrains = Nothing) As CSectionStateResult
     If request Is Nothing Then Err.Raise vbObjectError + 3992, "CStateProvider", "Не передан запрос на расчёт НДС выбранного назначения."
     Set mLastRunner = Nothing
     mLastStateWasReused = False
@@ -82,7 +83,7 @@ Public Function GetOrSolve(ByVal request As CStateRequest, _
     If Not mRepository Is Nothing Then
         BindRepositoryContext
         Dim cached As CSectionStateResult
-        Set cached = mRepository.FindEquivalent(request)
+        If initialField Is Nothing Then Set cached = mRepository.FindEquivalent(request)
         If Not cached Is Nothing Then
             mLastStateWasReused = True
             mRepository.StoreState cached
@@ -94,6 +95,7 @@ Public Function GetOrSolve(ByVal request As CStateRequest, _
     Dim runner As CStateSolutionRunner
     Set runner = New CStateSolutionRunner
     ConfigureRunner runner
+    If Not initialField Is Nothing Then runner.SetInitialStrainField initialField
 
     Dim concreteMaterial As CMaterialDiagram
     Dim steelMaterial As CMaterialDiagram
@@ -118,7 +120,13 @@ Public Function GetOrSolve(ByVal request As CStateRequest, _
             runner.DiagnosticLog, True, False
         Set missingState = New CSectionStateResult
         missingState.InitializeFailure request, missingMeta
-        If Not mRepository Is Nothing Then mRepository.StoreForRequest request, missingState
+        If Not mRepository Is Nothing Then
+            If initialField Is Nothing Then
+                mRepository.StoreForRequest request, missingState
+            Else
+                mRepository.StoreState missingState
+            End If
+        End If
         Set GetOrSolve = missingState
         Exit Function
     End If
@@ -129,7 +137,13 @@ Public Function GetOrSolve(ByVal request As CStateRequest, _
         service, runner.ExtensionUsed, runner.WithinPhysicalRange, _
         runner.SolverCallCount, runner.DiagnosticLog
 
-    If Not mRepository Is Nothing Then mRepository.StoreForRequest request, stateResult
+    If Not mRepository Is Nothing Then
+        If initialField Is Nothing Then
+            mRepository.StoreForRequest request, stateResult
+        Else
+            mRepository.StoreState stateResult ' Тот же запрос N/M может иметь разные исходные поля и не использует кэш плоского равновесия.
+        End If
+    End If
     Set GetOrSolve = stateResult
 End Function
 
@@ -167,6 +181,7 @@ Public Function SolverSnapshot(ByVal stateResult As CSectionStateResult) As CSec
     Dim runner As CStateSolutionRunner
     Set runner = New CStateSolutionRunner
     ConfigureRunner runner
+    If Not stateResult.InitialStrainField Is Nothing Then runner.SetInitialStrainField stateResult.InitialStrainField
     Set SolverSnapshot = runner.RestoreSnapshot(mSection, ConcreteMaterialForRequest(request), _
         SteelMaterialForRequest(request), stateResult)
 End Function

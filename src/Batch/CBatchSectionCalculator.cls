@@ -33,6 +33,7 @@ Private Type TCombinationInput
     N As Double ' Продольная сила во внутренних единицах, Н.
     Mx As Double ' Момент Mx во внутренних единицах, Н*мм.
     My As Double ' Момент My во внутренних единицах, Н*мм.
+    Torque As Double ' Крутящий момент во внутренних единицах, Н*мм. Используется предварительной проверкой.
     ProfileId As String ' Имя профиля, задающего нужные проверки и материалы.
     LoadPath As String ' Способ изменения составляющих нагрузки при поиске предела.
     Comment As String ' Пользовательское пояснение сочетания.
@@ -45,6 +46,9 @@ Private mMaterialProvider As CMaterialModelProvider ' Подготовка ди�
 Private mProfiles As CCalculationProfileCatalog ' Каталог расчетных профилей PR1/PR2/... из Config.
 Private mStatusPolicy As CResultStatusPolicy ' Единый словарь пользовательских статусов и правил их агрегирования.
 Private mCount As Long ' Сколько сочетаний реально добавлено в пакет.
+Private mTorsionDiameter As Double, mTorsionSpacing As Double, mTorsionCover As Double, mTorsionResistance As Double
+Private mTorsionInputError As String, mTorsionRange As String, mTorsionPreparationError As String
+Private mTorsionPrepared As CTorsionPlanarPreparation
 
 Private mInputs() As TCombinationInput ' Исходные данные LC, прочитанные из фактических строк rngLoadCombinations.
 Private mWorkingLoads() As CSectionLoadState ' Рабочие усилия текущего запуска; исходная строка не изменяется.
@@ -230,6 +234,24 @@ End Sub
 Public Property Set ProfileCatalog(ByVal profiles As CCalculationProfileCatalog)
     Set mProfiles = profiles
 End Property
+
+' Показывает, нужен ли параметрический блок хомута хотя бы одному сочетанию.
+Friend Function HasTorqueCombinations() As Boolean
+    Dim i As Long
+    For i = 1 To mCount
+        If mInputs(i).Torque <> 0# Then
+            HasTorqueCombinations = True
+            Exit Function
+        End If
+    Next i
+End Function
+
+' Сохраняет параметры хомута во внутренних единицах и фактический адрес блока.
+Friend Sub ConfigurePlanarTorsion(ByVal diameter As Double, ByVal spacing As Double, ByVal cover As Double, _
+        ByVal resistance As Double, ByVal settingsAddress As String, Optional ByVal inputError As String = vbNullString)
+    mTorsionDiameter = diameter: mTorsionSpacing = spacing: mTorsionCover = cover: mTorsionResistance = resistance
+    mTorsionInputError = inputError: mTorsionRange = settingsAddress
+End Sub
 
 ' Подключает внешний отчёт выполнения и добавляет в него события расчёта.
 ' Открытие и сохранение файла выполняет вызывающий Excel-макрос.
@@ -495,9 +517,11 @@ End Sub
 Public Sub AddCombination(ByVal combinationID As String, ByVal nValue As Double, ByVal mxValue As Double, _
         ByVal myValue As Double, ByVal profileId As String, ByVal comment As String, _
         Optional ByVal loadPathText As String = vbNullString, Optional ByVal sourceDataOffset As Long = 0, _
-        Optional ByVal sourceReference As String = vbNullString, Optional ByVal profileReference As String = vbNullString)
+        Optional ByVal sourceReference As String = vbNullString, Optional ByVal profileReference As String = vbNullString, _
+        Optional ByVal torqueValue As Double = 0#)
     AddCombinationInternal combinationID, nValue, mxValue, myValue, profileId, comment, True, vbNullString, loadPathText, sourceDataOffset, sourceReference
     mInputs(mCount).ProfileReference = profileReference
+    mInputs(mCount).Torque = torqueValue
 End Sub
 
 ' Сохраняет сочетание с ошибкой ввода для вывода причины в отчёте.
@@ -525,6 +549,7 @@ Private Sub AddCombinationInternal(ByVal combinationID As String, ByVal nValue A
     mInputs(mCount).N = nValue
     mInputs(mCount).Mx = mxValue
     mInputs(mCount).My = myValue
+    mInputs(mCount).Torque = 0# ' Строка с ошибкой не содержит нагрузки. Слот может использоваться повторно.
     mInputs(mCount).ProfileId = Trim$(profileId)
     mInputs(mCount).LoadPath = Trim$(loadPathText)
     mInputs(mCount).Comment = comment
@@ -706,6 +731,8 @@ Public Sub Execute()
 
     stage = "Initialize"
     t0 = Timer
+    Set mTorsionPrepared = Nothing
+    mTorsionPreparationError = vbNullString
     mGoverningCombinationIndex = 0
     mCrackGoverningCombinationIndex = 0
     mWorstCombinationIndex = 0
@@ -849,7 +876,15 @@ Private Sub RunCombination(ByVal index As Long)
     End If
 
     ReportSection "Расчет по модели прочности"
+    Dim torsionResult As CTorsionPlanarResult, initialField As CSectionInitialStrains
+    If mInputs(index).Torque <> 0# Then
+        Set torsionResult = New CTorsionPlanarResult
+        torsionResult.Initialize mInputs(index).Torque
+        Set initialField = PreparePlanarTorsion(torsionResult, profile.StrengthSpec)
+        mResults(index).StorePlanarTorsion torsionResult
+    End If
     If profile.StrengthCapacityEnabled Then
+        If Not torsionResult Is Nothing Then ReportStep "Предельный коэффициент в этой таблице относится к штатной траектории N/M."
         ReportStep "Запускается проверка несущей способности по профилю."
         RunCapacity index, profile.StrengthSpec
     Else
@@ -857,9 +892,15 @@ Private Sub RunCombination(ByVal index As Long)
         StoreNotCalculatedCapacity index
     End If
 
-    If profile.StrengthDirectStateEnabled Then
+    If profile.StrengthDirectStateEnabled Or Not initialField Is Nothing Then
         ReportStep "Запускается прямое НДС по модели прочности профиля."
-        RunProfileState index, sstStrengthState, cpStrength, profile.StrengthSpec
+        RunProfileState index, sstStrengthState, cpStrength, profile.StrengthSpec, initialField:=initialField
+    End If
+    If Not torsionResult Is Nothing Then
+        If Not initialField Is Nothing Then torsionResult.CheckNormalState mSection, _
+            mResults(index).StateRepository.FindState(sstStrengthState)
+        ReportMetaComment "Хомут от T", torsionResult.HoopMeta
+        ReportMetaComment "НДС с начальными деформациями от T", torsionResult.NormalMeta
     End If
 
     ReportSection "Расчет нормальных и продольных трещин"
@@ -884,6 +925,42 @@ Failed:
         failureSource & "; error=" & CStr(failureNumber)
     mResults(index).SetWorkflowMeta failureMeta
     AppendDiagnostic index
+End Sub
+
+' Подготавливает хомут один раз на пакет, проверяет заданный T и строит
+' начальные деформации по физическим материалам выбранного профиля.
+Private Function PreparePlanarTorsion(ByVal result As CTorsionPlanarResult, ByVal spec As CMaterialModelSpec) As CSectionInitialStrains
+    If Len(mTorsionInputError) > 0 Then
+        result.SetInputError mTorsionInputError
+        Exit Function
+    End If
+    If mTorsionPrepared Is Nothing And Len(mTorsionPreparationError) = 0 Then InitializeTorsionPreparation
+    If mTorsionPrepared Is Nothing Then
+        result.SetInputError mTorsionPreparationError
+        Exit Function
+    End If
+
+    Dim totalForce As Double: result.CheckHoop mTorsionPrepared, totalForce
+    If Len(mTorsionPrepared.FieldError) > 0 Then
+        result.SetFieldUnavailable mTorsionPrepared.FieldError, False
+        Exit Function
+    End If
+    Dim detail As String
+    Set PreparePlanarTorsion = mTorsionPrepared.BuildInitialStrains(mSection, totalForce, _
+        mMaterialProvider.ConcreteMaterialFromSpec(spec), mMaterialProvider.SteelMaterialFromSpec(spec), detail)
+    If PreparePlanarTorsion Is Nothing Then result.SetFieldUnavailable detail, True
+End Function
+
+' Хранит диагностический результат подготовки до окончания этого пакета.
+Private Sub InitializeTorsionPreparation()
+    On Error GoTo Failed
+    Dim prepared As New CTorsionPlanarPreparation
+    prepared.Initialize mSection, mTorsionDiameter, mTorsionSpacing, mTorsionCover, mTorsionResistance
+    Set mTorsionPrepared = prepared
+    Exit Sub
+Failed:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
+    mTorsionPreparationError = mTorsionRange & ". " & Err.Description
 End Sub
 
 ' Применяет продольный изгиб к нагрузкам сочетания. CStabilityCalculator
@@ -1168,7 +1245,8 @@ End Sub
 Private Function RunProfileState(ByVal index As Long, ByVal stateType As ESectionStateType, _
         ByVal materialRole As ECalculationPurpose, ByVal spec As CMaterialModelSpec, _
         Optional ByVal useDiagramExtension As Boolean = True, _
-        Optional ByVal mergeIntoDirectStateStatus As Boolean = True) As CStateSolutionRunner
+        Optional ByVal mergeIntoDirectStateStatus As Boolean = True, _
+        Optional ByVal initialField As CSectionInitialStrains = Nothing) As CStateSolutionRunner
     mResults(index).SetDiagramExtensionEnabled mMaterialProvider.DiagramExtensionEnabled
     Dim effectiveDiagramExtension As Boolean
     effectiveDiagramExtension = (useDiagramExtension And mResults(index).DiagramExtensionEnabled)
@@ -1182,7 +1260,7 @@ Private Function RunProfileState(ByVal index As Long, ByVal stateType As ESectio
     Set provider = CreateStateProvider(index)
 
     Dim stateResult As CSectionStateResult
-    Set stateResult = provider.GetOrSolve(request)
+    Set stateResult = provider.GetOrSolve(request, initialField:=initialField)
 
     Dim runner As CStateSolutionRunner
     Set runner = provider.LastRunner

@@ -13,12 +13,15 @@ Option Explicit
 ' Чтение таблицы сочетаний нагрузок
 ' ==========================================================================
 ' Переносит строки rngLoadCombinations в CBatchSectionCalculator. Пустые
-' компоненты N, Mx и My считаются нулём; полностью нулевая нагрузка пропускается,
+' компоненты N, Mx, My и T считаются нулём; полностью нулевая нагрузка пропускается,
 ' а неполные/некорректные строки сохраняются как InvalidInput, чтобы пользователь
 ' увидел их в отчете. Повторяющиеся заполненные ID прерывают запуск до добавления строк.
 '
 ' Если передан CUnitSystem, усилия сразу переводятся из INPUT-единиц и
 ' пользовательской системы знаков во внутреннюю систему расчетного ядра.
+
+Private Const TORQUE_COLUMN As Long = 8 ' При сборке добавляется в конец rngLoadCombinations, после Comment.
+Private Const TORQUE_HEADER As String = "T" ' Другие заголовки восьмого столбца не включают чтение крутящего момента.
 
 ' Загружает сочетания из именованного диапазона книги.
 Public Sub LoadFromWorkbook(ByVal workbook As Object, ByVal batch As CBatchSectionCalculator, Optional ByVal units As CUnitSystem = Nothing)
@@ -37,11 +40,20 @@ Public Sub LoadFromRange(ByVal source As Object, ByVal batch As CBatchSectionCal
     data = source.Value2
     RequireUniqueIDs data, source
 
-    Dim rowIndex As Long
+    Dim rowIndex As Long, hasTorque As Boolean
+    hasTorque = HasTorqueColumn(data)
     For rowIndex = 2 To UBound(data, 1) ' Пустой номер отключает строку, сохраняя введённые нагрузки и её исходное место.
-        If Not IsBlankCell(data(rowIndex, 1)) Then AddRow data, batch, rowIndex, units, source
+        If Not IsBlankCell(data(rowIndex, 1)) Then AddRow data, batch, rowIndex, units, source, hasTorque
     Next rowIndex
 End Sub
+
+' Опознаёт столбец только по точному тексту T в восьмой ячейке заголовков.
+' Книги с меньшим диапазоном и произвольным восьмым полем совместимы.
+Private Function HasTorqueColumn(ByRef data As Variant) As Boolean
+    If UBound(data, 2) < TORQUE_COLUMN Then Exit Function
+    If VarType(data(1, TORQUE_COLUMN)) <> vbString Then Exit Function
+    HasTorqueColumn = (StrComp(CStr(data(1, TORQUE_COLUMN)), TORQUE_HEADER, vbBinaryCompare) = 0)
+End Function
 
 ' Проверяет заполненные ID до чтения геометрии и запуска расчёта; пустой ID отключает строку.
 ' Регистр и крайние пробелы не различаются, как при выборе сохранённого сочетания.
@@ -93,7 +105,7 @@ End Sub
 ' Ошибки ввода не прерывают весь расчет: строка попадает в отчет как InvalidInput,
 ' остальные сочетания продолжают считаться.
 Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator, ByVal rowIndex As Long, _
-        ByVal units As CUnitSystem, ByVal source As Object)
+        ByVal units As CUnitSystem, ByVal source As Object, ByVal hasTorque As Boolean)
     Dim combinationID As String
     Dim profileId As String
     Dim loadPathText As String
@@ -103,14 +115,16 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
     pathLocation = "LoadPath"
     If UBound(data, 2) >= 6 Then pathLocation = CellLocation(source, rowIndex, 6, "LoadPath")
     combinationID = ReadCellText(data(rowIndex, 1), CellLocation(source, rowIndex, 1, "CombinationID"), errorText, hasError)
-    Dim nValue As Double, mxValue As Double, myValue As Double
+    Dim nValue As Double, mxValue As Double, myValue As Double, torqueValue As Double
     nValue = ReadOptionalLoadDouble(data(rowIndex, 2), CellLocation(source, rowIndex, 2, "N"), errorText, hasError)
     mxValue = ReadOptionalLoadDouble(data(rowIndex, 3), CellLocation(source, rowIndex, 3, "Mx"), errorText, hasError)
     myValue = ReadOptionalLoadDouble(data(rowIndex, 4), CellLocation(source, rowIndex, 4, "My"), errorText, hasError)
+    If hasTorque Then torqueValue = ReadOptionalLoadDouble(data(rowIndex, TORQUE_COLUMN), _
+        CellLocation(source, rowIndex, TORQUE_COLUMN, TORQUE_HEADER), errorText, hasError)
     If Not hasError Then ' Точно нулевой LC не использует профиль, путь и комментарий; ненулевые малые нагрузки сохраняются.
-        ConvertLoadsToInternal units, nValue, mxValue, myValue, errorText, hasError, source, rowIndex
+        ConvertLoadsToInternal units, nValue, mxValue, myValue, torqueValue, hasTorque, errorText, hasError, source, rowIndex
         If Not hasError Then
-            If nValue = 0# And mxValue = 0# And myValue = 0# Then Exit Sub
+            If nValue = 0# And mxValue = 0# And myValue = 0# And torqueValue = 0# Then Exit Sub
         End If
     End If
     profileId = ReadCellText(data(rowIndex, 5), CellLocation(source, rowIndex, 5, "ProfileId"), errorText, hasError)
@@ -136,12 +150,12 @@ Private Sub AddRow(ByRef data As Variant, ByVal batch As CBatchSectionCalculator
         batch.AddInvalidCombination combinationID, profileId, comment, errorText, loadPathText, rowIndex - 1, RowLocation(source, rowIndex)
     Else
         batch.AddCombination combinationID, nValue, mxValue, myValue, profileId, comment, loadPathText, rowIndex - 1, _
-            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False)
+            RowLocation(source, rowIndex), source.Worksheet.Name & "!" & source.Cells(rowIndex, 5).Address(False, False), torqueValue
     End If
 End Sub
 
 ' Читает нагрузку, где пустая ячейка означает 0.
-' Это позволяет задавать одноосный изгиб как N + Mx при пустом My.
+' Это позволяет задавать одноосный изгиб и чистое кручение.
 Private Function ReadOptionalLoadDouble(ByVal value As Variant, ByVal fieldName As String, ByRef errorText As String, ByRef hasError As Boolean) As Double
     Dim parsed As Double
     If IsError(value) Then
@@ -186,14 +200,18 @@ End Function
 ' Переводит успешно прочитанные нагрузки через единый адаптер единиц.
 ' Переполнение конкретной компоненты является ошибкой строки, не всего пакета.
 Private Sub ConvertLoadsToInternal(ByVal units As CUnitSystem, ByRef nValue As Double, _
-        ByRef mxValue As Double, ByRef myValue As Double, ByRef errorText As String, ByRef hasError As Boolean, _
-        ByVal source As Object, ByVal rowIndex As Long)
+        ByRef mxValue As Double, ByRef myValue As Double, ByRef torqueValue As Double, ByVal hasTorque As Boolean, _
+        ByRef errorText As String, ByRef hasError As Boolean, ByVal source As Object, ByVal rowIndex As Long)
     If units Is Nothing Then Exit Sub
     On Error GoTo ConversionFailed
     Dim fieldName As String
     fieldName = CellLocation(source, rowIndex, 2, "N"): nValue = units.InputForceToInternal(nValue)
     fieldName = CellLocation(source, rowIndex, 3, "Mx"): mxValue = units.InputMomentMxToInternal(mxValue)
     fieldName = CellLocation(source, rowIndex, 4, "My"): myValue = units.InputMomentMyToInternal(myValue)
+    If hasTorque Then
+        fieldName = CellLocation(source, rowIndex, TORQUE_COLUMN, TORQUE_HEADER)
+        torqueValue = units.InputTorqueToInternal(torqueValue)
+    End If
     Exit Sub
 ConversionFailed:
     AppendError errorText, hasError, fieldName & " не может быть переведено во внутренние единицы: числовой диапазон превышен"

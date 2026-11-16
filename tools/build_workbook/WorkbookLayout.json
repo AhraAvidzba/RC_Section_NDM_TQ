@@ -51,11 +51,11 @@
     },
     {
       "Name": "rngLoadCombinations",
-      "RefersTo": "=Config!$H$70:$N$100",
+      "RefersTo": "=Config!$H$70:$O$100",
       "Sheet": "Config",
-      "Address": "$H$70:$N$100",
+      "Address": "$H$70:$O$100",
       "Rows": 31,
-      "Columns": 7
+      "Columns": 8
     },
     {
       "Name": "rngNDMElementGeometry",
@@ -110,6 +110,30 @@
       "RefersTo": "=Results!$S$156",
       "Sheet": "Results",
       "Address": "$S$156",
+      "Rows": 1,
+      "Columns": 1
+    },
+    {
+      "Name": "rngPlanarTorsionHoop",
+      "RefersTo": "=Сечения!$A$135:$B$139",
+      "Sheet": "Сечения",
+      "Address": "$A$135:$B$139",
+      "Rows": 5,
+      "Columns": 2
+    },
+    {
+      "Name": "rngPlanarTorsionSteel",
+      "RefersTo": "=Results!$EH$156",
+      "Sheet": "Results",
+      "Address": "$EH$156",
+      "Rows": 1,
+      "Columns": 1
+    },
+    {
+      "Name": "rngPlanarTorsionSummary",
+      "RefersTo": "=Results!$DW$156",
+      "Sheet": "Results",
+      "Address": "$DW$156",
       "Rows": 1,
       "Columns": 1
     },
@@ -380,6 +404,11 @@
         },
         {
           "Row": 93,
+          "Height": 21,
+          "Hidden": false
+        },
+        {
+          "Row": 134,
           "Height": 21,
           "Hidden": false
         }
@@ -5075,8 +5104,32 @@
         },
         {
           "First": 116,
-          "Last": 129,
+          "Last": 126,
           "Width": 14,
+          "Hidden": false
+        },
+        {
+          "First": 127,
+          "Last": 127,
+          "Width": 16,
+          "Hidden": false
+        },
+        {
+          "First": 128,
+          "Last": 134,
+          "Width": 14,
+          "Hidden": false
+        },
+        {
+          "First": 135,
+          "Last": 135,
+          "Width": 36,
+          "Hidden": false
+        },
+        {
+          "First": 138,
+          "Last": 142,
+          "Width": 15,
           "Hidden": false
         }
       ],

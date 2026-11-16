@@ -173,6 +173,50 @@ function Add-GeometryTableValidation {
     }
 }
 
+# Создаёт общий блок единственного хомута ниже таблиц типов сечений.
+# В именованный диапазон входят постоянные ключи и ячейки ввода.
+function Add-PlanarTorsionHoopTable {
+    param([object]$Workbook, [object]$Sheet, [int]$HeaderRow, [int]$StartColumn=1)
+
+    $table = $Sheet.Cells.Item($HeaderRow, $StartColumn).Resize(5, 4)
+    $band = $Sheet.Cells.Item($HeaderRow - 1, $StartColumn).Resize(1, 4)
+    if ($Sheet.Application.WorksheetFunction.CountA($band.Resize(6, 4)) -ne 0) {
+        throw 'Область таблицы хомута на листе «Сечения» уже занята.'
+    }
+    $band.Merge() | Out-Null
+    $band.Cells.Item(1, 1).Value2 = 'Хомут при кручении'
+    $band.Interior.Color = 15921906
+    $band.Font.Bold = $true
+    $band.VerticalAlignment = -4108
+    $band.HorizontalAlignment = -4131
+    $band.EntireRow.RowHeight = 21
+
+    $data = New-Object 'object[,]' 5, 4
+    $data[0,0] = 'Ключ'; $data[0,1] = 'Значение'; $data[0,2] = 'Параметр'; $data[0,3] = 'Ед. ввода'
+    $data[1,0] = 'Diameter'; $data[1,2] = 'Диаметр хомута'
+    $data[2,0] = 'Spacing'; $data[2,2] = 'Шаг хомутов'
+    $data[3,0] = 'Cover'; $data[3,2] = 'Защитный слой'
+    $data[4,0] = 'Rsw'; $data[4,2] = 'Сопр. хомута'
+    Set-GeometryTableMatrix $table $data
+    for ($row = 2; $row -le 4; $row++) {
+        Set-InputUnitCell $table.Cells.Item($row, 4) 'мм'
+    }
+    Set-InputUnitCell $table.Cells.Item(5, 4) 'МПа'
+    $table.Font.Name = 'Arial'
+    $table.Font.Size = 9
+    $table.WrapText = $false
+    $table.VerticalAlignment = -4108
+    $table.HorizontalAlignment = -4108
+    $table.Columns.Item(3).HorizontalAlignment = -4131
+    $table.Rows.Item(1).Interior.Color = 14277081
+    $table.Rows.Item(1).Font.Bold = $true
+    $table.Cells.Item(2, 2).Resize(4, 1).Interior.Color = 15135487
+    $table.Borders.Weight = 2
+    $table.Borders.Color = 0
+    $table.Borders.LineStyle = -4115
+    Set-WorkbookNameByBounds $Workbook 'rngPlanarTorsionHoop' $Sheet $HeaderRow $StartColumn ($HeaderRow + 4) ($StartColumn + 1)
+}
+
 # Создаёт лист ввода сечений сразу после Config. Каждый тип занимает одну таблицу.
 # Столбцы и строки получают стандартные размеры один раз при создании листа.
 function Add-SectionSettingsTables {
@@ -191,6 +235,10 @@ function Add-SectionSettingsTables {
         $height=Add-GeometrySettingsTable $Workbook $sheet $definition $row 1
         $row+=$height+3
     }
+    $hoopLayout = @((Read-WorkbookLayout).Names | Where-Object Name -ceq 'rngPlanarTorsionHoop')[0]
+    $hoopAnchor = $sheet.Range($hoopLayout.Address)
+    if ($hoopAnchor.Row -lt $row) { throw 'Таблица хомута пересекает таблицы сечений в раскладке книги.' }
+    Add-PlanarTorsionHoopTable $Workbook $sheet $hoopAnchor.Row $hoopAnchor.Column
     $sheet.PageSetup.Orientation=2
     $sheet.PageSetup.Zoom=$false;$sheet.PageSetup.FitToPagesWide=1;$sheet.PageSetup.FitToPagesTall=$false
     return $sheet

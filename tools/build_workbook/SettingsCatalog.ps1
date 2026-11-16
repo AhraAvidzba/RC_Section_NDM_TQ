@@ -455,7 +455,7 @@ function Apply-ConfigUserInputAlignment {
         @{ Name = "rngConcreteMaterialParameters"; Columns = @(2, 3) },
         @{ Name = "rngCalculationProfiles"; Columns = @(3, 4, 5, 6) },
         @{ Name = "rngPlotAnnotationSettings"; Columns = @(2, 3) },
-        @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7); CommentColumns = @(7) },
+        @{ Name = "rngLoadCombinations"; Columns = @(1, 2, 3, 4, 5, 6, 7, 8); CommentColumns = @(7) },
         @{ Name = "rngStabilityDurationLoads"; Columns = @(1, 2, 3, 4) },
         @{ Name = "rngSP35Table721"; Columns = @(1, 2, 3, 4, 5, 6) }
     )
@@ -467,6 +467,7 @@ function Apply-ConfigUserInputAlignment {
             if ($range.Rows.Count -lt 2) { continue }
 
             foreach ($columnIndex in $item.Columns) {
+                if ($columnIndex -gt $range.Columns.Count) { continue }
                 if($columnIndex -notin $item.CommentColumns){
                     Set-ConfigInputCellAlignment $range.Offset(1, $columnIndex - 1).Resize($range.Rows.Count - 1, 1)
                 }
@@ -2599,6 +2600,83 @@ function Add-LoadCombinationsTable {
     $capacityLoadPathRange.Value2 = "Auto"
 
     Set-WorkbookNameByBounds $Workbook "rngLoadCombinations" $Sheet $HeaderRow $StartColumn ($HeaderRow + 30) ($StartColumn + 6)
+    Add-LoadCombinationTorqueColumn $Workbook
+}
+
+# Добавляет свободный столбец после Comment без переноса существующего ввода.
+# Заголовок T остаётся постоянным ключом VBA, единица видна над ним.
+function Add-LoadCombinationTorqueColumn {
+    param([object]$Workbook)
+
+    $range = $Workbook.Names.Item('rngLoadCombinations').RefersToRange
+    if ($range.Columns.Count -ne 7) { throw 'Для добавления T требуется исходная таблица сочетаний из семи столбцов.' }
+    $sheet = $range.Worksheet
+    $headerRow = [int]$range.Row
+    $startColumn = [int]$range.Column
+    $torqueColumn = $startColumn + 7
+    $lastRow = $headerRow + $range.Rows.Count - 1
+    $column = $sheet.Cells.Item($headerRow, $torqueColumn).Resize($range.Rows.Count, 1)
+    $unit = $sheet.Cells.Item($headerRow - 1, $torqueColumn)
+    if ($sheet.Application.WorksheetFunction.CountA($unit.Resize($range.Rows.Count + 1, 1)) -ne 0) {
+        throw 'Столбец справа от Comment уже занят. Проверьте расположение таблицы сочетаний.'
+    }
+
+    $header = $column.Cells.Item(1, 1)
+    $header.Value2 = 'T'
+    $header.Font.Bold = $true
+    $header.Interior.Color = $script:ConfigTableHeaderColor
+    $header.HorizontalAlignment = -4108
+    Set-InputUnitCell $unit 'Н*мм'
+    $unit.Font.Bold = $true
+    $unit.Interior.Color = 15921906
+    $unit.HorizontalAlignment = -4108
+    $inputCells = $column.Cells.Item(2, 1).Resize($range.Rows.Count - 1, 1)
+    Set-ConfigInputCellAlignment $inputCells
+    $inputCells.Interior.Color = 15135487
+    $column.Borders.Weight = 2
+    $column.Borders.Color = 0
+    $column.Borders.LineStyle = -4115
+    Set-WorkbookNameByBounds $Workbook 'rngLoadCombinations' $sheet $headerRow $startColumn $lastRow $torqueColumn
+}
+
+# Назначает начала двух новых блоков справа от служебного индекса Results.
+# Заголовки и строки заполняет общий писатель результатов при расчёте.
+function Add-PlanarTorsionResultsAnchors {
+    param([object]$Workbook, [object]$Layout)
+
+    $results = $Workbook.Worksheets.Item('Results')
+    $used = $results.UsedRange
+    $lastRow = [int]$used.Row + [int]$used.Rows.Count - 1
+    $definitions = [ordered]@{rngPlanarTorsionSummary = 9; rngPlanarTorsionSteel = 5}
+    foreach ($name in $definitions.Keys) {
+        $entry = @($Layout.Names | Where-Object Name -ceq $name)[0]
+        $anchor = $results.Range($entry.Address)
+        $firstColumn = [int]$anchor.Column
+        $lastColumn = $firstColumn + [int]$definitions[$name] - 1
+        $claimed = $anchor.Resize([Math]::Max(1, $lastRow - [int]$anchor.Row + 1), [int]$definitions[$name])
+        if ($results.Application.WorksheetFunction.CountA($claimed) -ne 0) {
+            throw "Место блока $name на листе Results уже занято."
+        }
+        Set-WorkbookNameByBounds $Workbook $name $results $anchor.Row $firstColumn $anchor.Row $firstColumn
+        $layoutSheet = @($Layout.Sheets | Where-Object Name -ceq 'Results')[0]
+        for ($column = $firstColumn; $column -le $lastColumn; $column++) {
+            $width = @($layoutSheet.Columns | Where-Object {$_.First -le $column -and $_.Last -ge $column})[0].Width
+            $results.Columns.Item($column).ColumnWidth = [double]$width
+        }
+    }
+}
+
+# Дополняет оформленную исходную книгу полями эксперимента. Исходные
+# сочетания, существующие диапазоны и служебный индекс сохраняются.
+function Add-PlanarTorsionWorkbookUI {
+    param([object]$Workbook)
+
+    $layout = Read-WorkbookLayout
+    Add-LoadCombinationTorqueColumn $Workbook
+    $sections = $Workbook.Worksheets.Item('Сечения')
+    $hoop = $sections.Range(@($layout.Names | Where-Object Name -ceq 'rngPlanarTorsionHoop')[0].Address)
+    Add-PlanarTorsionHoopTable $Workbook $sections $hoop.Row $hoop.Column
+    Add-PlanarTorsionResultsAnchors $Workbook $layout
 }
 
 # Подключает выпадающий список профилей после создания rngCalculationProfiles.
@@ -3640,7 +3718,7 @@ function Apply-SystemSettingsLayout {
     $materialControlHeaderRow = 2
     $materialControlColumn = 35
     $materialChartTopRow = 1
-    $materialChartColumn = 22
+    $materialChartColumn = 23 # Временный столбец V занят T до переноса таблиц в конечную раскладку.
     Add-SP35Table721 $Workbook $Sheet 60 35
 
     Add-UnitSettingsTable $Workbook $Sheet $rightRow $rightColumn

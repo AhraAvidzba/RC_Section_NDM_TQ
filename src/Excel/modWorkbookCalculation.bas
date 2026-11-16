@@ -454,6 +454,7 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     report.AddSection "Сочетания нагрузок"
     report.AddStep "Начато чтение rngLoadCombinations."
     reader.LoadFromWorkbook workbook, batch, units
+    If batch.HasTorqueCombinations Then ReadPlanarTorsionConfiguration workbook, batch, units
     If batch.Count = 0 Then
         CalculateSectionCore = "Расчёт не запускался: нет сочетаний с заполненным CombinationID и ненулевыми нагрузками. Прежние результаты сохранены."
         report.AddStep CalculateSectionCore
@@ -506,6 +507,7 @@ Private Function CalculateSectionCore(ByVal workbook As Object, Optional ByVal s
     report.AddStep "Результаты подготовлены; сохранение в выбранном режиме и вывод из памяти."
     Dim plotWarning As String, plotHasWarning As Boolean
     plotWarning = SaveAndDisplayCalculationSnapshot(workbook, savedSnapshot, plotHasWarning)
+    WritePlanarTorsionResults workbook, batch, units
     report.AddStep "Подробные таблицы и схема заполнены из готовых данных без повторного решения. Полный файл снимка сохраняется только в режиме File."
 
     Dim totalElapsedSeconds As Double
@@ -547,6 +549,35 @@ Failed:
     End If
     On Error GoTo 0
     Err.Raise errorNumber, errorSource, errorDescription
+End Function
+
+' Загружает параметры экспериментального хомута с листа сечения.
+' Ошибка относится только к сочетаниям, где задан ненулевой T.
+Private Sub ReadPlanarTorsionConfiguration(ByVal workbook As Object, ByVal batch As CBatchSectionCalculator, ByVal units As CUnitSystem)
+    On Error GoTo Failed
+    Dim source As Object, location As String
+    location = "Лист Сечения, таблица rngPlanarTorsionHoop"
+    Set source = workbook.Names.Item("rngPlanarTorsionHoop").RefersToRange
+    location = source.Worksheet.Name & "!" & source.Address(False, False) & " (rngPlanarTorsionHoop)"
+    Dim reader As New CSystemSettingsReader
+    reader.LoadPlanarTorsionHoop source
+    Dim diameter As Double, spacing As Double, cover As Double, resistance As Double
+    diameter = units.InputLengthToInternal(ReadHoopDimension(reader, "Diameter", False))
+    spacing = units.InputLengthToInternal(ReadHoopDimension(reader, "Spacing", False))
+    cover = units.InputLengthToInternal(ReadHoopDimension(reader, "Cover", True))
+    resistance = units.InputStressToInternal(ReadHoopDimension(reader, "Rsw", False))
+    batch.ConfigurePlanarTorsion diameter, spacing, cover, resistance, location
+    Exit Sub
+Failed:
+    If Err.Number = 18 Then Err.Raise Err.Number, Err.Source, Err.Description
+    batch.ConfigurePlanarTorsion 0#, 0#, 0#, 0#, location, location & ". " & Err.Description
+End Sub
+
+' Проверяет знак заданного числа и сообщает адрес параметра хомута.
+Private Function ReadHoopDimension(ByVal reader As CSystemSettingsReader, ByVal key As String, ByVal allowZero As Boolean) As Double
+    ReadHoopDimension = reader.GetRequiredDouble(key)
+    If ReadHoopDimension < 0# Or (ReadHoopDimension = 0# And Not allowZero) Then _
+        Err.Raise vbObjectError + 4511, "ReadHoopDimension", reader.InputErrorMessage(key, "Недопустимое число.", "Проверьте знак и единицы INPUT.")
 End Function
 
 
@@ -1267,6 +1298,7 @@ Public Sub ClearSectionResultsForWorkbook(ByVal workbook As Object)
     Dim ndmWriter As CNDMResultsWriter
     Set ndmWriter = New CNDMResultsWriter
     ndmWriter.ClearResults workbook
+    ClearPlanarTorsionResults workbook
 End Sub
 
 ' Читает зарегистрированные таблицы выбранного рецепта и создаёт единое описание сечения.

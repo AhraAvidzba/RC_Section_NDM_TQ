@@ -27,6 +27,7 @@ Private mStrengthResult As CStrengthResult ' Результаты НДС при 
 Private mCrackResult As CCrackResult ' Результаты образования и раскрытия трещин, текущего НДС и проверки продольных трещин.
 Private mStabilityResult As CStabilityResult ' Проверка устойчивости.
 Private mWorkflowMeta As CResultMeta ' Ошибка общей проверки исходных данных или остановка выполнения сочетания до получения инженерного результата.
+Private mPlanarTorsion As CTorsionPlanarResult ' Отдельная предварительная проверка для сочетания с ненулевым T.
 
 ' Создаёт пустые результаты отдельных проверок. Несуществующее НДС при этом не подставляется.
 Private Sub Class_Initialize()
@@ -41,6 +42,7 @@ Public Sub Clear(ByVal defaultCapacityPath As String)
     mStrengthResult.Clear defaultCapacityPath
     Set mCrackResult = New CCrackResult
     Set mStabilityResult = New CStabilityResult
+    Set mPlanarTorsion = Nothing
     Set mWorkflowMeta = New CResultMeta
     mWorkflowMeta.SetNotRequested rkGeneric
     mProfileId = vbNullString
@@ -81,16 +83,27 @@ Public Property Get GoverningUtil() As Double
     If mCrackResult.Width.Utilization > GoverningUtil Then GoverningUtil = mCrackResult.Width.Utilization
     If mCrackResult.Longitudinal.Utilization > GoverningUtil Then GoverningUtil = mCrackResult.Longitudinal.Utilization
     If mStabilityResult.Utilization > GoverningUtil Then GoverningUtil = mStabilityResult.Utilization
+    If Not mPlanarTorsion Is Nothing Then
+        If mPlanarTorsion.NormalUtilization > GoverningUtil Then GoverningUtil = mPlanarTorsion.NormalUtilization
+        If mPlanarTorsion.HoopReserve > 0# Then
+            Dim hoopUtil As Double: hoopUtil = 1# / mPlanarTorsion.HoopReserve
+            If hoopUtil > GoverningUtil Then GoverningUtil = hoopUtil
+        End If
+    End If
 End Property
 
 ' Собирает итоговый статус сочетания и пояснения к проверкам с проблемами.
 ' Классы записи на лист получают готовый текст из этого результата.
 Public Property Get OverallMeta() As CResultMeta
     Dim strength As CResultMeta, crack As CResultMeta, stability As CResultMeta
+    Dim hoop As CResultMeta, normalWithTorsion As CResultMeta
     Set strength = mStrengthResult.ResultMeta
     Set crack = mCrackResult.ResultMeta
     Set stability = mStabilityResult.Meta
-    Set OverallMeta = Policy.WorstResultMeta(rkGeneric, mWorkflowMeta, strength, crack, stability)
+    If Not mPlanarTorsion Is Nothing Then
+        Set hoop = mPlanarTorsion.HoopMeta: Set normalWithTorsion = mPlanarTorsion.NormalMeta
+    End If
+    Set OverallMeta = Policy.WorstResultMeta(rkGeneric, mWorkflowMeta, strength, crack, stability, hoop, normalWithTorsion)
     If mWorkflowMeta.InternalStatus = rsInvalidInput Or mWorkflowMeta.InternalStatus = rsInvalidConfiguration Then
         If OverallMeta.InternalStatus = mWorkflowMeta.InternalStatus And OverallMeta.ResultCode = mWorkflowMeta.ResultCode Then
             OverallMeta.ResultComment = mWorkflowMeta.ResultComment ' Общую ошибку ввода показываем один раз; отдельный CalcErr сохраняется, если именно он определил общий статус.
@@ -102,7 +115,20 @@ Public Property Get OverallMeta() As CResultMeta
     strength.AppendCommentTo comment, True
     crack.AppendCommentTo comment, True
     stability.AppendCommentTo comment
+    If Not hoop Is Nothing Then hoop.AppendCommentTo comment
+    If Not normalWithTorsion Is Nothing Then normalWithTorsion.AppendCommentTo comment
     OverallMeta.ResultComment = comment
+End Property
+
+' Сохраняет законченные проверки хомута и суммы нормальных напряжений.
+Friend Sub StorePlanarTorsion(ByVal result As CTorsionPlanarResult)
+    AssertWritable
+    Set mPlanarTorsion = result
+End Sub
+
+' Возвращает проверку кручения текущего сочетания. Для T=0 она отсутствует.
+Public Property Get PlanarTorsion() As CTorsionPlanarResult
+    Set PlanarTorsion = mPlanarTorsion
 End Property
 
 ' Возвращает причину общей ошибки ввода или технической остановки сочетания.

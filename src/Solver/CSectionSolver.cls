@@ -97,6 +97,8 @@ Private mInitialTargetMy As Double ' Начальное My при продолж
 Private mSnapshotSection As CSectionModel ' Модель последнего Solve/Evaluate; общая ссылка без копирования сетки.
 Private mSnapshotConcrete As CMaterialDiagram ' Фактически переданная диаграмма, не повторный выбор по Config.
 Private mSnapshotSteel As CMaterialDiagram ' Фактически переданная диаграмма арматуры.
+Private mInitialStrainField As CSectionInitialStrains ' Неизменяемое поле до приложения N и M.
+Private mInitialConcreteStrains() As Double, mInitialSteelStrains() As Double ' Подготовка для циклов равновесия.
 Private mEvaluationReuseEnabled As Boolean ' Только внутри одного Solve с неизменными штатными диаграммами.
 Private mPhysicalEvaluationValid As Boolean, mPhysicalEvaluationHasK As Boolean ' Готовность последнего физического НДС и наличие его касательной матрицы.
 Private mPhysicalEvaluationRevision As Long, mPhysicalEvaluationPlane(1 To 3) As Double ' Версия геометрии и три параметра поля последнего физического НДС.
@@ -1005,7 +1007,8 @@ Private Sub EvaluateStateInto(ByVal section As CSectionModel, _
     If TypeName(concreteMaterial) = "CMaterialDiagram" Then Set concreteDiagram = concreteMaterial
     If TypeName(steelMaterial) = "CMaterialDiagram" Then Set steelDiagram = steelMaterial
 
-    If Not physical And Not concreteDiagram Is Nothing Then
+    Dim hasInitialStrains As Boolean: hasInitialStrains = Not mInitialStrainField Is Nothing
+    If Not hasInitialStrains And Not physical And Not concreteDiagram Is Nothing Then
         If section.ConcreteCount > 5000 Then
             If section.TryConcreteForces(concreteDiagram, eps0, kx, ky, originX, originY, nInt, mxInt, myInt) Then GoTo ConcreteForcesReady
         End If
@@ -1015,6 +1018,7 @@ Private Sub EvaluateStateInto(ByVal section As CSectionModel, _
     For i = 1 To mConcreteProjectionCount
         xCoord = mConcreteProjectionX(i): yCoord = mConcreteProjectionY(i): area = mConcreteProjectionArea(i)
         strain = eps0 + kx * yCoord + ky * xCoord
+        If hasInitialStrains Then strain = strain + mInitialConcreteStrains(i)
         If physical Then
             If strain < mMinConcreteStrain Then
                 If Abs(strain - mMinConcreteStrain) <= Abs(strain) * STRAIN_EXTREMA_ROUNDING_MARGIN Then mStrainExtremaAmbiguous = True
@@ -1054,10 +1058,13 @@ Private Sub EvaluateStateInto(ByVal section As CSectionModel, _
 
 ConcreteForcesReady:
     If section.RebarCount > 0 Then
+        Dim planeStrain As Double
         PrepareNumericProjection section, originX, originY, False
         For i = 1 To mRebarProjectionCount
             xCoord = mRebarProjectionX(i): yCoord = mRebarProjectionY(i): area = mRebarProjectionArea(i)
-            strain = eps0 + kx * yCoord + ky * xCoord
+            planeStrain = eps0 + kx * yCoord + ky * xCoord
+            strain = planeStrain
+            If hasInitialStrains Then strain = strain + mInitialSteelStrains(i)
             If physical Then
                 If strain < mMinSteelStrain Then
                     If Abs(strain - mMinSteelStrain) <= Abs(strain) * STRAIN_EXTREMA_ROUNDING_MARGIN Then mStrainExtremaAmbiguous = True
@@ -1087,12 +1094,12 @@ ConcreteForcesReady:
                 End If
             End If
             If concreteDiagram Is Nothing Then
-                concreteStress = concreteMaterial.GetStress(strain)
-                If buildTangent Then concreteTangent = concreteMaterial.GetTangentModulus(strain)
+                concreteStress = concreteMaterial.GetStress(planeStrain)
+                If buildTangent Then concreteTangent = concreteMaterial.GetTangentModulus(planeStrain)
             ElseIf physical Then
-                concreteDiagram.EvaluateAtStrain strain, concreteStress, concreteTangent
+                concreteDiagram.EvaluateAtStrain planeStrain, concreteStress, concreteTangent
             Else
-                concreteStress = concreteDiagram.StressAtStrain(strain)
+                concreteStress = concreteDiagram.StressAtStrain(planeStrain)
             End If
             stress = steelStress - concreteStress ' Бетонная сетка включает площадь стержня, поэтому сталь заменяет этот бетон, а не добавляется поверх него.
             force = stress * area
@@ -1279,6 +1286,12 @@ Private Function ValidateInputs(ByVal section As CSectionModel, ByVal concreteMa
             "Solver.ToleranceN;Solver.ToleranceMx;Solver.ToleranceMy"
 
     Else
+        If Not mInitialStrainField Is Nothing Then
+            If Not mInitialStrainField.Matches(section) Then
+                SetValidationFailure sfcInvalidInput, "Начальные деформации относятся к другой ревизии сечения."
+                Exit Function
+            End If
+        End If
         ValidateInputs = True
     End If
 End Function
@@ -1433,6 +1446,20 @@ Friend Sub CopyMaterialContext(ByRef section As CSectionModel, ByRef concrete As
     If Not mSnapshotConcrete Is Nothing Then Set concrete = mSnapshotConcrete.Clone
     If Not mSnapshotSteel Is Nothing Then Set steel = mSnapshotSteel.Clone
 End Sub
+
+' Подключает неизменяемое поле до запуска равновесия и сбрасывает кэш,
+' поскольку плоскость без поля и плоскость с полем дают разные усилия.
+Friend Sub SetInitialStrainField(ByVal field As CSectionInitialStrains)
+    Set mInitialStrainField = field
+    Erase mInitialConcreteStrains: Erase mInitialSteelStrains
+    If Not field Is Nothing Then field.CopyArrays mInitialConcreteStrains, mInitialSteelStrains
+    mPhysicalEvaluationValid = False: mForceEvaluationValid = False: mStrainExtremaValid = False
+End Sub
+
+' Возвращает поле для сохранения фактических деформаций элементов.
+Friend Property Get InitialStrainField() As CSectionInitialStrains
+    Set InitialStrainField = mInitialStrainField
+End Property
 
 ' Задаёт начальное поле деформаций для следующего решения.
 ' Расчёт трещин и несущей способности может передать близкое ранее найденное НДС.

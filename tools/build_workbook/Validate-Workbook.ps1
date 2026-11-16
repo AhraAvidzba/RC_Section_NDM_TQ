@@ -148,6 +148,9 @@ try {
 
     $requiredNames = @(
         "rngLoadCombinations",
+        "rngPlanarTorsionHoop",
+        "rngPlanarTorsionSummary",
+        "rngPlanarTorsionSteel",
         "rngUnitSettings",
         "rngSignConventionSettings",
         "rngPlotAnnotationSettings",
@@ -387,12 +390,22 @@ try {
     Add-Check $checks "Config right-side ranges vertical stack" $rightStackOk ($rightStackDetails -join "; ")
 
     $loads = $workbook.Names.Item("rngLoadCombinations").RefersToRange
-    $expectedLoadHeaders = @("CombinationID", "N, tf", "Mx, tf*m", "My, tf*m", "ProfileId", "LoadPath", "Comment")
+    $expectedLoadHeaders = @("CombinationID", "N, tf", "Mx, tf*m", "My, tf*m", "ProfileId", "LoadPath", "Comment", "T")
     $actualLoadHeaders = @()
-    for ($i = 1; $i -le 7; $i++) {
+    for ($i = 1; $i -le $expectedLoadHeaders.Count; $i++) {
         $actualLoadHeaders += [string]$loads.Cells.Item(1, $i).Value2
     }
-    Add-Check $checks "Load combinations table headers" (($actualLoadHeaders -join "|") -eq ($expectedLoadHeaders -join "|")) ($actualLoadHeaders -join " | ")
+    $loadHeadersOk = ($loads.Columns.Count -eq 8) -and (($actualLoadHeaders -join "|") -ceq ($expectedLoadHeaders -join "|"))
+    Add-Check $checks "Load combinations table headers" $loadHeadersOk ($actualLoadHeaders -join " | ")
+    $hoop = $workbook.Names.Item('rngPlanarTorsionHoop').RefersToRange
+    $hoopKeys = @(for ($i = 2; $i -le 5; $i++) { [string]$hoop.Cells.Item($i, 1).Value2 })
+    $hoopLayoutOk = (Test-SavedNamedRange $hoop 'rngPlanarTorsionHoop') -and ($hoop.Rows.Count -eq 5) -and
+        ($hoop.Columns.Count -eq 2) -and (($hoopKeys -join '|') -ceq 'Diameter|Spacing|Cover|Rsw')
+    Add-Check $checks "Planar torsion hoop inputs" $hoopLayoutOk ($hoopKeys -join ' | ')
+    foreach ($name in 'rngPlanarTorsionSummary', 'rngPlanarTorsionSteel') {
+        $anchor = $workbook.Names.Item($name).RefersToRange
+        Add-Check $checks "Planar torsion anchor $name" ((Test-SavedNamedRange $anchor $name) -and ($anchor.Count -eq 1)) $anchor.Address()
+    }
     Add-Check $checks "Formulas allowed on workbook sheets" $true "Excel formulas are allowed and preferred for transparent user-level calculations; VBA validation covers workbook structure."
 
     $excelSourceDir = Join-Path $root "src/Excel"

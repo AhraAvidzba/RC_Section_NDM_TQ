@@ -107,6 +107,25 @@ Public Sub LoadFromRange(ByVal settingsRange As Object)
     ValidateDiagramExtensionSetting
 End Sub
 
+' Читает отдельный блок одного хомута только для сочетаний с ненулевым T.
+' Строки используют общие правила чтения чисел и расчёта адресов ошибок.
+Friend Sub LoadPlanarTorsionHoop(ByVal settingsRange As Object)
+    Clear
+    mLoadingSheet = CStr(settingsRange.Worksheet.Name)
+    mLoadingRow = settingsRange.Row: mLoadingColumn = settingsRange.Column
+    If settingsRange.Areas.Count <> 1 Or settingsRange.Rows.Count <> 5 Or settingsRange.Columns.Count <> 2 Then _
+        Err.Raise vbObjectError + 4316, TypeName(Me), "Восстановите таблицу хомута rngPlanarTorsionHoop из пяти строк и двух столбцов."
+    Dim data As Variant: data = settingsRange.Value2
+    Dim keys As Variant: keys = Array("Diameter", "Spacing", "Cover", "Rsw")
+    Dim i As Long, key As String, row As Long
+    For i = LBound(keys) To UBound(keys)
+        row = i + 2: key = CStr(keys(i))
+        If StrComp(ConfigCellText(data(row, 1), "ключ хомута", row, key, False, 1), key, vbBinaryCompare) <> 0 Then _
+            Err.Raise vbObjectError + 4316, TypeName(Me), "Восстановите ключ " & key & " в " & InputCellLocation(row, 1) & "."
+        AppendSetting key, ConfigCellText(data(row, 2), "параметр хомута", row, key, False, 2), vbNullString, vbNullString, row, 2
+    Next i
+End Sub
+
 ' Проверяет текущий переключатель без преобразования структуры и переименования ключей.
 ' Для неполного автономного LoadFromRange добавляет Yes; в полной книге строка обязательна.
 Private Sub ValidateDiagramExtensionSetting(Optional ByVal requireWorkbookValue As Boolean = False)

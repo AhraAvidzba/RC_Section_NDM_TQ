@@ -217,6 +217,12 @@ Public Function InputMomentMyToInternal(ByVal value As Double) As Double
     InputMomentMyToInternal = value * MomentFactorToNmm(mInputMoment) * MySignFactor()
 End Function
 
+' Переводит T из INPUT в Н*мм. Положительное кручение действует по часовой
+' стрелке при взгляде вдоль +Z. Настройки знаков Mx и My к T не применяются.
+Public Function InputTorqueToInternal(ByVal value As Double) As Double
+    InputTorqueToInternal = value * MomentFactorToNmm(mInputMoment)
+End Function
+
 ' Переводит пользовательскую настройку вида "момент на единицу длины" во
 ' внутренние Н*мм/мм. Знак момента здесь не применяется: это положительный
 ' инженерный порог, а не расчетное усилие.
@@ -232,6 +238,11 @@ End Function
 ' Переводит внутренний My в OUTPUT-единицы с учетом пользовательского знака My.
 Public Function InternalMomentMyToOutput(ByVal value As Double) As Double
     InternalMomentMyToOutput = value / MomentFactorToNmm(mOutputMoment) * MySignFactor()
+End Function
+
+' Переводит внутренний T в OUTPUT с сохранением направления вокруг Z.
+Public Function InternalTorqueToOutput(ByVal value As Double) As Double
+    InternalTorqueToOutput = value / MomentFactorToNmm(mOutputMoment)
 End Function
 
 ' Переводит модуль момента без применения знаковых соглашений.

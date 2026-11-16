@@ -461,6 +461,45 @@ Public Function PointStress(ByVal index As Long) As Double
     PointStress = mStresses(index)
 End Function
 
+' Восстанавливает начальную деформацию для заданного напряжения на первой
+' физической ветви, начиная с нуля. Вспомогательные области продолжения
+' и повторные корни за максимумом диаграммы не используются.
+Friend Function TryInitialStrainForStress(ByVal stress As Double, ByRef strain As Double) As Boolean
+    EnsureInitialized
+    strain = 0#
+    If StressAtStrain(0#) <> 0# Then Exit Function
+    If stress = 0# Then
+        TryInitialStrainForStress = True
+        Exit Function
+    End If
+    Dim direction As Long: direction = Sgn(stress)
+    Dim first As Long, last As Long, limit As Double
+    If direction > 0 Then
+        If Not mHasPhysicalTensionLimit Then Exit Function
+        first = 1: last = mPointCount: limit = mPhysicalTensionStrain
+    Else
+        first = mPointCount: last = 1: limit = mPhysicalCompressionStrain
+    End If
+
+    Dim i As Long, point As Double, magnitude As Double, previousStrain As Double, previousMagnitude As Double
+    Dim required As Double: required = Abs(stress)
+    For i = first To last Step direction
+        point = mStrains(i)
+        If direction * point > 0# Then
+            If direction * (point - limit) > 0# Then point = limit
+            magnitude = direction * StressAtStrain(point)
+            If magnitude < previousMagnitude Then Exit Function
+            If magnitude >= required And magnitude > previousMagnitude Then
+                strain = previousStrain + (point - previousStrain) * ((required - previousMagnitude) / (magnitude - previousMagnitude))
+                TryInitialStrainForStress = True
+                Exit Function
+            End If
+            If point = limit Then Exit Function
+            previousStrain = point: previousMagnitude = magnitude
+        End If
+    Next i
+End Function
+
 ' ==========================================================================
 ' ДЛЯ ТЕСТОВ
 ' ==========================================================================

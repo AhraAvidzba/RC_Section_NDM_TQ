@@ -32,6 +32,7 @@ Private mDiagnosticsEnabled As Boolean ' Нужно ли копить подро
 Private mSolver As CSectionSolver ' Объект последней попытки решения НДС, в том числе неуспешной.
 Private mExtensionUsed As Boolean ' Признак использования вспомогательного продолжения диаграмм в найденном НДС.
 Private mWithinPhysicalRange As Boolean ' True, если все элементы остались в физических eps-пределах.
+Private mInitialStrainField As CSectionInitialStrains ' Общее исходное поле для всех повторов одной нагрузки.
 Private mDiagnosticLog As String ' Краткий журнал повторных попыток решения НДС.
 Private mInitialGuessApplied As Boolean ' True, если стартовая плоскость была задана не нулевой.
 Private mSolverCallCount As Long ' Количество фактических вызовов CSectionSolver.Solve.
@@ -343,6 +344,12 @@ Private Sub ConfigureSolver(ByVal solver As CSectionSolver)
     solver.ToleranceMy = mToleranceMy
     solver.SecantMaxRestarts = mSecantMaxRestarts
     solver.DiagnosticsEnabled = mDiagnosticsEnabled
+    If Not mInitialStrainField Is Nothing Then solver.SetInitialStrainField mInitialStrainField
+End Sub
+
+' Подключает начальные деформации до основной попытки и повторных стартов.
+Friend Sub SetInitialStrainField(ByVal field As CSectionInitialStrains)
+    Set mInitialStrainField = field
 End Sub
 
 ' Строит начальную плоскость для случаев, где нулевая плоскость является плохой
@@ -419,6 +426,7 @@ Private Function TrySolveFromExtensionGuess(ByVal section As CSectionModel, _
         ByVal attemptName As String, ByRef service As CSectionSolver) As Boolean
     Dim startState As CSectionSolver
     Set startState = New CSectionSolver
+    If Not mInitialStrainField Is Nothing Then startState.SetInitialStrainField mInitialStrainField
     startState.EvaluateStrainPlane section, concreteMaterial, steelMaterial, eps0, kx, ky
 
     Dim retryLoadSteps As Long
@@ -592,10 +600,12 @@ Public Function StateUsesExtension(ByVal section As CSectionModel, ByVal solver 
 
     Dim i As Long
     Dim strain As Double
+    Dim field As CSectionInitialStrains: Set field = solver.InitialStrainField
 
     If Not concreteDiagram Is Nothing Then
         For i = 1 To section.ConcreteCount
             strain = ElementStrain(solver, section.ConcreteX(i), section.ConcreteY(i))
+            If Not field Is Nothing Then strain = strain + field.ConcreteStrain(i)
             If concreteDiagram.IsInExtensionRange(strain) Then
                 StateUsesExtension = True
                 Exit Function
@@ -606,6 +616,7 @@ Public Function StateUsesExtension(ByVal section As CSectionModel, ByVal solver 
     If Not steelDiagram Is Nothing Then
         For i = 1 To section.RebarCount
             strain = ElementStrain(solver, section.RebarX(i), section.RebarY(i))
+            If Not field Is Nothing Then strain = strain + field.SteelStrain(i)
             If steelDiagram.IsInExtensionRange(strain) Then
                 StateUsesExtension = True
                 Exit Function
@@ -645,10 +656,12 @@ Public Function StateWithinPhysicalRange(ByVal section As CSectionModel, ByVal s
 
     Dim i As Long
     Dim strain As Double
+    Dim field As CSectionInitialStrains: Set field = solver.InitialStrainField
 
     If Not concreteDiagram Is Nothing Then
         For i = 1 To section.ConcreteCount
             strain = ElementStrain(solver, section.ConcreteX(i), section.ConcreteY(i))
+            If Not field Is Nothing Then strain = strain + field.ConcreteStrain(i)
             If Not concreteDiagram.IsInPhysicalRange(strain) Then Exit Function
         Next i
     End If
@@ -656,6 +669,7 @@ Public Function StateWithinPhysicalRange(ByVal section As CSectionModel, ByVal s
     If Not steelDiagram Is Nothing Then
         For i = 1 To section.RebarCount
             strain = ElementStrain(solver, section.RebarX(i), section.RebarY(i))
+            If Not field Is Nothing Then strain = strain + field.SteelStrain(i)
             If Not steelDiagram.IsInPhysicalRange(strain) Then Exit Function
         Next i
     End If

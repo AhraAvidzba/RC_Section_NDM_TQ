@@ -590,6 +590,7 @@ try {
     Add-WorkbookName $workbook "rngNDMSectionAnnotations" $results '$CL$156'
     Add-WorkbookName $workbook "rngNDMElementGeometry" $results '$BR$156'
     Add-IndexedResultsTable $workbook $script:WorkbookLayout
+    Add-PlanarTorsionResultsAnchors $workbook $script:WorkbookLayout
     $contourHeaders = @('RunID', 'LoopID', 'SegmentID', 'Sequence', 'LoopRole', 'SegmentType', 'StartX', 'StartY', 'EndX', 'EndY', 'CenterX', 'CenterY', 'Radius', 'SweepAngle, rad', 'SourceID', 'Comment', 'LengthUnit (SectionXY)')
     # Постоянные подписи создаются один раз при сборке шаблона.
     # Поэлементная запись обходит ограничение COM-адаптера PowerShell для этой шапки.
