@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "97E7934E25EB9BE0E1CAE9D8D88108EAD472887752B423487C9930957406A3CC",
+  "manifest_sha256": "F3D62264BC8006160EA2D822B1EFC999325E823BB621BF79B9788EFD437EC7AD",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 127,
+  "passed": 129,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1084,6 +1084,22 @@
       "archive": "HardShearRefinedShouldersNative20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "HardShear portable evidence: VERIFIED"
+    },
+    {
+      "id": "mvt2-external-opensees-elastic-rig-native",
+      "journal_section": 438,
+      "archive": "MVT2OpenSeesElastic20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "83BE89FD592C8263B5092AFA28593B5675FE195DDABB176E4B7099BE0A3DF7A8"
+      },
+      "verified_stdout": "MVT2_ELASTIC_DETACHED_PASS 4 steps"
+    },
+    {
+      "id": "mvt2-h26-rejected-optimizer-radius-native",
+      "journal_section": 439,
+      "archive": "MVT2H26RadiusRejectionNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "RADIUS WITNESS 5EEEBC4AB45369232CCB0430C9A94AD42221DB3432077BEDF4C7AB051BF05326 MECHANISM C8EB959F0B39430E864689767F2C5F6585EC05DEBA210F91294F70DD5F282597"
     }
   ]
 }
