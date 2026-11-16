@@ -929,41 +929,55 @@ Private Sub PutCoupledTrace(ByRef data() As Variant, ByRef row As Long, ByVal ru
     Next i
 End Sub
 
-' Сохраняет механизм и подтверждённый вектор физического предела
-' в пользовательской точке даже при отсутствии НДС заданных нагрузок.
+' Сохраняет механизм и подтверждённые усилия в пользовательской точке.
+' Арматурное событие с неопределённым общим пределом имеет отдельные свойства.
 Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As Long, ByVal runID As Variant, _
         ByVal id As String, ByVal capacity As CCapacityResult, ByVal units As CUnitSystem)
     Dim meta As CResultMeta: Set meta = capacity.ResultMeta
+    Dim hasSteelLimit As Boolean: hasSteelLimit = capacity.HasSteelLimitPoint
+    Dim hasUltimate As Boolean: hasUltimate = capacity.HasUltimatePoint
     PutProperty data, row, runID, id, "Coupled.Capacity.ResultCode", ResultCodeToText(meta.ResultCode), "-", "Код результата поиска предела."
     PutProperty data, row, runID, id, "Coupled.Capacity.LimitState", capacity.LimitState, "-", "Определяющий механизм или причина остановки поиска."
     If capacity.HasConfirmedLowerBound Then _
         PutProperty data, row, runID, id, "Coupled.Capacity.LowerLambda", capacity.ConfirmedLowerLambda, "-", "Последнее подтверждённое равновесие без превышения арматурного критерия."
     If capacity.IsTransverseLimit Then
         PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Status", capacity.TransverseLimitStatus, "-", "Статус по предельному множителю поперечной арматуры."
-        If capacity.HasUltimatePoint Then
-            PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Lambda", capacity.CoupledLimitLambda, "-", "Предельный множитель, определяемый поперечной арматурой."
-            PutCoupledTransverseProperties data, row, runID, id, capacity.StateResult, units, "Coupled.Transverse.Limit."
+        If hasSteelLimit Then
+            PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Lambda", capacity.CoupledLimitLambda, "-", "Множитель достижения предельной деформации поперечной арматуры."
+            PutCoupledTransverseProperties data, row, runID, id, capacity.SteelLimitStateResult, units, "Coupled.Transverse.Limit."
         End If
     End If
-    If Not capacity.HasUltimatePoint Then Exit Sub
-    Dim torque As Double, qx As Double, qy As Double
-    torque = capacity.TUltimate: qx = capacity.QxUltimate: qy = capacity.QyUltimate
-    If Not units Is Nothing Then
-        torque = units.InternalTorqueToOutput(torque)
-        qx = units.InternalShearToOutput(qx): qy = units.InternalShearToOutput(qy)
-    End If
+    If Not hasUltimate And Not hasSteelLimit Then Exit Sub
     If capacity.PeakLambda > 0# Then
         PutProperty data, row, runID, id, "Coupled.Capacity.PeakLambda", capacity.PeakLambda, "-", "Множитель в первом подтверждённом максимуме."
         PutProperty data, row, runID, id, "Coupled.Capacity.PeakAccuracy", capacity.PeakAccuracy, "-", "Оценка погрешности по невязке и делению деформационного шага."
-    Else
+    ElseIf hasSteelLimit Then
         PutProperty data, row, runID, id, "Coupled.Capacity.SteelLambda", capacity.CoupledLimitLambda, "-", "Множитель достижения предельной деформации арматуры."
     End If
-    PutProperty data, row, runID, id, "Coupled.Capacity.NUltimate", OutputForce(capacity.NUltimate, units), OutputForceUnit(units), "Продольная сила в предельной точке."
-    PutProperty data, row, runID, id, "Coupled.Capacity.MxUltimate", OutputMx(capacity.MxUltimate, units), OutputMomentUnit(units), "Изгибающий момент Mx в предельной точке."
-    PutProperty data, row, runID, id, "Coupled.Capacity.MyUltimate", OutputMy(capacity.MyUltimate, units), OutputMomentUnit(units), "Изгибающий момент My в предельной точке."
-    PutProperty data, row, runID, id, "Coupled.Capacity.TUltimate", torque, OutputMomentUnit(units), "Крутящий момент в предельной точке."
-    PutProperty data, row, runID, id, "Coupled.Capacity.QxUltimate", qx, OutputForceUnit(units), "Поперечная сила X в предельной точке."
-    PutProperty data, row, runID, id, "Coupled.Capacity.QyUltimate", qy, OutputForceUnit(units), "Поперечная сила Y в предельной точке."
+
+    Dim vector() As Double, prefix As String, suffix As String, pointNote As String
+    If hasUltimate Then
+        ReDim vector(1 To 6)
+        vector(1) = capacity.NUltimate: vector(2) = capacity.MxUltimate: vector(3) = capacity.MyUltimate
+        vector(4) = capacity.TUltimate: vector(5) = capacity.QxUltimate: vector(6) = capacity.QyUltimate
+        prefix = "Coupled.Capacity.": suffix = "Ultimate": pointNote = " в предельной точке."
+    Else
+        If Not capacity.CopySteelLimitVector(vector) Then Exit Sub
+        prefix = "Coupled.Capacity.SteelLimit."
+        pointNote = " при достижении предельной деформации арматуры."
+    End If
+    PutProperty data, row, runID, id, prefix & "N" & suffix, OutputForce(vector(1), units), OutputForceUnit(units), _
+        "Продольная сила" & pointNote
+    PutProperty data, row, runID, id, prefix & "Mx" & suffix, OutputMx(vector(2), units), OutputMomentUnit(units), _
+        "Изгибающий момент Mx" & pointNote
+    PutProperty data, row, runID, id, prefix & "My" & suffix, OutputMy(vector(3), units), OutputMomentUnit(units), _
+        "Изгибающий момент My" & pointNote
+    PutProperty data, row, runID, id, prefix & "T" & suffix, OutputCoupledResultant(vector(4), 4, units), OutputMomentUnit(units), _
+        "Крутящий момент" & pointNote
+    PutProperty data, row, runID, id, prefix & "Qx" & suffix, OutputCoupledResultant(vector(5), 5, units), OutputForceUnit(units), _
+        "Поперечная сила X" & pointNote
+    PutProperty data, row, runID, id, prefix & "Qy" & suffix, OutputCoupledResultant(vector(6), 6, units), OutputForceUnit(units), _
+        "Поперечная сила Y" & pointNote
 End Sub
 
 ' Записывает логический признак одинаково в любой локали Excel:

@@ -336,19 +336,19 @@ Private Sub PutTransverseHeaders(ByRef headers() As Variant, ByVal stressLabel A
     headers(2, COL_TRANSVERSE_RESERVE) = "На пределе поперечной арматуры"
     headers(HEADER_NOTES_ROW, COL_TRANSVERSE_POINT) = "Точка наибольшего использования"
     headers(HEADER_NOTES_ROW, COL_TRANSVERSE_UTIL) = "|" & epsilon & " / " & epsilon & "lim|"
-    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_LIMIT) = "Если предел определяет хомут или ветвь"
+    headers(HEADER_NOTES_ROW, COL_TRANSVERSE_LIMIT) = "Предельная деформация хомута или ветви"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_POINT) = "Группа, класс и точка"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRESS) = stressLabel
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRAIN) = epsilon
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STRAIN_LIMIT) = epsilon & "lim"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_UTIL) = "Использование"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_STATUS) = "Статус НДС"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = "Запас " & ChrW$(&H3BB)
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_RESERVE) = ChrW$(&H3BB) & " арматуры"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT) = "Точка и причина предела"
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRESS) = stressLabel
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRAIN) = epsilon
     headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STRAIN_LIMIT) = epsilon & "lim"
-    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус запаса"
+    headers(HEADER_LABEL_ROW, COL_TRANSVERSE_LIMIT_STATUS) = "Статус предела"
 End Sub
 
 ' Заполняет строку обычных пояснений над нижним ярусом обозначений.
@@ -534,7 +534,7 @@ Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
 End Sub
 
 ' Отдельно показывает максимальное использование хомута при заданных усилиях
-' и предельный множитель сочетания, если предел определила поперечная арматура.
+' и множитель достижения предельной деформации поперечной арматуры.
 ' Если подготовка не завершилась, показывает ошибку запрошенного этапа.
 Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
         ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem, _
@@ -566,9 +566,9 @@ Private Sub PutTransverseState(ByRef data() As Variant, ByVal row As Long, _
     If Not capacity.IsTransverseLimit Then Exit Sub
     data(row, COL_TRANSVERSE_LIMIT) = capacity.LimitState
     data(row, COL_TRANSVERSE_LIMIT_STATUS) = capacity.TransverseLimitStatus
-    If Not capacity.HasUltimatePoint Then Exit Sub ' При отказе на постоянной части множителя переменной нагрузки нет.
+    If Not capacity.HasSteelLimitPoint Then Exit Sub ' При отказе на постоянной части множителя переменной нагрузки нет.
     data(row, COL_TRANSVERSE_RESERVE) = capacity.CoupledLimitLambda
-    Set state = capacity.StateResult
+    Set state = capacity.SteelLimitStateResult
     If state Is Nothing Then Exit Sub
     If state.CopyCoupledTransverseControl(description, utilization, stress, strain, strainLimit) Then
         data(row, COL_TRANSVERSE_LIMIT_STRESS) = OutputStress(stress, units)
@@ -671,7 +671,7 @@ Private Sub PutCapacityState(ByRef data() As Variant, ByVal rowIndex As Long, _
     Set stateResult = batch.ResultAt(index).StateRepository.FindState(sstCapacityState)
     If capacity.HasUltimatePoint And (Not stateResult Is Nothing Or capacity.ReserveFactor > 0#) Then _
         PutCapacityLoadPointComponents data, rowIndex, capacity, units
-    If Not stateResult Is Nothing Then
+    If Not stateResult Is Nothing And Not (capacity.HasSteelLimitPoint And Not capacity.HasUltimatePoint) Then
         PutStatePlane data, rowIndex, stateResult, units, COL_CAP_EPS0, COL_CAP_KX, COL_CAP_KY
         PutStateExtremes data, rowIndex, stateResult, units, _
             COL_CAP_EBC, COL_CAP_EBT, COL_CAP_ESC, COL_CAP_EST, _

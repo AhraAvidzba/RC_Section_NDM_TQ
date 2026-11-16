@@ -216,7 +216,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     End If
 End Function
 
-' Восстанавливает материалы только до проверенной предельной точки.
+' Восстанавливает материалы только до проверенной точки предела.
 ' При неполных полях сохраняет интегральный результат и предупреждение.
 Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver As CCoupledNewtonSolver, _
         ByVal spec As CMaterialModelSpec, ByVal history As Collection, ByVal reinforcement As CCoupledReinforcedResponse, _
@@ -224,13 +224,19 @@ Private Sub SaveCapacityFields(ByVal capacity As CCapacityResult, ByVal solver A
         ByRef actual() As Double, ByVal fc As Double, ByVal ft As Double, Optional ByVal governingTransversePoint As Long = 0)
     Dim warning As String, state As CSectionStateResult
     If history Is Nothing Then
-        warning = "История предельной точки недоступна для вывода полей."
+        warning = "История проверенной точки недоступна для вывода полей."
     ElseIf Not solver.ReplayAcceptedFields(history, history.Count) Then
-        warning = "Не удалось восстановить историю материалов в предельной точке."
+        warning = "Не удалось восстановить историю материалов в проверенной точке."
     Else
         Dim stateMeta As New CResultMeta, capacityMeta As CResultMeta
+        Dim stateComment As String
         Set capacityMeta = capacity.ResultMeta
-        stateMeta.SetResult rsSuccess, rcNone, rkCapacity, "Предельное равновесие подтверждено.", capacityMeta.DiagnosticDetails
+        If capacity.HasUltimatePoint Then
+            stateComment = "Предельное равновесие подтверждено."
+        Else
+            stateComment = "Подтверждено равновесие на пределе арматуры."
+        End If
+        stateMeta.SetResult rsSuccess, rcNone, rkCapacity, stateComment, capacityMeta.DiagnosticDetails
         Set state = CaptureAcceptedState(sstCapacityState, spec, history, concrete, reinforcement, models, _
             target, actual, fc, ft, stateMeta, warning, governingTransversePoint)
     End If

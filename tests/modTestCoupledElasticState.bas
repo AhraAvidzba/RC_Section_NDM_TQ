@@ -2317,7 +2317,8 @@ Public Function RunTestCoupledHoopCapacity() As String
     Dim capacity As CCapacityResult, lambda As Double
     Set capacity = analysis.SolveCapacity(loads, "Auto", spec, 1#, 1.5, 0.0001, 30)
     lambda = capacity.LambdaCapacity
-    TestRecord capacity.HasUltimatePoint And capacity.IsTransverseLimit And capacity.Status = "FAIL" And InStr(capacity.LimitState, "TestWeakHoop") > 0, _
+    TestRecord capacity.HasUltimatePoint And capacity.HasSteelLimitPoint And capacity.IsTransverseLimit And _
+        capacity.Status = "FAIL" And InStr(capacity.LimitState, "TestWeakHoop") > 0, _
         "hoop governs capacity " & capacity.ResultMeta.ResultComment, passed, failed, report
     TestRecord lambda > 0.35 And lambda < 0.85, _
         "reserve near independent elastic Poisson estimate of 0.60, lambda=" & CStr(lambda), passed, failed, report
@@ -2348,6 +2349,7 @@ Public Function RunTestCoupledHoopCapacity() As String
     Dim partialCapacity As New CCapacityResult, partialVector(1 To 6) As Double
     partialCapacity.InitializeCoupledLimit 1.02, partialVector, "Auto", "Test hoop", Nothing, transverseLimit:=True
     TestRecord partialCapacity.Status = "NumFail" And partialCapacity.ReserveFactor = 0# And _
+        partialCapacity.HasSteelLimitPoint And Not partialCapacity.HasUltimatePoint And _
         partialCapacity.TransverseLimitStatus = "OK" And partialCapacity.CoupledLimitLambda = 1.02, _
         "passed hoop limit is distinct from unresolved concrete reserve", passed, failed, report
     combined.Clear "Auto"
@@ -2369,8 +2371,12 @@ Public Function RunTestCoupledHoopCapacity() As String
         Set batch.ProfileCatalog = catalog
         batch.ConfigureCoupledAnalysis analysis
         batch.AddCombination "Hoop", -216000#, 90000#, -40000#, "PR4", "", torque:=250000#, qx:=120#, qy:=-80#
+        Dim eventScale As Double: eventScale = lambda / 1.2 ' Та же пропорциональная траектория, с арматурным событием за расчётной точкой.
+        batch.AddCombination "HoopEvent", -216000# * eventScale, 90000# * eventScale, -40000# * eventScale, "PR4", "", _
+            torque:=250000# * eventScale, qx:=120# * eventScale, qy:=-80# * eventScale
         batch.ApplyLoadReference 2#, -1#, 2#, -1#
         batch.Execute
+        TestUnresolvedHoopState batch.ResultAt(2), eventScale, passed, failed, report
         execution.Save
         Dim fso As Object, stream As Object, reportText As String, heading As Long, ending As Long, detail As String
         Set fso = CreateObject("Scripting.FileSystemObject")
@@ -2394,6 +2400,8 @@ Public Function RunTestCoupledHoopCapacity() As String
         TestRecord anchor.Offset(-1, 41).Value2 = "Tult, N*mm" And anchor.Offset(-1, 42).Value2 = "Qx,ult, N" And _
             anchor.Offset(-1, 43).Value2 = "Qy,ult, N", "the three ultimate components follow My", passed, failed, report
         Dim cellCapacity As CCapacityResult: Set cellCapacity = batch.ResultAt(1).StrengthResult.Capacity
+        Dim confirmed As CSectionStateResult: Set confirmed = batch.ResultAt(1).StateRepository.FindState(sstCapacityState)
+        TestRecord Not confirmed Is Nothing, "confirmed governing steel limit keeps CapacityState", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 41).Value2), cellCapacity.TUltimate, 1E-7, "Results ultimate T", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 42).Value2), cellCapacity.QxUltimate, 1E-7, "Results ultimate Qx", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 43).Value2), cellCapacity.QyUltimate, 1E-7, "Results ultimate signed Qy", passed, failed, report
@@ -2408,7 +2416,7 @@ Public Function RunTestCoupledHoopCapacity() As String
             InStr(anchor.Offset(0, 60).Value2, "TestWeakHoop (TestHoopGrade)") = 1, _
             "Results starts with the governing hoop and its grade in each check", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 59).Value2), lambda, 0.01, "reserve is written in the hoop subsection", passed, failed, report
-        TestSavedHoopCapacityFields ThisWorkbook, section, provider, batch, passed, failed, report
+        TestSavedHoopCapacityFields ThisWorkbook, section, provider, batch, eventScale, passed, failed, report
     End If
     RunTestCoupledHoopCapacity = report & "TOTAL_COUPLED_HOOP_CAPACITY: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -2417,13 +2425,55 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Разделяет фактически рассчитанное арматурное событие и общий предел на той же траектории.
+Private Sub TestUnresolvedHoopState(ByVal result As CCombinationResult, ByVal eventScale As Double, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim eventCapacity As CCapacityResult: Set eventCapacity = result.StrengthResult.Capacity
+    TestRecord eventCapacity.ResultMeta.ResultCode = rcCoupledConcreteLimitUnresolved And _
+        eventCapacity.Status = "NumFail" And eventCapacity.ReserveFactor = 0# And eventCapacity.HasSteelLimitPoint And _
+        Not eventCapacity.HasUltimatePoint And eventCapacity.TransverseLimitStatus = "OK", _
+        "calculated hoop event above design is distinct from unresolved overall capacity", passed, failed, report
+    TestExpectNear eventCapacity.CoupledLimitLambda, 1.2, 0.01, "hoop event scaling agrees with the reference path", passed, failed, report
+    Dim overall As CSectionStateResult: Set overall = eventCapacity.StateResult
+    Dim published As CSectionStateResult: Set published = result.StateRepository.FindState(sstCapacityState)
+    TestRecord overall Is Nothing And published Is Nothing And _
+        eventCapacity.NUltimate = 0# And eventCapacity.MxUltimate = 0# And eventCapacity.MyUltimate = 0# And _
+        eventCapacity.TUltimate = 0# And eventCapacity.QxUltimate = 0# And eventCapacity.QyUltimate = 0#, _
+        "unresolved steel event supplies neither the ultimate vector nor the global CapacityState", passed, failed, report
+    Dim eventState As CSectionStateResult: Set eventState = eventCapacity.SteelLimitStateResult
+    If eventState Is Nothing Then
+        TestRecord False, "hoop event equilibrium state is missing", passed, failed, report
+    Else
+        Dim control As String, utilization As Double, stress As Double
+        TestRecord eventState.Converged And eventState.WithinPhysicalRange And _
+            eventState.CopyCoupledTransverseControl(control, utilization, stress) And _
+            utilization > 0.99 And utilization <= 1# And stress > 6#, _
+            "separate hoop event keeps the accepted near-limit material state", passed, failed, report
+    End If
+    Dim actual() As Double, expected As Variant, i As Long, hasVector As Boolean
+    hasVector = eventCapacity.CopySteelLimitVector(actual)
+    TestRecord hasVector, "hoop event has its dedicated vector", passed, failed, report
+    If Not hasVector Then Exit Sub
+    expected = Array(-216000#, 90000#, -40000#, 250000#, 120#, -80#)
+    For i = 1 To 6
+        TestExpectNear actual(i), CDbl(expected(i - 1)) * eventScale * eventCapacity.CoupledLimitLambda, 1E-7, _
+            "signed hoop event component " & CStr(i), passed, failed, report
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет подраздел хомута при выводе на лист и восстановлении из файла,
 ' а также предельные поля обоих носителей по ElementID и ключу состояния.
 Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As CSectionModel, _
         ByVal provider As CMaterialModelProvider, ByVal batch As CBatchSectionCalculator, _
-        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+        ByVal eventScale As Double, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
     Dim settings As Object: Set settings = book.Names.Item("rngSystemSettings").RefersToRange
     TestInputCell(settings, "Results.SnapshotName").Value2 = "TestSavedHoopCapacityFields"
+    Dim selector As Object, combination As Object, savedSelector As Variant, savedCombination As Variant
+    Set selector = TestInputCell(settings, "Output.CombinationMode")
+    Set combination = TestInputCell(settings, "Output.CombinationID")
+    savedSelector = selector.Value2: savedCombination = combination.Value2
+    selector.Value2 = "User": combination.Value2 = "Hoop"
     Dim props As New CSectionPropertiesCalculator, writer As New CNDMResultsWriter, summary As New CBatchResultWriter
     props.PrepareSnapshot section, provider
     Dim snap As New CCalculationSnapshot, store As New CCalculationSnapshotStore
@@ -2434,12 +2484,17 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
     TestInputCell(settings, "Results.SnapshotStorage").Value2 = "File"
     store.SaveFile book, snap
     Dim anchor As Object: Set anchor = book.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+    Dim eventRow As Object: Set eventRow = anchor.Offset(1, 0)
+    Dim eventLambda As Double: eventLambda = batch.ResultAt(2).StrengthResult.Capacity.CoupledLimitLambda
     Dim reserve As Double: reserve = CDbl(anchor.Offset(0, 59).Value2)
     Dim mode As Variant, values As Variant, n As Long, shear As Object, runId As Double
     n = section.ConcreteCount + section.RebarCount
     For Each mode In Array("Excel", "File")
         TestInputCell(settings, "Results.SnapshotStorage").Value2 = CStr(mode)
         anchor.Offset(0, 53).Resize(1, 12).ClearContents ' Проверяем вывод заново, без значений от другого носителя.
+        eventRow.Offset(0, 31).Resize(1, 3).Value2 = 1# ' Подмена плоскости и общих предельных величин до восстановления снимка.
+        eventRow.Offset(0, 37).Resize(1, 14).Value2 = 1#
+        eventRow.Offset(0, 59).Resize(1, 6).ClearContents
         If mode = "Excel" Then
             UpdateSectionResultsForWorkbook book, snap
         Else
@@ -2459,6 +2514,7 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
             InStr(CStr(anchor.Offset(0, 60).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
             CStr(mode) & " restores the hoop and its grade in both checks", passed, failed, report
         TestHoopStrainDetails book, anchor, CStr(mode), passed, failed, report
+        TestSavedUnresolvedHoopEvent book, eventRow, eventScale, eventLambda, CStr(mode), passed, failed, report
         Dim expected As Variant
         expected = Array(-216000# * reserve, 306000# * reserve, -472000# * reserve, 249960# * reserve, 120# * reserve, -80# * reserve)
         TestSavedCoupledEquilibrium book, "Hoop", "CapacityState", expected, Nothing, CStr(mode), passed, failed, report
@@ -2480,6 +2536,56 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
         End If
     Next mode
     TestTraceWithoutElementResults book, snap, passed, failed, report
+    selector.Value2 = savedSelector: combination.Value2 = savedCombination
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет раздельные утверждения отчёта после восстановления листа или файла.
+Private Sub TestSavedUnresolvedHoopEvent(ByVal book As Object, ByVal row As Object, ByVal eventScale As Double, _
+        ByVal eventLambda As Double, ByVal mode As String, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const EVENT_ID As String = "HoopEvent"
+    TestRecord row.Value2 = EVENT_ID And row.Offset(0, 51).Value2 = "NumFail" And _
+        book.Application.WorksheetFunction.CountA(row.Offset(0, 31).Resize(1, 3), row.Offset(0, 37).Resize(1, 14)) = 0, _
+        mode & " leaves the global ultimate plane, vector and reserve unpublished", passed, failed, report
+    TestRecord row.Offset(0, 58).Value2 = "OK" And row.Offset(0, 64).Value2 = "OK" And _
+        InStr(CStr(row.Offset(0, 60).Value2), "TestWeakHoop (TestHoopGrade)") = 1, _
+        mode & " preserves the separate hoop event and both hoop statuses", passed, failed, report
+    TestRecord ReadLoadCasePropertyText(book, EVENT_ID, "Coupled.Capacity.ResultCode") = "COUPLED_CONCRETE_LIMIT_UNRESOLVED" And _
+        ReadLoadCasePropertyText(book, EVENT_ID, "Coupled.Transverse.Limit.Status") = "OK", _
+        mode & " preserves separate machine and hoop event statuses", passed, failed, report
+    TestRecord Len(ReadLoadCasePropertyText(book, EVENT_ID, "State.CapacityState.Equilibrium.Reference")) = 0 And _
+        Not HasResultTableRows(ReadElementResultTable(book, EVENT_ID, "CapacityState")), _
+        mode & " has no global CapacityState for the unresolved steel event", passed, failed, report
+    If eventLambda <= 0# Then Exit Sub
+    TestExpectNear CDbl(row.Offset(0, 59).Value2), eventLambda, 1E-10, mode & " restores the hoop event multiplier", passed, failed, report
+    Dim key As Variant, actual As String
+    For Each key In Array("Coupled.Capacity.SteelLambda", "Coupled.Transverse.Limit.Lambda")
+        actual = ReadLoadCasePropertyText(book, EVENT_ID, CStr(key))
+        If IsNumeric(actual) Then
+            TestExpectNear CDbl(actual), eventLambda, 1E-10, mode & " keeps multiplier " & key, passed, failed, report
+        Else
+            TestRecord False, mode & " is missing multiplier " & key, passed, failed, report
+        End If
+    Next key
+    TestExpectNear CDbl(row.Offset(0, 63).Value2), 0.00004, 1E-12, mode & " keeps the hoop event strain limit", passed, failed, report
+    TestRecord CDbl(row.Offset(0, 61).Value2) > 6# And CDbl(row.Offset(0, 62).Value2) > 0.0000396 And _
+        CDbl(row.Offset(0, 62).Value2) <= 0.00004, mode & " keeps stress and admissible strain at the separate hoop event", passed, failed, report
+    Dim components As Variant, reference As Variant, i As Long, component As String
+    components = Array("N", "Mx", "My", "T", "Qx", "Qy")
+    reference = Array(-216000#, 90000#, -40000#, 250000#, 120#, -80#)
+    For i = LBound(components) To UBound(components)
+        component = CStr(components(i))
+        TestRecord Len(ReadLoadCasePropertyText(book, EVENT_ID, "Coupled.Capacity." & component & "Ultimate")) = 0 And _
+            IsNumeric(ReadLoadCasePropertyText(book, "Hoop", "Coupled.Capacity." & component & "Ultimate")), _
+            mode & " keeps ultimate " & component & " only for the confirmed governing limit", passed, failed, report
+        actual = ReadLoadCasePropertyText(book, EVENT_ID, "Coupled.Capacity.SteelLimit." & component)
+        If IsNumeric(actual) Then
+            TestExpectNear CDbl(actual), CDbl(reference(i)) * eventScale * eventLambda, 1E-7, _
+                mode & " keeps the signed steel event component " & component, passed, failed, report
+        Else
+            TestRecord False, mode & " is missing steel event component " & component, passed, failed, report
+        End If
+    Next i
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

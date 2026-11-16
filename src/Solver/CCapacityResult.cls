@@ -13,15 +13,16 @@ Option Explicit
 ' Результат расчёта несущей способности
 ' ==========================================================================
 ' Принимает итог общего поиска предела и сохраняет инженерные величины.
-' Переносит полный предельный вектор нагрузки в пользовательскую точку
-' приложения и при наличии решения сохраняет CapacityState для Results.
+' Хранит усилия проверенной точки в пользовательской точке приложения.
+' Арматурный предел при неопределённой общей несущей способности
+' доступен отдельно от предельных усилий и CapacityState.
 ' Способ поиска и чтение настроек остаются у вызывающего расчёта.
 
 Private mFrozen As Boolean ' После передачи готового результата его заполнение и очистка запрещены; сохранённые числа доступны для чтения.
 Private Const CAPACITY_PATH_NONE As String = "None" ' Признак того, что несущая способность для сочетания не рассчитывалась.
 
 Private mSearchResult As CLimitSearchResult ' Типизированный результат общего LimitSearch.
-Private mStateResult As CSectionStateResult ' Сохранённое предельное НДС CapacityState, если оно найдено.
+Private mStateResult As CSectionStateResult ' НДС найденного предела или проверенной арматурной точки.
 Private mLimitState As String ' Физическая причина предела или текст ошибки.
 Private mSolutionMethod As String ' Фактически принятая ветка: UltimateStrain или LoadMultiplier.
 Private mPathResolved As String ' Проверенный ключ выбранного изменения нагрузки при поиске предела.
@@ -122,7 +123,7 @@ Friend Sub InitializeCoupledPeak(ByVal lambda As Double, ByVal accuracy As Doubl
     mResultMeta.SetResult status, code, rkCapacity, reason, details
 End Sub
 
-' Сохраняет все подтверждённые усилия в пользовательской точке.
+' Сохраняет усилия общей предельной или арматурной точки в точке приложения.
 Private Sub StoreCoupledVector(ByRef ultimate() As Double)
     mNUltimate = ultimate(1): mMxUltimate = ultimate(2): mMyUltimate = ultimate(3)
     mTUltimate = ultimate(4): mQxUltimate = ultimate(5): mQyUltimate = ultimate(6)
@@ -428,9 +429,14 @@ Public Function MethodChoiceReport(ByVal solutionStrategy As String, _
     End If
 End Function
 
-' Возвращает сохранённое предельное состояние CapacityState или Nothing, если оно не получено.
+' Возвращает НДС общего предела для вывода как CapacityState.
 Public Property Get StateResult() As CSectionStateResult
-    Set StateResult = mStateResult
+    If Not IsSteelLimitOnly Then Set StateResult = mStateResult
+End Property
+
+' Возвращает НДС арматурного предела для его самостоятельной диагностики.
+Friend Property Get SteelLimitStateResult() As CSectionStateResult
+    If HasSteelLimitPoint Then Set SteelLimitStateResult = mStateResult
 End Property
 
 ' Возвращает внешний статус по сохранённому ResultMeta и общим правилам.
@@ -463,9 +469,31 @@ End Property
 
 ' Сообщает, что сохранены подтверждённые предельные усилия.
 Friend Property Get HasUltimatePoint() As Boolean
+    If IsSteelLimitOnly Then Exit Property
     HasUltimatePoint = (mCoupledLimitLambda > 0# Or mPeakLambda > 0#)
     If Not mSearchResult Is Nothing Then HasUltimatePoint = mSearchResult.HasLimitPoint
 End Property
+
+' Отличает найденное арматурное событие от подтверждённой общей предельной точки.
+Private Function IsSteelLimitOnly() As Boolean
+    IsSteelLimitOnly = (mResultMeta.ResultCode = rcCoupledConcreteLimitUnresolved)
+End Function
+
+' Подтверждает арматурную точку с положительным множителем переменной нагрузки.
+Friend Property Get HasSteelLimitPoint() As Boolean
+    HasSteelLimitPoint = (mCoupledLimitLambda > 0#)
+End Property
+
+' Передаёт шесть усилий арматурной точки в пользовательской точке
+' приложения в Н и Н·мм. При отсутствии точки выходной массив пуст.
+Friend Function CopySteelLimitVector(ByRef values() As Double) As Boolean
+    Erase values
+    If Not HasSteelLimitPoint Then Exit Function
+    ReDim values(1 To 6)
+    values(1) = mNUltimate: values(2) = mMxUltimate: values(3) = mMyUltimate
+    values(4) = mTUltimate: values(5) = mQxUltimate: values(6) = mQyUltimate
+    CopySteelLimitVector = True
+End Function
 
 ' Возвращает множитель подтверждённого максимума, если он найден.
 Friend Property Get PeakLambda() As Double
@@ -513,17 +541,17 @@ End Property
 
 ' Возвращает предельное кручение в пользовательской точке, Н·мм.
 Friend Property Get TUltimate() As Double
-    TUltimate = mTUltimate
+    If Not IsSteelLimitOnly Then TUltimate = mTUltimate
 End Property
 
 ' Возвращает предельную поперечную силу X, Н.
 Friend Property Get QxUltimate() As Double
-    QxUltimate = mQxUltimate
+    If Not IsSteelLimitOnly Then QxUltimate = mQxUltimate
 End Property
 
 ' Возвращает предельную поперечную силу Y, Н.
 Friend Property Get QyUltimate() As Double
-    QyUltimate = mQyUltimate
+    If Not IsSteelLimitOnly Then QyUltimate = mQyUltimate
 End Property
 
 ' Использование несущей способности.
@@ -533,63 +561,63 @@ End Property
 
 ' Предельная N в точке приложения нагрузки.
 Public Property Get NUltimate() As Double
-    NUltimate = mNUltimate
+    If Not IsSteelLimitOnly Then NUltimate = mNUltimate
 End Property
 
 ' Предельный Mx в точке приложения нагрузки.
 Public Property Get MxUltimate() As Double
-    MxUltimate = mMxUltimate
+    If Not IsSteelLimitOnly Then MxUltimate = mMxUltimate
 End Property
 
 ' Предельный My в точке приложения нагрузки.
 Public Property Get MyUltimate() As Double
-    MyUltimate = mMyUltimate
+    If Not IsSteelLimitOnly Then MyUltimate = mMyUltimate
 End Property
 
 ' Возвращает внутреннюю продольную силу сохранённого предельного НДС.
 ' Без состояния возвращает 0; наличие и допустимость проверяются отдельно.
 Public Property Get CapacityStateN() As Double
-    If Not mStateResult Is Nothing Then CapacityStateN = mStateResult.Nint
+    If CapacityStateAvailable Then CapacityStateN = mStateResult.Nint
 End Property
 
 ' Возвращает внутренний момент Mx предельного состояния относительно начала модели, Н*мм.
 ' При отсутствии состояния возвращает 0; его наличие проверяется отдельно.
 Public Property Get CapacityStateMx() As Double
-    If Not mStateResult Is Nothing Then CapacityStateMx = mStateResult.Mxint
+    If CapacityStateAvailable Then CapacityStateMx = mStateResult.Mxint
 End Property
 
 ' Возвращает внутренний момент My предельного состояния относительно начала модели, Н*мм.
 ' При отсутствии состояния возвращает 0; его наличие проверяется отдельно.
 Public Property Get CapacityStateMy() As Double
-    If Not mStateResult Is Nothing Then CapacityStateMy = mStateResult.Myint
+    If CapacityStateAvailable Then CapacityStateMy = mStateResult.Myint
 End Property
 
 ' Модуль полного предельного момента в точке приложения нагрузки.
 Public Property Get MomentUltimate() As Double
-    MomentUltimate = mMomentUltimate
+    If Not IsSteelLimitOnly Then MomentUltimate = mMomentUltimate
 End Property
 
 ' Показывает, сохранено ли предельное напряжённо-деформированное состояние CapacityState.
 Public Property Get CapacityStateAvailable() As Boolean
-    CapacityStateAvailable = Not mStateResult Is Nothing
+    CapacityStateAvailable = (Not mStateResult Is Nothing) And Not IsSteelLimitOnly
 End Property
 
 ' Возвращает деформацию в начале координат сохранённого предельного НДС.
 ' Без состояния возвращает 0; это не подтверждение найденного равновесия.
 Public Property Get CapacityEpsilon0() As Double
-    If Not mStateResult Is Nothing Then CapacityEpsilon0 = mStateResult.Epsilon0
+    If CapacityStateAvailable Then CapacityEpsilon0 = mStateResult.Epsilon0
 End Property
 
 ' Возвращает сохранённую кривизну kappaX предельного состояния, 1/мм.
 ' Ноль при отсутствии состояния не подтверждает найденное равновесие.
 Public Property Get CapacityKappaX() As Double
-    If Not mStateResult Is Nothing Then CapacityKappaX = mStateResult.KappaX
+    If CapacityStateAvailable Then CapacityKappaX = mStateResult.KappaX
 End Property
 
 ' Возвращает сохранённую кривизну kappaY предельного состояния, 1/мм.
 ' Ноль при отсутствии состояния не подтверждает найденное равновесие.
 Public Property Get CapacityKappaY() As Double
-    If Not mStateResult Is Nothing Then CapacityKappaY = mStateResult.KappaY
+    If CapacityStateAvailable Then CapacityKappaY = mStateResult.KappaY
 End Property
 
 ' Показывает, выбран ли осевой численный расчёт после переноса нагрузки

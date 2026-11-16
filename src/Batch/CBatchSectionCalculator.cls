@@ -982,7 +982,7 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
             Set meta = capacity.ResultMeta
             ReportStep meta.ResultComment
             If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
-            If capacity.CoupledLimitLambda > 0# And Not capacity.IsTransverseLimit Then _
+            If capacity.HasSteelLimitPoint And Not capacity.IsTransverseLimit Then _
                 ReportValue "Множитель предела продольной арматуры", FormatNumberInvariant(capacity.CoupledLimitLambda)
             If capacity.PeakLambda > 0# Then
                 ReportValue "Множитель при максимуме", FormatNumberInvariant(capacity.PeakLambda)
@@ -1023,9 +1023,9 @@ Private Sub ReportCoupledTransverse(ByVal state As CSectionStateResult, ByVal ca
     If hasLimit Then
         ReportValue "Статус предела поперечной арматуры", capacity.TransverseLimitStatus
         ReportStep capacity.LimitState
-        If capacity.HasUltimatePoint Then
+        If capacity.HasSteelLimitPoint Then
             ReportValue "Коэффициент запаса хомута на выбранной траектории", FormatNumberInvariant(capacity.CoupledLimitLambda)
-            Dim limitState As CSectionStateResult: Set limitState = capacity.StateResult
+            Dim limitState As CSectionStateResult: Set limitState = capacity.SteelLimitStateResult
             If Not limitState Is Nothing Then
                 If limitState.CopyCoupledTransverseControl(control, utilization, stress, strain, strainLimit) Then
                     ReportValue "Контрольная точка при предельной нагрузке", control
