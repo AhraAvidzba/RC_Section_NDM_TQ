@@ -4784,3 +4784,91 @@ Public Function RunTestCoupledFinalLoadTolerance() As String
 Failed:
     RunTestCoupledFinalLoadTolerance = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет продолжение после локального пика, где малый шаг попадает
+' в допуск уравнения управления без изменения механического поля.
+Public Function RunTestCoupledControlProgress() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const STEEL_AREA As Double = 100#, DESIGN_FORCE As Double = 410000#
+    Const ABS_TOL As Double = 0.03, REL_TOL As Double = 1E-8
+    Const TAIL_STRAIN As Double = 0.0007
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize 200000#, 40#, 40#, 0#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    concrete.TestInitialize operators.PointCount
+    concrete.TestUseTwinPeakAxialLaw
+    concrete.TestFreezeAxialTailAt = TAIL_STRAIN - 0.00000001
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = DESIGN_FORCE
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim coordinate As Variant, factor As Double, previous As Double, lambda As Double
+    For Each coordinate In Array(0.0004, 0.0006)
+        If Not solver.TryDeformationStep(offset, direction, control, CDbl(coordinate), lambda, factor, 1E-8, REL_TOL, 30) Then _
+            Err.Raise 5, , "Не получено исходное равновесие. " & solver.ResultMeta.DiagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        trace.Add 1#, factor
+        previous = lambda: lambda = factor
+    Next coordinate
+    TestExpectNear previous, 0.75, 1E-8, "исходная первая нагрузка", passed, failed, report
+    TestExpectNear lambda, 0.8, 1E-8, "исходная вторая нагрузка", passed, failed, report
+
+    Dim branch As New CCoupledDeformationContinuation
+    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, ABS_TOL, REL_TOL, trace
+    Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
+    Dim status As CResultMeta: Set status = branch.ResultMeta
+    TestRecord status.InternalStatus = rsNumericalFailure, "предел сечения остаётся неподтверждённым", passed, failed, report
+    TestExpectNear branch.BestAdmissibleLambda, 1.1, 0.0005, "подтверждён пройденный локальный максимум", passed, failed, report
+    TestRecord saved.Count = 5, "стационарные повторы не добавлены к пяти принятым состояниям", passed, failed, report
+    TestRecord concrete.TestAcceptedSteps = 5, "стационарные повторы не записаны в материал", passed, failed, report
+    Dim i As Long, offsetFraction As Double, expected As Variant, expectedCoordinate As Variant
+    Dim firstRepetition As Long
+    expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
+    expectedCoordinate = Array(0.0004, 0.0005, 0.0006, 0.00065, 0.0007)
+    For i = 1 To GeomMin(saved.Count, 5)
+        saved.ReadPoint i, offsetFraction, lambda
+        TestExpectNear lambda, CDbl(expected(i - 1)), 0.0005, "принятая нагрузка " & CStr(i), passed, failed, report
+        TestExpectNear concrete.TestAcceptedAxialAt(i), CDbl(expectedCoordinate(i - 1)), 0.000000001, _
+            "фактическая координата принятого поля " & CStr(i), passed, failed, report
+    Next i
+    For i = 2 To concrete.TestAcceptedSteps
+        If concrete.TestAcceptedAxialAt(i) <= concrete.TestAcceptedAxialAt(i - 1) Then
+            firstRepetition = i
+            Exit For
+        End If
+    Next i
+    TestRecord firstRepetition = 0, "фактические координаты всех закреплённых шагов строго возрастают", passed, failed, report
+    solver.CopyAccepted field
+    TestExpectNear field(1), TAIL_STRAIN, 0.000000001, "оставлено последнее фактически достигнутое поле", passed, failed, report
+
+    Dim trial() As Double, recovered As Boolean
+    recovered = solver.TryDeformationStep(offset, direction, control, field(1) + 0.00000078125, lambda, factor, _
+        ABS_TOL, REL_TOL, 30)
+    TestRecord recovered, "решатель допускает остаток управления внутри заданного допуска", passed, failed, report
+    If recovered Then
+        solver.CopyTrial trial, resultants
+        TestRecord trial(1) = field(1) And factor = lambda, _
+            "проба внутри допуска остаётся тем же полем и множителем", passed, failed, report
+        solver.DiscardStep
+    Else
+        TestRecord False, "не получено исходное стационарное поле", passed, failed, report
+    End If
+    RunTestCoupledControlProgress = report & "TOTAL_COUPLED_CONTROL_PROGRESS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledControlProgress = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

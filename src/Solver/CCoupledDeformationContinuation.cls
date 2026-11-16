@@ -118,12 +118,18 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         StopSearch "Не удалось выбрать меняющуюся меру деформации."
         Exit Sub
     End If
-    left.Coordinate = current.Coordinate - nominal
+    left.Coordinate = CoordinateOf(previousField)
+    nominal = current.Coordinate - left.Coordinate
+    If nominal <= 0# Then
+        StopSearch "Приращение начальной меры деформации не различается в принятом поле."
+        Exit Sub
+    End If
     increment = nominal * 0.5
     minimum = increment * MIN_STEP_RATIO
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
-    Dim lastProbeFailed As Boolean, unresolvedSteel As Boolean
+    Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, unresolvedSteel As Boolean
+    Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean
     Dim recoveryProjection() As Double
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
@@ -131,24 +137,28 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If attempt > STEP_LIMIT And mLocalPeak = 0# Then Exit For
         If increment < minimum Then
-            If Not lastProbeFailed Or unresolvedSteel Then Exit For
-            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum) Then Exit For
+            If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
+            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then Exit For
         End If
-        trial.Coordinate = current.Coordinate + increment
-        If trial.Coordinate <= current.Coordinate Then Exit For
-        probed = Probe(trial, current.Lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        targetCoordinate = current.Coordinate + increment
+        If targetCoordinate <= current.Coordinate Then Exit For
+        trial.Coordinate = targetCoordinate
+        probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
         lastProbeFailed = Not probed
+        lastNoProgress = False
         changedControl = False: smoothTrial = False
         If probed Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
                 probed = TryAdoptRecoveredControl(history, current, trial, recoveryProjection, nominal, increment, minimum)
                 changedControl = probed
-                If Not probed Then mSolver.DiscardStep
+                If probed Then targetCoordinate = trial.Coordinate Else mSolver.DiscardStep
             End If
         End If
-        If probed And Len(mPostPeakControlName) > 0 Then
-            probed = TrialMovesForward(history, current.HistoryIndex)
-            If probed And mFollowingLocalPeak Then smoothTrial = FitsPostPeakSecant(history, left, current, trial)
+        If probed Then
+            probed = UpdateTrialCoordinate(trial, current.Coordinate)
+            lastNoProgress = Not probed
+            If probed And mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then _
+                smoothTrial = FitsPostPeakSecant(history, left, current, trial)
         End If
         If Not probed Then
             smoothSteps = 0
@@ -159,9 +169,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             smoothSteps = 0
             increment = increment * 0.5
         ElseIf trial.Lambda > maximumLambda Then
-            mSolver.DiscardStep
-            mMeta.SetResult rsNumericalFailure, rcSearchBoundReached, rkCapacity, _
-                "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", Details()
+            StopAtSearchBound
             Exit Sub
         ElseIf BeyondSteelLimit() Then
             unresolvedSteel = True ' Смена меры не может пропустить наблюдавшееся пересечение предела арматуры.
@@ -176,22 +184,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
             designAtTrial = False
             If mDesignHistoryIndex = 0 And current.Lambda < 1# And trial.Lambda >= 1# And mProbeCount + 2 <= PROBE_LIMIT Then
-                designAtTrial = VerifyDesignLoad(current.Coordinate, trial.Coordinate)
-                If Not Probe(trial, current.Lambda, False) Then
-                    StopSearch "Не удалось повторить пробу после проверки заданных усилий."
-                    Exit Sub
-                End If
-                If Len(mPostPeakControlName) > 0 Then
-                    If Not TrialMovesForward(history, current.HistoryIndex) Then
-                        StopSearch "Повторная проба после проверки заданных усилий вернулась по деформационной ветви."
-                        Exit Sub
-                    End If
-                End If
-                If BeyondSteelLimit() Then
-                    mSolver.DiscardStep
-                    StopSearch "Повторная проба не подтвердила допустимость арматуры."
-                    Exit Sub
-                End If
+                If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial) Then Exit Sub
             End If
             AcceptPoint history, trial
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
@@ -252,11 +245,12 @@ End Sub
 ' численная проба потребовала шаг ниже минимального. Сохраняет принятое
 ' поле, историю и одностороннюю материальную касательную.
 Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef left As TBranchPoint, _
-        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
+        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double, _
+        ByVal stalledOnCoordinate As Boolean) As Boolean
     If Len(mPostPeakControlName) > 0 Or Not mFollowingLocalPeak Or Not mUsesYieldControl Then Exit Function
     If history.Count < 3 Or current.HistoryIndex <> history.Count Or left.HistoryIndex <> history.Count - 1 Then Exit Function
     Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
-    If code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
+    If Not stalledOnCoordinate And code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
 
     Dim oldest() As Double, previous() As Double, currentField() As Double, accepted() As Double
     oldest = history(history.Count - 2): previous = history(left.HistoryIndex): currentField = history(current.HistoryIndex)
@@ -311,14 +305,19 @@ Friend Function FitsMechanicalSecant(ByRef previous() As Double, ByRef accepted(
     FitsMechanicalSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
 End Function
 
-' Проверяет продвижение по выбранной мере на фактических полях.
-' Отклоняет возврат по ветви до принятия материальной истории.
-Private Function TrialMovesForward(ByVal history As Collection, ByVal currentIndex As Long) As Boolean
-    Dim field() As Double, resultants() As Double, previous() As Double
+' Заменяет цель фактической мерой поля только при прямом движении ветви.
+' Равновесный повтор на месте допустим как НДС и не образует нового шага.
+Private Function UpdateTrialCoordinate(ByRef point As TBranchPoint, ByVal previousCoordinate As Double) As Boolean
+    Dim field() As Double, resultants() As Double, coordinate As Double
     mSolver.CopyTrial field, resultants
-    previous = history(currentIndex)
-    TrialMovesForward = (CoordinateOf(field) > CoordinateOf(previous))
-    If Not TrialMovesForward Then mSolver.DiscardStep
+    coordinate = CoordinateOf(field)
+    If coordinate <= previousCoordinate Then
+        mSolver.DiscardStep
+        mProbeDetails = "Проба не продвинулась по мере деформации с " & CStr(previousCoordinate) & " до " & CStr(coordinate) & "."
+        Exit Function
+    End If
+    point.Coordinate = coordinate
+    UpdateTrialCoordinate = True
 End Function
 
 ' Считает восстановление после проверенного нисходящего плеча.
@@ -373,9 +372,10 @@ Friend Property Get ResultMeta() As CResultMeta
     Set ResultMeta = mMeta.Clone
 End Property
 
-' Решает пробу при заданной мере и по запросу оценивает влияние невязки.
+' Решает пробу при заданной мере. Проверки продвижения и касательной
+' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
-        ByVal estimateUncertainty As Boolean, Optional ByVal recoverYieldControl As Boolean = False) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     point.Uncertainty = 0#
@@ -386,13 +386,6 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     If Not solved Then
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
         Exit Function
-    End If
-    If estimateUncertainty Then
-        If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, point.Uncertainty) Then
-            mSolver.DiscardStep
-            mProbeDetails = "Не удалось оценить чувствительность множителя к невязке."
-            Exit Function
-        End If
     End If
     Probe = True
 End Function
@@ -442,15 +435,49 @@ Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint
     mBestLambda = GeomMax(mBestLambda, point.Lambda)
 End Sub
 
+' Повторяет правое поле после силовой пробы. Точка lambda = 1 должна
+' принадлежать фактическому интервалу именно принятого повтора.
+Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As TBranchPoint, _
+        ByVal targetCoordinate As Double, ByRef designVerified As Boolean) As Boolean
+    Dim designCoordinate As Double
+    designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate)
+    trial.Coordinate = targetCoordinate
+    If Not Probe(trial, current.Lambda) Then
+        StopSearch "Не удалось повторить пробу после проверки заданных усилий."
+        Exit Function
+    End If
+    If Not UpdateTrialCoordinate(trial, current.Coordinate) Then
+        StopSearch "Повторная проба после проверки заданных усилий не продвинулась по деформационной ветви."
+        Exit Function
+    End If
+    If trial.Lambda > mMaximumLambda Then
+        StopAtSearchBound
+        Exit Function
+    End If
+    If trial.Lambda <= 0# Or (Not mFollowingLocalPeak And trial.Lambda <= current.Lambda + LoadResolution(current.Lambda)) Then
+        mSolver.DiscardStep
+        StopSearch "Повторная проба не подтвердила допустимое изменение множителя нагрузки."
+        Exit Function
+    End If
+    If BeyondSteelLimit() Then
+        mSolver.DiscardStep
+        StopSearch "Повторная проба не подтвердила допустимость арматуры."
+        Exit Function
+    End If
+    If designVerified Then designVerified = (designCoordinate >= current.Coordinate And designCoordinate <= trial.Coordinate)
+    RepeatDesignTrial = True
+End Function
+
 ' Проверяет точное lambda = 1 от левого плеча перед продвижением истории.
 ' Контрольная мера должна попасть внутрь проверяемого участка.
-Private Function VerifyDesignLoad(ByVal leftCoordinate As Double, ByVal rightCoordinate As Double) As Boolean
+Private Function VerifyDesignLoad(ByVal leftCoordinate As Double, ByVal rightCoordinate As Double, _
+        Optional ByRef coordinate As Double = 0#) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     Dim load(1 To COMPONENT_COUNT) As Double, i As Long
     For i = 1 To COMPONENT_COUNT: load(i) = mOffset(i) + mDirection(i): Next i
     If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations) Then Exit Function
-    Dim field() As Double, resultants() As Double, coordinate As Double
+    Dim field() As Double, resultants() As Double
     mSolver.CopyTrial field, resultants
     coordinate = CoordinateOf(field)
     If Not BeyondSteelLimit() Then VerifyDesignLoad = (coordinate >= leftCoordinate And coordinate <= rightCoordinate)
@@ -581,10 +608,20 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         End If
         For i = 1 To divisions
             point.Coordinate = start + (finish - start) * i / divisions
+            If point.Coordinate <= samples(index).Coordinate Then
+                mProbeDetails = "Уточнённая цель плеча лежит на уже пройденной части деформационной ветви."
+                Exit Function
+            End If
             If mProbeCount < PROBE_LIMIT Then mShoulderProbes = mShoulderProbes + 1
-            If Not Probe(point, previousLambda, True) Then Exit Function
+            If Not Probe(point, previousLambda) Then Exit Function
+            If Not UpdateTrialCoordinate(point, samples(index).Coordinate) Then Exit Function
             If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
                 mSolver.DiscardStep
+                Exit Function
+            End If
+            If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, point.Uncertainty) Then
+                mSolver.DiscardStep
+                mProbeDetails = "Не удалось оценить чувствительность множителя к невязке."
                 Exit Function
             End If
             If keepRight And point.Lambda <= 0# Then
@@ -740,7 +777,13 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
         End If
         point.Coordinate = low.Coordinate + 0.5 * (high.Coordinate - low.Coordinate)
         If point.Coordinate <= low.Coordinate Or point.Coordinate >= high.Coordinate Then Exit Function
-        If Not Probe(point, low.Lambda, False) Then Exit Function
+        If Not Probe(point, low.Lambda) Then Exit Function
+        If Not UpdateTrialCoordinate(point, low.Coordinate) Then Exit Function
+        If point.Coordinate >= high.Coordinate Then
+            mSolver.DiscardStep
+            mProbeDetails = "Фактическая мера промежуточной пробы вышла за правое плечо предела арматуры."
+            Exit Function
+        End If
         If Not ReadSteelTrialBound(point) Then Exit Function
         ratio = mReinforcement.TrialSteelUtilization
         If ratio > 1# Then
@@ -751,7 +794,8 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
             mSolver.CopyTrial field, actual
             mSolver.AcceptStep
             refined.Add field: multipliers.Add low.Lambda
-            If Not Probe(high, low.Lambda, False) Then Exit Function
+            If Not Probe(high, low.Lambda) Then Exit Function
+            If Not UpdateTrialCoordinate(high, low.Coordinate) Then Exit Function
             If Not ReadSteelTrialBound(high) Then Exit Function
             eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
             eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
@@ -781,7 +825,7 @@ End Function
 ' Считывает выбранную физическую меру из поля.
 Private Function CoordinateOf(ByRef field() As Double) As Double
     Dim i As Long
-    For i = 1 To UBound(field): CoordinateOf = CoordinateOf + mProjection(i) * field(i): Next i
+    For i = 1 To mSolver.PhysicalDegreeCount: CoordinateOf = CoordinateOf + mProjection(i) * field(i): Next i
 End Function
 
 ' Выделяет изменение множителя для выбора пробного интервала. В итоговой
@@ -789,6 +833,14 @@ End Function
 Private Function LoadResolution(ByVal lambda As Double) As Double
     LoadResolution = 8# * mRelTol * (1# + Abs(lambda))
 End Function
+
+' Отклоняет пробу за установленной пользователем границей множителя
+' и сохраняет достигнутую допустимую нагрузку в диагностике.
+Private Sub StopAtSearchBound()
+    mSolver.DiscardStep
+    mMeta.SetResult rsNumericalFailure, rcSearchBoundReached, rkCapacity, _
+        "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", Details()
+End Sub
 
 ' Сохраняет численную неопределённость и достигнутую допустимую нагрузку.
 Private Sub StopSearch(ByVal reason As String)

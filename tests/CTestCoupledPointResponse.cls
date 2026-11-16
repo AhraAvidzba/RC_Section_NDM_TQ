@@ -24,6 +24,8 @@ Private mMinimumAxialStrain As Double
 Private mCubic As Double, mTwinPeaks As Boolean, mBlocksRefinedDesign As Boolean
 Private mCoarseShoulderBump As Boolean
 Private mTangentFailure As ESolverFailureCode, mStressOnlyProbes As Long
+Private mFrozenAxialTail As Double
+Private mTrialAxial As Double, mAcceptedAxial As Collection
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
@@ -32,6 +34,7 @@ Friend Sub TestInitialize(ByVal pointCount As Long)
     mCubic = 1E+10#: mTwinPeaks = False: mBlocksRefinedDesign = False
     mCoarseShoulderBump = False
     mTangentFailure = sfcNone: mStressOnlyProbes = 0
+    mFrozenAxialTail = 0#
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -138,6 +141,18 @@ Friend Property Get TestStressOnlyProbes() As Long
 End Property
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Оставляет доступным равновесие на месте и включает запись координат.
+Friend Property Let TestFreezeAxialTailAt(ByVal strain As Double)
+    mFrozenAxialTail = strain
+End Property
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает деформацию первой точки принятого поля однородной осевой ветви.
+Friend Function TestAcceptedAxialAt(ByVal index As Long) As Double
+    TestAcceptedAxialAt = CDbl(mAcceptedAxial.Item(index))
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Считает диагональный отклик с нелинейным упрочнением в направлении z.
 ' Отрицательные параметры для провокации отказа в закон не вводятся.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
@@ -168,7 +183,10 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     End If
     Dim peak As Double: peak = mAcceptedPeak(point)
     If Abs(e) > peak Then peak = Abs(e)
-    If recordTrial Then mTrialPeak(point) = peak
+    If recordTrial Then
+        mTrialPeak(point) = peak
+        If point = 1 And mFrozenAxialTail > 0# Then mTrialAxial = e
+    End If
     If mBlocksRefinedDesign And mAcceptedPeak(point) >= 0.0008 And mAcceptedPeak(point) < 0.00081135 Then
         If Abs(e - 0.0008114) <= 0.00000005 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
     End If
@@ -177,6 +195,10 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
     If mMinimumAxialStrain > 0# And e < mMinimumAxialStrain Then _
         ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+    If mFrozenAxialTail > 0# And mAcceptedPeak(point) >= mFrozenAxialTail Then
+        If Abs(e - mAcceptedPeak(point)) > 0.000000000001 Then _
+            ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+    End If
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -184,6 +206,7 @@ End Function
 Private Sub ICoupledPointResponse_AcceptTrial()
     mAcceptedPeak = mTrialPeak
     mAcceptedSteps = mAcceptedSteps + 1
+    If Not mAcceptedAxial Is Nothing Then mAcceptedAxial.Add mTrialAxial
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -192,4 +215,7 @@ Private Sub ICoupledPointResponse_ClearHistory()
     ReDim mAcceptedPeak(1 To mCount)
     ReDim mTrialPeak(1 To mCount)
     mAcceptedSteps = 0
+    mTrialAxial = 0#
+    Set mAcceptedAxial = Nothing
+    If mFrozenAxialTail > 0# Then Set mAcceptedAxial = New Collection
 End Sub
