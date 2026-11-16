@@ -4872,3 +4872,67 @@ Public Function RunTestCoupledControlProgress() As String
 Failed:
     RunTestCoupledControlProgress = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сопоставляет решение около единицы с точным пределом осевой ветви.
+' Слабое кручение сохраняет пространственный путь без влияния на осевую диаграмму.
+Public Function RunTestCoupledSteelAtDesign() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#, BAR_AREA As Double = 1000#, STEEL_LIMIT As Double = 0.001
+    Const LIMIT_FORCE As Double = (AREA - BAR_AREA) * (30000# * STEEL_LIMIT + 1E+10 * STEEL_LIMIT ^ 3) + _
+        BAR_AREA * (100# + 2000# * (STEEL_LIMIT - 100# / 200000#))
+    Const ABS_TOL As Double = 0.0000005, REL_TOL As Double = 0.0000005
+    Dim section As CSectionModel, operators As New CCoupledElasticState
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, 12#, BAR_AREA, "TestGrade"
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModulus:=200000#
+    Dim concrete As New CTestCoupledPointResponse, steel As New CCoupledSteelModel, models As Object
+    concrete.TestInitialize operators.PointCount
+    steel.Initialize 200000#, 100#, 100#, 2000#, 2000#, STEEL_LIMIT, STEEL_LIMIT
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "TestGrade", steel
+    Dim response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    response.Initialize operators, concrete, models
+    solver.Initialize operators, response, 30000#
+
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    Dim designForce As Double, expected As Variant, initialFactor As Variant
+    Dim low As Double, high As Double, onOffset As Boolean, eventFound As Boolean
+    Dim numericalRatio As Double, meta As CResultMeta, field() As Double, resultants() As Double
+    For Each expected In Array(0.98, 0.999999, 1#, 1.00000002, 1.02)
+        designForce = LIMIT_FORCE / CDbl(expected)
+        solver.ResetHistory
+        If Not solver.TryStep(designForce, 0#, 0#, 300000#, 0#, 0#, ABS_TOL, REL_TOL, 60) Then _
+            Err.Raise 5, , "Не получено контрольное прямое равновесие."
+        solver.CopyTrial field, resultants
+        numericalRatio = response.TrialSteelUtilization
+        solver.DiscardStep
+        path.Initialize 0#, designForce, 0#, 0#, 0#, 0#, 0#, 300000#, 0#, 0#, 0#, 0#
+        For Each initialFactor In Array(1#, 0.5)
+            branch.Initialize solver, path, 4, 64, 60, ABS_TOL, REL_TOL, True
+            branch.TraceSteelLimit response, CDbl(initialFactor), 1#, 0.003, preferDeformationOnStall:=True
+            low = 0#: high = 0#
+            eventFound = branch.CopySteelLimit(low, high, onOffset)
+            Set meta = branch.ResultMeta
+            report = report & "STEEL_NEAR: exact=" & CStr(expected) & "; initial=" & CStr(initialFactor) & _
+                "; directU-1=" & CStr(numericalRatio - 1#) & "; event=" & CStr(eventFound) & "; lo=" & CStr(low) & _
+                "; hi=" & CStr(high) & "; accepted=" & CStr(branch.AcceptedLambda) & "; code=" & CStr(meta.ResultCode) & vbCrLf
+            report = report & "STEEL_NEAR_DETAIL: " & meta.DiagnosticDetails & vbCrLf
+            If expected >= 1# Then
+                TestRecord meta.InternalStatus <> rsCheckFailed, "допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки", _
+                    passed, failed, report
+            ElseIf expected < 0.99 Then
+                TestRecord eventFound And low <= expected And high >= expected And high < 1# And meta.InternalStatus = rsCheckFailed, _
+                    "определённый арматурный предел ниже расчётной нагрузки", passed, failed, report
+            Else
+                TestRecord Not eventFound Or (low <= expected And high >= expected), _
+                    "при близком физическом пределе найденный интервал содержит аналитическое значение", passed, failed, report
+            End If
+        Next initialFactor
+    Next expected
+    RunTestCoupledSteelAtDesign = report & "TOTAL_COUPLED_STEEL_AT_DESIGN: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledSteelAtDesign = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

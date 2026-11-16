@@ -130,8 +130,9 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupled
     Set ContinueByDeformation = controlled
 End Function
 
-' Возвращает интервал пересечения арматурного критерия, подтверждённый
-' равновесными пробами. Для преднагружения границы относятся к его доле.
+' Возвращает интервал арматурного события по равновесным пробам.
+' Если он охватывает заданную нагрузку, ResultMeta сообщает NumFail.
+' Для преднагружения границы относятся к его доле.
 Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef onOffset As Boolean, _
         Optional ByRef criticalPoint As Long = 0) As Boolean
     If Not mHasSteelLimit Then Exit Function
@@ -526,10 +527,16 @@ Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
             mLimitResultants = mResultants
         End If
     End If
-    mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-        "На ветви достигнута предельная деформация арматуры.", _
-        ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _
+    Dim limitDetails As String
+    limitDetails = ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _
         "], отношения деформаций к пределам: " & CStr(lowRatio) & " и " & CStr(highRatio) & "."
+    If Not offsetStage And low < 1# And high >= 1# Then
+        mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
+            "Интервал достижения предельной деформации арматуры охватывает расчётную нагрузку (lambda = 1).", limitDetails
+    Else
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
+            "На ветви достигнута предельная деформация арматуры.", limitDetails
+    End If
 End Sub
 
 ' Ограничивает шаг верхней границей без Excel API.

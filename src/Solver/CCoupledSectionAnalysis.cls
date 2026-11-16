@@ -166,6 +166,11 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
     Dim limitHistory As Collection, actual() As Double, limitTarget() As Double
     hasSteel = branch.CopySteelLimit(low, high, onOffset, criticalPoint)
+    If hasSteel And meta.InternalStatus = rsNumericalFailure Then
+        meta.ResultComment = meta.ResultComment & " " & SteelControlDescription(criticalPoint) & "."
+        capacity.InitializeCoupledUnresolved meta, loadPath, low
+        Exit Function
+    End If
     If Not hasSteel Then
         Set controlled = branch.ContinueByDeformation(maximumLambda)
         If Not controlled Is Nothing Then

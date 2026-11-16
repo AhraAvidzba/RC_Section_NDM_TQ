@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-16 19:32:38
+Date: 2026-11-16 20:01:16
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -27917,7 +27917,7 @@ Private mMeta As CResultMeta
 Public Sub PrepareModel(ByVal section As CSectionModel, ByVal MODULUS As Double, ByVal poisson As Double, _
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
-        Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing, _
+        Optional ByVal steelModulus As Double = 0#, Optional ByVal SteelModels As Object = Nothing, _
         Optional ByVal importedGrade As String = vbNullString)
     Set mMeta = New CResultMeta
     mArea = 0#
@@ -27933,7 +27933,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal MODULUS As Double,
     mQuadrature.Prepare pointsPerSpan, mx, my, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
     mPointCount = mConcreteCount
-    PrepareReinforcement section, transverse, steelModulus, steelModels, importedGrade, indices, dx, dy
+    PrepareReinforcement section, transverse, steelModulus, SteelModels, importedGrade, indices, dx, dy
     PrepareOperators indices, dx, dy
     Assemble
     Set mSystem = New CCoupledLinearSystem
@@ -28003,7 +28003,7 @@ End Property
 ' Добавляет точки продольных стержней из CSectionModel и точки хомутов.
 ' Вес каждой точки стали одновременно вычитает бетон в той же кинематике.
 Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
-        ByVal steelModulus As Double, ByVal steelModels As Object, ByVal importedGrade As String, _
+        ByVal steelModulus As Double, ByVal SteelModels As Object, ByVal importedGrade As String, _
         ByRef indices() As Long, ByRef dx() As Double, ByRef dy() As Double)
     Erase mSteelModulus: Erase mSteelDirection: Erase mSteelClass: Erase mTransverseGroup
     Dim bars As New CTransverseRebarQuadrature
@@ -28011,7 +28011,7 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
     Dim last As Long, i As Long, point As Long, k As Long
     last = mConcreteCount + section.rebarCount + bars.count
     If last = mConcreteCount Then Exit Sub
-    If steelModels Is Nothing And steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+    If SteelModels Is Nothing And steelModulus <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
         "Для упругой проверки армированного сечения задайте положительный модуль стали."
     ReDim Preserve mx(1 To last): ReDim Preserve my(1 To last): ReDim Preserve mWeight(1 To last)
     ReDim Preserve indices(1 To SHAPE_COUNT, 1 To last): ReDim Preserve mShape(1 To SHAPE_COUNT, 1 To last)
@@ -28050,12 +28050,12 @@ Private Sub PrepareReinforcement(ByVal section As CSectionModel, ByVal transvers
             mTransverseGroup(point) = group
         End If
         mx(point) = x: my(point) = y: mWeight(point) = AREA
-        If steelModels Is Nothing Then
+        If SteelModels Is Nothing Then
             mSteelModulus(point) = steelModulus
         Else
-            If Not steelModels.Exists(mSteelClass(point)) Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
+            If Not SteelModels.Exists(mSteelClass(point)) Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
                 "Для класса «" & mSteelClass(point) & "» не назначена модель арматуры."
-            Set gradeModel = steelModels.item(mSteelClass(point))
+            Set gradeModel = SteelModels.item(mSteelClass(point))
             mSteelModulus(point) = gradeModel.elasticModulus
             If mSteelModulus(point) <= 0# Then Err.Raise vbObjectError + 1779, "CCoupledElasticState", _
                 "Для класса «" & mSteelClass(point) & "» не задан положительный модуль Es."
@@ -29032,7 +29032,7 @@ End Property
 ====================================================================================================
 COMPONENT: CCoupledLoadContinuation
 TYPE: 2
-LINES: 541
+LINES: 548
 ====================================================================================================
 Option Explicit
 
@@ -29157,8 +29157,9 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupled
     Set ContinueByDeformation = controlled
 End Function
 
-' Возвращает интервал пересечения арматурного критерия, подтверждённый
-' равновесными пробами. Для преднагружения границы относятся к его доле.
+' Возвращает интервал арматурного события по равновесным пробам.
+' Если он охватывает заданную нагрузку, ResultMeta сообщает NumFail.
+' Для преднагружения границы относятся к его доле.
 Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef onOffset As Boolean, _
         Optional ByRef criticalPoint As Long = 0) As Boolean
     If Not mHasSteelLimit Then Exit Function
@@ -29553,10 +29554,16 @@ Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
             mLimitResultants = mResultants
         End If
     End If
-    mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-        "На ветви достигнута предельная деформация арматуры.", _
-        ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _
+    Dim limitDetails As String
+    limitDetails = ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _
         "], отношения деформаций к пределам: " & CStr(lowRatio) & " и " & CStr(highRatio) & "."
+    If Not offsetStage And low < 1# And high >= 1# Then
+        mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
+            "Интервал достижения предельной деформации арматуры охватывает расчётную нагрузку (lambda = 1).", limitDetails
+    Else
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
+            "На ветви достигнута предельная деформация арматуры.", limitDetails
+    End If
 End Sub
 
 ' Ограничивает шаг верхней границей без Excel API.
@@ -31024,7 +31031,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledSectionAnalysis
 TYPE: 2
-LINES: 575
+LINES: 580
 ====================================================================================================
 Option Explicit
 
@@ -31185,6 +31192,11 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
     Dim limitHistory As Collection, actual() As Double, limitTarget() As Double
     hasSteel = branch.CopySteelLimit(low, high, onOffset, criticalPoint)
+    If hasSteel And meta.internalStatus = rsNumericalFailure Then
+        meta.resultComment = meta.resultComment & " " & SteelControlDescription(criticalPoint) & "."
+        capacity.InitializeCoupledUnresolved meta, loadPath, low
+        Exit Function
+    End If
     If Not hasSteel Then
         Set controlled = branch.ContinueByDeformation(maximumLambda)
         If Not controlled Is Nothing Then
@@ -31308,7 +31320,7 @@ Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concret
 
     On Error GoTo InvalidMaterialOrGeometry
     Dim meta As CResultMeta
-    Set models = steelModels(spec)
+    Set models = SteelModels(spec)
     PrepareOperators spec, models
     Set meta = mOperators.ResultMeta
     Set PrepareResponse = meta
@@ -31423,7 +31435,7 @@ Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As O
         Set mOperators = mOperatorCache(key)
     Else
         Dim prepared As New CCoupledElasticState
-        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models, importedGrade:=mSteelClass
+        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, SteelModels:=models, importedGrade:=mSteelClass
         mOperatorCache.Add key, prepared
         Set mOperators = prepared
     End If
@@ -31438,9 +31450,9 @@ End Sub
 
 ' Возвращает только применённые классы для набора характеристик профиля.
 ' Ошибка строки одного набора не мешает использованию другого набора.
-Private Function steelModels(ByVal spec As CMaterialModelSpec) As Object
+Private Function SteelModels(ByVal spec As CMaterialModelSpec) As Object
     Dim key As String: key = spec.valueSetText
-    If mSteelCache.Exists(key) Then Set steelModels = mSteelCache(key): Exit Function
+    If mSteelCache.Exists(key) Then Set SteelModels = mSteelCache(key): Exit Function
 
     Dim available As Object
     If Not mSupplementarySteel Is Nothing Then
@@ -31458,7 +31470,7 @@ Private Function steelModels(ByVal spec As CMaterialModelSpec) As Object
         models.Add grade, model
     Next grade
     mSteelCache.Add key, models
-    Set steelModels = models
+    Set SteelModels = models
 End Function
 
 ' Использует штатную двухлинейную диаграмму для явно сопоставленного класса.
@@ -111069,7 +111081,7 @@ End Sub
 ====================================================================================================
 COMPONENT: modTestCoupledElasticState
 TYPE: 1
-LINES: 4875
+LINES: 4939
 ====================================================================================================
 Option Explicit
 
@@ -112114,7 +112126,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
-    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
     concrete.TestInitialize operators.pointCount
     concrete.TestUseDescendingAxialLaw
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
@@ -115439,7 +115451,7 @@ Public Function RunTestCoupledRetainedShoulders() As String
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
-    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
     concrete.TestInitialize operators.pointCount
     concrete.TestUseTwinPeakAxialLaw
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
@@ -115633,7 +115645,7 @@ Public Function RunTestCoupledDiscardedShoulder() As String
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
-    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
     concrete.TestInitialize operators.pointCount
     concrete.TestUseDiscardedShoulderLaw
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
@@ -115873,7 +115885,7 @@ Public Function RunTestCoupledControlProgress() As String
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
-    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, SteelModels:=models
     concrete.TestInitialize operators.pointCount
     concrete.TestUseTwinPeakAxialLaw
     concrete.TestFreezeAxialTailAt = TAIL_STRAIN - 0.00000001
@@ -115943,6 +115955,70 @@ Public Function RunTestCoupledControlProgress() As String
     Exit Function
 Failed:
     RunTestCoupledControlProgress = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сопоставляет решение около единицы с точным пределом осевой ветви.
+' Слабое кручение сохраняет пространственный путь без влияния на осевую диаграмму.
+Public Function RunTestCoupledSteelAtDesign() As String
+    Dim passed As Long, Failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#, BAR_AREA As Double = 1000#, STEEL_LIMIT As Double = 0.001
+    Const LIMIT_FORCE As Double = (AREA - BAR_AREA) * (30000# * STEEL_LIMIT + 10000000000# * STEEL_LIMIT ^ 3) + _
+        BAR_AREA * (100# + 2000# * (STEEL_LIMIT - 100# / 200000#))
+    Const ABS_TOL As Double = 0.0000005, REL_TOL As Double = 0.0000005
+    Dim section As CSectionModel, operators As New CCoupledElasticState
+    Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, 12#, BAR_AREA, "TestGrade"
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModulus:=200000#
+    Dim concrete As New CTestCoupledPointResponse, steel As New CCoupledSteelModel, models As Object
+    concrete.TestInitialize operators.pointCount
+    steel.Initialize 200000#, 100#, 100#, 2000#, 2000#, STEEL_LIMIT, STEEL_LIMIT
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "TestGrade", steel
+    Dim response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    response.Initialize operators, concrete, models
+    solver.Initialize operators, response, 30000#
+
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    Dim designForce As Double, expected As Variant, initialFactor As Variant
+    Dim low As Double, high As Double, onOffset As Boolean, eventFound As Boolean
+    Dim numericalRatio As Double, meta As CResultMeta, field() As Double, resultants() As Double
+    For Each expected In Array(0.98, 0.999999, 1#, 1.00000002, 1.02)
+        designForce = LIMIT_FORCE / CDbl(expected)
+        solver.ResetHistory
+        If Not solver.TryStep(designForce, 0#, 0#, 300000#, 0#, 0#, ABS_TOL, REL_TOL, 60) Then _
+            Err.Raise 5, , "Не получено контрольное прямое равновесие."
+        solver.CopyTrial field, resultants
+        numericalRatio = response.TrialSteelUtilization
+        solver.DiscardStep
+        path.Initialize 0#, designForce, 0#, 0#, 0#, 0#, 0#, 300000#, 0#, 0#, 0#, 0#
+        For Each initialFactor In Array(1#, 0.5)
+            branch.Initialize solver, path, 4, 64, 60, ABS_TOL, REL_TOL, True
+            branch.TraceSteelLimit response, CDbl(initialFactor), 1#, 0.003, preferDeformationOnStall:=True
+            low = 0#: high = 0#
+            eventFound = branch.CopySteelLimit(low, high, onOffset)
+            Set meta = branch.ResultMeta
+            report = report & "STEEL_NEAR: exact=" & CStr(expected) & "; initial=" & CStr(initialFactor) & _
+                "; directU-1=" & CStr(numericalRatio - 1#) & "; event=" & CStr(eventFound) & "; lo=" & CStr(low) & _
+                "; hi=" & CStr(high) & "; accepted=" & CStr(branch.AcceptedLambda) & "; code=" & CStr(meta.resultCode) & vbCrLf
+            report = report & "STEEL_NEAR_DETAIL: " & meta.diagnosticDetails & vbCrLf
+            If expected >= 1# Then
+                TestRecord meta.internalStatus <> rsCheckFailed, "допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки", _
+                    passed, Failed, report
+            ElseIf expected < 0.99 Then
+                TestRecord eventFound And low <= expected And high >= expected And high < 1# And meta.internalStatus = rsCheckFailed, _
+                    "определённый арматурный предел ниже расчётной нагрузки", passed, Failed, report
+            Else
+                TestRecord Not eventFound Or (low <= expected And high >= expected), _
+                    "при близком физическом пределе найденный интервал содержит аналитическое значение", passed, Failed, report
+            End If
+        Next initialFactor
+    Next expected
+    RunTestCoupledSteelAtDesign = report & "TOTAL_COUPLED_STEEL_AT_DESIGN: passed=" & passed & "; failed=" & Failed
+    Exit Function
+Failed:
+    RunTestCoupledSteelAtDesign = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
 End Function
 
 
@@ -116019,7 +116095,7 @@ Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText A
     Dim section As CSectionModel, layout As CTransverseRebarLayout, steel As Object
     Set section = BuildKaniSectionTest(layout, steel)
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
-    operators.PrepareModel section, ec, 0.2, spans, spans, 5, layout, steelModels:=steel
+    operators.PrepareModel section, ec, 0.2, spans, spans, 5, layout, SteelModels:=steel
     Dim solver As New CCoupledNewtonSolver, shearX() As Double, shearY() As Double
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, ec, 0.2, fc, ft, 0.0022, gt, gc, spatialHistory
     operators.MeanShearProjections shearX, shearY
@@ -116173,7 +116249,7 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
     Set steel = CreateObject("Scripting.Dictionary")
     steel.Add "A2_LONG", ExperimentBilinearSteelTest(200000#, longitudinalYield, 0#)
     steel.Add "A2_HOOP", ExperimentBilinearSteelTest(200000#, hoopYield, 0#)
-    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, SteelModels:=steel
     AddExperimentTraceTest report, tracePath, "A2_PARAMETERS: Ec " & ExperimentNumberTest(ec) & " | Ft " & _
         ExperimentNumberTest(ft) & " | Gt " & ExperimentNumberTest(gt) & " | Gc " & ExperimentNumberTest(gc) & _
         " | wall " & ExperimentNumberTest(wall) & " | fy hoop " & ExperimentNumberTest(hoopYield) & _
@@ -116526,7 +116602,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
     If commonHoopQuadrature Then Set layout = CommonTBU3HoopLayoutTest(section, layout)
     Dim gaugeLeftX As Double, gaugeRightX As Double
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse
-    operators.PrepareModel section, ec, NU, spans, spans, cellsPerSpan, layout, steelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, cellsPerSpan, layout, SteelModels:=steel
     If measureHoop Then
        Dim hoopPath As CGeometryPath: Set hoopPath = layout.path(1)
         hoopPath.ProjectionBounds 1#, 0#, gaugeLeftX, gaugeRightX
@@ -117407,7 +117483,7 @@ Private Function TestReplayPrismHistory(ByVal inputPath As String, ByVal spansTe
     Set section = TestPrismSection(layout, steel)
     Dim operators As New CCoupledElasticState, frame As New CSectionNumericalFrame
     frame.Initialize section
-    operators.PrepareModel section, CONCRETE_E, CONCRETE_NU, spans, spans, POINTS_PER_SPAN, layout, steelModels:=steel
+    operators.PrepareModel section, CONCRETE_E, CONCRETE_NU, spans, spans, POINTS_PER_SPAN, layout, SteelModels:=steel
     Dim center As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     TestInitializePrismResponse operators, steel, center, response, solver
     Dim shearX() As Double, shearY() As Double
@@ -152012,7 +152088,7 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
     Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, reinforcement As New CCoupledReinforcedResponse
     Dim gt As Double, gc As Double
     gt = 0.073 * fc ^ 0.18: gc = (fc / ft) ^ 2 * gt ' Оценки Poliotti и Bairan (2019), а не опытные энергии.
-    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
+    operators.PrepareModel section, ec, NU, spans, spans, 5, layout, SteelModels:=steel
     concrete.Initialize operators.pointCount, ec, NU, 0.6 * fc, fc, ft, PEAK_STRAIN, gt, gc, LOCALIZATION
     reinforcement.Initialize operators, concrete, steel
 
