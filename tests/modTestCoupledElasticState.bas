@@ -1947,6 +1947,108 @@ Private Function TestMatrixMaterials() As CMaterialModelProvider
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет шесть компонентов явных плоских путей с ненулевыми T, Qx и Qy.
+' В том числе проверяет точный ноль направления при нулевом выбранном усилии.
+Public Function RunTestCoupledCenteredLoadPaths() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim layout As New CTransverseRebarLayout, provider As CMaterialModelProvider
+    layout.DeclareNone
+    Set provider = TestMatrixMaterials()
+    Dim origins As Variant, cases As Variant
+    origins = Array(Array(250#, 125#), Array(-1000000#, 1000000#))
+    cases = Array(Array("LambdaMx", False, True, False, 0#, 0#), _
+        Array("LambdaMy", False, False, True, 620000#, 0#), _
+        Array("LambdaMxy", False, True, True, 0#, 0#), _
+        Array("LambdaMx", False, True, False, 620000#, -420000#), _
+        Array("LambdaMy", False, False, True, 620000#, -420000#), _
+        Array("LambdaMxy", False, True, True, 620000#, -420000#), _
+        Array("LambdaN", True, False, False, 620000#, -420000#), _
+        Array("LambdaNMxy", True, True, True, 620000#, -420000#))
+    Dim origin As Variant, caseData As Variant, cx As Double, cy As Double, area As Double
+    Dim section As CSectionModel, analysis As CCoupledSectionAnalysis
+    For Each origin In origins
+        Set section = New CSectionModel
+        section.AddConcreteElement CDbl(origin(0)), CDbl(origin(1)), 10000#
+        section.ConcreteMeshCentroid cx, cy, area
+        Set analysis = New CCoupledSectionAnalysis
+        analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+        For Each caseData In cases
+            TestCenteredLoadPathComponents analysis, caseData, cx, cy, passed, failed, report
+        Next caseData
+    Next origin
+    TestCenteredLoadPathCapacity provider, passed, failed, report
+    RunTestCoupledCenteredLoadPaths = report & "TOTAL_COUPLED_CENTERED_LOAD_PATHS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledCenteredLoadPaths = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Независимо масштабирует заданные пользователем усилия и переносит винт
+' по разности координат. Фиксированные компоненты имеют точный ноль в Base.
+Private Sub TestCenteredLoadPathComponents(ByVal analysis As CCoupledSectionAnalysis, ByVal caseData As Variant, _
+        ByVal cx As Double, ByVal cy As Double, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const AXIAL As Double = 12345.6, TORQUE As Double = -80000#, SHEAR_X As Double = -110#, SHEAR_Y As Double = 270#
+    Dim loads As New CSectionLoadState, path As CLoadPathVector
+    Dim pointX As Double, pointY As Double, dx As Double, dy As Double
+    pointX = cx - 7.4: pointY = cy + 17.3
+    dx = pointX - cx: dy = pointY - cy
+    loads.Initialize AXIAL, CDbl(caseData(4)), CDbl(caseData(5)), pointX, pointY
+    loads.SetSpatialComponents TORQUE, SHEAR_X, SHEAR_Y
+    Set path = analysis.TestCenteredLoadPath(loads, CStr(caseData(0)))
+    Dim offset() As Double, direction() As Double, actual() As Double
+    path.Components offset, direction
+    Dim expected(1 To 6) As Double, factor As Variant, index As Long, label As String
+    label = CStr(caseData(0)) & " | центр Y=" & CStr(cy) & " | Mx=" & CStr(caseData(4)) & " My=" & CStr(caseData(5))
+    If Not CBool(caseData(1)) Then
+        If Not CBool(caseData(2)) Or CDbl(caseData(4)) = 0# Then _
+            TestRecord direction(2) = 0#, label & " | точно фиксированный Mx", passed, failed, report
+        If Not CBool(caseData(3)) Or CDbl(caseData(5)) = 0# Then _
+            TestRecord direction(3) = 0#, label & " | точно фиксированный My", passed, failed, report
+    End If
+    TestRecord direction(4) = 0# And direction(5) = 0# And direction(6) = 0#, _
+        label & " | точно фиксированные T, Qx, Qy", passed, failed, report
+    For Each factor In Array(0#, 0.375, 1#)
+        expected(1) = AXIAL * CDbl(IIf(caseData(1), factor, 1#))
+        expected(2) = CDbl(caseData(4)) * CDbl(IIf(caseData(2), factor, 1#)) + expected(1) * dy
+        expected(3) = CDbl(caseData(5)) * CDbl(IIf(caseData(3), factor, 1#)) + expected(1) * dx
+        expected(4) = TORQUE + dx * SHEAR_Y - dy * SHEAR_X
+        expected(5) = SHEAR_X: expected(6) = SHEAR_Y
+        path.TargetSix CDbl(factor), actual
+        For index = 1 To 6
+            TestRecord Abs(actual(index) - expected(index)) <= 0.000000001, label & " | λ=" & CStr(factor) & _
+                " | компонента " & CStr(index) & " | " & CStr(actual(index)) & " / " & CStr(expected(index)), passed, failed, report
+        Next index
+    Next factor
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Подтверждает статус неприменимого поиска после решения постоянной части
+' нагрузки для λ*Mx при нулевом заданном Mx и ненулевых N, T, Qx, Qy.
+Private Sub TestCenteredLoadPathCapacity(ByVal provider As CMaterialModelProvider, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim section As CSectionModel, hoop As CGeometryPath, layout As New CTransverseRebarLayout
+    Set section = TestReinforcedAsymmetricSection(hoop, -1000000#, 1000000#)
+    layout.AddGroup hoop, 8#, 100#, "A400"
+    Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    Dim cx As Double, cy As Double, area As Double, loads As New CSectionLoadState
+    section.ConcreteMeshCentroid cx, cy, area
+    loads.Initialize 12345.6, 0#, -42000#, cx - 7.4, cy + 17.3
+    loads.SetSpatialComponents -80000#, -110#, 270#
+    Dim capacity As CCapacityResult
+    Set capacity = analysis.SolveCapacity(loads, "LambdaMx", spec, 1#, 2#, 0.0001, 30)
+    TestRecord capacity.ResultMeta.InternalStatus = rsNotApplicable And capacity.ResultMeta.ResultCode = rcNotApplicable, _
+        "Нулевой λ*Mx: статус поиска после решения постоянной нагрузки | " & capacity.ResultMeta.ResultComment, passed, failed, report
+    TestRecord capacity.Status = "N/A" And InStr(1, capacity.ResultMeta.ResultComment, "ненулевой переменной частью", vbTextCompare) > 0, _
+        "Нулевой λ*Mx: внешний статус и причина неприменимости", passed, failed, report
+    TestRecord Not capacity.HasUltimatePoint And Not capacity.HasConfirmedLowerBound And capacity.ReserveFactor = 0#, _
+        "Нулевой λ*Mx: предельная точка и запас отсутствуют", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет перенос, поворот на 90°, отражение и смену точки приведения
 ' полного вектора. Ортогональные преобразования сохраняют шаг сетки.
 Public Function RunTestCoupledFrameInvariance() As String

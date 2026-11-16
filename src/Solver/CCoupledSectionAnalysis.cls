@@ -488,14 +488,41 @@ Private Function BuildPath(ByVal loads As CSectionLoadState, ByVal loadPath As S
     If loadPath = "Auto" Or loadPath = "LambdaAll6" Then
         result.Initialize 0#, target(1), 0#, target(2), 0#, target(3), 0#, target(4), 0#, target(5), 0#, target(6)
     Else
-        Dim mxOffset As Double, myOffset As Double
+        Dim mxOffset As Double, mxBase As Double, myOffset As Double, myBase As Double
         descriptor.InitializeFromLoadState loadPath, loads
-        mxOffset = descriptor.MxOffset - descriptor.NOffset * mCenterY
-        myOffset = descriptor.MyOffset - descriptor.NOffset * mCenterX
-        result.Initialize descriptor.NOffset, descriptor.NBase, mxOffset, target(2) - mxOffset, _
-            myOffset, target(3) - myOffset, target(4), 0#, target(5), 0#, target(6), 0#
+        SplitBendingAtCenter descriptor.ScalesN, descriptor.ScalesMx, loads.LoadPointMx, _
+            loads.AxialMxAboutPoint(mCenterY), target(2), mxOffset, mxBase
+        SplitBendingAtCenter descriptor.ScalesN, descriptor.ScalesMy, loads.LoadPointMy, _
+            loads.AxialMyAboutPoint(mCenterX), target(3), myOffset, myBase
+        result.Initialize descriptor.NOffset, descriptor.NBase, mxOffset, mxBase, _
+            myOffset, myBase, target(4), 0#, target(5), 0#, target(6), 0#
     End If
     Set BuildPath = result
+End Function
+
+' Разделяет момент в центре на изменяемую и постоянную части по признакам
+' масштабирования N и заданного момента. При одинаковых признаках используется
+' весь перенесённый момент, другая часть остаётся точно нулевой.
+Private Sub SplitBendingAtCenter(ByVal scaleN As Boolean, ByVal scaleMoment As Boolean, _
+        ByVal momentAtLoadPoint As Double, ByVal eccentricMoment As Double, ByVal totalMoment As Double, _
+        ByRef offset As Double, ByRef direction As Double)
+    If scaleN = scaleMoment Then
+        If scaleN Then
+            offset = 0#: direction = totalMoment
+        Else
+            offset = totalMoment: direction = 0#
+        End If
+    ElseIf scaleN Then
+        offset = momentAtLoadPoint: direction = eccentricMoment
+    Else
+        offset = eccentricMoment: direction = momentAtLoadPoint
+    End If
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Передаёт фактическую траекторию ядра для сверки её шести усилий без решения НДС.
+Friend Function TestCenteredLoadPath(ByVal loads As CSectionLoadState, ByVal loadPath As String) As CLoadPathVector
+    Set TestCenteredLoadPath = BuildPath(loads, loadPath)
 End Function
 
 ' Возвращает исправляемую пользователем причину отсутствия связанного решения.
