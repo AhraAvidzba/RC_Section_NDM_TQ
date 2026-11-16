@@ -248,14 +248,14 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     End If
     On Error GoTo EvaluationFailed
     Dim current() As Double, correction() As Double, norm As Double, tolerance As Double
-    Dim candidateNorm As Double, fraction As Double, i As Long, accepted As Boolean
+    Dim candidateNorm As Double, candidateTolerance As Double, fraction As Double, i As Long, accepted As Boolean
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
     Dim useGradientTangent As Boolean, built As Boolean
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
     If mControlActive Then SetControlledLoad currentLambda, load
-    tolerance = absoluteTolerance + relativeTolerance * StressScale(mExternal)
+    tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
     If IsMissing(initialField) Then
         current = mAccepted
     Else
@@ -332,6 +332,7 @@ RecomputeTangent:
         End If
         ReDim mCandidate(1 To mDegreeCount)
         fraction = 1#: accepted = False: hasValidTrial = False
+        candidateTolerance = tolerance
         Do While fraction >= MIN_FRACTION
             For i = 1 To mDegreeCount
                 mCandidate(i) = current(i) + fraction * correction(i)
@@ -341,6 +342,7 @@ RecomputeTangent:
                 SetControlledLoad candidateLambda, load
             End If
             If Evaluate(mCandidate, False) Then
+                If mControlActive Then candidateTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
                 candidateNorm = EquilibriumNorm(load, mCandidate)
                 If Not hasValidTrial Or candidateNorm < bestTrialNorm Then bestTrialNorm = candidateNorm
                 hasValidTrial = True
@@ -348,7 +350,7 @@ RecomputeTangent:
                     trialEquation = mResidual(governingRow)
                     trialFraction = fraction
                 End If
-                accepted = (candidateNorm <= tolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
+                accepted = (candidateNorm <= candidateTolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
             ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
                 RecordFailure mFailureCode, "Материальная проба не может быть повторена с меньшей поправкой."
                 Exit Function
@@ -372,7 +374,8 @@ RecomputeTangent:
                 rejectedExternal = mExternal: rejectedResidual = mResidual: rejectedResultants = mTrialResultants
                 rejectedMatrix = mMatrix
                 For i = 1 To COMPONENT_COUNT: rejectedLoad(i) = load(i): Next i
-                If TrySmallStrainEquilibrium(current, currentLambda, load, norm, tolerance, candidateLambda) Then
+                If TrySmallStrainEquilibrium(current, currentLambda, load, norm, tolerance, _
+                        absoluteTolerance, relativeTolerance, candidateLambda) Then
                     mIterations = mIterations + 1
                     PublishCandidate candidateLambda
                     mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; поправка с ограниченным приращением деформации"
@@ -402,18 +405,20 @@ RecomputeTangent:
             End If
             mMeta.DiagnosticDetails = details
             If recoverYieldControl And Len(mismatch) > 0 And mUseSpatialHistory Then
-                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance)
+                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
+                    absoluteTolerance, relativeTolerance)
             End If
             Exit Function
         End If
         mIterations = mIterations + 1
-        If candidateNorm <= tolerance And GaugesVerified(tolerance) Then
+        If candidateNorm <= candidateTolerance And GaugesVerified(candidateTolerance) Then
             PublishCandidate candidateLambda
             SolveStep = True
             Exit Function
         End If
         current = mCandidate
         currentLambda = candidateLambda
+        tolerance = candidateTolerance
     Loop
     RecordFailure sfcNumericalFailure, "Достигнут лимит итераций связанного равновесия."
     Exit Function
@@ -501,7 +506,8 @@ End Function
 ' Ищет соседнюю траекторию только после наблюдаемой смены ветви на
 ' отклонённой поправке. Принятые буферы материала остаются исходными.
 Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Double, ByRef correction() As Double, _
-        ByVal fraction As Double, ByVal tolerance As Double) As Boolean
+        ByVal fraction As Double, ByVal tolerance As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double) As Boolean
     If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
             TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
     Dim ends() As Double, i As Long
@@ -518,14 +524,15 @@ Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Doubl
     On Error GoTo Failed
     mControlActive = False
     If TraceYieldCrossing(station, field, ends, lambda, lambda + fraction * correction(mDegreeCount + 1), _
-            tolerance, True, result, trialLambda, newProjection) Then
-        Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double
+            tolerance, absoluteTolerance, relativeTolerance, True, result, trialLambda, newProjection) Then
+        Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double, trialTolerance As Double
         For i = 1 To mGaugeStart - 1: coordinate = coordinate + newProjection(i) * result(i): Next i
         mControlProjection = newProjection: mTargetControl = coordinate
         mControlActive = True
         SetControlledLoad trialLambda, load
+        trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
         If Evaluate(result, False) Then
-            If EquilibriumNorm(load, result) <= tolerance And GaugesVerified(tolerance) Then
+            If EquilibriumNorm(load, result) <= trialTolerance And GaugesVerified(trialTolerance) Then
                 mRecoveredProjection = newProjection
                 mCandidate = result
                 mConsistentControl = True
@@ -631,7 +638,8 @@ End Function
 ' Начинает на стороне исходного поля и при необходимости повторяет с
 ' другой стороны. Малый отступ отделяет пробу от границы округления.
 Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field() As Double, ByRef ends() As Double, _
-        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
         ByRef result() As Double, ByRef lambda As Double, ByRef projection() As Double) As Boolean
     Dim target As Double, fraction As Double, trial As Long, i As Long, anchor() As Double
     target = Sgn(station.FromValue) * GeomMin(0.125 * tolerance, _
@@ -641,7 +649,7 @@ Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field(
         If LocateYieldCoordinate(station, field, ends, target, fraction) Then
             For i = 1 To mDegreeCount: anchor(i) = field(i) + fraction * (ends(i) - field(i)): Next i
             If FollowYieldCoordinate(station, anchor, fromLambda + fraction * (toLambda - fromLambda), _
-                    target, tolerance, allowSuccessor, result, lambda, projection) Then
+                    target, absoluteTolerance, relativeTolerance, allowSuccessor, result, lambda, projection) Then
                 TraceYieldCrossing = True
                 Exit Function
             End If
@@ -654,12 +662,14 @@ End Function
 ' части одной факторизации задают поправку и направление вдоль Ftrial.
 ' Следующая станция допускается по фактической ошибке текущего шага.
 Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef startField() As Double, _
-        ByVal lambda As Double, ByVal target As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByVal lambda As Double, ByVal target As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
         ByRef result() As Double, ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
     Dim field() As Double, trial() As Double, load(1 To COMPONENT_COUNT) As Double
     Dim correction() As Double, nullDirection() As Double, eventRow() As Double, nextStation As TYieldStation
     Dim strainRate(1 To COMPONENT_COUNT) As Double, i As Long, iteration As Long, damping As Long
     Dim baseNorm As Double, norm As Double, value As Double, beta As Double, fraction As Double, trialLambda As Double
+    Dim trialTolerance As Double
     Dim row As Long, baseRow As Double, expected As Double, previousTrySuccessor As Boolean, accepted As Boolean
     field = startField
     ReDim trial(1 To mDegreeCount)
@@ -678,8 +688,9 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
                 SetControlledLoad trialLambda, load
                 If Evaluate(trial, False, recordTrial:=False) Then
                     norm = EquilibriumNorm(load, trial)
-                    If GaugesVerified(tolerance) Then
-                        If norm <= tolerance And trialLambda > 0# Then
+                    trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+                    If GaugesVerified(trialTolerance) Then
+                        If norm <= trialTolerance And trialLambda > 0# Then
                             ReDim projection(1 To mDegreeCount)
                             For i = 1 To mGaugeStart - 1: projection(i) = eventRow(i) / mReferenceModulus: Next i
                             result = trial: resultLambda = trialLambda
@@ -694,8 +705,8 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
                         For i = 1 To mDegreeCount: expected = expected + mMatrix(i, row) * (trial(i) - field(i)): Next i
                         If FindYieldDeparture(station, field, trial, row, mResidual(row) - baseRow - expected, nextStation) Then
                             previousTrySuccessor = True
-                            If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, tolerance, False, _
-                                    result, resultLambda, projection) Then
+                            If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, trialTolerance, _
+                                    absoluteTolerance, relativeTolerance, False, result, resultLambda, projection) Then
                                 FollowYieldCoordinate = True
                                 Exit Function
                             End If
@@ -858,10 +869,12 @@ End Function
 ' не уменьшает действительный остаток после возврата материалов.
 Private Function TrySmallStrainEquilibrium(ByRef field() As Double, ByVal lambda As Double, _
         ByRef load() As Double, ByVal norm As Double, ByVal tolerance As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByRef trialLambda As Double) As Boolean
     Dim force() As Double, forceResidual() As Double, equality() As Double, equalityResidual() As Double
     Dim scales() As Double, strain() As Double, correction() As Double, trial() As Double
     Dim optimizer As New CCoupledStepOptimizer, i As Long, row As Long, fraction As Double, radius As Double
+    Dim trialTolerance As Double
     On Error GoTo UnavailableCorrection
     SetControlledLoad lambda, load
     If Not Evaluate(field, True, recordTrial:=False, refinedBranch:=True) Then Exit Function
@@ -887,10 +900,11 @@ Private Function TrySmallStrainEquilibrium(ByRef field() As Double, ByVal lambda
         Next i
         trialLambda = lambda + fraction * correction(mDegreeCount + 1)
         SetControlledLoad trialLambda, load
+        trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
         If Evaluate(trial, False, recordTrial:=False) Then
-            If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+            If EquilibriumNorm(load, trial) <= trialTolerance And GaugesVerified(trialTolerance) Then
                 If Evaluate(trial, False) Then
-                    If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+                    If EquilibriumNorm(load, trial) <= trialTolerance And GaugesVerified(trialTolerance) Then
                         mCandidate = trial
                         TrySmallStrainEquilibrium = True
                         Exit Function
@@ -1023,7 +1037,7 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
     Dim adjoint As New CCoupledLinearSystem
     If Not adjoint.Solve(matrix, weights, size) Then Exit Function
     Dim norm As Double, residual As Double
-    norm = absoluteTolerance + relativeTolerance * StressScale(mExternal)
+    norm = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
     For i = 1 To mDegreeCount
         residual = Abs(mResidual(i))
         If i >= mGaugeStart Then residual = residual * mReferenceModulus
@@ -1352,6 +1366,12 @@ Private Function StressScale(ByRef values() As Double) As Double
         value = Abs(values(i))
         If value > StressScale Then StressScale = value
     Next i
+End Function
+
+' Вычисляет допуск в МПа по внешним уравнениям текущей пробы. При управлении
+' деформацией они меняются вместе с множителем нагрузки.
+Private Function EquilibriumTolerance(ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double) As Double
+    EquilibriumTolerance = absoluteTolerance + relativeTolerance * StressScale(mExternal)
 End Function
 
 ' Проверяет, что кандидат относится к последней успешной пробе.

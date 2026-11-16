@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-16 18:15:30
+Date: 2026-11-16 19:08:24
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -19822,11 +19822,11 @@ Friend Sub CopyCalibrationPoints(ByVal elasticModulus As Double, ByVal direction
 End Sub
 
 ' Координата полной деформации использует эффективное напряжение напрямую.
-Private Sub PutCalibrationPoint(ByVal point As Long, ByVal plastic As Double, ByVal modulus As Double, _
+Private Sub PutCalibrationPoint(ByVal point As Long, ByVal plastic As Double, ByVal MODULUS As Double, _
         ByVal direction As Double, ByRef STRAIN() As Double, ByRef stress() As Double)
     Dim nominal As Double, effective As Double, degraded As Double, energy As Double
     Evaluate plastic, nominal, effective, degraded, energy
-    STRAIN(point) = direction * (plastic + effective / modulus)
+    STRAIN(point) = direction * (plastic + effective / MODULUS)
     stress(point) = direction * nominal
 End Sub
 
@@ -19895,16 +19895,16 @@ Private mDeviatorCompliance As Double ' 1/(2G): перевод девиатор�
 ' Готовит единственный набор параметров бетона для текущей секции.
 ' Прочности в МПа, G в Н/мм, характерная длина в мм, углы в градусах.
 ' Деформация пика сжатия задаётся положительной величиной.
-Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal poisson As Double, _
+Friend Sub Initialize(ByVal pointCount As Long, ByVal MODULUS As Double, ByVal poisson As Double, _
         ByVal fc0 As Double, ByVal fc As Double, ByVal ft As Double, ByVal peakCompression As Double, _
         ByVal gt As Double, ByVal gc As Double, ByVal localizationLength As Double, _
         Optional ByVal alpha As Double = 0.12, Optional ByVal gamma As Double = 3#, _
         Optional ByVal friction As Double = 65#, Optional ByVal dilation As Double = 32#, _
         Optional ByVal eccentricity As Double = 0.1)
-    If pointCount < 1 Or modulus <= 0# Or ft <= 0# Or fc0 <= ft Or fc <= fc0 Or _
+    If pointCount < 1 Or MODULUS <= 0# Or ft <= 0# Or fc0 <= ft Or fc <= fc0 Or _
             gt <= 0# Or gc <= 0# Or localizationLength <= 0# Then _
         InvalidInput "Укажите положительные модули, энергии, характерную длину и прочности ft < fc0 < fc."
-    If peakCompression <= fc / modulus Or InvalidDilationAngles(friction, dilation) Then _
+    If peakCompression <= fc / MODULUS Or InvalidDilationAngles(friction, dilation) Then _
         InvalidInput "Проверьте деформацию пика сжатия и углы дилатансии и внутреннего трения."
     If alpha < 0# Or alpha >= 1# Or gamma < 0# Or eccentricity <= 0# Or poisson <= -1# Or poisson >= 0.5 Then _
         InvalidInput "Проверьте коэффициент Пуассона и параметры пластического потенциала."
@@ -19912,15 +19912,15 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
         InvalidInput "Соотношение начальных прочностей несовместимо с поверхностью текучести."
 
     Set mReturn = New CCoupledConcreteReturn
-    mReturn.Initialize modulus, poisson, alpha, gamma, eccentricity
-    CoupledElasticTensor modulus, poisson, mElastic
-    mPressureModulus = modulus / (1# - 2# * poisson)
+    mReturn.Initialize MODULUS, poisson, alpha, gamma, eccentricity
+    CoupledElasticTensor MODULUS, poisson, mElastic
+    mPressureModulus = MODULUS / (1# - 2# * poisson)
     mDeviatorCompliance = 1# / (2# * mElastic(4, 4))
     Set mTension = New CCoupledConcreteEnvelope: Set mCompression = New CCoupledConcreteEnvelope
     Dim halfTension As Double, compressDamage As Double, plasticPeak As Double
     halfTension = Log(2#) * gt / (ft * localizationLength)
-    compressDamage = 0.423 * (1# - fc / (peakCompression * modulus))
-    plasticPeak = peakCompression - fc / ((1# - compressDamage) * modulus)
+    compressDamage = 0.423 * (1# - fc / (peakCompression * MODULUS))
+    plasticPeak = peakCompression - fc / ((1# - compressDamage) * MODULUS)
     mTension.Initialize ft, ft, 0#, gt, localizationLength, 0.5, halfTension
     mCompression.Initialize fc0, fc, plasticPeak, gc, localizationLength, compressDamage, plasticPeak
     mAlpha = alpha: mGamma = gamma
@@ -20266,12 +20266,12 @@ End Sub
 
 ' Снимает одноосную огибающую из фактического закона данного бетона.
 ' Отрицательная ветвь передаётся от начала к хвосту сжатия.
-Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal modulus As Double, _
+Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal MODULUS As Double, _
         ByRef STRAIN() As Double, ByRef stress() As Double)
     If compression Then
-        mCompression.CopyCalibrationPoints modulus, -1#, STRAIN, stress
+        mCompression.CopyCalibrationPoints MODULUS, -1#, STRAIN, stress
     Else
-        mTension.CopyCalibrationPoints modulus, 1#, STRAIN, stress
+        mTension.CopyCalibrationPoints MODULUS, 1#, STRAIN, stress
     End If
 End Sub
 
@@ -20603,13 +20603,13 @@ Private mBulk As Double
 Private mAlpha As Double, mGamma As Double, mEccentricity As Double
 
 ' Задаёт упругость и форму поверхности; все модули в МПа.
-Friend Sub Initialize(ByVal modulus As Double, ByVal poisson As Double, _
+Friend Sub Initialize(ByVal MODULUS As Double, ByVal poisson As Double, _
         ByVal alpha As Double, ByVal gamma As Double, ByVal eccentricity As Double)
-    If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Or _
+    If MODULUS <= 0# Or poisson <= -1# Or poisson >= 0.5 Or _
             alpha < 0# Or alpha >= 1# Or gamma < 0# Or eccentricity <= 0# Then _
         Err.Raise 5, "CCoupledConcreteReturn", "Неверные параметры упругости или пластического возврата бетона."
-    mTwiceShear = modulus / (1# + poisson)
-    mBulk = modulus / (3# * (1# - 2# * poisson))
+    mTwiceShear = MODULUS / (1# + poisson)
+    mBulk = MODULUS / (3# * (1# - 2# * poisson))
     mAlpha = alpha: mGamma = gamma: mEccentricity = eccentricity
 End Sub
 
@@ -20907,14 +20907,14 @@ Private mPoints As Long
 
 ' Снимает диаграммы из фактически использованных экземпляров моделей.
 ' Диаграммы передаются всем сочетаниям одинакового набора как неизменяемые.
-Friend Sub Initialize(ByVal concrete As CCoupledConcreteResponse, ByVal modulus As Double, ByVal steel As Object)
+Friend Sub Initialize(ByVal concrete As CCoupledConcreteResponse, ByVal MODULUS As Double, ByVal steel As Object)
     If Not mSeries Is Nothing Then Err.Raise 5, "CCoupledMaterialSnapshot", "Диаграммы уже сохранены."
     Set mSeries = New Collection
     Dim compressionStrain() As Double, compressionStress() As Double
     Dim tensionStrain() As Double, tensionStress() As Double
     Dim STRAIN() As Double, stress() As Double
-    concrete.CopyCalibrationPoints True, modulus, compressionStrain, compressionStress
-    concrete.CopyCalibrationPoints False, modulus, tensionStrain, tensionStress
+    concrete.CopyCalibrationPoints True, MODULUS, compressionStrain, compressionStress
+    concrete.CopyCalibrationPoints False, MODULUS, tensionStrain, tensionStress
     Dim negativeCount As Long: negativeCount = UBound(compressionStrain)
     Dim point As Long, source As Long, total As Long: total = negativeCount + UBound(tensionStrain) - 1
     ReDim STRAIN(1 To total): ReDim stress(1 To total)
@@ -23203,9 +23203,9 @@ End Enum
 
 ' Готовит тензор изотропной упругости в инженерных компонентах.
 ' Вызывающий проверяет диапазон E и коэффициента Пуассона.
-Public Sub CoupledElasticTensor(ByVal modulus As Double, ByVal poisson As Double, ByRef tensor() As Double)
+Public Sub CoupledElasticTensor(ByVal MODULUS As Double, ByVal poisson As Double, ByRef tensor() As Double)
     Dim shear As Double, lame As Double, i As Long, j As Long
-    shear = modulus / (2# * (1# + poisson))
+    shear = MODULUS / (2# * (1# + poisson))
     lame = 2# * shear * poisson / (1# - 2# * poisson)
     For j = 1 To 6
         For i = 1 To 6: tensor(i, j) = 0#: Next i
@@ -27862,21 +27862,21 @@ Private mMeta As CResultMeta
 
 ' Подготавливает упругую систему и её геометрические операторы один раз.
 ' Координаты, обобщённые перемещения и силы нормированы по длине и площади.
-Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double, ByVal poisson As Double, _
+Public Sub PrepareModel(ByVal section As CSectionModel, ByVal MODULUS As Double, ByVal poisson As Double, _
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
         Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing, _
         Optional ByVal importedGrade As String = vbNullString)
     Set mMeta = New CResultMeta
     mArea = 0#
-    If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
+    If MODULUS <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
         Err.Raise vbObjectError + 1776, "CCoupledElasticState", _
             "Для упругого расчёта задайте E больше нуля и коэффициент Пуассона между -1 и 0,5."
     End If
     Set mQuadrature = New CCoupledSectionQuadrature
     mQuadrature.Initialize section, spansX, spansY
     mLength = mQuadrature.frame.lengthScale
-    CoupledElasticTensor modulus, poisson, mElastic
+    CoupledElasticTensor MODULUS, poisson, mElastic
     Dim indices() As Long, dx() As Double, dy() As Double
     mQuadrature.Prepare pointsPerSpan, mx, my, mWeight, indices, mShape, dx, dy
     mConcreteCount = UBound(mWeight)
@@ -29573,7 +29573,7 @@ End Function
 ====================================================================================================
 COMPONENT: CCoupledNewtonSolver
 TYPE: 2
-LINES: 1373
+LINES: 1393
 ====================================================================================================
 Option Explicit
 
@@ -29816,14 +29816,14 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     End If
     On Error GoTo EvaluationFailed
     Dim current() As Double, correction() As Double, norm As Double, tolerance As Double
-    Dim candidateNorm As Double, fraction As Double, i As Long, accepted As Boolean
+    Dim candidateNorm As Double, candidateTolerance As Double, fraction As Double, i As Long, accepted As Boolean
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
     Dim useGradientTangent As Boolean, built As Boolean
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
     If mControlActive Then SetControlledLoad currentLambda, load
-    tolerance = absoluteTolerance + relativeTolerance * StressScale(mExternal)
+    tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
     If IsMissing(initialField) Then
         current = mAccepted
     Else
@@ -29900,6 +29900,7 @@ RecomputeTangent:
         End If
         ReDim mCandidate(1 To mDegreeCount)
         fraction = 1#: accepted = False: hasValidTrial = False
+        candidateTolerance = tolerance
         Do While fraction >= MIN_FRACTION
             For i = 1 To mDegreeCount
                 mCandidate(i) = current(i) + fraction * correction(i)
@@ -29909,6 +29910,7 @@ RecomputeTangent:
                 SetControlledLoad candidateLambda, load
             End If
             If Evaluate(mCandidate, False) Then
+                If mControlActive Then candidateTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
                 candidateNorm = EquilibriumNorm(load, mCandidate)
                 If Not hasValidTrial Or candidateNorm < bestTrialNorm Then bestTrialNorm = candidateNorm
                 hasValidTrial = True
@@ -29916,7 +29918,7 @@ RecomputeTangent:
                     trialEquation = mResidual(governingRow)
                     trialFraction = fraction
                 End If
-                accepted = (candidateNorm <= tolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
+                accepted = (candidateNorm <= candidateTolerance Or candidateNorm < norm * (1# - MIN_PROGRESS * fraction))
             ElseIf mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
                 RecordFailure mFailureCode, "Материальная проба не может быть повторена с меньшей поправкой."
                 Exit Function
@@ -29940,7 +29942,8 @@ RecomputeTangent:
                 rejectedExternal = mExternal: rejectedResidual = mResidual: rejectedResultants = mTrialResultants
                 rejectedMatrix = mMatrix
                 For i = 1 To COMPONENT_COUNT: rejectedLoad(i) = load(i): Next i
-                If TrySmallStrainEquilibrium(current, currentLambda, load, norm, tolerance, candidateLambda) Then
+                If TrySmallStrainEquilibrium(current, currentLambda, load, norm, tolerance, _
+                        absoluteTolerance, relativeTolerance, candidateLambda) Then
                     mIterations = mIterations + 1
                     PublishCandidate candidateLambda
                     mMeta.diagnosticDetails = mMeta.diagnosticDetails & "; поправка с ограниченным приращением деформации"
@@ -29970,18 +29973,20 @@ RecomputeTangent:
             End If
             mMeta.diagnosticDetails = details
             If recoverYieldControl And Len(mismatch) > 0 And mUseSpatialHistory Then
-                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance)
+                SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
+                    absoluteTolerance, relativeTolerance)
             End If
             Exit Function
         End If
         mIterations = mIterations + 1
-        If candidateNorm <= tolerance And GaugesVerified(tolerance) Then
+        If candidateNorm <= candidateTolerance And GaugesVerified(candidateTolerance) Then
             PublishCandidate candidateLambda
             SolveStep = True
             Exit Function
         End If
         current = mCandidate
         currentLambda = candidateLambda
+        tolerance = candidateTolerance
     Loop
     RecordFailure sfcNumericalFailure, "Достигнут лимит итераций связанного равновесия."
     Exit Function
@@ -30069,7 +30074,8 @@ End Function
 ' Ищет соседнюю траекторию только после наблюдаемой смены ветви на
 ' отклонённой поправке. Принятые буферы материала остаются исходными.
 Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Double, ByRef correction() As Double, _
-        ByVal fraction As Double, ByVal tolerance As Double) As Boolean
+        ByVal fraction As Double, ByVal tolerance As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double) As Boolean
     If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
             TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
     Dim ends() As Double, i As Long
@@ -30086,14 +30092,15 @@ Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Doubl
     On Error GoTo Failed
     mControlActive = False
     If TraceYieldCrossing(station, field, ends, lambda, lambda + fraction * correction(mDegreeCount + 1), _
-            tolerance, True, result, trialLambda, newProjection) Then
-        Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double
+            tolerance, absoluteTolerance, relativeTolerance, True, result, trialLambda, newProjection) Then
+        Dim load(1 To COMPONENT_COUNT) As Double, coordinate As Double, trialTolerance As Double
         For i = 1 To mGaugeStart - 1: coordinate = coordinate + newProjection(i) * result(i): Next i
         mControlProjection = newProjection: mTargetControl = coordinate
         mControlActive = True
         SetControlledLoad trialLambda, load
+        trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
         If Evaluate(result, False) Then
-            If EquilibriumNorm(load, result) <= tolerance And GaugesVerified(tolerance) Then
+            If EquilibriumNorm(load, result) <= trialTolerance And GaugesVerified(trialTolerance) Then
                 mRecoveredProjection = newProjection
                 mCandidate = result
                 mConsistentControl = True
@@ -30199,7 +30206,8 @@ End Function
 ' Начинает на стороне исходного поля и при необходимости повторяет с
 ' другой стороны. Малый отступ отделяет пробу от границы округления.
 Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field() As Double, ByRef ends() As Double, _
-        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
         ByRef result() As Double, ByRef lambda As Double, ByRef projection() As Double) As Boolean
     Dim target As Double, fraction As Double, trial As Long, i As Long, anchor() As Double
     target = Sgn(station.FromValue) * GeomMin(0.125 * tolerance, _
@@ -30209,7 +30217,7 @@ Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field(
         If LocateYieldCoordinate(station, field, ends, target, fraction) Then
             For i = 1 To mDegreeCount: anchor(i) = field(i) + fraction * (ends(i) - field(i)): Next i
             If FollowYieldCoordinate(station, anchor, fromLambda + fraction * (toLambda - fromLambda), _
-                    target, tolerance, allowSuccessor, result, lambda, projection) Then
+                    target, absoluteTolerance, relativeTolerance, allowSuccessor, result, lambda, projection) Then
                 TraceYieldCrossing = True
                 Exit Function
             End If
@@ -30222,12 +30230,14 @@ End Function
 ' части одной факторизации задают поправку и направление вдоль Ftrial.
 ' Следующая станция допускается по фактической ошибке текущего шага.
 Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef startField() As Double, _
-        ByVal lambda As Double, ByVal target As Double, ByVal tolerance As Double, ByVal allowSuccessor As Boolean, _
+        ByVal lambda As Double, ByVal target As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
         ByRef result() As Double, ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
     Dim field() As Double, trial() As Double, load(1 To COMPONENT_COUNT) As Double
     Dim correction() As Double, nullDirection() As Double, eventRow() As Double, nextStation As TYieldStation
     Dim strainRate(1 To COMPONENT_COUNT) As Double, i As Long, iteration As Long, damping As Long
     Dim baseNorm As Double, norm As Double, value As Double, beta As Double, fraction As Double, trialLambda As Double
+    Dim trialTolerance As Double
     Dim row As Long, baseRow As Double, expected As Double, previousTrySuccessor As Boolean, accepted As Boolean
     field = startField
     ReDim trial(1 To mDegreeCount)
@@ -30246,8 +30256,9 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
                 SetControlledLoad trialLambda, load
                 If Evaluate(trial, False, recordTrial:=False) Then
                     norm = EquilibriumNorm(load, trial)
-                    If GaugesVerified(tolerance) Then
-                        If norm <= tolerance And trialLambda > 0# Then
+                    trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+                    If GaugesVerified(trialTolerance) Then
+                        If norm <= trialTolerance And trialLambda > 0# Then
                             ReDim projection(1 To mDegreeCount)
                             For i = 1 To mGaugeStart - 1: projection(i) = eventRow(i) / mReferenceModulus: Next i
                             result = trial: resultLambda = trialLambda
@@ -30262,8 +30273,8 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
                         For i = 1 To mDegreeCount: expected = expected + mMatrix(i, row) * (trial(i) - field(i)): Next i
                         If FindYieldDeparture(station, field, trial, row, mResidual(row) - baseRow - expected, nextStation) Then
                             previousTrySuccessor = True
-                            If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, tolerance, False, _
-                                    result, resultLambda, projection) Then
+                            If TraceYieldCrossing(nextStation, field, trial, lambda, trialLambda, trialTolerance, _
+                                    absoluteTolerance, relativeTolerance, False, result, resultLambda, projection) Then
                                 FollowYieldCoordinate = True
                                 Exit Function
                             End If
@@ -30426,10 +30437,12 @@ End Function
 ' не уменьшает действительный остаток после возврата материалов.
 Private Function TrySmallStrainEquilibrium(ByRef field() As Double, ByVal lambda As Double, _
         ByRef load() As Double, ByVal norm As Double, ByVal tolerance As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByRef trialLambda As Double) As Boolean
     Dim FORCE() As Double, forceResidual() As Double, equality() As Double, equalityResidual() As Double
     Dim scales() As Double, STRAIN() As Double, correction() As Double, trial() As Double
     Dim optimizer As New CCoupledStepOptimizer, i As Long, row As Long, fraction As Double, RADIUS As Double
+    Dim trialTolerance As Double
     On Error GoTo UnavailableCorrection
     SetControlledLoad lambda, load
     If Not Evaluate(field, True, recordTrial:=False, refinedBranch:=True) Then Exit Function
@@ -30455,10 +30468,11 @@ Private Function TrySmallStrainEquilibrium(ByRef field() As Double, ByVal lambda
         Next i
         trialLambda = lambda + fraction * correction(mDegreeCount + 1)
         SetControlledLoad trialLambda, load
+        trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
         If Evaluate(trial, False, recordTrial:=False) Then
-            If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+            If EquilibriumNorm(load, trial) <= trialTolerance And GaugesVerified(trialTolerance) Then
                 If Evaluate(trial, False) Then
-                    If EquilibriumNorm(load, trial) <= tolerance And GaugesVerified(tolerance) Then
+                    If EquilibriumNorm(load, trial) <= trialTolerance And GaugesVerified(trialTolerance) Then
                         mCandidate = trial
                         TrySmallStrainEquilibrium = True
                         Exit Function
@@ -30591,7 +30605,7 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
     Dim adjoint As New CCoupledLinearSystem
     If Not adjoint.Solve(matrix, weights, size) Then Exit Function
     Dim norm As Double, residual As Double
-    norm = absoluteTolerance + relativeTolerance * StressScale(mExternal)
+    norm = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
     For i = 1 To mDegreeCount
         residual = Abs(mResidual(i))
         If i >= mGaugeStart Then residual = residual * mReferenceModulus
@@ -30920,6 +30934,12 @@ Private Function StressScale(ByRef values() As Double) As Double
         value = Abs(values(i))
         If value > StressScale Then StressScale = value
     Next i
+End Function
+
+' Вычисляет допуск в МПа по внешним уравнениям текущей пробы. При управлении
+' деформацией они меняются вместе с множителем нагрузки.
+Private Function EquilibriumTolerance(ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double) As Double
+    EquilibriumTolerance = absoluteTolerance + relativeTolerance * StressScale(mExternal)
 End Function
 
 ' Проверяет, что кандидат относится к последней успешной пробе.
@@ -79110,7 +79130,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         ByRef stress() As Double, ByRef tangent() As Double, _
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
-    Const modulus As Double = 30000#
+    Const MODULUS As Double = 30000#
     If tangentMode = ctmStressOnly Then
         mStressOnlyProbes = mStressOnlyProbes + 1
     ElseIf mTangentFailure <> sfcNone Then
@@ -79120,8 +79140,8 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     Dim j As Long, k As Long, E As Double
     For j = 1 To 6
         For k = 1 To 6: tangent(j, k) = 0#: Next k
-        tangent(j, j) = modulus
-        If j > 3 Then tangent(j, j) = modulus * 0.5
+        tangent(j, j) = MODULUS
+        If j > 3 Then tangent(j, j) = MODULUS * 0.5
         stress(j) = tangent(j, j) * STRAIN(j)
     Next j
     E = STRAIN(3)
@@ -110971,7 +110991,7 @@ End Sub
 ====================================================================================================
 COMPONENT: modTestCoupledElasticState
 TYPE: 1
-LINES: 4749
+LINES: 4787
 ====================================================================================================
 Option Explicit
 
@@ -113351,7 +113371,7 @@ Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop A
         ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
     Const STRAIN_LIMIT As Double = 0.000012
     Const POISSON_RATIO As Double = 0.2
-    Const modulus As Double = 30000#
+    Const MODULUS As Double = 30000#
     Const FORCE As Double = -100000#
     Dim loads As New CSectionLoadState, capacity As CCapacityResult
     loads.Initialize FORCE, 120000#, -90000#, cx, cy
@@ -113362,7 +113382,7 @@ Private Sub TestPerforatedHoopLimit(ByVal section As CSectionModel, ByVal hoop A
         "perforated section reaches the hoop limit: " & capacity.ResultMeta.resultComment, passed, Failed, report
     If Not capacity.HasUltimatePoint Then Exit Sub
     Const AREA As Double = 30800# - 441# * GEOM_PI ' Точное сечение по двум прямоугольникам за вычетом круга.
-    Dim estimate As Double: estimate = STRAIN_LIMIT * modulus * AREA / (POISSON_RATIO * Abs(FORCE))
+    Dim estimate As Double: estimate = STRAIN_LIMIT * MODULUS * AREA / (POISSON_RATIO * Abs(FORCE))
     TestRecord Abs(lambda - estimate) < 0.2, "hoop reserve " & lambda & " near the axial Poisson estimate " & estimate, passed, Failed, report
     TestExpectNear capacity.NUltimate, lambda * FORCE, 0.0000001, "perforated limit N", passed, Failed, report
     TestExpectNear capacity.MxUltimate, lambda * 120000#, 0.0000001, "perforated limit Mx", passed, Failed, report
@@ -115139,19 +115159,19 @@ End Function
 ' Сверяет одностороннюю касательную у начала растягивающего возврата
 ' и готовый буфер, оставшийся после читающих проб другой деформации.
 Private Sub TestYieldBranchReadTransaction(ByVal material As CCoupledConcreteResponse, ByVal response As ICoupledPointResponse, _
-        ByVal modulus As Double, ByVal poisson As Double, ByVal tensileStrength As Double, _
+        ByVal MODULUS As Double, ByVal poisson As Double, ByVal tensileStrength As Double, _
         ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
     Dim STRAIN(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
     Dim saved(1 To 2) As Double, point As Long, status As ESolverFailureCode
     For point = 1 To 2
-        STRAIN(1) = point * 0.25 * tensileStrength / modulus
+        STRAIN(1) = point * 0.25 * tensileStrength / MODULUS
         STRAIN(2) = -poisson * STRAIN(1): STRAIN(3) = STRAIN(2)
         status = response.EvaluatePoint(point, STRAIN, stress, tangent, ctmStressOnly)
         If status <> sfcNone Then Err.Raise 5, , "Не создано пробное поле для проверки буфера бетона."
         saved(point) = stress(1)
     Next point
 
-    STRAIN(1) = (1# - 0.00000008) * tensileStrength / modulus
+    STRAIN(1) = (1# - 0.00000008) * tensileStrength / MODULUS
     STRAIN(2) = -poisson * STRAIN(1): STRAIN(3) = STRAIN(2)
     Dim gradient(1 To 6) As Double, centerF As Double, leftF As Double, rightF As Double, delta As Double
     Dim centerX As Double, leftStress As Double, slope As Double, hadPlastic As Boolean, principalSign As Long, substeps As Long
@@ -115185,7 +115205,7 @@ Private Sub TestYieldBranchReadTransaction(ByVal material As CCoupledConcreteRes
         TestRecord stress(1) = saved(point), "сохранена ранее записанная проба " & CStr(point), passed, Failed, report
     Next point
 
-    STRAIN(1) = 1.02 * tensileStrength / modulus
+    STRAIN(1) = 1.02 * tensileStrength / MODULUS
     STRAIN(2) = -poisson * STRAIN(1): STRAIN(3) = STRAIN(2)
     For point = 1 To 2
         status = response.EvaluatePoint(point, STRAIN, stress, tangent, ctmStressOnly)
@@ -115719,6 +115739,44 @@ ReadFailed:
     number = Err.number: source = Err.source: description = Err.description
     On Error GoTo 0
     If number <> 5 Or source <> "CCoupledNewtonSolver" Then Err.Raise number, source, description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает допуск принятого деформационного шага с нагрузкой найденного состояния.
+Public Function RunTestCoupledFinalLoadTolerance() As String
+    Dim passed As Long, Failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#, MODULUS As Double = 30000#
+    Const CUBIC As Double = 10000000000#, STRAIN As Double = 0.0000018
+    Const ABS_TOL As Double = 0.00000001, REL_TOL As Double = 0.0000005
+    Const TARGET_LAMBDA As Double = 1# + CUBIC * STRAIN ^ 2 / MODULUS
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim material As New CTestCoupledPointResponse
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), MODULUS, 0#, 1, 1, 5
+    material.TestInitialize operators.pointCount
+    solver.Initialize operators, material, MODULUS
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = AREA * MODULUS * STRAIN
+    ReDim control(1 To operators.degreeCount)
+    control(1) = 1#
+    Dim lambda As Double, field() As Double, resultants() As Double, target(1 To 6) As Double
+    If Not solver.TryDeformationStep(offset, direction, control, STRAIN, 3#, lambda, ABS_TOL, REL_TOL, 12) Then _
+        Err.Raise 5, , "Не найдена точка кубической ветви. " & solver.ResultMeta.diagnosticDetails
+    solver.CopyTrial field, resultants
+    target(1) = direction(1) * lambda
+    Dim actualTolerance As Double: actualTolerance = ABS_TOL + REL_TOL * Abs(target(1) / AREA)
+    Dim residual As Double: residual = operators.ResultantResidualNorm(resultants, target)
+    TestRecord Abs(field(1) - STRAIN) * MODULUS <= actualTolerance, _
+        "заданная деформация подтверждена", passed, Failed, report
+    TestRecord residual <= actualTolerance, "остаток в допуске найденной нагрузки " & CStr(residual) & _
+        " <= " & CStr(actualTolerance), passed, Failed, report
+    TestExpectNear lambda, TARGET_LAMBDA, 0.000000001, "множитель по независимому кубическому закону", passed, Failed, report
+    TestRecord material.TestAcceptedSteps = 0, "до принятия история остаётся исходной", passed, Failed, report
+    solver.DiscardStep
+    RunTestCoupledFinalLoadTolerance = report & "TOTAL_COUPLED_FINAL_LOAD_TOLERANCE: passed=" & passed & "; failed=" & Failed
+    Exit Function
+Failed:
+    RunTestCoupledFinalLoadTolerance = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
 End Function
 
 
@@ -116695,9 +116753,9 @@ End Function
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Двухлинейная аппроксимация измеренной стали. После текучести модуль
 ' упрочнения включается сразу. Предел 0,05 принят только для диагностики.
-Private Function ExperimentBilinearSteelTest(ByVal modulus As Double, ByVal strength As Double, ByVal hardening As Double) As CCoupledSteelModel
+Private Function ExperimentBilinearSteelTest(ByVal MODULUS As Double, ByVal strength As Double, ByVal hardening As Double) As CCoupledSteelModel
     Dim steel As New CCoupledSteelModel
-    steel.Initialize modulus, strength, strength, hardening, hardening, 0.05, 0.05
+    steel.Initialize MODULUS, strength, strength, hardening, hardening, 0.05, 0.05
     Set ExperimentBilinearSteelTest = steel
 End Function
 
@@ -148685,14 +148743,14 @@ End Sub
 Private Sub TestAudit03LargeTangentState(ByRef stats As TSectionSolverTestStats)
     Dim geom As CGeometryRegion, mesh As CFiberMeshBuilder, section As CSectionModel
     Dim concrete As CTestLinearConcreteMaterial, steel As CTestLinearSteelMaterial, solver As CSectionSolver
-    Dim modulus As Variant, code As Long, reason As String, prefix As String
+    Dim MODULUS As Variant, code As Long, reason As String, prefix As String
     Set geom = TestRectangleGeometry(200#, 100#)
     Set mesh = TestBuildMesh(geom, 10#)
     Set section = TestBuildGeneratedSectionModel(mesh, Nothing)
     Set concrete = New CTestLinearConcreteMaterial
     Set steel = New CTestLinearSteelMaterial: steel.TestInitialize 200000#
-    For Each modulus In Array(1E+110, 1E+200)
-        concrete.TestInitialize CDbl(modulus)
+    For Each MODULUS In Array(1E+110, 1E+200)
+        concrete.TestInitialize CDbl(MODULUS)
         Set solver = New CSectionSolver
         TestConfigureStrictSolver solver
         solver.SolverMethod = "Newton"
@@ -148701,13 +148759,13 @@ Private Sub TestAudit03LargeTangentState(ByRef stats As TSectionSolverTestStats)
         Err.Clear: solver.Solve section, concrete, steel, 250000#, 120000000#, -80000000#
         code = Err.number: reason = Err.description
         On Error GoTo 0
-        prefix = "audit03.linear.largeTangent." & CStr(modulus)
+        prefix = "audit03.linear.largeTangent." & CStr(MODULUS)
         TestAssertTrue stats, prefix & ".noRuntimeError", code = 0
         TestAssertTrue stats, prefix & ".converged", solver.Converged
         TestAssertTrue stats, prefix & ".code", solver.failureCode = sfcNone
         If solver.Converged Then TestAssertEquilibrium stats, prefix, solver, 250000#, 120000000#, -80000000#
         TestAppendLine stats, "LARGE_TANGENT_STATE: " & prefix & "|iterations=" & CStr(solver.iterations) & "|" & solver.StopReason
-    Next modulus
+    Next MODULUS
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

@@ -4746,3 +4746,41 @@ ReadFailed:
     On Error GoTo 0
     If number <> 5 Or source <> "CCoupledNewtonSolver" Then Err.Raise number, source, description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает допуск принятого деформационного шага с нагрузкой найденного состояния.
+Public Function RunTestCoupledFinalLoadTolerance() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const AREA As Double = 21600#, MODULUS As Double = 30000#
+    Const CUBIC As Double = 1E+10, STRAIN As Double = 0.0000018
+    Const ABS_TOL As Double = 1E-8, REL_TOL As Double = 0.0000005
+    Const TARGET_LAMBDA As Double = 1# + CUBIC * STRAIN ^ 2 / MODULUS
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim material As New CTestCoupledPointResponse
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), MODULUS, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    solver.Initialize operators, material, MODULUS
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = AREA * MODULUS * STRAIN
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim lambda As Double, field() As Double, resultants() As Double, target(1 To 6) As Double
+    If Not solver.TryDeformationStep(offset, direction, control, STRAIN, 3#, lambda, ABS_TOL, REL_TOL, 12) Then _
+        Err.Raise 5, , "Не найдена точка кубической ветви. " & solver.ResultMeta.DiagnosticDetails
+    solver.CopyTrial field, resultants
+    target(1) = direction(1) * lambda
+    Dim actualTolerance As Double: actualTolerance = ABS_TOL + REL_TOL * Abs(target(1) / AREA)
+    Dim residual As Double: residual = operators.ResultantResidualNorm(resultants, target)
+    TestRecord Abs(field(1) - STRAIN) * MODULUS <= actualTolerance, _
+        "заданная деформация подтверждена", passed, failed, report
+    TestRecord residual <= actualTolerance, "остаток в допуске найденной нагрузки " & CStr(residual) & _
+        " <= " & CStr(actualTolerance), passed, failed, report
+    TestExpectNear lambda, TARGET_LAMBDA, 1E-9, "множитель по независимому кубическому закону", passed, failed, report
+    TestRecord material.TestAcceptedSteps = 0, "до принятия история остаётся исходной", passed, failed, report
+    solver.DiscardStep
+    RunTestCoupledFinalLoadTolerance = report & "TOTAL_COUPLED_FINAL_LOAD_TOLERANCE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledFinalLoadTolerance = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
