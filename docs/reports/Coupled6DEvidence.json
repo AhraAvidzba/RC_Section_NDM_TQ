@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "6d42af5",
+  "source_checkpoint": "f4741ae",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
-    "workbook/output/VBA_All_Code.txt": "28B9A04D457B4516C23C6945E9192A205829C8328C7215F6CE64A317FDBBF216"
+    "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
+    "workbook/output/VBA_All_Code.txt": "45961EADF84F8863B38D25992B8643A524CD6A47068CDB471DED3820F37B0DB8"
   },
   "python_packages": [
     "numpy",
@@ -80,7 +80,10 @@
     "HardShearActualDeformationProgress20261116": "70559BBE5E093D533BF30BF423018E1725879D8720ECE734700F5CBF9F65F489",
     "MVT2BranchLockedNative20261116": "42648C93E2A03D55A09F8E9688357D062D3E4210F98FA4B7507CF3FB5820FFF5",
     "KaniH45ElasticDamageSectionPortable": "E4F57928BA1FEAA08E737642FB340F2B9A547B7A938A9D59FD60013B52911C51",
-    "MVT2Force15Native20261116": "AAF97ABED8510F390488F2A5C515E57431BED7ED56694181D2CD763F35A8900F"
+    "MVT2Force15Native20261116": "AAF97ABED8510F390488F2A5C515E57431BED7ED56694181D2CD763F35A8900F",
+    "CoupledSteelDesignBracket20261116": "8243063C3F3A8093D81433F29EA9E9C52F695A40FEBA9B1F698455D78BEB53AA",
+    "KaniH45DLastDirectionPortable": "648CEB7D037BD9E95D86BFF222EB9CEEB68BE914A61F085FACFBD67B96A9250B",
+    "MVT2MeasuredNormalsNative20261116": "84DAF40599AD0FE9A0AE1C2EBA2CF2F72DED306F0F47B222F1A0528216D50A86"
   },
   "cases": [
     {
@@ -954,6 +957,33 @@
       "arguments": ["--decision"],
       "outputs": {
         "PortableReport.json": "14062D2ED157F1D016ADD5521922B53CA6BC0A32E4D9D8D7BE144DC47C611263"
+      }
+    },
+    {
+      "id": "coupled-steel-force-limit-brackets-design",
+      "journal_section": 381,
+      "archive": "CoupledSteelDesignBracket20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "5B5C059BFBDAEA46E41039216B11FB81E209AA97EB198909FC6CDDB4667511F9"
+      }
+    },
+    {
+      "id": "kani-h45-analytical-variant-final-direction",
+      "journal_section": 382,
+      "archive": "KaniH45DLastDirectionPortable",
+      "script": "Replay-D.py",
+      "arguments": ["--repo-root", "{repo}"],
+      "stdout_contains": "D_DIRECTION_REPLAY_PASS C6C0A03A6FF04527F584011D609E4DCAB29049282C0E1D2D621F096F453F6BDA 8D7BDB10C420D1745FE31415584F839E79BFAC577AA182717F03A33D842B0B1A"
+    },
+    {
+      "id": "mvt2-native-correction-with-measured-yield-normals",
+      "journal_section": 383,
+      "archive": "MVT2MeasuredNormalsNative20261116",
+      "script": "ReplayProof.py",
+      "arguments": ["--decision"],
+      "outputs": {
+        "PortableReport.json": "2C7C000ECE05C35552C636721E0EA744095BB44D8AD6AF5560DE18978BD79DC0"
       }
     }
   ],

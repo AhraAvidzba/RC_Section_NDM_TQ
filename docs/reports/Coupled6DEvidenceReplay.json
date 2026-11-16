@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "E0D108B40765D02A7EA45C2A48738952B3BEB24BD53CABB03B4BA1AA7A35F6FB",
-  "source_checkpoint": "6d42af5",
+  "manifest_sha256": "ACFDFE90F9F8F7328B923555EC44D2B99BA7E6B08AF7482B9163FE056E1A2B98",
+  "source_checkpoint": "f4741ae",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
-    "workbook/output/VBA_All_Code.txt": "28B9A04D457B4516C23C6945E9192A205829C8328C7215F6CE64A317FDBBF216"
+    "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
+    "workbook/output/VBA_All_Code.txt": "45961EADF84F8863B38D25992B8643A524CD6A47068CDB471DED3820F37B0DB8"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 76,
+  "passed": 79,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -682,6 +682,31 @@
       "archive": "MVT2Force15Native20261116",
       "verified_outputs_sha256": {
         "PortableReport.json": "14062D2ED157F1D016ADD5521922B53CA6BC0A32E4D9D8D7BE144DC47C611263"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "coupled-steel-force-limit-brackets-design",
+      "journal_section": 381,
+      "archive": "CoupledSteelDesignBracket20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "5B5C059BFBDAEA46E41039216B11FB81E209AA97EB198909FC6CDDB4667511F9"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-analytical-variant-final-direction",
+      "journal_section": 382,
+      "archive": "KaniH45DLastDirectionPortable",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "D_DIRECTION_REPLAY_PASS C6C0A03A6FF04527F584011D609E4DCAB29049282C0E1D2D621F096F453F6BDA 8D7BDB10C420D1745FE31415584F839E79BFAC577AA182717F03A33D842B0B1A"
+    },
+    {
+      "id": "mvt2-native-correction-with-measured-yield-normals",
+      "journal_section": 383,
+      "archive": "MVT2MeasuredNormalsNative20261116",
+      "verified_outputs_sha256": {
+        "PortableReport.json": "2C7C000ECE05C35552C636721E0EA744095BB44D8AD6AF5560DE18978BD79DC0"
       },
       "verified_stdout": null
     }
