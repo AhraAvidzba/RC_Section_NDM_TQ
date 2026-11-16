@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "225DF0903F4F71948C926309598B23E6A4F3A09CB9F16575DD226504E0E8676C",
-  "source_checkpoint": "e660d27",
+  "manifest_sha256": "E6DE1C6A8A60A500E64DF754BB9FCF9EB152E4E206EF706CD55ABA972CFC8A5B",
+  "source_checkpoint": "6d42af5",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "D0CB47951B64A65DD5FE84A1F823DBE395C8BF027C2833813EDAF0FF6A06BBE6",
-    "workbook/output/VBA_All_Code.txt": "A03E9C9507854B6A8BD892C6A218883695B3BA2F9D176625F572B2AC04EBABB1"
+    "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
+    "workbook/output/VBA_All_Code.txt": "28B9A04D457B4516C23C6945E9192A205829C8328C7215F6CE64A317FDBBF216"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 70,
+  "passed": 73,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -628,6 +628,33 @@
       "archive": "MVT2ReactedFreshNative20261116",
       "verified_outputs_sha256": {
         "ReplayedReport.json": "B4A9B1B076208ED5870EBC327379F9FB569A84FE301E192B28DEA5CECCC747D8"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-native-analytical-elastic-damage",
+      "journal_section": 374,
+      "archive": "KaniH45ElasticDamageNativePortable",
+      "verified_outputs_sha256": {
+        "Replay-Verification-Points.json": "768274C6196433589A9EDF33C8DC11FFF1E1EAE50E0AE56D8F2BF6C67FF261A0"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "coupled-actual-deformation-progress-and-replay",
+      "journal_section": 375,
+      "archive": "CoupledActualDeformationProgress20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "515FC878E0F7771C11D05C94F535185C48DA66800D51CC8E0F428EC5AB32A559"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "hard-shear-actual-deformation-progress",
+      "journal_section": 376,
+      "archive": "HardShearActualDeformationProgress20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "852D18928CA20FD853EEC17B217B1DABFFB5A35F41FFF69A78E184F25DBA8DF5"
       },
       "verified_stdout": null
     }

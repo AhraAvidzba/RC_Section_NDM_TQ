@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "e660d27",
+  "source_checkpoint": "6d42af5",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "D0CB47951B64A65DD5FE84A1F823DBE395C8BF027C2833813EDAF0FF6A06BBE6",
-    "workbook/output/VBA_All_Code.txt": "A03E9C9507854B6A8BD892C6A218883695B3BA2F9D176625F572B2AC04EBABB1"
+    "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
+    "workbook/output/VBA_All_Code.txt": "28B9A04D457B4516C23C6945E9192A205829C8328C7215F6CE64A317FDBBF216"
   },
   "python_packages": [
     "numpy",
@@ -74,7 +74,10 @@
     "KaniH45Row81SpectralDamagePortable": "817AB3A89092F11E49DC8E7A4013554DF36340E999AA1F1D74FBC4A5172DB457",
     "CoupledFinalLoadTolerance20261116": "6D5FE141CC4083DA4C9FD90012A3BFD7964F9FDBE1C66F66A77988EF54B01D7B",
     "HardShearFinalLoadTolerance20261116": "908D6002C0A78D06D4E1620AF73999308C4B1131645224AC3AB1BE566A7B22E0",
-    "MVT2ReactedFreshNative20261116": "5DCAB88E25FD13C1DB6C43A8898243D2AF03E906ADA2F87C31A17638E84ABA3E"
+    "MVT2ReactedFreshNative20261116": "5DCAB88E25FD13C1DB6C43A8898243D2AF03E906ADA2F87C31A17638E84ABA3E",
+    "KaniH45ElasticDamageNativePortable": "751CC8385ADDA61CFBC422B2F93C7EB4150A70964A4F294DD1CBE06B4F98F0FA",
+    "CoupledActualDeformationProgress20261116": "EED10254B2EEC0B0EE31AC6D1114ADAA0BF849769CCCAC154202D4BF3E8F858B",
+    "HardShearActualDeformationProgress20261116": "70559BBE5E093D533BF30BF423018E1725879D8720ECE734700F5CBF9F65F489"
   },
   "cases": [
     {
@@ -887,6 +890,37 @@
       ],
       "outputs": {
         "ReplayedReport.json": "B4A9B1B076208ED5870EBC327379F9FB569A84FE301E192B28DEA5CECCC747D8"
+      }
+    },
+    {
+      "id": "kani-h45-native-analytical-elastic-damage",
+      "journal_section": 374,
+      "archive": "KaniH45ElasticDamageNativePortable",
+      "script": "Replay-Points.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-Verification-Points.json": "768274C6196433589A9EDF33C8DC11FFF1E1EAE50E0AE56D8F2BF6C67FF261A0"
+      }
+    },
+    {
+      "id": "coupled-actual-deformation-progress-and-replay",
+      "journal_section": 375,
+      "archive": "CoupledActualDeformationProgress20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "515FC878E0F7771C11D05C94F535185C48DA66800D51CC8E0F428EC5AB32A559"
+      }
+    },
+    {
+      "id": "hard-shear-actual-deformation-progress",
+      "journal_section": 376,
+      "archive": "HardShearActualDeformationProgress20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "852D18928CA20FD853EEC17B217B1DABFFB5A35F41FFF69A78E184F25DBA8DF5"
       }
     }
   ],
