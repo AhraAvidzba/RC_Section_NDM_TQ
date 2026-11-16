@@ -88,7 +88,10 @@
     "MVT2SeparatedEventsNative20261116": "60DE46B7044294109413E368C03418A5D0FE4B4F8EEB1C5F035E5E08CDA515C7",
     "TBU3MatchedSpectrum20261116": "FD08DA662E8E7A9056FCAEDE154B7B49073E223D3F0A810A0900A4E7BD88D608",
     "DirectSteelBoundary20261116": "7D0ECA04E334836EF12CABF1D7C89C71F01E1FC173642A9B0376A9059711D275",
-    "A2LaneAResumeNative20261116": "ACF2D94715C705AC9FCFC99788B5F3F4ECB8A76A557254E29E227FDB831DE076"
+    "A2LaneAResumeNative20261116": "ACF2D94715C705AC9FCFC99788B5F3F4ECB8A76A557254E29E227FDB831DE076",
+    "KaniH45GuardedCorrectionPortable": "10FB6242D6A1CFF30A74EE7E51949D7A39E14F18CA32C5CDE65E0AB82C53A990",
+    "MVT2JointCenterGradientNative20261116": "47B975208823EF5563F76CB759F4FAED557529D0BCEA90CE4F503BCC1BE2029C",
+    "DirectSteelTrialVerification20261116": "1C8A12D4CADA66CDEB3629D929A29E18EC71F84AB4AF14A5228C63ED2BD811A8"
   },
   "cases": [
     {
@@ -1039,6 +1042,40 @@
         "IndependentReplay.json": "4AF27D36669C38A51826FC8095ADF735B670D903B5F2EF56B3B0D3F1117CBEC9",
         "PortableReplay.json": "34BE1F4D9EB000F9978D45CD89FF755E29FAD344B865A6E844CD6937B3C8F0E4"
       }
+    },
+    {
+      "id": "kani-h45-guarded-three-native-fields",
+      "journal_section": 392,
+      "archive": "KaniH45GuardedCorrectionPortable",
+      "script": "Replay-Chart.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-ChartComparison.json": "A00ACB604757A6D1B4BC9F76B6DA3CFC1DE76F3C3270A8DF78CFB29F74E58441"
+      }
+    },
+    {
+      "id": "mvt2-measured-joint-center-gradient-correction",
+      "journal_section": 393,
+      "archive": "MVT2JointCenterGradientNative20261116",
+      "script": "ReplayProof.py",
+      "arguments": [],
+      "outputs": {
+        "PortableReport.json": "2E46BB8882B7050F31AA662284A147807A49B92AC79BD8B1EB54C46BF4A081A7"
+      }
+    },
+    {
+      "id": "direct-steel-trial-candidate-native",
+      "journal_section": 394,
+      "archive": "DirectSteelTrialVerification20261116",
+      "script": "Verify-Archive.py",
+      "arguments": [
+        "--repo",
+        "{repo}"
+      ],
+      "stdout_contains": "DIRECT STEEL CANDIDATE EVIDENCE PASS 6D1871B308FC6690DC44BD74F5C193DD6A1B521C9373181E756AB9FE49251148"
     }
   ],
   "frozen_repositories": {
