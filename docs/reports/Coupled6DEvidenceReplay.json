@@ -1,6 +1,6 @@
 {
-  "manifest_sha256": "886E8D9768592E004C47105A5D9BB7C684A07182E627828960B655976F47EF23",
-  "source_checkpoint": "dde8810",
+  "manifest_sha256": "5602BE1727C4BF38AF893676DE3EE81654B7DC910C9A4C152AE50D9D85A4320E",
+  "source_checkpoint": "9245074",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "9A99BF072D67536CBCCA525A75E049F510C5242D46CB4EA3ADA7BC4C726088F8",
     "workbook/output/VBA_All_Code.txt": "DA8E76A50A4917DCF66AEC162F51D98D75E03DC3595D8506E920CEF98B3145C9"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 51,
+  "passed": 53,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -453,6 +453,24 @@
       "archive": "MVT2Step3Native20261116",
       "verified_outputs_sha256": {
         "Verification.json": "004F3463BA3B1F0C7119CB8A8A0857CF6DED6173432E4435C58824415E18C6B6"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-native-alternate-control",
+      "journal_section": 351,
+      "archive": "KaniH45AlternateControlPortable",
+      "verified_outputs_sha256": {
+        "Replay-AlternateVerification.json": "1E75149B89831B346BF0B8CECC641FDAF9722C1AB10A99F6E7CFBFD9F49BF234"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "hardshear-retained-bounds-release",
+      "journal_section": 352,
+      "archive": "HardShearRetainedBounds20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "24F9B79624DBDF2E6330E610B0D4E3EA32AEE6E5B9971EC3FE8C9B4817A85F32"
       },
       "verified_stdout": null
     }

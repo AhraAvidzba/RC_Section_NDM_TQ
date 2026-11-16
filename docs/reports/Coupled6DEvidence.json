@@ -1,5 +1,5 @@
 {
-  "source_checkpoint": "dde8810",
+  "source_checkpoint": "9245074",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "9A99BF072D67536CBCCA525A75E049F510C5242D46CB4EA3ADA7BC4C726088F8",
     "workbook/output/VBA_All_Code.txt": "DA8E76A50A4917DCF66AEC162F51D98D75E03DC3595D8506E920CEF98B3145C9"
@@ -56,7 +56,9 @@
     "MVT2ArchiveDirections20261116": "2A650D598682D0F69D89B85C46BEE9BA30A4C1983E5DE04C016754AF4C894692",
     "KaniH45PhysicalBranchPortable": "F22D91FE8632950056C045D519879962947297ACA12D5530BCDFEA236406F4F2",
     "CoupledRetainedBoundsResults20261116": "36F37977DFBB1559198139842425ED15C4304ABFD4CAB35D0FE07D14D84B1A80",
-    "MVT2Step3Native20261116": "FDCB0C512B54989A19793F0A1B449ADB743779C406AA1A6A49972C6E5E789CB7"
+    "MVT2Step3Native20261116": "FDCB0C512B54989A19793F0A1B449ADB743779C406AA1A6A49972C6E5E789CB7",
+    "KaniH45AlternateControlPortable": "4A9CADBD73726D133E99B5EA1D58F1DB8DB574C45BC189470F8EEC856C911BD4",
+    "HardShearRetainedBounds20261116": "6B5806F03B1F9999BAF014738C0F45322AD7875E9484A4A0FCB88738F9C39FD8"
   },
   "cases": [
     {
@@ -629,6 +631,28 @@
       ],
       "outputs": {
         "Verification.json": "004F3463BA3B1F0C7119CB8A8A0857CF6DED6173432E4435C58824415E18C6B6"
+      }
+    },
+    {
+      "id": "kani-h45-native-alternate-control",
+      "journal_section": 351,
+      "archive": "KaniH45AlternateControlPortable",
+      "script": "Replay-Alt.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-AlternateVerification.json": "1E75149B89831B346BF0B8CECC641FDAF9722C1AB10A99F6E7CFBFD9F49BF234"
+      }
+    },
+    {
+      "id": "hardshear-retained-bounds-release",
+      "journal_section": 352,
+      "archive": "HardShearRetainedBounds20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "24F9B79624DBDF2E6330E610B0D4E3EA32AEE6E5B9971EC3FE8C9B4817A85F32"
       }
     }
   ],
