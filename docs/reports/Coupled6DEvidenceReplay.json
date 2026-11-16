@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "E379E6E8F0C0B8737DF6C5D464332D097BF1799056B509C6D1A13F92C408C4A8",
-  "source_checkpoint": "f4741ae",
+  "manifest_sha256": "10B8A81AC7B78374E5567D3CD62AD6FA472C82051EE6998AD263EE9A3AB45453",
+  "source_checkpoint": "c9e7268",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
-    "workbook/output/VBA_All_Code.txt": "45961EADF84F8863B38D25992B8643A524CD6A47068CDB471DED3820F37B0DB8"
+    "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
+    "workbook/output/VBA_All_Code.txt": "F852DFA2A1F94FF70425783634ABB4AAB0C688FC6DF393A225F9E7E80927B737"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 108,
+  "passed": 113,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -949,6 +949,43 @@
       "archive": "MVT2SafeguardedTangentShift20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "A6BE7C71F36D66C21E12BACB3F66D041B86C4DE2AE16DFED109642A7BFBEB47E"
+    },
+    {
+      "id": "coupled-retained-direct-rendered-excel-file-caption",
+      "journal_section": 418,
+      "archive": "RetainedSteelExcelCaption20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS RENDERED CAPTION File"
+    },
+    {
+      "id": "coupled-direct-steel-accepted-tangent-native",
+      "journal_section": 419,
+      "archive": "DirectSteelStaleTangent20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS STALE ARCHIVE Corrected 72A775D1B2449EE3BB9A6EE6E3E47230FE7D76E47B7D4C618BE9F85A888E9935"
+    },
+    {
+      "id": "mvt2-stock-column-perturbation-yield-crossings",
+      "journal_section": 421,
+      "archive": "MVT2CoordinateYieldAudit20261116",
+      "verified_outputs_sha256": {
+        "CoordinateYieldReplay.json": "95A14F0DC97862A6532BB933D52997A4C34DDF83C7612ED4319BA1F69D79BD3D"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-same-ray-native-branch-derivative",
+      "journal_section": 422,
+      "archive": "MVT2SameRayDerivativeNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL NATIVE STENCIL 1242A059FBBF5E2128ABD94774A48D68C7A54CE33CC937055F808602B746C8D6"
+    },
+    {
+      "id": "coupled-direct-steel-production-workbook-and-source",
+      "journal_section": 420,
+      "archive": "CoupledDirectSteelPublication20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS DIRECTED RELEASE ARCHIVE 7D5052B4A305D2D27EA4B4C2BF0B43D69B2ECBCBEDA16DFD36017C85A40146DF"
     }
   ]
 }
