@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "6454238997065B6134C571CB7C41CE3A0F456F4C0CB45DFD886CF50C85EB91AE",
+  "manifest_sha256": "D3D3E1F60309AD8FCC8140A2EBC2294EA1E87D66B5693372A6546CEAD5B3A098",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 94,
+  "passed": 98,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -840,6 +840,38 @@
       "archive": "MixedHoopDirectContact20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "MIXED HOOP EVIDENCE PASS 50D5A9437E7AB5086AC441AA16E15138D7DADE315EB335D49DAAA5B5F0864A3C"
+    },
+    {
+      "id": "coupled-soft-equilibrium-with-no-retained-tangent",
+      "journal_section": 405,
+      "archive": "DirectSteelMissingTangent20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "NO SAVED TANGENT EVIDENCE PASS B3BFB473F9D8E37B0B77627B55C8D7C43282DBD0BD5B1018D8AC0DCA1CCA39D7"
+    },
+    {
+      "id": "retained-steel-snapshot-compatibility-excel",
+      "journal_section": 406,
+      "archive": "RetainedSteelSnapshotCompatibility20261116",
+      "verified_outputs_sha256": {
+        "Native/Excel.Verification.json": "DE629FB0316872CF6E6DE41A6D4F1671820E5E59CFED9CE27596DE47D92BA258"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "retained-steel-snapshot-compatibility-file",
+      "journal_section": 406,
+      "archive": "RetainedSteelSnapshotCompatibility20261116",
+      "verified_outputs_sha256": {
+        "Native/File.Verification.json": "41C27D809C78B7FF2DF033678F9795ED1951EA6C64F5074343D202B161B89D57"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-fresh-jacobian-and-guarded-native-update",
+      "journal_section": 407,
+      "archive": "MVT2HalfJointJetNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "Stage B: reproduced exact canonical report 5DC30790DF86629B78F7BA2ABBA4E1AD3A80117469D01E77820FAAB0ACB7B12D"
     }
   ]
 }

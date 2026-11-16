@@ -98,7 +98,10 @@
     "RetainedCoupledDirectState20261116": "BC717D9A1C32AE48CF494C78561C0DAE2F5FB14C4BDDE4665A9D163A66F19AC5",
     "A2LaneABExactNative20261116": "CA2C750095DBB1F3DB62D5CC2EE046638E86D79D8CADCD3EF821EFF8DD31AF53",
     "A2FieldSeedPairPortable": "229FC672AEC273083B544C7B8B47234C28EB1D7037CEDE905B7073A90B01E49D",
-    "MixedHoopDirectContact20261116": "E4B617D01445DD11B3753CF26F509546461D8125A9BC14AB59CB47141DB26A4C"
+    "MixedHoopDirectContact20261116": "E4B617D01445DD11B3753CF26F509546461D8125A9BC14AB59CB47141DB26A4C",
+    "DirectSteelMissingTangent20261116": "A23B99BF5CE3CF5CC80DE1549F9189DA4FC576CA958214C84481992B8056BB55",
+    "RetainedSteelSnapshotCompatibility20261116": "406C74B55C5C6D2B7FF523E3B764C1C8FDC1C321FDD559A80FA3BFFDDA9578AF",
+    "MVT2HalfJointJetNative20261116": "6E4FBCB3E345DB0250009A458C6169888F81E09D2D91CA4EA822ADA69840AD33"
   },
   "cases": [
     {
@@ -1168,6 +1171,48 @@
       "script": "Verify-Archive.py",
       "arguments": [],
       "stdout_contains": "MIXED HOOP EVIDENCE PASS 50D5A9437E7AB5086AC441AA16E15138D7DADE315EB335D49DAAA5B5F0864A3C"
+    },
+    {
+      "id": "coupled-soft-equilibrium-with-no-retained-tangent",
+      "journal_section": 405,
+      "archive": "DirectSteelMissingTangent20261116",
+      "script": "Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "NO SAVED TANGENT EVIDENCE PASS B3BFB473F9D8E37B0B77627B55C8D7C43282DBD0BD5B1018D8AC0DCA1CCA39D7"
+    },
+    {
+      "id": "retained-steel-snapshot-compatibility-excel",
+      "journal_section": 406,
+      "archive": "RetainedSteelSnapshotCompatibility20261116",
+      "script": "Verify.py",
+      "arguments": [
+        "Excel",
+        "Native/Excel.txt"
+      ],
+      "outputs": {
+        "Native/Excel.Verification.json": "DE629FB0316872CF6E6DE41A6D4F1671820E5E59CFED9CE27596DE47D92BA258"
+      }
+    },
+    {
+      "id": "retained-steel-snapshot-compatibility-file",
+      "journal_section": 406,
+      "archive": "RetainedSteelSnapshotCompatibility20261116",
+      "script": "Verify.py",
+      "arguments": [
+        "File",
+        "Native/File.txt"
+      ],
+      "outputs": {
+        "Native/File.Verification.json": "41C27D809C78B7FF2DF033678F9795ED1951EA6C64F5074343D202B161B89D57"
+      }
+    },
+    {
+      "id": "mvt2-fresh-jacobian-and-guarded-native-update",
+      "journal_section": 407,
+      "archive": "MVT2HalfJointJetNative20261116",
+      "script": "VerifyPortable.py",
+      "arguments": [],
+      "stdout_contains": "Stage B: reproduced exact canonical report 5DC30790DF86629B78F7BA2ABBA4E1AD3A80117469D01E77820FAAB0ACB7B12D"
     }
   ],
   "frozen_repositories": {
