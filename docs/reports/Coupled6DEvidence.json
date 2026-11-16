@@ -84,7 +84,9 @@
     "CoupledSteelDesignBracket20261116": "8243063C3F3A8093D81433F29EA9E9C52F695A40FEBA9B1F698455D78BEB53AA",
     "KaniH45DLastDirectionPortable": "648CEB7D037BD9E95D86BFF222EB9CEEB68BE914A61F085FACFBD67B96A9250B",
     "MVT2MeasuredNormalsNative20261116": "84DAF40599AD0FE9A0AE1C2EBA2CF2F72DED306F0F47B222F1A0528216D50A86",
-    "KaniH45ShortDampingEPortable": "202BABB0E20A7ACACB410E6BF3205846107F918821112D4BC630B447C28A7D9E"
+    "KaniH45ShortDampingEPortable": "202BABB0E20A7ACACB410E6BF3205846107F918821112D4BC630B447C28A7D9E",
+    "MVT2SeparatedEventsNative20261116": "60DE46B7044294109413E368C03418A5D0FE4B4F8EEB1C5F035E5E08CDA515C7",
+    "TBU3MatchedSpectrum20261116": "FD08DA662E8E7A9056FCAEDE154B7B49073E223D3F0A810A0900A4E7BD88D608"
   },
   "cases": [
     {
@@ -995,6 +997,26 @@
       "arguments": ["--repo-root", "{repo}"],
       "outputs": {
         "Replay-ShortDampingEComparison.json": "008EBDF17B30F84F9280A6A670D5DC07B1F48419478FBB0574F11477BE2994E9"
+      }
+    },
+    {
+      "id": "mvt2-two-isolated-native-material-events",
+      "journal_section": 386,
+      "archive": "MVT2SeparatedEventsNative20261116",
+      "script": "ReplayProof.py",
+      "arguments": ["--decision"],
+      "outputs": {
+        "PortableReport.json": "F27C51D4612C38AA2D23707C179A25029442A19FBD9FB2A18945FAD5D0CD85E2"
+      }
+    },
+    {
+      "id": "tbu3-matched-history-torque-spectrum",
+      "journal_section": 387,
+      "archive": "TBU3MatchedSpectrum20261116",
+      "script": "Spectral.py",
+      "arguments": ["Stresses.json", "SpectralReplay.json"],
+      "outputs": {
+        "SpectralReplay.json": "728109EB104975F93DBE21871A0CDBC55CEA0B80AD456DCBD87625C8602974B5"
       }
     }
   ],
