@@ -246,6 +246,7 @@ End Property
 ' Дополнительные пробы точной цели ограничены общим бюджетом и последним принятым интервалом.
 Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, ByVal offsetStage As Boolean) As Boolean
     Dim nominal As Double, minimum As Double, increment As Double, candidate As Double
+    Dim attemptedIncrement As Double
     Dim segmentStart As Double, triedExactTarget As Boolean, triedSecant As Boolean
     segmentStart = reached
     nominal = (target - segmentStart) / mInitialSteps
@@ -257,6 +258,7 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             mMeta.DiagnosticDetails = ProgressDetails()
             Exit Function
         End If
+        attemptedIncrement = increment
         If increment >= target - reached Then
             candidate = target ' Последняя проба должна получить нагрузку в запрошенной точке точно.
         Else
@@ -269,7 +271,10 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             mMeta.DiagnosticDetails = ProgressDetails()
             Exit Function
         End If
-        If candidate = target Then triedExactTarget = True
+        If candidate = target Then
+            triedExactTarget = True
+            attemptedIncrement = target - reached ' Учитываем укороченную длину точной конечной пробы.
+        End If
         If SolveAndAccept(candidate, offsetStage) Then
             reached = candidate
             triedExactTarget = False
@@ -294,7 +299,7 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
                     Exit Function
                 End If
             End If
-            increment = (candidate - reached) * 0.5
+            increment = attemptedIncrement * 0.5 ' Вычитание близких множителей может потерять граничный шаг 1/64.
             If increment < minimum Then
                 If Not offsetStage And Not triedExactTarget And mReinforcement Is Nothing And _
                         reached > segmentStart And target - reached <= nominal And mAttempts < mMaxAttempts Then

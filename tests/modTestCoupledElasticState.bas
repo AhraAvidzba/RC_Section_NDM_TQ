@@ -554,6 +554,59 @@ Failed:
     RunTestCoupledContinuation = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
 
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Воспроизводит округление суммы текущего множителя и номинального шага.
+' Проверяет отказ и принятие ровно на границе 1/64 до исчерпания бюджета.
+Public Function RunTestCoupledMinimumLoadStep() As String
+    Const START As Double = 18.55811, FINISH As Double = 20.337165
+    Const FORCE_SCALE As Double = 10000#, AREA As Double = 21600#
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse
+    Dim solver As New CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As New CLoadPathVector
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    solver.Initialize operators, material, 30000#
+    path.Initialize 0#, FORCE_SCALE, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 2, 7, 20, 1E-8, 1E-8, True
+    If Not branch.Advance(START) Then Err.Raise 5, , "Не достигнуто исходное состояние контрольного шага."
+
+    Dim trace As CCoupledLoadTrace, traceCount As Long, acceptedCount As Long, solved As Boolean
+    Set trace = branch.SavedTrace
+    traceCount = trace.Count: acceptedCount = material.TestAcceptedSteps
+    material.TestFail = True
+    solved = branch.Advance(FINISH)
+    TestRecord Not solved And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
+        "отказ на граничном подшаге остаётся численным", passed, failed, report
+    TestRecord branch.RejectedAttempts = 7, "проверены все семь проб вплоть до 1/64", passed, failed, report
+    TestRecord branch.AcceptedLambda = START And trace.Count = traceCount And material.TestAcceptedSteps = acceptedCount, _
+        "численный отказ сохраняет принятую нагрузку и историю", passed, failed, report
+
+    material.TestFail = False
+    branch.Initialize solver, path, 2, 7, 20, 1E-8, 1E-8, True
+    If Not branch.Advance(START) Then Err.Raise 5, , "Не восстановлено исходное состояние контрольного шага."
+    Set trace = branch.SavedTrace
+    traceCount = trace.Count: acceptedCount = material.TestAcceptedSteps
+    Dim field() As Double, resultants() As Double, expected() As Double, minimum As Double
+    branch.CopyAccepted field, resultants
+    minimum = ((FINISH - START) / 2#) / 64#
+    material.TestMaximumIncrement = 1.5 * minimum * FORCE_SCALE / (AREA * (30000# + 3E+10 * field(1) ^ 2))
+    solved = branch.Advance(FINISH)
+    TestRecord Not solved And branch.ResultMeta.InternalStatus = rsNumericalFailure, _
+        "бюджет заканчивается после принятия, целевое усилие остаётся открытым", passed, failed, report
+    TestRecord branch.AcceptedLambda = START + minimum, "граничный подшаг принят при прежнем нижнем пределе", passed, failed, report
+    TestRecord branch.RejectedAttempts = 6 And trace.Count = traceCount + 1 And material.TestAcceptedSteps = acceptedCount + 1, _
+        "шесть отказов сохраняют историю, граничная проба пишет ровно один шаг", passed, failed, report
+    branch.CopyAccepted field, resultants
+    path.TargetSix START + minimum, expected
+    TestRecord operators.ResultantResidualNorm(resultants, expected) < 1E-6, _
+        "в принятой граничной точке выполнено равновесие шести усилий", passed, failed, report
+    RunTestCoupledMinimumLoadStep = report & "TOTAL_COUPLED_MINIMUM_LOAD_STEP: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledMinimumLoadStep = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет остаток порядка округления Double в четвёртом переменном
