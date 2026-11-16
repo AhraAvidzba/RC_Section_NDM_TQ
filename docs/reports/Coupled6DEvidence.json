@@ -108,7 +108,10 @@
     "HardShearH68PseudoArcNativePortable": "E1140D78FFD51715B73009D27E425E7F441E13CD65571E43A2EB28E9E10D6EF4",
     "OpenSeesLoadArcFold20261116": "7F889D83356BE0C142213CFF0F63C20850FFEBEFB1B2004023C971C30FD5D540",
     "MVT2PseudoArclengthNativeComparison20261116": "20F807CD70BDBA3797FE2709B7BDBA9131BF128B25FFBD38C8236F42D5B69229",
-    "A2LocalFoldComparison20261116": "C3BE5C5278981478F246BD5C721AE294B5B44F9341DE55682F4D8D204F7C8B10"
+    "A2LocalFoldComparison20261116": "C3BE5C5278981478F246BD5C721AE294B5B44F9341DE55682F4D8D204F7C8B10",
+    "IntegratedDirectSteel20261116": "51A8CCEB4B5C4271AAC6E3F4F2D820F080B1B445BE544B8328760B8D58510DBF",
+    "MVT2PseudoArclengthAdaptiveNative20261116": "9AEDEA656A2918E685E9CD4799BFD38922CD25F67C651E5D952C86959E5C11D8",
+    "MVT2SafeguardedTangentShift20261116": "688E1CB09A1FC7E4A4976FEA214BB4E0A9DADA0FE042BBBB6AFA55D1EA9B0979"
   },
   "cases": [
     {
@@ -1292,6 +1295,30 @@
       "script": "A2LocalFold/Verify-Archive.py",
       "arguments": ["--git", "{repo}"],
       "stdout_contains": "PASS A2 FOLD OFFLINE 910DC52F5004C1E5FF51AB0055E2E2C4A317360056CD95C14229CF74270267A8"
+    },
+    {
+      "id": "coupled-retained-direct-integrated-native",
+      "journal_section": 415,
+      "archive": "IntegratedDirectSteel20261116",
+      "script": "IntegratedDirectSteel/Verify-Archive.py",
+      "arguments": ["--git", "{repo}"],
+      "stdout_contains": "PASS DSI OFFLINE 988715E00C30D2306F01E11B9149244D903C7CE75721114F134DA0CECA2F933F D5DD7A956A69DE8B504DA7DC08394787A51D6C86CE4AD9BE9812F1DE71040A3C"
+    },
+    {
+      "id": "mvt2-pseudo-arclength-two-smaller-native-steps",
+      "journal_section": 416,
+      "archive": "MVT2PseudoArclengthAdaptiveNative20261116",
+      "script": "ReplayPortableAdaptive.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2PseudoArclengthNativeComparison20261116.zip"],
+      "stdout_contains": "CANONICAL ADAPTIVE MVT2 B8F43A7B4298A3147D64A2B0741C59F5844A1CE2F3F3332DE85EDEC10F101EE7"
+    },
+    {
+      "id": "mvt2-one-regularized-tangent-step-original-law",
+      "journal_section": 417,
+      "archive": "MVT2SafeguardedTangentShift20261116",
+      "script": "ReplayPortable.py",
+      "arguments": ["{evidence}/MVT2PseudoArclengthNativeComparison20261116.zip", "{evidence}/MVT2HalfJointJetNative20261116.zip"],
+      "stdout_contains": "A6BE7C71F36D66C21E12BACB3F66D041B86C4DE2AE16DFED109642A7BFBEB47E"
     }
   ],
   "frozen_repositories": {

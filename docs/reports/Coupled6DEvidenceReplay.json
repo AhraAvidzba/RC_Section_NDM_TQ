@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "F3A892B45C4A030CBA3604C4918A71728E002A3FF9753FEE3FBEE39AC6A5BEB9",
+  "manifest_sha256": "E379E6E8F0C0B8737DF6C5D464332D097BF1799056B509C6D1A13F92C408C4A8",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 105,
+  "passed": 108,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -928,6 +928,27 @@
       "archive": "A2LocalFoldComparison20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "PASS A2 FOLD OFFLINE 910DC52F5004C1E5FF51AB0055E2E2C4A317360056CD95C14229CF74270267A8"
+    },
+    {
+      "id": "coupled-retained-direct-integrated-native",
+      "journal_section": 415,
+      "archive": "IntegratedDirectSteel20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS DSI OFFLINE 988715E00C30D2306F01E11B9149244D903C7CE75721114F134DA0CECA2F933F D5DD7A956A69DE8B504DA7DC08394787A51D6C86CE4AD9BE9812F1DE71040A3C"
+    },
+    {
+      "id": "mvt2-pseudo-arclength-two-smaller-native-steps",
+      "journal_section": 416,
+      "archive": "MVT2PseudoArclengthAdaptiveNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL ADAPTIVE MVT2 B8F43A7B4298A3147D64A2B0741C59F5844A1CE2F3F3332DE85EDEC10F101EE7"
+    },
+    {
+      "id": "mvt2-one-regularized-tangent-step-original-law",
+      "journal_section": 417,
+      "archive": "MVT2SafeguardedTangentShift20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "A6BE7C71F36D66C21E12BACB3F66D041B86C4DE2AE16DFED109642A7BFBEB47E"
     }
   ]
 }
