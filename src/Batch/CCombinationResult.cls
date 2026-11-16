@@ -231,18 +231,14 @@ Public Property Get CapacityMeta() As CResultMeta
 End Property
 
 ' Возвращает понятное название фактически принятого изменения нагрузки при поиске предела.
-' Сохранённый расчётный ключ PathResolved преобразуется в обозначение lambda*...
-' общим CLoadPathDescriptor.
+' Для пространственного Auto обозначение соответствует пропорциональной траектории всех усилий.
 Public Property Get CapacityPathDisplayName() As String
+    Dim pathKey As String: pathKey = mStrengthResult.Capacity.PathResolved
     If (mStrengthResult.Capacity.SolutionMethod = "CoupledContinuation" Or _
             mStrengthResult.Capacity.SolutionMethod = "CoupledDeformationControl") And _
-            mStrengthResult.Capacity.PathResolved = "Auto" Then
-        CapacityPathDisplayName = ChrW$(&H3BB) & "*(N, Mx, My, T, Qx, Qy)"
-        Exit Property
-    End If
-    Dim loadPath As CLoadPathDescriptor
-    Set loadPath = New CLoadPathDescriptor
-    CapacityPathDisplayName = loadPath.DisplayNameForKey(mStrengthResult.Capacity.PathResolved)
+            pathKey = "Auto" Then pathKey = "LambdaAll6"
+    Dim loadPath As New CLoadPathDescriptor
+    CapacityPathDisplayName = loadPath.DisplayNameForKey(pathKey)
 End Property
 
 ' Получает из готовых результатов показатель для выбора определяющего сочетания.

@@ -317,11 +317,12 @@ Private Sub WriteHeaders(ByVal target As Object, ByVal units As CUnitSystem)
     MergeHeaders target
 End Sub
 
-' Задаёт подписи и единицы пространственных усилий в точке приложения нагрузки.
+' Задаёт однострочные подписи пространственных усилий в точке приложения нагрузки.
 Private Sub PutCapacitySpatialHeaders(ByRef headers() As Variant, ByVal momentUnit As String, ByVal forceUnit As String)
-    headers(HEADER_NOTES_ROW, COL_CAP_T) = "полный T при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
-    headers(HEADER_NOTES_ROW, COL_CAP_QX) = "полная Qx при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
-    headers(HEADER_NOTES_ROW, COL_CAP_QY) = "полная Qy при " & ChrW$(&H3BB) & "ult в точке приложения нагрузки"
+    Dim atLimit As String: atLimit = " при " & ChrW$(&H3BB) & "ult"
+    headers(HEADER_NOTES_ROW, COL_CAP_T) = "T" & atLimit
+    headers(HEADER_NOTES_ROW, COL_CAP_QX) = "Qx" & atLimit
+    headers(HEADER_NOTES_ROW, COL_CAP_QY) = "Qy" & atLimit
     headers(HEADER_LABEL_ROW, COL_CAP_T) = "Tult, " & momentUnit
     headers(HEADER_LABEL_ROW, COL_CAP_QX) = "Qx,ult, " & forceUnit
     headers(HEADER_LABEL_ROW, COL_CAP_QY) = "Qy,ult, " & forceUnit
@@ -778,6 +779,7 @@ Private Sub FormatTable(ByVal target As Object, ByVal batch As CBatchSectionCalc
         target.Offset(HEADER_ROWS, COL_STATE_DIAGEXT - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_STATE_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_CAP_LIMIT_STATE - 1).Resize(dataRows, 3).NumberFormat = "@"
+        target.Offset(HEADER_ROWS, COL_CAP_METHOD - 1).Resize(dataRows, 1).ShrinkToFit = True ' Имя фактического метода не обрезается в узком столбце.
         target.Offset(HEADER_ROWS, COL_CAP_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_TRANSVERSE_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"
         target.Offset(HEADER_ROWS, COL_TRANSVERSE_LIMIT_STATUS - 1).Resize(dataRows, 1).NumberFormat = "@"

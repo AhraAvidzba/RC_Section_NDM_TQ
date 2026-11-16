@@ -2397,6 +2397,14 @@ Public Function RunTestCoupledHoopCapacity() As String
         Dim writer As New CStrengthSummaryWriter, anchor As Object
         writer.WriteSummary ThisWorkbook, batch, section:=section
         Set anchor = ThisWorkbook.Names.Item("rngStrengthSummaryAnchor").RefersToRange
+        Dim lambdaLabel As String: lambdaLabel = ChrW$(&H3BB)
+        TestRecord anchor.Offset(0, 35).Value2 = lambdaLabel & "*All6" And anchor.Offset(1, 35).Value2 = lambdaLabel & "*All6", _
+            "spatial Auto displays the effective six-component load path in both rows", passed, failed, report
+        TestRecord anchor.Offset(-2, 41).Value2 = "T при " & lambdaLabel & "ult" And _
+            anchor.Offset(-2, 42).Value2 = "Qx при " & lambdaLabel & "ult" And anchor.Offset(-2, 43).Value2 = "Qy при " & lambdaLabel & "ult", _
+            "compact notes identify all three spatial ultimate components", passed, failed, report
+        TestRecord anchor.Offset(0, 36).ShrinkToFit And Not anchor.Offset(0, 36).WrapText, _
+            "capacity method fits the existing column without wrapping", passed, failed, report
         TestRecord anchor.Offset(-1, 41).Value2 = "Tult, N*mm" And anchor.Offset(-1, 42).Value2 = "Qx,ult, N" And _
             anchor.Offset(-1, 43).Value2 = "Qy,ult, N", "the three ultimate components follow My", passed, failed, report
         Dim cellCapacity As CCapacityResult: Set cellCapacity = batch.ResultAt(1).StrengthResult.Capacity
@@ -2503,6 +2511,8 @@ Private Sub TestSavedHoopCapacityFields(ByVal book As Object, ByVal section As C
         End If
         TestRecord anchor.Offset(0, 58).Value2 = "FAIL" And anchor.Offset(0, 64).Value2 = "FAIL", _
             CStr(mode) & " restores both independent hoop statuses on Results", passed, failed, report
+        TestRecord anchor.Offset(0, 35).Value2 = ChrW$(&H3BB) & "*All6" And eventRow.Offset(0, 35).Value2 = ChrW$(&H3BB) & "*All6", _
+            CStr(mode) & " restores the effective six-component load path", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 59).Value2), reserve, 1E-10, _
             CStr(mode) & " restores the hoop reserve on Results", passed, failed, report
         TestExpectNear CDbl(anchor.Offset(0, 50).Value2), reserve, 1E-10, _
