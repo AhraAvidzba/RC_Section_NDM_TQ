@@ -106,6 +106,41 @@ LC-сводок и расчётных профилей, чтение после 
 версия 6 — 178. Проверка сохранённых хешей выполняется на заново
 сформированном Contour после нативного Save/Close/Open.
 
+### Направленные проверки уточнённой касательной
+
+Сборку из [журнала §267](reports/Coupled6DProgress.md#267-рабочая-книга-с-уточнённой-касательной-и-резервной-поправкой)
+можно повторно проверить из чистой рабочей копии на Windows с Excel.
+Для протокола §267 требуется SHA-256 книги
+`13D7F49388BFCC2FCB65BB914BB3CA6327C9E1D9427467D23230517E91CC2653`.
+На другой сборке тот же набор проверяет те же свойства отдельным
+протоколом. Watchdog работает на приватной копии.
+
+```powershell
+$macros = @(
+    'modTestCoupledElasticState.RunCoupledElasticStateTests'
+    'modTestCoupledElasticState.RunCoupledNewtonTests'
+    'modTestCoupledElasticState.RunTestCoupledGradientLinearization'
+    'modTestCoupledElasticState.RunTestCoupledHoopCapacity'
+    'modTestCoupledElasticState.RunTestCoupledDeformationControl'
+    'modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing'
+    'modTestCoupledElasticState.RunTestCoupledTraditionalChecks'
+    'modTestConfiguration.RunAudit03UniversalLoadPathTests'
+)
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_workbook/Run-Audit03Watchdog.ps1 `
+    -SourceWorkbook workbook/output/RC_Section_NDM.xlsm `
+    -ReportPath docs/regression/Audit03/CoupledOptimizerRepeat/DirectedNative.txt `
+    -Macro ($macros -join ',') -Mode No -TimeoutSeconds 260 -FailFast
+```
+
+В итогах макросов ожидаются 21, 19, 3, 228, 35, 32, 16 и 945
+пройденных утверждений соответственно, по каждому набору ноль
+провалов. Проверяются exit 0, `SOURCE_UNCHANGED: True` и
+`Passed: true` у отчёта `ProcessClosure.json` этого запуска.
+Для штатного замера с поиском предела и записью Results выполните
+[отдельный HardShear §268](reports/Coupled6DProgress.md#268-штатный-hardshear-в-обновлённой-книге).
+
+### Дополнительные направленные проверки
+
 Отмену связанного расчёта проверяет направленный запуск
 `Run-CoupledCancellationTests.ps1 -SourceWorkbook <книга> -EvidenceDirectory <новый каталог в docs/regression>`.
 Сценарий создаёт отдельную книгу и воспроизводит ошибку Excel 18 при
