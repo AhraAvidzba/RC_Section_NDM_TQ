@@ -125,6 +125,7 @@ $macros = @(
     'modTestCoupledElasticState.RunTestCoupledHoopCapacity'
     'modTestCoupledElasticState.RunTestCoupledDeformationControl'
     'modTestCoupledElasticState.RunTestCoupledRetainedShoulders'
+    'modTestCoupledElasticState.RunTestCoupledDesignWitness'
     'modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing'
     'modTestCoupledElasticState.RunTestCoupledTraditionalChecks'
     'modTestConfiguration.RunAudit03UniversalLoadPathTests'

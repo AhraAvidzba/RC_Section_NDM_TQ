@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "FB4A531654544FB3382C47E8896C69B55180A99D04A38653169AF6900117A28C",
-  "source_checkpoint": "aab6994",
+  "manifest_sha256": "9A998345E156E5AB40C390EA944BF82FED4801823B34D2EB8BD36150F8978298",
+  "source_checkpoint": "bdeee01",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "0B82F8C795B7FE19309FC9AC165BF5016AADBC6E0FE02FA2F3F19DED9A062603",
-    "workbook/output/VBA_All_Code.txt": "5290CD5B59DEB41A06E35F73CF6CCFD808A12E40A202E970EFAFFC5F7AF9FA14"
+    "workbook/output/RC_Section_NDM.xlsm": "E9F63337672E9FEC00E228A100EF554E9CA740D9395AC80D92E23417D0DA8833",
+    "workbook/output/VBA_All_Code.txt": "76AC8357F413716ECAB391C5005B7C2431C942A995D48738713B586CBB3C6ADB"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 44,
+  "passed": 47,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -392,6 +392,33 @@
       "archive": "CoupledRetainedShouldersRelease20261116",
       "verified_outputs_sha256": {
         "Replay.json": "1B013A7483B04ED788DF64FA096530F864DAAED841D771A9E11858D93A39159D"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-mixed-native-witness",
+      "journal_section": 342,
+      "archive": "KaniH45MixedWitnessPortable",
+      "verified_outputs_sha256": {
+        "ReplayedMixedVerification.json": "D26C9E730E08C27B4F697623939E872D09BB00B05344399D5CF67C5CEA354CCA"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-two-measured-directions",
+      "journal_section": 343,
+      "archive": "MVT2CompensationSubspace20261116",
+      "verified_outputs_sha256": {
+        "CompensationSubspace.json": "2E0AC86885AE4F92B59910968C9AA1B2F738F03D66D342E1F7437FA842CAEC4E"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "capacity-design-witness-release",
+      "journal_section": 344,
+      "archive": "CoupledDesignWitnessRelease20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "201C8767700129122B958A1893D428577626C55E252E1913160E7C67DD234D7A"
       },
       "verified_stdout": null
     }

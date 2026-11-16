@@ -4381,8 +4381,8 @@ Public Function RunTestCoupledRetainedShoulders() As String
     Dim meta As CResultMeta: Set meta = branch.ResultMeta
     TestRecord InStr(1, meta.ResultComment, "локальный максимум при lambda = " & Format$(1.1, "0.000000")) > 0, _
         "в диагностике указан больший подтверждённый максимум", passed, failed, report
-    TestRecord InStr(1, meta.DiagnosticDetails, "равновесие при lambda = 1 подтверждено: False", vbTextCompare) > 0, _
-        "переход через единицу не подменяет точное равновесие", passed, failed, report
+    TestRecord InStr(1, meta.DiagnosticDetails, "равновесие при lambda = 1 подтверждено: True", vbTextCompare) > 0, _
+        "точное сочетание проверено из уточнённого восходящего участка", passed, failed, report
 
     Dim accuracy As Double, designVerified As Boolean, limitFields As Collection
     TestRecord meta.InternalStatus = rsNumericalFailure And Not branch.CopyPeak(factor, accuracy, designVerified), _
@@ -4399,3 +4399,122 @@ Public Function RunTestCoupledRetainedShoulders() As String
 Failed:
     RunTestCoupledRetainedShoulders = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет прямую пробу при единице до и после замены принятой истории.
+Public Function RunTestCoupledDesignWitness() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    TestDesignWitnessAfterRefinement True, passed, failed, report
+    TestDesignWitnessAfterRefinement False, passed, failed, report
+    TestDesignWitnessInPrefix passed, failed, report
+    RunTestCoupledDesignWitness = report & "TOTAL_COUPLED_DESIGN_WITNESS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledDesignWitness = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Уточняет два плеча кубической силовой ветви с возможным отказом в единственной полосе деформаций.
+Private Sub TestDesignWitnessAfterRefinement(ByVal blocksRefined As Boolean, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const AREA As Double = 21600#, LEFT_STRAIN As Double = 0.00075, DESIGN_STRAIN As Double = 0.0008114013519
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    material.TestUseDescendingAxialLaw
+    If blocksRefined Then material.TestBlockRefinedDesign
+    solver.Initialize operators, material, 30000#
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    offset(1) = 4# * AREA: direction(1) = 15# * AREA
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace
+    Dim field() As Double, resultants() As Double, trialResults() As Double
+    Dim previous As Double, lambda As Double, prior As Double, eps As Variant
+    For Each eps In Array(0.0003, LEFT_STRAIN)
+        If Not solver.TryDeformationStep(offset, direction, control, CDbl(eps), lambda, prior, 1E-8, 1E-8, 30) Then _
+            Err.Raise 5, , "Не получено исходное поле кубической ветви."
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        trace.Add 1#, prior
+        previous = lambda: lambda = prior
+    Next eps
+    TestExpectNear lambda, (30000# * LEFT_STRAIN - 1E+10# * LEFT_STRAIN ^ 3 - 4#) / 15#, 1E-8, _
+        "левая принятая нагрузка", passed, failed, report
+    If Not solver.TryStep(19# * AREA, 0#, 0#, 0#, 0#, 0#, 1E-8, 1E-8, 30) Then _
+        Err.Raise 5, , "Силовая проба с исходного поля не подтверждена."
+    solver.CopyTrial field, trialResults
+    TestExpectNear field(1), DESIGN_STRAIN, 1E-11, "точная сила на грубом плече", passed, failed, report
+    solver.DiscardStep
+
+    Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
+    branch.Trace solver, Nothing, offset, direction, history, previous, lambda, resultants, 1.4, 0.0125, 30, 1E-8, 1E-8, trace
+    If Not branch.CopyPeak(peak, accuracy, designVerified) Then _
+        Err.Raise 5, , "Не подтверждён максимум: " & branch.ResultMeta.DiagnosticDetails
+    TestExpectNear peak, (30000# * 0.000975 - 1E+10# * 0.000975 ^ 3 - 4#) / 15#, 1E-8, _
+        "сохранён проверенный локальный максимум", passed, failed, report
+    TestRecord peak - accuracy > 1# And accuracy <= 0.0125, _
+        "максимум отделён от единицы по погрешности", passed, failed, report
+    TestRecord designVerified = Not blocksRefined, _
+        "подтверждение сочетания относится к уточнённой истории, отказ=" & CStr(blocksRefined), passed, failed, report
+
+    Dim capacity As New CCapacityResult, actual() As Double, atPeak As Collection
+    If Not branch.CopyLimitState(atPeak, actual) Then Err.Raise 5, , "У максимума отсутствует подтверждённое поле."
+    capacity.InitializeCoupledPeak peak, accuracy, designVerified, actual, "Auto", branch.ResultMeta.DiagnosticDetails
+    If blocksRefined Then
+        TestRecord capacity.Status = "NumFail" And capacity.LambdaCapacity = 0#, _
+            "пик выше единицы без равновесия сочетания даёт NumFail", passed, failed, report
+    Else
+        TestRecord capacity.Status = "OK" And capacity.LambdaCapacity = peak, _
+            "подтверждённое сочетание и больший пик дают OK", passed, failed, report
+    End If
+    Dim i As Long, priorIndex As Long
+    For i = 1 To atPeak.Count
+        field = atPeak.Item(i)
+        If field(1) < DESIGN_STRAIN Then priorIndex = i
+    Next i
+    If priorIndex < 1 Then Err.Raise 5, , "Не найден левый уточнённый узел."
+    field = atPeak.Item(priorIndex)
+    TestExpectNear field(1), 0.00080625, 1E-12, "выбранный уточнённый левый узел", passed, failed, report
+    If Not solver.ReplayAcceptedFields(atPeak, priorIndex) Then Err.Raise 5, , "Не восстановлено уточнённое плечо."
+    Dim exact As Boolean: exact = solver.TryStep(19# * AREA, 0#, 0#, 0#, 0#, 0#, 1E-8, 1E-8, 30)
+    TestRecord exact = Not blocksRefined, _
+        "независимая точная проба с сохранённого левого узла, отказ=" & CStr(blocksRefined), passed, failed, report
+    solver.DiscardStep
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет точное силовое равновесие в неизменившемся префиксе истории.
+Private Sub TestDesignWitnessInPrefix(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const AREA As Double = 21600#, DESIGN_FORCE As Double = 19# * AREA
+    Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    material.TestInitialize operators.PointCount
+    material.TestUseDescendingAxialLaw
+    material.TestBlockRefinedDesign
+    solver.Initialize operators, material, 30000#
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = DESIGN_FORCE
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace
+    Dim field() As Double, actual() As Double, lambda As Double
+    If Not solver.TryStep(DESIGN_FORCE, 0#, 0#, 0#, 0#, 0#, 1E-8, 1E-8, 30) Then _
+        Err.Raise 5, , "Не подтверждена точная исходная сила."
+    solver.CopyTrial field, actual
+    solver.AcceptStep
+    history.Add field: trace.Add 1#, 1#
+    If Not solver.TryDeformationStep(offset, direction, control, 0.0009, 1#, lambda, 1E-8, 1E-8, 30) Then _
+        Err.Raise 5, , "Не подтверждён второй узел префикса."
+    solver.CopyTrial field, actual
+    solver.AcceptStep
+    history.Add field: trace.Add 1#, lambda
+
+    Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, designVerified As Boolean
+    branch.Trace solver, Nothing, offset, direction, history, 1#, lambda, actual, 1.4, 0.005, 30, 1E-8, 1E-8, trace
+    TestRecord branch.CopyPeak(peak, accuracy, designVerified) And designVerified, _
+        "точное сочетание из сохранённого префикса подтверждено", passed, failed, report
+End Sub

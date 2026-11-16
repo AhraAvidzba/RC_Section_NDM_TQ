@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "aab6994",
+  "source_checkpoint": "bdeee01",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "0B82F8C795B7FE19309FC9AC165BF5016AADBC6E0FE02FA2F3F19DED9A062603",
-    "workbook/output/VBA_All_Code.txt": "5290CD5B59DEB41A06E35F73CF6CCFD808A12E40A202E970EFAFFC5F7AF9FA14"
+    "workbook/output/RC_Section_NDM.xlsm": "E9F63337672E9FEC00E228A100EF554E9CA740D9395AC80D92E23417D0DA8833",
+    "workbook/output/VBA_All_Code.txt": "76AC8357F413716ECAB391C5005B7C2431C942A995D48738713B586CBB3C6ADB"
   },
   "python_packages": [
     "numpy",
@@ -49,7 +49,10 @@
     "MVT2AxialWorkItem20261116": "1C42AA22A2F23F1EB633292EBDD81CC8852DE3C2AD9FED4ADE73BFF298ECB5D5",
     "MVT2AxialNative20261116": "82B8388B418852B9966D02DDCA7A4229A94AE141E7FB97B560F8D9241EB8AA91",
     "KaniMeasuredSubspacePortable": "E7BB5594610D4DF13C9CF4E9E02E21E719F63AE0A85D27FB9300CB4E4FDEC635",
-    "CoupledRetainedShouldersRelease20261116": "5824096AA6F6777FBC0FD27704294D95A367FB9C9D9BBD97FF9E76181552E673"
+    "CoupledRetainedShouldersRelease20261116": "5824096AA6F6777FBC0FD27704294D95A367FB9C9D9BBD97FF9E76181552E673",
+    "KaniH45MixedWitnessPortable": "C604D13C749743EC9C6B91C9731FEFC7113088633878AAA80962FFF46C72EA27",
+    "MVT2CompensationSubspace20261116": "CA40C6644BF20A9E5A9C702425D39437132F0D84ECDEC0D1808F7F96F5D1C6E5",
+    "CoupledDesignWitnessRelease20261116": "8DA37ACF252FA9EBE92C3531F72655EA93C5B23C356A71E5EE30A225536D14F3"
   },
   "cases": [
     {
@@ -542,6 +545,41 @@
       "script": "Verify-RetainedShoulders.py",
       "outputs": {
         "Replay.json": "1B013A7483B04ED788DF64FA096530F864DAAED841D771A9E11858D93A39159D"
+      }
+    },
+    {
+      "id": "kani-mixed-native-witness",
+      "journal_section": 342,
+      "archive": "KaniH45MixedWitnessPortable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "ReplayedMixedVerification.json": "D26C9E730E08C27B4F697623939E872D09BB00B05344399D5CF67C5CEA354CCA"
+      }
+    },
+    {
+      "id": "mvt2-two-measured-directions",
+      "journal_section": 343,
+      "archive": "MVT2CompensationSubspace20261116",
+      "script": "CompensationSubspace.py",
+      "arguments": [
+        "{evidence}",
+        "CompensationSubspace.json"
+      ],
+      "outputs": {
+        "CompensationSubspace.json": "2E0AC86885AE4F92B59910968C9AA1B2F738F03D66D342E1F7437FA842CAEC4E"
+      }
+    },
+    {
+      "id": "capacity-design-witness-release",
+      "journal_section": 344,
+      "archive": "CoupledDesignWitnessRelease20261116",
+      "script": "Verify-DesignWitness.py",
+      "outputs": {
+        "Replay.json": "201C8767700129122B958A1893D428577626C55E252E1913160E7C67DD234D7A"
       }
     }
   ],

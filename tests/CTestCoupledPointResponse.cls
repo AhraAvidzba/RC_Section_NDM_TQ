@@ -21,13 +21,13 @@ Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
 Private mMinimumAxialStrain As Double
-Private mCubic As Double, mTwinPeaks As Boolean
+Private mCubic As Double, mTwinPeaks As Boolean, mBlocksRefinedDesign As Boolean
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
 Friend Sub TestInitialize(ByVal pointCount As Long)
     mCount = pointCount
-    mCubic = 1E+10#: mTwinPeaks = False
+    mCubic = 1E+10#: mTwinPeaks = False: mBlocksRefinedDesign = False
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -59,6 +59,13 @@ Private Sub TestTwinPeakStress(ByVal strain As Double, ByRef stress As Double, B
         stress = (DESIGN_FORCE * factor / 600# - STEEL_FORCE) / NET_AREA
         tangent = DESIGN_FORCE * slope / (600# * NET_AREA * SCALE_STRAIN)
     End If
+End Sub
+
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Исключает точную силовую точку только после принятия уточнённого шага.
+Friend Sub TestBlockRefinedDesign()
+    mBlocksRefinedDesign = True
 End Sub
 
 
@@ -118,6 +125,9 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     Dim peak As Double: peak = mAcceptedPeak(point)
     If Abs(e) > peak Then peak = Abs(e)
     If recordTrial Then mTrialPeak(point) = peak
+    If mBlocksRefinedDesign And mAcceptedPeak(point) >= 0.0008 And mAcceptedPeak(point) < 0.00081135 Then
+        If Abs(e - 0.0008114) <= 0.00000005 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
+    End If
     If mFail And point = 2 Then ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
     If mMaximumIncrement > 0# And peak - mAcceptedPeak(point) > mMaximumIncrement Then _
         ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure

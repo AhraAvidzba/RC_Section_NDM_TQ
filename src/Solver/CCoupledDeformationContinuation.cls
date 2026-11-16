@@ -49,7 +49,8 @@ Private mAbsTol As Double, mRelTol As Double, mLambdaTolerance As Double
 Private mMaxIterations As Long, mMaximumLambda As Double, mBestLambda As Double
 Private mControlName As String, mProbeDetails As String, mMeta As CResultMeta
 Private mPeak As TBranchPoint, mPeakAccuracy As Double
-Private mHasPeak As Boolean, mDesignVerified As Boolean
+Private mHasPeak As Boolean
+Private mDesignHistoryIndex As Long ' Индекс правого принятого узла, подтверждающего сочетание.
 Private mLocalPeak As Double, mLocalPeakAccuracy As Double
 Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
 Private mReusedRightPoints As Long
@@ -78,7 +79,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mOffset = offset: mDirection = direction
     mMaxIterations = maximumIterations: mMaximumLambda = maximumLambda
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
-    mBestLambda = currentLambda: mDesignVerified = (currentLambda >= 1#)
+    mBestLambda = currentLambda: mDesignHistoryIndex = 0
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
@@ -104,6 +105,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         Exit Sub
     End If
 
+    mDesignHistoryIndex = InitialDesignHistoryIndex(history.Count, previousLambda, currentLambda)
+
     Dim left As TBranchPoint, current As TBranchPoint, trial As TBranchPoint
     Dim previousField() As Double, field() As Double, increment As Double, minimum As Double, nominal As Double
     left.HistoryIndex = history.Count - 1: left.Lambda = previousLambda
@@ -119,7 +122,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, unresolvedSteel As Boolean
-    Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double
+    Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean
     Dim recoveryProjection() As Double
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
@@ -169,8 +172,9 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 StopSearch "После локального максимума множитель вышел из области положительной нагрузки."
                 Exit Sub
             End If
-            If Not mDesignVerified And current.Lambda < 1# And trial.Lambda >= 1# Then
-                VerifyDesignLoad current, trial
+            designAtTrial = False
+            If mDesignHistoryIndex = 0 And current.Lambda < 1# And trial.Lambda >= 1# And mProbeCount + 2 <= PROBE_LIMIT Then
+                designAtTrial = VerifyDesignLoad(current.Coordinate, trial.Coordinate)
                 If Not Probe(trial, current.Lambda, False) Then
                     StopSearch "Не удалось повторить пробу после проверки заданных усилий."
                     Exit Sub
@@ -188,6 +192,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 End If
             End If
             AcceptPoint history, trial
+            If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
             unresolvedSteel = False
             If changedControl Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
             If Len(mPostPeakControlName) > 0 Then
@@ -337,7 +342,7 @@ End Property
 ' Передаёт подтверждённый максимум ветви без арматуры и оценку точности.
 Friend Function CopyPeak(ByRef lambda As Double, ByRef accuracy As Double, ByRef designVerified As Boolean) As Boolean
     If Not mHasPeak Then Exit Function
-    lambda = mPeak.Lambda: accuracy = mPeakAccuracy: designVerified = mDesignVerified
+    lambda = mPeak.Lambda: accuracy = mPeakAccuracy: designVerified = (mDesignHistoryIndex > 0)
     CopyPeak = True
 End Function
 
@@ -436,18 +441,54 @@ End Sub
 
 ' Проверяет точное lambda = 1 от левого плеча перед продвижением истории.
 ' Контрольная мера должна попасть внутрь проверяемого участка.
-Private Sub VerifyDesignLoad(ByRef left As TBranchPoint, ByRef right As TBranchPoint)
-    If mProbeCount >= PROBE_LIMIT Then Exit Sub
+Private Function VerifyDesignLoad(ByVal leftCoordinate As Double, ByVal rightCoordinate As Double) As Boolean
+    If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     Dim load(1 To COMPONENT_COUNT) As Double, i As Long
     For i = 1 To COMPONENT_COUNT: load(i) = mOffset(i) + mDirection(i): Next i
-    If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations) Then Exit Sub
+    If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations) Then Exit Function
     Dim field() As Double, resultants() As Double, coordinate As Double
     mSolver.CopyTrial field, resultants
     coordinate = CoordinateOf(field)
-    If Not BeyondSteelLimit() Then mDesignVerified = (coordinate >= left.Coordinate And coordinate <= right.Coordinate)
+    If Not BeyondSteelLimit() Then VerifyDesignLoad = (coordinate >= leftCoordinate And coordinate <= rightCoordinate)
     mSolver.DiscardStep
-End Sub
+End Function
+
+' Читает точную силовую точку из сохранённой истории с полной постоянной частью.
+' Без следа можно подтвердить только один из двух переданных конечных узлов.
+Private Function InitialDesignHistoryIndex(ByVal historyCount As Long, _
+        ByVal previousLambda As Double, ByVal currentLambda As Double) As Long
+    If Not mTrace Is Nothing Then
+        If mTrace.Count = historyCount Then
+            Dim i As Long, fraction As Double, factor As Double
+            For i = 1 To historyCount
+                mTrace.ReadPoint i, fraction, factor
+                If fraction = 1# And factor = 1# Then
+                    InitialDesignHistoryIndex = i
+                    Exit Function
+                End If
+            Next i
+            Exit Function
+        End If
+    End If
+    If currentLambda = 1# Then
+        InitialDesignHistoryIndex = historyCount
+    ElseIf previousLambda = 1# Then
+        InitialDesignHistoryIndex = historyCount - 1
+    End If
+End Function
+
+' Проверяет точное сочетание от сохранённого уточнённого левого поля.
+' Силовая проба отбрасывается, затем восстанавливается вся передаваемая история.
+Private Function VerifyRefinedDesign(ByVal fields As Collection, ByVal leftIndex As Long, _
+        ByRef designIndex As Long) As Boolean
+    If Not mSolver.ReplayAcceptedFields(fields, leftIndex) Then Exit Function
+    Dim leftField() As Double, rightField() As Double
+    leftField = fields.Item(leftIndex): rightField = fields.Item(leftIndex + 1)
+    If VerifyDesignLoad(CoordinateOf(leftField), CoordinateOf(rightField)) Then designIndex = leftIndex + 1
+    VerifyRefinedDesign = mSolver.ReplayAcceptedFields(fields, fields.Count)
+End Function
+
 
 ' Повторяет оба плеча от одного принятого левого состояния.
 ' Для предела без арматуры уточняет максимум до допуска. Для
@@ -455,14 +496,17 @@ End Sub
 Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal keepRight As Boolean) As Boolean
     If middle.Lambda <= left.Lambda + LoadResolution(middle.Lambda) Then Exit Function
-    Dim shoulderStart As Double: shoulderStart = left.Coordinate ' Левая граница проверки до замены пары уточнёнными точками.
+    Dim sharedPrefix As Long: sharedPrefix = left.HistoryIndex ' При уточнении сохраняются поля по этот индекс.
+    Dim shoulderStart As Double: shoulderStart = left.Coordinate
     Dim first As TBranchPoint, second As TBranchPoint, tolerance As Double
+    Dim checkedLeft As TBranchPoint, checkedRight As TBranchPoint
+    checkedLeft = left: checkedRight = right
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
     Dim sampling As Double, refinedFields As Collection, actual As Variant
-    Dim accuracy As Double, divisions As Long, retainedMaximum As Double
+    Dim accuracy As Double, divisions As Long, retainedMaximum As Double, refinedDesignLeft As Long
     If keepRight Then
-        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True, retainedMaximum) Then Exit Function
+        If Not ReplayShoulders(history, checkedLeft, middle, checkedRight, 2, second, sampling, refinedFields, actual, True, retainedMaximum, refinedDesignLeft) Then Exit Function
         accuracy = Abs(middle.Lambda - second.Lambda)
         If sampling > accuracy Then accuracy = sampling
         accuracy = accuracy + second.Uncertainty
@@ -471,7 +515,7 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
         If Not ReplayShoulders(history, left, middle, right, 2, first, sampling) Then Exit Function
         divisions = 4
         Do
-            If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual) Then Exit Function
+            If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual, designLeftIndex:=refinedDesignLeft) Then Exit Function
             accuracy = Abs(first.Lambda - second.Lambda)
             If sampling > accuracy Then accuracy = sampling
             accuracy = accuracy + first.Uncertainty + second.Uncertainty
@@ -482,6 +526,16 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
         Loop While divisions <= 16
         If accuracy > tolerance Then Exit Function
     End If
+    Dim designIndex As Long: designIndex = mDesignHistoryIndex
+    If designIndex > sharedPrefix Then designIndex = 0
+    If designIndex = 0 And refinedDesignLeft > 0 And mProbeCount < PROBE_LIMIT Then
+        If Not VerifyRefinedDesign(refinedFields, refinedDesignLeft, designIndex) Then
+            Set mLimitTrace = Nothing
+            Exit Function
+        End If
+    End If
+    If keepRight Then left = checkedLeft: right = checkedRight
+    mDesignHistoryIndex = designIndex
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
     Set mLimitFields = refinedFields: mLimitResultants = actual
     mBestLambda = GeomMax(mBestLambda, GeomMax(second.Lambda, retainedMaximum))
@@ -498,7 +552,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
         Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False, _
-        Optional ByRef retainedMaximum As Double = 0#) As Boolean
+        Optional ByRef retainedMaximum As Double = 0#, Optional ByRef designLeftIndex As Long = 0) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim start As Double, finish As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
@@ -568,10 +622,12 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         fieldCount = peakIndex
         If keepRight Then fieldCount = index
         For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
-        retainedMaximum = peak.Lambda
+        retainedMaximum = peak.Lambda: designLeftIndex = 0
         For j = 1 To fieldCount
             limitFields.Add refined.Item(j)
             retainedMaximum = GeomMax(retainedMaximum, samples(j).Lambda)
+            If designLeftIndex = 0 And samples(j - 1).Lambda < 1# And samples(j).Lambda >= 1# Then _
+                designLeftIndex = left.HistoryIndex + j - 1
         Next j
         If Not mTrace Is Nothing Then
             Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
@@ -735,7 +791,7 @@ End Sub
 ' Записывает выбранную управляемую величину и область проверенной ветви.
 Private Function Details() As String
     Details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
-        "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignVerified) & "; проб: " & CStr(mProbeCount)
+        "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignHistoryIndex > 0) & "; проб: " & CStr(mProbeCount)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
