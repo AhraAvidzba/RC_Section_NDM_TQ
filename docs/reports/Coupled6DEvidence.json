@@ -132,7 +132,11 @@
     "MVT2ExactH26SmallerArcNative20261116": "B775E3D70EED7CC8239F905AC4E3779AA65CE8994BA1F045BED899B6235B4F07",
     "HardShearRefinedShouldersNative20261116": "BC008874E70D1D35EC6CE8DB8CD71BED41560DB49FDD936E73C175545E7282D5",
     "MVT2OpenSeesElastic20261117": "A20830E9794E51B38466D963E85106503C0991A82ED598FD3877F45C59E14728",
-    "MVT2H26RadiusRejectionNative20261117": "72D5A584147EB019F811EAA92E439F81504E88218FF499899A1BE17152FD1788"
+    "MVT2H26RadiusRejectionNative20261117": "72D5A584147EB019F811EAA92E439F81504E88218FF499899A1BE17152FD1788",
+    "MVT2H26YieldEventBracketsNative20261117": "CDD029CFA2F066DE30221A478A145B42964D39433A7FEE267B9D3F3606C52DF4",
+    "HardShearTangentRankNative20261117": "4A979BC575689E5A42CCA0A54D3ECD521C67B9E27CA3729BC076C17A57E9E5FE",
+    "MVT2OpenSeesStartup20261117": "EE2B69A04C7E60FF20664B372BEDF249936BBE461EFBB4216F3FB9FD5B3CD459",
+    "MVT2H26YieldGuideOriginalPlaneNative20261117": "8B5402E9D61B2C058DF2FA3033E81767C8AFF70CB82810B5807AAFFADBA2883F"
   },
   "cases": [
     {
@@ -1531,6 +1535,50 @@
         "{evidence}"
       ],
       "stdout_contains": "RADIUS WITNESS 5EEEBC4AB45369232CCB0430C9A94AD42221DB3432077BEDF4C7AB051BF05326 MECHANISM C8EB959F0B39430E864689767F2C5F6585EC05DEBA210F91294F70DD5F282597"
+    },
+    {
+      "id": "mvt2-h26-three-yield-station-brackets-native",
+      "journal_section": 440,
+      "archive": "MVT2H26YieldEventBracketsNative20261117",
+      "script": "ReplayYieldPortable.py",
+      "arguments": [
+        "--archives",
+        "{evidence}"
+      ],
+      "stdout_contains": "NATIVE YIELD EVENT BRACKETS 60B732E6E2B20676B06C23A52E4E5A335761408BA6A2BC133DE29B42C0335830 ANALYSIS 0EC0BC9EE1D58C65534DE72F581CC60BC9EC2828DCE25119A0CA220D2264883A"
+    },
+    {
+      "id": "hardshear-stored-shoulders-projected-tangent-native",
+      "journal_section": 441,
+      "archive": "HardShearTangentRankNative20261117",
+      "script": "HardShearTangentRankNative/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "HARDSHEAR RANK PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-opensees-small-torque-startup-native",
+      "journal_section": 442,
+      "archive": "MVT2OpenSeesStartup20261117",
+      "script": "Verify-Startup.py",
+      "arguments": [
+        "--out",
+        "Replayed.json"
+      ],
+      "outputs": {
+        "Replayed.json": "FE00A8696C80F7ADD046365A8839F7448C2AC55A4E3FF54B638AB8B3F7909BCD"
+      },
+      "stdout_contains": "MVT2_STARTUP_DETACHED_PASS"
+    },
+    {
+      "id": "mvt2-h26-material-event-guide-exact-original-plane-native",
+      "journal_section": 443,
+      "archive": "MVT2H26YieldGuideOriginalPlaneNative20261117",
+      "script": "ReplayGuidePortable.py",
+      "arguments": [
+        "--archives",
+        "{evidence}"
+      ],
+      "stdout_contains": "NATIVE YIELD GUIDE 0B9E9033401684AEF852C7A49292FB36B81C5265D8BF27376709375BD1F06949 EVENT [22, -1]"
     }
   ],
   "frozen_repositories": {

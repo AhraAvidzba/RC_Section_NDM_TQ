@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "F3D62264BC8006160EA2D822B1EFC999325E823BB621BF79B9788EFD437EC7AD",
+  "manifest_sha256": "38F1F599FD5D5A08E2C1D3751BF30283345A0BA1BCF4830B543170958CBE7285",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 129,
+  "passed": 133,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1100,6 +1100,36 @@
       "archive": "MVT2H26RadiusRejectionNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "RADIUS WITNESS 5EEEBC4AB45369232CCB0430C9A94AD42221DB3432077BEDF4C7AB051BF05326 MECHANISM C8EB959F0B39430E864689767F2C5F6585EC05DEBA210F91294F70DD5F282597"
+    },
+    {
+      "id": "mvt2-h26-three-yield-station-brackets-native",
+      "journal_section": 440,
+      "archive": "MVT2H26YieldEventBracketsNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "NATIVE YIELD EVENT BRACKETS 60B732E6E2B20676B06C23A52E4E5A335761408BA6A2BC133DE29B42C0335830 ANALYSIS 0EC0BC9EE1D58C65534DE72F581CC60BC9EC2828DCE25119A0CA220D2264883A"
+    },
+    {
+      "id": "hardshear-stored-shoulders-projected-tangent-native",
+      "journal_section": 441,
+      "archive": "HardShearTangentRankNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR RANK PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-opensees-small-torque-startup-native",
+      "journal_section": 442,
+      "archive": "MVT2OpenSeesStartup20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "FE00A8696C80F7ADD046365A8839F7448C2AC55A4E3FF54B638AB8B3F7909BCD"
+      },
+      "verified_stdout": "MVT2_STARTUP_DETACHED_PASS"
+    },
+    {
+      "id": "mvt2-h26-material-event-guide-exact-original-plane-native",
+      "journal_section": 443,
+      "archive": "MVT2H26YieldGuideOriginalPlaneNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "NATIVE YIELD GUIDE 0B9E9033401684AEF852C7A49292FB36B81C5265D8BF27376709375BD1F06949 EVENT [22, -1]"
     }
   ]
 }
