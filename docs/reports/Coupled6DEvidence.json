@@ -77,7 +77,8 @@
     "MVT2ReactedFreshNative20261116": "5DCAB88E25FD13C1DB6C43A8898243D2AF03E906ADA2F87C31A17638E84ABA3E",
     "KaniH45ElasticDamageNativePortable": "751CC8385ADDA61CFBC422B2F93C7EB4150A70964A4F294DD1CBE06B4F98F0FA",
     "CoupledActualDeformationProgress20261116": "EED10254B2EEC0B0EE31AC6D1114ADAA0BF849769CCCAC154202D4BF3E8F858B",
-    "HardShearActualDeformationProgress20261116": "70559BBE5E093D533BF30BF423018E1725879D8720ECE734700F5CBF9F65F489"
+    "HardShearActualDeformationProgress20261116": "70559BBE5E093D533BF30BF423018E1725879D8720ECE734700F5CBF9F65F489",
+    "MVT2BranchLockedNative20261116": "42648C93E2A03D55A09F8E9688357D062D3E4210F98FA4B7507CF3FB5820FFF5"
   },
   "cases": [
     {
@@ -921,6 +922,16 @@
       "script": "Verify.py",
       "outputs": {
         "Replay.json": "852D18928CA20FD853EEC17B217B1DABFFB5A35F41FFF69A78E184F25DBA8DF5"
+      }
+    },
+    {
+      "id": "mvt2-branch-locked-native-half-and-full",
+      "journal_section": 378,
+      "archive": "MVT2BranchLockedNative20261116",
+      "script": "ReplayProof.py",
+      "arguments": ["--decision", "--output", "ReplayedReport.json"],
+      "outputs": {
+        "ReplayedReport.json": "146F4565ACA08F8AC13843070BDA72C0F60EF2B28A42E2E05B7FD7DCE9A45E7C"
       }
     }
   ],

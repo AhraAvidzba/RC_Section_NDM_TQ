@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "E6DE1C6A8A60A500E64DF754BB9FCF9EB152E4E206EF706CD55ABA972CFC8A5B",
+  "manifest_sha256": "B7E761C5D725E78D540BA5E2BC27BC3F6F0E2924DA0A507E2CE2360A5DD46E20",
   "source_checkpoint": "6d42af5",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "475E57DE58848B3F83DA8C79B1A10EC05B3726CC52B0C904E5B975F4CFBDFB18",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 73,
+  "passed": 74,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -655,6 +655,15 @@
       "archive": "HardShearActualDeformationProgress20261116",
       "verified_outputs_sha256": {
         "Replay.json": "852D18928CA20FD853EEC17B217B1DABFFB5A35F41FFF69A78E184F25DBA8DF5"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-branch-locked-native-half-and-full",
+      "journal_section": 378,
+      "archive": "MVT2BranchLockedNative20261116",
+      "verified_outputs_sha256": {
+        "ReplayedReport.json": "146F4565ACA08F8AC13843070BDA72C0F60EF2B28A42E2E05B7FD7DCE9A45E7C"
       },
       "verified_stdout": null
     }
