@@ -124,7 +124,11 @@
     "MVT2FirstBoundedBranchCorrectionNative20261116": "A2ED199D5EE0699206ADD65F0D89DE1DC3007A027B64F5B466E605A6646DB135",
     "ConcreteBaseResponseCacheNative20261116": "7D2F85735E07EC8A883119B5B696D0A20529495AF1F1BEAACFEC4DAE2063A2DD",
     "MVT2SecondBoundedEquilibriumNative20261116": "07F9AA915BEE7D1DEA7E9854FE594B7F6D9D8740D2A15BAEEA4B8E83B6DDBFE8",
-    "MVT2AutomaticBoundedBranchRecoveryNative20261116": "C115A4F6C4B7A986229D05F9E279D1E132B86BF00BCAE9D133611809B94AE28F"
+    "MVT2AutomaticBoundedBranchRecoveryNative20261116": "C115A4F6C4B7A986229D05F9E279D1E132B86BF00BCAE9D133611809B94AE28F",
+    "HardShearCurrentDepthNative20261116": "41AC53AEF118CA7E0C14781E1AE03F874EBEC37E9BF793EA55329183E62AB43E",
+    "MVT2AdaptiveBoundedContinuationNative20261116": "A5F4EABFE14F46544D6BA36934B050AED5C5F3655DC91D32D6E8C6408562E699",
+    "MVT2ExactForceAffineSeedNative20261116": "AFA8504EE62B9FA39766A1AFDA088D62BFA15CAD7EB1501EEDEEE78F8079677E",
+    "MVT2ProductionAffineCoreNative20261116": "28D9F83C687CD501A1B8CCEF7616C659C82675E78CC26B63C94F9BF53C39B886"
   },
   "cases": [
     {
@@ -1436,6 +1440,47 @@
       "script": "ReplayPortable.py",
       "arguments": ["{evidence}/MVT2StockBranchArcNative20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip"],
       "stdout_contains": "MVT2 AUTOMATIC FALLBACK CC64D1BB52C21D5B3A247D12E771D6945BAF66CC135FACAD02098D79A3DDD7CD RADIUS/DIRECTION 31407A1EC398024B9BFFDB0C06C62087008D57EF3D15899501482886176F310D"
+    },
+    {
+      "id": "hardshear-current-long-positive-ray-native",
+      "journal_section": 432,
+      "archive": "HardShearCurrentDepthNative20261116",
+      "script": "HardShearCurrentDepthNative/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "PASS CURRENT HARD SHEAR DEPTH C941CE97A583A09C08F7193E006C7A58A9A55D6232C5F017BBB6C10782B4FB25 533 probes, 496 accepted chart fields, coarse H8 replaced, positive ray exited"
+    },
+    {
+      "id": "mvt2-adaptive-bounded-continuation-native",
+      "journal_section": 433,
+      "archive": "MVT2AdaptiveBoundedContinuationNative20261116",
+      "script": "ReplayContinuePortable.py",
+      "arguments": [
+        "--archives",
+        "{evidence}"
+      ],
+      "stdout_contains": "MVT2 NATIVE CONTINUATION AD22C868815404D79FCA5D888B46D11F77F923FF3FFA6C5C645F635EEACABFF4 FALLBACK DIAGNOSTICS 8DE446D95F537C59BD4CD66C13FD623A85FB0BD1A71B5D9D6B6DB045045C99AF"
+    },
+    {
+      "id": "mvt2-exact-force-affine-initial-field-native",
+      "journal_section": 434,
+      "archive": "MVT2ExactForceAffineSeedNative20261116",
+      "script": "ReplayPortable.py",
+      "arguments": [
+        "{evidence}/MVT2AutomaticBoundedBranchRecoveryNative20261116.zip",
+        "{evidence}/MVT2HalfJointJetNative20261116.zip"
+      ],
+      "stdout_contains": "MVT2_EXACT_FORCE_BOTH_NUMFAIL"
+    },
+    {
+      "id": "mvt2-affine-corrector-exact-wires-native",
+      "journal_section": 435,
+      "archive": "MVT2ProductionAffineCoreNative20261116",
+      "script": "ReplayPortable.py",
+      "arguments": [
+        "{evidence}/MVT2AutomaticBoundedBranchRecoveryNative20261116.zip",
+        "{evidence}/MVT2StockBranchArcNative20261116.zip"
+      ],
+      "stdout_contains": "MVT2_PRODUCTION_AFFINE_CORE_EXACT_WIRES"
     }
   ],
   "frozen_repositories": {
