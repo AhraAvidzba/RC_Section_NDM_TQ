@@ -1,5 +1,5 @@
 {
-  "source_checkpoint": "0e6618a",
+  "source_checkpoint": "d788c83",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
     "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
@@ -62,7 +62,10 @@
     "MVT2PureTwistNative20261116": "4920B773CAF518ABDC3B7B553472C66B815E1E203C6FAF8A6577916C01F87962",
     "CoupledEquilibriumTangentFallback20261116": "22B7BA3CD39C77ED473B55C75472B32EE0D110984FE252658F6ABAD1C7D66EBA",
     "MVT2MeasuredTwistFeasibility20261116": "46A2CB10379A4B5C33FA5296356C60EF99925B17A21E27938B0CEF3EC981B626",
-    "HardShearTangentFallback20261116": "6746A8DB022A0B5EA4309678A1074180D0FE1968F27B37EC8E18A9111ADEC1C3"
+    "HardShearTangentFallback20261116": "6746A8DB022A0B5EA4309678A1074180D0FE1968F27B37EC8E18A9111ADEC1C3",
+    "KaniH45Row81DirectionPortable": "4B65725C0977E6855720BFBD0F9CA7D5D3FCF0AD3F4C1C0A8FA68F73DECDA701",
+    "KaniH45Row81TangentAmplitudePortable": "9581BB153C205C4A8385EFC33EEBF8223B4A56B034BC12B4516A59BF54B52C74",
+    "MVT2MixedRobustNative20261116": "4B2A9123F9080B8FEE4914541CEBF0FF34E8A8044799DE25DD545019B0A6F1B1"
   },
   "cases": [
     {
@@ -703,6 +706,49 @@
       "script": "Verify.py",
       "outputs": {
         "Replay.json": "41A62A7E028F5C4C2605E9399C1AF88AE83273B055C2A70ACFDDEF6100F18D1D"
+      }
+    },
+    {
+      "id": "kani-h45-row-81-native-direction",
+      "journal_section": 359,
+      "archive": "KaniH45Row81DirectionPortable",
+      "script": "Replay-Row.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-KaniRowVerification.json": "742A063E044EA739BF528623A187B64116CE6D6C105809C9194FAEEF4C4829A9",
+        "Replay-KaniRowDiagnosis.json": "D6D8E6398B705AE9DE81F5ADC5E3F97976227FD8360FA876DCA98811C55C9651"
+      }
+    },
+    {
+      "id": "kani-h45-row-81-tangent-amplitude",
+      "journal_section": 360,
+      "archive": "KaniH45Row81TangentAmplitudePortable",
+      "script": "Tangent-Amplitude.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}",
+        "--witness-root",
+        "{KaniH45Row81DirectionPortable}",
+        "--out",
+        "TangentAmplitude.json"
+      ],
+      "outputs": {
+        "TangentAmplitude.json": "A1065518A9067CD6A89DB03F9C0049C16A24A410E4F70E415E663EB1CABD68E2"
+      }
+    },
+    {
+      "id": "mvt2-native-measured-robust-mix",
+      "journal_section": 361,
+      "archive": "MVT2MixedRobustNative20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "D2B75EB621FB430F252909149FB22333A142C21F6C3C1DF251108C30009124E4"
       }
     }
   ],
