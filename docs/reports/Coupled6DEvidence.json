@@ -136,7 +136,9 @@
     "MVT2H26YieldEventBracketsNative20261117": "CDD029CFA2F066DE30221A478A145B42964D39433A7FEE267B9D3F3606C52DF4",
     "HardShearTangentRankNative20261117": "4A979BC575689E5A42CCA0A54D3ECD521C67B9E27CA3729BC076C17A57E9E5FE",
     "MVT2OpenSeesStartup20261117": "EE2B69A04C7E60FF20664B372BEDF249936BBE461EFBB4216F3FB9FD5B3CD459",
-    "MVT2H26YieldGuideOriginalPlaneNative20261117": "8B5402E9D61B2C058DF2FA3033E81767C8AFF70CB82810B5807AAFFADBA2883F"
+    "MVT2H26YieldGuideOriginalPlaneNative20261117": "8B5402E9D61B2C058DF2FA3033E81767C8AFF70CB82810B5807AAFFADBA2883F",
+    "HardShearMaterialSwitchNative20261117": "CF482DA9F7A9DCE0AE93EE4E49EAC86B021B5DBB2582D27C67C59B5BB406B48F",
+    "MVT2OpenSeesDistributedElastic20261117": "807E5B0B7EAEEB11D2159C10B0EA2D07C18FFF6A6E72616FFBE2324678271E89"
   },
   "cases": [
     {
@@ -1579,6 +1581,28 @@
         "{evidence}"
       ],
       "stdout_contains": "NATIVE YIELD GUIDE 0B9E9033401684AEF852C7A49292FB36B81C5265D8BF27376709375BD1F06949 EVENT [22, -1]"
+    },
+    {
+      "id": "hardshear-stored-peaks-material-switch-native",
+      "journal_section": 444,
+      "archive": "HardShearMaterialSwitchNative20261117",
+      "script": "HardShearMaterialSwitchNative/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "HARDSHEAR MATERIAL SWITCH PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-elastic-native",
+      "journal_section": 445,
+      "archive": "MVT2OpenSeesDistributedElastic20261117",
+      "script": "Verify-Pads.py",
+      "arguments": [
+        "--out",
+        "Replayed.json"
+      ],
+      "outputs": {
+        "Replayed.json": "CBAF7D2BF605388D478798807A88F61EC6D28919F745E1045F64CCBFEFE05E67"
+      },
+      "stdout_contains": "MVT2_DISTRIBUTED_DETACHED_PASS 4 states"
     }
   ],
   "frozen_repositories": {

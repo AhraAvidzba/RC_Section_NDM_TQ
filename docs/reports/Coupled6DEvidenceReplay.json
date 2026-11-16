@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "38F1F599FD5D5A08E2C1D3751BF30283345A0BA1BCF4830B543170958CBE7285",
+  "manifest_sha256": "84618845290FCCB017F099A6E31C95C918F54759568AF975A96557F6609ACD32",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 133,
+  "passed": 135,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1130,6 +1130,22 @@
       "archive": "MVT2H26YieldGuideOriginalPlaneNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "NATIVE YIELD GUIDE 0B9E9033401684AEF852C7A49292FB36B81C5265D8BF27376709375BD1F06949 EVENT [22, -1]"
+    },
+    {
+      "id": "hardshear-stored-peaks-material-switch-native",
+      "journal_section": 444,
+      "archive": "HardShearMaterialSwitchNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR MATERIAL SWITCH PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-opensees-distributed-pad-elastic-native",
+      "journal_section": 445,
+      "archive": "MVT2OpenSeesDistributedElastic20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "CBAF7D2BF605388D478798807A88F61EC6D28919F745E1045F64CCBFEFE05E67"
+      },
+      "verified_stdout": "MVT2_DISTRIBUTED_DETACHED_PASS 4 states"
     }
   ]
 }
