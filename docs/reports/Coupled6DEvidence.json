@@ -1,5 +1,5 @@
 {
-  "source_checkpoint": "d788c83",
+  "source_checkpoint": "1e1d0f4",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
     "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
@@ -65,7 +65,12 @@
     "HardShearTangentFallback20261116": "6746A8DB022A0B5EA4309678A1074180D0FE1968F27B37EC8E18A9111ADEC1C3",
     "KaniH45Row81DirectionPortable": "4B65725C0977E6855720BFBD0F9CA7D5D3FCF0AD3F4C1C0A8FA68F73DECDA701",
     "KaniH45Row81TangentAmplitudePortable": "9581BB153C205C4A8385EFC33EEBF8223B4A56B034BC12B4516A59BF54B52C74",
-    "MVT2MixedRobustNative20261116": "4B2A9123F9080B8FEE4914541CEBF0FF34E8A8044799DE25DD545019B0A6F1B1"
+    "MVT2MixedRobustNative20261116": "4B2A9123F9080B8FEE4914541CEBF0FF34E8A8044799DE25DD545019B0A6F1B1",
+    "KaniH45LocalTangentGuardPortable": "B0424BBEEDF7DAFE7602BA8882527A2FCB16BD001FEA8AC3F6E3CFED71E8D6D0",
+    "KaniH45RefitMatrixPortable": "E4C08F91001DCDBA9479028E86DD37EE3CE478F40389666E7158399058ACB065",
+    "MVT2Row29ReactionsPlanned20261116": "4436121F4292811C79FC1BA5FB444F9E31E224BC59FA1FE37D5FC563CD6B681A",
+    "KaniH45NativeLocalColumns20261116": "C3C326809940BB05D8AA30430AB6C06D3ED14A6D52A4F147AB7F15DD98A444BD",
+    "MVT2Row29ReactionsNative20261116": "3E496D7AC294E3FF95F5F4F15778B10A656AFFF87C55EFEC58E0197E207601E0"
   },
   "cases": [
     {
@@ -749,6 +754,86 @@
       ],
       "outputs": {
         "Verification.json": "D2B75EB621FB430F252909149FB22333A142C21F6C3C1DF251108C30009124E4"
+      }
+    },
+    {
+      "id": "kani-h45-guard-independent",
+      "journal_section": 363,
+      "archive": "KaniH45LocalTangentGuardPortable",
+      "script": "Audit-LocalTangent.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}",
+        "--witness-root",
+        "{KaniH45Row81DirectionPortable}",
+        "--out",
+        "Replay-LocalTangentAudit.json"
+      ],
+      "outputs": {
+        "Replay-LocalTangentAudit.json": "8B0BFA8D0C5AC7E55F5549A85A5D7242BC9C461FF34A529774449F6DD23C916D"
+      }
+    },
+    {
+      "id": "kani-h45-three-tangent-native-trials",
+      "journal_section": 364,
+      "archive": "KaniH45RefitMatrixPortable",
+      "script": "Replay.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "A/ReplayedVerification.json": "A43D5FC3CB283C1D760226D39947BC4CE3C3DB2ABB9FB02158206C26A1349744",
+        "B/ReplayedVerification.json": "435AB0848358EF92178A4EC5A1A125C0A724E5CF48336195C17184F0FAFE1442",
+        "C/ReplayedVerification.json": "51C7B999B59BD74D3258FB7B2E6EEE9BD6670C7A7BE7AE4B6B54818D8A09E96C"
+      }
+    },
+    {
+      "id": "mvt2-row-29-gauge-reaction-prediction",
+      "journal_section": 365,
+      "archive": "MVT2Row29ReactionsPlanned20261116",
+      "script": "MeasuredRow29.py",
+      "arguments": [
+        "{evidence}",
+        "ReplayedReport.json",
+        "--stage",
+        "ReplayedInputs"
+      ],
+      "outputs": {
+        "ReplayedReport.json": "EAAFBC269DE56866B9BB21FE765731F16858B5045E7BC0AB7DE6DA937011AFAF"
+      }
+    },
+    {
+      "id": "kani-h45-native-local-tangent-columns",
+      "journal_section": 366,
+      "archive": "KaniH45NativeLocalColumns20261116",
+      "script": "VerifyColumns.py",
+      "outputs": {
+        "ColumnsVerification.json": "1571B6D6A34DB9E1381C4B012613BB4F980DF84363E7CC5F849A3E8314A0A023"
+      }
+    },
+    {
+      "id": "mvt2-native-row-29-reaction-fields",
+      "journal_section": 367,
+      "archive": "MVT2Row29ReactionsNative20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "0003623EB0BAF91FA1F8D1A587A7E16B739FC1D46339FA620CDC28D62240A128"
+      }
+    },
+    {
+      "id": "mvt2-native-row-29-reaction-comparison",
+      "journal_section": 367,
+      "archive": "MVT2Row29ReactionsNative20261116",
+      "script": "CompareNative.py",
+      "arguments": [
+        "."
+      ],
+      "outputs": {
+        "Comparison.json": "94728188D0C1AC05F176DC26E6E98EB29BA7CBDFEFC1257FB515CB034F433A48"
       }
     }
   ],

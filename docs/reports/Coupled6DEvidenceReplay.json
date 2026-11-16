@@ -1,6 +1,6 @@
 {
-  "manifest_sha256": "6C9ADAE47DE3EBA9941FA013A9A44C5EFE31A04C93DCAEF9AED01CD9537C8131",
-  "source_checkpoint": "d788c83",
+  "manifest_sha256": "5FE8013FD351563DCD9945FC2F11D38D570D43E54225BE2855F071705DA2997D",
+  "source_checkpoint": "1e1d0f4",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
     "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 60,
+  "passed": 66,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -536,6 +536,62 @@
       "archive": "MVT2MixedRobustNative20261116",
       "verified_outputs_sha256": {
         "Verification.json": "D2B75EB621FB430F252909149FB22333A142C21F6C3C1DF251108C30009124E4"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-guard-independent",
+      "journal_section": 363,
+      "archive": "KaniH45LocalTangentGuardPortable",
+      "verified_outputs_sha256": {
+        "Replay-LocalTangentAudit.json": "8B0BFA8D0C5AC7E55F5549A85A5D7242BC9C461FF34A529774449F6DD23C916D"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-three-tangent-native-trials",
+      "journal_section": 364,
+      "archive": "KaniH45RefitMatrixPortable",
+      "verified_outputs_sha256": {
+        "A/ReplayedVerification.json": "A43D5FC3CB283C1D760226D39947BC4CE3C3DB2ABB9FB02158206C26A1349744",
+        "B/ReplayedVerification.json": "435AB0848358EF92178A4EC5A1A125C0A724E5CF48336195C17184F0FAFE1442",
+        "C/ReplayedVerification.json": "51C7B999B59BD74D3258FB7B2E6EEE9BD6670C7A7BE7AE4B6B54818D8A09E96C"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-row-29-gauge-reaction-prediction",
+      "journal_section": 365,
+      "archive": "MVT2Row29ReactionsPlanned20261116",
+      "verified_outputs_sha256": {
+        "ReplayedReport.json": "EAAFBC269DE56866B9BB21FE765731F16858B5045E7BC0AB7DE6DA937011AFAF"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-native-local-tangent-columns",
+      "journal_section": 366,
+      "archive": "KaniH45NativeLocalColumns20261116",
+      "verified_outputs_sha256": {
+        "ColumnsVerification.json": "1571B6D6A34DB9E1381C4B012613BB4F980DF84363E7CC5F849A3E8314A0A023"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-native-row-29-reaction-fields",
+      "journal_section": 367,
+      "archive": "MVT2Row29ReactionsNative20261116",
+      "verified_outputs_sha256": {
+        "Verification.json": "0003623EB0BAF91FA1F8D1A587A7E16B739FC1D46339FA620CDC28D62240A128"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-native-row-29-reaction-comparison",
+      "journal_section": 367,
+      "archive": "MVT2Row29ReactionsNative20261116",
+      "verified_outputs_sha256": {
+        "Comparison.json": "94728188D0C1AC05F176DC26E6E98EB29BA7CBDFEFC1257FB515CB034F433A48"
       },
       "verified_stdout": null
     }
