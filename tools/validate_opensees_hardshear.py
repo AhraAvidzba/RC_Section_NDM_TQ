@@ -1,7 +1,8 @@
 """Проверяет объёмную модель HardShear в OpenSeesPy (Н, мм, МПа).
 
-Закреплена нижняя грань. Поперечные силы создают градиент моментов вдоль
-призмы. В контрольной плоскости поддерживается заданная траектория шести
+Нижнюю грань можно закрепить или приложить уравновешенные нагрузки к обоим
+торцам, устранив шесть жёстких перемещений. Поперечные силы создают
+градиент моментов вдоль призмы. В контрольной плоскости задана траектория шести
 усилий. Остановка продолжения сохраняется отдельно от достижения предела.
 Положительное N означает растяжение, как во внутренней системе НДМ.
 """
@@ -101,12 +102,13 @@ def mesh_axis(values, refine):
 
 
 class Prism:
-    def __init__(self,length,h,variant,refine,control,section_target=TARGET):
+    def __init__(self,length,h,variant,refine,control,section_target=TARGET,end_condition="clamped"):
         if length <= 0 or h <= 0 or not math.isclose(length / h, round(length / h)):
             raise ValueError("Length must be a positive multiple of dz")
         if not 0 < control < length or refine < 1:
             raise ValueError("Control cut must be internal and refinement must be positive")
         self.section_target = section_target
+        self.end_condition = end_condition
         self.x,self.y = mesh_axis(X,refine),mesh_axis(Y,refine)
         self.nx,self.ny,self.nz = len(self.x)-1,len(self.y)-1,round(length/h)
         self.z = [i*h for i in range(self.nz+1)]
@@ -126,8 +128,10 @@ class Prism:
             self.coords[tag] = p
             self.planes[k].append(tag)
             ops.node(tag,*p)
-            if k==0:
+            if k==0 and self.end_condition=="clamped":
                 ops.fix(tag,1,1,1)
+        if self.end_condition=="balanced-tractions":
+            self.fix_rigid_modes()
         self.next = 1
         for k,j,i in product(range(self.nz),range(self.ny),range(self.nx)):
             tags = [self.node(i+dx,j+dy,k+dz) for dz in (0,1) for dx,dy in CORNERS]
@@ -162,10 +166,17 @@ class Prism:
             nodes = [self.node(i,j,k) for i,j in loop]
             for a,b in zip(nodes,nodes[1:]+nodes[:1],strict=True):
                 self.bar(a,b,3,8.)
-        self.loads = self.apply_loads()
+        self.loads,self.lower_loads = self.apply_loads()
 
     def node(self,i,j,k):
         return 1+(k*(self.ny+1)+j)*(self.nx+1)+i
+
+    def fix_rigid_modes(self):
+        """Убирает переносы в A и повороты по плечам AB и AC нижнего торца."""
+        center_x,center_y = self.x.index(0.),self.y.index(0.)
+        ops.fix(self.node(center_x,center_y,0),1,1,1)
+        ops.fix(self.node(self.nx,center_y,0),0,1,1)
+        ops.fix(self.node(center_x,self.ny,0),0,0,1)
 
     def bar(self,a,b,material,diameter):
         tag = self.next
@@ -183,26 +194,35 @@ class Prism:
     def apply_loads(self):
         ops.timeSeries("Linear",1)
         ops.pattern("Plain",1,1)
-        result = {tag:[0.]*3 for tag in self.planes[-1]}
-        dist = self.z[-1]-self.z[self.mid]
+        upper = self.face_loads(upper=True)
+        lower = self.face_loads(upper=False) if self.end_condition=="balanced-tractions" else {}
+        for loads in (upper,lower):
+            for tag,force in loads.items():
+                ops.load(tag,*force)
+        return upper,lower
+
+    def face_loads(self,upper):
+        """Переносит винт к выбранному торцу и интегрирует распределённую тягу."""
+        layer,first,sign = (-1,4,1.) if upper else (0,0,-1.)
+        result = {tag:[0.]*3 for tag in self.planes[layer]}
+        dist = self.z[layer]-self.z[self.mid]
         n,mx,my,t,qx,qy = self.section_target
         mx,my = mx+dist*qy,my+dist*qx
-        for _,nodes in self.bricks[-1]:
-            top = nodes[4:]
-            x0,y0,_ = self.coords[top[0]]
-            x1,y1,_ = self.coords[top[2]]
+        for _,nodes in self.bricks[layer]:
+            face = nodes[first:first+4]
+            x0,y0,_ = self.coords[face[0]]
+            x1,y1,_ = self.coords[face[2]]
             jac = (x1-x0)*(y1-y0)/4
             for r,s in product(GAUSS,repeat=2):
                 x,y = (x0+x1+r*(x1-x0))/2,(y0+y1+s*(y1-y0))/2
                 forces = [qx/AREA-t*y/(IX+IY),qy/AREA+t*x/(IX+IY),n/AREA+mx*y/IX+my*x/IY]
-                for tag,(i,j) in zip(top,CORNERS,strict=True):
+                for tag,(i,j) in zip(face,CORNERS,strict=True):
                     shape = (1+(2*i-1)*r)*(1+(2*j-1)*s)/4
-                    add(result[tag],scale(shape*jac,forces))
-        for tag,force in result.items():
-            ops.load(tag,*force)
+                    add(result[tag],scale(sign*shape*jac,forces))
         applied = self.resultant(result,self.z[self.mid])
-        if error(applied,self.section_target)>1.e-8:
-            raise RuntimeError(("wrench at control plane",applied,self.section_target))
+        target = scale(sign,self.section_target)
+        if error(applied,target)>1.e-8:
+            raise RuntimeError(("wrench at control plane",applied,target))
         return result
 
     def cut(self,layer,lower):
@@ -223,9 +243,16 @@ class Prism:
         return total
 
     def field(self,variant):
-        target = scale(ops.getTime(),self.section_target)
+        factor = ops.getTime()
+        target = scale(factor,self.section_target)
         ops.reactions()
-        base = self.resultant({node:scale(-1,ops.nodeReaction(node)) for node in self.planes[0]},self.z[self.mid])
+        ref = self.z[self.mid]
+        reactions = self.resultant({node:ops.nodeReaction(node) for node in self.planes[0]},ref)
+        base = scale(-1,reactions)
+        if self.lower_loads:
+            if error(reactions,[0.]*6)>CROSS_TOL:
+                raise RuntimeError(("gauge reactions violate self-equilibrium",factor,reactions))
+            add(base,scale(-factor,self.resultant(self.lower_loads,ref)))
         low,up = self.cut(self.mid-1,True),self.cut(self.mid,False)
         errors = [error(expected,target) for expected in (base,low,up)]
         if max(errors)>CROSS_TOL:
@@ -262,7 +289,7 @@ class Prism:
                             if value > damage_max[i]["value"]:
                                 damage_max[i] = dict(value=value, element=tag, gauss_point=point,
                                                      z_interval_mm=self.z[layer:layer+2])
-        return dict(factor=ops.getTime(),equilibrium_error=errors,lower_cut=low,upper_cut=up,
+        return dict(factor=factor,equilibrium_error=errors,lower_cut=low,upper_cut=up,lower_reactions_at_cut=reactions,
                     base_at_cut=base,steel=strains,adjacent_damage=damage,prism_damage_max=damage_max,
                     top_axis_displacement=ops.nodeDisp(self.node(self.x.index(0),self.y.index(0),self.nz)))
 
@@ -278,10 +305,11 @@ def analyze(prism,opts):
     ops.algorithm("Linear" if opts.variant=="elastic" else "Newton")
     ops.integrator("LoadControl",1.)
     ops.analysis("Static")
-    output = dict(opensees=ops.version(),variant=opts.variant,section_target=prism.section_target,
+    output = dict(opensees=ops.version(),variant=opts.variant,section_target=prism.section_target,end_condition=prism.end_condition,
                   length=opts.length,z_control=opts.cut,mesh=[prism.nx,prism.ny,prism.nz],
                   hoop_planes=prism.hoop_levels,installed_adjustment=prism.installed_adjustment,
                   cut_check_error_N=CROSS_TOL,applied_at_free_face=prism.resultant(prism.loads,prism.z[-1]),
+                  applied_at_lower_face=prism.resultant(prism.lower_loads,prism.z[0]),
                   states=[],rejected=[],termination=None)
     start = perf_counter()
 
@@ -411,6 +439,7 @@ def main():
     p.add_argument("--arc-length",type=float)
     p.add_argument("--continuation-start",type=float,default=float("inf"))
     p.add_argument("--variant",choices=["elastic","default","matched"],default="matched")
+    p.add_argument("--end-condition",choices=["clamped","balanced-tractions"],default="clamped")
     p.add_argument("--axial-force",type=float,default=TARGET[0],
                    help="reference axial force at the cut in N, positive for tension (default: %(default)g)")
     p.add_argument("--out",type=Path,required=True)
@@ -418,7 +447,7 @@ def main():
     if not math.isfinite(opts.axial_force):
         p.error("--axial-force must be finite")
     section_target = (opts.axial_force,*TARGET[1:])
-    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target),opts)
+    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target,opts.end_condition),opts)
     print("saved",opts.out,flush=True)
 
 
