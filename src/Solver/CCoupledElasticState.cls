@@ -21,6 +21,7 @@ Private Const PLANE_DOF As Long = 4
 Private Const STRESS_COMPONENTS As Long = 6
 Private Const SHAPE_COUNT As Long = 16
 Private Const GAUGES As Long = 4
+Private Const WARP_GAUGE_OFFSET As Long = 3
 Private Const LOCAL_DOF As Long = PLANE_DOF + 3 * SHAPE_COUNT
 
 Private mQuadrature As CCoupledSectionQuadrature
@@ -565,6 +566,41 @@ Friend Sub SteelProjection(ByVal point As Long, ByRef direction() As Double)
     Next j
 End Sub
 
+' Подбирает поправку множителя среднего продольного перемещения при заданной невязке.
+' Пересекает интервалы допустимых поправок по слабым уравнениям, не меняя поле и нагрузку.
+Friend Function TryWarpGaugeCorrection(ByRef residual() As Double, ByVal tolerance As Double, _
+        ByRef gauge As Long, ByRef change As Double) As Boolean
+    If tolerance <= 0# Then Exit Function
+    Dim row As Long, gaugeIndex As Long, weight As Double, value As Double
+    Dim lower As Double, upper As Double, rowLower As Double, rowUpper As Double, bounded As Boolean
+    gaugeIndex = mGaugeBase + WARP_GAUGE_OFFSET
+    On Error GoTo Unavailable
+    For row = 1 To mGaugeBase
+        weight = mMatrix(gaugeIndex, row): value = residual(row)
+        If weight = 0# Then
+            If Abs(value) > tolerance Then Exit Function
+        Else
+            If weight < 0# Then Exit Function ' Интегралы функций среднего перемещения неотрицательны.
+            rowLower = (-tolerance - value) / weight: rowUpper = (tolerance - value) / weight
+            If bounded Then
+                lower = GeomMax(lower, rowLower): upper = GeomMin(upper, rowUpper)
+                If lower > upper Then Exit Function
+            Else
+                lower = rowLower: upper = rowUpper: bounded = True
+            End If
+        End If
+    Next row
+    If Not bounded Then Exit Function
+    Dim midpoint As Double: midpoint = 0.5 * lower + 0.5 * upper
+    If midpoint = 0# Then Exit Function
+    gauge = gaugeIndex: change = midpoint
+    TryWarpGaugeCorrection = True
+    Exit Function
+
+Unavailable:
+    If Err.Number <> 6 And Err.Number <> 11 Then Err.Raise Err.Number, Err.Source, Err.Description
+End Function
+
 ' Готовит буфер нелинейных уравнений и добавляет четыре точных ограничения.
 ' Материальные вклады накапливаются вызовами AddPointEquilibrium.
 Friend Sub StartEquations(ByRef field() As Double, ByRef external() As Double, ByRef residual() As Double, _
@@ -801,7 +837,7 @@ Friend Sub CopyResultantResidualProjection(ByRef projection() As Double)
     Next row
     Dim alongX() As Double, alongY() As Double
     mQuadrature.CopyCoordinateCoefficients alongX, alongY
-    warpGauge = mGaugeBase + 3 ' Закрепление среднего продольного перемещения использует только бетон.
+    warpGauge = mGaugeBase + WARP_GAUGE_OFFSET ' Закрепление среднего продольного перемещения использует только бетон.
     Dim weight As Double, weightSum As Double, centerX As Double, centerY As Double
     For basis = 1 To UBound(mSupport)
         If mSupport(basis) > 0 Then

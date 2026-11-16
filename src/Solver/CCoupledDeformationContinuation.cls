@@ -274,7 +274,7 @@ End Function
 
 ' Сравнивает приращения на двух соседних шагах одной нисходящей ветви.
 ' Не меняет ни поля, ни историю. Рост шага возможен при устойчивых
-' наклонах множителя и нормированного поля неизвестных решателя.
+' наклонах нагрузки и механического поля.
 Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
     If left.HistoryIndex <> current.HistoryIndex - 1 Then Exit Function
@@ -288,14 +288,21 @@ Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As T
     Dim previous() As Double, accepted() As Double, field() As Double, resultants() As Double
     previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
     mSolver.CopyTrial field, resultants
+    FitsPostPeakSecant = FitsMechanicalSecant(previous, accepted, field, mSolver.PhysicalDegreeCount, ratio)
+End Function
+
+' Проверяет относительное отклонение механических приращений от секущей.
+' Множители кинематических связей лежат за границей mechanicalCount.
+Friend Function FitsMechanicalSecant(ByRef previous() As Double, ByRef accepted() As Double, _
+        ByRef field() As Double, ByVal mechanicalCount As Long, ByVal ratio As Double) As Boolean
     Dim i As Long, delta As Double, expectedDelta As Double, stepScale As Double, deviation As Double
-    For i = 1 To UBound(field)
+    For i = 1 To mechanicalCount
         delta = field(i) - accepted(i)
         expectedDelta = ratio * (accepted(i) - previous(i))
         stepScale = GeomMax(stepScale, Abs(expectedDelta))
         deviation = GeomMax(deviation, Abs(delta - expectedDelta))
     Next i
-    FitsPostPeakSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
+    FitsMechanicalSecant = (stepScale > 0# And deviation <= stepScale * POST_PEAK_SECANT_TOLERANCE)
 End Function
 
 ' Проверяет продвижение по выбранной мере на фактических полях.

@@ -851,6 +851,110 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет поправку множителя закрепления и выбор шага по механическому полю.
+Public Function RunTestCoupledKinematicGauge() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
+    Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
+    operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
+    center.TestInitialize operators.PointCount
+    plusSide.TestInitialize operators.PointCount
+    minusSide.TestInitialize operators.PointCount
+    solver.Initialize operators, center, 30000#, plusSide, minusSide
+    TestRecord operators.DegreeCount - solver.PhysicalDegreeCount = 4, "четыре множителя отделены от механики", passed, failed, report
+    TestMechanicalSecant solver.PhysicalDegreeCount, operators.DegreeCount, passed, failed, report
+    TestWarpGaugeCorrection operators, solver, passed, failed, report
+    RunTestCoupledKinematicGauge = report & "TOTAL_COUPLED_KINEMATIC_GAUGE: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledKinematicGauge = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает точную механическую секущую, отклонённое поле и чистое приращение множителя связи.
+Private Sub TestMechanicalSecant(ByVal mechanicalCount As Long, ByVal degreeCount As Long, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim branch As New CCoupledDeformationContinuation
+    Dim left() As Double, current() As Double, trial() As Double
+    ReDim left(1 To degreeCount): ReDim current(1 To degreeCount): ReDim trial(1 To degreeCount)
+    current(1) = 1E-6: trial(1) = 1.5E-6
+    TestRecord branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "точная механическая секущая", passed, failed, report
+    trial(mechanicalCount + 3) = -5.66313495971864E-7
+    TestRecord branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "поправка множителя не меняет секущую", passed, failed, report
+    trial(1) = 1.52E-6
+    TestRecord Not branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "четыре процента отклонения механики превышают допуск", passed, failed, report
+    current(1) = 0#: trial(1) = 0#
+    TestRecord Not branch.FitsMechanicalSecant(left, current, trial, mechanicalCount, 0.5), _
+        "чистый шаг множителя не продолжает механическую ветвь", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет линейную поправку, фактическую пересборку и штатное принятие нулевого поля НДС.
+Private Sub TestWarpGaugeCorrection(ByVal operators As CCoupledElasticState, ByVal solver As CCoupledNewtonSolver, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Const TOLERANCE As Double = 1E-7
+    Dim field() As Double, external() As Double, residual() As Double, tangent() As Double, control() As Double
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
+    Dim i As Long, count As Long, warpGauge As Long, gauge As Long, first As Long, second As Long
+    Dim weight As Double, maximumWeight As Double, initialValue As Double, change As Double, norm As Double
+    count = operators.DegreeCount: warpGauge = solver.PhysicalDegreeCount + 3
+    ReDim field(1 To count): ReDim external(1 To count): ReDim control(1 To count)
+    operators.StartEquations field, external, residual, tangent, True
+    For i = 1 To solver.PhysicalDegreeCount
+        weight = tangent(i, warpGauge)
+        If weight > 0# Then
+            If first = 0 Then first = i Else second = i
+            maximumWeight = GeomMax(maximumWeight, weight)
+        End If
+    Next i
+    If second = 0 Then Err.Raise 5, , "Для проверки нужны две ненулевые связи продольного перемещения."
+    initialValue = 1.5 * TOLERANCE / maximumWeight
+    field(warpGauge) = initialValue
+    operators.StartEquations field, external, residual, tangent, False
+    If Not operators.TryWarpGaugeCorrection(residual, TOLERANCE, gauge, change) Then _
+        Err.Raise 5, , "Допустимый интервал поправки не найден."
+    TestRecord gauge = warpGauge And change < 0#, "поправка адресована продольному множителю", passed, failed, report
+    field(gauge) = field(gauge) + change
+    operators.StartEquations field, external, residual, tangent, False
+    For i = 1 To count: norm = GeomMax(norm, Abs(residual(i))): Next i
+    TestRecord norm <= TOLERANCE, "пересборка проходит силовые уравнения и связи", passed, failed, report
+
+    residual(1) = 1.1 * TOLERANCE
+    TestRecord Not operators.TryWarpGaugeCorrection(residual, TOLERANCE, gauge, change), _
+        "множитель не исправляет независимое уравнение", passed, failed, report
+    residual(1) = 0#: residual(first) = 1.5 * TOLERANCE: residual(second) = -1.5 * TOLERANCE
+    TestRecord Not operators.TryWarpGaugeCorrection(residual, TOLERANCE, gauge, change), _
+        "несовместимые поправки к одному множителю отклоняются", passed, failed, report
+
+    Dim history As New Collection, trial() As Double, forces() As Double, stored() As Double, factor As Double
+    field(warpGauge) = initialValue: history.Add field
+    If Not solver.ReplayAcceptedFields(history, 1) Then Err.Raise 5, , "Не воспроизведено поле для пробы решателя."
+    direction(1) = 21600#: control(1) = 1#
+    If Not solver.TryDeformationStep(baseLoad, direction, control, 0#, 0#, factor, TOLERANCE, 1E-8, 1, consistentControl:=True) Then _
+        Err.Raise 5, , "Штатный решатель не принял поправку. " & solver.ResultMeta.DiagnosticDetails
+    TestRecord InStr(1, solver.ResultMeta.DiagnosticDetails, "Итерации: 0", vbBinaryCompare) > 0, _
+        "поправка принята до шага Ньютона", passed, failed, report
+    solver.CopyTrial trial, forces
+    Dim changed As Long
+    For i = 1 To count
+        If trial(i) <> field(i) Then changed = changed + 1
+    Next i
+    TestRecord changed = 1 And trial(warpGauge) <> initialValue, "изменён только продольный множитель", passed, failed, report
+    norm = 0#
+    For i = 1 To 6: norm = GeomMax(norm, Abs(forces(i))): Next i
+    TestRecord norm = 0# And factor = 0#, "шесть усилий и множитель нагрузки сохранены", passed, failed, report
+    solver.CopyAccepted stored
+    TestRecord stored(warpGauge) = initialValue, "проба сохраняет принятую историю", passed, failed, report
+    solver.AcceptStep
+    solver.CopyAccepted stored
+    TestRecord stored(warpGauge) = trial(warpGauge), "принятое значение совпадает с проверенной пробой", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет достижение предельной деформации арматуры до и после пика N.
 ' На нисходящей ветви поздний предел не заменяет больший пройденный максимум.
 Public Function RunTestCoupledDeformationSteelCrossing() As String

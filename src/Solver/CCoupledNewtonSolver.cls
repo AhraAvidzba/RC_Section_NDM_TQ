@@ -134,6 +134,11 @@ Friend Property Get UsesSpatialHistory() As Boolean
     UsesSpatialHistory = mUseSpatialHistory
 End Property
 
+' Возвращает число механических координат поля перед множителями связей.
+Friend Property Get PhysicalDegreeCount() As Long
+    PhysicalDegreeCount = mGaugeStart - 1
+End Property
+
 ' Решает равновесие при управлении одной линейной мерой деформации.
 ' Множитель нагрузки определяется вместе с полем и возвращается только
 ' для сошедшейся пробы. Материал остаётся в принятом ранее состоянии.
@@ -272,6 +277,9 @@ RecomputeTangent:
             Exit Function
         End If
         norm = EquilibriumNorm(load, current)
+        If mConsistentControl And norm > tolerance And norm <= SMALL_STRAIN_MAX_NORM * tolerance Then
+            If TryWarpGaugeEquilibrium(current, load, tolerance) Then norm = mLastNorm
+        End If
         If norm <= tolerance Then
             If mConsistentControl Then
                 If Not Evaluate(current, False) Then
@@ -404,6 +412,49 @@ EvaluationFailed:
     Else
         RecordFailure sfcInternalError, "Ошибка сборки связанного равновесия. " & description
     End If
+End Function
+
+' Проверяет поправку служебного множителя без записи материальной пробы.
+' Поле передаётся штатной ветви принятия только после полной проверки равновесия.
+Private Function TryWarpGaugeEquilibrium(ByRef field() As Double, ByRef load() As Double, _
+        ByVal tolerance As Double) As Boolean
+    If Not GaugesVerified(tolerance) Or Abs(ControlResidual(field)) > tolerance Then Exit Function
+    If mSection.ResultantResidualNorm(mTrialResultants, load) > tolerance Then Exit Function
+    Dim gauge As Long, change As Double
+    If Not mSection.TryWarpGaugeCorrection(mResidual, tolerance, gauge, change) Then Exit Function
+
+    Dim savedGauge As Double, savedNorm As Double, savedResidual() As Double, savedResultants() As Double
+    Dim savedCode As ESolverFailureCode, savedPoint As Long, savedLastPoint As Long
+    Dim savedSide As Long, savedFailures As Long
+    Dim failureNumber As Long, failureSource As String, failureDescription As String
+    savedGauge = field(gauge): savedNorm = mLastNorm
+    savedResidual = mResidual: savedResultants = mTrialResultants
+    savedCode = mFailureCode: savedPoint = mMaterialPoint: savedLastPoint = mLastFailedPoint
+    savedSide = mLastFailedSide: savedFailures = mMaterialFailures
+    On Error GoTo ProbeFailed
+    field(gauge) = savedGauge + change
+    If field(gauge) = savedGauge Then Exit Function ' Поправка меньше точности представления координаты.
+    If Evaluate(field, False, recordTrial:=False) Then
+        If EquilibriumNorm(load, field) <= tolerance And GaugesVerified(tolerance) Then
+            TryWarpGaugeEquilibrium = True
+            Exit Function
+        End If
+    End If
+
+RestoreProbe:
+    On Error GoTo 0
+    field(gauge) = savedGauge
+    mResidual = savedResidual: mTrialResultants = savedResultants: mLastNorm = savedNorm
+    mFailureCode = savedCode: mMaterialPoint = savedPoint: mLastFailedPoint = savedLastPoint
+    mLastFailedSide = savedSide: mMaterialFailures = savedFailures
+    If failureNumber <> 0 Then Err.Raise failureNumber, failureSource, failureDescription
+    Exit Function
+
+ProbeFailed:
+    If Err.Number <> 6 And Err.Number <> 11 Then
+        failureNumber = Err.Number: failureSource = Err.Source: failureDescription = Err.Description
+    End If
+    Resume RestoreProbe
 End Function
 
 ' Находит наибольшую невязку уравнений равновесия в МПа без уравнений закрепления.
