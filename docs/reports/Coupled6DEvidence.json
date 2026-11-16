@@ -123,7 +123,8 @@
     "HardShearTerminalBudgetAudit20261116": "EC0E74852D1FD83E788A1C3EDB8E2C50381F9BE9054E8A3638953A69FCD5D98B",
     "MVT2FirstBoundedBranchCorrectionNative20261116": "A2ED199D5EE0699206ADD65F0D89DE1DC3007A027B64F5B466E605A6646DB135",
     "ConcreteBaseResponseCacheNative20261116": "7D2F85735E07EC8A883119B5B696D0A20529495AF1F1BEAACFEC4DAE2063A2DD",
-    "MVT2SecondBoundedEquilibriumNative20261116": "07F9AA915BEE7D1DEA7E9854FE594B7F6D9D8740D2A15BAEEA4B8E83B6DDBFE8"
+    "MVT2SecondBoundedEquilibriumNative20261116": "07F9AA915BEE7D1DEA7E9854FE594B7F6D9D8740D2A15BAEEA4B8E83B6DDBFE8",
+    "MVT2AutomaticBoundedBranchRecoveryNative20261116": "C115A4F6C4B7A986229D05F9E279D1E132B86BF00BCAE9D133611809B94AE28F"
   },
   "cases": [
     {
@@ -1427,6 +1428,14 @@
       "script": "ReplaySecondPortable.py",
       "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip", "{evidence}/MVT2FirstBoundedBranchCorrectionNative20261116.zip"],
       "stdout_contains": "PRIVATE EXACT ACCEPTANCE REPRODUCED 04F899F1943CDB65F2DD022F0AD63A51DB254F321D77AF919D5D97ECF6D917DB"
+    },
+    {
+      "id": "mvt2-automatic-private-bounded-recovery-native",
+      "journal_section": 431,
+      "archive": "MVT2AutomaticBoundedBranchRecoveryNative20261116",
+      "script": "ReplayPortable.py",
+      "arguments": ["{evidence}/MVT2StockBranchArcNative20261116.zip", "{evidence}/MVT2SameRayDerivativeNative20261116.zip"],
+      "stdout_contains": "MVT2 AUTOMATIC FALLBACK CC64D1BB52C21D5B3A247D12E771D6945BAF66CC135FACAD02098D79A3DDD7CD RADIUS/DIRECTION 31407A1EC398024B9BFFDB0C06C62087008D57EF3D15899501482886176F310D"
     }
   ],
   "frozen_repositories": {

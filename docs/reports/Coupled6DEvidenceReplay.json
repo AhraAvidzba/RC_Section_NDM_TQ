@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "52151AE1ADE246A909612641EA34E18DA84DE47410AD6B54B3D56A2C6CC73B31",
+  "manifest_sha256": "7AD6F3445CF45B4731C3CE26D3EAB3077749E0487B216146763B6A7B35D30722",
   "source_checkpoint": "c9e7268",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 120,
+  "passed": 121,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1035,6 +1035,13 @@
       "archive": "MVT2SecondBoundedEquilibriumNative20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "PRIVATE EXACT ACCEPTANCE REPRODUCED 04F899F1943CDB65F2DD022F0AD63A51DB254F321D77AF919D5D97ECF6D917DB"
+    },
+    {
+      "id": "mvt2-automatic-private-bounded-recovery-native",
+      "journal_section": 431,
+      "archive": "MVT2AutomaticBoundedBranchRecoveryNative20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 AUTOMATIC FALLBACK CC64D1BB52C21D5B3A247D12E771D6945BAF66CC135FACAD02098D79A3DDD7CD RADIUS/DIRECTION 31407A1EC398024B9BFFDB0C06C62087008D57EF3D15899501482886176F310D"
     }
   ]
 }
