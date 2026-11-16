@@ -51,7 +51,11 @@ def materialize_frozen_repository(repo, specification, destination):
     revision = specification["revision"]
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError(f"Для исторических входов нужен полный SHA-1 Git: {revision}")
-    for relative, expected in specification["files"].items():
+    files = specification["files"]
+    checkout_crlf = specification.get("checkout_crlf", {})
+    if not checkout_crlf.keys() <= files.keys():
+        raise ValueError("Преобразование CRLF задано для незакреплённого исторического входа")
+    for relative, expected in files.items():
         path = PurePosixPath(relative)
         if not path.parts or path.is_absolute() or ".." in path.parts or ":" in relative or "\\" in relative:
             raise ValueError(f"Недопустимый путь исторического входа: {relative}")
@@ -61,11 +65,17 @@ def materialize_frozen_repository(repo, specification, destination):
         )
         if result.returncode:
             raise ValueError(f"Исторический вход {relative} недоступен в ревизии {revision}")
-        if sha256(result.stdout).hexdigest().upper() != expected:
+        contents = result.stdout
+        if relative in checkout_crlf:
+            raw = sha256(contents).hexdigest().upper()
+            if raw != checkout_crlf[relative] or b"\r" in contents or b"\x00" in contents:
+                raise ValueError(f"Исходный Git-блоб для преобразования CRLF не совпал: {relative}")
+            contents = contents.replace(b"\n", b"\r\n")
+        if sha256(contents).hexdigest().upper() != expected:
             raise ValueError(f"Контрольная сумма исторического входа {relative} не совпала")
         target = destination.joinpath(*path.parts)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(result.stdout)
+        target.write_bytes(contents)
 
 
 def replay_case(case, locations):

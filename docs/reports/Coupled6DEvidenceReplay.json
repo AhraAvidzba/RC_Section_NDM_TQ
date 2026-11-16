@@ -1,12 +1,13 @@
 {
-  "manifest_sha256": "E44F38C35F0EFAFDF897C6CD9F25B21CB7B4E52262DFAC1B593D3D416D50C6F0",
-  "source_checkpoint": "c9e7268",
+  "manifest_sha256": "B38C9F63CB9197948906E7EBE9C1C3B08856D37114632C0C71975C7AD4F69948",
+  "source_checkpoint": "77c3c7f09ad85ea75ecef7e916f830b5f8c2f983",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "2ACFC02576861DB076FDBDBF12471FE630DA95D738A60D4A48A0D9EAF02937EF",
-    "workbook/output/VBA_All_Code.txt": "F852DFA2A1F94FF70425783634ABB4AAB0C688FC6DF393A225F9E7E80927B737"
+    "workbook/output/RC_Section_NDM.xlsm": "C603E41639484DB313C5390930BC52F1AC3CC42ED4CE01BC1946BC01ED84FA95",
+    "workbook/output/VBA_All_Code.txt": "7C5D85EF5D7500E95541EDF1AAF1BEC9AF2177A3B65491356A6DFE16335E365E"
   },
   "frozen_revisions": {
-    "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
+    "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51",
+    "repo_c9e7268": "c9e7268fe8b7c3c40edca958d137eb0531a53c19"
   },
   "python": "3.12.10",
   "python_packages": {
@@ -15,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 144,
+  "passed": 146,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1215,6 +1216,20 @@
         "Replayed.json": "797452063F200A27F1BD86F86C983EC17F7449A0DF6BCA7DC4351A8C42DE0E1B"
       },
       "verified_stdout": "MVT2_DISTRIBUTED_SHEAR_DETACHED_PASS [5.0]"
+    },
+    {
+      "id": "hardshear-same-control-workbook-v2-native",
+      "journal_section": 455,
+      "archive": "HardShearSameControlWorkbookV220261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR V2 WORKBOOK SMOKE PORTABLE VERIFIED"
+    },
+    {
+      "id": "mvt2-h26-plain-physical-arc-exact-fixed-target-native",
+      "journal_section": 456,
+      "archive": "MVT2H26PlainArcBridgeNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "EXACT FIXED TARGET 18.5807648375649 ITERATIONS LEFT 6"
     }
   ]
 }
