@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "9A998345E156E5AB40C390EA944BF82FED4801823B34D2EB8BD36150F8978298",
-  "source_checkpoint": "bdeee01",
+  "manifest_sha256": "886E8D9768592E004C47105A5D9BB7C684A07182E627828960B655976F47EF23",
+  "source_checkpoint": "dde8810",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "E9F63337672E9FEC00E228A100EF554E9CA740D9395AC80D92E23417D0DA8833",
-    "workbook/output/VBA_All_Code.txt": "76AC8357F413716ECAB391C5005B7C2431C942A995D48738713B586CBB3C6ADB"
+    "workbook/output/RC_Section_NDM.xlsm": "9A99BF072D67536CBCCA525A75E049F510C5242D46CB4EA3ADA7BC4C726088F8",
+    "workbook/output/VBA_All_Code.txt": "DA8E76A50A4917DCF66AEC162F51D98D75E03DC3595D8506E920CEF98B3145C9"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 47,
+  "passed": 51,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -419,6 +419,40 @@
       "archive": "CoupledDesignWitnessRelease20261116",
       "verified_outputs_sha256": {
         "Replay.json": "201C8767700129122B958A1893D428577626C55E252E1913160E7C67DD234D7A"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-archive-direction-audit",
+      "journal_section": 346,
+      "archive": "MVT2ArchiveDirections20261116",
+      "verified_outputs_sha256": {
+        "ArchiveDirections.json": "9D1DA40B4CD770AE57B29A4536B5649CE6940B4E6BF01AF9C579D0FCE681DEFD"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-physical-branch-control",
+      "journal_section": 347,
+      "archive": "KaniH45PhysicalBranchPortable",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "\"plannedControlIncrement\": 1.5e-08"
+    },
+    {
+      "id": "retained-bound-and-results-release",
+      "journal_section": 348,
+      "archive": "CoupledRetainedBoundsResults20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "30D602BCA5CAA6885CC0A38A915E1B084A57797AB04286CDC5A26D262A21105C"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-native-step-three",
+      "journal_section": 349,
+      "archive": "MVT2Step3Native20261116",
+      "verified_outputs_sha256": {
+        "Verification.json": "004F3463BA3B1F0C7119CB8A8A0857CF6DED6173432E4435C58824415E18C6B6"
       },
       "verified_stdout": null
     }

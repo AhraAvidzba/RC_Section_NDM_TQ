@@ -3076,6 +3076,7 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestRecord grades.Borders.Item(10).LineStyle <> -4142, "steel class catalog has right border", passed, failed, report
 
     TestInputCell(settings, "Geometry.Source").Value2 = "Generated"
+    TestInputCell(settings, "General.DiagramExtension").Value2 = "Yes"
     TestInputCell(settings, "Output.CombinationMode").Value2 = "Worst"
     TestInputCell(settings, "Results.SnapshotName").Value2 = "TestCoupledWorkbookInput"
     Dim pr4 As Long
@@ -3087,6 +3088,7 @@ Public Function RunTestCoupledWorkbookInput() As String
     TestInputCell(profiles, "Calculation.Stability.Enabled", 2, pr4).Value2 = "No"
     TestInputCell(profiles, "Calculation.Crack.Width", 2, pr4).Value2 = "No"
     TestInputCell(profiles, "MaterialModel.Strength.ValueSet", 2, pr4).Value2 = "ULS(I)"
+    TestInputCell(profiles, "MaterialModel.Strength.ConcreteDiagram", 2, pr4).Value2 = "ThreeLine"
     TestInputCell(profiles, "MaterialModel.Strength.ConcreteTension", 2, pr4).Value2 = "UseDiagram"
     TestInputCell(profiles, "MaterialModel.Strength.SteelDiagram", 2, pr4).Value2 = "TwoLine"
     TestInputCell(profiles, "Visualization.State", 2, pr4).Value2 = "StrengthState"
@@ -3182,6 +3184,7 @@ Public Function RunTestCoupledWorkbookInput() As String
             CStr(mode) & " writes hoop status only for spatial case", passed, failed, report
         TestRecord hoopAnchor.Offset(0, 64).Value2 = "N/A" And Len(hoopAnchor.Offset(0, 59).Value2) = 0, _
             CStr(mode) & " distinguishes direct OK from a switched-off reserve search", passed, failed, report
+        TestStrengthModelColumns hoopAnchor, CStr(mode), passed, failed, report
         If CStr(mode) = "File" Then
             Dim savedStrength As Variant, reader As CResultReadSource
             Set reader = CurrentResultSource(book)
@@ -3189,7 +3192,10 @@ Public Function RunTestCoupledWorkbookInput() As String
             TestRecord UBound(savedStrength, 2) = STRENGTH_SNAPSHOT_COLUMNS And savedStrength(1, 59) = "OK", _
                 "File stores separate hoop status and schema", passed, failed, report
             hoopAnchor.Offset(0, 58).ClearContents
+            hoopAnchor.Offset(0, 10).Resize(1, 4).Value2 = 1#
+            hoopAnchor.Offset(0, 27).Value2 = "no"
             UpdateSectionResultsForWorkbook book
+            TestStrengthModelColumns hoopAnchor, "File после восстановления", passed, failed, report
             TestRecord hoopAnchor.Offset(0, 58).Value2 = "OK", "File restores a removed hoop status", passed, failed, report
             TestStrengthSnapshotWidths book, reader, hoopAnchor, passed, failed, report
         End If
@@ -3221,6 +3227,29 @@ Public Function RunTestCoupledWorkbookInput() As String
 Failed:
     RunTestCoupledWorkbookInput = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Различает плоские предельные деформации и фактические результаты связанного НДС.
+Private Sub TestStrengthModelColumns(ByVal anchor As Object, ByVal mode As String, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim spatial As Variant, planar As Variant, i As Long, nonempty As Long, positiveLimits As Long
+    spatial = anchor.Offset(0, 10).Resize(1, 4).Value2
+    planar = anchor.Offset(1, 10).Resize(1, 4).Value2
+    For i = 1 To 4
+        If Not IsEmpty(spatial(1, i)) Then nonempty = nonempty + 1
+        If IsNumeric(planar(1, i)) Then
+            If Abs(CDbl(planar(1, i))) > 0# Then positiveLimits = positiveLimits + 1
+        End If
+    Next i
+    TestRecord anchor.Value2 = "Spatial" And nonempty = 0, _
+        mode & " не подставляет плоские пределы в связанное НДС", passed, failed, report
+    TestRecord anchor.Offset(1, 0).Value2 = "Plane" And positiveLimits = 4, _
+        mode & " сохраняет четыре предельные деформации плоской модели", passed, failed, report
+    TestRecord anchor.Offset(0, 27).Value2 = "-" And anchor.Offset(1, 27).Value2 = "no", _
+        mode & " различает неприменимое продолжение и разрешённое, но не использованное", passed, failed, report
+    TestRecord InStr(1, CStr(anchor.Offset(-2, 10).Value2), "плоской модели", vbTextCompare) > 0, _
+        mode & " указывает применимость в шапке предельной деформации", passed, failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Сверяет шесть усилий в центре бетонной сетки и приведённые невязки.
@@ -4518,3 +4547,75 @@ Private Sub TestDesignWitnessInPrefix(ByRef passed As Long, ByRef failed As Long
     TestRecord branch.CopyPeak(peak, accuracy, designVerified) And designVerified, _
         "точное сочетание из сохранённого префикса подтверждено", passed, failed, report
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет нижнюю границу с сохранёнными равновесиями после замены грубого плеча.
+Public Function RunTestCoupledDiscardedShoulder() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const STEEL_AREA As Double = 100#, DESIGN_FORCE As Double = 410000#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize 200000#, 40#, 40#, 0#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    concrete.TestInitialize operators.PointCount
+    concrete.TestUseDiscardedShoulderLaw
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = DESIGN_FORCE
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim coordinate As Variant, factor As Double, lambda As Double, previous As Double
+    For Each coordinate In Array(0.0004, 0.0006)
+        If Not solver.TryDeformationStep(offset, direction, control, CDbl(coordinate), lambda, factor, 1E-8, 1E-8, 30) Then _
+            Err.Raise 5, , "Не получено исходное равновесие. " & solver.ResultMeta.DiagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        trace.Add 1#, factor
+        previous = lambda: lambda = factor
+    Next coordinate
+    TestExpectNear previous, 0.75, 1E-8, "грубое левое поле", passed, failed, report
+    TestExpectNear lambda, 1.2, 1E-8, "грубый максимум до уточнения", passed, failed, report
+
+    Dim branch As New CCoupledDeformationContinuation
+    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 1E-8, 1E-8, trace
+    Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
+    TestRecord saved.Count = 5, "итоговая история содержит четыре подшага", passed, failed, report
+    Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
+    Dim i As Long, offsetFraction As Double, greatest As Double
+    For i = 1 To GeomMin(saved.Count, 5)
+        saved.ReadPoint i, offsetFraction, factor
+        TestExpectNear factor, CDbl(expected(i - 1)), 1E-8, "множитель принятого поля " & CStr(i), passed, failed, report
+        TestExpectNear offsetFraction, 1#, 1E-12, "доля постоянной части " & CStr(i), passed, failed, report
+        greatest = GeomMax(greatest, factor)
+    Next i
+    TestExpectNear greatest, 1.1, 1E-8, "максимум уточнённой истории", passed, failed, report
+    TestExpectNear branch.BestAdmissibleLambda, greatest, 1E-8, _
+        "граница подтверждения принадлежит сохранённой истории", passed, failed, report
+
+    Dim meta As CResultMeta: Set meta = branch.ResultMeta
+    Dim capacity As New CCapacityResult
+    capacity.InitializeCoupledUnresolved meta, "Auto", branch.BestAdmissibleLambda
+    TestRecord capacity.HasConfirmedLowerBound And Not capacity.HasUltimatePoint And _
+        capacity.ResultMeta.InternalStatus = rsNumericalFailure, _
+        "сохраняется численный исход без физического предела", passed, failed, report
+    TestExpectNear capacity.ConfirmedLowerLambda, greatest, 1E-8, _
+        "публикуемая нижняя граница взята из принятой ветви", passed, failed, report
+    solver.CopyAccepted field
+    TestExpectNear field(1), 0.0007, 1E-12, "состояние конца уточнённого плеча", passed, failed, report
+    TestExpectNear concrete.TestAcceptedPeak, field(1), 1E-12, "материальная история совпадает с полем", passed, failed, report
+    TestRecord concrete.TestAcceptedSteps = saved.Count, "история и след имеют одинаковое число шагов", passed, failed, report
+    RunTestCoupledDiscardedShoulder = report & "TOTAL_COUPLED_DISCARDED_SHOULDER: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledDiscardedShoulder = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

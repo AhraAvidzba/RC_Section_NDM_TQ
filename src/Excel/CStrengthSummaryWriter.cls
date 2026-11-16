@@ -361,10 +361,10 @@ Private Sub PutHeaderNotes(ByRef headers() As Variant)
     headers(HEADER_NOTES_ROW, COL_LOAD_N) = "продольная сила N, переданная в расчёт прочности, в пользовательской точке приложения нагрузки"
     headers(HEADER_NOTES_ROW, COL_LOAD_MX) = "момент Mx, переданный в расчёт прочности, в пользовательской точке приложения нагрузки. Продольный изгиб учтён, если он включён для сочетания."
     headers(HEADER_NOTES_ROW, COL_LOAD_MY) = "момент My, переданный в расчёт прочности, в пользовательской точке приложения нагрузки. Продольный изгиб учтён, если он включён для сочетания."
-    headers(HEADER_NOTES_ROW, COL_LIM_EBC) = "предельная деформация бетона при сжатии"
-    headers(HEADER_NOTES_ROW, COL_LIM_EBT) = "предельная деформация бетона при растяжении; пусто, если растянутый бетон не работает"
-    headers(HEADER_NOTES_ROW, COL_LIM_ESC) = "предельная деформация продольной арматуры при сжатии"
-    headers(HEADER_NOTES_ROW, COL_LIM_EST) = "предельная деформация продольной арматуры при растяжении"
+    headers(HEADER_NOTES_ROW, COL_LIM_EBC) = "предельная деформация бетона при сжатии в плоской модели"
+    headers(HEADER_NOTES_ROW, COL_LIM_EBT) = "предельная деформация бетона при растяжении в плоской модели при включённом растяжении"
+    headers(HEADER_NOTES_ROW, COL_LIM_ESC) = "предельная деформация продольной арматуры при сжатии в плоской модели"
+    headers(HEADER_NOTES_ROW, COL_LIM_EST) = "предельная деформация продольной арматуры при растяжении в плоской модели"
     headers(HEADER_NOTES_ROW, COL_STATE_EPS0) = ChrW$(&H3B5) & "0 в точке (0;0) внутренней системы координат модели; от этой точки заданы координаты всех элементов сечения"
     headers(HEADER_NOTES_ROW, COL_STATE_KX) = "кривизна kx при координате y во внутренней системе координат модели"
     headers(HEADER_NOTES_ROW, COL_STATE_KY) = "кривизна ky при координате x во внутренней системе координат модели"
@@ -378,7 +378,7 @@ Private Sub PutHeaderNotes(ByRef headers() As Variant)
     headers(HEADER_NOTES_ROW, COL_STATE_SST) = "максимальное растяжение продольной арматуры"
     headers(HEADER_NOTES_ROW, COL_STATE_H) = "полная высота сечения по нормали к нейтральной линии"
     headers(HEADER_NOTES_ROW, COL_STATE_X) = "высота сжатой зоны по нормали к нейтральной линии"
-    headers(HEADER_NOTES_ROW, COL_STATE_DIAGEXT) = "yes - равновесие найдено через продолжение диаграммы; no - продолжение было разрешено, но не понадобилось; - - продолжение выключено"
+    headers(HEADER_NOTES_ROW, COL_STATE_DIAGEXT) = "плоская модель: yes — продолжение использовано, no — разрешено. Прочерк — выключено или связанный расчёт"
     headers(HEADER_NOTES_ROW, COL_STATE_RESERVE) = "минимальный запас по предельным деформациям"
     headers(HEADER_NOTES_ROW, COL_STATE_STATUS) = "статус фактического НДС по модели прочности"
     headers(HEADER_NOTES_ROW, COL_CAP_EPS0) = ChrW$(&H3B5) & "0 в точке (0;0) внутренней системы координат модели; от этой точки заданы координаты всех элементов сечения"
@@ -528,7 +528,7 @@ Private Sub PutCombination(ByRef data() As Variant, ByVal rowIndex As Long, _
     data(rowIndex, COL_LOAD_MX) = OutputMx(batch.StrengthLoadPointMx(index), units)
     data(rowIndex, COL_LOAD_MY) = OutputMy(batch.StrengthLoadPointMy(index), units)
 
-    PutStrengthLimits data, rowIndex, batch, index, units
+    If Not batch.HasSpatialLoads(index) Then PutPlanarStrengthLimits data, rowIndex, batch, index
     PutStrengthState data, rowIndex, batch, index, units, section, policy
     PutCapacityState data, rowIndex, batch, index, units, section, policy
     If batch.HasSpatialLoads(index) Then PutTransverseState data, rowIndex, batch, index, units, policy
@@ -598,10 +598,10 @@ Private Function OutputDataOffset(ByVal batch As CBatchSectionCalculator, ByVal 
     If OutputDataOffset > dataRows Then OutputDataOffset = dataRows
 End Function
 
-' Записывает физические пределы деформаций фактически использованной модели прочности.
+' Записывает предельные деформации плоской модели прочности.
 ' Растянутый предел бетона показывает только при включённой растянутой ветви.
-Private Sub PutStrengthLimits(ByRef data() As Variant, ByVal rowIndex As Long, _
-        ByVal batch As CBatchSectionCalculator, ByVal index As Long, ByVal units As CUnitSystem)
+Private Sub PutPlanarStrengthLimits(ByRef data() As Variant, ByVal rowIndex As Long, _
+        ByVal batch As CBatchSectionCalculator, ByVal index As Long)
     data(rowIndex, COL_LIM_EBC) = batch.StrengthConcreteCompressionLimitForCombination(index)
     If batch.StrengthConcreteTensionLimitEnabledForCombination(index) Then _
         data(rowIndex, COL_LIM_EBT) = batch.StrengthConcreteTensionLimitForCombination(index)

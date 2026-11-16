@@ -22,12 +22,14 @@ Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
 Private mMinimumAxialStrain As Double
 Private mCubic As Double, mTwinPeaks As Boolean, mBlocksRefinedDesign As Boolean
+Private mCoarseShoulderBump As Boolean
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
 Friend Sub TestInitialize(ByVal pointCount As Long)
     mCount = pointCount
     mCubic = 1E+10#: mTwinPeaks = False: mBlocksRefinedDesign = False
+    mCoarseShoulderBump = False
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -40,6 +42,27 @@ End Sub
 ' Задаёт два максимума между крупными шагами деформационного продолжения.
 Friend Sub TestUseTwinPeakAxialLaw()
     mTwinPeaks = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Добавляет отклик крупного шага, который исчезает при принятии промежуточного поля.
+Friend Sub TestUseDiscardedShoulderLaw()
+    TestUseTwinPeakAxialLaw
+    mCoarseShoulderBump = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вводит гладкий локальный вклад 0,4 в множитель до принятия промежуточного поля.
+Private Sub TestAddCoarseShoulder(ByVal strain As Double, ByVal acceptedPeak As Double, _
+        ByRef stress As Double, ByRef tangent As Double)
+    Const PEAK_STRAIN As Double = 0.0006, HALF_WIDTH As Double = 0.00002
+    Const AMPLITUDE As Double = 0.4 * 410000# / 21500#
+    If acceptedPeak >= 0.00045 Then Exit Sub
+    Dim point As Double: point = (strain - PEAK_STRAIN) / HALF_WIDTH
+    If Abs(point) >= 1# Then Exit Sub
+    Dim blend As Double: blend = 1# - point * point
+    stress = stress + AMPLITUDE * blend * blend
+    tangent = tangent - 4# * AMPLITUDE * point * blend / HALF_WIDTH
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -118,6 +141,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     e = strain(3)
     If mTwinPeaks Then
         TestTwinPeakStress e, stress(3), tangent(3, 3)
+        If mCoarseShoulderBump Then TestAddCoarseShoulder e, mAcceptedPeak(point), stress(3), tangent(3, 3)
     Else
         stress(3) = stress(3) + mCubic * e ^ 3
         tangent(3, 3) = tangent(3, 3) + 3# * mCubic * e ^ 2

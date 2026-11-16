@@ -47,6 +47,7 @@ Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedRes
 Private mOffset() As Double, mDirection() As Double, mProjection() As Double
 Private mAbsTol As Double, mRelTol As Double, mLambdaTolerance As Double
 Private mMaxIterations As Long, mMaximumLambda As Double, mBestLambda As Double
+Private mBestBeforeCurrent As Double ' Наибольший множитель до последнего принятого поля.
 Private mControlName As String, mProbeDetails As String, mMeta As CResultMeta
 Private mPeak As TBranchPoint, mPeakAccuracy As Double
 Private mHasPeak As Boolean
@@ -79,7 +80,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mOffset = offset: mDirection = direction
     mMaxIterations = maximumIterations: mMaximumLambda = maximumLambda
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
-    mBestLambda = currentLambda: mDesignHistoryIndex = 0
+    mBestBeforeCurrent = previousLambda: mBestLambda = currentLambda ' Начальный силовой участок монотонно возрастает.
+    mDesignHistoryIndex = 0
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0
@@ -201,7 +203,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If increment > nominal Then mPostPeakWidePoints = mPostPeakWidePoints + 1
             End If
             left = current: current = trial
-            If current.Lambda > mBestLambda Then mBestLambda = current.Lambda
             If mFollowingLocalPeak Then CheckRecovery current.Lambda
             If smoothTrial And mFollowingLocalPeak Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
             stepCeiling = nominal
@@ -437,6 +438,8 @@ Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint
     history.Add field
     If Not mTrace Is Nothing Then mTrace.Add 1#, point.Lambda
     point.HistoryIndex = history.Count
+    mBestBeforeCurrent = mBestLambda
+    mBestLambda = GeomMax(mBestLambda, point.Lambda)
 End Sub
 
 ' Проверяет точное lambda = 1 от левого плеча перед продвижением истории.
@@ -504,9 +507,11 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
     Dim sampling As Double, refinedFields As Collection, actual As Variant
-    Dim accuracy As Double, divisions As Long, retainedMaximum As Double, refinedDesignLeft As Long
+    Dim accuracy As Double, divisions As Long, refinedDesignLeft As Long
+    Dim retainedMaximum As Double, retainedPreviousMaximum As Double
     If keepRight Then
-        If Not ReplayShoulders(history, checkedLeft, middle, checkedRight, 2, second, sampling, refinedFields, actual, True, retainedMaximum, refinedDesignLeft) Then Exit Function
+        If Not ReplayShoulders(history, checkedLeft, middle, checkedRight, 2, second, sampling, refinedFields, actual, True, retainedMaximum, refinedDesignLeft, _
+                retainedPreviousMaximum) Then Exit Function
         accuracy = Abs(middle.Lambda - second.Lambda)
         If sampling > accuracy Then accuracy = sampling
         accuracy = accuracy + second.Uncertainty
@@ -515,7 +520,9 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
         If Not ReplayShoulders(history, left, middle, right, 2, first, sampling) Then Exit Function
         divisions = 4
         Do
-            If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual, designLeftIndex:=refinedDesignLeft) Then Exit Function
+            If Not ReplayShoulders(history, left, middle, right, divisions, second, sampling, refinedFields, actual, _
+                    retainedMaximum:=retainedMaximum, designLeftIndex:=refinedDesignLeft, _
+                    retainedPreviousMaximum:=retainedPreviousMaximum) Then Exit Function
             accuracy = Abs(first.Lambda - second.Lambda)
             If sampling > accuracy Then accuracy = sampling
             accuracy = accuracy + first.Uncertainty + second.Uncertainty
@@ -538,7 +545,8 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     mDesignHistoryIndex = designIndex
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
     Set mLimitFields = refinedFields: mLimitResultants = actual
-    mBestLambda = GeomMax(mBestLambda, GeomMax(second.Lambda, retainedMaximum))
+    mBestBeforeCurrent = retainedPreviousMaximum
+    mBestLambda = retainedMaximum ' Равновесие удалённого крупного шага остаётся только в оценке погрешности.
     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
         "Подтверждён первый максимум прослеженной ветви.", Details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
         " | Координаты плеч: " & CStr(shoulderStart) & ", " & CStr(right.Coordinate)
@@ -552,7 +560,8 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
         Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False, _
-        Optional ByRef retainedMaximum As Double = 0#, Optional ByRef designLeftIndex As Long = 0) As Boolean
+        Optional ByRef retainedMaximum As Double = 0#, Optional ByRef designLeftIndex As Long = 0, _
+        Optional ByRef retainedPreviousMaximum As Double = 0#) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim start As Double, finish As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
@@ -622,9 +631,10 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         fieldCount = peakIndex
         If keepRight Then fieldCount = index
         For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
-        retainedMaximum = peak.Lambda: designLeftIndex = 0
+        retainedMaximum = mBestBeforeCurrent: designLeftIndex = 0 ' Префикс заканчивается левым полем грубой ветви.
         For j = 1 To fieldCount
             limitFields.Add refined.Item(j)
+            retainedPreviousMaximum = retainedMaximum
             retainedMaximum = GeomMax(retainedMaximum, samples(j).Lambda)
             If designLeftIndex = 0 And samples(j - 1).Lambda < 1# And samples(j).Lambda >= 1# Then _
                 designLeftIndex = left.HistoryIndex + j - 1

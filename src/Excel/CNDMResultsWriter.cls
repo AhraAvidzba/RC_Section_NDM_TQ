@@ -939,7 +939,7 @@ Private Sub PutCoupledCapacityProperties(ByRef data() As Variant, ByRef row As L
     PutProperty data, row, runID, id, "Coupled.Capacity.ResultCode", ResultCodeToText(meta.ResultCode), "-", "Код результата поиска предела."
     PutProperty data, row, runID, id, "Coupled.Capacity.LimitState", capacity.LimitState, "-", "Определяющий механизм или причина остановки поиска."
     If capacity.HasConfirmedLowerBound Then _
-        PutProperty data, row, runID, id, "Coupled.Capacity.LowerLambda", capacity.ConfirmedLowerLambda, "-", "Последнее подтверждённое равновесие без превышения арматурного критерия."
+        PutProperty data, row, runID, id, "Coupled.Capacity.LowerLambda", capacity.ConfirmedLowerLambda, "-", "Наибольший подтверждённый множитель сохранённой ветви без превышения предельной деформации арматуры."
     If capacity.IsTransverseLimit Then
         PutProperty data, row, runID, id, "Coupled.Transverse.Limit.Status", capacity.TransverseLimitStatus, "-", "Статус по предельному множителю поперечной арматуры."
         If hasSteelLimit Then

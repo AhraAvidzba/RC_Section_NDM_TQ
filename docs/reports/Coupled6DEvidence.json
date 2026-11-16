@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "bdeee01",
+  "source_checkpoint": "dde8810",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "E9F63337672E9FEC00E228A100EF554E9CA740D9395AC80D92E23417D0DA8833",
-    "workbook/output/VBA_All_Code.txt": "76AC8357F413716ECAB391C5005B7C2431C942A995D48738713B586CBB3C6ADB"
+    "workbook/output/RC_Section_NDM.xlsm": "9A99BF072D67536CBCCA525A75E049F510C5242D46CB4EA3ADA7BC4C726088F8",
+    "workbook/output/VBA_All_Code.txt": "DA8E76A50A4917DCF66AEC162F51D98D75E03DC3595D8506E920CEF98B3145C9"
   },
   "python_packages": [
     "numpy",
@@ -52,7 +52,11 @@
     "CoupledRetainedShouldersRelease20261116": "5824096AA6F6777FBC0FD27704294D95A367FB9C9D9BBD97FF9E76181552E673",
     "KaniH45MixedWitnessPortable": "C604D13C749743EC9C6B91C9731FEFC7113088633878AAA80962FFF46C72EA27",
     "MVT2CompensationSubspace20261116": "CA40C6644BF20A9E5A9C702425D39437132F0D84ECDEC0D1808F7F96F5D1C6E5",
-    "CoupledDesignWitnessRelease20261116": "8DA37ACF252FA9EBE92C3531F72655EA93C5B23C356A71E5EE30A225536D14F3"
+    "CoupledDesignWitnessRelease20261116": "8DA37ACF252FA9EBE92C3531F72655EA93C5B23C356A71E5EE30A225536D14F3",
+    "MVT2ArchiveDirections20261116": "2A650D598682D0F69D89B85C46BEE9BA30A4C1983E5DE04C016754AF4C894692",
+    "KaniH45PhysicalBranchPortable": "F22D91FE8632950056C045D519879962947297ACA12D5530BCDFEA236406F4F2",
+    "CoupledRetainedBoundsResults20261116": "36F37977DFBB1559198139842425ED15C4304ABFD4CAB35D0FE07D14D84B1A80",
+    "MVT2Step3Native20261116": "FDCB0C512B54989A19793F0A1B449ADB743779C406AA1A6A49972C6E5E789CB7"
   },
   "cases": [
     {
@@ -580,6 +584,51 @@
       "script": "Verify-DesignWitness.py",
       "outputs": {
         "Replay.json": "201C8767700129122B958A1893D428577626C55E252E1913160E7C67DD234D7A"
+      }
+    },
+    {
+      "id": "mvt2-archive-direction-audit",
+      "journal_section": 346,
+      "archive": "MVT2ArchiveDirections20261116",
+      "script": "ArchiveDirections.py",
+      "arguments": [
+        "{evidence}",
+        "ArchiveDirections.json"
+      ],
+      "outputs": {
+        "ArchiveDirections.json": "9D1DA40B4CD770AE57B29A4536B5649CE6940B4E6BF01AF9C579D0FCE681DEFD"
+      }
+    },
+    {
+      "id": "kani-h45-physical-branch-control",
+      "journal_section": 347,
+      "archive": "KaniH45PhysicalBranchPortable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "stdout_contains": "\"plannedControlIncrement\": 1.5e-08"
+    },
+    {
+      "id": "retained-bound-and-results-release",
+      "journal_section": 348,
+      "archive": "CoupledRetainedBoundsResults20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "30D602BCA5CAA6885CC0A38A915E1B084A57797AB04286CDC5A26D262A21105C"
+      }
+    },
+    {
+      "id": "mvt2-native-step-three",
+      "journal_section": 349,
+      "archive": "MVT2Step3Native20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "004F3463BA3B1F0C7119CB8A8A0857CF6DED6173432E4435C58824415E18C6B6"
       }
     }
   ],
