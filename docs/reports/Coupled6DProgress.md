@@ -11151,6 +11151,11 @@ $N$, а после деления принят следующий шаг. По �
 `Verify-MVT2Controlled.py` проверяет сохранённые поля
 и подписанные винты независимо от Excel.
 
+В переносимом комплекте [MVT2ControlledOffline.zip](../regression/Coupled6D/MVT2ControlledOffline.zip)
+входы и Python-проверка доступны из рабочей копии Git.
+После отдельной распаковки получен тот же SHA-256 результата.
+SHA-256 ZIP `FAD3D91F3698D726CB871EF4D3F5F7952BF6E8D8B2F9C5024BDB87573B2217B2`.
+
 - `Preparation.json` `D168E5AC3AD1FBBCD8EF6EDECB33338E6BA728CDB409DF5F21ED70AB598EC571`.
 - `Verification.json` `519C20A8DEDA2DA4983C340FC351FA4EA950B93E5DD904C27229AC8D750A5453`.
 - `Native/MVT2.csv` `427FC6AA9AC59DBA17527DC6782D0C0548934C2B5D2CC6BDE57F75C8D1F2E9EA`.
