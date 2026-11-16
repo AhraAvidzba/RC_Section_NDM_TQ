@@ -1,0 +1,290 @@
+{
+  "source_checkpoint": "876f4be",
+  "installed_inputs": {
+    "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
+    "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
+  },
+  "python_packages": [
+    "numpy",
+    "scipy"
+  ],
+  "archives": {
+    "CoupledGaugeHardShearNative": "EE0EEF921D2E1FF01663CBE6D93185E15690DD856FC5C3E3E8B628F52EE66DD2",
+    "MVT2TurnOffline": "5220E9613EB633B07C06CF9A270DB1F89340B718E319B0F882A7D84B194600A9",
+    "MVT2MinimumBisectionReplay": "3C835F7389A3A2E97FD6ED702E98A289D96EE9B00764EDDF1CA9ACE30D606C99",
+    "MVT2AcceptedStrainOffline": "9EDFB99C3A74A6D875BF2FFA1C176AB44B22986062907C12998E935B5EBA44E1",
+    "MVT2ShearControlled20261116": "802BBA6FE78A388696887C1DBDE0D63B08FBABF7857957101B6575387D9A44E7",
+    "ConcreteLimitAudit20261116": "939A1F36A0D2F241338C34D213AE0B5601D3EF9001B2A3ACF2091E561F0BBB15",
+    "KaniMechanics44Portable": "FECD6E310F9C465AC2AA6A43978B12F67A57A4655D8599AFE404B8B789546B5F",
+    "MVT2ShearRaw20261116": "6B2144D3FA80458C949D3FA2E43A7432EEA8DC176CC5C8D843AEDA588BF1B691",
+    "MVT2RawStrainCompare20261116": "ABC5C8A336D013A4D68700F604B1CA5D8A23B0330FFA43FC34CAFB2AB6D1EADA",
+    "MVT2ShearBracket20261116": "ED888ECE8BFAE46A4BB3B44C34B852A327A7675C73747A29014BD7A7F1667A5B",
+    "ConcreteAxisPatch20261116": "BCD52C41CA04660A4D3A01C25B594EF7CBC7096CE6E887A5817714EEF7569E4A",
+    "KaniPracticalProbe45Portable": "4AC1F4D0256849A40E67192D7DBA77C1FAD0F58E4BB2773455B273B25069F113",
+    "MVT2ShearMean20261116": "1BC8A303725326D6EE2A2B2964EAFAA4CCB2798520665DCAF9D99FD1CD606CBF",
+    "ConcreteYieldDirectional20261116": "B3E6531F2C1199BB893AF75D3DD1F678D799BB8BB5992388CF29CBE7FD348DF1",
+    "ConcreteAxisReplay20261116": "0B32F28764FA25F53ABAA883A4C55F58B74C469F785CDCFB0402CBE888FCCDA0",
+    "MVT2ShearTangent20261116": "3E060F449D886074133E679A8B8CCEF293F3FC9604F265AF018FEE492ACF1835",
+    "KaniRankOne46Portable": "80EB566222C15907EEA8C72E866102B268642B1CD2E4B353EAF1CC76AF107C14",
+    "MVT2BoundedCorrection20261116": "0ECDB11258AD98F3C26AABE128FBA3411892AA6265D149B45067AECCA400307A",
+    "KaniHydrostaticApex46Portable": "B920F591EA6436DB65914CEF8582EA8EB42301679A15311A924253942FEAAEA5",
+    "MVT2BoundedReplay20261116": "7E7E4274767518BA473007113F51DD0E27FC4CA792882B1B1D41BCCDC24772A2",
+    "KaniApexConstitutiveReplay20261116": "7AC4030A1635FAFED411B69A6AB5AB23CEEC6A29EFA98D52C3D2DBEF5D496484",
+    "KaniRefitNear47Portable": "409609AC8C79261DF38EE37A1B450B2BBD5CCDAB50142398B5DF61F274834122"
+  },
+  "cases": [
+    {
+      "id": "hardshear-native-record",
+      "journal_section": 268,
+      "archive": "CoupledGaugeHardShearNative",
+      "script": "Verify-HardShear.py",
+      "stdout_contains": "\"capacity\": \"NumFail\""
+    },
+    {
+      "id": "mvt2-twist-history",
+      "journal_section": 284,
+      "archive": "MVT2TurnOffline",
+      "script": "Verify-MVT2Turn.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "TurnVerification.json": "59835E1D58AF19F5FA958C28621717AE62B45FE7D0FD2AF9577C4C2F19352B71"
+      }
+    },
+    {
+      "id": "mvt2-minimum-step",
+      "journal_section": 299,
+      "archive": "MVT2MinimumBisectionReplay",
+      "script": "Verify-Bundle.py",
+      "stdout_contains": "four outputs reproduced byte-for-byte"
+    },
+    {
+      "id": "mvt2-accepted-strain",
+      "journal_section": 300,
+      "archive": "MVT2AcceptedStrainOffline",
+      "script": "Verify-MVT2AcceptedStrain.py",
+      "arguments": [
+        "{repo}",
+        "--output",
+        "ReplayedStrains.json"
+      ],
+      "outputs": {
+        "ReplayedStrains.json": "09C2DD8950ED2A66172435A7E8AB6F4F698C38957A5339ADABA84B3D14FBC564"
+      }
+    },
+    {
+      "id": "mvt2-control",
+      "journal_section": 301,
+      "archive": "MVT2ShearControlled20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "8BE17456D03D6ED6DFB1CCFB099879FCF9F93010EC846E0EE384F0F66F695B3F"
+      }
+    },
+    {
+      "id": "material-limit-indicators",
+      "journal_section": 302,
+      "archive": "ConcreteLimitAudit20261116",
+      "script": "Verify-ConcreteLimit.py",
+      "outputs": {
+        "ConcreteLimitChecks.json": "81C3DF376F53E770BD2269DED171C23B7D105123A0E4E2BBE11197900B93C013"
+      }
+    },
+    {
+      "id": "material-lateral-tension",
+      "journal_section": 302,
+      "archive": "ConcreteLimitAudit20261116",
+      "script": "Verify-LateralTensionSensitivity.py",
+      "outputs": {
+        "TBU3LateralTensionSensitivity.json": "844E6899115E20F6AB7130DE59C3D6D450ED44A19FA61FFC755E9EBDE6FA32DC"
+      }
+    },
+    {
+      "id": "kani-accepted-field",
+      "journal_section": 303,
+      "archive": "KaniMechanics44Portable",
+      "script": "Verify.py",
+      "stdout_contains": "\"outcome\": \"EXACT_ACCEPTED\""
+    },
+    {
+      "id": "mvt2-raw-states",
+      "journal_section": 304,
+      "archive": "MVT2ShearRaw20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "C763BE14A6695BE5CE2E5C50092B51A0CCE504B9E652E9C612416860C0B00C45"
+      }
+    },
+    {
+      "id": "mvt2-raw-strain",
+      "journal_section": 305,
+      "archive": "MVT2RawStrainCompare20261116",
+      "script": "Verify-StationStep.py",
+      "arguments": [
+        "{evidence}/MVT2ShearRaw20261116.zip",
+        "ReplayedStationStep.json"
+      ],
+      "outputs": {
+        "ReplayedStationStep.json": "1F9F5D9E409ADC584576711CD5511837DC86F8CB015F84B6A01D481114453BB0"
+      }
+    },
+    {
+      "id": "mvt2-small-twist",
+      "journal_section": 306,
+      "archive": "MVT2ShearBracket20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "F96CDFD81935FC25650FDB7945623371D9F20E10C400E4F688E2CF3AB6D4287F"
+      }
+    },
+    {
+      "id": "concrete-constitutive-comparison",
+      "journal_section": 307,
+      "archive": "ConcreteAxisPatch20261116",
+      "script": "Verify-ConcreteAxisPatch.py",
+      "outputs": {
+        "AxisPatchChecks.json": "A01BFEC8311DC5F4DEC2762BCB4B0F3D2A4B30971524C2F4E82A2C363758014B"
+      }
+    },
+    {
+      "id": "kani-signed-probes",
+      "journal_section": 308,
+      "archive": "KaniPracticalProbe45Portable",
+      "script": "Verify.py",
+      "stdout_contains": "\"checkedForceRows\": 89"
+    },
+    {
+      "id": "mvt2-mean-shear",
+      "journal_section": 309,
+      "archive": "MVT2ShearMean20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "6EDAD279F0CBB3F1ECADBBC3A03A6C40F1EA5056E45C6B59F74161091190675F"
+      }
+    },
+    {
+      "id": "mvt2-mean-shear-projection",
+      "journal_section": 309,
+      "archive": "MVT2ShearMean20261116",
+      "script": "projection/Verify-MVT2MeanShear.py",
+      "arguments": [
+        "{evidence}",
+        "ReplayedProjection.json"
+      ],
+      "outputs": {
+        "ReplayedProjection.json": "8CB47BAA52A5D6E7865943C3EDB96F83112028A091CF127B9E540683D1221DF0"
+      }
+    },
+    {
+      "id": "concrete-one-sided-derivative",
+      "journal_section": 310,
+      "archive": "ConcreteYieldDirectional20261116",
+      "script": "DirectionalMaterial.py",
+      "arguments": [
+        "{ConcreteAxisPatch20261116}/Verify-ConcreteAxisPatch.py",
+        "ReplayedDirectional.json"
+      ],
+      "outputs": {
+        "ReplayedDirectional.json": "9BAA0FF9F44D91FAC225714F6D5962B985092FE2D82225D9D58A12E59CA5E5BA"
+      }
+    },
+    {
+      "id": "concrete-native-replay",
+      "journal_section": 311,
+      "archive": "ConcreteAxisReplay20261116",
+      "script": "Verify-ConcreteAxisReplay.py",
+      "outputs": {
+        "NativeReplayChecks.json": "2A48AE94C616F8CEC655809C6FA5141FD776FA3116081E80C657F24946288F18"
+      }
+    },
+    {
+      "id": "mvt2-tangent-replay",
+      "journal_section": 312,
+      "archive": "MVT2ShearTangent20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "934C1114E947E577DD7D4A3B8E0CFE2A25915CD9BC74003D3EFB7E348ECB6BFA"
+      }
+    },
+    {
+      "id": "kani-one-sided-correction",
+      "journal_section": 313,
+      "archive": "KaniRankOne46Portable",
+      "script": "Verify.py",
+      "stdout_contains": "\"bothPlasticCount\": 59"
+    },
+    {
+      "id": "mvt2-bounded-correction",
+      "journal_section": 314,
+      "archive": "MVT2BoundedCorrection20261116",
+      "script": "BoundedCorrection.py",
+      "arguments": [
+        "{MVT2ShearTangent20261116}",
+        "ReplayedBounds.json"
+      ],
+      "outputs": {
+        "ReplayedBounds.json": "C742ED85CDCC7D0BB728DD14E487A7F1F6BCE8BE2CE8E6EF893D085A4FA5CF25"
+      }
+    },
+    {
+      "id": "kani-hydrostatic-apex",
+      "journal_section": 315,
+      "archive": "KaniHydrostaticApex46Portable",
+      "script": "Verify.py",
+      "arguments": [
+        "{evidence}/KaniPracticalProbe45Portable.zip",
+        "{evidence}/KaniRankOne46Portable.zip"
+      ],
+      "stdout_contains": "\"bothPlastic\": 59"
+    },
+    {
+      "id": "mvt2-bounded-native",
+      "journal_section": 316,
+      "archive": "MVT2BoundedReplay20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "B42628BA648B7DBFB835A2F763C3F6B06C80E162AE3F52904C7752CB0B369582"
+      }
+    },
+    {
+      "id": "kani-apex-material-return",
+      "journal_section": 317,
+      "archive": "KaniApexConstitutiveReplay20261116",
+      "script": "Verify-KaniApexReturn.py",
+      "arguments": [
+        "{evidence}/KaniPracticalProbe45Portable.zip",
+        "{evidence}/KaniRankOne46Portable.zip",
+        "{evidence}/KaniHydrostaticApex46Portable.zip"
+      ],
+      "outputs": {
+        "KaniApexReturnChecks.json": "A5D4B2B82299CC4CC15FEBE496DA89B9AE48E1C09279CAEBD570234392103E28"
+      }
+    },
+    {
+      "id": "kani-admitted-refit",
+      "journal_section": 318,
+      "archive": "KaniRefitNear47Portable",
+      "script": "Verify.py",
+      "stdout_contains": "\"outcome\": \"ADMITTED_EXACT_SAME_BRANCH\""
+    }
+  ]
+}
