@@ -19,6 +19,7 @@ Private Const COMPONENT_COUNT As Long = 6
 Private Const MIN_STEP_RATIO As Double = 0.015625 ' Не менее 1/64 начального приращения.
 Private Const STEP_GROWTH As Double = 1.5 ' Возвращает начальный шаг за несколько удачных подшагов.
 Private Const DOUBLE_RELATIVE_ROUNDING As Double = 2.22044604925031E-16 ' Относительный шаг представления Double около единицы.
+Private Const TWIST_DEGREE As Long = 4 ' Закручивание, приведённое к габариту сечения.
 
 Private mSolver As CCoupledNewtonSolver
 Private mOffset() As Double, mDirection() As Double
@@ -29,6 +30,7 @@ Private mPreviousLambda As Double
 Private mPreferDeformationOnStall As Boolean
 Private mExactTargetRecovery As String ' Способ подтверждения точной конечной нагрузки после численного отказа.
 Private mSecantFailure As String ' Причина отказа прогноза для диагностики всей запрошенной ветви.
+Private mTwistGuideDetails As String ' Исход вспомогательной пробы, которая не входит в принятую историю.
 Private mInitialSteps As Long, mMaxAttempts As Long, mMaxIterations As Long
 Private mAbsoluteTolerance As Double, mRelativeTolerance As Double
 Private mRejected As Long, mAccepted As Long, mAttempts As Long
@@ -182,6 +184,7 @@ Friend Function Advance(ByVal targetLambda As Double) As Boolean
     mRejected = 0: mAccepted = 0: mAttempts = 0
     mExactTargetRecovery = vbNullString
     mSecantFailure = vbNullString
+    mTwistGuideDetails = vbNullString
     If targetLambda < mLambda Then
         mMeta.SetSolverFailure sfcInvalidInput, rkDirectState, _
             "Целевой множитель ниже достигнутого. Начните траекторию заново.", False
@@ -240,7 +243,7 @@ Friend Property Get ResultMeta() As CResultMeta
 End Property
 
 ' Проходит отрезок, уменьшая приращение после численного отказа.
-' Точную нагрузку прямого расчёта можно один раз проверить с секущим прогнозом.
+' Дополнительные пробы точной цели ограничены общим бюджетом и последним принятым интервалом.
 Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, ByVal offsetStage As Boolean) As Boolean
     Dim nominal As Double, minimum As Double, increment As Double, candidate As Double
     Dim segmentStart As Double, triedExactTarget As Boolean, triedSecant As Boolean
@@ -279,7 +282,7 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
             If mHasSteelLimit Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
             mRejected = mRejected + 1
             If candidate = target And Not offsetStage Then
-                If TryRecoverTargetWithSecant(target, triedSecant) Then
+                If TryRecoverTargetFromPrediction(target, triedSecant) Then
                     reached = target
                     FollowSegment = True
                     Exit Function
@@ -322,30 +325,82 @@ Private Function TryRecoverExactTarget(ByVal target As Double, ByRef triedSecant
         Dim canPredict As Boolean: canPredict = (mMeta.InternalStatus = rsNumericalFailure)
         stall.DiagnosticDetails = stall.DiagnosticDetails & " | Точная конечная проба: " & mMeta.ResultComment
         Set mMeta = stall
-        If canPredict Then TryRecoverExactTarget = TryRecoverTargetWithSecant(target, triedSecant)
+        If canPredict Then TryRecoverExactTarget = TryRecoverTargetFromPrediction(target, triedSecant)
     End If
 End Function
 
-' Повторяет ту же конечную нагрузку от секущего прогноза двух принятых полей.
-' Допускается только в прямом расчёте с завершённой постоянной частью.
-Private Function TryRecoverTargetWithSecant(ByVal target As Double, ByRef triedSecant As Boolean) As Boolean
+' Повторяет точную нагрузку от секущего прогноза двух принятых полей. После
+' численного отказа допускает вспомогательную пробу с управлением закручиванием.
+' Восстановление доступно только в прямом расчёте с завершённой постоянной частью.
+Private Function TryRecoverTargetFromPrediction(ByVal target As Double, ByRef triedSecant As Boolean) As Boolean
     If triedSecant Or mAttempts >= mMaxAttempts Or Not mReinforcement Is Nothing Then Exit Function
     If mOffsetFraction <> 1# Or mPreviousLambda <= 0# Then Exit Function
     Dim previousSpan As Double: previousSpan = mLambda - mPreviousLambda
     Dim remaining As Double: remaining = target - mLambda
     If previousSpan <= mLambda * DOUBLE_RELATIVE_ROUNDING Or remaining <= 0# Or remaining > previousSpan Then Exit Function
     Dim initialField As Variant
-    If Not BuildSecantField(remaining / previousSpan, initialField) Then Exit Function
+    Dim ratio As Double: ratio = remaining / previousSpan
+    If Not BuildSecantField(ratio, initialField) Then Exit Function
 
     Dim failure As CResultMeta: Set failure = mMeta
     triedSecant = True
     If TryEquilibrium(target, False, initialField) Then
         SaveCandidate target, False
         mExactTargetRecovery = "точной конечной пробой с секущим прогнозом."
-        TryRecoverTargetWithSecant = True
+        TryRecoverTargetFromPrediction = True
     Else
         mRejected = mRejected + 1
         mSecantFailure = mMeta.ResultComment
+        Dim canGuide As Boolean: canGuide = (mMeta.InternalStatus = rsNumericalFailure)
+        Set mMeta = failure
+        If canGuide Then TryRecoverTargetFromPrediction = TryRecoverTargetWithTwist(target, ratio, previousSpan, remaining)
+    End If
+End Function
+
+' Использует равновесие при заданном закручивании только как начальное поле.
+' Принятие возможно лишь в отдельной силовой пробе на точной конечной нагрузке.
+Private Function TryRecoverTargetWithTwist(ByVal target As Double, ByVal ratio As Double, _
+        ByVal previousSpan As Double, ByVal remaining As Double) As Boolean
+    If mMaxAttempts - mAttempts < 2 Or Not mHasDirection Or Not mSolver.UsesSpatialHistory Then Exit Function
+    Dim currentTwist As Double: currentTwist = mField(TWIST_DEGREE)
+    Dim previousTwist As Double: previousTwist = mPreviousField(TWIST_DEGREE)
+    Dim delta As Double: delta = currentTwist - previousTwist ' Конечность обоих полей проверена в секущем прогнозе.
+    If Abs(delta) <= (Abs(currentTwist) + Abs(previousTwist)) * DOUBLE_RELATIVE_ROUNDING Then Exit Function
+    Dim projection() As Double: ReDim projection(1 To UBound(mField))
+    projection(TWIST_DEGREE) = Sgn(delta)
+    Dim currentControl As Double: currentControl = projection(TWIST_DEGREE) * currentTwist
+    Dim targetControl As Double: targetControl = currentControl + ratio * Abs(delta)
+    If targetControl = currentControl Then Exit Function ' Прогноз приращения меньше точности представления.
+
+    Dim guideLambda As Double, failure As CResultMeta: Set failure = mMeta
+    mAttempts = mAttempts + 1
+    If Not mSolver.TryDeformationStep(mOffset, mDirection, projection, targetControl, target, guideLambda, _
+            mAbsoluteTolerance, mRelativeTolerance, mMaxIterations, consistentControl:=True) Then
+        mRejected = mRejected + 1
+        mTwistGuideDetails = mSolver.ResultMeta.ResultComment
+        mSolver.DiscardStep
+        Exit Function
+    End If
+    If guideLambda <> guideLambda Or guideLambda <= mLambda Or _
+            guideLambda - mLambda > previousSpan Or guideLambda - target > remaining Then
+        mRejected = mRejected + 1
+        mTwistGuideDetails = "Вспомогательный множитель вне проверяемого интервала: " & CStr(guideLambda) & "."
+        mSolver.DiscardStep
+        Exit Function
+    End If
+
+    Dim guideField() As Double, guideResultants() As Double, initialField As Variant
+    mSolver.CopyTrial guideField, guideResultants
+    mSolver.DiscardStep
+    initialField = guideField
+    mTwistGuideDetails = "Вспомогательный множитель: " & CStr(guideLambda) & "."
+    If TryEquilibrium(target, False, initialField) Then
+        SaveCandidate target, False
+        mExactTargetRecovery = "точной конечной пробой после управления закручиванием."
+        TryRecoverTargetWithTwist = True
+    Else
+        mRejected = mRejected + 1
+        mTwistGuideDetails = mTwistGuideDetails & " Точная силовая проба: " & mMeta.ResultComment
         Set mMeta = failure
     End If
 End Function
@@ -484,4 +539,5 @@ Private Function ProgressDetails() As String
         "; принято: " & CStr(mAccepted) & "; отклонено: " & CStr(mRejected) & "; проб: " & CStr(mAttempts)
     If Len(mExactTargetRecovery) > 0 Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено " & mExactTargetRecovery
     If Len(mSecantFailure) > 0 Then ProgressDetails = ProgressDetails & " | Секущий прогноз: " & mSecantFailure
+    If Len(mTwistGuideDetails) > 0 Then ProgressDetails = ProgressDetails & " | Управление закручиванием: " & mTwistGuideDetails
 End Function

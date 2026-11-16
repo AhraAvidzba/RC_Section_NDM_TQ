@@ -126,6 +126,11 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
     TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, initialField:=initialField)
 End Function
 
+' Сообщает, доступна ли согласованная касательная для пространственной истории материалов.
+Friend Property Get UsesSpatialHistory() As Boolean
+    UsesSpatialHistory = mUseSpatialHistory
+End Property
+
 ' Решает равновесие при управлении одной линейной мерой деформации.
 ' Множитель нагрузки определяется вместе с полем и возвращается только
 ' для сошедшейся пробы. Материал остаётся в принятом ранее состоянии.
