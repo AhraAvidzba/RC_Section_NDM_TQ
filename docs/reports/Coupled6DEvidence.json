@@ -73,7 +73,8 @@
     "MVT2Row29ReactionsNative20261116": "3E496D7AC294E3FF95F5F4F15778B10A656AFFF87C55EFEC58E0197E207601E0",
     "KaniH45Row81SpectralDamagePortable": "817AB3A89092F11E49DC8E7A4013554DF36340E999AA1F1D74FBC4A5172DB457",
     "CoupledFinalLoadTolerance20261116": "6D5FE141CC4083DA4C9FD90012A3BFD7964F9FDBE1C66F66A77988EF54B01D7B",
-    "HardShearFinalLoadTolerance20261116": "908D6002C0A78D06D4E1620AF73999308C4B1131645224AC3AB1BE566A7B22E0"
+    "HardShearFinalLoadTolerance20261116": "908D6002C0A78D06D4E1620AF73999308C4B1131645224AC3AB1BE566A7B22E0",
+    "MVT2ReactedFreshNative20261116": "5DCAB88E25FD13C1DB6C43A8898243D2AF03E906ADA2F87C31A17638E84ABA3E"
   },
   "cases": [
     {
@@ -872,6 +873,20 @@
       "script": "Verify.py",
       "outputs": {
         "Replay.json": "11CE2EC3263946186F05FD27C456765722680127438D922921BFEEDA1889B259"
+      }
+    },
+    {
+      "id": "mvt2-reacted-fresh-tangent-and-native-correction",
+      "journal_section": 373,
+      "archive": "MVT2ReactedFreshNative20261116",
+      "script": "ReplayProof.py",
+      "arguments": [
+        "--plan",
+        "--output",
+        "ReplayedReport.json"
+      ],
+      "outputs": {
+        "ReplayedReport.json": "B4A9B1B076208ED5870EBC327379F9FB569A84FE301E192B28DEA5CECCC747D8"
       }
     }
   ],

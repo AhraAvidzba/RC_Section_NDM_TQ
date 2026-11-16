@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "974B6B354C4819944E987CD635CA609B38223570C51F79E8EF9BED184AD997A5",
+  "manifest_sha256": "225DF0903F4F71948C926309598B23E6A4F3A09CB9F16575DD226504E0E8676C",
   "source_checkpoint": "e660d27",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "D0CB47951B64A65DD5FE84A1F823DBE395C8BF027C2833813EDAF0FF6A06BBE6",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 69,
+  "passed": 70,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -619,6 +619,15 @@
       "archive": "HardShearFinalLoadTolerance20261116",
       "verified_outputs_sha256": {
         "Replay.json": "11CE2EC3263946186F05FD27C456765722680127438D922921BFEEDA1889B259"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-reacted-fresh-tangent-and-native-correction",
+      "journal_section": 373,
+      "archive": "MVT2ReactedFreshNative20261116",
+      "verified_outputs_sha256": {
+        "ReplayedReport.json": "B4A9B1B076208ED5870EBC327379F9FB569A84FE301E192B28DEA5CECCC747D8"
       },
       "verified_stdout": null
     }
