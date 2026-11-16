@@ -129,7 +129,8 @@
     "MVT2AdaptiveBoundedContinuationNative20261116": "A5F4EABFE14F46544D6BA36934B050AED5C5F3655DC91D32D6E8C6408562E699",
     "MVT2ExactForceAffineSeedNative20261116": "AFA8504EE62B9FA39766A1AFDA088D62BFA15CAD7EB1501EEDEEE78F8079677E",
     "MVT2ProductionAffineCoreNative20261116": "28D9F83C687CD501A1B8CCEF7616C659C82675E78CC26B63C94F9BF53C39B886",
-    "MVT2ExactH26SmallerArcNative20261116": "B775E3D70EED7CC8239F905AC4E3779AA65CE8994BA1F045BED899B6235B4F07"
+    "MVT2ExactH26SmallerArcNative20261116": "B775E3D70EED7CC8239F905AC4E3779AA65CE8994BA1F045BED899B6235B4F07",
+    "HardShearRefinedShouldersNative20261116": "BC008874E70D1D35EC6CE8DB8CD71BED41560DB49FDD936E73C175545E7282D5"
   },
   "cases": [
     {
@@ -1493,6 +1494,14 @@
         "{evidence}"
       ],
       "stdout_contains": "EXACT H26 REPLAY 89A3FFCE98A7FD8B76D9F7886D3983ADEA1E4CAE70A43A1BDE4B260A32F156CE H24 RESTORED True"
+    },
+    {
+      "id": "hardshear-refined-local-peak-shoulders-native",
+      "journal_section": 437,
+      "archive": "HardShearRefinedShouldersNative20261116",
+      "script": "HardShearRefinedShouldersNative/Verify-Archive.py",
+      "arguments": [],
+      "stdout_contains": "HardShear portable evidence: VERIFIED"
     }
   ],
   "frozen_repositories": {
