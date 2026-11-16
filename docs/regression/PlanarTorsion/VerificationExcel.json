@@ -1,0 +1,597 @@
+{
+  "book_sha256": "978178F2AE2E49F0338405BE712EBEA7D7A1FA87922FD9ACBFA8402B50315344",
+  "cases": [
+    {
+      "formation_seconds": 3.37109375,
+      "calculation_seconds": 1.27880859375,
+      "wall_seconds": 18.513448699999998,
+      "results_reopen_sha256": "39502F9ED0825805278AF15D1BCC7DEE84AD93B809F37C867DC4300134659FBB",
+      "owner_pid": 8464,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -40000.00000000001,
+        3000000.0,
+        -1499999.999999999
+      ],
+      "residual_n_mx_my": [
+        -7.275957614183426e-12,
+        0.0,
+        9.313225746154785e-10
+      ],
+      "serialization_margin": [
+        7.275957614183426e-10,
+        9.313225746154785e-08,
+        4.6566128730773926e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        -7.247535904753022e-11,
+        -1.6786572132332367e-09,
+        1.4228618283596006e-09
+      ],
+      "state_plane_internal": [
+        -1.18786029370416e-05,
+        5.6023962915318e-08,
+        -5.27038901099993e-08
+      ],
+      "concrete_cells": 140,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Rectangles",
+      "load_case": "T0",
+      "request_n_nmm": [
+        -40000.0,
+        3000000.0,
+        -1500000.0,
+        0.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 0,
+        "steel_detail_rows": 0,
+        "reference": {
+          "axis_area_mm2": 82764.0,
+          "axis_perimeter_mm": 1168.0,
+          "flow_n_mm": 0.0,
+          "hoop_stress_mpa": 0.0,
+          "longitudinal_tension_n": 0.0
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 3.02001953125,
+      "calculation_seconds": 1.14599609375,
+      "wall_seconds": 17.792076899999998,
+      "results_reopen_sha256": "43E429C98ECA129FB6F9885FBF4B24DBEFFC33A3C56DAF3B671C6BFF721EE4A5",
+      "owner_pid": 37412,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -5.218225851422176e-11,
+        5.877609510207549e-10,
+        -2.801243681460619e-10
+      ],
+      "residual_n_mx_my": [
+        -5.218225851422176e-11,
+        5.877609510207549e-10,
+        -2.801243681460619e-10
+      ],
+      "serialization_margin": [
+        3.637978807091713e-10,
+        4.6566128730773926e-08,
+        2.3283064365386963e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        3.142019977531163e-11,
+        2.543401933507994e-09,
+        0.0
+      ],
+      "state_plane_internal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "concrete_cells": 140,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Rectangles",
+      "load_case": "PureT",
+      "request_n_nmm": [
+        0.0,
+        0.0,
+        0.0,
+        1500000.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 1,
+        "steel_detail_rows": 8,
+        "reference": {
+          "axis_area_mm2": 82764.0,
+          "axis_perimeter_mm": 1168.0,
+          "flow_n_mm": 9.061910975786574,
+          "hoop_stress_mpa": 18.028099070689176,
+          "longitudinal_tension_n": 10584.312019718718
+        },
+        "initial_steel_tension_n": 10584.312019718733,
+        "summary": {
+          "Сочетание": "TP-FIXTURE",
+          "T, tf*m": ".152957431946689",
+          "q, Н/мм": "9.06191097578657",
+          "Напряжение хомута, MPa": "18.0280990706892",
+          "Запас хомута": "13.3125516483433",
+          "Статус хомута": "OK",
+          "Использование N/M + T": "1.54140247054392E-03",
+          "Статус N/M + T": "OK",
+          "ResultComment": "Нормальные деформации проверены при начальном поле от T. Диагональное разрушение бетона и предел всего сечения по T здесь не оцениваются."
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 2.9990234375,
+      "calculation_seconds": 1.11376953125,
+      "wall_seconds": 17.602154199999998,
+      "results_reopen_sha256": "BBDF365323AC627E8FC8CD0812BF1D6D521E1D4CF7919771B14189D958B9C056",
+      "owner_pid": 33080,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -39999.99999999997,
+        3000000.0,
+        -1500000.0000000005
+      ],
+      "residual_n_mx_my": [
+        2.9103830456733704e-11,
+        0.0,
+        -4.656612873077393e-10
+      ],
+      "serialization_margin": [
+        7.275957614183426e-10,
+        9.313225746154785e-08,
+        9.313225746154785e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        -5.631051180898794e-11,
+        2.1247714698802156e-09,
+        3.553068950168381e-10
+      ],
+      "state_plane_internal": [
+        -1.21996319587856e-05,
+        5.14223926397181e-08,
+        -4.71618048521904e-08
+      ],
+      "concrete_cells": 140,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Rectangles",
+      "load_case": "Mixed",
+      "request_n_nmm": [
+        -40000.0,
+        3000000.0,
+        -1500000.0,
+        1500000.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 1,
+        "steel_detail_rows": 8,
+        "reference": {
+          "axis_area_mm2": 82764.0,
+          "axis_perimeter_mm": 1168.0,
+          "flow_n_mm": 9.061910975786574,
+          "hoop_stress_mpa": 18.028099070689176,
+          "longitudinal_tension_n": 10584.312019718718
+        },
+        "initial_steel_tension_n": 10584.312019718733,
+        "summary": {
+          "Сочетание": "TP-FIXTURE",
+          "T, tf*m": ".152957431946689",
+          "q, Н/мм": "9.06191097578657",
+          "Напряжение хомута, MPa": "18.0280990706892",
+          "Запас хомута": "13.3125516483433",
+          "Статус хомута": "OK",
+          "Использование N/M + T": "8.20081253195328E-03",
+          "Статус N/M + T": "OK",
+          "ResultComment": "Нормальные деформации проверены при начальном поле от T. Диагональное разрушение бетона и предел всего сечения по T здесь не оцениваются."
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 2.9580078125,
+      "calculation_seconds": 0.998046875,
+      "wall_seconds": 16.5183216,
+      "results_reopen_sha256": "23F93566436DEA432CFD75CEB73C4264B7239C9776F492B1AFCAC52B5575F3CD",
+      "owner_pid": 14584,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -40000.00000000001,
+        3000000.000000001,
+        -1500000.0000000007
+      ],
+      "residual_n_mx_my": [
+        -7.275957614183426e-12,
+        9.313225746154785e-10,
+        -6.984919309616089e-10
+      ],
+      "serialization_margin": [
+        7.275957614183426e-10,
+        4.6566128730773926e-08,
+        4.6566128730773926e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        -2.124969536184776e-11,
+        2.3643530028085687e-09,
+        5.1786600294483243e-11
+      ],
+      "state_plane_internal": [
+        -8.06307233709383e-06,
+        7.3882344753526e-08,
+        -3.6911741900609e-08
+      ],
+      "concrete_cells": 88,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Circle",
+      "load_case": "T0",
+      "request_n_nmm": [
+        -40000.0,
+        3000000.0,
+        -1500000.0,
+        0.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 0,
+        "steel_detail_rows": 0,
+        "reference": {
+          "axis_area_mm2": 91863.31078361913,
+          "axis_perimeter_mm": 1074.4246875277092,
+          "flow_n_mm": 0.0,
+          "hoop_stress_mpa": 0.0,
+          "longitudinal_tension_n": 0.0
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 3.08203125,
+      "calculation_seconds": 1.044921875,
+      "wall_seconds": 16.9779549,
+      "results_reopen_sha256": "573513E4DF72C00CD04B82ACA60E8B7F45C11851CDBD20291D35D5ACA13741C4",
+      "owner_pid": 35924,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -5.3574922276311554e-11,
+        4.575423162946109e-10,
+        1.120832526411949e-10
+      ],
+      "residual_n_mx_my": [
+        -5.3574922276311554e-11,
+        4.575423162946109e-10,
+        1.120832526411949e-10
+      ],
+      "serialization_margin": [
+        3.637978807091713e-10,
+        2.3283064365386963e-08,
+        2.3283064365386963e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        1.1786482900788542e-10,
+        2.519965136939291e-10,
+        -1.207473910126748e-10
+      ],
+      "state_plane_internal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "concrete_cells": 88,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Circle",
+      "load_case": "PureT",
+      "request_n_nmm": [
+        0.0,
+        0.0,
+        0.0,
+        1500000.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 1,
+        "steel_detail_rows": 8,
+        "reference": {
+          "axis_area_mm2": 91863.31078361913,
+          "axis_perimeter_mm": 1074.4246875277092,
+          "flow_n_mm": 8.16430404698345,
+          "hoop_stress_mpa": 16.242366824782273,
+          "longitudinal_tension_n": 8771.929824561405
+        },
+        "initial_steel_tension_n": 8771.929824561415,
+        "summary": {
+          "Сочетание": "TP-FIXTURE",
+          "T, tf*m": ".152957431946689",
+          "q, Н/мм": "8.16430404698345",
+          "Напряжение хомута, MPa": "16.2423668247823",
+          "Запас хомута": "14.7761716373634",
+          "Статус хомута": "OK",
+          "Использование N/M + T": "1.30439050794054E-03",
+          "Статус N/M + T": "OK",
+          "ResultComment": "Нормальные деформации проверены при начальном поле от T. Диагональное разрушение бетона и предел всего сечения по T здесь не оцениваются."
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 2.8916015625,
+      "calculation_seconds": 1.00634765625,
+      "wall_seconds": 16.5670789,
+      "results_reopen_sha256": "75AB7ECF2AEA2EE95514430F4541112C694E930063AE2D307A28BD2E5A30E19F",
+      "owner_pid": 2696,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -39999.99999999999,
+        3000000.000000002,
+        -1499999.9999999998
+      ],
+      "residual_n_mx_my": [
+        7.275957614183426e-12,
+        1.862645149230957e-09,
+        2.3283064365386963e-10
+      ],
+      "serialization_margin": [
+        7.275957614183426e-10,
+        9.313225746154785e-08,
+        9.313225746154785e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        1.468986354023425e-11,
+        2.666856529351348e-09,
+        2.977530964844592e-10
+      ],
+      "state_plane_internal": [
+        -8.57105495509191e-06,
+        6.7083077458057e-08,
+        -3.2834291406779e-08
+      ],
+      "concrete_cells": 88,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Circle",
+      "load_case": "Mixed",
+      "request_n_nmm": [
+        -40000.0,
+        3000000.0,
+        -1500000.0,
+        1500000.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 1,
+        "steel_detail_rows": 8,
+        "reference": {
+          "axis_area_mm2": 91863.31078361913,
+          "axis_perimeter_mm": 1074.4246875277092,
+          "flow_n_mm": 8.16430404698345,
+          "hoop_stress_mpa": 16.242366824782273,
+          "longitudinal_tension_n": 8771.929824561405
+        },
+        "initial_steel_tension_n": 8771.929824561415,
+        "summary": {
+          "Сочетание": "TP-FIXTURE",
+          "T, tf*m": ".152957431946689",
+          "q, Н/мм": "8.16430404698345",
+          "Напряжение хомута, MPa": "16.2423668247823",
+          "Запас хомута": "14.7761716373634",
+          "Статус хомута": "OK",
+          "Использование N/M + T": "7.85651612651599E-03",
+          "Статус N/M + T": "OK",
+          "ResultComment": "Нормальные деформации проверены при начальном поле от T. Диагональное разрушение бетона и предел всего сечения по T здесь не оцениваются."
+        }
+      },
+      "statuses": {
+        "OverallStatus": "OK",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    },
+    {
+      "formation_seconds": 2.97216796875,
+      "calculation_seconds": 1.2041015625,
+      "wall_seconds": 17.9700545,
+      "results_reopen_sha256": "0880BC860C48BF6C7B4C918755309361CC17B5D0774DB4AF67FDB369524FCC92",
+      "owner_pid": 24668,
+      "owner_absent": true,
+      "actual_n_mx_my": [
+        -5.218225851422176e-11,
+        5.877609510207549e-10,
+        -2.801243681460619e-10
+      ],
+      "residual_n_mx_my": [
+        -5.218225851422176e-11,
+        5.877609510207549e-10,
+        -2.801243681460619e-10
+      ],
+      "serialization_margin": [
+        3.637978807091713e-10,
+        4.6566128730773926e-08,
+        2.3283064365386963e-08
+      ],
+      "initial_t_only_n_mx_my": [
+        3.142019977531163e-11,
+        2.543401933507994e-09,
+        0.0
+      ],
+      "state_plane_internal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "concrete_cells": 140,
+      "rebar_count": 8,
+      "fields_columns": [
+        "RunID",
+        "LoadCase",
+        "ProfileId",
+        "StateType",
+        "ElementID",
+        "MaterialType",
+        "Strain",
+        "Stress, MPa",
+        "PhysicalState"
+      ],
+      "shape": "Rectangles",
+      "load_case": "HoopFail",
+      "request_n_nmm": [
+        0.0,
+        0.0,
+        0.0,
+        1500000.0
+      ],
+      "tolerance_n_nmm": [
+        0.980665,
+        980.665,
+        980.665
+      ],
+      "torsion": {
+        "summary_rows": 1,
+        "steel_detail_rows": 8,
+        "reference": {
+          "axis_area_mm2": 82764.0,
+          "axis_perimeter_mm": 1168.0,
+          "flow_n_mm": 9.061910975786574,
+          "hoop_stress_mpa": 18.028099070689176,
+          "longitudinal_tension_n": 10584.312019718718
+        },
+        "initial_steel_tension_n": 10584.312019718733,
+        "summary": {
+          "Сочетание": "TP-FIXTURE",
+          "T, tf*m": ".152957431946689",
+          "q, Н/мм": "9.06191097578657",
+          "Напряжение хомута, MPa": "18.0280990706892",
+          "Запас хомута": ".665627582417166",
+          "Статус хомута": "FAIL",
+          "Использование N/M + T": "1.54140247054392E-03",
+          "Статус N/M + T": "OK",
+          "ResultComment": "Хомута недостаточно на заданное кручение. Нормальные деформации проверены при начальном поле от T. Диагональное разрушение бетона и предел всего сечения по T здесь не оцениваются."
+        }
+      },
+      "statuses": {
+        "OverallStatus": "FAIL",
+        "DirectStateStatus": "OK",
+        "CapacityStatus": "N/A"
+      },
+      "published_torsion": {}
+    }
+  ]
+}

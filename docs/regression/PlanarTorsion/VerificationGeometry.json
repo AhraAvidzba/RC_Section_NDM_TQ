@@ -1,0 +1,45 @@
+{
+  "benchmarks": {
+    "evaluation_and_solve_s": 0.0048828125,
+    "mesh_s": 0.037109375,
+    "preparation_s": 0.009765625,
+    "total_s": 0.0517578125
+  },
+  "candidate_sha256": "978178F2AE2E49F0338405BE712EBEA7D7A1FA87922FD9ACBFA8402B50315344",
+  "checks": "PASS",
+  "compile_owner": {
+    "PID": 34148,
+    "StartTicksUTC": "639304668632835394",
+    "State": "Absent"
+  },
+  "compiled_test_sha256": "051A432B1D1237660E14E44CA2E823F1FF56684767F51141D759BB397C9FBFF2",
+  "geometry": {
+    "area_mm2": "40800",
+    "compressed": "107",
+    "concrete": "148",
+    "flow_N_per_mm": "100",
+    "hoop_MPa": "119.366207318921",
+    "perimeter_mm": "920",
+    "steel": "7"
+  },
+  "native_owner": {
+    "ObservedUTC": "2026-11-16T23:01:29.8543993+00:00",
+    "PID": 17592,
+    "Reason": "Explicit NoProcessFoundForGivenId",
+    "StartTicksUTC": "639304668830844081",
+    "State": "Absent"
+  },
+  "native_wall_seconds": 9.2340718,
+  "raw_report_sha256": "B78D1E8ADB0DF3B5E69CF7FACE1AF0045B802A776EDC627AEE58F1D49B4306AA",
+  "residuals": {
+    "Mx_Nmm": "3.78531694877893E-09",
+    "My_Nmm": "3.98891624836078E-09",
+    "N_N": "6.00266503170133E-11"
+  },
+  "steel_inverse": {
+    "accepted": "13",
+    "max_strain_error": "1.73472347597681E-18",
+    "max_stress_error_MPa": "7.27196081129478E-15",
+    "rejected": "2"
+  }
+}
