@@ -46,6 +46,14 @@ Public Enum EResultCode
     rcSolverDidNotReturnState = 19   ' Для обязательного расчётного состояния не получен объект решателя НДС.
     rcCoupledConcreteLimitUnresolved = 20 ' Подтверждён арматурный предел; бетонный механизм связанной ветви ещё не определён.
     rcTransverseStrainExceeded = 21   ' В связанном НДС превышен предел деформации поперечной арматуры.
+    rcCoupledSteelLimitUnresolved = 22 ' Равновесие подтверждено, сторона предела стали не различима.
+End Enum
+
+' Отдельные группы стали с неразрешённым знаком по предельной деформации.
+Public Enum ECoupledSteelUncertainty
+    csuNone = 0
+    csuLongitudinal = 1
+    csuTransverse = 2
 End Enum
 
 Public Enum EResultKind
@@ -120,6 +128,7 @@ Public Function ResultCodeToText(ByVal value As EResultCode) As String
         Case rcSolverDidNotReturnState: ResultCodeToText = "SOLVER_DID_NOT_RETURN_STATE"
         Case rcCoupledConcreteLimitUnresolved: ResultCodeToText = "COUPLED_CONCRETE_LIMIT_UNRESOLVED"
         Case rcTransverseStrainExceeded: ResultCodeToText = "TRANSVERSE_STRAIN_EXCEEDED"
+        Case rcCoupledSteelLimitUnresolved: ResultCodeToText = "COUPLED_STEEL_LIMIT_UNRESOLVED"
         Case Else: ResultCodeToText = "INTERNAL_ERROR"
     End Select
 End Function

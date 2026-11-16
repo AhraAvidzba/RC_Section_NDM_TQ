@@ -95,25 +95,31 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
         STRESS_TOLERANCE, RELATIVE_TOLERANCE, captureFields
-    If continuation.Advance(1#) Then
+    If continuation.Advance(1#, response) Then
         continuation.CopyAccepted field, resultants
         Set meta = continuation.ResultMeta
-        If response.AcceptedTransverseSteelUtilization > 1# Then
-            meta.SetResult rsCheckFailed, rcTransverseStrainExceeded, rkDirectState, _
-                SteelLimitComment(response.AcceptedTransverseCriticalPoint) & ". Использование по деформации " & _
-                    Format$(response.AcceptedTransverseSteelUtilization, "0.000") & ".", meta.DiagnosticDetails
-        ElseIf response.AcceptedSteelUtilization > 1# Then
-            meta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkDirectState, _
-                SteelLimitComment(response.AcceptedSteelCriticalPoint) & ". Использование по деформации " & _
-                    Format$(response.AcceptedSteelUtilization, "0.000") & ".", meta.DiagnosticDetails
+        Dim uncertain As ECoupledSteelUncertainty: uncertain = continuation.DirectSteelUncertainty
+        Dim longitudinalMeta As CResultMeta, hoopMeta As CResultMeta
+        Set longitudinalMeta = DirectSteelCriterion(response.AcceptedLongitudinalUtilization, _
+            response.AcceptedLongitudinalPoint, (uncertain And csuLongitudinal) <> 0, rcPhysicalLimitExceeded)
+        Set hoopMeta = DirectSteelCriterion(response.AcceptedTransverseSteelUtilization, _
+            response.AcceptedTransverseCriticalPoint, (uncertain And csuTransverse) <> 0, rcTransverseStrainExceeded)
+        If hoopMeta.InternalStatus = rsCheckFailed Then
+            meta.SetResult rsCheckFailed, hoopMeta.ResultCode, rkDirectState, hoopMeta.ResultComment, meta.DiagnosticDetails
+        ElseIf longitudinalMeta.InternalStatus = rsCheckFailed Then
+            meta.SetResult rsCheckFailed, longitudinalMeta.ResultCode, rkDirectState, longitudinalMeta.ResultComment, meta.DiagnosticDetails
+        ElseIf uncertain <> csuNone Then
+            meta.SetResult rsNumericalFailure, rcCoupledSteelLimitUnresolved, rkDirectState, _
+                "Равновесие по шести усилиям подтверждено. Сторона предела деформации арматуры численно не различима.", meta.DiagnosticDetails
         Else
             meta.ResultComment = "Связанное равновесие подтверждено по шести усилиям."
         End If
+
         If captureFields Then
             Dim target() As Double, warning As String
             path.TargetSix 1#, target
             Set acceptedState = CaptureAcceptedState(sstStrengthState, spec, continuation.AcceptedFields, _
-                concrete, response, models, target, resultants, fc, ft, meta, warning)
+                concrete, response, models, target, resultants, fc, ft, meta, warning, transverseMeta:=hoopMeta)
             If Len(warning) > 0 Then AppendStateWarning meta, warning
         End If
     Else
@@ -354,7 +360,8 @@ End Function
 Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVal spec As CMaterialModelSpec, _
         ByVal history As Collection, ByVal concrete As CCoupledConcreteResponse, ByVal reinforcement As CCoupledReinforcedResponse, _
         ByVal models As Object, ByRef target() As Double, ByRef resultants() As Double, ByVal fc As Double, ByVal ft As Double, _
-        ByVal meta As CResultMeta, ByRef warning As String, Optional ByVal governingTransversePoint As Long = 0) As CSectionStateResult
+        ByVal meta As CResultMeta, ByRef warning As String, Optional ByVal governingTransversePoint As Long = 0, _
+        Optional ByVal transverseMeta As CResultMeta = Nothing) As CSectionStateResult
     Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot
     observer.Initialize mSection.ConcreteCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
     fields.Capture mSection, mOperators, history, observer, concrete, reinforcement, warning
@@ -366,16 +373,16 @@ Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVa
     Dim residualArea As Double, residualLength As Double
     mOperators.CopyResultantResidualScales residualArea, residualLength
     state.InitializeFromCoupled stateType, mSection, spec, target, resultants, eps0, kx, ky, twist, fields, fieldMeta, _
-        (reinforcement.AcceptedSteelUtilization <= 1#), residualArea, residualLength
+        (reinforcement.AcceptedSteelUtilization <= 1# And meta.ResultCode <> rcCoupledSteelLimitUnresolved), residualArea, residualLength
     state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
-    SetTransverseControl state, reinforcement, models, field, governingTransversePoint
+    SetTransverseControl state, reinforcement, models, field, governingTransversePoint, transverseMeta
     Set CaptureAcceptedState = state
 End Function
 
 ' Считывает напряжение и вычисляет проекцию деформации для одной точки
 ' принятого поля. При пределе использует точку, определившую арматурный критерий.
 Private Sub SetTransverseControl(ByVal state As CSectionStateResult, ByVal reinforcement As CCoupledReinforcedResponse, _
-        ByVal models As Object, ByRef field() As Double, ByVal point As Long)
+        ByVal models As Object, ByRef field() As Double, ByVal point As Long, ByVal criterion As CResultMeta)
     If point = 0 Then point = reinforcement.AcceptedTransverseCriticalPoint
     If point = 0 Then Exit Sub
     Dim tensor(1 To 6) As Double, direction(1 To 6) As Double, strain As Double, strainLimit As Double, i As Long
@@ -387,8 +394,26 @@ Private Sub SetTransverseControl(ByVal state As CSectionStateResult, ByVal reinf
     Dim steel As CCoupledSteelModel: Set steel = models.Item(mOperators.SteelClassAt(point))
     strainLimit = steel.SignedStrainLimit(strain)
     state.SetCoupledTransverseControl SteelControlDescription(point), _
-        steel.StrainUtilization(strain), reinforcement.AcceptedSteelStress(point), strain, strainLimit
+        steel.StrainUtilization(strain), reinforcement.AcceptedSteelStress(point), strain, strainLimit, criterion
 End Sub
+
+' Определяет результат одной группы стали независимо от результата другой группы.
+Private Function DirectSteelCriterion(ByVal utilization As Double, ByVal point As Long, ByVal unresolved As Boolean, _
+        ByVal failureCode As EResultCode) As CResultMeta
+    Dim meta As New CResultMeta
+    If point = 0 Then
+        meta.SetNotApplicable rkDirectState
+    ElseIf unresolved Then
+        meta.SetResult rsNumericalFailure, rcCoupledSteelLimitUnresolved, rkDirectState, _
+            "Сторона предела деформации этой группы стали численно не различима."
+    ElseIf utilization > 1# Then
+        meta.SetResult rsCheckFailed, failureCode, rkDirectState, _
+            SteelLimitComment(point) & ". Использование по деформации " & Format$(utilization, "0.000") & "."
+    Else
+        meta.SetResult rsSuccess, rcNone, rkDirectState
+    End If
+    Set DirectSteelCriterion = meta
+End Function
 
 ' Добавляет предупреждение о поле, сохраняя статус физической проверки.
 Private Sub AppendStateWarning(ByVal meta As CResultMeta, ByVal warning As String)

@@ -58,6 +58,7 @@ Private Const MSO_SHAPE_DIAMOND As Long = 4 ' Код ромбовидной фи
 Private Const MSO_SHAPE_OVAL As Long = 9 ' Код овальной фигуры.
 Private Const EXTENSION_WARNING_TEXT As String = "ВНЕ ФИЗИЧЕСКОЙ ДИАГРАММЫ МАТЕРИАЛА" ' Текст предупреждения об использовании продолжения диаграммы.
 Private Const NUMERICAL_STATE_WARNING_TEXT As String = "ПРЯМОЕ НДС НЕ СОШЛОСЬ" ' Текст предупреждения о недостигнутом равновесии.
+Private Const STEEL_CHECK_WARNING_TEXT As String = "РАВНОВЕСИЕ ПОДТВЕРЖДЕНО. ПРЕДЕЛ АРМАТУРЫ НЕ УТОЧНЁН"
 Private Const RESULT_COLOR_BUCKET_COUNT As Long = 16 ' Число цветовых ступеней для расчетных маркеров Excel Chart.
 Private Const CONCRETE_MARKER_SIZE_BUCKET As Long = 3 ' Шаг группировки бетонных маркеров, чтобы Chart не превысил лимит series.
 Private Const ELEMENT_SHAPE_RENDER_MAX_COUNT As Long = 5000 ' До этого числа элементов геометрию рисуем поэлементно Shape-ами.
@@ -1131,16 +1132,16 @@ Private Sub DrawAxisNameLabels()
     BringShapeToFront yLabel
 End Sub
 
-' Показывает под схемой короткое красное предупреждение по сохраненному
-' DirectStateStatus. Для FAIL состояние найдено
-' вне физической диаграммы. Для NumFail отдельно предупреждаем, что на схеме
-' может быть последняя итерация, а не корректное равновесное состояние.
+' Показывает предупреждение по выбранному сохранённому НДС. Отдельная
+' подпись сообщает о неопределённости предела стали при подтверждённом равновесии.
 Private Sub DrawStateWarning(ByVal data As CSectionPlotDataReader)
     Dim warningText As String
     Dim policy As CResultStatusPolicy
     Set policy = New CResultStatusPolicy
 
-    If data.PhysicalDiagramWarningRequired Then
+    If data.RetainedSteelLimitUnresolved Then
+        warningText = STEEL_CHECK_WARNING_TEXT
+    ElseIf data.PhysicalDiagramWarningRequired Then
         warningText = EXTENSION_WARNING_TEXT
     ElseIf policy.ToUserStatus(data.DirectStateStatus) = policy.NumFail Then
         warningText = NUMERICAL_STATE_WARNING_TEXT

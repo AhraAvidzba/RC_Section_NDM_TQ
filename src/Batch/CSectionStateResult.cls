@@ -1,4 +1,4 @@
-﻿VERSION 1.0 CLASS
+VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -65,6 +65,7 @@ Private mCoupledFields As CCoupledFieldSnapshot ' Напряжения по пр
 Private mCoupledTarget() As Double, mCoupledResultants() As Double ' N, Mx, My, T, Qx, Qy в центре бетонной сетки, Н и Н·мм.
 Private mCoupledResidualArea As Double, mCoupledResidualLength As Double ' Масштабы интегральной проверки: мм² и мм.
 Private mCoupledMaterialCurves As CCoupledMaterialSnapshot ' Одноосные точки фактически применённых законов.
+Private mCoupledTransverseMeta As CResultMeta
 Private mCoupledTransverseControl As String ' Группа и точка наибольшего использования поперечной арматуры.
 Private mCoupledTransverseUtilization As Double, mCoupledTransverseStress As Double
 Private mCoupledTransverseStrain As Double, mCoupledTransverseStrainLimit As Double
@@ -197,8 +198,10 @@ End Property
 ' Сохраняет контрольную точку принятого НДС: напряжение в МПа, знаковые
 ' деформацию и предел своей ветви, использование в долях.
 Friend Sub SetCoupledTransverseControl(ByVal description As String, ByVal utilization As Double, ByVal stress As Double, _
-        ByVal strain As Double, ByVal strainLimit As Double)
+        ByVal strain As Double, ByVal strainLimit As Double, Optional ByVal criterion As CResultMeta = Nothing)
     AssertWritable
+    Set mCoupledTransverseMeta = Nothing
+    If Not criterion Is Nothing Then Set mCoupledTransverseMeta = criterion.Clone
     mCoupledTransverseControl = description
     mCoupledTransverseUtilization = utilization
     mCoupledTransverseStress = stress
@@ -217,16 +220,28 @@ Friend Function CopyCoupledTransverseControl(ByRef description As String, ByRef 
     CopyCoupledTransverseControl = (Len(description) > 0)
 End Function
 
-' Возвращает статус только критерия деформации поперечной арматуры
-' в подтверждённом состоянии. При отсутствии данных ячейка остаётся пустой.
-Friend Property Get CoupledTransverseStatus() As String
+' Возвращает метаданные критерия хомута. Для сохранённой предельной точки
+' мера определена принятым полем на допустимой стороне найденной границы.
+Friend Property Get CoupledTransverseMeta() As CResultMeta
     If Len(mCoupledTransverseControl) = 0 Then Exit Property
-    Dim policy As New CResultStatusPolicy, meta As New CResultMeta
+    If Not mCoupledTransverseMeta Is Nothing Then
+        Set CoupledTransverseMeta = mCoupledTransverseMeta.Clone
+        Exit Property
+    End If
+    Dim meta As New CResultMeta
     If mCoupledTransverseUtilization > 1# Then
-        meta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkDirectState
+        meta.SetResult rsCheckFailed, rcTransverseStrainExceeded, rkDirectState
     Else
         meta.SetResult rsSuccess, rcNone, rkDirectState
     End If
+    Set CoupledTransverseMeta = meta
+End Property
+
+' Возвращает статус отдельного критерия, сохраняемый в отчёте и Results.
+Friend Property Get CoupledTransverseStatus() As String
+    Dim meta As CResultMeta: Set meta = CoupledTransverseMeta
+    If meta Is Nothing Then Exit Property
+    Dim policy As New CResultStatusPolicy
     CoupledTransverseStatus = policy.ExternalStatus(meta)
 End Property
 
@@ -261,6 +276,7 @@ Private Sub ClearSnapshot()
     Set mCoupledFields = Nothing: Set mCoupledMaterialCurves = Nothing: mTwist = 0#
     Erase mCoupledTarget: Erase mCoupledResultants
     mCoupledResidualArea = 0#: mCoupledResidualLength = 0#
+    Set mCoupledTransverseMeta = Nothing
     mCoupledTransverseControl = vbNullString: mCoupledTransverseUtilization = 0#: mCoupledTransverseStress = 0#
     mCoupledTransverseStrain = 0#: mCoupledTransverseStrainLimit = 0#
     mSnapshotRevision = 0

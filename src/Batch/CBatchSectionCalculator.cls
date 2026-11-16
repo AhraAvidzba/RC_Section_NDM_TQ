@@ -963,10 +963,12 @@ Private Sub RunCoupledCombination(ByVal index As Long, ByVal profile As CCalcula
         Dim acceptedState As CSectionStateResult
         Set meta = mCoupledAnalysis.SolveTarget(mWorkingLoads(index), mWorkingPaths(index), profile.StrengthSpec, field, resultants, True, acceptedState, trace)
         combined.StoreCoupledTrace False, trace
-        combined.SetDirectStateMeta meta
-        If Not acceptedState Is Nothing Then combined.AddState acceptedState
-        If meta.InternalStatus = rsSuccess Or meta.InternalStatus = rsSuccessWithWarning Or meta.InternalStatus = rsCheckFailed Then _
+        If Not acceptedState Is Nothing Then
+            combined.AddState acceptedState
+            combined.StoreSectionStateResult acceptedState
             combined.StoreCoupledResultants resultants
+        End If
+        combined.SetDirectStateMeta meta
         ReportStep meta.ResultComment
         If Len(meta.DiagnosticDetails) > 0 Then ReportStep meta.DiagnosticDetails
     End If

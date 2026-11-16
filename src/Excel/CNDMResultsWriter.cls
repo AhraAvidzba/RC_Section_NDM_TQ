@@ -43,8 +43,8 @@ Private Const COMMON_SECTION_PROPERTY_ROWS As Long = 75 ' Строки общи�
 Private mCalculationInputStamp As String ' Подпись входных данных до запуска решателя.
 Private mIncompleteCalculationCount As Long ' Сочетания с недоступными инженерными проверками.
 Private Const LC_SECTION_PROPERTY_ROWS As Long = 23 ' Число строк общих свойств одного сочетания без дополнительных данных отдельных НДС.
-Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 37 ' Пространственное НДС, предельный вектор и контроль хомута в двух состояниях.
-Private Const STATE_SECTION_PROPERTY_ROWS As Long = 14 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
+Private Const COUPLED_SECTION_PROPERTY_ROWS As Long = 38 ' Пространственное НДС, предельный вектор и контроль хомута в двух состояниях.
+Private Const STATE_SECTION_PROPERTY_ROWS As Long = 15 ' Базовое число строк дополнительных данных одного сохранённого расчётного состояния.
 Private Const COUPLED_EQUILIBRIUM_PROPERTY_ROWS As Long = 29 ' Пять свойств контроля и по четыре значения на каждое из шести усилий.
 Private Const SNAPSHOT_TITLE_OFFSET As Long = 2 ' Строка общего синего заголовка расположена на две строки выше начал нижних таблиц результатов.
 
@@ -896,6 +896,9 @@ Private Sub PutCoupledSectionProperties(ByRef data() As Variant, ByRef row As Lo
         PutProperty data, row, runID, id, "Coupled.Twist", state.Twist, "rad/mm", "Закручивание на единицу продольной длины."
         If PutCoupledTransverseProperties(data, row, runID, id, state, units, "Coupled.Transverse.") Then
             PutProperty data, row, runID, id, "Coupled.Transverse.Status", state.CoupledTransverseStatus, "-", "Статус по достижению предельной деформации при заданных нагрузках."
+            Dim hoopMeta As CResultMeta: Set hoopMeta = state.CoupledTransverseMeta
+            PutProperty data, row, runID, id, "Coupled.Transverse.ResultCode", ResultCodeToText(hoopMeta.ResultCode), "-", _
+                "Машинная причина результата по предельной деформации хомута."
         End If
     End If
 End Sub
@@ -1407,6 +1410,8 @@ Private Sub PutNamedStateProperties(ByRef data() As Variant, ByRef rowIndex As L
                 BooleanText(stateResult.ExtensionUsed), "-", "True, если это расчетное состояние использовало numerical extension."
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "Status", _
                 stateResult.Status, "-", "Короткий статус НДС, сохранённый при расчёте сочетания."
+            PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "ResultCode", _
+                ResultCodeToText(stateResult.ResultMeta.ResultCode), "-", "Машинная причина результата именованного НДС."
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "ResultComment", _
                 CalculationResultMessage(batch, combinationIndex, stateResult.ResultMeta), "-", "Причина результата НДС, номер сочетания и сохранённый адрес исходной строки нагрузок."
             PutProperty data, rowIndex, runID, batch.CombinationID(combinationIndex), prefix & "StopReason", _

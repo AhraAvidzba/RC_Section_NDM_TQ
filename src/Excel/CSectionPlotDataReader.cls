@@ -73,6 +73,7 @@ Private mLoadReferenceX As Double ' Координата X общей точки
 Private mLoadReferenceY As Double ' Координата Y общей точки приложения нагрузки, сохранённая в Results.
 Private mExtensionUsed As Boolean ' Признак использования численного продолжения диаграмм в выбранном НДС.
 Private mStateStatus As String ' Статус выбранного сохранённого расчётного состояния.
+Private mRetainedSteelLimitUnresolved As Boolean
 Private mAnnotationCount As Long ' Число размеров, подписей и исходных контуров для схемы; расчётные области трещин сюда не включаются.
 Private mAnnotationCapacity As Long ' Закрытый резерв массивов аннотаций; внешний Count содержит только заполненную часть.
 Private mAnnotationType() As String ' Тип аннотации: DIMENSION, REBAR_ANNOTATION, REBAR_GLOBAL_ANNOTATION, REBAR_LOCAL_ANNOTATION, TEXT_ANNOTATION или CONTOUR_*.
@@ -361,7 +362,7 @@ Private Function ReadSectionProperties(ByVal workbook As Object) As Object
     Dim colUnit As Long: colUnit = ResultColumn(data, "Unit")
 
     Dim rowIndex As Long
-    Dim parameter As String, loadCase As String
+    Dim parameter As String, loadCase As String, propertyKey As String
     Dim stateFields As Object: Set stateFields = CreateObject("Scripting.Dictionary")
     Dim selectedStateMetadataExists As Boolean
     For rowIndex = 2 To UBound(data, 1) ' Сначала читаем единицы результата, чтобы порядок строк свойств не влиял на перевод величин без отдельно указанной единицы.
@@ -387,7 +388,13 @@ Private Function ReadSectionProperties(ByVal workbook As Object) As Object
             ElseIf StrComp(loadCase, mLoadCase, vbTextCompare) = 0 Then
                 If Not mGeometryOnly Or mGeometryReferenceItemsEnabled Then
                     ReadLoadCaseProperty parameter, data(rowIndex, colValue), data(rowIndex, colUnit), anchor, rowIndex, colValue, colUnit
-                    stateFields(LCase$(parameter)) = Array(data(rowIndex, colValue), data(rowIndex, colUnit), rowIndex, colValue, colUnit)
+                    propertyKey = LCase$(parameter)
+                    If propertyKey = "directstatestatus" Or (Left$(propertyKey, 6) = "state." And _
+                            (Right$(propertyKey, 7) = ".status" Or Right$(propertyKey, 11) = ".resultcode")) Then
+                        If stateFields.Exists(propertyKey) Then Err.Raise vbObjectError + 4720, "CSectionPlotDataReader", _
+                            SnapshotMetadataInputMessage(anchor, rowIndex, colValue, parameter)
+                    End If
+                    stateFields(propertyKey) = Array(data(rowIndex, colValue), data(rowIndex, colUnit), rowIndex, colValue, colUnit)
                     If Left$(LCase$(parameter), Len("state." & mStateType & ".")) = "state." & LCase$(mStateType) & "." Then selectedStateMetadataExists = True
                 End If
             End If
@@ -499,7 +506,7 @@ Private Sub ReadGeometryAndResults(ByVal workbook As Object, ByVal stateFields A
             ' Индекс содержит только ключи состояний, без ElementID/Strain/Stress.
             ' Он доказывает наличие результатов в Full, но не заменяет строки выбранного LC.
             Dim availableStates As Variant: availableStates = ReadElementResultTable(workbook, , , True)
-            If Not HasRows(availableStates) Then Err.Raise vbObjectError + 4705, "CSectionPlotDataReader", _
+            If Not HasRows(availableStates) And Not HasSavedNoFieldDirectFailure(workbook, stateFields) Then Err.Raise vbObjectError + 4705, "CSectionPlotDataReader", _
                 "На листе Results нет результатов элементов."
             Dim emptyCaseStates As Object: Set emptyCaseStates = CreateObject("Scripting.Dictionary")
             emptyCaseStates.CompareMode = vbTextCompare
@@ -627,7 +634,7 @@ End Function
 Private Sub RequireSavedStateFields(ByVal workbook As Object, ByVal stateFields As Object, _
         ByVal stateType As String, ByVal validateValues As Boolean)
     Dim anchor As Object: Set anchor = workbook.Names.Item("rngNDMSectionProperties").RefersToRange
-    Dim field As Variant, key As String, saved As Variant, number As Double, flag As Boolean, status As String, unit As String
+    Dim field As Variant, key As String, saved As Variant, number As Double, flag As Boolean, unit As String
     Dim knownState As Boolean
     Select Case LCase$(Trim$(stateType))
         Case "strengthstate", "capacitystate", "precrackstate", "postcrackstate", "crackedstate": knownState = True
@@ -648,11 +655,44 @@ Private Sub RequireSavedStateFields(ByVal workbook As Object, ByVal stateFields 
                     number = ReadSnapshotNumber(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), key)
                     unit = ReadSnapshotUnit(saved(1), "Curvature", mSnapshotCurvatureUnit, "1/mm", anchor, CLng(saved(2)), CLng(saved(4)), key & ".Unit", True)
                 Case "ExtensionUsed": flag = ReadSnapshotBoolean(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), key)
-                Case "Status": status = ReadSnapshotStatus(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), key)
             End Select
         End If
     Next field
+    Dim status As String, retainedSteel As Boolean
+    key = "State." & stateType & ".Status"
+    saved = stateFields.Item(LCase$(key))
+    status = ReadSnapshotStatus(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), key)
+    retainedSteel = SavedStateRetainsUnresolvedSteel(anchor, stateFields, stateType, status)
+    If StrComp(stateType, mStateType, vbTextCompare) = 0 Then mRetainedSteelLimitUnresolved = retainedSteel
 End Sub
+
+' Допускает отсутствие ключа в совместимых снимках. Присутствующий код
+' проверяется даже при полностью сохранённых строках элементов.
+Private Function SavedStateRetainsUnresolvedSteel(ByVal anchor As Object, ByVal stateFields As Object, _
+        ByVal stateType As String, ByVal status As String) As Boolean
+    Dim key As String: key = "State." & stateType & ".ResultCode"
+    If Not stateFields.Exists(LCase$(key)) Then Exit Function
+    Dim saved As Variant, retainedSteel As Boolean: saved = stateFields.Item(LCase$(key))
+    If Not TryReadSnapshotStateResultCode(saved(0), status, retainedSteel) Then Err.Raise vbObjectError + 4720, _
+        "CSectionPlotDataReader", SnapshotMetadataInputMessage(anchor, CLng(saved(2)), CLng(saved(3)), key)
+    SavedStateRetainsUnresolvedSteel = retainedSteel
+End Function
+
+' В расчётном снимке прямой численный отказ без НДС сохраняет статус LC,
+' профиль и геометрию. Частичное именованное НДС или остатки подтверждённых
+' усилий означают повреждение и не разрешают этот режим. Одного LC достаточно.
+Private Function HasSavedNoFieldDirectFailure(ByVal workbook As Object, ByVal stateFields As Object) As Boolean
+    If StrComp(mStateType, "StrengthState", vbTextCompare) <> 0 Then Exit Function
+    If Not stateFields.Exists("directstatestatus") Or Not stateFields.Exists("profileid") Then Exit Function
+    Dim key As Variant
+    For Each key In stateFields.Keys
+        If Left$(CStr(key), Len("state.strengthstate.")) = "state.strengthstate." Or _
+                Left$(CStr(key), Len("coupled.internal.")) = "coupled.internal." Or CStr(key) = "coupled.statesolver" Then Exit Function
+    Next key
+    Dim anchor As Object: Set anchor = workbook.Names.Item("rngNDMSectionProperties").RefersToRange
+    Dim saved As Variant: saved = stateFields.Item("directstatestatus")
+    HasSavedNoFieldDirectFailure = (ReadSnapshotStatus(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), "DirectStateStatus") = "NumFail")
+End Function
 
 ' Отсутствующее выбранное НДС разрешает только геометрию проверенного Full:
 ' рассчитанные состояния этого LC имеют полный payload и metadata; полностью
@@ -673,7 +713,7 @@ Private Sub RequireMissingStateFullSnapshot(ByVal workbook As Object, ByVal stat
     For Each key In metadataStates.Keys
         RequireSavedStateFields workbook, stateFields, CStr(key), True
         If SavedStateNeedsElementRows(workbook, stateFields, CStr(key)) And Not caseStates.Exists(key) Then Err.Raise vbObjectError + 4703, "CSectionPlotDataReader", _
-            "В сохраненном снимке Results успешное состояние " & CStr(key) & " не имеет строк элементов для " & mLoadCase & _
+            "В сохраненном снимке Results состояние " & CStr(key) & " не имеет требуемых строк элементов для " & mLoadCase & _
             " (rngNDMSectionProperties, " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & "). Повторите расчет."
     Next key
     If Not stateFields.Exists("profileid") Then Err.Raise vbObjectError + 4703, "CSectionPlotDataReader", _
@@ -683,7 +723,8 @@ Private Sub RequireMissingStateFullSnapshot(ByVal workbook As Object, ByVal stat
     If StrComp(Trim$(ReadSnapshotText(profile(0), anchor, CLng(profile(2)), CLng(profile(3)), "ProfileId")), mProfileId, vbTextCompare) <> 0 Then _
         Err.Raise vbObjectError + 4703, "CSectionPlotDataReader", "Не совпадает сохраненный ProfileId сочетания " & mLoadCase & _
         " (rngNDMSectionProperties, " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & "). Повторите расчет."
-    If caseStates.Count = 0 And Not metadataStates.Exists(LCase$(mStateType)) Then Err.Raise vbObjectError + 4703, "CSectionPlotDataReader", _
+    If caseStates.Count = 0 And Not metadataStates.Exists(LCase$(mStateType)) And _
+            Not HasSavedNoFieldDirectFailure(workbook, stateFields) Then Err.Raise vbObjectError + 4703, "CSectionPlotDataReader", _
         "В сохраненном снимке Results нет полного состояния или диагностических свойств сочетания " & mLoadCase & _
         " (rngNDMSectionProperties, " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & "). Повторите расчет."
     Dim expectedElements As Object: Set expectedElements = CreateObject("Scripting.Dictionary"): expectedElements.CompareMode = vbTextCompare
@@ -718,7 +759,8 @@ Private Function SavedStateNeedsElementRows(ByVal workbook As Object, ByVal stat
     Dim status As String: status = ReadSnapshotStatus(saved(0), anchor, CLng(saved(2)), CLng(saved(3)), "State." & stateType & ".Status")
     Select Case status
         Case "OK", "FAIL", "BaseFail": SavedStateNeedsElementRows = True
-        Case "NumFail", "InputErr", "CalcErr", "N/A": SavedStateNeedsElementRows = False
+        Case "NumFail": SavedStateNeedsElementRows = SavedStateRetainsUnresolvedSteel(anchor, stateFields, stateType, status)
+        Case "InputErr", "CalcErr", "N/A": SavedStateNeedsElementRows = False
     End Select
 End Function
 
@@ -1060,6 +1102,7 @@ Private Sub ResetReaderState()
     mLoadReferenceX = 0#: mLoadReferenceY = 0#
     mExtensionUsed = False
     mStateStatus = vbNullString
+    mRetainedSteelLimitUnresolved = False
 
     Erase mElementID
     Erase mMaterialType
@@ -1450,6 +1493,10 @@ Public Property Get LoadReferenceY() As Double: LoadReferenceY = mLoadReferenceY
 Public Property Get ExtensionUsed() As Boolean: ExtensionUsed = mExtensionUsed: End Property
 ' Статус выбранного сохранённого расчётного состояния.
 Public Property Get DirectStateStatus() As String: DirectStateStatus = mStateStatus: End Property
+' Выбранное сохранённое НДС уравновешено, сторона предела стали открыта.
+Friend Property Get RetainedSteelLimitUnresolved() As Boolean
+    RetainedSteelLimitUnresolved = mRetainedSteelLimitUnresolved
+End Property
 ' Проверяет по Results, нужно ли предупреждение о продолжении диаграмм
 ' или физическом FAIL. Решатель не запускается; обозначение статуса
 ' остаётся заданным общими правилами.

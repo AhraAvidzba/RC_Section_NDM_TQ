@@ -878,3 +878,18 @@ Friend Function ResultantResidualNorm(ByRef actual() As Double, ByRef expected()
         If difference > ResultantResidualNorm Then ResultantResidualNorm = difference
     Next i
 End Function
+
+' Возвращает линейный оператор продольной деформации стержня по координатам поля.
+' Кинематические множители связей не входят в проекцию.
+Friend Sub CopySteelStrainProjection(ByVal point As Long, ByRef projection() As Double)
+    ReDim projection(1 To mGaugeBase)
+    Dim localIndex As Long, degree As Long
+    For localIndex = 1 To LOCAL_DOF
+        degree = mSectionDof(localIndex, point)
+        If degree > 0 Then
+            projection(degree) = projection(degree) + _
+                mSteelDirection(mFirstComponent(localIndex), point) * mOperators(1, localIndex, point) + _
+                mSteelDirection(mSecondComponent(localIndex), point) * mOperators(2, localIndex, point)
+        End If
+    Next localIndex
+End Sub

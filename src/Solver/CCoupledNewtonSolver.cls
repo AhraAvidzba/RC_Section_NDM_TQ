@@ -57,6 +57,7 @@ Private mSlopeTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double
 Private mPlusStrain(1 To COMPONENT_COUNT) As Double, mMinusStrain(1 To COMPONENT_COUNT) As Double
 Private mPlusStress(1 To COMPONENT_COUNT) As Double, mMinusStress(1 To COMPONENT_COUNT) As Double
 Private mMatrix() As Double, mExternal() As Double, mResidual() As Double
+Private mDirectProofMatrix As Boolean ' Матрица собрана непосредственно в принятом силовом поле.
 Private mCandidateReady As Boolean
 Private mYieldRecoveryTried As Boolean
 Private mRecoveredProjection() As Double
@@ -119,14 +120,15 @@ End Sub
 Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As Double, _
         ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByRef initialField As Variant) As Boolean
+        Optional ByRef initialField As Variant, Optional ByVal retainDirectProof As Boolean = False) As Boolean
     Dim load(1 To COMPONENT_COUNT) As Double
     load(1) = force: load(2) = mx: load(3) = my
     load(4) = torque: load(5) = qx: load(6) = qy
     mControlActive = False
     mConsistentControl = False
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
-    TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, initialField:=initialField)
+    TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, _
+        initialField:=initialField, retainDirectProof:=retainDirectProof)
 End Function
 
 ' Сообщает, доступна ли согласованная касательная для пространственной истории материалов.
@@ -234,7 +236,9 @@ End Function
 ' невязкой, ограничителями поправок и фиксацией материальных состояний.
 Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant) As Boolean
+        Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
+        Optional ByVal retainDirectProof As Boolean = False) As Boolean
+    mDirectProofMatrix = False
     mMeta.Clear
     mCandidateReady = False
     mYieldRecoveryTried = False: Erase mRecoveredProjection
@@ -311,6 +315,7 @@ RecomputeTangent:
                 Exit Function
             End If
             mCandidate = current
+            mDirectProofMatrix = retainDirectProof And Not mControlActive
             PublishCandidate currentLambda
             SolveStep = True
             Exit Function
@@ -1330,6 +1335,159 @@ Friend Function TestEquilibriumLinearization(ByRef field() As Double, ByVal with
     If mCandidateReady Then
         mExternal = savedExternal: mTrialResultants = savedResultants
     End If
+End Function
+
+' Уточняет сторону предела на пробной истории. Если знак не разделён,
+' сохраняет только то силовое поле, которое проверила та же система уравнений.
+Friend Function VerifyDirectSteelTrial(ByRef load() As Double, ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        ByRef details As String, ByRef unresolved As ECoupledSteelUncertainty) As Boolean
+    Const CHECK_TOLERANCE As Double = 1E-12 ' МПа или относительный масштаб повторной проверки равновесия.
+    RequireCandidate
+    unresolved = csuNone: details = vbNullString
+    If mControlActive Then Err.Raise 5, , "Проверка стали требует силовой пробы."
+    If Not reinforcement.HasSteel Then VerifyDirectSteelTrial = True: Exit Function
+
+    Dim original() As Double, correction() As Double, point As Long
+    original = mCandidate
+    If Not ReadDirectScreen(original, correction) Then
+        unresolved = reinforcement.PresentSteelCriteria
+        details = "Равновесие сохранено. Чувствительность предела стали не подтверждена."
+        VerifyDirectSteelTrial = True
+        Exit Function
+    End If
+    If Not reinforcement.SteelBoundaryWithinCorrection(mSection, original, correction, point, unresolved) Then
+        VerifyDirectSteelTrial = True
+        Exit Function
+    End If
+
+    ' Уточнение начинается из принятого поля. Остаток и знак меняются с кривизной ветви.
+    Dim seed As Variant, strictAbsolute As Double, strictRelative As Double
+    seed = original
+    strictAbsolute = GeomMin(absoluteTolerance, CHECK_TOLERANCE)
+    strictRelative = GeomMin(relativeTolerance, CHECK_TOLERANCE)
+    If Not TryStep(load(1), load(2), load(3), load(4), load(5), load(6), strictAbsolute, strictRelative, maxIterations, seed) Then
+        If mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+        details = "Уточнение стороны предела: " & mMeta.ResultComment
+        VerifyDirectSteelTrial = RestoreDirectForceField(original, load, absoluteTolerance, relativeTolerance)
+        Exit Function
+    End If
+    If Not WithinDirectCorrection(original, correction, mCandidate) Then
+        details = "Уточнение стороны предела вышло из окрестности силовой пробы."
+        VerifyDirectSteelTrial = RestoreDirectForceField(original, load, absoluteTolerance, relativeTolerance)
+        Exit Function
+    End If
+
+    Dim polished() As Double, refinedCorrection() As Double, refinedUncertainty As ECoupledSteelUncertainty
+    polished = mCandidate
+    If ReadDirectCorrection(polished, refinedCorrection) Then
+        If Not reinforcement.SteelBoundaryWithinCorrection(mSection, polished, refinedCorrection, point, refinedUncertainty) Then
+            unresolved = csuNone
+            details = "Сторона предела стали подтверждена уточнённым силовым равновесием."
+            VerifyDirectSteelTrial = True
+            Exit Function
+        End If
+        unresolved = refinedUncertainty
+    Else
+        unresolved = reinforcement.PresentSteelCriteria
+        details = "Силовое равновесие уточнено. Чувствительность предела стали не подтверждена."
+        VerifyDirectSteelTrial = True
+        Exit Function
+    End If
+
+    ' Предельное поле даёт диагностическую невязку, даже при равенстве в пределах арифметики.
+    ' Напряжения для публикации всегда остаются на подтверждённом силовом поле.
+    Dim boundary() As Double: boundary = polished
+    If point > 0 Then
+        If reinforcement.ProjectSteelBoundary(mSection, point, boundary) Then
+            If WithinDirectCorrection(original, correction, boundary) Then
+                If CheckDirectBoundaryField(boundary, load, strictAbsolute, strictRelative) Then _
+                    details = "Невязка поля на границе стали, МПа: " & CStr(mLastNorm) & "."
+                VerifyDirectSteelTrial = RestoreDirectForceField(polished, load, strictAbsolute, strictRelative)
+                Exit Function
+            End If
+        End If
+    End If
+    VerifyDirectSteelTrial = True
+End Function
+
+' Пересчитывает фиксированное силовое поле из прежнего принятого буфера.
+' Проба удовлетворяет всем усилиям, слабым условиям и связям однозначности.
+Private Function RestoreDirectForceField(ByRef field() As Double, ByRef load() As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double) As Boolean
+    mCandidateReady = False
+    If Evaluate(field, False) Then
+        Dim tolerance As Double: tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+        If EquilibriumNorm(load, field) <= tolerance And GaugesVerified(tolerance) Then
+            mCandidate = field
+            PublishCandidate 0#
+            RestoreDirectForceField = True
+            Exit Function
+        End If
+        RecordFailure sfcNumericalFailure, "Повторная проверка не подтвердила равновесие сохранённого силового поля."
+    Else
+        RecordFailure mFailureCode, "Не восстановлен материальный отклик сохранённого силового поля."
+    End If
+End Function
+
+' Оценивает чувствительность по матрице принятого поля. После принятой
+' поправки нужна новая касательная, поскольку наклон диаграммы мог измениться.
+Private Function ReadDirectScreen(ByRef field() As Double, ByRef correction() As Double) As Boolean
+    If mDirectProofMatrix Then
+        correction = mResidual
+        Dim i As Long
+        For i = 1 To mDegreeCount: correction(i) = -correction(i): Next i
+        ReadDirectScreen = mSystem.Solve(mMatrix, correction, mDegreeCount)
+        If ReadDirectScreen Then Exit Function
+    End If
+    ReadDirectScreen = ReadDirectCorrection(field, correction)
+End Function
+
+' Оценивает поправку на пробном поле без замены принятой истории, пробных
+' напряжений и исходного результата силового шага.
+Private Function ReadDirectCorrection(ByRef field() As Double, ByRef correction() As Double) As Boolean
+    Dim savedResidual() As Double, savedForces() As Double, savedNorm As Double
+    Dim savedFailure As ESolverFailureCode, savedPoint As Long, savedLastPoint As Long, savedSide As Long
+    Dim savedEvaluations As Long, savedGradient As Long, savedLocalGradient As Long, savedFailures As Long
+    savedResidual = mResidual: savedForces = mTrialResultants: savedNorm = mLastNorm
+    savedFailure = mFailureCode: savedPoint = mMaterialPoint: savedLastPoint = mLastFailedPoint: savedSide = mLastFailedSide
+    savedEvaluations = mEvaluations: savedGradient = mGradientBuilds: savedLocalGradient = mLocalGradientBuilds
+    savedFailures = mMaterialFailures
+    Dim useGradient As Boolean: useGradient = mSection.HasAxialGradient(field)
+    If Evaluate(field, True, useGradient, recordTrial:=False) Then
+        ReadDirectCorrection = SolveCorrection(field, correction)
+    End If
+    mResidual = savedResidual: mTrialResultants = savedForces: mLastNorm = savedNorm
+    mFailureCode = savedFailure: mMaterialPoint = savedPoint: mLastFailedPoint = savedLastPoint: mLastFailedSide = savedSide
+    mEvaluations = savedEvaluations: mGradientBuilds = savedGradient: mLocalGradientBuilds = savedLocalGradient
+    mMaterialFailures = savedFailures
+    If Not ReadDirectCorrection Then ReDim correction(1 To mDegreeCount)
+End Function
+
+' Ограничивает уточнение окрестностью исходной поправки Ньютона.
+' Множитель два резервирует следующее приращение в сжимающейся итерации.
+Private Function WithinDirectCorrection(ByRef reference() As Double, ByRef correction() As Double, ByRef trial() As Double) As Boolean
+    Const ROUNDING_STEP As Double = 2.22044604925031E-16
+    Dim i As Long, change As Double, radius As Double, fieldMagnitude As Double
+    For i = 1 To mGaugeStart - 1
+        change = GeomMax(change, Abs(trial(i) - reference(i)))
+        radius = GeomMax(radius, Abs(correction(i)))
+        fieldMagnitude = GeomMax(fieldMagnitude, Abs(reference(i)))
+    Next i
+    WithinDirectCorrection = (change <= 2# * radius + 8# * ROUNDING_STEP * fieldMagnitude)
+End Function
+
+' Проверяет неподвижное поле на пределах арифметической точности
+' интегралов и более строгом допуске силовой задачи.
+Private Function CheckDirectBoundaryField(ByRef field() As Double, ByRef load() As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double) As Boolean
+    Const ROUNDING_STEP As Double = 2.22044604925031E-16
+    Dim forceMagnitude As Double: forceMagnitude = 1# + StressScale(mExternal)
+    Dim tolerance As Double: tolerance = GeomMin(EquilibriumTolerance(absoluteTolerance, relativeTolerance), _
+        (mPointCount + mDegreeCount) * ROUNDING_STEP * forceMagnitude)
+    If Not Evaluate(field, False) Then Exit Function
+    If EquilibriumNorm(load, field) > tolerance Then Exit Function
+    CheckDirectBoundaryField = GaugesVerified(tolerance)
 End Function
 
 ' Возвращает максимум по всем силовым уравнениям и интегралам в масштабе МПа.

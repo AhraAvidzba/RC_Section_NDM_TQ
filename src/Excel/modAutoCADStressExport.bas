@@ -33,6 +33,7 @@ Private Type TAutoCADExportSettings
 End Type
 
 Private Const EXTENSION_WARNING_TEXT As String = "ВНЕ ФИЗИЧЕСКОЙ ДИАГРАММЫ МАТЕРИАЛА"
+Private Const STEEL_CHECK_WARNING_TEXT As String = "РАВНОВЕСИЕ ПОДТВЕРЖДЕНО. ПРЕДЕЛ АРМАТУРЫ НЕ УТОЧНЁН"
 Private Const NUMERICAL_STATE_WARNING_TEXT As String = "ПРЯМОЕ НДС НЕ СОШЛОСЬ"
 Private Const GEOMETRY_ONLY_EXPORT_WARNING As String = "В AutoCAD передана только геометрия сечения." & vbCrLf & vbCrLf & "Сохранённые результаты расчёта сечения отсутствуют."
 Private Const EXTENSION_WARNING_LAYER As String = "RC_NDM_Warnings"
@@ -456,7 +457,7 @@ Private Sub ReadSectionPropertiesForCombination(ByVal workbook As Object, ByVal 
 
     Dim foundState As Boolean
     Dim stateFields As Object: Set stateFields = CreateObject("Scripting.Dictionary")
-    Dim stateStatus As String
+    Dim stateStatus As String, stateCodeValue As Variant, stateCodeRow As Long, retainedSteel As Boolean
     Dim policy As CResultStatusPolicy
     Dim rowIndex As Long
     Dim concreteCentroidX As Double
@@ -492,6 +493,9 @@ Private Sub ReadSectionPropertiesForCombination(ByVal workbook As Object, ByVal 
             key = LCase$(Trim$(SafeText(data(rowIndex, colParameter))))
             prefix = "state." & LCase$(stateType) & "."
             If Left$(key, Len(prefix)) = prefix Then
+                If key = prefix & "resultcode" Or key = prefix & "status" Then
+                    If stateFields.Exists(key) Then RejectExportSnapshotMetadata workbook, rowIndex, colValue, SafeText(data(rowIndex, colParameter))
+                End If
                 stateFields(key) = True
                 Select Case Mid$(key, Len(prefix) + 1)
                 Case "epsilon0"
@@ -504,6 +508,8 @@ Private Sub ReadSectionPropertiesForCombination(ByVal workbook As Object, ByVal 
                 Case "extensionused"
                     If Not TryReadSnapshotBoolean(data(rowIndex, colValue), extensionUsed) Then _
                         RejectExportSnapshotMetadata workbook, rowIndex, colValue, SafeText(data(rowIndex, colParameter))
+                Case "resultcode"
+                    stateCodeValue = data(rowIndex, colValue): stateCodeRow = rowIndex
                 Case "status"
                     If Not TryReadSnapshotStatus(data(rowIndex, colValue), stateStatus) Then _
                         RejectExportSnapshotMetadata workbook, rowIndex, colValue, SafeText(data(rowIndex, colParameter))
@@ -520,7 +526,13 @@ Private Sub ReadSectionPropertiesForCombination(ByVal workbook As Object, ByVal 
             " (rngNDMSectionProperties, " & anchor.Worksheet.Name & "!" & anchor.Address(False, False) & "). Повторите расчет/импорт для восстановления снимка."
     Next field
 
-    If extensionUsed Or stateStatus = policy.Fail Then
+    If stateCodeRow > 0 Then
+        If Not TryReadSnapshotStateResultCode(stateCodeValue, stateStatus, retainedSteel) Then _
+            RejectExportSnapshotMetadata workbook, stateCodeRow, colValue, "State." & stateType & ".ResultCode"
+    End If
+    If retainedSteel Then
+        stateWarningText = STEEL_CHECK_WARNING_TEXT
+    ElseIf extensionUsed Or stateStatus = policy.Fail Then
         stateWarningText = EXTENSION_WARNING_TEXT
     ElseIf stateStatus = policy.NumFail Then
         stateWarningText = NUMERICAL_STATE_WARNING_TEXT

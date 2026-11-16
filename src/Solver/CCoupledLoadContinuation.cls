@@ -37,6 +37,10 @@ Private mRejected As Long, mAccepted As Long, mAttempts As Long
 Private mMeta As CResultMeta
 Private mAcceptedFields As Collection ' Копии полей принятых шагов для восстановления истории в точках вывода.
 Private mAcceptedTrace As CCoupledLoadTrace
+Private mDirectSteel As CCoupledReinforcedResponse ' Чтение границы стали на точной силовой цели.
+Private mDirectTarget As Double
+Private mDirectSteelDetails As String
+Private mDirectSteelUncertainty As ECoupledSteelUncertainty
 Private mReinforcement As CCoupledReinforcedResponse ' Контроль предельных деформаций включается при поиске.
 Private mLimitTolerance As Double
 Private mHasSteelLimit As Boolean, mSteelLimitOnOffset As Boolean
@@ -67,7 +71,7 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mAbsoluteTolerance = absoluteTolerance: mRelativeTolerance = relativeTolerance
     mOffsetFraction = 0#: mLambda = 0#: mPreviousLambda = -1#: mHasAccepted = False
     mPreferDeformationOnStall = False
-    Set mReinforcement = Nothing
+    Set mReinforcement = Nothing: Set mDirectSteel = Nothing
     mHasSteelLimit = False: mSteelLimitOnOffset = False
     mSteelLimitPoint = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
@@ -180,8 +184,10 @@ End Function
 ' Продвигается до заданного lambda по текущей истории. После отказа
 ' доступны достигнутая точка и повтор от неё. Уменьшение lambda требует
 ' восстановления снимка истории или повторной подготовки траектории.
-Friend Function Advance(ByVal targetLambda As Double) As Boolean
+Friend Function Advance(ByVal targetLambda As Double, Optional ByVal verifyDirectSteel As CCoupledReinforcedResponse = Nothing) As Boolean
     mMeta.Clear
+    Set mDirectSteel = verifyDirectSteel: mDirectTarget = targetLambda: mDirectSteelDetails = vbNullString
+    mDirectSteelUncertainty = csuNone
     mRejected = 0: mAccepted = 0: mAttempts = 0
     mExactTargetRecovery = vbNullString
     mSecantFailure = vbNullString
@@ -209,6 +215,11 @@ Friend Function Advance(ByVal targetLambda As Double) As Boolean
     mMeta.DiagnosticDetails = ProgressDetails()
     Advance = True
 End Function
+
+' Сообщает, какая проверка стали осталась открытой при подтверждённом НДС.
+Friend Property Get DirectSteelUncertainty() As ECoupledSteelUncertainty
+    DirectSteelUncertainty = mDirectSteelUncertainty
+End Property
 
 ' Возвращает копию результата последнего принятого шага текущей ветви.
 ' При отказе это подтверждённая промежуточная точка с собственным lambda.
@@ -452,11 +463,24 @@ Private Function TryEquilibrium(ByVal parameter As Double, ByVal offsetStage As 
             load(i) = mOffset(i) + parameter * mDirection(i)
         End If
     Next i
+    Dim checkSteel As Boolean
+    If Not mDirectSteel Is Nothing Then
+        checkSteel = (Not offsetStage And parameter = mDirectTarget) Or _
+            (offsetStage And parameter = 1# And mDirectTarget = 0#)
+        checkSteel = checkSteel And mDirectSteel.HasSteel
+    End If
     mAttempts = mAttempts + 1
     If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
-            mAbsoluteTolerance, mRelativeTolerance, mMaxIterations, initialField) Then
+            mAbsoluteTolerance, mRelativeTolerance, mMaxIterations, initialField, retainDirectProof:=checkSteel) Then
         Set mMeta = mSolver.ResultMeta
         Exit Function
+    End If
+    If checkSteel Then
+        If Not mSolver.VerifyDirectSteelTrial(load, mDirectSteel, mAbsoluteTolerance, mRelativeTolerance, _
+                mMaxIterations, mDirectSteelDetails, mDirectSteelUncertainty) Then
+            Set mMeta = mSolver.ResultMeta
+            Exit Function
+        End If
     End If
     TryEquilibrium = True
 End Function
@@ -549,6 +573,7 @@ End Function
 Private Function ProgressDetails() As String
     ProgressDetails = "Доля постоянной части: " & CStr(mOffsetFraction) & "; lambda: " & CStr(mLambda) & _
         "; принято: " & CStr(mAccepted) & "; отклонено: " & CStr(mRejected) & "; проб: " & CStr(mAttempts)
+    If Len(mDirectSteelDetails) > 0 Then ProgressDetails = ProgressDetails & " | " & mDirectSteelDetails
     If Len(mExactTargetRecovery) > 0 Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено " & mExactTargetRecovery
     If Len(mSecantFailure) > 0 Then ProgressDetails = ProgressDetails & " | Секущий прогноз: " & mSecantFailure
     If Len(mTwistGuideDetails) > 0 Then ProgressDetails = ProgressDetails & " | Управление закручиванием: " & mTwistGuideDetails

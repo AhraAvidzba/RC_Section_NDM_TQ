@@ -1282,6 +1282,28 @@ Public Function TryReadSnapshotStatus(ByVal value As Variant, ByRef parsed As St
 InvalidValue:
 End Function
 
+' Читает присутствующий машинный код из сохранённого НДС. Отсутствующий
+' ключ обрабатывает адаптер по формату снимка. Неуточнённый предел стали
+' допустим только при статусе NumFail, даже если равновесие подтверждено.
+Public Function TryReadSnapshotStateResultCode(ByVal value As Variant, ByVal stateStatus As String, _
+        ByRef retainedSteel As Boolean) As Boolean
+    retainedSteel = False
+    If IsObject(value) Or IsArray(value) Then Exit Function
+    If VarType(value) <> vbString Then Exit Function
+    Dim codeText As String: codeText = UCase$(Trim$(CStr(value)))
+    Dim code As EResultCode
+    For code = rcNone To rcCoupledSteelLimitUnresolved
+        If codeText = ResultCodeToText(code) Then
+            If code = rcCoupledSteelLimitUnresolved Then
+                If stateStatus <> "NumFail" Then Exit Function
+                retainedSteel = True
+            End If
+            TryReadSnapshotStateResultCode = True
+            Exit Function
+        End If
+    Next code
+End Function
+
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Показывает число блочных чтений и освобождение таблиц после операции.
 Public Function TestSectionSnapshotReadDiagnostics() As String
