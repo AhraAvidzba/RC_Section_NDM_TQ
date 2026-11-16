@@ -1,6 +1,6 @@
 {
-  "manifest_sha256": "8BEE18E74E08048D8D069E223035842E30F75BD7626E924CFF5A7FF874E55BE0",
-  "source_checkpoint": "032ec14",
+  "manifest_sha256": "2015CFB7368EDCD0BB01BB3D46DB36FEBEE1FD6911CB61689CA3CC0E4B0DA95F",
+  "source_checkpoint": "3fd1763",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
     "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
@@ -11,7 +11,7 @@
     "scipy": "1.18.1"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 29,
+  "passed": 34,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -255,6 +255,49 @@
       "archive": "KaniApexSectionActions20261116",
       "verified_outputs_sha256": {
         "ApexSectionVerification.json": "ED408C571CE1A614E9287131B81C2BBB3CE2BFB143EC4798F5524D38AD7B4594"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-gradient-signed",
+      "journal_section": 325,
+      "archive": "MVT2GradientCorrection20261116",
+      "verified_outputs_sha256": {
+        "VerificationA.json": "663899257F9E8A8B1810243F564B804A58A1A6728EA2195C1A977B0BF3AC8E56"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-gradient-paired",
+      "journal_section": 325,
+      "archive": "MVT2GradientCorrection20261116",
+      "verified_outputs_sha256": {
+        "VerificationB.json": "0C5FC9583E0C5CC3BBFF74258DFAAC135B782DCE4DFA8C285F99E1A1B87826F9"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-apex-partition",
+      "journal_section": 326,
+      "archive": "KaniApexSectionPartition20261116",
+      "verified_outputs_sha256": {
+        "SectionApexPartition.json": "21F96394C901555DE04B350FD7D2C14ED34173043C453FFBCCF5D8CE7A1FAEDF"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-observable-increment",
+      "journal_section": 327,
+      "archive": "KaniH45Plus18Portable",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "\"stationsWithUnverifiedLinearRemainder\": 448"
+    },
+    {
+      "id": "mvt2-repeated-fixed",
+      "journal_section": 328,
+      "archive": "MVT2RepeatedFixed20261116",
+      "verified_outputs_sha256": {
+        "Verification.json": "E7F7B3F1F40865529F562BC962E6B7662C1D470CE96C4483CF4A49D0816325B0"
       },
       "verified_stdout": null
     }

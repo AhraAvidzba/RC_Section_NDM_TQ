@@ -1,5 +1,5 @@
 {
-  "source_checkpoint": "032ec14",
+  "source_checkpoint": "3fd1763",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
     "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
@@ -34,7 +34,11 @@
     "KaniCommitNear48Portable": "EA0A80006AF81D99799B53FDCB75B18CDDE7B7DF730AB16039902F12C6431488",
     "KaniApexGuardPortable20261116": "89B6492D9BF44E7779BE3D9641BACDB891F9360C20BC2C23282B9E988D20651B",
     "MVT2FreshBounded20261116": "48EAAC2597C4A5691072E698E56EEAE14F45B92B58BF85FF3515BEB451A2CA8C",
-    "KaniApexSectionActions20261116": "360D22C5847F1DF3D40ECAA11689AF2B8B68CF8C94A22E7ACC2B3D19A08486A6"
+    "KaniApexSectionActions20261116": "360D22C5847F1DF3D40ECAA11689AF2B8B68CF8C94A22E7ACC2B3D19A08486A6",
+    "MVT2GradientCorrection20261116": "FA407B0A7625E2CC09C240470D205A5C70CE86BDC67AE04443C3B5306B323CA9",
+    "KaniApexSectionPartition20261116": "00A0DF715175D14BC47BB908B8F569C2624B63FCE99C4A5D86336A115ACB8D2A",
+    "KaniH45Plus18Portable": "D34B8511FA133F1D4F146199F66C2A406DE9E790AB0F19E9B5D7B2AE099B975F",
+    "MVT2RepeatedFixed20261116": "2A4127B75031E56AA35AD06FC2C6CA52EF4DF51E9E69EE3BCC75358B4401A1A2"
   },
   "cases": [
     {
@@ -341,6 +345,66 @@
       "script": "Verify-ApexSectionPortable.py",
       "outputs": {
         "ApexSectionVerification.json": "ED408C571CE1A614E9287131B81C2BBB3CE2BFB143EC4798F5524D38AD7B4594"
+      }
+    },
+    {
+      "id": "mvt2-gradient-signed",
+      "journal_section": 325,
+      "archive": "MVT2GradientCorrection20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline",
+        "--phase",
+        "A"
+      ],
+      "outputs": {
+        "VerificationA.json": "663899257F9E8A8B1810243F564B804A58A1A6728EA2195C1A977B0BF3AC8E56"
+      }
+    },
+    {
+      "id": "mvt2-gradient-paired",
+      "journal_section": 325,
+      "archive": "MVT2GradientCorrection20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline",
+        "--phase",
+        "B"
+      ],
+      "outputs": {
+        "VerificationB.json": "0C5FC9583E0C5CC3BBFF74258DFAAC135B782DCE4DFA8C285F99E1A1B87826F9"
+      }
+    },
+    {
+      "id": "kani-apex-partition",
+      "journal_section": 326,
+      "archive": "KaniApexSectionPartition20261116",
+      "script": "Verify-SectionApexPartition.py",
+      "arguments": [
+        "{repo}"
+      ],
+      "outputs": {
+        "SectionApexPartition.json": "21F96394C901555DE04B350FD7D2C14ED34173043C453FFBCCF5D8CE7A1FAEDF"
+      }
+    },
+    {
+      "id": "kani-h45-observable-increment",
+      "journal_section": 327,
+      "archive": "KaniH45Plus18Portable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "stdout_contains": "\"stationsWithUnverifiedLinearRemainder\": 448"
+    },
+    {
+      "id": "mvt2-repeated-fixed",
+      "journal_section": 328,
+      "archive": "MVT2RepeatedFixed20261116",
+      "script": "Verify-Repeated.py",
+      "outputs": {
+        "Verification.json": "E7F7B3F1F40865529F562BC962E6B7662C1D470CE96C4483CF4A49D0816325B0"
       }
     }
   ]
