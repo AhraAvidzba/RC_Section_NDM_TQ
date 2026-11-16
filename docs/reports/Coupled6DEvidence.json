@@ -83,7 +83,8 @@
     "MVT2Force15Native20261116": "AAF97ABED8510F390488F2A5C515E57431BED7ED56694181D2CD763F35A8900F",
     "CoupledSteelDesignBracket20261116": "8243063C3F3A8093D81433F29EA9E9C52F695A40FEBA9B1F698455D78BEB53AA",
     "KaniH45DLastDirectionPortable": "648CEB7D037BD9E95D86BFF222EB9CEEB68BE914A61F085FACFBD67B96A9250B",
-    "MVT2MeasuredNormalsNative20261116": "84DAF40599AD0FE9A0AE1C2EBA2CF2F72DED306F0F47B222F1A0528216D50A86"
+    "MVT2MeasuredNormalsNative20261116": "84DAF40599AD0FE9A0AE1C2EBA2CF2F72DED306F0F47B222F1A0528216D50A86",
+    "KaniH45ShortDampingEPortable": "202BABB0E20A7ACACB410E6BF3205846107F918821112D4BC630B447C28A7D9E"
   },
   "cases": [
     {
@@ -984,6 +985,16 @@
       "arguments": ["--decision"],
       "outputs": {
         "PortableReport.json": "2C7C000ECE05C35552C636721E0EA744095BB44D8AD6AF5560DE18978BD79DC0"
+      }
+    },
+    {
+      "id": "kani-h45-short-damping-native-trials",
+      "journal_section": 385,
+      "archive": "KaniH45ShortDampingEPortable",
+      "script": "Replay-E.py",
+      "arguments": ["--repo-root", "{repo}"],
+      "outputs": {
+        "Replay-ShortDampingEComparison.json": "008EBDF17B30F84F9280A6A670D5DC07B1F48419478FBB0574F11477BE2994E9"
       }
     }
   ],

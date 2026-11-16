@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "ACFDFE90F9F8F7328B923555EC44D2B99BA7E6B08AF7482B9163FE056E1A2B98",
+  "manifest_sha256": "78A5C072C66F946364700A59904D979C4A853490F93C1A9062107B36A4F8FF55",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 79,
+  "passed": 80,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -707,6 +707,15 @@
       "archive": "MVT2MeasuredNormalsNative20261116",
       "verified_outputs_sha256": {
         "PortableReport.json": "2C7C000ECE05C35552C636721E0EA744095BB44D8AD6AF5560DE18978BD79DC0"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-short-damping-native-trials",
+      "journal_section": 385,
+      "archive": "KaniH45ShortDampingEPortable",
+      "verified_outputs_sha256": {
+        "Replay-ShortDampingEComparison.json": "008EBDF17B30F84F9280A6A670D5DC07B1F48419478FBB0574F11477BE2994E9"
       },
       "verified_stdout": null
     }
