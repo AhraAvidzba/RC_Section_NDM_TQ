@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "BEEF2BB9678E816BA7498C2C46CAAE505541BE751E6FC3D998F0ABF345940378",
+  "manifest_sha256": "AB0A156F7359C8B92BBDEC71EA0F8F3243AE6D9EAC980A096C4F8BDE4887989E",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 83,
+  "passed": 84,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -743,6 +743,16 @@
       "archive": "DirectSteelBoundary20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "DIRECT STEEL EVIDENCE PASS E8C200A5E4A8952DEFCF2B59138E4BCF146E855CED2BEC9BACDE4D7BD1CA9D7D"
+    },
+    {
+      "id": "a2-lane-a-resume-three-exact-forces",
+      "journal_section": 391,
+      "archive": "A2LaneAResumeNative20261116",
+      "verified_outputs_sha256": {
+        "IndependentReplay.json": "4AF27D36669C38A51826FC8095ADF735B670D903B5F2EF56B3B0D3F1117CBEC9",
+        "PortableReplay.json": "34BE1F4D9EB000F9978D45CD89FF755E29FAD344B865A6E844CD6937B3C8F0E4"
+      },
+      "verified_stdout": null
     }
   ]
 }
