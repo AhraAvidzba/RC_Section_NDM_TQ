@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "5FE8013FD351563DCD9945FC2F11D38D570D43E54225BE2855F071705DA2997D",
-  "source_checkpoint": "1e1d0f4",
+  "manifest_sha256": "974B6B354C4819944E987CD635CA609B38223570C51F79E8EF9BED184AD997A5",
+  "source_checkpoint": "e660d27",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
-    "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
+    "workbook/output/RC_Section_NDM.xlsm": "D0CB47951B64A65DD5FE84A1F823DBE395C8BF027C2833813EDAF0FF6A06BBE6",
+    "workbook/output/VBA_All_Code.txt": "A03E9C9507854B6A8BD892C6A218883695B3BA2F9D176625F572B2AC04EBABB1"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 66,
+  "passed": 69,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -592,6 +592,33 @@
       "archive": "MVT2Row29ReactionsNative20261116",
       "verified_outputs_sha256": {
         "Comparison.json": "94728188D0C1AC05F176DC26E6E98EB29BA7CBDFEFC1257FB515CB034F433A48"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-h45-row-81-elastic-damage-spectrum",
+      "journal_section": 369,
+      "archive": "KaniH45Row81SpectralDamagePortable",
+      "verified_outputs_sha256": {
+        "Replay-Remainder.json": "CF0D2226DEBF5C3304EF01B037B156C1E57D59710998D6805D32FC7F1111838E"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "coupled-newton-converged-load-tolerance",
+      "journal_section": 370,
+      "archive": "CoupledFinalLoadTolerance20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "7A0B293E8DD7F9ABD698A559D069EC4EAF3A1145AB5CCDF608DD5CCE3F67A7BF"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "hard-shear-converged-load-tolerance",
+      "journal_section": 371,
+      "archive": "HardShearFinalLoadTolerance20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "11CE2EC3263946186F05FD27C456765722680127438D922921BFEEDA1889B259"
       },
       "verified_stdout": null
     }

@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "1e1d0f4",
+  "source_checkpoint": "e660d27",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "A90C7A5E610C19D2C3CF0D7DB12831651DB12EEFD052E5DBED1378EE3C2C04FA",
-    "workbook/output/VBA_All_Code.txt": "543E864F67C587ED17E6E4C2F3F3B9F23ACDA60623B004A919F790C3B2E48C9E"
+    "workbook/output/RC_Section_NDM.xlsm": "D0CB47951B64A65DD5FE84A1F823DBE395C8BF027C2833813EDAF0FF6A06BBE6",
+    "workbook/output/VBA_All_Code.txt": "A03E9C9507854B6A8BD892C6A218883695B3BA2F9D176625F572B2AC04EBABB1"
   },
   "python_packages": [
     "numpy",
@@ -70,7 +70,10 @@
     "KaniH45RefitMatrixPortable": "E4C08F91001DCDBA9479028E86DD37EE3CE478F40389666E7158399058ACB065",
     "MVT2Row29ReactionsPlanned20261116": "4436121F4292811C79FC1BA5FB444F9E31E224BC59FA1FE37D5FC563CD6B681A",
     "KaniH45NativeLocalColumns20261116": "C3C326809940BB05D8AA30430AB6C06D3ED14A6D52A4F147AB7F15DD98A444BD",
-    "MVT2Row29ReactionsNative20261116": "3E496D7AC294E3FF95F5F4F15778B10A656AFFF87C55EFEC58E0197E207601E0"
+    "MVT2Row29ReactionsNative20261116": "3E496D7AC294E3FF95F5F4F15778B10A656AFFF87C55EFEC58E0197E207601E0",
+    "KaniH45Row81SpectralDamagePortable": "817AB3A89092F11E49DC8E7A4013554DF36340E999AA1F1D74FBC4A5172DB457",
+    "CoupledFinalLoadTolerance20261116": "6D5FE141CC4083DA4C9FD90012A3BFD7964F9FDBE1C66F66A77988EF54B01D7B",
+    "HardShearFinalLoadTolerance20261116": "908D6002C0A78D06D4E1620AF73999308C4B1131645224AC3AB1BE566A7B22E0"
   },
   "cases": [
     {
@@ -834,6 +837,41 @@
       ],
       "outputs": {
         "Comparison.json": "94728188D0C1AC05F176DC26E6E98EB29BA7CBDFEFC1257FB515CB034F433A48"
+      }
+    },
+    {
+      "id": "kani-h45-row-81-elastic-damage-spectrum",
+      "journal_section": 369,
+      "archive": "KaniH45Row81SpectralDamagePortable",
+      "script": "Replay-Remainder.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}",
+        "--witness-root",
+        "{KaniH45Row81DirectionPortable}",
+        "--out",
+        "Replay-Remainder.json"
+      ],
+      "outputs": {
+        "Replay-Remainder.json": "CF0D2226DEBF5C3304EF01B037B156C1E57D59710998D6805D32FC7F1111838E"
+      }
+    },
+    {
+      "id": "coupled-newton-converged-load-tolerance",
+      "journal_section": 370,
+      "archive": "CoupledFinalLoadTolerance20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "7A0B293E8DD7F9ABD698A559D069EC4EAF3A1145AB5CCDF608DD5CCE3F67A7BF"
+      }
+    },
+    {
+      "id": "hard-shear-converged-load-tolerance",
+      "journal_section": 371,
+      "archive": "HardShearFinalLoadTolerance20261116",
+      "script": "Verify.py",
+      "outputs": {
+        "Replay.json": "11CE2EC3263946186F05FD27C456765722680127438D922921BFEEDA1889B259"
       }
     }
   ],
