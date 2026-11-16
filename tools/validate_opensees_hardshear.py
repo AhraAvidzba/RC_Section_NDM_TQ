@@ -3,6 +3,7 @@
 Закреплена нижняя грань. Поперечные силы создают градиент моментов вдоль
 призмы. В контрольной плоскости поддерживается заданная траектория шести
 усилий. Остановка продолжения сохраняется отдельно от достижения предела.
+Положительное N означает растяжение, как во внутренней системе НДМ.
 """
 import argparse
 import json
@@ -14,7 +15,7 @@ from time import perf_counter
 
 import openseespy.opensees as ops
 
-TARGET = (-28000., 510000., 180000., 1500000., 17000., -7100.)
+TARGET = (28000., 510000., 180000., 1500000., 17000., -7100.)
 X = [-90., -76., -38., 0., 38., 76., 90.]
 Y = [-60., -46., -30., 0., 30., 46., 60.]
 AREA, IX, IY = 180.*120., 180.*120.**3/12., 120.*180.**3/12.
@@ -100,11 +101,12 @@ def mesh_axis(values, refine):
 
 
 class Prism:
-    def __init__(self,length,h,variant,refine,control):
+    def __init__(self,length,h,variant,refine,control,section_target=TARGET):
         if length <= 0 or h <= 0 or not math.isclose(length / h, round(length / h)):
             raise ValueError("Length must be a positive multiple of dz")
         if not 0 < control < length or refine < 1:
             raise ValueError("Control cut must be internal and refinement must be positive")
+        self.section_target = section_target
         self.x,self.y = mesh_axis(X,refine),mesh_axis(Y,refine)
         self.nx,self.ny,self.nz = len(self.x)-1,len(self.y)-1,round(length/h)
         self.z = [i*h for i in range(self.nz+1)]
@@ -183,7 +185,7 @@ class Prism:
         ops.pattern("Plain",1,1)
         result = {tag:[0.]*3 for tag in self.planes[-1]}
         dist = self.z[-1]-self.z[self.mid]
-        n,mx,my,t,qx,qy = TARGET
+        n,mx,my,t,qx,qy = self.section_target
         mx,my = mx+dist*qy,my+dist*qx
         for _,nodes in self.bricks[-1]:
             top = nodes[4:]
@@ -199,8 +201,8 @@ class Prism:
         for tag,force in result.items():
             ops.load(tag,*force)
         applied = self.resultant(result,self.z[self.mid])
-        if error(applied,TARGET)>1.e-8:
-            raise RuntimeError(("wrench at control plane",applied,TARGET))
+        if error(applied,self.section_target)>1.e-8:
+            raise RuntimeError(("wrench at control plane",applied,self.section_target))
         return result
 
     def cut(self,layer,lower):
@@ -221,7 +223,7 @@ class Prism:
         return total
 
     def field(self,variant):
-        target = scale(ops.getTime(),TARGET)
+        target = scale(ops.getTime(),self.section_target)
         ops.reactions()
         base = self.resultant({node:scale(-1,ops.nodeReaction(node)) for node in self.planes[0]},self.z[self.mid])
         low,up = self.cut(self.mid-1,True),self.cut(self.mid,False)
@@ -276,7 +278,7 @@ def analyze(prism,opts):
     ops.algorithm("Linear" if opts.variant=="elastic" else "Newton")
     ops.integrator("LoadControl",1.)
     ops.analysis("Static")
-    output = dict(opensees=ops.version(),variant=opts.variant,section_target=TARGET,
+    output = dict(opensees=ops.version(),variant=opts.variant,section_target=prism.section_target,
                   length=opts.length,z_control=opts.cut,mesh=[prism.nx,prism.ny,prism.nz],
                   hoop_planes=prism.hoop_levels,installed_adjustment=prism.installed_adjustment,
                   cut_check_error_N=CROSS_TOL,applied_at_free_face=prism.resultant(prism.loads,prism.z[-1]),
@@ -409,9 +411,14 @@ def main():
     p.add_argument("--arc-length",type=float)
     p.add_argument("--continuation-start",type=float,default=float("inf"))
     p.add_argument("--variant",choices=["elastic","default","matched"],default="matched")
+    p.add_argument("--axial-force",type=float,default=TARGET[0],
+                   help="reference axial force at the cut in N, positive for tension (default: %(default)g)")
     p.add_argument("--out",type=Path,required=True)
     opts=p.parse_args()
-    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut),opts)
+    if not math.isfinite(opts.axial_force):
+        p.error("--axial-force must be finite")
+    section_target = (opts.axial_force,*TARGET[1:])
+    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target),opts)
     print("saved",opts.out,flush=True)
 
 
