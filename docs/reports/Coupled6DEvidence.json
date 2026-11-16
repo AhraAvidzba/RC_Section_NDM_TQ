@@ -101,7 +101,14 @@
     "MixedHoopDirectContact20261116": "E4B617D01445DD11B3753CF26F509546461D8125A9BC14AB59CB47141DB26A4C",
     "DirectSteelMissingTangent20261116": "A23B99BF5CE3CF5CC80DE1549F9189DA4FC576CA958214C84481992B8056BB55",
     "RetainedSteelSnapshotCompatibility20261116": "406C74B55C5C6D2B7FF523E3B764C1C8FDC1C321FDD559A80FA3BFFDDA9578AF",
-    "MVT2HalfJointJetNative20261116": "6E4FBCB3E345DB0250009A458C6169888F81E09D2D91CA4EA822ADA69840AD33"
+    "MVT2HalfJointJetNative20261116": "6E4FBCB3E345DB0250009A458C6169888F81E09D2D91CA4EA822ADA69840AD33",
+    "MVT2PseudoArclengthReference20261116": "89419174198A3E9C4EF27C08BAFFC1E7D63D1A23A773A114696D22A1F322AA9A",
+    "CoupledPseudoArcNative20261116": "31C3807F392E875DB31F24CCAB3EDF622108A121253B0B2BA021BFF6B7E541C4",
+    "A2BPostAnchorNativePortable": "D3DF2D73D31B4E2C423C02609F2D3D452E3A2DA38055D2EBB2C9E0ED508041E1",
+    "HardShearH68PseudoArcNativePortable": "E1140D78FFD51715B73009D27E425E7F441E13CD65571E43A2EB28E9E10D6EF4",
+    "OpenSeesLoadArcFold20261116": "7F889D83356BE0C142213CFF0F63C20850FFEBEFB1B2004023C971C30FD5D540",
+    "MVT2PseudoArclengthNativeComparison20261116": "20F807CD70BDBA3797FE2709B7BDBA9131BF128B25FFBD38C8236F42D5B69229",
+    "A2LocalFoldComparison20261116": "C3BE5C5278981478F246BD5C721AE294B5B44F9341DE55682F4D8D204F7C8B10"
   },
   "cases": [
     {
@@ -1213,6 +1220,78 @@
       "script": "VerifyPortable.py",
       "arguments": [],
       "stdout_contains": "Stage B: reproduced exact canonical report 5DC30790DF86629B78F7BA2ABBA4E1AD3A80117469D01E77820FAAB0ACB7B12D"
+    },
+    {
+      "id": "pseudo-arclength-analytic-controls-and-mvt2-metric",
+      "journal_section": 409,
+      "archive": "MVT2PseudoArclengthReference20261116",
+      "script": "VerifyPortable.py",
+      "arguments": [
+        "{evidence}/MVT2JointCenterGradientNative20261116.zip"
+      ],
+      "stdout_contains": "REPLAY PASS Reference.json E0C790878C3B99001372330B380C651616A29E8EBF9914F28C04F2D94F6F8731"
+    },
+    {
+      "id": "native-pseudo-arclength-axial-and-torsion-fold",
+      "journal_section": 409,
+      "archive": "CoupledPseudoArcNative20261116",
+      "script": "Verify-Archive.py",
+      "arguments": [],
+      "outputs": {
+        "Replay.json": "5AA9CBC8BA245FA36CA46DB40BFCB06572834263E45E1F1E9E93139E68B16EB6"
+      }
+    },
+    {
+      "id": "a2-lane-b-late-peak-and-descending-branch",
+      "journal_section": 410,
+      "archive": "A2BPostAnchorNativePortable",
+      "script": "Replay-Post.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-B-Post-Verification.json": "6BFA97F4CC2144129DB9038FF54C274A0D361B3BD3CE9470D7095104EAA74666",
+        "B-Post-Observed-Events.json": "FAE1A94F07D9163C1DF615F4DD00D168A9C250D6244F5E6F4B136B4BEB642680"
+      }
+    },
+    {
+      "id": "hardshear-current-law-pseudo-arclength-versus-mean-shear",
+      "journal_section": 411,
+      "archive": "HardShearH68PseudoArcNativePortable",
+      "script": "Replay-HardArc.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "outputs": {
+        "Replay-HardArcVerification.json": "67BD8E2A33173DF0E1C7884A5251113295E9C4044B93006235CF8962A56DD47A"
+      },
+      "stdout_contains": "HARD_ARC_PORTABLE_PASS 63BB9B171AC18A51F86CD01854447C5D68D7F53268D2D2029105E56FD7516DFE"
+    },
+    {
+      "id": "opensees-loadcontrol-arclength-original-fold",
+      "journal_section": 412,
+      "archive": "OpenSeesLoadArcFold20261116",
+      "script": "VerifyOpenSeesFold.py",
+      "arguments": [],
+      "stdout_contains": "OPENSEES FOLD EVIDENCE PASS"
+    },
+    {
+      "id": "mvt2-original-law-force-versus-pseudo-arclength-native",
+      "journal_section": 413,
+      "archive": "MVT2PseudoArclengthNativeComparison20261116",
+      "script": "ReplayPortable.py",
+      "arguments": ["{evidence}/MVT2HalfJointJetNative20261116.zip"],
+      "stdout_contains": "CANONICAL NATIVE COMPARISON 5E37145AB506167B149152328EF940AEE296D045B20C5FDE9C3E9C4E357AF02E"
+    },
+    {
+      "id": "a2-local-fold-twist-versus-pseudo-arclength",
+      "journal_section": 414,
+      "archive": "A2LocalFoldComparison20261116",
+      "script": "A2LocalFold/Verify-Archive.py",
+      "arguments": ["--git", "{repo}"],
+      "stdout_contains": "PASS A2 FOLD OFFLINE 910DC52F5004C1E5FF51AB0055E2E2C4A317360056CD95C14229CF74270267A8"
     }
   ],
   "frozen_repositories": {

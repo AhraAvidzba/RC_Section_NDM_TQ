@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "D3D3E1F60309AD8FCC8140A2EBC2294EA1E87D66B5693372A6546CEAD5B3A098",
+  "manifest_sha256": "F3A892B45C4A030CBA3604C4918A71728E002A3FF9753FEE3FBEE39AC6A5BEB9",
   "source_checkpoint": "f4741ae",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "8EAD3E67257BA557426FABED92308AC5912B877F50334CB60BCE505676AC86EF",
@@ -15,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 98,
+  "passed": 105,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -872,6 +872,62 @@
       "archive": "MVT2HalfJointJetNative20261116",
       "verified_outputs_sha256": {},
       "verified_stdout": "Stage B: reproduced exact canonical report 5DC30790DF86629B78F7BA2ABBA4E1AD3A80117469D01E77820FAAB0ACB7B12D"
+    },
+    {
+      "id": "pseudo-arclength-analytic-controls-and-mvt2-metric",
+      "journal_section": 409,
+      "archive": "MVT2PseudoArclengthReference20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "REPLAY PASS Reference.json E0C790878C3B99001372330B380C651616A29E8EBF9914F28C04F2D94F6F8731"
+    },
+    {
+      "id": "native-pseudo-arclength-axial-and-torsion-fold",
+      "journal_section": 409,
+      "archive": "CoupledPseudoArcNative20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "5AA9CBC8BA245FA36CA46DB40BFCB06572834263E45E1F1E9E93139E68B16EB6"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "a2-lane-b-late-peak-and-descending-branch",
+      "journal_section": 410,
+      "archive": "A2BPostAnchorNativePortable",
+      "verified_outputs_sha256": {
+        "Replay-B-Post-Verification.json": "6BFA97F4CC2144129DB9038FF54C274A0D361B3BD3CE9470D7095104EAA74666",
+        "B-Post-Observed-Events.json": "FAE1A94F07D9163C1DF615F4DD00D168A9C250D6244F5E6F4B136B4BEB642680"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "hardshear-current-law-pseudo-arclength-versus-mean-shear",
+      "journal_section": 411,
+      "archive": "HardShearH68PseudoArcNativePortable",
+      "verified_outputs_sha256": {
+        "Replay-HardArcVerification.json": "67BD8E2A33173DF0E1C7884A5251113295E9C4044B93006235CF8962A56DD47A"
+      },
+      "verified_stdout": "HARD_ARC_PORTABLE_PASS 63BB9B171AC18A51F86CD01854447C5D68D7F53268D2D2029105E56FD7516DFE"
+    },
+    {
+      "id": "opensees-loadcontrol-arclength-original-fold",
+      "journal_section": 412,
+      "archive": "OpenSeesLoadArcFold20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "OPENSEES FOLD EVIDENCE PASS"
+    },
+    {
+      "id": "mvt2-original-law-force-versus-pseudo-arclength-native",
+      "journal_section": 413,
+      "archive": "MVT2PseudoArclengthNativeComparison20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "CANONICAL NATIVE COMPARISON 5E37145AB506167B149152328EF940AEE296D045B20C5FDE9C3E9C4E357AF02E"
+    },
+    {
+      "id": "a2-local-fold-twist-versus-pseudo-arclength",
+      "journal_section": 414,
+      "archive": "A2LocalFoldComparison20261116",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "PASS A2 FOLD OFFLINE 910DC52F5004C1E5FF51AB0055E2E2C4A317360056CD95C14229CF74270267A8"
     }
   ]
 }
