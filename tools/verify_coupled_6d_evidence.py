@@ -7,6 +7,7 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -43,6 +44,28 @@ def extract_archive(source, fingerprint, destination):
                 raise ValueError(f"{source.name}: недопустимая запись {entry.filename!r}")
             member_names.add(name.as_posix().casefold())
         archive.extractall(destination)
+
+
+def materialize_frozen_repository(repo, specification, destination):
+    """Восстанавливает только закреплённые входы архивного сценария."""
+    revision = specification["revision"]
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise ValueError(f"Для исторических входов нужен полный SHA-1 Git: {revision}")
+    for relative, expected in specification["files"].items():
+        path = PurePosixPath(relative)
+        if not path.parts or path.is_absolute() or ".." in path.parts or ":" in relative or "\\" in relative:
+            raise ValueError(f"Недопустимый путь исторического входа: {relative}")
+        result = subprocess.run(
+            ["git", "cat-file", "blob", f"{revision}:{relative}"],
+            cwd=repo, capture_output=True, timeout=20, check=False,
+        )
+        if result.returncode:
+            raise ValueError(f"Исторический вход {relative} недоступен в ревизии {revision}")
+        if sha256(result.stdout).hexdigest().upper() != expected:
+            raise ValueError(f"Контрольная сумма исторического входа {relative} не совпала")
+        target = destination.joinpath(*path.parts)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(result.stdout)
 
 
 def replay_case(case, locations):
@@ -86,6 +109,7 @@ def replay(repo):
         require_digest(repo / file, fingerprint)
     archive_directory = repo / ARCHIVE_DIRECTORY
     libraries = {name: version(name) for name in manifest["python_packages"]}
+    frozen_repositories = manifest.get("frozen_repositories", {})
     with TemporaryDirectory(prefix="ndm-coupled-evidence-") as scratch:
         locations = {"repo": str(repo), "evidence": str(archive_directory)}
         for name, fingerprint in manifest["archives"].items():
@@ -94,11 +118,18 @@ def replay(repo):
             destination = Path(scratch) / name
             extract_archive(archive_directory / f"{name}.zip", fingerprint, destination)
             locations[name] = str(destination)
+        for name, specification in frozen_repositories.items():
+            if not name.isidentifier() or name in locations:
+                raise ValueError(f"Недопустимое имя исторического набора входов: {name}")
+            destination = Path(scratch) / name
+            materialize_frozen_repository(repo, specification, destination)
+            locations[name] = str(destination)
         cases = [replay_case(case, locations) for case in manifest["cases"]]
     return {
         "manifest_sha256": sha256(content).hexdigest().upper(),
         "source_checkpoint": manifest["source_checkpoint"],
         "installed_inputs": manifest["installed_inputs"],
+        "frozen_revisions": {name: specification["revision"] for name, specification in frozen_repositories.items()},
         "python": sys.version.split()[0],
         "python_packages": libraries,
         "mode": "offline_replay_of_archived_evidence",

@@ -1,9 +1,12 @@
 {
-  "manifest_sha256": "137DF52293C928F1E839BA88FDC3158FE5464D635549087A3FBADA9E60437164",
-  "source_checkpoint": "38f476e",
+  "manifest_sha256": "FB4A531654544FB3382C47E8896C69B55180A99D04A38653169AF6900117A28C",
+  "source_checkpoint": "aab6994",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
-    "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
+    "workbook/output/RC_Section_NDM.xlsm": "0B82F8C795B7FE19309FC9AC165BF5016AADBC6E0FE02FA2F3F19DED9A062603",
+    "workbook/output/VBA_All_Code.txt": "5290CD5B59DEB41A06E35F73CF6CCFD808A12E40A202E970EFAFFC5F7AF9FA14"
+  },
+  "frozen_revisions": {
+    "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51"
   },
   "python": "3.12.10",
   "python_packages": {
@@ -12,7 +15,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 41,
+  "passed": 44,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -364,6 +367,31 @@
       "verified_outputs_sha256": {
         "replay/WorkItem.json": "2C3A0508375C4760205F45F0B7F652A0C499E0ADA69EA3E7BDEF34E21BE08C0F",
         "replay/Fields.csv": "FC94654219AAF4ED7E5994F070DEB7CB08830335D2E3FAE41EAFFB97BFA37530"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "mvt2-fixed-axial-native",
+      "journal_section": 338,
+      "archive": "MVT2AxialNative20261116",
+      "verified_outputs_sha256": {
+        "Verification.json": "2D084A885AAB7C3E024203BCC36388BED57FA08C4ACEEC8F357997A900DE9366"
+      },
+      "verified_stdout": null
+    },
+    {
+      "id": "kani-axial-gradient-and-measured-span",
+      "journal_section": 339,
+      "archive": "KaniMeasuredSubspacePortable",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "native records, controls and model bounds replayed"
+    },
+    {
+      "id": "retained-shoulders-release",
+      "journal_section": 340,
+      "archive": "CoupledRetainedShouldersRelease20261116",
+      "verified_outputs_sha256": {
+        "Replay.json": "1B013A7483B04ED788DF64FA096530F864DAAED841D771A9E11858D93A39159D"
       },
       "verified_stdout": null
     }

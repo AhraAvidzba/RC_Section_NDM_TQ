@@ -1,4 +1,4 @@
-﻿# Проверки
+# Проверки
 
 После исправлений приёмки 22.10 использовать направленные
 RunAudit03ImportedSnapshotUnitChangeTests, RunAudit03GeometrySnapshotTests,
@@ -124,6 +124,7 @@ $macros = @(
     'modTestCoupledElasticState.RunTestCoupledGradientLinearization'
     'modTestCoupledElasticState.RunTestCoupledHoopCapacity'
     'modTestCoupledElasticState.RunTestCoupledDeformationControl'
+    'modTestCoupledElasticState.RunTestCoupledRetainedShoulders'
     'modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing'
     'modTestCoupledElasticState.RunTestCoupledTraditionalChecks'
     'modTestConfiguration.RunAudit03UniversalLoadPathTests'

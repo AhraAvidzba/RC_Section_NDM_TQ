@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-16 14:52:51
+Date: 2026-11-16 17:09:41
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -19895,13 +19895,13 @@ Private mDeviatorCompliance As Double ' 1/(2G): перевод девиатор�
 ' Готовит единственный набор параметров бетона для текущей секции.
 ' Прочности в МПа, G в Н/мм, характерная длина в мм, углы в градусах.
 ' Деформация пика сжатия задаётся положительной величиной.
-Friend Sub Initialize(ByVal PointCount As Long, ByVal modulus As Double, ByVal poisson As Double, _
+Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal poisson As Double, _
         ByVal fc0 As Double, ByVal fc As Double, ByVal ft As Double, ByVal peakCompression As Double, _
         ByVal gt As Double, ByVal gc As Double, ByVal localizationLength As Double, _
         Optional ByVal alpha As Double = 0.12, Optional ByVal gamma As Double = 3#, _
         Optional ByVal friction As Double = 65#, Optional ByVal dilation As Double = 32#, _
         Optional ByVal eccentricity As Double = 0.1)
-    If PointCount < 1 Or modulus <= 0# Or ft <= 0# Or fc0 <= ft Or fc <= fc0 Or _
+    If pointCount < 1 Or modulus <= 0# Or ft <= 0# Or fc0 <= ft Or fc <= fc0 Or _
             gt <= 0# Or gc <= 0# Or localizationLength <= 0# Then _
         InvalidInput "Укажите положительные модули, энергии, характерную длину и прочности ft < fc0 < fc."
     If peakCompression <= fc / modulus Or InvalidDilationAngles(friction, dilation) Then _
@@ -19927,7 +19927,7 @@ Friend Sub Initialize(ByVal PointCount As Long, ByVal modulus As Double, ByVal p
     mFt = ft: mFc = fc
     mApexPotentialOffset = eccentricity * ft
     mFrictionMax = friction * GEOM_PI / 180#: mDilationMax = dilation * GEOM_PI / 180#
-    mPointCount = PointCount
+    mPointCount = pointCount
     ICoupledPointResponse_ClearHistory
 End Sub
 
@@ -20947,8 +20947,8 @@ Friend Property Get seriesCount() As Long
 End Property
 
 ' Возвращает число строк всех кривых для размерности общего массива отчёта.
-Friend Property Get PointCount() As Long
-    PointCount = mPoints
+Friend Property Get pointCount() As Long
+    pointCount = mPoints
 End Property
 
 ' Класс для выбора подписи и ссылки в сохранённом состоянии.
@@ -21002,7 +21002,7 @@ Friend Sub Initialize(ByVal operators As CCoupledElasticState, ByVal concrete As
     Set mConcrete = Nothing
     Erase mSteel: Erase mDirection
     mFirstSteel = operators.ConcretePointCount + 1
-    mLastSteel = operators.PointCount
+    mLastSteel = operators.pointCount
     mFirstTransverse = mLastSteel + 1
     If mLastSteel >= mFirstSteel Then
         If models Is Nothing Then Err.Raise 5, "CCoupledReinforcedResponse", "Не подготовлены диаграммы стали."
@@ -21314,7 +21314,7 @@ Private Const RANGE_TOLERANCE As Double = 0.000000000001 ' Малый допус
 ' Загружает готовые массивы точек диаграммы. Provider передает сюда уже
 ' рассчитанные и знаково оформленные координаты: сжатие в проекте имеет
 ' отрицательную деформацию и отрицательное напряжение, растяжение - положительное.
-Public Sub InitializeFromArrays(ByRef strains() As Double, ByRef stresses() As Double, ByVal PointCount As Long, _
+Public Sub InitializeFromArrays(ByRef strains() As Double, ByRef stresses() As Double, ByVal pointCount As Long, _
         Optional ByVal PhysicalCompressionStrain As Variant, Optional ByVal PhysicalTensionStrain As Variant, _
         Optional ByVal HasCompressionExtension As Boolean = False, Optional ByVal HasTensionExtension As Boolean = False, _
         Optional ByVal compressionExtensionStartStrain As Variant, Optional ByVal tensionExtensionStartStrain As Variant)
@@ -21323,22 +21323,22 @@ Public Sub InitializeFromArrays(ByRef strains() As Double, ByRef stresses() As D
     On Error GoTo Failed
     mInitialized = False ' Ошибочная повторная загрузка не оставляет доступным материал из другой инициализации.
     mPointCount = 0
-    If PointCount < 2 Then Err.Raise vbObjectError + 3100, "CMaterialDiagram", "Диаграмма материала должна содержать не менее двух точек."
-    ValidateInputArray strains, PointCount, "деформаций"
-    ValidateInputArray stresses, PointCount, "напряжений"
+    If pointCount < 2 Then Err.Raise vbObjectError + 3100, "CMaterialDiagram", "Диаграмма материала должна содержать не менее двух точек."
+    ValidateInputArray strains, pointCount, "деформаций"
+    ValidateInputArray stresses, pointCount, "напряжений"
 
-    ReDim mStrains(1 To PointCount)
-    ReDim mStresses(1 To PointCount)
+    ReDim mStrains(1 To pointCount)
+    ReDim mStresses(1 To pointCount)
 
     Dim i As Long
-    For i = 1 To PointCount
+    For i = 1 To pointCount
         mStrains(i) = strains(i)
         mStresses(i) = stresses(i)
     Next i
 
     SortPointsByStrain
     ValidatePointOrder
-    mPointCount = PointCount
+    mPointCount = pointCount
     If IsMissing(PhysicalCompressionStrain) Then
         mPhysicalCompressionStrain = mStrains(1)
     Else
@@ -21395,15 +21395,15 @@ End Property
 
 ' Проверяет наличие всех используемых индексов до копирования точек.
 ' Дополнительные индексы за пределами 1..pointCount допустимы и не читаются.
-Private Sub ValidateInputArray(ByRef values() As Double, ByVal PointCount As Long, ByVal valueName As String)
+Private Sub ValidateInputArray(ByRef values() As Double, ByVal pointCount As Long, ByVal valueName As String)
     On Error GoTo InvalidArray
     If LBound(values) > 1 Then GoTo InvalidArray
-    If UBound(values) < PointCount Then GoTo InvalidArray
+    If UBound(values) < pointCount Then GoTo InvalidArray
     Exit Sub
 InvalidArray:
     On Error GoTo 0
     Err.Raise vbObjectError + 3113, "CMaterialDiagram", _
-        "Массив " & valueName & " диаграммы не содержит все точки с индексами от 1 до " & CStr(PointCount) & "."
+        "Массив " & valueName & " диаграммы не содержит все точки с индексами от 1 до " & CStr(pointCount) & "."
 End Sub
 
 ' ------------------------------
@@ -21692,8 +21692,8 @@ Private Sub EnsureInitialized()
 End Sub
 
 ' Количество активных точек диаграммы.
-Public Property Get PointCount() As Long
-    PointCount = mPointCount
+Public Property Get pointCount() As Long
+    pointCount = mPointCount
 End Property
 
 ' Копирует использованные точки и физические пределы для сохранённого НДС.
@@ -22149,12 +22149,12 @@ Private Sub ValidateStrainPointOrder(ByRef strains() As Double, ByVal count As L
 End Sub
 
 ' Создает CMaterialDiagram из массивов физических точек.
-Private Function DiagramFromArrays(ByRef strains() As Double, ByRef stresses() As Double, ByVal PointCount As Long, _
+Private Function DiagramFromArrays(ByRef strains() As Double, ByRef stresses() As Double, ByVal pointCount As Long, _
         ByVal compressionE As Double, ByVal tensionE As Double) As CMaterialDiagram
     Dim diagram As CMaterialDiagram
     Set diagram = New CMaterialDiagram
-    ApplyPlateauSlope strains, stresses, PointCount, compressionE, tensionE
-    diagram.InitializeFromArrays strains, stresses, PointCount
+    ApplyPlateauSlope strains, stresses, pointCount, compressionE, tensionE
+    diagram.InitializeFromArrays strains, stresses, pointCount
     diagram.Freeze
     Set DiagramFromArrays = diagram
 End Function
@@ -22205,8 +22205,8 @@ Private Function DiagramWithExtension(ByVal baseDiagram As CMaterialDiagram, _
 
     Dim eps() As Double
     Dim sig() As Double
-    ReDim eps(1 To baseDiagram.PointCount + 2)
-    ReDim sig(1 To baseDiagram.PointCount + 2)
+    ReDim eps(1 To baseDiagram.pointCount + 2)
+    ReDim sig(1 To baseDiagram.pointCount + 2)
 
     Dim i As Long
     Dim targetIndex As Long
@@ -22218,7 +22218,7 @@ Private Function DiagramWithExtension(ByVal baseDiagram As CMaterialDiagram, _
         targetIndex = targetIndex + 1
     End If
 
-    For i = 1 To baseDiagram.PointCount
+    For i = 1 To baseDiagram.pointCount
         eps(targetIndex) = baseDiagram.PointStrain(i)
         sig(targetIndex) = baseDiagram.pointStress(i)
         targetIndex = targetIndex + 1
@@ -24236,7 +24236,7 @@ End Sub
 ' бетонного механизма и число остаётся множителем арматурного предела.
 Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Double, _
         ByVal pathKey As String, ByVal mechanism As String, ByVal state As CSectionStateResult, _
-        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
+        Optional ByVal Details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
     AssertWritable
     If lambda <= 0# Or LBound(ultimate) <> 1 Or UBound(ultimate) <> 6 Then _
         Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и положительный множитель арматурного предела."
@@ -24253,17 +24253,17 @@ Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Do
     If lambda < 1# Then
         mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
         mResultMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-            mechanism & ". Предел достигнут при множителе " & format$(lambda, "0.000000") & ".", details
+            mechanism & ". Предел достигнут при множителе " & format$(lambda, "0.000000") & ".", Details
     Else
         mResultMeta.SetResult rsNumericalFailure, rcCoupledConcreteLimitUnresolved, rkCapacity, _
-            mechanism & ". Определён арматурный предел. Для полного запаса требуется проверка предела бетонной ветви.", details
+            mechanism & ". Определён арматурный предел. Для полного запаса требуется проверка предела бетонной ветви.", Details
     End If
 End Sub
 
 ' Сохраняет подтверждённый максимум. Проверка у единицы требует
 ' отделить пик от расчётной нагрузки с учётом оценённой погрешности.
 Friend Sub InitializeCoupledPeak(ByVal lambda As Double, ByVal accuracy As Double, _
-        ByVal designVerified As Boolean, ByRef ultimate() As Double, ByVal pathKey As String, ByVal details As String)
+        ByVal designVerified As Boolean, ByRef ultimate() As Double, ByVal pathKey As String, ByVal Details As String)
     AssertWritable
     If lambda <= 0# Or accuracy < 0# Or LBound(ultimate) <> 1 Or UBound(ultimate) <> 6 Then _
         Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и оценку подтверждённого максимума."
@@ -24290,7 +24290,7 @@ Friend Sub InitializeCoupledPeak(ByVal lambda As Double, ByVal accuracy As Doubl
     End If
     If status <> rsNumericalFailure Then mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
     Set mResultMeta = New CResultMeta
-    mResultMeta.SetResult status, code, rkCapacity, reason, details
+    mResultMeta.SetResult status, code, rkCapacity, reason, Details
 End Sub
 
 ' Сохраняет усилия общей предельной или арматурной точки в точке приложения.
@@ -24302,11 +24302,11 @@ End Sub
 
 ' Сохраняет подтверждённое превышение при нагружении постоянной части пути.
 Friend Sub InitializeCoupledBaseFail(ByVal mechanism As String, ByVal pathKey As String, _
-        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
+        Optional ByVal Details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
     InitializeBaseFail mechanism & ". Предел достигнут при нагружении постоянной части.", pathKey
     mCoupledSearch = True: mIsTransverseLimit = transverseLimit
     mSolutionMethod = "CoupledContinuation"
-    mResultMeta.diagnosticDetails = details
+    mResultMeta.diagnosticDetails = Details
 End Sub
 
 ' Сохраняет причину без предельной точки. Последний принятый множитель
@@ -27002,7 +27002,7 @@ End Property
 ====================================================================================================
 COMPONENT: CCoupledDeformationContinuation
 TYPE: 2
-LINES: 732
+LINES: 746
 ====================================================================================================
 Option Explicit
 
@@ -27128,7 +27128,7 @@ Friend Sub trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         trial.coordinate = current.coordinate + increment
         If trial.coordinate <= current.coordinate Then Exit For
-        probed = probe(trial, current.lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
+        probed = Probe(trial, current.lambda, False, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak)
         lastProbeFailed = Not probed
         changedControl = False: smoothTrial = False
         If probed Then
@@ -27153,7 +27153,7 @@ Friend Sub trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         ElseIf trial.lambda > maximumLambda Then
             mSolver.DiscardStep
             mMeta.SetResult rsNumericalFailure, rcSearchBoundReached, rkCapacity, _
-                "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", details()
+                "Достигнута граница Capacity.MaxLambda до подтверждения предельного состояния.", Details()
             Exit Sub
         ElseIf BeyondSteelLimit() Then
             unresolvedSteel = True ' Смена меры не может пропустить наблюдавшееся пересечение предела арматуры.
@@ -27168,7 +27168,7 @@ Friend Sub trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
             If Not mDesignVerified And current.lambda < 1# And trial.lambda >= 1# Then
                 VerifyDesignLoad current, trial
-                If Not probe(trial, current.lambda, False) Then
+                If Not Probe(trial, current.lambda, False) Then
                     StopSearch "Не удалось повторить пробу после проверки заданных усилий."
                     Exit Sub
                 End If
@@ -27365,7 +27365,7 @@ Friend Property Get ResultMeta() As CResultMeta
 End Property
 
 ' Решает пробу при заданной мере и по запросу оценивает влияние невязки.
-Private Function probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
+Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
         ByVal estimateUncertainty As Boolean, Optional ByVal recoverYieldControl As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
@@ -27385,7 +27385,7 @@ Private Function probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
             Exit Function
         End If
     End If
-    probe = True
+    Probe = True
 End Function
 
 ' Принимает новую координату на возрастающем участке. Последнее
@@ -27457,9 +27457,9 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     tolerance = mLambdaTolerance
     If Abs(middle.lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
     Dim sampling As Double, refinedFields As Collection, actual As Variant
-    Dim accuracy As Double, divisions As Long
+    Dim accuracy As Double, divisions As Long, retainedMaximum As Double
     If keepRight Then
-        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True) Then Exit Function
+        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True, retainedMaximum) Then Exit Function
         accuracy = Abs(middle.lambda - second.lambda)
         If sampling > accuracy Then accuracy = sampling
         accuracy = accuracy + second.uncertainty
@@ -27481,9 +27481,9 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     End If
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
     Set mLimitFields = refinedFields: mLimitResultants = actual
-    If second.lambda > mBestLambda Then mBestLambda = second.lambda
+    mBestLambda = GeomMax(mBestLambda, GeomMax(second.lambda, retainedMaximum))
     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
-        "Подтверждён первый максимум прослеженной ветви.", details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
+        "Подтверждён первый максимум прослеженной ветви.", Details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
         " | Координаты плеч: " & CStr(shoulderStart) & ", " & CStr(right.coordinate)
     VerifyPeak = True
 End Function
@@ -27494,7 +27494,8 @@ End Function
 Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
-        Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False) As Boolean
+        Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False, _
+        Optional ByRef retainedMaximum As Double = 0#) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim START As Double, FINISH As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
@@ -27515,7 +27516,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         For i = 1 To divisions
             point.coordinate = START + (FINISH - START) * i / divisions
             If mProbeCount < PROBE_LIMIT Then mShoulderProbes = mShoulderProbes + 1
-            If Not probe(point, previousLambda, True) Then Exit Function
+            If Not Probe(point, previousLambda, True) Then Exit Function
             If BeyondSteelLimit() Or point.lambda > mMaximumLambda Then
                 mSolver.DiscardStep
                 Exit Function
@@ -27535,39 +27536,52 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             previousLambda = point.lambda
         Next i
     Next shoulder
-    Dim dropLeft As Double, dropRight As Double
+    Dim peakIndex As Long, lower As Double
     For i = 1 To index - 1
-        point = samples(i)
-        If point.lambda - point.uncertainty > samples(i - 1).lambda + samples(i - 1).uncertainty And _
-                point.lambda - point.uncertainty > samples(i + 1).lambda + samples(i + 1).uncertainty Then
-            If point.lambda - point.uncertainty <= left.lambda + LoadResolution(point.lambda) Then Exit Function
-            If point.lambda - point.uncertainty <= samples(index).lambda + samples(index).uncertainty Then Exit Function
-            peak = point
-            dropLeft = peak.lambda - samples(i - 1).lambda + samples(i - 1).uncertainty
-            dropRight = peak.lambda - samples(i + 1).lambda + samples(i + 1).uncertainty
-            sampling = dropLeft
-            If dropRight > sampling Then sampling = dropRight
-            If saveFields Then
-                Set limitFields = New Collection
-                Dim j As Long, fieldCount As Long
-                fieldCount = i
-                If keepRight Then fieldCount = index
-                For j = 1 To left.HistoryIndex: limitFields.Add history.item(j): Next j
-                For j = 1 To fieldCount: limitFields.Add refined.item(j): Next j
-                If Not mTrace Is Nothing Then
-                    Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
-                    For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).lambda: Next j
-                End If
-                limitResultants = integrated.item(fieldCount)
-                If keepRight Then
-                    left = samples(index - 1) ' Предшественник нужен при смене меры до принятия следующего шага.
-                    right = samples(index)
-                End If
+        point = samples(i): lower = point.lambda - point.uncertainty
+        If lower > samples(i - 1).lambda + samples(i - 1).uncertainty And _
+                lower > samples(i + 1).lambda + samples(i + 1).uncertainty Then
+            If lower <= left.lambda + LoadResolution(point.lambda) Or _
+                    lower <= samples(index).lambda + samples(index).uncertainty Then
+                If Not keepRight Then Exit Function
+            ElseIf peakIndex = 0 Then
+                peakIndex = i
+                If Not keepRight Then Exit For
+            ElseIf lower > samples(peakIndex).lambda + samples(peakIndex).uncertainty Then
+                peakIndex = i ' Больший максимум должен различаться с учётом невязки.
             End If
-            ReplayShoulders = True
-            Exit Function
         End If
     Next i
+    If peakIndex = 0 Then Exit Function
+
+    peak = samples(peakIndex)
+    Dim dropLeft As Double, dropRight As Double
+    dropLeft = peak.lambda - samples(peakIndex - 1).lambda + samples(peakIndex - 1).uncertainty
+    dropRight = peak.lambda - samples(peakIndex + 1).lambda + samples(peakIndex + 1).uncertainty
+    sampling = GeomMax(dropLeft, dropRight)
+    If saveFields Then
+        Set limitFields = New Collection
+        Dim j As Long, fieldCount As Long
+        fieldCount = peakIndex
+        If keepRight Then fieldCount = index
+        For j = 1 To left.HistoryIndex: limitFields.Add history.item(j): Next j
+        retainedMaximum = peak.lambda
+        For j = 1 To fieldCount
+            limitFields.Add refined.item(j)
+            retainedMaximum = GeomMax(retainedMaximum, samples(j).lambda)
+        Next j
+        If Not mTrace Is Nothing Then
+            Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
+            For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).lambda: Next j
+        End If
+        limitResultants = integrated.item(fieldCount)
+        If keepRight Then
+            left = samples(index - 1) ' Пара сохранённых полей нужна для выбора меры после максимума.
+            right = samples(index)
+        End If
+    End If
+    ReplayShoulders = True
+
 End Function
 
 ' Уточняет первое пересечение по возрастающей деформационной координате.
@@ -27624,7 +27638,7 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
         End If
         mLimitResultants = actual
         mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-            "Достигнута предельная деформация арматуры на возрастающем участке.", details()
+            "Достигнута предельная деформация арматуры на возрастающем участке.", Details()
     End If
     ResolveSteelCrossing = True
 End Function
@@ -27657,7 +27671,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
         End If
         point.coordinate = low.coordinate + 0.5 * (high.coordinate - low.coordinate)
         If point.coordinate <= low.coordinate Or point.coordinate >= high.coordinate Then Exit Function
-        If Not probe(point, low.lambda, False) Then Exit Function
+        If Not Probe(point, low.lambda, False) Then Exit Function
         If Not ReadSteelTrialBound(point) Then Exit Function
         ratio = mReinforcement.TrialSteelUtilization
         If ratio > 1# Then
@@ -27668,7 +27682,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
             mSolver.CopyTrial field, actual
             mSolver.AcceptStep
             refined.Add field: multipliers.Add low.lambda
-            If Not probe(high, low.lambda, False) Then Exit Function
+            If Not Probe(high, low.lambda, False) Then Exit Function
             If Not ReadSteelTrialBound(high) Then Exit Function
             eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
             eventState.criticalPoint = mReinforcement.TrialSteelCriticalPoint
@@ -27712,27 +27726,27 @@ Private Sub StopSearch(ByVal reason As String)
     If mLocalPeak > 0# Then reason = "Подтверждён локальный максимум при lambda = " & format$(mLocalPeak, "0.000000") & _
         ". Предельное состояние железобетонного сечения не установлено. " & reason
     If mBestLambda > 0# Then reason = reason & " Допустимое равновесие подтверждено до lambda = " & format$(mBestLambda, "0.000000") & "."
-    mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, reason, details()
+    mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, reason, Details()
 End Sub
 
 ' Записывает выбранную управляемую величину и область проверенной ветви.
-Private Function details() As String
-    details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
+Private Function Details() As String
+    Details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
         "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignVerified) & "; проб: " & CStr(mProbeCount)
-    If mYieldRecoveryProbes > 0 Then details = details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
+    If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
-    If Len(mPostPeakControlName) > 0 Then details = details & "; пробная мера после максимума: " & mPostPeakControlName & _
+    If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
-    If mPostPeakWidePoints > 0 Then details = details & "; принято увеличенных шагов: " & CStr(mPostPeakWidePoints)
+    If mPostPeakWidePoints > 0 Then Details = Details & "; принято увеличенных шагов: " & CStr(mPostPeakWidePoints)
     If mLocalPeak > 0# Then
-        details = details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
+        Details = Details & "; локальный максимум lambda: " & CStr(mLocalPeak) & _
             "; погрешность локального максимума: " & CStr(mLocalPeakAccuracy) & _
             "; максимумов превзойдено после спада: " & CStr(mRecoveredPeaks)
-        details = details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
-        details = details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
+        Details = Details & "; повторно использовано точек правого плеча: " & CStr(mReusedRightPoints)
+        Details = Details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
-    If Len(mSteelEventDetails) > 0 Then details = details & " | " & mSteelEventDetails
-    If Len(mProbeDetails) > 0 Then details = details & " | Последняя неудачная проба: " & mProbeDetails
+    If Len(mSteelEventDetails) > 0 Then Details = Details & " | " & mSteelEventDetails
+    If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
 
 
@@ -28096,8 +28110,8 @@ Friend Property Get degreeCount() As Long
 End Property
 
 ' Возвращает число точек интегрирования бетона и поправок от стали.
-Friend Property Get PointCount() As Long
-    PointCount = mPointCount
+Friend Property Get pointCount() As Long
+    pointCount = mPointCount
 End Property
 
 ' Возвращает число точек исходного бетона до поправок замещения.
@@ -29577,7 +29591,7 @@ Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As I
             Err.Raise 5, "CCoupledNewtonSolver", "Для секущего градиента требуются три независимые материальные истории."
     End If
     mDegreeCount = section.degreeCount
-    mPointCount = section.PointCount
+    mPointCount = section.pointCount
     If mDegreeCount <= GAUGE_COUNT Or mPointCount < 1 Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Геометрические операторы связанного сечения не подготовлены."
     mGaugeStart = mDegreeCount - GAUGE_COUNT + 1
@@ -29860,20 +29874,20 @@ RecomputeTangent:
                 For i = 1 To COMPONENT_COUNT: load(i) = rejectedLoad(i): Next i
             End If
             RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
-            Dim details As String, mismatch As String
-            details = mMeta.diagnosticDetails
+            Dim Details As String, mismatch As String
+            Details = mMeta.diagnosticDetails
             If hasValidTrial Then
-                details = details & "; невязка перед демпфированием, МПа: " & CStr(norm) & _
+                Details = Details & "; невязка перед демпфированием, МПа: " & CStr(norm) & _
                     "; лучшая невязка проб, МПа: " & CStr(bestTrialNorm)
                 If governingRow > 0 Then
                     mismatch = DirectionMismatchDetails(governingRow, baseEquation, _
                         (trialEquation - baseEquation) / trialFraction, correction)
-                    details = details & mismatch
+                    Details = Details & mismatch
                 End If
             Else
-                details = details & "; ни одна уменьшенная поправка не дала материального отклика"
+                Details = Details & "; ни одна уменьшенная поправка не дала материального отклика"
             End If
-            mMeta.diagnosticDetails = details
+            mMeta.diagnosticDetails = Details
             If recoverYieldControl And Len(mismatch) > 0 And mUseSpatialHistory Then
                 SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance)
             End If
@@ -30024,15 +30038,15 @@ End Function
 ' Ftrial служит для скобки; фактические упругая и пластическая ветви
 ' подтверждаются локальным возвратом без материального дробления.
 Private Function FirstYieldCrossing(ByRef field() As Double, ByRef ends() As Double, ByRef first As TYieldStation) As Boolean
-    Dim probe As TYieldStation, fraction As Double, nearest As Double
+    Dim Probe As TYieldStation, fraction As Double, nearest As Double
     Dim point As Long, side As Long
     nearest = 1#
     For point = 1 To mPointCount
         For side = -1 To 1
-            If ReadYieldCrossing(point, side, field, ends, probe) Then
-                If LocateYieldCoordinate(probe, field, ends, 0#, fraction) Then
+            If ReadYieldCrossing(point, side, field, ends, Probe) Then
+                If LocateYieldCoordinate(Probe, field, ends, 0#, fraction) Then
                     If Not FirstYieldCrossing Or fraction < nearest Then
-                        nearest = fraction: first = probe: FirstYieldCrossing = True
+                        nearest = fraction: first = Probe: FirstYieldCrossing = True
                     End If
                 End If
             End If
@@ -31165,7 +31179,7 @@ End Function
 ' общие операторы геометрии и неизменяемые диаграммы всех классов стали.
 Private Sub InitializePointResponse(ByVal concrete As CCoupledConcreteResponse, ByVal response As CCoupledReinforcedResponse, _
         ByVal fc As Double, ByVal ft As Double, ByVal models As Object)
-    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    concrete.Initialize mOperators.pointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
     response.Initialize mOperators, concrete, models
 End Sub
 
@@ -31409,7 +31423,7 @@ Friend Sub TestIntegratedState(ByVal loads As CSectionLoadState, ByVal spec As C
     ReDim resultants(1 To 6): ReDim shear(1 To 2, 1 To bulkCount): activePoints = 0
     Dim point As Long, x As Double, y As Double, weight As Double, normal As Double, tx As Double, ty As Double
     Dim stress(1 To 6) As Double, projection(1 To 6) As Double, steel As Double, tension As Double, compression As Double
-    For point = 1 To mOperators.PointCount
+    For point = 1 To mOperators.pointCount
         mOperators.point point, x, y, weight
         concrete.CopyAcceptedStress point, stress
         normal = stress(3): tx = stress(5): ty = stress(6)
@@ -60021,13 +60035,13 @@ Private Sub AppendMaterialDiagramPoints(ByRef data() As Variant, ByRef rowIndex 
     written.Add diagramId, True
 
     Dim pointIndex As Long, strain As Double, stress As Double, bounds As Variant
-    For pointIndex = 1 To diagram.PointCount
+    For pointIndex = 1 To diagram.pointCount
         strain = diagram.PointStrain(pointIndex)
         stress = diagram.pointStress(pointIndex)
         If strainRanges.Exists(diagramId) Then
             bounds = strainRanges(diagramId)
             If pointIndex = 1 And diagram.HasCompressionExtension Then strain = MinDouble(strain, CDbl(bounds(0)))
-            If pointIndex = diagram.PointCount And diagram.HasTensionExtension Then strain = MaxDouble(strain, CDbl(bounds(1)))
+            If pointIndex = diagram.pointCount And diagram.HasTensionExtension Then strain = MaxDouble(strain, CDbl(bounds(1)))
             If strain <> diagram.PointStrain(pointIndex) Then stress = diagram.GetStress(strain)
         End If
         data(rowIndex, 1) = runID
@@ -60474,8 +60488,8 @@ Private Function MaterialDiagramRowCount(ByVal batch As CBatchSectionCalculator)
             Set stateResult = batch.ResultAt(combinationIndex).StateRepository.StateAt(stateIndex)
             If Not stateResult Is Nothing Then
                 If stateResult.HasMaterialSnapshot Then rowCount = rowCount + _
-                    stateResult.ConcreteDiagramSnapshot.PointCount + stateResult.SteelDiagramSnapshot.PointCount
-                If Not stateResult.CoupledMaterialCurves Is Nothing Then rowCount = rowCount + stateResult.CoupledMaterialCurves.PointCount
+                    stateResult.ConcreteDiagramSnapshot.pointCount + stateResult.SteelDiagramSnapshot.pointCount
+                If Not stateResult.CoupledMaterialCurves Is Nothing Then rowCount = rowCount + stateResult.CoupledMaterialCurves.pointCount
             End If
         Next stateIndex
     Next combinationIndex
@@ -71388,17 +71402,17 @@ Private Function DrawContourSegmentPolyline(ByVal ms As Object, ByVal contourLay
             "Параметрический контур в Results не замкнут. Экспорт контура остановлен."
     End If
 
-    Dim points() As Double, PointCount As Long
-    PointCount = segmentCount
-    If Not closed Then PointCount = PointCount + 1
-    ReDim points(0 To PointCount * 2 - 1)
+    Dim points() As Double, pointCount As Long
+    pointCount = segmentCount
+    If Not closed Then pointCount = pointCount + 1
+    ReDim points(0 To pointCount * 2 - 1)
     For segmentIndex = 1 To segmentCount
         points((segmentIndex - 1) * 2) = startX(segmentIndex)
         points((segmentIndex - 1) * 2 + 1) = startY(segmentIndex)
     Next segmentIndex
     If Not closed Then
-        points((PointCount - 1) * 2) = endX(segmentCount)
-        points((PointCount - 1) * 2 + 1) = endY(segmentCount)
+        points((pointCount - 1) * 2) = endX(segmentCount)
+        points((pointCount - 1) * 2 + 1) = endY(segmentCount)
     End If
 
     Dim entity As Object
@@ -71956,26 +71970,26 @@ Private Sub DrawNeutralLineByState(ByVal ms As Object, ByVal section As CSection
     Dim pointY() As Double
     ReDim pointX(1 To 4)
     ReDim pointY(1 To 4)
-    Dim PointCount As Long
+    Dim pointCount As Long
 
-    AppendNeutralIntersection pointX, pointY, PointCount, minX, _
+    AppendNeutralIntersection pointX, pointY, pointCount, minX, _
         NeutralYAtXState(epsilon0, kappaX, kappaY, minX), minX, maxX, minY, maxY
-    AppendNeutralIntersection pointX, pointY, PointCount, maxX, _
+    AppendNeutralIntersection pointX, pointY, pointCount, maxX, _
         NeutralYAtXState(epsilon0, kappaX, kappaY, maxX), minX, maxX, minY, maxY
-    AppendNeutralIntersection pointX, pointY, PointCount, _
+    AppendNeutralIntersection pointX, pointY, pointCount, _
         NeutralXAtYState(epsilon0, kappaX, kappaY, minY), minY, minX, maxX, minY, maxY
-    AppendNeutralIntersection pointX, pointY, PointCount, _
+    AppendNeutralIntersection pointX, pointY, pointCount, _
         NeutralXAtYState(epsilon0, kappaX, kappaY, maxY), maxY, minX, maxX, minY, maxY
 
-    If PointCount < 2 Then Exit Sub
+    If pointCount < 2 Then Exit Sub
 
     Dim i As Long
     Dim j As Long
     Dim bestI As Long
     Dim bestJ As Long
     Dim bestDistance2 As Double
-    For i = 1 To PointCount - 1
-        For j = i + 1 To PointCount
+    For i = 1 To pointCount - 1
+        For j = i + 1 To pointCount
             Dim distance2 As Double
             distance2 = (pointX(i) - pointX(j)) ^ 2 + (pointY(i) - pointY(j)) ^ 2
             If distance2 > bestDistance2 Then
@@ -72056,20 +72070,20 @@ End Function
 ' Добавляет допустимое пересечение нулевой линии с рамкой без повторов углов.
 ' Проверяет вместимость массива до записи; из этих точек выбирается отрезок.
 Private Sub AppendNeutralIntersection(ByRef pointX() As Double, ByRef pointY() As Double, _
-        ByRef PointCount As Long, ByVal x As Double, ByVal y As Double, _
+        ByRef pointCount As Long, ByVal x As Double, ByVal y As Double, _
         ByVal minX As Double, ByVal maxX As Double, ByVal minY As Double, ByVal maxY As Double)
     If x < minX - 0.0000001 Or x > maxX + 0.0000001 Then Exit Sub
     If y < minY - 0.0000001 Or y > maxY + 0.0000001 Then Exit Sub
 
     Dim i As Long
-    For i = 1 To PointCount
+    For i = 1 To pointCount
         If Abs(pointX(i) - x) < 0.0000001 And Abs(pointY(i) - y) < 0.0000001 Then Exit Sub
     Next i
 
-    If PointCount >= UBound(pointX) Then Exit Sub
-    PointCount = PointCount + 1
-    pointX(PointCount) = x
-    pointY(PointCount) = y
+    If pointCount >= UBound(pointX) Then Exit Sub
+    pointCount = pointCount + 1
+    pointX(pointCount) = x
+    pointY(pointCount) = y
 End Sub
 
 ' Выгружает одну универсальную бетонную ячейку по ее фактическим границам.
@@ -78802,7 +78816,7 @@ End Function
 Private Function ErrorReasonParagraphs(ByVal reason As String) As String
     ErrorReasonParagraphs = reason
     If left$(reason, Len("Настройка ")) <> "Настройка " Then Exit Function
-    Dim first As Long, last As Long, location As String, details As String, position As Long
+    Dim first As Long, last As Long, location As String, Details As String, position As Long
     first = InStr(1, reason, " (лист ", vbBinaryCompare)
     If first = 0 Then Exit Function
     last = InStr(first + 2, reason, ")", vbBinaryCompare)
@@ -78810,9 +78824,9 @@ Private Function ErrorReasonParagraphs(ByVal reason As String) As String
     location = mid$(reason, first + 2, last - first - 2)
     position = InStr(1, location, ", ячейка ", vbBinaryCompare)
     If position > 0 Then location = mid$(location, Len("лист ") + 1, position - Len("лист ") - 1) & "!" & mid$(location, position + Len(", ячейка "))
-    details = Trim$(mid$(reason, last + 1))
-    If left$(details, 1) = ":" Then details = Trim$(mid$(details, 2))
-    ErrorReasonParagraphs = SectionRecipeErrorText(details, location, left$(reason, first - 1))
+    Details = Trim$(mid$(reason, last + 1))
+    If left$(Details, 1) = ":" Then Details = Trim$(mid$(Details, 2))
+    ErrorReasonParagraphs = SectionRecipeErrorText(Details, location, left$(reason, first - 1))
 End Function
 
 
@@ -78876,7 +78890,7 @@ End Function
 ====================================================================================================
 COMPONENT: CTestCoupledPointResponse
 TYPE: 2
-LINES: 103
+LINES: 134
 ====================================================================================================
 Option Explicit
 
@@ -78892,13 +78906,13 @@ Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
 Private mMinimumAxialStrain As Double
-Private mCubic As Double
+Private mCubic As Double, mTwinPeaks As Boolean
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
-Friend Sub TestInitialize(ByVal PointCount As Long)
-    mCount = PointCount
-    mCubic = 10000000000#
+Friend Sub TestInitialize(ByVal pointCount As Long)
+    mCount = pointCount
+    mCubic = 10000000000#: mTwinPeaks = False
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -78906,6 +78920,32 @@ End Sub
 Friend Sub TestUseDescendingAxialLaw()
     mCubic = -10000000000#
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт два максимума между крупными шагами деформационного продолжения.
+Friend Sub TestUseTwinPeakAxialLaw()
+    mTwinPeaks = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает напряжение за вычетом силы стержня на плато 4 кН.
+' Суммарный отклик сечения описывает полином по безразмерной деформации.
+Private Sub TestTwinPeakStress(ByVal strain As Double, ByRef stress As Double, ByRef tangent As Double)
+    Const SCALE_STRAIN As Double = 0.0001, START_STRAIN As Double = 0.0004
+    Const NET_AREA As Double = 21500#, DESIGN_FORCE As Double = 410000#
+    Const STEEL_FORCE As Double = 4000#
+    If strain < START_STRAIN Then
+        tangent = (0.75 * DESIGN_FORCE - STEEL_FORCE) / (NET_AREA * START_STRAIN)
+        stress = tangent * strain
+    Else
+        Dim t As Double: t = (strain - START_STRAIN) / SCALE_STRAIN
+        Dim factor As Double: factor = (((-218# * t + 1309#) * t - 2428#) * t + 1379#) * t + 450#
+        Dim slope As Double: slope = ((-872# * t + 3927#) * t - 4856#) * t + 1379#
+        stress = (DESIGN_FORCE * factor / 600# - STEEL_FORCE) / NET_AREA
+        tangent = DESIGN_FORCE * slope / (600# * NET_AREA * SCALE_STRAIN)
+    End If
+End Sub
+
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Включает контролируемый материальный отказ после записи первого кандидата.
@@ -78954,8 +78994,12 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         stress(j) = tangent(j, j) * strain(j)
     Next j
     E = strain(3)
-    stress(3) = stress(3) + mCubic * E ^ 3
-    tangent(3, 3) = tangent(3, 3) + 3# * mCubic * E ^ 2
+    If mTwinPeaks Then
+        TestTwinPeakStress E, stress(3), tangent(3, 3)
+    Else
+        stress(3) = stress(3) + mCubic * E ^ 3
+        tangent(3, 3) = tangent(3, 3) + 3# * mCubic * E ^ 2
+    End If
     Dim peak As Double: peak = mAcceptedPeak(point)
     If Abs(E) > peak Then peak = Abs(E)
     If recordTrial Then mTrialPeak(point) = peak
@@ -78980,6 +79024,7 @@ Private Sub ICoupledPointResponse_ClearHistory()
     ReDim mTrialPeak(1 To mCount)
     mAcceptedSteps = 0
 End Sub
+
 
 
 ====================================================================================================
@@ -88468,7 +88513,7 @@ Public Function RunUnboundedDiagramResultsTests() As String
     writer.WriteResults fixture, section, props, batch, units
     TestAssertTrue stats, "unbounded.results.noNewSolve", SectionEquilibriumSolveCount() = solves
     data = TestPostAudit03ReadSnapshotTable(fixture, "rngNDMMaterialDiagrams")
-    TestAssertTrue stats, "unbounded.results.noDuplicateDiagrams", UBound(data, 1) = 1 + concrete.PointCount + steel.PointCount
+    TestAssertTrue stats, "unbounded.results.noDuplicateDiagrams", UBound(data, 1) = 1 + concrete.pointCount + steel.pointCount
     Set unique = CreateObject("Scripting.Dictionary")
     For row = 2 To UBound(data, 1)
         point = CLng(data(row, 9)): key = CStr(data(row, 2)) & "|" & CStr(point)
@@ -88477,18 +88522,18 @@ Public Function RunUnboundedDiagramResultsTests() As String
         If CStr(data(row, 8)) = "Concrete" Then
             Set diagram = concrete: expected = diagram.PointStrain(point)
             If point = 1 And diagram.HasCompressionExtension Then expected = TestMinDouble(expected, cMin)
-            If point = diagram.PointCount And diagram.HasTensionExtension Then expected = TestMaxDouble(expected, cMax)
+            If point = diagram.pointCount And diagram.HasTensionExtension Then expected = TestMaxDouble(expected, cMax)
         Else
             Set diagram = steel: expected = diagram.PointStrain(point)
             If point = 1 And diagram.HasCompressionExtension Then expected = TestMinDouble(expected, sMin)
-            If point = diagram.PointCount And diagram.HasTensionExtension Then expected = TestMaxDouble(expected, sMax)
+            If point = diagram.pointCount And diagram.HasTensionExtension Then expected = TestMaxDouble(expected, sMax)
         End If
         TestAssertClose stats, "unbounded.results.strain." & CStr(row), CDbl(data(row, 10)), expected, 0.000000000001
         TestAssertClose stats, "unbounded.results.stress." & CStr(row), units.OutputStressToInternal(CDbl(data(row, 11))), diagram.GetStress(expected), 0.000001
     Next row
     TestAssertTrue stats, "unbounded.results.compressionBeyond100", cMin < -100# And sMin < -100#
     TestAssertTrue stats, "unbounded.results.tensionBeyond100", sMax > 100#
-    TestAssertTrue stats, "unbounded.results.originalReferencesRetained", concrete.PointStrain(1) > -2# And steel.PointStrain(steel.PointCount) < 2#
+    TestAssertTrue stats, "unbounded.results.originalReferencesRetained", concrete.PointStrain(1) > -2# And steel.PointStrain(steel.pointCount) < 2#
     GoTo Finished
 Failed:
     TestAssertTrue stats, "unbounded.results.runtime." & CStr(Err.number) & "." & Err.description, False
@@ -96370,7 +96415,7 @@ Private Sub TestAudit03KnownExtendedStateCase(ByRef stats As TBatchTestStats, By
     Set concrete = materials.ConcreteMaterialForEquilibriumFromSpec(spec)
     Set steel = materials.SteelMaterialForEquilibriumFromSpec(spec)
     TestAssertTrue stats, prefix & ".compressionReference", concrete.PointStrain(1) < concrete.PhysicalCompressionStrain
-    TestAssertTrue stats, prefix & ".steelReference", steel.PointStrain(steel.PointCount) > steel.PhysicalTensionStrain
+    TestAssertTrue stats, prefix & ".steelReference", steel.PointStrain(steel.pointCount) > steel.PhysicalTensionStrain
     Dim eps0 As Double, kx As Double, ky As Double
     TestAudit03OverloadPlane section, magnitude, mode, eps0, kx, ky
     Dim oracle As CSectionSolver
@@ -96536,16 +96581,16 @@ Private Sub TestAudit03InspectStressFailure(ByRef stats As TBatchTestStats, _
         ByVal section As CSectionModel, ByVal concrete As CMaterialDiagram, _
         ByVal steel As CMaterialDiagram, ByVal load As CSectionLoadState, _
         ByVal state As CSectionStateResult, ByVal prefix As String)
-    Dim probe As CSectionSolver, i As Long, j As Long, strain As Double
-    Set probe = New CSectionSolver
-    probe.EvaluateStrainPlane section, concrete, steel, state.epsilon0, state.kappaX, state.kappaY
+    Dim Probe As CSectionSolver, i As Long, j As Long, strain As Double
+    Set Probe = New CSectionSolver
+    Probe.EvaluateStrainPlane section, concrete, steel, state.epsilon0, state.kappaX, state.kappaY
     TestAppendLine stats, "STRESS_FAILURE_PLANE: " & prefix & "|eps0=" & TestFormatNumberInvariant(state.epsilon0) & _
         "|kx=" & TestFormatNumberInvariant(state.kappaX) & "|ky=" & TestFormatNumberInvariant(state.kappaY)
     For i = 1 To 3
         Dim rowText As String
         rowText = "STRESS_FAILURE_TANGENT: row=" & CStr(i)
         For j = 1 To 3
-            rowText = rowText & "|" & TestFormatNumberInvariant(probe.tangent(i, j))
+            rowText = rowText & "|" & TestFormatNumberInvariant(Probe.tangent(i, j))
         Next j
         TestAppendLine stats, rowText
     Next i
@@ -96558,7 +96603,7 @@ Private Sub TestAudit03InspectStressFailure(ByRef stats As TBatchTestStats, _
     Dim builder As CStateGuessBuilder, guessEps As Double, guessKx As Double, guessKy As Double
     Set builder = New CStateGuessBuilder
     For i = 1 To builder.ExtensionAttemptCount
-        If builder.BuildAttemptForExtensionState(i, section, probe, concrete, steel, _
+        If builder.BuildAttemptForExtensionState(i, section, Probe, concrete, steel, _
                 load.n, load.InternalMx, load.InternalMy, guessEps, guessKx, guessKy) Then
             Dim guessed As CSectionSolver
             Set guessed = New CSectionSolver
@@ -96573,17 +96618,17 @@ Private Sub TestAudit03InspectStressFailure(ByRef stats As TBatchTestStats, _
     Dim initialStrain As Variant, diagnosticMethod As Variant
     For Each diagnosticMethod In Array("Newton", "Secant")
     For Each initialStrain In Array(0.0005, 0.001, 0.002, 0.005, 0.01, 0.015, 0.02, 0.0255, 0.03, 0.04, 0.05, 0.1, 0.5, -0.0255)
-        Set probe = New CSectionSolver
-        probe.SolverMethod = CStr(diagnosticMethod)
-        probe.loadSteps = 1: probe.maxIterations = 80
-        probe.toleranceN = 1#: probe.toleranceMx = 1000#: probe.toleranceMy = 1000#
-        probe.SetInitialState CDbl(initialStrain), 0#, 0#
-        probe.Solve section, concrete, steel, load.n, load.InternalMx, load.InternalMy
+        Set Probe = New CSectionSolver
+        Probe.SolverMethod = CStr(diagnosticMethod)
+        Probe.loadSteps = 1: Probe.maxIterations = 80
+        Probe.toleranceN = 1#: Probe.toleranceMx = 1000#: Probe.toleranceMy = 1000#
+        Probe.SetInitialState CDbl(initialStrain), 0#, 0#
+        Probe.Solve section, concrete, steel, load.n, load.InternalMx, load.InternalMy
         TestAppendLine stats, "STRESS_DIAGNOSTIC_START: " & prefix & "|method=" & CStr(diagnosticMethod) & "|initial=" & CStr(initialStrain) & _
-            "|converged=" & CStr(probe.Converged) & "|eps0=" & TestFormatNumberInvariant(probe.epsilon0) & _
-            "|kx=" & TestFormatNumberInvariant(probe.kappaX) & "|ky=" & TestFormatNumberInvariant(probe.kappaY) & _
-            "|rN=" & TestFormatNumberInvariant(probe.ResidualN) & "|rMx=" & TestFormatNumberInvariant(probe.ResidualMx) & _
-            "|rMy=" & TestFormatNumberInvariant(probe.ResidualMy) & "|reason=" & probe.StopReason
+            "|converged=" & CStr(Probe.Converged) & "|eps0=" & TestFormatNumberInvariant(Probe.epsilon0) & _
+            "|kx=" & TestFormatNumberInvariant(Probe.kappaX) & "|ky=" & TestFormatNumberInvariant(Probe.kappaY) & _
+            "|rN=" & TestFormatNumberInvariant(Probe.ResidualN) & "|rMx=" & TestFormatNumberInvariant(Probe.ResidualMx) & _
+            "|rMy=" & TestFormatNumberInvariant(Probe.ResidualMy) & "|reason=" & Probe.StopReason
     Next initialStrain
     Next diagnosticMethod
 End Sub
@@ -98878,7 +98923,7 @@ Public Function RunPostAudit03SnapshotOwnerTests() As String
         state.InitializeFromSolver sstStrengthState, cpStrength, spec, solver, mode = 1, mode = 0
         data = state.PrepareElementSnapshot(section)
         TestAssertTrue stats, "postAudit03.snapshot.materials." & CStr(mode), state.HasMaterialSnapshot
-        TestAssertTrue stats, "postAudit03.snapshot.points." & CStr(mode), state.ConcreteDiagramSnapshot.PointCount = concrete.PointCount
+        TestAssertTrue stats, "postAudit03.snapshot.points." & CStr(mode), state.ConcreteDiagramSnapshot.pointCount = concrete.pointCount
         For i = 1 To 4
             If i <= 2 Then
                 actualStrain = eps + 0.000001 * section.concreteY(i) - 0.0000005 * section.concreteX(i)
@@ -108353,20 +108398,20 @@ End Sub
 ' файловой копии сохраняет assertion и диагностику в возвращаемом отчете;
 ' после освобождения файла запись возобновляется без повторения расчета.
 Private Sub TestAudit03ProgressFileFailure(ByRef stats As TConfigTestStats)
-    Dim lockedFile As Integer, probe As TConfigTestStats, warningPreserved As Boolean
+    Dim lockedFile As Integer, Probe As TConfigTestStats, warningPreserved As Boolean
     On Error GoTo Failed
     lockedFile = FreeFile
     Open ThisWorkbook.path & Application.PathSeparator & "Audit03_Search_Progress.txt" For Binary Access Read Write Lock Read Write As #lockedFile
-    TestCheck probe, "progressFile.locked.assertion", True
-    warningPreserved = probe.passed = 1 And probe.Failed = 0 And _
-        InStr(1, probe.report, "TEST_PROGRESS_WARNING:", vbBinaryCompare) > 0 And _
-        InStr(1, probe.report, "OK: progressFile.locked.assertion", vbBinaryCompare) > 0
+    TestCheck Probe, "progressFile.locked.assertion", True
+    warningPreserved = Probe.passed = 1 And Probe.Failed = 0 And _
+        InStr(1, Probe.report, "TEST_PROGRESS_WARNING:", vbBinaryCompare) > 0 And _
+        InStr(1, Probe.report, "OK: progressFile.locked.assertion", vbBinaryCompare) > 0
     Close #lockedFile
     lockedFile = 0
     TestCheck stats, "audit03.progressFile.failureDoesNotAbort", warningPreserved
-    TestCheck probe, "progressFile.recovered.assertion", True
-    TestCheck stats, "audit03.progressFile.recovered", probe.passed = 2 And probe.Failed = 0 And _
-        InStr(1, probe.report, "OK: progressFile.recovered.assertion", vbBinaryCompare) > 0
+    TestCheck Probe, "progressFile.recovered.assertion", True
+    TestCheck stats, "audit03.progressFile.recovered", Probe.passed = 2 And Probe.Failed = 0 And _
+        InStr(1, Probe.report, "OK: progressFile.recovered.assertion", vbBinaryCompare) > 0
     Exit Sub
 Failed:
     Dim failureNumber As Long, failureDescription As String
@@ -110791,7 +110836,7 @@ End Sub
 ====================================================================================================
 COMPONENT: modTestCoupledElasticState
 TYPE: 1
-LINES: 4327
+LINES: 4403
 ====================================================================================================
 Option Explicit
 
@@ -111049,7 +111094,7 @@ Public Function RunCoupledEquationAssemblyTests() As String
         state(i) = Sin(i) * 0.0000001
     Next i
     solver.StartEquations state, external, residual, linearized, True
-    For point = 1 To solver.PointCount
+    For point = 1 To solver.pointCount
         solver.PointStrain point, state, strain
         For j = 1 To 6
             stress(j) = tangent(j, j) * strain(j)
@@ -111068,7 +111113,7 @@ Public Function RunCoupledEquationAssemblyTests() As String
     Next i
     solver.StartEquations state, external, residual, linearized, False
     Erase trialForces
-    For point = 1 To solver.PointCount
+    For point = 1 To solver.pointCount
         solver.PointStrain point, state, strain
         For j = 1 To 6
             stress(j) = tangent(j, j) * strain(j)
@@ -111212,7 +111257,7 @@ Public Function RunCoupledNewtonTests() As String
     Set section = TestBuildSection(TestFixtureBox(180#, 120#))
     operators.PrepareModel section, 30000#, 0#, 1, 1, 8
     Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     solver.Initialize operators, material, 30000#
     Const area As Double = 21600#
     Const strain As Double = 0.001
@@ -111285,7 +111330,7 @@ Public Function RunTestCoupledContinuation() As String
     Set section = TestBuildSection(TestFixtureBox(180#, 120#))
     operators.PrepareModel section, 30000#, 0#, 1, 1, 8
     Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     material.TestMaximumIncrement = 0.00022
     solver.Initialize operators, material, 30000#
     Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
@@ -111359,7 +111404,7 @@ Public Function RunTestCoupledMinimumLoadStep() As String
     Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse
     Dim solver As New CCoupledNewtonSolver, branch As New CCoupledLoadContinuation, path As New CLoadPathVector
     operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     solver.Initialize operators, material, 30000#
     path.Initialize 0#, FORCE_SCALE, 0#, 0#, 0#, 0#
     branch.Initialize solver, path, 2, 7, 20, 0.00000001, 0.00000001, True
@@ -111450,7 +111495,7 @@ Private Sub TestLoadSecantRetryCase(ByVal operators As CCoupledElasticState, ByV
         ByRef passed As Long, ByRef Failed As Long, ByRef report As String)
     Dim material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
     Dim branch As New CCoupledLoadContinuation
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     solver.Initialize operators, material, 30000#
     branch.Initialize solver, path, 1, attempts, 20, 0.00000001, 0.00000001, True
     Dim ok As Boolean: ok = branch.Advance(0.25)
@@ -111506,7 +111551,7 @@ Public Function RunTestCoupledSteelLimit() As String
     section.AddRebarElement 0#, 0#, 12#, BAR_AREA, "TestGrade"
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModulus:=200000#
     Dim material As New CTestCoupledPointResponse, steel As New CCoupledSteelModel, models As Object
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     steel.Initialize 200000#, 100#, 100#, 2000#, 2000#, STEEL_LIMIT, STEEL_LIMIT
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "TestGrade", steel
@@ -111567,7 +111612,7 @@ Public Function RunTestCoupledGradientLinearization() As String
     Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
     Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     solver.Initialize operators, material, 30000#
 
     Dim field() As Double, residual() As Double, frozen() As Double, corrected() As Double
@@ -111622,7 +111667,7 @@ Public Function RunTestCoupledDeformationControl() As String
     Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
     Dim operators As New CCoupledElasticState, material As New CTestCoupledPointResponse, solver As New CCoupledNewtonSolver
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5
-    material.TestInitialize operators.PointCount
+    material.TestInitialize operators.pointCount
     material.TestUseDescendingAxialLaw
     solver.Initialize operators, material, 30000#
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
@@ -111705,9 +111750,9 @@ Public Function RunTestCoupledKinematicGauge() As String
     Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
     Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
     operators.PrepareModel TestBuildSection(TestFixtureBox(180#, 120#)), 30000#, 0#, 1, 1, 5
-    center.TestInitialize operators.PointCount
-    plusSide.TestInitialize operators.PointCount
-    minusSide.TestInitialize operators.PointCount
+    center.TestInitialize operators.pointCount
+    plusSide.TestInitialize operators.pointCount
+    minusSide.TestInitialize operators.pointCount
     solver.Initialize operators, center, 30000#, plusSide, minusSide
     TestRecord operators.degreeCount - solver.PhysicalDegreeCount = 4, "четыре множителя отделены от механики", passed, Failed, report
     TestMechanicalSecant solver.PhysicalDegreeCount, operators.degreeCount, passed, Failed, report
@@ -111837,7 +111882,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     models.Add "A400", steel
     Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
-    concrete.TestInitialize operators.PointCount
+    concrete.TestInitialize operators.pointCount
     concrete.TestUseDescendingAxialLaw
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     material.Initialize operators, concrete, models
@@ -111940,7 +111985,7 @@ Public Function RunTestCoupledReinforcedResponse() As String
     Set models = CreateObject("Scripting.Dictionary")
     models.Add "A400", longSteel: models.Add "A240", transverseSteel
     Dim concrete As New CTestCoupledPointResponse
-    concrete.TestInitialize operators.PointCount
+    concrete.TestInitialize operators.pointCount
     Dim material As New CCoupledReinforcedResponse, response As ICoupledPointResponse
     material.Initialize operators, concrete, models
     Set response = material
@@ -111951,7 +111996,7 @@ Public Function RunTestCoupledReinforcedResponse() As String
         "distinct material classes follow geometry", passed, Failed, report
 
     strain(1) = 0.003: strain(3) = 0.004: strain(5) = 0.001
-    For point = 1 To operators.PointCount
+    For point = 1 To operators.pointCount
         resultCode = response.EvaluatePoint(point, strain, stress, tangent)
         If resultCode <> sfcNone Then GoTo Done
         Select Case point
@@ -112604,7 +112649,7 @@ Private Sub TestPrepareCoupledConcreteSection(ByVal operators As CCoupledElastic
     Dim layout As New CTransverseRebarLayout
     layout.AddContourGroup section, "TestHoop", "", 8#, 100#, 10#, "A240"
     operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
-    concrete.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    concrete.Initialize operators.pointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
     Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
     longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1000#, 0.025, 0.018
     hoop.Initialize 200000#, 240#, 240#, 2000#, 0#, 0.02, 0.02
@@ -114810,9 +114855,9 @@ Public Function RunTestCoupledSpatialTransactions() As String
     Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
     Dim center As New CTestCoupledPointResponse, plusSide As New CTestCoupledPointResponse, minusSide As New CTestCoupledPointResponse
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5
-    center.TestInitialize operators.PointCount
-    plusSide.TestInitialize operators.PointCount
-    minusSide.TestInitialize operators.PointCount
+    center.TestInitialize operators.pointCount
+    plusSide.TestInitialize operators.pointCount
+    minusSide.TestInitialize operators.pointCount
     solver.Initialize operators, center, 30000#, plusSide, minusSide
 
     Dim history As New Collection, field() As Double, resultants() As Double
@@ -115044,9 +115089,9 @@ Public Function RunTestCoupledConsistentZeroStep() As String
     Dim operators As New CCoupledElasticState, solver As New CCoupledNewtonSolver
     Dim center As New CCoupledConcreteResponse, plusSide As New CCoupledConcreteResponse, minusSide As New CCoupledConcreteResponse
     operators.PrepareModel section, 30000#, 0.2, 1, 1, 5
-    center.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
-    plusSide.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
-    minusSide.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    center.Initialize operators.pointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    plusSide.Initialize operators.pointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    minusSide.Initialize operators.pointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
     solver.Initialize operators, center, 30000#, plusSide, minusSide
 
     If Not solver.TryStep(-9000#, 1000#, -1200#, 900#, 650#, -520#, 0.00000001, 0.00000001, 25) Then _
@@ -115118,6 +115163,82 @@ Private Sub TestCopyConcreteTriplet(ByVal center As CCoupledConcreteResponse, By
     minusSide.CopyAcceptedStress 1, stress
     For i = 1 To 6: values(i, 3) = stress(i): Next i
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет два максимума на подшагах, сохранённую нагрузку и принятую историю.
+Public Function RunTestCoupledRetainedShoulders() As String
+    Dim passed As Long, Failed As Long, report As String
+    On Error GoTo Failed
+    Const STEEL_AREA As Double = 100#, DESIGN_FORCE As Double = 410000#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize 200000#, 40#, 40#, 0#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    concrete.TestInitialize operators.pointCount
+    concrete.TestUseTwinPeakAxialLaw
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = DESIGN_FORCE
+    ReDim control(1 To operators.degreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim coordinate As Variant, strain As Double, lambda As Double, previous As Double, factor As Double
+    For Each coordinate In Array(0.0004, 0.0006)
+        strain = CDbl(coordinate)
+        If Not solver.TryDeformationStep(offset, direction, control, strain, lambda, factor, 0.00000001, 0.00000001, 30) Then _
+            Err.Raise 5, , "Не получено исходное равновесие. " & solver.ResultMeta.diagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        trace.Add 1#, factor
+        previous = lambda: lambda = factor
+    Next coordinate
+    TestExpectNear previous, 0.75, 0.00000001, "первое исходное поле", passed, Failed, report
+    TestExpectNear lambda, 0.8, 0.00000001, "второе исходное поле", passed, Failed, report
+
+    Dim branch As New CCoupledDeformationContinuation
+    branch.trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 0.00000001, 0.00000001, trace
+    Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
+    TestRecord saved.count = 5, "уточнённые поля заменяют грубое плечо", passed, Failed, report
+    Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
+    Dim i As Long, offsetFraction As Double, greatest As Double
+    For i = 1 To GeomMin(saved.count, 5)
+        saved.ReadPoint i, offsetFraction, factor
+        TestExpectNear factor, CDbl(expected(i - 1)), 0.00000001, "множитель поля " & CStr(i), passed, Failed, report
+        TestExpectNear offsetFraction, 1#, 0.000000000001, "постоянная часть поля " & CStr(i), passed, Failed, report
+        greatest = GeomMax(greatest, factor)
+    Next i
+    TestExpectNear branch.BestAdmissibleLambda, greatest, 0.00000001, _
+        "нижняя оценка включает все сохранённые равновесия", passed, Failed, report
+    Dim meta As CResultMeta: Set meta = branch.ResultMeta
+    TestRecord InStr(1, meta.resultComment, "локальный максимум при lambda = " & format$(1.1, "0.000000")) > 0, _
+        "в диагностике указан больший подтверждённый максимум", passed, Failed, report
+    TestRecord InStr(1, meta.diagnosticDetails, "равновесие при lambda = 1 подтверждено: False", vbTextCompare) > 0, _
+        "переход через единицу не подменяет точное равновесие", passed, Failed, report
+
+    Dim accuracy As Double, designVerified As Boolean, limitFields As Collection
+    TestRecord meta.internalStatus = rsNumericalFailure And Not branch.CopyPeak(factor, accuracy, designVerified), _
+        "локальный пик железобетона не опубликован как предел", passed, Failed, report
+    TestRecord Not branch.CopyLimitState(limitFields, resultants), _
+        "локальный пик не публикует предельное поле", passed, Failed, report
+    solver.CopyAccepted field
+    TestExpectNear field(1), 0.0007, 0.000000000001, "сохранено последнее допустимое поле правого плеча", passed, Failed, report
+    TestExpectNear concrete.TestAcceptedPeak, field(1), 0.000000000001, _
+        "отклонённая проба не изменила принятую материальную историю", passed, Failed, report
+    TestRecord concrete.TestAcceptedSteps = saved.count, "индексы истории и следа совпадают", passed, Failed, report
+    RunTestCoupledRetainedShoulders = report & "TOTAL_COUPLED_RETAINED_SHOULDERS: passed=" & passed & "; failed=" & Failed
+    Exit Function
+Failed:
+    RunTestCoupledRetainedShoulders = report & "RUNTIME ERROR: " & Err.source & " " & Err.description
+End Function
+
 
 
 
@@ -115199,7 +115320,7 @@ Private Function TraceKaniShearTest(ByVal spansText As String, ByVal shearText A
     operators.MeanShearProjections shearX, shearY
     Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double
     direction(6) = FORCE_SCALE
-    AddExperimentTraceTest report, tracePath, "KANI_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.degreeCount)
+    AddExperimentTraceTest report, tracePath, "KANI_POINTS: " & CStr(operators.pointCount) & " | DOF: " & CStr(operators.degreeCount)
 
     Dim coordinate As Double, increment As Double, candidate As Double, trialLambda As Double, reached As Double
     Dim field() As Double, actual() As Double, attempt As Long, i As Long, errorNorm As Double, difference As Double
@@ -115352,7 +115473,7 @@ Private Function TraceLopesA2Test(ByVal spansText As String, ByVal twistText As 
         ExperimentNumberTest(ft) & " | Gt " & ExperimentNumberTest(gt) & " | Gc " & ExperimentNumberTest(gc) & _
         " | wall " & ExperimentNumberTest(wall) & " | fy hoop " & ExperimentNumberTest(hoopYield) & _
         " | fy longitudinal " & ExperimentNumberTest(longitudinalYield)
-    AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.PointCount) & " | DOF: " & CStr(operators.degreeCount)
+    AddExperimentTraceTest report, tracePath, "A2_POINTS: " & CStr(operators.pointCount) & " | DOF: " & CStr(operators.degreeCount)
     Dim concrete As New CCoupledConcreteResponse, response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     InitializeExperimentSolverTest solver, operators, concrete, response, steel, ec, NU, fc, ft, peakStrain, gt, gc, spatialHistory
     If strengthMaximum > 0# Then
@@ -115485,15 +115606,15 @@ End Function
 Private Sub CheckLopesA2LocalPeakTest(ByVal controlled As CCoupledDeformationContinuation, ByVal best As Double, _
         ByVal peak As Double, ByVal steelPoint As Long, ByVal fields As Collection, ByRef report As String, _
         ByVal tracePath As String, ByRef passed As Long, ByRef failures As Long)
-    Dim passedLocal As Boolean, details As String, capacity As New CCapacityResult
+    Dim passedLocal As Boolean, Details As String, capacity As New CCapacityResult
     If Not controlled Is Nothing Then
         Const RECOVERY_MARKER As String = "максимумов превзойдено после спада: "
         Dim meta As CResultMeta: Set meta = controlled.ResultMeta
-        details = meta.diagnosticDetails
-        Dim recoveryAt As Long: recoveryAt = InStr(details, RECOVERY_MARKER)
+        Details = meta.diagnosticDetails
+        Dim recoveryAt As Long: recoveryAt = InStr(Details, RECOVERY_MARKER)
         If recoveryAt > 0 Then
-            passedLocal = (Val(mid$(details, recoveryAt + Len(RECOVERY_MARKER))) > 0 And _
-                InStr(details, "локальный максимум lambda:") > 0 And peak = 0# And best > 1.54)
+            passedLocal = (Val(mid$(Details, recoveryAt + Len(RECOVERY_MARKER))) > 0 And _
+                InStr(Details, "локальный максимум lambda:") > 0 And peak = 0# And best > 1.54)
         End If
         If steelPoint = 0 Then
             capacity.InitializeCoupledUnresolved meta, "Auto", best
@@ -115716,7 +115837,7 @@ Private Function TraceTBU3Test(ByVal spansText As String, ByVal maximumStageText
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_BASE_MM;" & ExperimentNumberTest(-TBU3_MEASUREMENT_HALF_HEIGHT) & _
             ";" & ExperimentNumberTest(TBU3_MEASUREMENT_HALF_HEIGHT)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_RESOLUTION;" & CStr(spans) & ";" & CStr(cellsPerSpan) & ";" & _
-            CStr(operators.ConcretePointCount) & ";" & CStr(operators.PointCount) & ";" & CStr(operators.degreeCount)
+            CStr(operators.ConcretePointCount) & ";" & CStr(operators.pointCount) & ";" & CStr(operators.degreeCount)
         AddExperimentTraceTest report, tracePath, "TBU3_GAUGE_COLUMNS;stage;Mx_kNm;T_kNm;strain_left;strain_right"
     End If
     If commonHoopQuadrature Then RecordTBU3QuadratureTest operators, report, tracePath
@@ -115809,7 +115930,7 @@ End Function
 Private Sub RecordTBU3QuadratureTest(ByVal operators As CCoupledElasticState, ByRef report As String, ByVal tracePath As String)
     Dim index As Long, x As Double, y As Double, weight As Double, row As String, group As Long
     Dim direction(1 To 6) As Double, material As String
-    For index = 1 To operators.PointCount
+    For index = 1 To operators.pointCount
         operators.point index, x, y, weight
         group = 0: material = "Concrete"
         If index > operators.ConcretePointCount Then
@@ -115880,9 +116001,9 @@ Private Sub InitializeExperimentSolverTest(ByVal solver As CCoupledNewtonSolver,
         ByVal ec As Double, ByVal NU As Double, ByVal fc As Double, ByVal ft As Double, ByVal peakStrain As Double, _
         ByVal gt As Double, ByVal gc As Double, ByVal spatialHistory As Boolean)
     Const LOCALIZATION_LENGTH As Double = 125# ' мм, принятое значение во всех трёх сопоставлениях.
-    Dim PointCount As Long: PointCount = operators.PointCount
+    Dim pointCount As Long: pointCount = operators.pointCount
     Dim fc0 As Double: fc0 = 0.6 * fc ' Начальная прочность сжатия в материальной модели.
-    concrete.Initialize PointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    concrete.Initialize pointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
     center.Initialize operators, concrete, steel
     If Not spatialHistory Then
         solver.Initialize operators, center, ec
@@ -115890,8 +116011,8 @@ Private Sub InitializeExperimentSolverTest(ByVal solver As CCoupledNewtonSolver,
     End If
     Dim plusConcrete As New CCoupledConcreteResponse, minusConcrete As New CCoupledConcreteResponse
     Dim plusSide As New CCoupledReinforcedResponse, minusSide As New CCoupledReinforcedResponse
-    plusConcrete.Initialize PointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
-    minusConcrete.Initialize PointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    plusConcrete.Initialize pointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
+    minusConcrete.Initialize pointCount, ec, NU, fc0, fc, ft, peakStrain, gt, gc, LOCALIZATION_LENGTH
     plusSide.Initialize operators, plusConcrete, steel
     minusSide.Initialize operators, minusConcrete, steel
     solver.Initialize operators, center, ec, plusSide, minusSide
@@ -116159,7 +116280,7 @@ Public Function RunTestCoupledMixedMaterial(ByVal stepsText As String) As String
     Dim cases As Variant: cases = Array("Compression", "Shear", "Tension")
     Dim AXIAL As Variant: AXIAL = Array(-0.00018, 0#, 0.00009)
     Dim valley As Long: valley = 3 * steps \ 5
-    Dim caseIndex As Long, probe As Long, lastProbe As Long, passed As Long, failures As Long, component As Long
+    Dim caseIndex As Long, Probe As Long, lastProbe As Long, passed As Long, failures As Long, component As Long
     Dim strain(1 To 6) As Double, stress(1 To 6) As Double, unused(1 To 6, 1 To 6) As Double
     Dim factor As Double, et As Double, ec As Double, previousEt As Double, previousEc As Double
     Dim report As String, line As String, status As ESolverFailureCode
@@ -116169,38 +116290,38 @@ Public Function RunTestCoupledMixedMaterial(ByVal stepsText As String) As String
     For caseIndex = LBound(cases) To UBound(cases)
         response.ClearHistory
         previousEt = 0#: previousEc = 0#
-        For probe = 1 To lastProbe
-            If probe <= steps Then
-                factor = CDbl(probe) / steps
-            ElseIf probe <= 2 * steps - valley Then
-                factor = CDbl(2 * steps - probe) / steps
+        For Probe = 1 To lastProbe
+            If Probe <= steps Then
+                factor = CDbl(Probe) / steps
+            ElseIf Probe <= 2 * steps - valley Then
+                factor = CDbl(2 * steps - Probe) / steps
             Else
-                factor = CDbl(probe - 2 * (steps - valley)) / steps
+                factor = CDbl(Probe - 2 * (steps - valley)) / steps
             End If
             strain(3) = AXIAL(caseIndex) * factor
             strain(1) = -poisson * strain(3): strain(2) = strain(1) ' Свободное поперечное расширение только для упругого эталона.
             strain(5) = PEAK_XZ * factor: strain(6) = PEAK_YZ * factor
             status = response.EvaluatePoint(1, strain, stress, unused, ctmStressOnly)
             If status <> sfcNone Then
-                report = report & "FAIL: NUMERICAL_FAILURE " & cases(caseIndex) & " step " & CStr(probe) & " at " & Trim$(Str$(factor)) & vbCrLf
+                report = report & "FAIL: NUMERICAL_FAILURE " & cases(caseIndex) & " step " & CStr(Probe) & " at " & Trim$(Str$(factor)) & vbCrLf
                 failures = failures + 1
                 Exit For
             End If
             response.AcceptTrial
             concrete.AcceptedPointDamage 1, et, ec
             If et + ENERGY_ROUNDING < previousEt Or ec + ENERGY_ROUNDING < previousEc Then
-                report = report & "FAIL: material history decreases at " & cases(caseIndex) & " step " & CStr(probe) & vbCrLf
+                report = report & "FAIL: material history decreases at " & cases(caseIndex) & " step " & CStr(Probe) & vbCrLf
                 failures = failures + 1
             Else
                 passed = passed + 1
             End If
             previousEt = et: previousEc = ec
-            line = "MIXED_POINT;" & cases(caseIndex) & ";" & CStr(probe) & ";" & Trim$(Str$(factor))
+            line = "MIXED_POINT;" & cases(caseIndex) & ";" & CStr(Probe) & ";" & Trim$(Str$(factor))
             For component = 1 To 6
                 line = line & ";" & Trim$(Str$(stress(component)))
             Next component
             report = report & line & ";" & Trim$(Str$(et)) & ";" & Trim$(Str$(ec)) & vbCrLf
-        Next probe
+        Next Probe
     Next caseIndex
     RunTestCoupledMixedMaterial = report & "TOTAL_COUPLED_MIXED_MATERIAL: passed=" & passed & "; failed=" & failures
     Exit Function
@@ -116590,7 +116711,7 @@ Private Function TestReplayPrismHistory(ByVal inputPath As String, ByVal spansTe
     Dim fileSystem As Object: Set fileSystem = CreateObject("Scripting.FileSystemObject")
     filePath = ThisWorkbook.path & Application.PathSeparator & "ReinforcedPrismVBA.csv"
     Set stream = fileSystem.CreateTextFile(filePath, False, True)
-    stream.WriteLine "META;NDM_PRISM_VBA_2;" & signature & ";" & CStr(spans) & ";" & CStr(POINTS_PER_SPAN) & ";" & CStr(operators.PointCount) & ";" & _
+    stream.WriteLine "META;NDM_PRISM_VBA_2;" & signature & ";" & CStr(spans) & ";" & CStr(POINTS_PER_SPAN) & ";" & CStr(operators.pointCount) & ";" & _
         TestPrismNumber(frame.originX) & ";" & TestPrismNumber(frame.originY) & ";" & TestPrismNumber(frame.lengthScale)
     stream.WriteLine "CONCRETE;30000;0.2;18;30;3;0.002;0.1;10;100"
     stream.WriteLine "STEEL;L500;12;200000;500;2000;0.05;unconfined_longitudinal_replacement"
@@ -116735,7 +116856,7 @@ Private Sub TestInitializePrismResponse(ByVal operators As CCoupledElasticState,
     Dim models As Variant, concrete As CCoupledConcreteResponse
     For Each models In Array(center, plusConcrete, minusConcrete)
         Set concrete = models
-        concrete.Initialize operators.PointCount, CONCRETE_E, CONCRETE_NU, 18#, 30#, 3#, 0.002, 0.1, 10#, 100#
+        concrete.Initialize operators.pointCount, CONCRETE_E, CONCRETE_NU, 18#, 30#, 3#, 0.002, 0.1, 10#, 100#
     Next models
     response.Initialize operators, center, steel
     plusSide.Initialize operators, plusConcrete, steel
@@ -116769,7 +116890,7 @@ Private Sub TestWritePrismPoints(ByVal stream As Object, ByVal stage As Long, By
     Dim x As Double, y As Double, weight As Double, tEnergy As Double, cEnergy As Double
     Dim stress(1 To 6) As Double, strain(1 To 6) As Double, direction(1 To 6) As Double
     Dim code As String, steelStress As Double, steelStrain As Double, fy As Double
-    For point = 1 To operators.PointCount
+    For point = 1 To operators.pointCount
         operators.point point, x, y, weight
         operators.PointStrain point, field, strain
         concrete.CopyAcceptedStress point, stress
@@ -130119,7 +130240,7 @@ Public Function RunCollapsedInputAddressTests() As String
     mPassed = 0: mFailed = 0: mReport = ""
     On Error GoTo Failed
     Dim originalGeometry As String, originalRebar As String, config As Object, saved As Variant
-    Dim probe As Object, geometry As Object, rebar As Object, geometryValues As Variant, rebarValues As Variant
+    Dim Probe As Object, geometry As Object, rebar As Object, geometryValues As Variant, rebarValues As Variant
     Dim units As CUnitSystem, location As Long, opening As Long, key As Variant, field As Variant, message As String
     Dim expected As String, prefix As String, alerts As Boolean
     originalGeometry = ThisWorkbook.names("rngHollowRectangleGeometry").RefersTo
@@ -130128,12 +130249,12 @@ Public Function RunCollapsedInputAddressTests() As String
     TestFixtureSelectRecipeType ThisWorkbook, "HollowRectangle"
     Application.Calculate
     geometryValues = ThisWorkbook.names("rngHollowRectangleGeometry").RefersToRange.value2
-    Set probe = ThisWorkbook.Worksheets.Add
+    Set Probe = ThisWorkbook.Worksheets.Add
     Set units = New CUnitSystem: units.InitializeDefaults
     For location = 0 To 1
-        Set geometry = probe.cells(40 + 160 * location, 2 + 28 * location).Resize(UBound(geometryValues, 1), UBound(geometryValues, 2))
+        Set geometry = Probe.cells(40 + 160 * location, 2 + 28 * location).Resize(UBound(geometryValues, 1), UBound(geometryValues, 2))
         geometry.value2 = geometryValues
-        ThisWorkbook.names("rngHollowRectangleGeometry").RefersTo = "='" & probe.name & "'!" & geometry.address
+        ThisWorkbook.names("rngHollowRectangleGeometry").RefersTo = "='" & Probe.name & "'!" & geometry.address
         For Each key In Array("Top", "Bottom", "Left", "Right", "OpeningTop", "OpeningBottom", "OpeningLeft", "OpeningRight")
             TestFixtureInputCell(geometry, "Main", CStr(key), "as").value2 = 40#
             For Each field In Array("d", "n", "s0", "s1")
@@ -130161,7 +130282,7 @@ Public Function RunCollapsedInputAddressTests() As String
             TestCheck prefix & ".cause", InStr(message, "не осталось участка для размещения арматуры") > 0
             If opening = 0 Then key = "Left" Else key = "OpeningLeft"
             For Each field In Array("as", "d", "s0", "s1", "n")
-                expected = probe.name & "!" & TestFixtureInputCell(geometry, "Main", CStr(key), CStr(field)).address(False, False)
+                expected = Probe.name & "!" & TestFixtureInputCell(geometry, "Main", CStr(key), CStr(field)).address(False, False)
                 If field = "s0" Or field = "s1" Or (opening = 1 And field = "n") Then
                     TestCheck prefix & ".excluded." & CStr(field), InStr(message, expected & ";") = 0 And InStr(message, expected & ":") = 0
                 Else
@@ -130170,7 +130291,7 @@ Public Function RunCollapsedInputAddressTests() As String
             Next field
             For Each field In Array("B", "H", "R")
                 If opening = 0 Then key = field Else key = CStr(field) & "o"
-                expected = probe.name & "!" & TestFixtureInputCell(geometry, "General", CStr(key)).address(False, False)
+                expected = Probe.name & "!" & TestFixtureInputCell(geometry, "General", CStr(key)).address(False, False)
                 TestCheck prefix & ".geometry." & CStr(key), InStr(message, expected) > 0
             Next field
         Next opening
@@ -130183,7 +130304,7 @@ Restore:
     ThisWorkbook.names("rngHollowRectangleGeometry").RefersTo = originalGeometry
     If IsArray(saved) Then TestFixtureRestoreInputs config, saved
     Application.DisplayAlerts = False
-    If Not probe Is Nothing Then probe.Delete
+    If Not Probe Is Nothing Then Probe.Delete
     Application.DisplayAlerts = alerts
     On Error GoTo 0
     RunCollapsedInputAddressTests = mReport & "TOTAL_COLLAPSED_INPUT_ADDRESSES: passed=" & CStr(mPassed) & "; failed=" & CStr(mFailed) & vbCrLf
@@ -132766,13 +132887,13 @@ Private Sub TestPlateauSlope(ByRef stats As TMaterialTestStats)
                             TestAssertClose stats, prefix & ".compressionLimit", equilibrium.PhysicalCompressionStrain, baseline.PhysicalCompressionStrain, 0#
                             TestAssertClose stats, prefix & ".tensionLimit", equilibrium.PhysicalTensionStrain, baseline.PhysicalTensionStrain, 0#
                             TestAssertTrue stats, prefix & ".frozen", diagram.IsFrozen And equilibrium.IsFrozen
-                            For i = 1 To baseline.PointCount
+                            For i = 1 To baseline.pointCount
                                 expected = TestPlateauExpectedStress(baseline, i, alpha, compressionE, tensionE)
                                 TestAssertClose stats, prefix & ".node." & CStr(i), diagram.pointStress(i), expected, 0.000000001
                                 TestAssertClose stats, prefix & ".strain." & CStr(i), diagram.PointStrain(i), baseline.PointStrain(i), 0#
                                 TestAssertClose stats, prefix & ".clone." & CStr(i), clone.pointStress(i), diagram.pointStress(i), 0#
                             Next i
-                            For i = 1 To baseline.PointCount - 1
+                            For i = 1 To baseline.pointCount - 1
                                 strain = (baseline.PointStrain(i) + baseline.PointStrain(i + 1)) / 2#
                                 expected = baseline.GetTangentModulus(strain)
                                 If expected = 0# And baseline.GetStress(strain) <> 0# Then
@@ -132814,7 +132935,7 @@ End Sub
 Private Function TestPlateauExpectedStress(ByVal baseline As CMaterialDiagram, ByVal index As Long, _
         ByVal alpha As Double, ByVal compressionE As Double, ByVal tensionE As Double) As Double
     Dim i As Long, change As Double
-    For i = 2 To baseline.PointCount
+    For i = 2 To baseline.pointCount
         If baseline.pointStress(i) <> 0# And baseline.pointStress(i) = baseline.pointStress(i - 1) Then
             If baseline.PointStrain(i) <= 0# And index < i Then _
                 change = change - alpha * compressionE * (baseline.PointStrain(i) - baseline.PointStrain(i - 1))
@@ -132941,8 +133062,8 @@ Private Sub TestAssertMaterialTransitions(ByRef stats As TMaterialTestStats, ByV
     Dim i As Long, j As Long, strain As Double, delta As Variant, seed As Variant, samples As Variant
     Dim first As Double, second As Double, expectedFirst As Double, expectedSecond As Double, name As String
     samples = Array(-1000#, -100#, -10#, -0.05, -0.0035, -0.001, 0#, 0.00015, 0.001, 0.025, 10#, 100#, 1000#)
-    For i = 1 To diagram.PointCount + UBound(samples) + 1
-        If i <= diagram.PointCount Then strain = diagram.PointStrain(i) Else strain = CDbl(samples(i - diagram.PointCount - 1))
+    For i = 1 To diagram.pointCount + UBound(samples) + 1
+        If i <= diagram.pointCount Then strain = diagram.PointStrain(i) Else strain = CDbl(samples(i - diagram.pointCount - 1))
         j = 0
         For Each delta In Array(-0.01, -0.0001, -0.000000000001, 0#, 0.000000000001, 0.0001, 0.01)
             j = j + 1
@@ -132965,15 +133086,15 @@ Private Sub TestMaterialTransitionOracle(ByVal diagram As CMaterialDiagram, ByVa
         ByVal delta As Double, ByRef first As Double, ByRef second As Double)
     If delta = 0# Then Exit Sub
     Dim i As Long, leftSlope As Double, rightSlope As Double, node As Double, distance As Double
-    For i = 1 To diagram.PointCount
+    For i = 1 To diagram.pointCount
         node = diagram.PointStrain(i)
         leftSlope = 0#: rightSlope = 0#
         If i > 1 Then leftSlope = (diagram.pointStress(i) - diagram.pointStress(i - 1)) / _
             (node - diagram.PointStrain(i - 1))
-        If i < diagram.PointCount Then rightSlope = (diagram.pointStress(i + 1) - diagram.pointStress(i)) / _
+        If i < diagram.pointCount Then rightSlope = (diagram.pointStress(i + 1) - diagram.pointStress(i)) / _
             (diagram.PointStrain(i + 1) - node)
         If i = 1 And diagram.HasCompressionExtension Then leftSlope = rightSlope
-        If i = diagram.PointCount And diagram.HasTensionExtension Then rightSlope = leftSlope
+        If i = diagram.pointCount And diagram.HasTensionExtension Then rightSlope = leftSlope
         If leftSlope <> rightSlope Then
             distance = (node - strain) / delta
             If distance > 0# And strain + distance * delta <> strain Then
@@ -133197,7 +133318,7 @@ Private Sub TestProviderStateSolutionExtension(ByRef stats As TMaterialTestStats
     Dim strain As Variant, expected As Double, stress As Double, tangent As Double
     TestAssertTrue stats, "state.extension.concrete.reference", stateConcrete.PointStrain(1) < physicalConcrete.PhysicalCompressionStrain
     TestAssertTrue stats, "state.extension.steel.leftReference", stateSteel.PointStrain(1) < physicalSteel.PhysicalCompressionStrain
-    TestAssertTrue stats, "state.extension.steel.rightReference", stateSteel.PointStrain(stateSteel.PointCount) > physicalSteel.PhysicalTensionStrain
+    TestAssertTrue stats, "state.extension.steel.rightReference", stateSteel.PointStrain(stateSteel.pointCount) > physicalSteel.PhysicalTensionStrain
     ' Прямая сохраняет наклон 0,01*E и за опорными точками, и за контрольными +/-10 и +/-100.
     For Each strain In Array(-1000000#, -1000#, -100#, -10.001, -10#, -9.999, 9.999, 10#, 10.001, 100#, 1000#, 1000000#)
         If CDbl(strain) < 0# Then
@@ -133453,13 +133574,13 @@ Private Sub TestAssertPhysicalDiagramPair(ByRef stats As TMaterialTestStats, ByV
         physical.PhysicalTensionStrain, 0.000000000001
     TestAssertTrue stats, testKey & ".compressionReference", extended.PointStrain(1) < physical.PhysicalCompressionStrain
     If physical.HasPhysicalTensionLimit Then
-        TestAssertTrue stats, testKey & ".tensionReference", extended.PointStrain(extended.PointCount) > physical.PhysicalTensionStrain
+        TestAssertTrue stats, testKey & ".tensionReference", extended.PointStrain(extended.pointCount) > physical.PhysicalTensionStrain
     End If
     Dim i As Long
     Dim strain As Double
     Dim stress As Double
     Dim tangent As Double
-    For i = 1 To 2 * physical.PointCount - 1
+    For i = 1 To 2 * physical.pointCount - 1
         If i Mod 2 = 1 Then
             strain = physical.PointStrain((i + 1) \ 2)
         Else
@@ -133518,7 +133639,7 @@ Private Sub TestAudit02ExtensionBeyondTechnicalDefault(ByRef stats As TMaterialT
     TestAssertTrue stats, "audit02.technical.compressionExtended", extended.HasCompressionExtension
     TestAssertTrue stats, "audit02.technical.tensionExtended", extended.HasTensionExtension
     TestAssertClose stats, "audit02.technical.left", extended.PointStrain(1), -240#, 0.000000000001
-    TestAssertClose stats, "audit02.technical.right", extended.PointStrain(extended.PointCount), 280#, 0.000000000001
+    TestAssertClose stats, "audit02.technical.right", extended.PointStrain(extended.pointCount), 280#, 0.000000000001
     TestAssertClose stats, "audit02.technical.physicalCompression", extended.PhysicalCompressionStrain, -120#, 0.000000000001
     TestAssertClose stats, "audit02.technical.physicalTension", extended.PhysicalTensionStrain, 140#, 0.000000000001
     TestAssertClose stats, "audit02.technical.physicalStress", extended.GetStress(130#), 350#, 0.000000000001
@@ -133527,7 +133648,7 @@ Private Sub TestAudit02ExtensionBeyondTechnicalDefault(ByRef stats As TMaterialT
     provider.TestInitializeFromParameters TestConcreteParameters(), steel
     Set extended = provider.SteelMaterialForEquilibrium(cpStrength)
     TestAssertClose stats, "audit02.technical.equal.left", extended.PointStrain(1), -200#, 0#
-    TestAssertClose stats, "audit02.technical.equal.right", extended.PointStrain(extended.PointCount), 200#, 0#
+    TestAssertClose stats, "audit02.technical.equal.right", extended.PointStrain(extended.pointCount), 200#, 0#
     TestAssertClose stats, "audit02.technical.beyondReference", extended.GetStress(1000#), 1800350#, 0.00000001
 End Sub
 
@@ -133569,7 +133690,7 @@ End Function
 ' Новые нормативные диаграммы или пределы здесь не вводятся.
 Private Sub TestAudit03DiagramArrayInputs(ByRef stats As TMaterialTestStats)
     Dim scenario As Variant, strains() As Double, stresses() As Double, diagram As CMaterialDiagram
-    Dim PointCount As Long, expectedCode As Long, actualCode As Long, description As String
+    Dim pointCount As Long, expectedCode As Long, actualCode As Long, description As String
     Dim prefix As String
     On Error GoTo Failed
     For Each scenario In Array("CountTooSmall", "MissingStrain", "MissingStress", _
@@ -133577,30 +133698,30 @@ Private Sub TestAudit03DiagramArrayInputs(ByRef stats As TMaterialTestStats)
         TestAudit03FillDiagramArrays strains, stresses
         Set diagram = New CMaterialDiagram
         diagram.InitializeFromArrays strains, stresses, 3
-        PointCount = 3
+        pointCount = 3
         expectedCode = vbObjectError + 3113
         Select Case CStr(scenario)
-            Case "CountTooSmall": PointCount = 1: expectedCode = vbObjectError + 3100
+            Case "CountTooSmall": pointCount = 1: expectedCode = vbObjectError + 3100
             Case "MissingStrain": Erase strains
             Case "MissingStress": Erase stresses
             Case "ShortStrain": ReDim strains(1 To 2)
             Case "ShortStress": ReDim stresses(1 To 2)
             Case "BoundsStrain": ReDim strains(2 To 4)
             Case "BoundsStress": ReDim stresses(2 To 4)
-            Case "CountBeyondArrays": PointCount = 4
+            Case "CountBeyondArrays": pointCount = 4
             Case "Duplicate": strains(1) = strains(2): expectedCode = vbObjectError + 3111
         End Select
         prefix = "audit03.diagramArray." & CStr(scenario)
-        actualCode = TestAudit03CaptureDiagramInitialize(diagram, strains, stresses, PointCount, description)
+        actualCode = TestAudit03CaptureDiagramInitialize(diagram, strains, stresses, pointCount, description)
         TestAssertTrue stats, prefix & ".inputError", actualCode = expectedCode
         TestAssertTrue stats, prefix & ".reason", Len(description) > 0
-        TestAssertTrue stats, prefix & ".noPoints", diagram.PointCount = 0
+        TestAssertTrue stats, prefix & ".noPoints", diagram.pointCount = 0
         TestAssertTrue stats, prefix & ".notUsable", TestAudit03CaptureDiagramStress(diagram) = vbObjectError + 3112
         TestAppendLine stats, "DIAGRAM_ARRAY_INPUT: case=" & CStr(scenario) & "|error=" & CStr(actualCode) & "|reason=" & description
         TestAudit03FillDiagramArrays strains, stresses
         diagram.InitializeFromArrays strains, stresses, 3
         TestAssertClose stats, prefix & ".restoredStress", diagram.GetStress(-0.00075), -7.75, 0.000000000001
-        TestAssertTrue stats, prefix & ".restoredPoints", diagram.PointCount = 3
+        TestAssertTrue stats, prefix & ".restoredPoints", diagram.pointCount = 3
     Next scenario
     ' Дополнительный индекс 0 допустим, если нужные индексы 1..pointCount есть.
     ' Он не участвует в диаграмме; не меняем существующий контракт этого входа.
@@ -133628,11 +133749,11 @@ End Sub
 ' Перехватывает только ошибку InitializeFromArrays, чтобы не прятать отказ
 ' последующей проверки и не переносить Err от предыдущего сценария.
 Private Function TestAudit03CaptureDiagramInitialize(ByVal diagram As CMaterialDiagram, _
-        ByRef strains() As Double, ByRef stresses() As Double, ByVal PointCount As Long, _
+        ByRef strains() As Double, ByRef stresses() As Double, ByVal pointCount As Long, _
         ByRef description As String) As Long
     On Error GoTo ExpectedError
     description = vbNullString
-    diagram.InitializeFromArrays strains, stresses, PointCount
+    diagram.InitializeFromArrays strains, stresses, pointCount
     Exit Function
 ExpectedError:
     TestAudit03CaptureDiagramInitialize = Err.number
@@ -133892,7 +134013,7 @@ Private Sub TestAudit03MaterialConfigMetric(ByVal provider As CMaterialModelProv
         Case 8, 10
             actual = 0#: expected = 0#
             If useTension Then
-                actual = diagram.PointStrain(diagram.PointCount - 1): expected = CDbl(v(8))
+                actual = diagram.PointStrain(diagram.pointCount - 1): expected = CDbl(v(8))
                 If three Then expected = CDbl(v(10))
             End If
             affected = useTension And ((index = 10) = three)
@@ -133929,7 +134050,7 @@ End Sub
 ' Не служит численным эталоном активного эффекта, который проверяется отдельно.
 Private Function TestAudit03MaterialDiagramSignature(ByVal diagram As CMaterialDiagram) As String
     Dim i As Long, signature As String
-    For i = 1 To diagram.PointCount
+    For i = 1 To diagram.pointCount
         signature = signature & CStr(diagram.PointStrain(i)) & ":" & CStr(diagram.pointStress(i)) & "|"
     Next i
     TestAudit03MaterialDiagramSignature = signature
@@ -134009,7 +134130,7 @@ Private Sub TestAudit03MaterialControlUnits(ByRef stats As TMaterialTestStats)
                 Else
                     Err.Raise vbObjectError + 9906, "TestAudit03MaterialControlUnits", "Неизвестный материал контрольной строки."
                 End If
-                expectedPoints = diagram.PointCount
+                expectedPoints = diagram.pointCount
                 pointIndex = 0: previousKey = key
             End If
             pointIndex = pointIndex + 1
@@ -134118,9 +134239,9 @@ Private Sub TestAudit03PublishedMaterialDiagrams(ByRef stats As TMaterialTestSta
                             beforeStress = diagram.GetStress(-0.0005)
                             physicalCompression = diagram.PhysicalCompressionStrain
                             physicalTension = diagram.PhysicalTensionStrain
-                            ReDim strains(1 To diagram.PointCount)
-                            ReDim stresses(1 To diagram.PointCount)
-                            For i = 1 To diagram.PointCount
+                            ReDim strains(1 To diagram.pointCount)
+                            ReDim stresses(1 To diagram.pointCount)
+                            For i = 1 To diagram.pointCount
                                 strains(i) = diagram.PointStrain(i)
                                 stresses(i) = 2# * diagram.pointStress(i)
                             Next i
@@ -134581,7 +134702,7 @@ Public Function RunPerformanceNumericTests() As String
     Dim full As CSectionSolver, physical As CSectionSolver
     Set full = New CSectionSolver: Set physical = New CSectionSolver
     For Each diagram In Array(frozenConcrete, frozenSteel)
-        For i = 1 To diagram.PointCount
+        For i = 1 To diagram.pointCount
             For Each shift In Array(-0.000000000001, 0#, 0.000000000001)
                 eps = diagram.PointStrain(i) + CDbl(shift)
                 full.EvaluateStrainPlane section, frozenConcrete, frozenSteel, eps, 0#, 0#
@@ -151187,7 +151308,7 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
     Dim gt As Double, gc As Double
     gt = 0.073 * fc ^ 0.18: gc = (fc / ft) ^ 2 * gt ' Оценки Poliotti и Bairan (2019), а не опытные энергии.
     operators.PrepareModel section, ec, NU, spans, spans, 5, layout, steelModels:=steel
-    concrete.Initialize operators.PointCount, ec, NU, 0.6 * fc, fc, ft, PEAK_STRAIN, gt, gc, LOCALIZATION
+    concrete.Initialize operators.pointCount, ec, NU, 0.6 * fc, fc, ft, PEAK_STRAIN, gt, gc, LOCALIZATION
     reinforcement.Initialize operators, concrete, steel
 
     Dim solver As New CCoupledNewtonSolver, path As New CLoadPathVector, branch As New CCoupledLoadContinuation
@@ -151199,7 +151320,7 @@ Public Function RunTestTravushSquareStage(ByVal pitchText As String, ByVal spans
         ";spans=" & CStr(spans) & _
         ";hoop_axis_from_face_mm=22;steel_limit=0.05;Ec_MPa=43000;localization_mm=125" & vbCrLf
     report = report & "MESH;concrete_points=" & CStr(operators.ConcretePointCount) & _
-        ";all_points=" & CStr(operators.PointCount) & ";DOF=" & CStr(operators.degreeCount) & vbCrLf
+        ";all_points=" & CStr(operators.pointCount) & ";DOF=" & CStr(operators.degreeCount) & vbCrLf
     report = report & "EXPERIMENT_CRACK;R_sup_kN=13.3;lambda_nominal=" & TravushNumberTest(SUPPORT_CRACK / SUPPORT_STAGE) & vbCrLf
     report = report & "stage;lambda;R_sup_kN;N_kN;Mx_kNm;My_kNm;T_kNm;Qx_kN;Qy_kN;" & _
         "twist_rad_per_m;curvature_x_per_m;tension_indicator;compression_indicator;" & _
@@ -151289,7 +151410,7 @@ Private Sub TravushMaterialExtremesTest(ByVal operators As CCoupledElasticState,
         stress = Abs(reinforcement.AcceptedSteelStress(i))
         If stress > longStress Then longStress = stress
     Next i
-    For i = operators.ConcretePointCount + rebarCount + 1 To operators.PointCount
+    For i = operators.ConcretePointCount + rebarCount + 1 To operators.pointCount
         stress = Abs(reinforcement.AcceptedSteelStress(i))
         If stress > hoopStress Then hoopStress = stress
     Next i
@@ -155576,14 +155697,14 @@ End Function
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Блокирует тестовый журнал, проверяет сохранение assertion и штатное возобновление записи.
 Private Sub TestUiProgressFileFailure(ByRef stats As TUiTestStats)
-    Dim locked As Integer, probe As TUiTestStats, path As String, wasPreserved As Boolean
+    Dim locked As Integer, Probe As TUiTestStats, path As String, wasPreserved As Boolean
     path = ThisWorkbook.path & "\RC_NDM_ui_test_progress.txt"
     On Error GoTo Failed
     locked = FreeFile
     Open path For Binary Access Read Write Lock Read Write As #locked
-    TestAppendLine probe, "RUN: ui.progressFile.locked"
-    wasPreserved = InStr(1, probe.report, "RUN: ui.progressFile.locked", vbBinaryCompare) > 0 And _
-        InStr(1, probe.report, "TEST_PROGRESS_WARNING:", vbBinaryCompare) > 0
+    TestAppendLine Probe, "RUN: ui.progressFile.locked"
+    wasPreserved = InStr(1, Probe.report, "RUN: ui.progressFile.locked", vbBinaryCompare) > 0 And _
+        InStr(1, Probe.report, "TEST_PROGRESS_WARNING:", vbBinaryCompare) > 0
     Close #locked
     locked = 0
     TestAssertTrue stats, "ui.progressFile.failurePreservesPrimaryReport", wasPreserved

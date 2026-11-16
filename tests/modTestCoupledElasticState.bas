@@ -4324,3 +4324,78 @@ Private Sub TestCopyConcreteTriplet(ByVal center As CCoupledConcreteResponse, By
     minusSide.CopyAcceptedStress 1, stress
     For i = 1 To 6: values(i, 3) = stress(i): Next i
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет два максимума на подшагах, сохранённую нагрузку и принятую историю.
+Public Function RunTestCoupledRetainedShoulders() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    Const STEEL_AREA As Double = 100#, DESIGN_FORCE As Double = 410000#
+    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
+    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "A400"
+    Dim steel As New CCoupledSteelModel, models As Object
+    steel.Initialize 200000#, 40#, 40#, 0#, 0#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", steel
+    Dim operators As New CCoupledElasticState, concrete As New CTestCoupledPointResponse
+    operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
+    concrete.TestInitialize operators.PointCount
+    concrete.TestUseTwinPeakAxialLaw
+    Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    material.Initialize operators, concrete, models
+    solver.Initialize operators, material, 30000#
+
+    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, control() As Double
+    direction(1) = DESIGN_FORCE
+    ReDim control(1 To operators.DegreeCount)
+    control(1) = 1#
+    Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
+    Dim coordinate As Variant, strain As Double, lambda As Double, previous As Double, factor As Double
+    For Each coordinate In Array(0.0004, 0.0006)
+        strain = CDbl(coordinate)
+        If Not solver.TryDeformationStep(offset, direction, control, strain, lambda, factor, 1E-8, 1E-8, 30) Then _
+            Err.Raise 5, , "Не получено исходное равновесие. " & solver.ResultMeta.DiagnosticDetails
+        solver.CopyTrial field, resultants
+        solver.AcceptStep
+        history.Add field
+        trace.Add 1#, factor
+        previous = lambda: lambda = factor
+    Next coordinate
+    TestExpectNear previous, 0.75, 1E-8, "первое исходное поле", passed, failed, report
+    TestExpectNear lambda, 0.8, 1E-8, "второе исходное поле", passed, failed, report
+
+    Dim branch As New CCoupledDeformationContinuation
+    branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 1E-8, 1E-8, trace
+    Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
+    TestRecord saved.Count = 5, "уточнённые поля заменяют грубое плечо", passed, failed, report
+    Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
+    Dim i As Long, offsetFraction As Double, greatest As Double
+    For i = 1 To GeomMin(saved.Count, 5)
+        saved.ReadPoint i, offsetFraction, factor
+        TestExpectNear factor, CDbl(expected(i - 1)), 1E-8, "множитель поля " & CStr(i), passed, failed, report
+        TestExpectNear offsetFraction, 1#, 1E-12, "постоянная часть поля " & CStr(i), passed, failed, report
+        greatest = GeomMax(greatest, factor)
+    Next i
+    TestExpectNear branch.BestAdmissibleLambda, greatest, 1E-8, _
+        "нижняя оценка включает все сохранённые равновесия", passed, failed, report
+    Dim meta As CResultMeta: Set meta = branch.ResultMeta
+    TestRecord InStr(1, meta.ResultComment, "локальный максимум при lambda = " & Format$(1.1, "0.000000")) > 0, _
+        "в диагностике указан больший подтверждённый максимум", passed, failed, report
+    TestRecord InStr(1, meta.DiagnosticDetails, "равновесие при lambda = 1 подтверждено: False", vbTextCompare) > 0, _
+        "переход через единицу не подменяет точное равновесие", passed, failed, report
+
+    Dim accuracy As Double, designVerified As Boolean, limitFields As Collection
+    TestRecord meta.InternalStatus = rsNumericalFailure And Not branch.CopyPeak(factor, accuracy, designVerified), _
+        "локальный пик железобетона не опубликован как предел", passed, failed, report
+    TestRecord Not branch.CopyLimitState(limitFields, resultants), _
+        "локальный пик не публикует предельное поле", passed, failed, report
+    solver.CopyAccepted field
+    TestExpectNear field(1), 0.0007, 1E-12, "сохранено последнее допустимое поле правого плеча", passed, failed, report
+    TestExpectNear concrete.TestAcceptedPeak, field(1), 1E-12, _
+        "отклонённая проба не изменила принятую материальную историю", passed, failed, report
+    TestRecord concrete.TestAcceptedSteps = saved.Count, "индексы истории и следа совпадают", passed, failed, report
+    RunTestCoupledRetainedShoulders = report & "TOTAL_COUPLED_RETAINED_SHOULDERS: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledRetainedShoulders = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

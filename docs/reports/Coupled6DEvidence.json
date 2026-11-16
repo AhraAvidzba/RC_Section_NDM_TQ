@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "38f476e",
+  "source_checkpoint": "aab6994",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
-    "workbook/output/VBA_All_Code.txt": "CB5AE0E2862F00A1C8058BBF96BE8E247130CB02654AADA575A31793FA8AAAFB"
+    "workbook/output/RC_Section_NDM.xlsm": "0B82F8C795B7FE19309FC9AC165BF5016AADBC6E0FE02FA2F3F19DED9A062603",
+    "workbook/output/VBA_All_Code.txt": "5290CD5B59DEB41A06E35F73CF6CCFD808A12E40A202E970EFAFFC5F7AF9FA14"
   },
   "python_packages": [
     "numpy",
@@ -46,7 +46,10 @@
     "MVT2MeasuredAction20261116": "D32C52853477FD9BBF5DD35988F77117170238D880EFA30EB396A847DBC33897",
     "MVT2MeasuredNative20261116": "0D19814EB74BA458E56B40BF7E5D2E58CE057FDC724CB79A610DC6D56A77BA5E",
     "KaniSecondDirectionNativePortable": "66068CCC3E3744B75D8877F635B0FFC1C2D0B6AB65CC1B5819731D8326758DC4",
-    "MVT2AxialWorkItem20261116": "1C42AA22A2F23F1EB633292EBDD81CC8852DE3C2AD9FED4ADE73BFF298ECB5D5"
+    "MVT2AxialWorkItem20261116": "1C42AA22A2F23F1EB633292EBDD81CC8852DE3C2AD9FED4ADE73BFF298ECB5D5",
+    "MVT2AxialNative20261116": "82B8388B418852B9966D02DDCA7A4229A94AE141E7FB97B560F8D9241EB8AA91",
+    "KaniMeasuredSubspacePortable": "E7BB5594610D4DF13C9CF4E9E02E21E719F63AE0A85D27FB9300CB4E4FDEC635",
+    "CoupledRetainedShouldersRelease20261116": "5824096AA6F6777FBC0FD27704294D95A367FB9C9D9BBD97FF9E76181552E673"
   },
   "cases": [
     {
@@ -422,7 +425,7 @@
       "script": "Verify.py",
       "arguments": [
         "--repo-root",
-        "{repo}"
+        "{repo_a0563}"
       ],
       "outputs": {
         "ReplayedPlus18Verification.json": "982D826223C8EC5B6EF6E8F72F4C1A4ABFE1E6AE24B6FDFC118D75E8AF2D82FD"
@@ -487,7 +490,7 @@
       "script": "Verify.py",
       "arguments": [
         "--repo-root",
-        "{repo}",
+        "{repo_a0563}",
         "--donor-zip",
         "{evidence}/KaniH45Plus18NativePortable.zip"
       ],
@@ -508,6 +511,48 @@
         "replay/WorkItem.json": "2C3A0508375C4760205F45F0B7F652A0C499E0ADA69EA3E7BDEF34E21BE08C0F",
         "replay/Fields.csv": "FC94654219AAF4ED7E5994F070DEB7CB08830335D2E3FAE41EAFFB97BFA37530"
       }
+    },
+    {
+      "id": "mvt2-fixed-axial-native",
+      "journal_section": 338,
+      "archive": "MVT2AxialNative20261116",
+      "script": "Verify-MVT2ShearControlled.py",
+      "arguments": [
+        "--offline"
+      ],
+      "outputs": {
+        "Verification.json": "2D084A885AAB7C3E024203BCC36388BED57FA08C4ACEEC8F357997A900DE9366"
+      }
+    },
+    {
+      "id": "kani-axial-gradient-and-measured-span",
+      "journal_section": 339,
+      "archive": "KaniMeasuredSubspacePortable",
+      "script": "Verify.py",
+      "arguments": [
+        "--repo-root",
+        "{repo}"
+      ],
+      "stdout_contains": "native records, controls and model bounds replayed"
+    },
+    {
+      "id": "retained-shoulders-release",
+      "journal_section": 340,
+      "archive": "CoupledRetainedShouldersRelease20261116",
+      "script": "Verify-RetainedShoulders.py",
+      "outputs": {
+        "Replay.json": "1B013A7483B04ED788DF64FA096530F864DAAED841D771A9E11858D93A39159D"
+      }
     }
-  ]
+  ],
+  "frozen_repositories": {
+    "repo_a0563": {
+      "revision": "aab6994d9be577564e4c8b17b4b556e6ee092d51",
+      "files": {
+        "workbook/output/RC_Section_NDM.xlsm": "A0563F44794A79776E4B4915AF2B075E4C172BC332CDDDC502B6B69941E56C5A",
+        "docs/regression/Coupled6D/KaniCommitNear48Portable.zip": "EA0A80006AF81D99799B53FDCB75B18CDDE7B7DF730AB16039902F12C6431488",
+        "docs/regression/Coupled6D/KaniPracticalProbe45Portable.zip": "4AC1F4D0256849A40E67192D7DBA77C1FAD0F58E4BB2773455B273B25069F113"
+      }
+    }
+  }
 }

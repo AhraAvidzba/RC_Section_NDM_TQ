@@ -21,13 +21,13 @@ Private mCount As Long, mAcceptedPeak() As Double, mTrialPeak() As Double
 Private mFail As Boolean, mAcceptedSteps As Long
 Private mMaximumIncrement As Double
 Private mMinimumAxialStrain As Double
-Private mCubic As Double
+Private mCubic As Double, mTwinPeaks As Boolean
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Задаёт число расчётных точек. Ненагруженное состояние задаёт ClearHistory.
 Friend Sub TestInitialize(ByVal pointCount As Long)
     mCount = pointCount
-    mCubic = 1E+10#
+    mCubic = 1E+10#: mTwinPeaks = False
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -35,6 +35,32 @@ End Sub
 Friend Sub TestUseDescendingAxialLaw()
     mCubic = -1E+10#
 End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Задаёт два максимума между крупными шагами деформационного продолжения.
+Friend Sub TestUseTwinPeakAxialLaw()
+    mTwinPeaks = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает напряжение за вычетом силы стержня на плато 4 кН.
+' Суммарный отклик сечения описывает полином по безразмерной деформации.
+Private Sub TestTwinPeakStress(ByVal strain As Double, ByRef stress As Double, ByRef tangent As Double)
+    Const SCALE_STRAIN As Double = 0.0001, START_STRAIN As Double = 0.0004
+    Const NET_AREA As Double = 21500#, DESIGN_FORCE As Double = 410000#
+    Const STEEL_FORCE As Double = 4000#
+    If strain < START_STRAIN Then
+        tangent = (0.75 * DESIGN_FORCE - STEEL_FORCE) / (NET_AREA * START_STRAIN)
+        stress = tangent * strain
+    Else
+        Dim t As Double: t = (strain - START_STRAIN) / SCALE_STRAIN
+        Dim factor As Double: factor = (((-218# * t + 1309#) * t - 2428#) * t + 1379#) * t + 450#
+        Dim slope As Double: slope = ((-872# * t + 3927#) * t - 4856#) * t + 1379#
+        stress = (DESIGN_FORCE * factor / 600# - STEEL_FORCE) / NET_AREA
+        tangent = DESIGN_FORCE * slope / (600# * NET_AREA * SCALE_STRAIN)
+    End If
+End Sub
+
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Включает контролируемый материальный отказ после записи первого кандидата.
@@ -83,8 +109,12 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         stress(j) = tangent(j, j) * strain(j)
     Next j
     e = strain(3)
-    stress(3) = stress(3) + mCubic * e ^ 3
-    tangent(3, 3) = tangent(3, 3) + 3# * mCubic * e ^ 2
+    If mTwinPeaks Then
+        TestTwinPeakStress e, stress(3), tangent(3, 3)
+    Else
+        stress(3) = stress(3) + mCubic * e ^ 3
+        tangent(3, 3) = tangent(3, 3) + 3# * mCubic * e ^ 2
+    End If
     Dim peak As Double: peak = mAcceptedPeak(point)
     If Abs(e) > peak Then peak = Abs(e)
     If recordTrial Then mTrialPeak(point) = peak

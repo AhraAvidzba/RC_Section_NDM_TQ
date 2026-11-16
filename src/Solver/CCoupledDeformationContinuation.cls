@@ -460,9 +460,9 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     tolerance = mLambdaTolerance
     If Abs(middle.Lambda - 1#) <= 0.05 And tolerance > NEAR_ONE_TOLERANCE Then tolerance = NEAR_ONE_TOLERANCE
     Dim sampling As Double, refinedFields As Collection, actual As Variant
-    Dim accuracy As Double, divisions As Long
+    Dim accuracy As Double, divisions As Long, retainedMaximum As Double
     If keepRight Then
-        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True) Then Exit Function
+        If Not ReplayShoulders(history, left, middle, right, 2, second, sampling, refinedFields, actual, True, retainedMaximum) Then Exit Function
         accuracy = Abs(middle.Lambda - second.Lambda)
         If sampling > accuracy Then accuracy = sampling
         accuracy = accuracy + second.Uncertainty
@@ -484,7 +484,7 @@ Private Function VerifyPeak(ByVal history As Collection, ByRef left As TBranchPo
     End If
     mPeak = second: mPeakAccuracy = accuracy: mHasPeak = True
     Set mLimitFields = refinedFields: mLimitResultants = actual
-    If second.Lambda > mBestLambda Then mBestLambda = second.Lambda
+    mBestLambda = GeomMax(mBestLambda, GeomMax(second.Lambda, retainedMaximum))
     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
         "Подтверждён первый максимум прослеженной ветви.", Details() & " | Оценка погрешности lambda: " & CStr(accuracy) & _
         " | Координаты плеч: " & CStr(shoulderStart) & ", " & CStr(right.Coordinate)
@@ -497,7 +497,8 @@ End Function
 Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef middle As TBranchPoint, ByRef right As TBranchPoint, ByVal divisions As Long, _
         ByRef peak As TBranchPoint, ByRef sampling As Double, Optional ByRef limitFields As Collection = Nothing, _
-        Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False) As Boolean
+        Optional ByRef limitResultants As Variant, Optional ByVal keepRight As Boolean = False, _
+        Optional ByRef retainedMaximum As Double = 0#) As Boolean
     If Not mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
     Dim start As Double, finish As Double, previousLambda As Double, point As TBranchPoint
     Dim samples() As TBranchPoint, shoulder As Long, i As Long, index As Long
@@ -538,39 +539,52 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
             previousLambda = point.Lambda
         Next i
     Next shoulder
-    Dim dropLeft As Double, dropRight As Double
+    Dim peakIndex As Long, lower As Double
     For i = 1 To index - 1
-        point = samples(i)
-        If point.Lambda - point.Uncertainty > samples(i - 1).Lambda + samples(i - 1).Uncertainty And _
-                point.Lambda - point.Uncertainty > samples(i + 1).Lambda + samples(i + 1).Uncertainty Then
-            If point.Lambda - point.Uncertainty <= left.Lambda + LoadResolution(point.Lambda) Then Exit Function
-            If point.Lambda - point.Uncertainty <= samples(index).Lambda + samples(index).Uncertainty Then Exit Function
-            peak = point
-            dropLeft = peak.Lambda - samples(i - 1).Lambda + samples(i - 1).Uncertainty
-            dropRight = peak.Lambda - samples(i + 1).Lambda + samples(i + 1).Uncertainty
-            sampling = dropLeft
-            If dropRight > sampling Then sampling = dropRight
-            If saveFields Then
-                Set limitFields = New Collection
-                Dim j As Long, fieldCount As Long
-                fieldCount = i
-                If keepRight Then fieldCount = index
-                For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
-                For j = 1 To fieldCount: limitFields.Add refined.Item(j): Next j
-                If Not mTrace Is Nothing Then
-                    Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
-                    For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).Lambda: Next j
-                End If
-                limitResultants = integrated.Item(fieldCount)
-                If keepRight Then
-                    left = samples(index - 1) ' Предшественник нужен при смене меры до принятия следующего шага.
-                    right = samples(index)
-                End If
+        point = samples(i): lower = point.Lambda - point.Uncertainty
+        If lower > samples(i - 1).Lambda + samples(i - 1).Uncertainty And _
+                lower > samples(i + 1).Lambda + samples(i + 1).Uncertainty Then
+            If lower <= left.Lambda + LoadResolution(point.Lambda) Or _
+                    lower <= samples(index).Lambda + samples(index).Uncertainty Then
+                If Not keepRight Then Exit Function
+            ElseIf peakIndex = 0 Then
+                peakIndex = i
+                If Not keepRight Then Exit For
+            ElseIf lower > samples(peakIndex).Lambda + samples(peakIndex).Uncertainty Then
+                peakIndex = i ' Больший максимум должен различаться с учётом невязки.
             End If
-            ReplayShoulders = True
-            Exit Function
         End If
     Next i
+    If peakIndex = 0 Then Exit Function
+
+    peak = samples(peakIndex)
+    Dim dropLeft As Double, dropRight As Double
+    dropLeft = peak.Lambda - samples(peakIndex - 1).Lambda + samples(peakIndex - 1).Uncertainty
+    dropRight = peak.Lambda - samples(peakIndex + 1).Lambda + samples(peakIndex + 1).Uncertainty
+    sampling = GeomMax(dropLeft, dropRight)
+    If saveFields Then
+        Set limitFields = New Collection
+        Dim j As Long, fieldCount As Long
+        fieldCount = peakIndex
+        If keepRight Then fieldCount = index
+        For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
+        retainedMaximum = peak.Lambda
+        For j = 1 To fieldCount
+            limitFields.Add refined.Item(j)
+            retainedMaximum = GeomMax(retainedMaximum, samples(j).Lambda)
+        Next j
+        If Not mTrace Is Nothing Then
+            Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
+            For j = 1 To fieldCount: mLimitTrace.Add 1#, samples(j).Lambda: Next j
+        End If
+        limitResultants = integrated.Item(fieldCount)
+        If keepRight Then
+            left = samples(index - 1) ' Пара сохранённых полей нужна для выбора меры после максимума.
+            right = samples(index)
+        End If
+    End If
+    ReplayShoulders = True
+
 End Function
 
 ' Уточняет первое пересечение по возрастающей деформационной координате.
