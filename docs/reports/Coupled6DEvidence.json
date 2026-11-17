@@ -167,7 +167,10 @@
     "MVT2NDMSignedWindow20261117": "F33926B1BC77BCD2E736DC39520CF66DCCA98CF630A51110D7C293FFE1861C25",
     "MVT2SquareTorsionGrid20261117": "4940EEBF2C1B0BB5C5133C8A0EDBABFF845F1655BD19F4E96A554569E082D8C4",
     "HardShearH9EquilibriumNative20261117": "A1D2C8D0D2FD7DEA397AF8846C024FE3961673AB59BA078D77AEF0475892912C",
-    "MVT2TorqueAdaptiveNative20261117": "FB9FD69DEA4E46AD564CD38F1BCD7E27240242D5B6C119538ACEDE6944ADD8CC"
+    "MVT2TorqueAdaptiveNative20261117": "FB9FD69DEA4E46AD564CD38F1BCD7E27240242D5B6C119538ACEDE6944ADD8CC",
+    "HardShearH9MaterialToleranceNative20261117": "B7FD9E930C7607C85E5A3BA153105C0FC01B50E8BE85C3241E9CFACEE1B9F4D3",
+    "MVT2GaussSpanNative20261117": "71DC4A17F7E648043DF52F423C8419E74A93B96944F9501D48102E04CFDC14C2",
+    "MVT2MixedAdaptiveNative20261117": "300ACEADD3033A627969BA1DBA7CB7EDC7FCD51632C4907CDA162758C8FDA990"
   },
   "cases": [
     {
@@ -1937,6 +1940,32 @@
         "Replayed20.json": "58DF345D0BE0561553772C3996417EA1DCDF2A103BF2E97B0414B0C477CFDE14"
       },
       "stdout_contains": "MVT2 ADAPTIVE TORSION PROOF PASS 6.8315"
+    },
+    {
+      "id": "hardshear-h9-six-pairs-tenfold-tighter-material-return",
+      "journal_section": 475,
+      "archive": "HardShearH9MaterialToleranceNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR H9 MATERIAL TOLERANCE PORTABLE VERIFIED 57745E4D9B7A562E856A97B3844DA0FA5989528F325D507AA76C2A02A048D1D9"
+    },
+    {
+      "id": "mvt2-full-span-gauss25-with-frozen-cut-cells",
+      "journal_section": 476,
+      "archive": "MVT2GaussSpanNative20261117",
+      "script": "Replay.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "PASS native closures, source bytes, independent six-resultant sums and analytical checks"
+    },
+    {
+      "id": "mvt2-refined100-mixed-fixed-torque-exact-signed-q15",
+      "journal_section": 477,
+      "archive": "MVT2MixedAdaptiveNative20261117",
+      "script": "Verify-MixedAdaptive.py",
+      "arguments": ["--root", "Casemixed", "--pure", "Case10/Verification.json", "--pure-wire", "Case10/Native/RightAdaptive10.csv", "--signed", "{evidence}/MVT2NDMSignedWindow20261117.zip", "--out", "ReplayedMixed.json"],
+      "outputs": {
+        "ReplayedMixed.json": "87BF509BAFF4C0EF463B7AD70A7CF79B62C31718770E81963D9124B7566A41B0"
+      },
+      "stdout_contains": "MVT2 REFINED MIXED PROOF PASS 18"
     }
   ],
   "frozen_repositories": {
