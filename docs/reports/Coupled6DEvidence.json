@@ -216,7 +216,9 @@
     "HardShearG13Step14vs15Metric20261117": "3F8C3FB8D6D4A83618AC7A2A6AAEA6220F08D41BB46F826B390A188087E95172",
     "HardShearBranchSelectionWorkbookNative20261117": "658C6B292AE5A3001E47E4F8BFFEC34CF522889A293B8BE46380CD6235B5C35A",
     "HardShearG13Arc31HalfNative20261117": "B0B056BB04E3E71879EB7538D3F48024CD3ED59BDE4DFED916B6A314BE71D53E",
-    "HardShearG13Arc31SteerNative20261117": "BFB46F391990F9A3D5A440C96B862D8E5BFC29B876EAB653A97B1BCE7DB7AA5A"
+    "HardShearG13Arc31SteerNative20261117": "BFB46F391990F9A3D5A440C96B862D8E5BFC29B876EAB653A97B1BCE7DB7AA5A",
+    "MVT2GaussASDNominalP7NaturalSwitch20261117": "0BF8235F231C8373331A5D1CD938DDA8DF4A18F7987C70D9AFAAE17DDCB09726",
+    "HardShearCoarseGrowthWorkbookNative20261117": "40B29680E2E73033519883545091BD201DC109430D405151D8EC5EBF97B99302"
   },
   "cases": [
     {
@@ -2362,6 +2364,22 @@
       "script": "Verify-Portable.py",
       "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip", "{evidence}/HardShearG13Arc31ResumeNative20261117.zip", "{evidence}/HardShearG13Arc31AutoNative20261117.zip"],
       "stdout_contains": "HARDSHEAR_ARC31_STEER_PORTABLE: VERIFIED_EVIDENCE; TRY15=REFUSED; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-h53-two-measured-directions-and-natural-p7-tension-switch",
+      "journal_section": 524,
+      "archive": "MVT2GaussASDNominalP7NaturalSwitch20261117",
+      "script": "Verify-P7Natural.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2_P7_NATURAL_SWITCH_OFFLINE_PASS 05FFBAF2120205604482010D92510669C30833C76DB6D09C5F133D9F27EF48B2"
+    },
+    {
+      "id": "hardshear-stock-workbook-descent-reach-at-fixed-probe-budget",
+      "journal_section": 525,
+      "archive": "HardShearCoarseGrowthWorkbookNative20261117",
+      "script": "Verify-GrowthPortable.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR COARSE GROWTH PORTABLE VERIFIED"
     }
   ],
   "frozen_repositories": {
