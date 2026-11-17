@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "710F69F51C84F8BAF9524C9C413B07171594465DA66732BBF88EBF46098538FF",
+  "manifest_sha256": "17F6E1DB1F823E14D052BE1B7AB006529A4614BFA12CFA8701690EE4D2ED4A73",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 259,
+  "passed": 260,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2121,6 +2121,15 @@
         "PV25NativeWitnessProof.json": "E701CE611E4800349F78B0DBD106B71501DC35A0BB0BD5867DDEF1A644EED840"
       },
       "verified_stdout": "PV25 NATIVE WITNESS OFFLINE PASS 361"
+    },
+    {
+      "id": "panel-jacobian-column-order-and-native-matrix-regression",
+      "journal_section": 568,
+      "archive": "PanelJacobianColumnFirst20261117",
+      "verified_outputs_sha256": {
+        "PanelJacobianProof.json": "E86C5C634B6D69FB955F84F68AE09256B486A557B4E1B33020EE0480249BD40E"
+      },
+      "verified_stdout": "PANEL JACOBIAN OFFLINE PASS 1740 19"
     }
   ]
 }
