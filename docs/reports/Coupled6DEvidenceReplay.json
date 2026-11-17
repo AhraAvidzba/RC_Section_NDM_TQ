@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "28FF28B39BB7C0463F9D737AD39AB802DC293E3E5DE98D846348581ABC996E8F",
+  "manifest_sha256": "31BBA76C919E1A0318A035EF3FDD4BDECA9D4A9EF0142CE2694592D01623F74A",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 261,
+  "passed": 262,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2139,6 +2139,15 @@
         "PanelFineProof.json": "4AC51F9072FFFE22B90EF973ED02D7953E99529603E8E003431950F9D62702A9"
       },
       "verified_stdout": "PANEL FINE AND CRACK TRACTION OFFLINE PASS 6960"
+    },
+    {
+      "id": "mvt2-native-concrete-on-three-strain-histories-with-reverse-substitution",
+      "journal_section": 570,
+      "archive": "MVT2ReverseConcreteMaterial20261117",
+      "verified_outputs_sha256": {
+        "ReverseMaterialProof.json": "11A0605B0DE1A838EC696F1ED307DF34071DDA546186EB79FC50825AD7DE88C3"
+      },
+      "verified_stdout": "MVT2 REVERSE MATERIAL OFFLINE PASS 11475"
     }
   ]
 }
