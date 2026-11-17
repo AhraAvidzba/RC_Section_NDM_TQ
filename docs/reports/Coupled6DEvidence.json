@@ -274,7 +274,8 @@
     "MVT2IntegratedSteelCorrection20261117": "20D400686306651D3605A60FEF7B81D4838BF3A368591264243F74434AFC88DC",
     "HardShearIntegratedSteelWorkbook20261117": "5E28B5A6CB9F49855708E91249A3370403A93461E325CDAEE41BB0520A63F9E1",
     "SteelCoreInstalledWorkbook20261117": "0297FC8AFBB0AD821372244446DA7A4724D11ECC254953A949A9328A6BF4D372",
-    "MVT2SecondBarControl20261117": "D6F9BF818204BC07A5CCF4EB6CF89A164CE2BC9FFBAB2E095407503CC1FFF14B"
+    "MVT2SecondBarControl20261117": "D6F9BF818204BC07A5CCF4EB6CF89A164CE2BC9FFBAB2E095407503CC1FFF14B",
+    "MVT2AfterSecondYield20261117": "F15579B9A829D363C8F22F3678CB4DB328868F801D752DA9D715A14EB2715645"
   },
   "cases": [
     {
@@ -3027,6 +3028,17 @@
       "stdout_contains": "MVT2 SECOND BAR CONTROL VERIFIED 150",
       "outputs": {
         "MVT2SecondBarProof.json": "231F566DAF1B39F931F8A9C4B6D4E67925330C642012CB3638B23C36C57CD8BD"
+      }
+    },
+    {
+      "id": "mvt2-central-strain-path-after-second-longitudinal-yield",
+      "journal_section": 582,
+      "archive": "MVT2AfterSecondYield20261117",
+      "script": "Verify-MVT2AfterSecondYield.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "MVT2AfterSecondYieldProof.json"],
+      "stdout_contains": "MVT2 AFTER SECOND YIELD VERIFIED 16 21",
+      "outputs": {
+        "MVT2AfterSecondYieldProof.json": "E1C032F3559874319691B8848B26033199340E167C23C6A35FF4607016B01419"
       }
     }
   ],

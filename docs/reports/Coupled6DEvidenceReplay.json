@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "E68A2EB6A95549268D6559E462530F60EB2DB2B8B87CD559C9979713005C0D24",
+  "manifest_sha256": "24FADEFA343DEBE6A7E6AB109DC9956312AA8CBAC8B9DBB624E807004C216C8D",
   "source_checkpoint": "826221bfde2fef1e690c65745c0169ef4a342161",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 273,
+  "passed": 274,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2247,6 +2247,15 @@
         "MVT2SecondBarProof.json": "231F566DAF1B39F931F8A9C4B6D4E67925330C642012CB3638B23C36C57CD8BD"
       },
       "verified_stdout": "MVT2 SECOND BAR CONTROL VERIFIED 150"
+    },
+    {
+      "id": "mvt2-central-strain-path-after-second-longitudinal-yield",
+      "journal_section": 582,
+      "archive": "MVT2AfterSecondYield20261117",
+      "verified_outputs_sha256": {
+        "MVT2AfterSecondYieldProof.json": "E1C032F3559874319691B8848B26033199340E167C23C6A35FF4607016B01419"
+      },
+      "verified_stdout": "MVT2 AFTER SECOND YIELD VERIFIED 16 21"
     }
   ]
 }
