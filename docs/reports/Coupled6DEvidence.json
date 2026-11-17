@@ -211,7 +211,9 @@
     "HardShearG13SerialArcAttempt14DirectionNative20261117": "6CA5C64823399B7385635AA50F31C132A221164C47DE8D8E96B42DBC23037318",
     "HardShearG13ArcAttempt14HoldP31Native20261117": "645D47A4E2792F0B60FF9E4998B9653FD7047CB719D9F5CFC844FDA58BFDA058",
     "MVT2GaussASDNominalP7KnotLevel20261117": "9C8DA4155BFC448FE6BAAF904A3D1DD1CAC28D6B9260ADA7D1E012F6F38B30C4",
-    "HardShearG13Arc31ResumeNative20261117": "819291EB230833351A6A9742D57B8FCC4473146176D5442BEDD7BB5557ED0978"
+    "HardShearG13Arc31ResumeNative20261117": "819291EB230833351A6A9742D57B8FCC4473146176D5442BEDD7BB5557ED0978",
+    "HardShearG13Arc31AutoNative20261117": "CBC7CB1E5D33FF2DC18FAC4A37BB109FFC7B18804D3BD4000A89173BEA8F77BC",
+    "HardShearG13Step14vs15Metric20261117": "3F8C3FB8D6D4A83618AC7A2A6AAEA6220F08D41BB46F826B390A188087E95172"
   },
   "cases": [
     {
@@ -2317,6 +2319,22 @@
       "script": "Verify-Portable.py",
       "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip", "{evidence}/HardShearG13ArcAttempt14HoldP31Native20261117.zip"],
       "stdout_contains": "HARDSHEAR_ARC31_RESUME_PORTABLE: VERIFIED_EVIDENCE; TRY14=ACCEPTED; TRY15=LOCALITY_OR_BALANCE; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-exact-automatic-concrete-station-and-recovered-serial-step",
+      "journal_section": 519,
+      "archive": "HardShearG13Arc31AutoNative20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip", "{evidence}/HardShearG13Arc31ResumeNative20261117.zip"],
+      "stdout_contains": "HARDSHEAR_ARC31_AUTO_PORTABLE: VERIFIED_EVIDENCE; TRY14=ACCEPTED; TRY15=LOCALITY_OR_BALANCE; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-step14-15-field-metric-and-cross-projection-displacement",
+      "journal_section": 520,
+      "archive": "HardShearG13Step14vs15Metric20261117",
+      "script": "Analyze-Step.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR_14_15_METRIC_OFFLINE_PASS 43E321CECB5EE9133F2B554A21ED23D69D56B453C2DC35DC6A67120BAAF7A486"
     }
   ],
   "frozen_repositories": {
