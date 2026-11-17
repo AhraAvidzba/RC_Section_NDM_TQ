@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "7CAA8620E8B411EC5CFB4A87F9AA55FFCA8020626F1E471A356FFA665A1B78CB",
+  "manifest_sha256": "4D1487DB58AAC946C8768AB52087E401CE49E44107E4B78FFA156011F752D9A7",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 174,
+  "passed": 178,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1458,6 +1458,34 @@
       "archive": "MVT2GaussSpatialOperatorsNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "MVT2 SPATIAL OPERATORS PORTABLE PASS D3B1A1EF41102F086A37F48288E861658BA71EEFAF592A8E6EC6598F68D10164"
+    },
+    {
+      "id": "mvt2-cold-reequilibrium-with-shared-ndm-operators-two-asd-laws",
+      "journal_section": 483,
+      "archive": "MVT2GaussReequilibratedASD20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD EQUILIBRIUM OFFLINE PASS 393EA5BED46723E5AA37544B6E8334D982ED15545D1E31F88D1A5716D506C463"
+    },
+    {
+      "id": "mvt2-asd-reference-length-tension-and-compression-isolated",
+      "journal_section": 484,
+      "archive": "MVT2ASDReferenceLength20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD REFERENCE LENGTH OFFLINE PASS 7BD88A4D31D9B0D51FB10426EF7D372E55C2B295FE7CFBFFC42800423AC93655"
+    },
+    {
+      "id": "hardshear-nested100-exact-prefix-and-secanted-controlled-extension",
+      "journal_section": 485,
+      "archive": "HardShearFineResumeNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_FINE_RESUME_PORTABLE: VERIFIED_EVIDENCE; PROBE_LIMIT; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-cold-asd-one-at-a-time-tensile-and-compressive-envelopes",
+      "journal_section": 486,
+      "archive": "MVT2GaussASDBranchFactorial20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD BRANCH FACTORIAL OFFLINE PASS 2EFB8356ADC6EB57D77CBEE2FF609DCD8F7CE4C0A2E9D3C63B393591111E3BC5"
     }
   ]
 }
