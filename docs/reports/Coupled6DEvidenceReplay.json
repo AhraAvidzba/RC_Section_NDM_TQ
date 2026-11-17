@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "5E91077B91C15A8F1D382B085B16C13DA17797952E16BC9276C034EDEBD56C08",
+  "manifest_sha256": "78DD401F95B1694CB63DC88DC51BBE5F1C1886E9ADD22BBE1CB8403C0CDF5BEC",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 266,
+  "passed": 267,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2184,6 +2184,15 @@
         "MVT2SteelTransitionProof.json": "33673460598A79C79738E79136B9019E278FA91894C8AE534354D9BA0088F061"
       },
       "verified_stdout": "MVT2 STEEL TRANSITION PASS 480"
+    },
+    {
+      "id": "mvt2-tabulated-active-steel-equilibrium-to-77-625-kn",
+      "journal_section": 575,
+      "archive": "MVT2TabulatedActiveSteel20261117",
+      "verified_outputs_sha256": {
+        "MVT2ContinuationProof.json": "1D2C026F8E2FF09B18C2C6F775083B1E23E02D116CFC5F0B55A89C7088B06780"
+      },
+      "verified_stdout": "MVT2 TABULATED CONTINUATION PASS 24"
     }
   ]
 }
