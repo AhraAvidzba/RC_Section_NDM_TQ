@@ -253,7 +253,8 @@
     "MVT2NativePublicationCutPostPeak20261117": "BF9D72D7D2DE15889534285A690753F3892F5E761F4591C5862F9D1BD8056525",
     "MVT2NativePublicationCutMaterialHistory20261117": "6920EB24A5D01585E510FDBC1064513C0C83AA62583AEB0C2553D6F0D495EE55",
     "MVT2NativePublicationCutLongPostPeak20261117": "26A208F294099A5B885AB99A5ED96A4ECAA45DE475E3D84A840AD92C4CCAC17E",
-    "MVT2NativePublicationCutDilationSweep20261117": "6D10C25C82A02D9C6A25BB568D08C84E3CA808B2D9CF96D9757D47E1928B6355"
+    "MVT2NativePublicationCutDilationSweep20261117": "6D10C25C82A02D9C6A25BB568D08C84E3CA808B2D9CF96D9757D47E1928B6355",
+    "MVT2NativePublicationCutDilation26Equilibrium20261117": "3ACA114CB255C978553604265B57040F2485317A88B6D08871F43D3FBABE1BD1"
   },
   "cases": [
     {
@@ -2775,6 +2776,17 @@
       "stdout_contains": "MVT2 DILATION SWEEP OFFLINE PASS 2200",
       "outputs": {
         "DilationSweepProof.json": "51D8243F082E09C0E3790F3AE0647A042CB653A9767102D147497E01CA25D423"
+      }
+    },
+    {
+      "id": "mvt2-native-equilibrium-at-26-degree-maximum-dilation",
+      "journal_section": 561,
+      "archive": "MVT2NativePublicationCutDilation26Equilibrium20261117",
+      "script": "Verify-DilationEquilibrium.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "DilationEquilibriumProof.json"],
+      "stdout_contains": "MVT2 DILATION EQUILIBRIUM OFFLINE PASS 11",
+      "outputs": {
+        "DilationEquilibriumProof.json": "19212721E4319B5AA8979FEEF884334B7671EC714D390C86B9BF18CFA77B0602"
       }
     }
   ],
