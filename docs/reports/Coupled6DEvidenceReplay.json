@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "070D4C25C3B775D78997616E5A7452B7F21229584BBE3892A1555CF9F517C322",
+  "manifest_sha256": "DA293B0E3CBB3214114C15695D80CC80A14A26E6B9BFC05ADE25D0967F983CC3",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 268,
+  "passed": 269,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2202,6 +2202,15 @@
         "ActiveSteelWitnessProof.json": "F50000E486042FB1257D1A20787568280E38E917743EC4605CECDD12EB44FFC5"
       },
       "verified_stdout": "MVT2 ACTIVE STEEL VBA WITNESS PASS 7 5"
+    },
+    {
+      "id": "mvt2-native-cold-hybrid-steel-branch-correction-to-77-625-kn",
+      "journal_section": 577,
+      "archive": "MVT2NativeSteelBranches20261117",
+      "verified_outputs_sha256": {
+        "NativeSteelBranchesProof.json": "101E3CEB002659BECEDFD17919ECBA8F88C0FB854E2A381F483E38FF79E9F57E"
+      },
+      "verified_stdout": "MVT2 NATIVE STEEL BRANCHES PASS 5 72812.5 72812.5 77625.0 75312.5 77625.0"
     }
   ]
 }
