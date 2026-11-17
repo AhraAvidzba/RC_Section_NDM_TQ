@@ -8,11 +8,24 @@
   "runtime_reported_version": "3.8.0",
   "python_package": "openseespywin 3.8.0.0",
   "native_module_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
-  "source_behavior_probe": {
+  "superseded_incomplete_prediction_probe_section_591": {
     "states": 24,
     "separate_spectral_update_error_MPa": 4.440892098500626e-15,
     "additional_compressive_mixing_prediction_error_MPa": 1.6941534367378805,
-    "whole_compute_source_correspondence_established": false
+    "whole_compute_source_correspondence_established": false,
+    "correction": "Дополнительный прогноз не учитывал R, который равен нулю при cdf=0. Расхождение не доказывает различия сборки и исходника."
   },
-  "limitation": "Совпадение поведения всего compute сохранённого исходника и двоичного модуля не установлено. Причина различия на уровне реализации или сборки открыта. Сопоставления фиксируют фактический ответ указанного нативного модуля; номер версии не заменяет его хеш."
+  "source_header": {
+    "source_url": "https://github.com/OpenSees/OpenSees/blob/6e55293513192aa05c7e1205e66a5a1a1ed088c4/SRC/material/nD/ASDConcrete3DMaterial.h",
+    "git_blob": "06e9ef4e828af69806705f847e9983d176d56288",
+    "sha256": "C8296D6BD4A4CCCC4CE0748ABB0B9A0FB8709C15A2961C54ECB3DF41F2951DD7"
+  },
+  "corrected_source_behavior_probe_section_592": {
+    "native_updates": 96,
+    "cdf_cases": ["default", 0, 1, 10],
+    "default_R": 0,
+    "maximum_stress_error_MPa": 4.440892098500626e-15,
+    "configured_source_mode_correspondence_established": true
+  },
+  "limitation": "Проверены выбранные истории неявного невязкого режима без фиксированных плоскостей трещин, включая cdf=0,1,10. Полная идентичность всех ветвей исходника и двоичной реализации не заявляется; номер версии не заменяет хеш загруженного модуля."
 }

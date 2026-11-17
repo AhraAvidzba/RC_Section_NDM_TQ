@@ -284,7 +284,8 @@
     "MVT2TorqueRecoveryAndFieldTangent20261117": "96CD6F7A847AC8937657E12D9E719EF59ABE72108FB999144C7F0255282ABBDF",
     "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028",
     "KrylovFallbackNative20261117": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633",
-    "ASDMaterialHistoryClosure20261117": "EEE550619B11A852744B8194608249FC654F9B3133789CB2115D360BBAF6251E"
+    "ASDMaterialHistoryClosure20261117": "EEE550619B11A852744B8194608249FC654F9B3133789CB2115D360BBAF6251E",
+    "ASDSpectralTangentAndCrossDamage20261118": "F1F9C9D65C4B33A03FD6A53DEB5B5BA0637FA1235069AE09FE15B99720ACEF66"
   },
   "cases": [
     {
@@ -3161,6 +3162,24 @@
       "stdout_contains": "ASD MATERIAL HISTORY AND NATIVE VBA VERIFIED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "MaterialIntegrationChecks.json": "5EF34DA63173E25C79235F69ECCF9D7ADAA162EAFB7DF452255FB8427909A354"
+      }
+    },
+    {
+      "id": "asd-spectral-tangent-controls-and-corrected-cross-damage",
+      "journal_section": 592,
+      "archive": "ASDSpectralTangentAndCrossDamage20261118",
+      "script": "Verify-TestASDSpectralEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "SpectralChecks.json"
+      ],
+      "stdout_contains": "ASD SPECTRAL TANGENTS AND CORRECTED CROSS DAMAGE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "SpectralChecks.json": "F4E2FC1DC9219952C176174C4A897A90DCB2F250625983E888D27259579CAD18"
       }
     }
   ],
