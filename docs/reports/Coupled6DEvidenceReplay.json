@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "F279747B9DADFFCAD6903F34A28B96AF896822D1E9479344D0C9E7A2ED9CD276",
+  "manifest_sha256": "16FB9C16B71AF476E072B17D42BC7C5FF243D7AA483F18B4E920D71B6B935EA5",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 251,
+  "passed": 252,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2049,6 +2049,15 @@
         "LongPostPeakProof.json": "2E7B546C840BE897E483275F48B4FE2B81B859EC3BF011DFD21C190C28834D1F"
       },
       "verified_stdout": "MVT2 LONG POST PEAK OFFLINE PASS 13"
+    },
+    {
+      "id": "mvt2-native-dilation-range-at-prescribed-strain-history",
+      "journal_section": 560,
+      "archive": "MVT2NativePublicationCutDilationSweep20261117",
+      "verified_outputs_sha256": {
+        "DilationSweepProof.json": "51D8243F082E09C0E3790F3AE0647A042CB653A9767102D147497E01CA25D423"
+      },
+      "verified_stdout": "MVT2 DILATION SWEEP OFFLINE PASS 2200"
     }
   ]
 }

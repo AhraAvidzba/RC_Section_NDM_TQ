@@ -252,7 +252,8 @@
     "MVT2Cut396MaterialPredictor20261117": "9371CDC9B169CEDDE05776280399C2676F776033DC12F01F0F7C572C1031EF55",
     "MVT2NativePublicationCutPostPeak20261117": "BF9D72D7D2DE15889534285A690753F3892F5E761F4591C5862F9D1BD8056525",
     "MVT2NativePublicationCutMaterialHistory20261117": "6920EB24A5D01585E510FDBC1064513C0C83AA62583AEB0C2553D6F0D495EE55",
-    "MVT2NativePublicationCutLongPostPeak20261117": "26A208F294099A5B885AB99A5ED96A4ECAA45DE475E3D84A840AD92C4CCAC17E"
+    "MVT2NativePublicationCutLongPostPeak20261117": "26A208F294099A5B885AB99A5ED96A4ECAA45DE475E3D84A840AD92C4CCAC17E",
+    "MVT2NativePublicationCutDilationSweep20261117": "6D10C25C82A02D9C6A25BB568D08C84E3CA808B2D9CF96D9757D47E1928B6355"
   },
   "cases": [
     {
@@ -2763,6 +2764,17 @@
       "stdout_contains": "MVT2 LONG POST PEAK OFFLINE PASS 13",
       "outputs": {
         "LongPostPeakProof.json": "2E7B546C840BE897E483275F48B4FE2B81B859EC3BF011DFD21C190C28834D1F"
+      }
+    },
+    {
+      "id": "mvt2-native-dilation-range-at-prescribed-strain-history",
+      "journal_section": 560,
+      "archive": "MVT2NativePublicationCutDilationSweep20261117",
+      "script": "Verify-DilationSweep.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "DilationSweepProof.json"],
+      "stdout_contains": "MVT2 DILATION SWEEP OFFLINE PASS 2200",
+      "outputs": {
+        "DilationSweepProof.json": "51D8243F082E09C0E3790F3AE0647A042CB653A9767102D147497E01CA25D423"
       }
     }
   ],
