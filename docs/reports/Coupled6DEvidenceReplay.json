@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "17F6E1DB1F823E14D052BE1B7AB006529A4614BFA12CFA8701690EE4D2ED4A73",
+  "manifest_sha256": "28FF28B39BB7C0463F9D737AD39AB802DC293E3E5DE98D846348581ABC996E8F",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 260,
+  "passed": 261,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2130,6 +2130,15 @@
         "PanelJacobianProof.json": "E86C5C634B6D69FB955F84F68AE09256B486A557B4E1B33020EE0480249BD40E"
       },
       "verified_stdout": "PANEL JACOBIAN OFFLINE PASS 1740 19"
+    },
+    {
+      "id": "panel-fine-shear-step-and-open-crack-normal-balance",
+      "journal_section": 569,
+      "archive": "PanelFineCrackNormal20261117",
+      "verified_outputs_sha256": {
+        "PanelFineProof.json": "4AC51F9072FFFE22B90EF973ED02D7953E99529603E8E003431950F9D62702A9"
+      },
+      "verified_stdout": "PANEL FINE AND CRACK TRACTION OFFLINE PASS 6960"
     }
   ]
 }

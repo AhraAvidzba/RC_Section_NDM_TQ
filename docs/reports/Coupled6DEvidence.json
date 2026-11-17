@@ -261,7 +261,8 @@
     "MixedPanelDilationWeights20261117": "9287C5B83CB3EDF71E91C715229DA1B25A9BC9A1E7D283BD82D9A7FB48514335",
     "PV25NormalChartAndPlaneStress20261117": "832C238395CDBC687230495F10D1FED61480AC62874BC70DB3ABAA7155B20B73",
     "PV25PlaneStressNativeWitness20261117": "A408438465B962629ACE0A6C79AE647DB8B30532C72D6DB493A96AE0BE3FB170",
-    "PanelJacobianColumnFirst20261117": "C24E80C272560006B8E117CC7AF1855E40093B36A1388995478106DE40B69627"
+    "PanelJacobianColumnFirst20261117": "C24E80C272560006B8E117CC7AF1855E40093B36A1388995478106DE40B69627",
+    "PanelFineCrackNormal20261117": "954C0B70FF88387229084BF7C284605CDB647AB629AFD9F7E601AA09727AB89E"
   },
   "cases": [
     {
@@ -2871,6 +2872,17 @@
       "stdout_contains": "PANEL JACOBIAN OFFLINE PASS 1740 19",
       "outputs": {
         "PanelJacobianProof.json": "E86C5C634B6D69FB955F84F68AE09256B486A557B4E1B33020EE0480249BD40E"
+      }
+    },
+    {
+      "id": "panel-fine-shear-step-and-open-crack-normal-balance",
+      "journal_section": 569,
+      "archive": "PanelFineCrackNormal20261117",
+      "script": "Verify-PanelFine.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "PanelFineProof.json"],
+      "stdout_contains": "PANEL FINE AND CRACK TRACTION OFFLINE PASS 6960",
+      "outputs": {
+        "PanelFineProof.json": "4AC51F9072FFFE22B90EF973ED02D7953E99529603E8E003431950F9D62702A9"
       }
     }
   ],
