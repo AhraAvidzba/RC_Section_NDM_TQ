@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "31CA66CE81F9E2CC7F01B050DA223762288F65EBF23809FE9E5222F2F39A35A2",
+  "manifest_sha256": "AF34FB9F5A82D77102C024BCD0634D40434D066FF880D229E295B287F4423C1A",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 226,
+  "passed": 228,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1824,6 +1824,24 @@
         "ASDDesignPathsProof.json": "653B9B5E4876D222939E9D37B12B539B6B5F307F22046F10CFFE942B98C08562"
       },
       "verified_stdout": "HARDSHEAR ASD DESIGN PATHS OFFLINE PASS 99709284964C237DD4F1B7C03C49199691B47054D2E011B0F1B8228E62950360"
+    },
+    {
+      "id": "hardshear-asd-repeated-strain-constitutive-update-reconstruction",
+      "journal_section": 535,
+      "archive": "HardShearSameSectionASDDrift20261117",
+      "verified_outputs_sha256": {
+        "ASDDriftReconstruction.json": "CD7989549E327FEE676FBE36F929D4F1D2FD7E7E953F47569C509AA100706233"
+      },
+      "verified_stdout": "HARDSHEAR ASD DRIFT RECONSTRUCTION PASS"
+    },
+    {
+      "id": "hardshear-installed-file-native-and-indexed-snapshot",
+      "journal_section": 536,
+      "archive": "HardShearInstalledFileSnapshot20261117",
+      "verified_outputs_sha256": {
+        "FileSnapshotProof.json": "BBE0168BDF95CFC0653F5BA2E180D4C03A72D58FBA022B110085847C2A0E3D8E"
+      },
+      "verified_stdout": "HARDSHEAR INSTALLED FILE SNAPSHOT OFFLINE PASS"
     }
   ]
 }

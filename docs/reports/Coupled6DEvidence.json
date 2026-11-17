@@ -227,7 +227,9 @@
     "HardShearSameSectionASDOnePoint20261117": "10C445A3A22C7C6A4AF87E4FD181FA4708BA3191379E39F78746AC9CC387E87B",
     "HardShearLateSteelDiagnosticNative20261117": "4AB502FC1CA801C30AD5A0C31A618768C7A43D9CED9C95304F334AB4F9D62CF9",
     "HardShearCoarseGrowthWorkbookRelease20261117": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63",
-    "HardShearSameSectionASDDesignPaths20261117": "3197E52A738FC93C69488146D0C5A5DCCD84094366D7733717E2471645E2D5B0"
+    "HardShearSameSectionASDDesignPaths20261117": "3197E52A738FC93C69488146D0C5A5DCCD84094366D7733717E2471645E2D5B0",
+    "HardShearSameSectionASDDrift20261117": "73B757C82B3AF3043A8FDE8B2D45E4C6787A02B891395B8CEEECC590A1B2C716",
+    "HardShearInstalledFileSnapshot20261117": "B3A21A61EFB84850779510F72D273457251EDA2E8709F147422BC9A243A6DDC8"
   },
   "cases": [
     {
@@ -2463,6 +2465,28 @@
       "stdout_contains": "HARDSHEAR ASD DESIGN PATHS OFFLINE PASS 99709284964C237DD4F1B7C03C49199691B47054D2E011B0F1B8228E62950360",
       "outputs": {
         "ASDDesignPathsProof.json": "653B9B5E4876D222939E9D37B12B539B6B5F307F22046F10CFFE942B98C08562"
+      }
+    },
+    {
+      "id": "hardshear-asd-repeated-strain-constitutive-update-reconstruction",
+      "journal_section": 535,
+      "archive": "HardShearSameSectionASDDrift20261117",
+      "script": "Explain-ASDRepeat.py",
+      "arguments": ["--repo", "{repo}", "--tables", "ASDExactTables.json", "--report", "ASDDriftReconstruction.json"],
+      "stdout_contains": "HARDSHEAR ASD DRIFT RECONSTRUCTION PASS",
+      "outputs": {
+        "ASDDriftReconstruction.json": "CD7989549E327FEE676FBE36F929D4F1D2FD7E7E953F47569C509AA100706233"
+      }
+    },
+    {
+      "id": "hardshear-installed-file-native-and-indexed-snapshot",
+      "journal_section": 536,
+      "archive": "HardShearInstalledFileSnapshot20261117",
+      "script": "Verify-FileSnapshot.py",
+      "arguments": ["--repo", "{repo}", "--report", "FileSnapshotProof.json"],
+      "stdout_contains": "HARDSHEAR INSTALLED FILE SNAPSHOT OFFLINE PASS",
+      "outputs": {
+        "FileSnapshotProof.json": "BBE0168BDF95CFC0653F5BA2E180D4C03A72D58FBA022B110085847C2A0E3D8E"
       }
     }
   ],
