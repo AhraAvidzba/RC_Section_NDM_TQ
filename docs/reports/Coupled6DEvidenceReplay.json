@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "78DD401F95B1694CB63DC88DC51BBE5F1C1886E9ADD22BBE1CB8403C0CDF5BEC",
+  "manifest_sha256": "070D4C25C3B775D78997616E5A7452B7F21229584BBE3892A1555CF9F517C322",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 267,
+  "passed": 268,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2193,6 +2193,15 @@
         "MVT2ContinuationProof.json": "1D2C026F8E2FF09B18C2C6F775083B1E23E02D116CFC5F0B55A89C7088B06780"
       },
       "verified_stdout": "MVT2 TABULATED CONTINUATION PASS 24"
+    },
+    {
+      "id": "mvt2-native-accepted-witness-at-77-625-kn-and-five-control-probes",
+      "journal_section": 576,
+      "archive": "MVT2TabulatedActiveSteelVBA20261117",
+      "verified_outputs_sha256": {
+        "ActiveSteelWitnessProof.json": "F50000E486042FB1257D1A20787568280E38E917743EC4605CECDD12EB44FFC5"
+      },
+      "verified_stdout": "MVT2 ACTIVE STEEL VBA WITNESS PASS 7 5"
     }
   ]
 }

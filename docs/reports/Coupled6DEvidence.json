@@ -268,7 +268,8 @@
     "MVT2EffectivePlasticFlow20261117": "42D0340DACD7FE6E3A9BE3592DD6464219A6F58832F43061EC59999553E12220",
     "MVT2TabulatedFlowNative20261117": "0DDB248B0B2F61AF814F1E70EAE55CABE46CC07C261E8E8043A8D8A960850F49",
     "MVT2SteelTransition20261117": "089F916E0CDF42C5E72669E5CB34F4C5FF3936130D647CFDEE319812D3D821F3",
-    "MVT2TabulatedActiveSteel20261117": "12AC8259874E45568C5B04BB110F4C17D18FDEBD617532A30DE34C262B999792"
+    "MVT2TabulatedActiveSteel20261117": "12AC8259874E45568C5B04BB110F4C17D18FDEBD617532A30DE34C262B999792",
+    "MVT2TabulatedActiveSteelVBA20261117": "87CECC42511E773F37611E4749AFD4947C299F5853893715F284FA9F498789FB"
   },
   "cases": [
     {
@@ -2955,6 +2956,17 @@
       "stdout_contains": "MVT2 TABULATED CONTINUATION PASS 24",
       "outputs": {
         "MVT2ContinuationProof.json": "1D2C026F8E2FF09B18C2C6F775083B1E23E02D116CFC5F0B55A89C7088B06780"
+      }
+    },
+    {
+      "id": "mvt2-native-accepted-witness-at-77-625-kn-and-five-control-probes",
+      "journal_section": 576,
+      "archive": "MVT2TabulatedActiveSteelVBA20261117",
+      "script": "Verify-ActiveSteelWitness.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "ActiveSteelWitnessProof.json"],
+      "stdout_contains": "MVT2 ACTIVE STEEL VBA WITNESS PASS 7 5",
+      "outputs": {
+        "ActiveSteelWitnessProof.json": "F50000E486042FB1257D1A20787568280E38E917743EC4605CECDD12EB44FFC5"
       }
     }
   ],
