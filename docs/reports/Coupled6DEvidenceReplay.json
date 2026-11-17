@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "BC12E3E65D6B5709ACDE213C72EFCE64FD963193424C137949968AC171B0F16C",
+  "manifest_sha256": "68D9B09E8B1380B74598564696040033F93BB86B70CAC333EA432B10C5EB299F",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 264,
+  "passed": 265,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2166,6 +2166,15 @@
         "MVT2EffectiveBundleProof.json": "FBCAD61F24F1C399BFBFD17DB03347CB0743CCF3EC7FED9C6A7A5C2BA6B2C4E6"
       },
       "verified_stdout": "MVT2 FULL EFFECTIVE FLOW OFFLINE PASS 7650"
+    },
+    {
+      "id": "mvt2-tabulated-plastic-flow-vba-replay-and-two-native-equilibrium-paths",
+      "journal_section": 573,
+      "archive": "MVT2TabulatedFlowNative20261117",
+      "verified_outputs_sha256": {
+        "TabulatedFlowNativeProof.json": "8A92574149B4B5363BAE51948075AC70547446223BE2CCB905EFDF2444AC820A"
+      },
+      "verified_stdout": "MVT2 TABULATED VBA OFFLINE PASS 7650 31 32"
     }
   ]
 }
