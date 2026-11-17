@@ -195,7 +195,11 @@
     "HardShearG14CrossedRestartNative20261117": "256147D18D3652204ACCC0B76AAA362E6E06E5DDC3B80AA413E16D24FCE5B082",
     "HardShearG14SubfloorNative20261117": "066E50516DD8267F96387437E50986156D45B73D788909DD1FF756110B1F523C",
     "MVT2GaussASDNominalVectorBundle20261117": "24464DB3DCC38635B06DF165D5CB79C31DEF76BF2B50240795FAD8C5D18CCC6B",
-    "HardShearG14MaterialCoordinateNative20261117": "D9AA3D7A7A01DA49F7FE23C7EF7D3304BF8C407510DD978FA4449D8E7C5B8A8F"
+    "HardShearG14MaterialCoordinateNative20261117": "D9AA3D7A7A01DA49F7FE23C7EF7D3304BF8C407510DD978FA4449D8E7C5B8A8F",
+    "HardShearG14MaterialOrientation20261117": "742B4B6392E2D4FCCF68833300D31F601D4BCB1C9A7DFFC76E1F14544B8ECBF0",
+    "HardShearG13PhysicalArcNative20261117": "5767488D18B48372CE68AC539B06C4E8368A50E009F226622E02E9F2DA74355D",
+    "MVT2GaussASDNominalStationEvents20261117": "995411807958875B23F169688738FEE6E4EBDEDAF8EAE63789A1EE2BA7AF899A",
+    "HardShearG13SerialArcNative20261117": "9BBFF5A2536A5C82E87C78999131E85A9A3618904B23879E479B1F1BF4DC824B"
   },
   "cases": [
     {
@@ -2181,6 +2185,35 @@
       "archive": "HardShearG14MaterialCoordinateNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_G14_MATERIAL_COORDINATE_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-g13-independent-orientation-of-material-event-equilibria",
+      "journal_section": 503,
+      "archive": "HardShearG14MaterialOrientation20261117",
+      "script": "Verify.py",
+      "stdout_contains": "HARDSHEAR_G14_EVENT_ORIENTATION: VERIFIED_EVIDENCE; backward_strain_projection=True; signed_lambda_unresolved=True"
+    },
+    {
+      "id": "hardshear-g13-native-forward-mechanical-and-augmented-arc-planes",
+      "journal_section": 504,
+      "archive": "HardShearG13PhysicalArcNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G13_PHYSICAL_ARC_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-asd-signed-station-event-localization-from-frozen-h53",
+      "journal_section": 505,
+      "archive": "MVT2GaussASDNominalStationEvents20261117",
+      "script": "Verify-Stations.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 EXACT ASD MATERIAL EVENT OFFLINE PASS 4E2615C9D2C09AC6A5896D011045DC865C1ADF0C74C7978CB0069E7A6A229950 22"
+    },
+    {
+      "id": "hardshear-g13-native-serial-physical-secant-continuation-eight-equilibrium-commits-and-exact-rollback",
+      "journal_section": 506,
+      "archive": "HardShearG13SerialArcNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G13_SERIAL_ARC_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
