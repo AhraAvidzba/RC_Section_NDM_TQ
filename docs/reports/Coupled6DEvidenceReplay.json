@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "DA49B345E43E0A44EF97BEA2B24A14D058C8728BBD9D87FF3A0C36CAC0C5F011",
+  "manifest_sha256": "A510ED2BEAFFC076A8BFBA249F8E8805178503EADAA32126989F4794C39F0E89",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 244,
+  "passed": 245,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1986,6 +1986,15 @@
         "Cut396PrincipalJacobiProof.json": "77054D7D70851F10F0E0EF4BB3BB2A4B5DF2A2197FB30A7759D8A9061E0D0D9F"
       },
       "verified_stdout": "MVT2 CUT396 PRINCIPAL SIGN OFFLINE PASS 3"
+    },
+    {
+      "id": "mvt2-concrete-principal-magnitude-and-axis-attribution",
+      "journal_section": 553,
+      "archive": "MVT2Cut396SpectralAttribution20261117",
+      "verified_outputs_sha256": {
+        "Cut396SpectralProof.json": "6B2FAD7882E6D47129F4E62D03612B9D47FC865A176266F36713BC2F8F8EE130"
+      },
+      "verified_stdout": "MVT2 CUT396 SPECTRAL SUBSTITUTION OFFLINE PASS 2"
     }
   ]
 }
