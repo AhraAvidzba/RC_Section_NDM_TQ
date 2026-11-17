@@ -251,7 +251,8 @@
     "MVT2NativePublicationCutSequentialTwist20261117": "5958DB1E43D9FDFD6129A0CAA1DFDBD777A9EC67D74DBDE46E22E9E5C402E8ED",
     "MVT2Cut396MaterialPredictor20261117": "9371CDC9B169CEDDE05776280399C2676F776033DC12F01F0F7C572C1031EF55",
     "MVT2NativePublicationCutPostPeak20261117": "BF9D72D7D2DE15889534285A690753F3892F5E761F4591C5862F9D1BD8056525",
-    "MVT2NativePublicationCutMaterialHistory20261117": "6920EB24A5D01585E510FDBC1064513C0C83AA62583AEB0C2553D6F0D495EE55"
+    "MVT2NativePublicationCutMaterialHistory20261117": "6920EB24A5D01585E510FDBC1064513C0C83AA62583AEB0C2553D6F0D495EE55",
+    "MVT2NativePublicationCutLongPostPeak20261117": "26A208F294099A5B885AB99A5ED96A4ECAA45DE475E3D84A840AD92C4CCAC17E"
   },
   "cases": [
     {
@@ -2751,6 +2752,17 @@
       "stdout_contains": "MVT2 NATIVE MATERIAL HISTORY OFFLINE PASS 18",
       "outputs": {
         "NDMMaterialHistoryProof.json": "6A6E6FD0DCF1298991397AAC1360D56AB58FFDC3950FBDC3AA3581728A15C147"
+      }
+    },
+    {
+      "id": "mvt2-native-continuation-above-first-post-peak-valley",
+      "journal_section": 559,
+      "archive": "MVT2NativePublicationCutLongPostPeak20261117",
+      "script": "Verify-LongPostPeak.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "LongPostPeakProof.json"],
+      "stdout_contains": "MVT2 LONG POST PEAK OFFLINE PASS 13",
+      "outputs": {
+        "LongPostPeakProof.json": "2E7B546C840BE897E483275F48B4FE2B81B859EC3BF011DFD21C190C28834D1F"
       }
     }
   ],

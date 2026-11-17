@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "6B90CFEDBBF2C2C72CB67C175ABE00AA179CDC032E9EDC0DE2C9F454B670A9FB",
+  "manifest_sha256": "F279747B9DADFFCAD6903F34A28B96AF896822D1E9479344D0C9E7A2ED9CD276",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 250,
+  "passed": 251,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2040,6 +2040,15 @@
         "NDMMaterialHistoryProof.json": "6A6E6FD0DCF1298991397AAC1360D56AB58FFDC3950FBDC3AA3581728A15C147"
       },
       "verified_stdout": "MVT2 NATIVE MATERIAL HISTORY OFFLINE PASS 18"
+    },
+    {
+      "id": "mvt2-native-continuation-above-first-post-peak-valley",
+      "journal_section": 559,
+      "archive": "MVT2NativePublicationCutLongPostPeak20261117",
+      "verified_outputs_sha256": {
+        "LongPostPeakProof.json": "2E7B546C840BE897E483275F48B4FE2B81B859EC3BF011DFD21C190C28834D1F"
+      },
+      "verified_stdout": "MVT2 LONG POST PEAK OFFLINE PASS 13"
     }
   ]
 }
