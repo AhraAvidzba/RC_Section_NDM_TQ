@@ -229,7 +229,8 @@
     "HardShearCoarseGrowthWorkbookRelease20261117": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63",
     "HardShearSameSectionASDDesignPaths20261117": "3197E52A738FC93C69488146D0C5A5DCCD84094366D7733717E2471645E2D5B0",
     "HardShearSameSectionASDDrift20261117": "73B757C82B3AF3043A8FDE8B2D45E4C6787A02B891395B8CEEECC590A1B2C716",
-    "HardShearInstalledFileSnapshot20261117": "B3A21A61EFB84850779510F72D273457251EDA2E8709F147422BC9A243A6DDC8"
+    "HardShearInstalledFileSnapshot20261117": "B3A21A61EFB84850779510F72D273457251EDA2E8709F147422BC9A243A6DDC8",
+    "A2FigureFaceOrientation20261117": "D21688FC5FF2FD5E954F2DC775F14C801D028C007DB8DA1BB436ADA116B14AA0"
   },
   "cases": [
     {
@@ -2487,6 +2488,17 @@
       "stdout_contains": "HARDSHEAR INSTALLED FILE SNAPSHOT OFFLINE PASS",
       "outputs": {
         "FileSnapshotProof.json": "BBE0168BDF95CFC0653F5BA2E180D4C03A72D58FBA022B110085847C2A0E3D8E"
+      }
+    },
+    {
+      "id": "a2-crack-map-and-archived-surface-kinematics",
+      "journal_section": 537,
+      "archive": "A2FigureFaceOrientation20261117",
+      "script": "Verify-A2FaceComparison.py",
+      "arguments": ["--repo", "{repo}", "--report", "A2FaceComparison.json"],
+      "stdout_contains": "A2 FACE CRACK DIRECTION CONTROL OFFLINE PASS",
+      "outputs": {
+        "A2FaceComparison.json": "8190713B2723F711D5DE06B44C2F3B0C45182602E6CAC7F371AFA804D894A16B"
       }
     }
   ],
