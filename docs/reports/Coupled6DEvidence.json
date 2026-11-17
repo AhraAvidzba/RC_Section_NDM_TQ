@@ -279,7 +279,8 @@
     "MVT2NativeBarControl20261117": "6AF0A50074FD1179DD3430C435E8FD2F05F13BDF318F27776954B7E3B119C30A",
     "MVT2NativeBarRefinement20261117": "C5FC470CF8C66A097572636D7F0F36FDF5F5289A2CA4AC913FFE992E3219C07A",
     "MVT2NativeBarOpenSeesReplay20261117": "3FC1E30F23F2410CCF8C3C716D5B8554E385BB59F21DC14DE69CE53DD9301DFE",
-    "MVT2NdmCurveConsistency20261117": "CE2DD6CE11F0C30BCAF46F3F14ABF35E25295B38762A4DBEDD90B0075DF85034"
+    "MVT2NdmCurveConsistency20261117": "CE2DD6CE11F0C30BCAF46F3F14ABF35E25295B38762A4DBEDD90B0075DF85034",
+    "MVT2ExplicitASDCalibration20261117": "052DFAE3AFB8552D77434F0947C67D26375B4DBA6C1085E4D06271A7ED820EC5"
   },
   "cases": [
     {
@@ -3087,6 +3088,17 @@
       "stdout_contains": "NDM CURVE NULL INCREMENT VERIFIED 1350",
       "outputs": {
         "NdmCurveNullChecks.json": "62521AE55347EAD13249C915060FBDE9AD40B8E74DB28C3B5C30E422474C519A"
+      }
+    },
+    {
+      "id": "mvt2-explicit-asd-energy-calibration-and-independent-numerical-witnesses",
+      "journal_section": 587,
+      "archive": "MVT2ExplicitASDCalibration20261117",
+      "script": "Verify-TestASDCalibration.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--wire", "ExplicitEnergyOpenSees.json.gz", "--out", "ExplicitEnergyChecks.json"],
+      "stdout_contains": "EXPLICIT ASD CALIBRATION VERIFIED 1350",
+      "outputs": {
+        "ExplicitEnergyChecks.json": "0EA2BB5D95CBFF55353358E9DC4F7B69B3349435447DE723E2BD8F53861CD3FC"
       }
     }
   ],
