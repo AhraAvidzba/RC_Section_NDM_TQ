@@ -233,7 +233,10 @@
     "A2FigureFaceOrientation20261117": "D21688FC5FF2FD5E954F2DC775F14C801D028C007DB8DA1BB436ADA116B14AA0",
     "InstalledExplicitTorqueEvidence20261117": "A35CD010E5D833D4877E5D75B9B13409484F2BFE54ABA6BD996AF7CAB24B5235",
     "A2LocalCrackTraction20261117": "E1563D7CFA7760BCAC24EFC5CA589FD4E7D0444D6CA5A74368F0940A44F68546",
-    "MVT2LocalTraction20261117": "452C888BDE17C478A212A18E48035B3AA5FA247EC0F0A102665547C79F5DEBCF"
+    "MVT2LocalTraction20261117": "452C888BDE17C478A212A18E48035B3AA5FA247EC0F0A102665547C79F5DEBCF",
+    "InstalledExplicitShearPaths20261117": "1B3A59DF0532E5D20AF84D02EB106B7F9D3F5EA039FCFC3DCCDDA8B1D6F7EFB3",
+    "MVT2PublicationCut20261117": "6835F02B3D2ED944823DA808E3CC3BC24CCFBF87CDE9D615AB283954B46E8DAD",
+    "HardShearSameSectionASDSmallForceSteps20261117": "1D5F5D72A72E4DA4855E150525761D710BDFEAD84A2C29CF265C4A9EFD27C8B9"
   },
   "cases": [
     {
@@ -2535,6 +2538,39 @@
       "stdout_contains": "MVT2 LOCAL TRACTION OFFLINE PASS",
       "outputs": {
         "MVT2LocalTractionProof.json": "8156DCFB0650E4AF25FF1D50F105C97A5E5C3A7E9FAF5B3E7DFC4C37D8A2AD7F"
+      }
+    },
+    {
+      "id": "installed-explicit-shear-paths-with-offsets",
+      "journal_section": 541,
+      "archive": "InstalledExplicitShearPaths20261117",
+      "script": "Verify-NativeShearPaths.py",
+      "arguments": ["--repo", "{repo}", "--report", "ExplicitShearProof.json"],
+      "stdout_contains": "EXPLICIT SHEAR WORKBOOK EVIDENCE OFFLINE PASS",
+      "outputs": {
+        "ExplicitShearProof.json": "71628DEF1A298C6F53C3763AC5369981508690B61C91FE78D3D825E103CC491D"
+      }
+    },
+    {
+      "id": "mvt2-published-crack-intersection-cut-and-step-sensitivity",
+      "journal_section": 542,
+      "archive": "MVT2PublicationCut20261117",
+      "script": "Verify-PublicationCut.py",
+      "arguments": ["--repo", "{repo}", "--report", "PublicationCutProof.json"],
+      "stdout_contains": "MVT2 PUBLICATION CUT OFFLINE PASS",
+      "outputs": {
+        "PublicationCutProof.json": "9D9E3FEB38F98B56CF9D311D4F0C2F07D3F9886FBB81BB252C3242314FAE5681"
+      }
+    },
+    {
+      "id": "hardshear-matched-asd-same-section-small-force-steps",
+      "journal_section": 543,
+      "archive": "HardShearSameSectionASDSmallForceSteps20261117",
+      "script": "Verify-ASDForceSteps.py",
+      "arguments": ["--repo", "{repo}", "--report", "ASDSmallForceStepsProof.json"],
+      "stdout_contains": "HARDSHEAR ASD SMALL FORCE STEPS OFFLINE PASS 5B61217ED8545E7DC25807E5BF88D5466C2C644CC6D5B1CA5C6F47C327F5DAA5",
+      "outputs": {
+        "ASDSmallForceStepsProof.json": "AEB2CA7D6B53F3041DC1693021D64BFAA1876EA7403BFE237B6F10D218E13469"
       }
     }
   ],

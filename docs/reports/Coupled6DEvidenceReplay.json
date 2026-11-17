@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "6F2606E662EC0E9ED1CBC3299547C2AFFA5CCC172C801D82EC23AA06E3B5D698",
+  "manifest_sha256": "45C0F804082A4AEF310DE22AC8A13BC901B43BA4950FF527F4CFB4CAD4B43C92",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 232,
+  "passed": 235,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1878,6 +1878,33 @@
         "MVT2LocalTractionProof.json": "8156DCFB0650E4AF25FF1D50F105C97A5E5C3A7E9FAF5B3E7DFC4C37D8A2AD7F"
       },
       "verified_stdout": "MVT2 LOCAL TRACTION OFFLINE PASS"
+    },
+    {
+      "id": "installed-explicit-shear-paths-with-offsets",
+      "journal_section": 541,
+      "archive": "InstalledExplicitShearPaths20261117",
+      "verified_outputs_sha256": {
+        "ExplicitShearProof.json": "71628DEF1A298C6F53C3763AC5369981508690B61C91FE78D3D825E103CC491D"
+      },
+      "verified_stdout": "EXPLICIT SHEAR WORKBOOK EVIDENCE OFFLINE PASS"
+    },
+    {
+      "id": "mvt2-published-crack-intersection-cut-and-step-sensitivity",
+      "journal_section": 542,
+      "archive": "MVT2PublicationCut20261117",
+      "verified_outputs_sha256": {
+        "PublicationCutProof.json": "9D9E3FEB38F98B56CF9D311D4F0C2F07D3F9886FBB81BB252C3242314FAE5681"
+      },
+      "verified_stdout": "MVT2 PUBLICATION CUT OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-matched-asd-same-section-small-force-steps",
+      "journal_section": 543,
+      "archive": "HardShearSameSectionASDSmallForceSteps20261117",
+      "verified_outputs_sha256": {
+        "ASDSmallForceStepsProof.json": "AEB2CA7D6B53F3041DC1693021D64BFAA1876EA7403BFE237B6F10D218E13469"
+      },
+      "verified_stdout": "HARDSHEAR ASD SMALL FORCE STEPS OFFLINE PASS 5B61217ED8545E7DC25807E5BF88D5466C2C644CC6D5B1CA5C6F47C327F5DAA5"
     }
   ]
 }
