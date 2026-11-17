@@ -273,7 +273,8 @@
     "MVT2NativeSteelBranches20261117": "6A77DEB08E746CF08833C747F39A4D837DC4C6C470C5CD24B89936DF6AF78D9C",
     "MVT2IntegratedSteelCorrection20261117": "20D400686306651D3605A60FEF7B81D4838BF3A368591264243F74434AFC88DC",
     "HardShearIntegratedSteelWorkbook20261117": "5E28B5A6CB9F49855708E91249A3370403A93461E325CDAEE41BB0520A63F9E1",
-    "SteelCoreInstalledWorkbook20261117": "0297FC8AFBB0AD821372244446DA7A4724D11ECC254953A949A9328A6BF4D372"
+    "SteelCoreInstalledWorkbook20261117": "0297FC8AFBB0AD821372244446DA7A4724D11ECC254953A949A9328A6BF4D372",
+    "MVT2SecondBarControl20261117": "D6F9BF818204BC07A5CCF4EB6CF89A164CE2BC9FFBAB2E095407503CC1FFF14B"
   },
   "cases": [
     {
@@ -3015,6 +3016,17 @@
       "stdout_contains": "STEEL CORE INSTALLED PAIR VERIFIED 226 121 68",
       "outputs": {
         "SteelCoreInstalledProof.json": "1F9A573431B82A045A1423B500F9B67A20FC39692B7D45DDDA3068A88A0C1265"
+      }
+    },
+    {
+      "id": "mvt2-second-longitudinal-bar-strain-control-and-subdivisions",
+      "journal_section": 581,
+      "archive": "MVT2SecondBarControl20261117",
+      "script": "Verify-MVT2SecondBar.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "MVT2SecondBarProof.json"],
+      "stdout_contains": "MVT2 SECOND BAR CONTROL VERIFIED 150",
+      "outputs": {
+        "MVT2SecondBarProof.json": "231F566DAF1B39F931F8A9C4B6D4E67925330C642012CB3638B23C36C57CD8BD"
       }
     }
   ],
