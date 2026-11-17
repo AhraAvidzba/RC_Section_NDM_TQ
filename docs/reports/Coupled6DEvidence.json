@@ -282,7 +282,8 @@
     "MVT2NdmCurveConsistency20261117": "CE2DD6CE11F0C30BCAF46F3F14ABF35E25295B38762A4DBEDD90B0075DF85034",
     "MVT2ExplicitASDCalibration20261117": "052DFAE3AFB8552D77434F0947C67D26375B4DBA6C1085E4D06271A7ED820EC5",
     "MVT2TorqueRecoveryAndFieldTangent20261117": "96CD6F7A847AC8937657E12D9E719EF59ABE72108FB999144C7F0255282ABBDF",
-    "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028"
+    "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028",
+    "KrylovFallbackNative20261117": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633"
   },
   "cases": [
     {
@@ -3123,6 +3124,24 @@
       "stdout_contains": "FIELD TANGENT WORKBOOK VERIFIED 365 28 68",
       "outputs": {
         "FieldTangentWorkbookChecks.json": "41EDBF0BAEFD01A74FFFE7B1364A21011B1E283A07C13F215DB1DB12D8EC019D"
+      }
+    },
+    {
+      "id": "bounded-gmres-native-linear-witness-and-two-nonlinear-cases",
+      "journal_section": 590,
+      "archive": "KrylovFallbackNative20261117",
+      "script": "Verify-TestKrylovFallback.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "KrylovFallbackChecks.json"
+      ],
+      "stdout_contains": "KRYLOV FALLBACK VERIFIED 141 28 68; TARGET NOT REACHED; NOT INSTALLED",
+      "outputs": {
+        "KrylovFallbackChecks.json": "C373C298BFE454B46C4D301B98BFE9F59B56F06EA39C0CC260E6A91F12730733"
       }
     }
   ],

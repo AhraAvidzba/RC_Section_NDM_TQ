@@ -129,3 +129,24 @@ curl.exe -fsSL 'https://opensees.github.io/OpenSeesDocumentation/user/manual/mat
 
 Официальная веб-страница может обновляться; для повтора §586 используется
 сохранённая копия с указанной контрольной суммой.
+
+## GMRES и ускорение Ньютона
+
+Для §590 сохранена оригинальная статья Saad–Schultz. Использованы
+алгоритм Арнольди, минимизация линейной невязки и последовательные
+вращения QR из §3.1–3.2. VBA написан по математической постановке;
+исходник `KrylovAccelerator` не переносился в рабочее ядро. В нём
+используются история поправок Ньютона и least-squares LAPACK,
+а проверенный VBA-вариант измеряет действие оператора на направления
+и использует существующее LU как правый предобусловливатель.
+Это разные реализации, совпадение с `KrylovNewton` этим не заявляется.
+
+| Локальный файл | Первичный источник | SHA-256 |
+| --- | --- | --- |
+| `Saad-Schultz-1986-GMRES.pdf` | Y. Saad, M. H. Schultz. *GMRES: A Generalized Minimal Residual Algorithm for Solving Nonsymmetric Linear Systems*. SIAM J. Sci. Stat. Comput. 7(3), 856–869 (1986). [DOI](https://doi.org/10.1137/0907058), [полный текст](https://math.berkeley.edu/~mgu/MA228A/saad-schultz.pdf). | `4e90d7387751887455ee519208e83d8f40dc4b8972e4ea382d9a51e7c7db387d` |
+| `OpenSees-3.8.0-KrylovAccelerator.cpp` | OpenSees, тег `v3.8.0`, `SRC/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.cpp`. [Точный исходник](https://raw.githubusercontent.com/OpenSees/OpenSees/v3.8.0/SRC/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.cpp). Авторская шапка сохранена. | `a4fc1e3770c21bb4a5db0fe35a91dc1d06a28cc7f4cae606d047ccdc4b104a74` |
+
+Использована английская первичная статья. Нормативные требования и
+свойства бетона по ней не задаются. PDF хранится локально вместе с
+остальной литературой проекта по принятому правилу этой папки.
+Сведения о команде OpenSees доступны в [официальной документации](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/algorithm/KrylovNewton.html).
