@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "BE31B07E085212BDF664FE2855775508E9BA7791A1031941BD3DB91E57063278",
+  "manifest_sha256": "7CAA8620E8B411EC5CFB4A87F9AA55FFCA8020626F1E471A356FFA665A1B78CB",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 173,
+  "passed": 174,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1451,6 +1451,13 @@
       "archive": "HardShearNestedQuadratureNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "HARDSHEAR_NESTED_QUADRATURE_PORTABLE: VERIFIED_EVIDENCE; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-live-spatial-operators-and-two-independent-equilibrium-anchors",
+      "journal_section": 482,
+      "archive": "MVT2GaussSpatialOperatorsNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 SPATIAL OPERATORS PORTABLE PASS D3B1A1EF41102F086A37F48288E861658BA71EEFAF592A8E6EC6598F68D10164"
     }
   ]
 }

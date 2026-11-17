@@ -174,7 +174,8 @@
     "MVT2GaussMixedNative20261117": "A3EC01957BB5D9AC49A11C1D23678FE874D53367524C4F76192C16002212BC09",
     "MVT2GaussTensorCaptureNative20261117": "D2DBF6FDE48CDB5997FD099056DEC49231EEABE6D018D817E809C3F951D801A1",
     "MVT2GaussFixedHistoryASD20261117": "56F7D14B51F60071DD6FD936663CEBEB3850045C842EDF1A947A54DB7FE7B4FB",
-    "HardShearNestedQuadratureNative20261117": "51EDBA769818A13DFF49853471B51904BC834D2D1F15EBE011807D4DAF6F88FC"
+    "HardShearNestedQuadratureNative20261117": "51EDBA769818A13DFF49853471B51904BC834D2D1F15EBE011807D4DAF6F88FC",
+    "MVT2GaussSpatialOperatorsNative20261117": "8807822311947EDB91EB483B6FDC8F359F95BCE10F9B36286E12DE7F37932D5A"
   },
   "cases": [
     {
@@ -2001,6 +2002,14 @@
       "archive": "HardShearNestedQuadratureNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_NESTED_QUADRATURE_PORTABLE: VERIFIED_EVIDENCE; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-live-spatial-operators-and-two-independent-equilibrium-anchors",
+      "journal_section": 482,
+      "archive": "MVT2GaussSpatialOperatorsNative20261117",
+      "script": "Replay-Operators.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 SPATIAL OPERATORS PORTABLE PASS D3B1A1EF41102F086A37F48288E861658BA71EEFAF592A8E6EC6598F68D10164"
     }
   ],
   "frozen_repositories": {
