@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "C04FB8C72B781D00CBB6BD6AE318EB926003E8B3FC0F52C409EC53B3B63D5C18",
+  "manifest_sha256": "8EF110F10B475E104337A73DE7D7424BD863CBFF64F4DE25971F26F4F221713D",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 257,
+  "passed": 258,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2103,6 +2103,15 @@
         "MixedPanelsProof.json": "ACF441B66C9ABF43012DACED1C29078DAB868DE69BD1AEAB0D6FFA4FA29583F5"
       },
       "verified_stdout": "MIXED PANELS NATIVE OFFLINE PASS 1260 2173"
+    },
+    {
+      "id": "pv25-native-thickness-control-and-independent-plane-stress-peak",
+      "journal_section": 566,
+      "archive": "PV25NormalChartAndPlaneStress20261117",
+      "verified_outputs_sha256": {
+        "PV25ChartProof.json": "624391AF60B1F12D18C3E6BE5285993AB8A7AFCD7DDA672A9FE80FE74ADC1F9E"
+      },
+      "verified_stdout": "PV25 CHART AND INDEPENDENT PLANE STRESS PASS 106"
     }
   ]
 }
