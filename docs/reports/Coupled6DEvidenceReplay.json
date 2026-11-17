@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "888CE00CFFB5F535306846DB5E88F681F5439098FC5651766826A8D9A0D525FD",
+  "manifest_sha256": "0F5FC96EF6E8FA7445DB9A1544C4C3C9B4981EED4BE70496C0B720AD95E5FB9C",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 204,
+  "passed": 207,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1668,6 +1668,27 @@
       "archive": "MVT2GaussASDNominalP7Crossing20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "MVT2 REJECTED P7 CROSSING OFFLINE PASS"
+    },
+    {
+      "id": "mvt2-h53-p7-three-station-knot-localization-and-same-branch-adjacent-correction",
+      "journal_section": 513,
+      "archive": "MVT2GaussASDNominalP7Adjacent20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD ADJACENT P7 OFFLINE PASS 4AA7F6AC19E6E1E02A1744B1A3861E664113FCFEFD5BD1C25110414DD414409A"
+    },
+    {
+      "id": "hardshear-native-consistent-control-equilibrium-first-exact-seed",
+      "journal_section": 514,
+      "archive": "HardShearConsistentSeedNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR CONSISTENT SEED A/B PASS"
+    },
+    {
+      "id": "hardshear-serial-attempt14-torque-gradient-direction-and-material-departure",
+      "journal_section": 515,
+      "archive": "HardShearG13SerialArcAttempt14DirectionNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_ARC56_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_RADIUS; physical_limit_certified=False"
     }
   ]
 }

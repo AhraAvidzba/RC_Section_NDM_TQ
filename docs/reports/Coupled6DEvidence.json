@@ -205,7 +205,10 @@
     "HardShearPhysicalControlCandidateANative20261117": "26FB0245FC32FF26661A354684AD8C4B70DA5DCB1A1E274E0BF6462C05221C1E",
     "MVT2GaussASDNominalExpandedTrust20261117": "B40BA00D6EC17464F587A7A6BBE0B1E6D9BE4F867BB38915FEDD1C1CE704EA28",
     "HardShearPhysicalControlCandidateBNative20261117": "EDE8F989348A06C21492DF840F7315C1DB5C4EF8C91719735B85D49A7A9E0F59",
-    "MVT2GaussASDNominalP7Crossing20261117": "EC3FD10733670B75F442AA6326228A62739BF8ABCEC3C58710E31DA647CAB6D3"
+    "MVT2GaussASDNominalP7Crossing20261117": "EC3FD10733670B75F442AA6326228A62739BF8ABCEC3C58710E31DA647CAB6D3",
+    "MVT2GaussASDNominalP7Adjacent20261117": "7DB48539D21CF598DC15FE1A6BB996479B6375DDA9EE658662C8B8AACA6B2EB8",
+    "HardShearConsistentSeedNative20261117": "FD244F92D0DE287CF3FDF5A77F10B9B134401689D7BFA7F9A9F958F2C9607A47",
+    "HardShearG13SerialArcAttempt14DirectionNative20261117": "6CA5C64823399B7385635AA50F31C132A221164C47DE8D8E96B42DBC23037318"
   },
   "cases": [
     {
@@ -2265,6 +2268,28 @@
       "script": "Verify-P7.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "MVT2 REJECTED P7 CROSSING OFFLINE PASS"
+    },
+    {
+      "id": "mvt2-h53-p7-three-station-knot-localization-and-same-branch-adjacent-correction",
+      "journal_section": 513,
+      "archive": "MVT2GaussASDNominalP7Adjacent20261117",
+      "script": "Verify-P7Adjacent.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 ASD ADJACENT P7 OFFLINE PASS 4AA7F6AC19E6E1E02A1744B1A3861E664113FCFEFD5BD1C25110414DD414409A"
+    },
+    {
+      "id": "hardshear-native-consistent-control-equilibrium-first-exact-seed",
+      "journal_section": 514,
+      "archive": "HardShearConsistentSeedNative20261117",
+      "script": "Verify.py",
+      "stdout_contains": "HARDSHEAR CONSISTENT SEED A/B PASS"
+    },
+    {
+      "id": "hardshear-serial-attempt14-torque-gradient-direction-and-material-departure",
+      "journal_section": 515,
+      "archive": "HardShearG13SerialArcAttempt14DirectionNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_ARC56_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_RADIUS; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
