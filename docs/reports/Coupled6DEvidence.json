@@ -288,7 +288,8 @@
     "ASDSpectralTangentAndCrossDamage20261118": "F1F9C9D65C4B33A03FD6A53DEB5B5BA0637FA1235069AE09FE15B99720ACEF66",
     "ASDResolutionSourceBooks20261118": "567B3B8117360BC69CFC8A3BACEB5CD800F06D1D856E54270DB2F98F5CED851E",
     "ASDResolutionVBAContainers20261118": "78018DA6AF03FF424DBC15107DB5B0D45881342703468BFF5AE154C248D32E9C",
-    "ASDResolutionAndNativeFieldTransfer0220261118": "3B8C85E2CFED75747325232CE5BBEC0ABAB4D6E94A93FD9C2FC7E8D02F5FBEC5"
+    "ASDResolutionAndNativeFieldTransfer0220261118": "3B8C85E2CFED75747325232CE5BBEC0ABAB4D6E94A93FD9C2FC7E8D02F5FBEC5",
+    "ASDReducedPredictorNative20261118": "144B075E2A7A207D0AFFE74664AED778D827A5C02A01F4D7DA0B54DE8F2BF461"
   },
   "cases": [
     {
@@ -3223,6 +3224,46 @@
       "stdout_contains": "RESOLUTION STUDY AND NATIVE FIELD TRANSFER VERIFIED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "ResolutionMechanicsChecks.json": "41DB6FBC31C9528584509F76CAC401D465AF2B3D23DACA3EAC30BD6C71734736"
+      }
+    },
+    {
+      "id": "asd-reduced-predictor-native",
+      "journal_section": 594,
+      "archive": "ASDReducedPredictorNative20261118",
+      "script": "Verify-TestReducedEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "ReducedNativeChecks.json"
+      ],
+      "stdout_contains": "REDUCED PREDICTOR NATIVE VBA AND CLOSED EXCEL VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "ReducedNativeChecks.json": "5D073C7D097A08EE70FE5C38E7619CCDA7E98EC78910DDC5592D64520E0B82FC"
+      }
+    },
+    {
+      "id": "asd-reduced-predictor-mechanics",
+      "journal_section": 594,
+      "archive": "ASDReducedPredictorNative20261118",
+      "script": "Verify-TestReducedEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "ReducedMechanicsChecks.json"
+      ],
+      "stdout_contains": "REDUCED PREDICTOR FULL EQUILIBRIUM AND GEOMETRY VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "ReducedMechanicsChecks.json": "FB2F7E3A9FF9DB39FFEC7183DF61006FA5326E4B8C04F4742AD95841219992D5"
       }
     }
   ],
