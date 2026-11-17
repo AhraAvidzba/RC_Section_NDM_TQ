@@ -182,7 +182,9 @@
     "MVT2GaussASDBranchFactorial20261117": "C608C6BA4BCD3ED21B950F903815D8A8E67446724B78F25962201430E6836246",
     "MVT2GaussASDTensileHybrids20261117": "CAD6B822D86C5641EB14613F276E3705C8D6826CD6DB2FA0838F8CC252323CE2",
     "MVT2NdmTensionSensitivityNative20261117": "FED7E7E4C8804737461B04EF2A19CD6AFE45E050278AAF63A7DE39CEFB417D3A",
-    "HardShearF19ContinuationNative20261117": "E6E987A86DE0191A649B123F3F1B629CD5821C24E71AF946FC1B010CFB25F131"
+    "HardShearF19ContinuationNative20261117": "E6E987A86DE0191A649B123F3F1B629CD5821C24E71AF946FC1B010CFB25F131",
+    "HardShearInstalledStockTiming20261117": "C452D2A59077C5DA5F6667DDD5ADF33778A0681F1B955A0E091FB08D8D2EE24F",
+    "MVT2GaussASDExtendedCutRays20261117": "D319B3DF22E8054815715B0A3F22663B2F1A815C428538EE15EDC9CBB80DE0E7"
   },
   "cases": [
     {
@@ -2071,6 +2073,22 @@
       "archive": "HardShearF19ContinuationNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_F19_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_STEP; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-installed-stock-both-actual-timing-and-results-reopen",
+      "journal_section": 490,
+      "archive": "HardShearInstalledStockTiming20261117",
+      "script": "Verify-Stock.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR STOCK NATIVE VERIFIED A28D9CEF48A3FECDC6D77F3B813EC9E12C7FB4EF4FF61825083A53162A466092"
+    },
+    {
+      "id": "mvt2-asd-right-window-and-separate-nominal-midspan-elastic-steel-rays",
+      "journal_section": 491,
+      "archive": "MVT2GaussASDExtendedCutRays20261117",
+      "script": "Verify-Rays.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 ASD TWO RAYS OFFLINE PASS"
     }
   ],
   "frozen_repositories": {
