@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "23B8CDF301646EB7A9884A2716DF77479DF2FF0EE01060AF8A099B5CE59F050B",
+  "manifest_sha256": "C54ADC1EFF5C4AE623C36F17CE19CABC11E336817E46D32AFFC0421F3774C6A4",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 270,
+  "passed": 271,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2220,6 +2220,15 @@
         "IntegratedSteelCorrectionProof.json": "6D4954BBCE9327252C3B65691E6DE72E0582C06E9E916C6DD1EE95152BEFD3D3"
       },
       "verified_stdout": "MVT2 INTEGRATED STEEL CORRECTION PASS 77625.0 365"
+    },
+    {
+      "id": "integrated-steel-clean-workbook-hardshear-results-reopen",
+      "journal_section": 579,
+      "archive": "HardShearIntegratedSteelWorkbook20261117",
+      "verified_outputs_sha256": {
+        "CleanSteelHardShearProof.json": "0D9B34C933F065673381AEF336FDC7EACE4E5461508E474688AC21B255E048EE"
+      },
+      "verified_stdout": "CLEAN STEEL HARDSHEAR VERIFIED 28 68"
     }
   ]
 }

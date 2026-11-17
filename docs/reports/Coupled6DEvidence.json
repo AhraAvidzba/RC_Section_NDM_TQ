@@ -271,7 +271,8 @@
     "MVT2TabulatedActiveSteel20261117": "12AC8259874E45568C5B04BB110F4C17D18FDEBD617532A30DE34C262B999792",
     "MVT2TabulatedActiveSteelVBA20261117": "87CECC42511E773F37611E4749AFD4947C299F5853893715F284FA9F498789FB",
     "MVT2NativeSteelBranches20261117": "6A77DEB08E746CF08833C747F39A4D837DC4C6C470C5CD24B89936DF6AF78D9C",
-    "MVT2IntegratedSteelCorrection20261117": "20D400686306651D3605A60FEF7B81D4838BF3A368591264243F74434AFC88DC"
+    "MVT2IntegratedSteelCorrection20261117": "20D400686306651D3605A60FEF7B81D4838BF3A368591264243F74434AFC88DC",
+    "HardShearIntegratedSteelWorkbook20261117": "5E28B5A6CB9F49855708E91249A3370403A93461E325CDAEE41BB0520A63F9E1"
   },
   "cases": [
     {
@@ -2991,6 +2992,17 @@
       "stdout_contains": "MVT2 INTEGRATED STEEL CORRECTION PASS 77625.0 365",
       "outputs": {
         "IntegratedSteelCorrectionProof.json": "6D4954BBCE9327252C3B65691E6DE72E0582C06E9E916C6DD1EE95152BEFD3D3"
+      }
+    },
+    {
+      "id": "integrated-steel-clean-workbook-hardshear-results-reopen",
+      "journal_section": 579,
+      "archive": "HardShearIntegratedSteelWorkbook20261117",
+      "script": "Verify-CleanSteelWorkbook.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "CleanSteelHardShearProof.json"],
+      "stdout_contains": "CLEAN STEEL HARDSHEAR VERIFIED 28 68",
+      "outputs": {
+        "CleanSteelHardShearProof.json": "0D9B34C933F065673381AEF336FDC7EACE4E5461508E474688AC21B255E048EE"
       }
     }
   ],
