@@ -277,7 +277,8 @@
     "MVT2SecondBarControl20261117": "D6F9BF818204BC07A5CCF4EB6CF89A164CE2BC9FFBAB2E095407503CC1FFF14B",
     "MVT2AfterSecondYield20261117": "F15579B9A829D363C8F22F3678CB4DB328868F801D752DA9D715A14EB2715645",
     "MVT2NativeBarControl20261117": "6AF0A50074FD1179DD3430C435E8FD2F05F13BDF318F27776954B7E3B119C30A",
-    "MVT2NativeBarRefinement20261117": "C5FC470CF8C66A097572636D7F0F36FDF5F5289A2CA4AC913FFE992E3219C07A"
+    "MVT2NativeBarRefinement20261117": "C5FC470CF8C66A097572636D7F0F36FDF5F5289A2CA4AC913FFE992E3219C07A",
+    "MVT2NativeBarOpenSeesReplay20261117": "3FC1E30F23F2410CCF8C3C716D5B8554E385BB59F21DC14DE69CE53DD9301DFE"
   },
   "cases": [
     {
@@ -3063,6 +3064,17 @@
       "stdout_contains": "NATIVE MVT2 BAR REFINEMENT VERIFIED 145 124",
       "outputs": {
         "NativeBarRefinementProof.json": "509DDF81D844605E36C31D9844645844B6752ABE49E1E34FC1EC42CDA7FACADB"
+      }
+    },
+    {
+      "id": "mvt2-native-strain-branch-opensees-material-and-equilibrium-replay",
+      "journal_section": 585,
+      "archive": "MVT2NativeBarOpenSeesReplay20261117",
+      "script": "Replay-NativeBarOpenSees.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--wire", "NativeBarOpenSeesStress.json.gz", "--out", "NativeBarOpenSeesProof.json"],
+      "stdout_contains": "NATIVE MVT2 OPENSEES REPLAY VERIFIED 22410",
+      "outputs": {
+        "NativeBarOpenSeesProof.json": "46E07FD8832BAECEA81C9C5A2AC43AFD091DD6A297EBEB5FC32724945EC0379F"
       }
     }
   ],
