@@ -185,7 +185,9 @@
     "HardShearF19ContinuationNative20261117": "E6E987A86DE0191A649B123F3F1B629CD5821C24E71AF946FC1B010CFB25F131",
     "HardShearInstalledStockTiming20261117": "C452D2A59077C5DA5F6667DDD5ADF33778A0681F1B955A0E091FB08D8D2EE24F",
     "MVT2GaussASDExtendedCutRays20261117": "D319B3DF22E8054815715B0A3F22663B2F1A815C428538EE15EDC9CBB80DE0E7",
-    "HardShearSecantContinuationABNative20261117": "48C68360A56D8369CA7670F11DB8BD875D5F0C06BDD780D1B9E012D35EB34154"
+    "HardShearSecantContinuationABNative20261117": "48C68360A56D8369CA7670F11DB8BD875D5F0C06BDD780D1B9E012D35EB34154",
+    "MVT2GaussASDNominalPostyield20261117": "06A04F304206A58E5CB1B5527B57A1AED030E017C70C7D625B0C0CA9BBDD98ED",
+    "HardShearG13PrecisionNative20261117": "1B7C0461264D41BE516B206B2AD05931F1B2695256CE8A85BCAE2C92533391C7"
   },
   "cases": [
     {
@@ -2097,6 +2099,21 @@
       "archive": "HardShearSecantContinuationABNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_SECANT_PORTABLE: VERIFIED_EVIDENCE; production_adopted=False; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-asd-nominal-midspan-first-yield-and-exact-ndm-steel-history",
+      "journal_section": 493,
+      "archive": "MVT2GaussASDNominalPostyield20261117",
+      "script": "Verify-Postyield.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 EXACT STEEL POSTYIELD OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-g13-exact-history-and-paired-tolerance-probes",
+      "journal_section": 494,
+      "archive": "HardShearG13PrecisionNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G13_PORTABLE: VERIFIED_EVIDENCE; COMPLETE; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
