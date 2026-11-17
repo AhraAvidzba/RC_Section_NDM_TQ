@@ -240,7 +240,9 @@
     "MVT2ConcreteCompression20261117": "5C53523A297D6A4827292AE62F09478BB14DCA4AF2A86BD0F08C97E5291A7669",
     "MVT2Cut396ConcreteCompression20261117": "37597D94C3E8D55AB56CFA57A22131DA60721EC71206615E98F668E6B50D953E",
     "MVT2PublicationCutTwist20261117": "BCF4262B8906B7BCBD521276288762CB83402FEC79E1137AA3EAE60D37944C78",
-    "MVT2NativePublicationCutTimed20261117": "EBAB47A1CDA340FAFD23604939D8A88CF9DC3CCC4B9535CB155FF104739C054A"
+    "MVT2NativePublicationCutTimed20261117": "EBAB47A1CDA340FAFD23604939D8A88CF9DC3CCC4B9535CB155FF104739C054A",
+    "MVT2MatchedNativeHistoryASD20261117": "BBE66E1B4D599DD5F50196F01083488C612AD6415441C3F7E539FF98BF4BB427",
+    "MVT2Cut396FixedStrainASD20261117": "66B681EF09F92BAD0F238CB838D5BCFD8DACDDB36D7041C454F76C49606B30F4"
   },
   "cases": [
     {
@@ -2619,6 +2621,28 @@
       "stdout_contains": "MVT2 NATIVE PUBLICATION CUT TIMED PREFIX OFFLINE PASS 14",
       "outputs": {
         "NativePublicationCutProof.json": "DAC237A8485BEADB860111A7E22B496BC6F3795ABC20D05150167367EF78627A"
+      }
+    },
+    {
+      "id": "mvt2-publication-cut-matched-native-and-asd-force-steps",
+      "journal_section": 548,
+      "archive": "MVT2MatchedNativeHistoryASD20261117",
+      "script": "Verify-MatchedHistory.py",
+      "arguments": ["--repo", "{repo}", "--report", "MatchedHistoryProof.json"],
+      "stdout_contains": "MVT2 MATCHED HISTORY OFFLINE PASS",
+      "outputs": {
+        "MatchedHistoryProof.json": "FE5B1DBDA76E90D74DF433C7742D7DE43B8A2B01B3E8AF3F66EEBB7D229755CD"
+      }
+    },
+    {
+      "id": "mvt2-publication-cut-concrete-laws-at-identical-strains",
+      "journal_section": 549,
+      "archive": "MVT2Cut396FixedStrainASD20261117",
+      "script": "Replay-Cut396FixedStrain.py",
+      "arguments": ["--repo", "{repo}", "--report", "Cut396FixedStrainReplay.json"],
+      "stdout_contains": "MVT2 CUT396 FIXED STRAIN OFFLINE PASS 22",
+      "outputs": {
+        "Cut396FixedStrainReplay.json": "8CADB493EFE80D8800AD0903FE50F9040FAD8AE3E4E8C2D5FA825C9A602DD5DC"
       }
     }
   ],

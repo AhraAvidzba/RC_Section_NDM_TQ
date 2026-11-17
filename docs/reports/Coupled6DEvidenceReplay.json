@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "8E646EC1B885C94547289232410AFABAC8A965DC83D1775DA883C6993AB60286",
+  "manifest_sha256": "B33A3AD781BF988BE0364DF7D0097E87212FD909011484ED44517118F0DA9937",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 239,
+  "passed": 241,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1941,6 +1941,24 @@
         "NativePublicationCutProof.json": "DAC237A8485BEADB860111A7E22B496BC6F3795ABC20D05150167367EF78627A"
       },
       "verified_stdout": "MVT2 NATIVE PUBLICATION CUT TIMED PREFIX OFFLINE PASS 14"
+    },
+    {
+      "id": "mvt2-publication-cut-matched-native-and-asd-force-steps",
+      "journal_section": 548,
+      "archive": "MVT2MatchedNativeHistoryASD20261117",
+      "verified_outputs_sha256": {
+        "MatchedHistoryProof.json": "FE5B1DBDA76E90D74DF433C7742D7DE43B8A2B01B3E8AF3F66EEBB7D229755CD"
+      },
+      "verified_stdout": "MVT2 MATCHED HISTORY OFFLINE PASS"
+    },
+    {
+      "id": "mvt2-publication-cut-concrete-laws-at-identical-strains",
+      "journal_section": 549,
+      "archive": "MVT2Cut396FixedStrainASD20261117",
+      "verified_outputs_sha256": {
+        "Cut396FixedStrainReplay.json": "8CADB493EFE80D8800AD0903FE50F9040FAD8AE3E4E8C2D5FA825C9A602DD5DC"
+      },
+      "verified_stdout": "MVT2 CUT396 FIXED STRAIN OFFLINE PASS 22"
     }
   ]
 }
