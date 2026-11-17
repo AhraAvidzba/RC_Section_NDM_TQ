@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "4D1487DB58AAC946C8768AB52087E401CE49E44107E4B78FFA156011F752D9A7",
+  "manifest_sha256": "9146F5FA046E3D69E195F9D13891DF6F2BDA66FEF9345B7236F3E058FBBD76D8",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 178,
+  "passed": 181,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1486,6 +1486,27 @@
       "archive": "MVT2GaussASDBranchFactorial20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "MVT2 ASD BRANCH FACTORIAL OFFLINE PASS 2EFB8356ADC6EB57D77CBEE2FF609DCD8F7CE4C0A2E9D3C63B393591111E3BC5"
+    },
+    {
+      "id": "mvt2-cold-asd-tensile-peak-nominal-softening-and-damage-isolated",
+      "journal_section": 487,
+      "archive": "MVT2GaussASDTensileHybrids20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD TENSILE HYBRID OFFLINE PASS 362EF0B11EBD24B75B967E90F5FA5A8E377AE4ADFCB6D91A14CC7BF5BA8F4B85"
+    },
+    {
+      "id": "mvt2-native-own-tensile-energy-and-degradation-sensitivity-four-arms",
+      "journal_section": 488,
+      "archive": "MVT2NdmTensionSensitivityNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 NDM TENSION PORTABLE PASS 8989B30CC3AD3237F5B5F8C19EE10B254701B969E359494346D108FD2DA62122 24ADE0D614A3AC4259687D370022AAFA3873570465420412E65EF28994072C14 9F2033D7408A96A15436D6ABB1269987CA7BE2A68456B09DBBAADB0BFAAA6856 7CBA87BEF7CC0CBAC7560CD01348090DA7B36D294FAC8D10B502657729916FF4"
+    },
+    {
+      "id": "hardshear-100-exact-history-replay-and-original-f20-recovery",
+      "journal_section": 489,
+      "archive": "HardShearF19ContinuationNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_F19_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_STEP; physical_limit_certified=False"
     }
   ]
 }

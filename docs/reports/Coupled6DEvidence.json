@@ -179,7 +179,10 @@
     "MVT2GaussReequilibratedASD20261117": "FB4F9F3ED9D83FE121B700E41752A16405C63123DADC46F28C5D6743CAC5D50E",
     "MVT2ASDReferenceLength20261117": "8A9471CF262CCF74F09374A80353DFA0C1F7CDE3547E4CA6F1F9C5752C1C9726",
     "HardShearFineResumeNative20261117": "9143FD1E28C70100FB5EC631D5E8C87A4D2D6BA8C3416B5F09BCFA834B2E7DF4",
-    "MVT2GaussASDBranchFactorial20261117": "C608C6BA4BCD3ED21B950F903815D8A8E67446724B78F25962201430E6836246"
+    "MVT2GaussASDBranchFactorial20261117": "C608C6BA4BCD3ED21B950F903815D8A8E67446724B78F25962201430E6836246",
+    "MVT2GaussASDTensileHybrids20261117": "CAD6B822D86C5641EB14613F276E3705C8D6826CD6DB2FA0838F8CC252323CE2",
+    "MVT2NdmTensionSensitivityNative20261117": "FED7E7E4C8804737461B04EF2A19CD6AFE45E050278AAF63A7DE39CEFB417D3A",
+    "HardShearF19ContinuationNative20261117": "E6E987A86DE0191A649B123F3F1B629CD5821C24E71AF946FC1B010CFB25F131"
   },
   "cases": [
     {
@@ -2045,6 +2048,29 @@
       "script": "Verify-Factorial.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "MVT2 ASD BRANCH FACTORIAL OFFLINE PASS 2EFB8356ADC6EB57D77CBEE2FF609DCD8F7CE4C0A2E9D3C63B393591111E3BC5"
+    },
+    {
+      "id": "mvt2-cold-asd-tensile-peak-nominal-softening-and-damage-isolated",
+      "journal_section": 487,
+      "archive": "MVT2GaussASDTensileHybrids20261117",
+      "script": "Verify-Hybrids.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 ASD TENSILE HYBRID OFFLINE PASS 362EF0B11EBD24B75B967E90F5FA5A8E377AE4ADFCB6D91A14CC7BF5BA8F4B85"
+    },
+    {
+      "id": "mvt2-native-own-tensile-energy-and-degradation-sensitivity-four-arms",
+      "journal_section": 488,
+      "archive": "MVT2NdmTensionSensitivityNative20261117",
+      "script": "Replay-NdmTension.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 NDM TENSION PORTABLE PASS 8989B30CC3AD3237F5B5F8C19EE10B254701B969E359494346D108FD2DA62122 24ADE0D614A3AC4259687D370022AAFA3873570465420412E65EF28994072C14 9F2033D7408A96A15436D6ABB1269987CA7BE2A68456B09DBBAADB0BFAAA6856 7CBA87BEF7CC0CBAC7560CD01348090DA7B36D294FAC8D10B502657729916FF4"
+    },
+    {
+      "id": "hardshear-100-exact-history-replay-and-original-f20-recovery",
+      "journal_section": 489,
+      "archive": "HardShearF19ContinuationNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_F19_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_STEP; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
