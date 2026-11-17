@@ -281,7 +281,8 @@
     "MVT2NativeBarOpenSeesReplay20261117": "3FC1E30F23F2410CCF8C3C716D5B8554E385BB59F21DC14DE69CE53DD9301DFE",
     "MVT2NdmCurveConsistency20261117": "CE2DD6CE11F0C30BCAF46F3F14ABF35E25295B38762A4DBEDD90B0075DF85034",
     "MVT2ExplicitASDCalibration20261117": "052DFAE3AFB8552D77434F0947C67D26375B4DBA6C1085E4D06271A7ED820EC5",
-    "MVT2TorqueRecoveryAndFieldTangent20261117": "96CD6F7A847AC8937657E12D9E719EF59ABE72108FB999144C7F0255282ABBDF"
+    "MVT2TorqueRecoveryAndFieldTangent20261117": "96CD6F7A847AC8937657E12D9E719EF59ABE72108FB999144C7F0255282ABBDF",
+    "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028"
   },
   "cases": [
     {
@@ -3111,6 +3112,17 @@
       "stdout_contains": "TORQUE RECOVERY AND NATIVE FIELD TANGENT VERIFIED",
       "outputs": {
         "TorqueRecoveryChecks.json": "D20DA690D63D0D305DD7D2A1DFA71877174909F6F01613AC4B4D78BD04FF5F6C"
+      }
+    },
+    {
+      "id": "broader-field-tangent-stock-regressions-and-clean-native-workbook",
+      "journal_section": 589,
+      "archive": "FieldTangentStockWorkbook20261117",
+      "script": "Verify-TestFieldTangentWorkbook.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "FieldTangentWorkbookChecks.json"],
+      "stdout_contains": "FIELD TANGENT WORKBOOK VERIFIED 365 28 68",
+      "outputs": {
+        "FieldTangentWorkbookChecks.json": "41EDBF0BAEFD01A74FFFE7B1364A21011B1E283A07C13F215DB1DB12D8EC019D"
       }
     }
   ],
