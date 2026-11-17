@@ -255,7 +255,8 @@
     "MVT2NativePublicationCutLongPostPeak20261117": "26A208F294099A5B885AB99A5ED96A4ECAA45DE475E3D84A840AD92C4CCAC17E",
     "MVT2NativePublicationCutDilationSweep20261117": "6D10C25C82A02D9C6A25BB568D08C84E3CA808B2D9CF96D9757D47E1928B6355",
     "MVT2NativePublicationCutDilation26Equilibrium20261117": "3ACA114CB255C978553604265B57040F2485317A88B6D08871F43D3FBABE1BD1",
-    "H35UnconfinedNative20261117": "04D75B624D33A9CBD52FE58538C3C36CB03E1F0947AB2ED7BB94115E53E39C75"
+    "H35UnconfinedNative20261117": "04D75B624D33A9CBD52FE58538C3C36CB03E1F0947AB2ED7BB94115E53E39C75",
+    "MVT2H35CompressionRateNative20261117": "994A773813B2A2144B5A2F74DB5BED8115AD387C94730627854B05E0F8B8F0D2"
   },
   "cases": [
     {
@@ -2799,6 +2800,17 @@
       "stdout_contains": "OSORIO H35 OFFLINE PASS 4400",
       "outputs": {
         "H35Proof.json": "A4FF653A3FAA27AF17FA12C7A0765B51DBA0CE2B68F142D1A0E55EBADF00FADE"
+      }
+    },
+    {
+      "id": "h35-compression-dilatancy-transfer-to-h45-and-mvt2-equilibrium",
+      "journal_section": 563,
+      "archive": "MVT2H35CompressionRateNative20261117",
+      "script": "Verify-CompressionRateMVT2.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "CompressionRateMVT2Proof.json"],
+      "stdout_contains": "MVT2 H35 COMPRESSION RATE OFFLINE PASS 14",
+      "outputs": {
+        "CompressionRateMVT2Proof.json": "B4A84569C47560A028F5A85A34FAA96D42E41D628D8F679A84B76FD70781D283"
       }
     }
   ],
