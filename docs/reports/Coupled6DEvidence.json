@@ -219,7 +219,9 @@
     "HardShearG13Arc31SteerNative20261117": "BFB46F391990F9A3D5A440C96B862D8E5BFC29B876EAB653A97B1BCE7DB7AA5A",
     "MVT2GaussASDNominalP7NaturalSwitch20261117": "0BF8235F231C8373331A5D1CD938DDA8DF4A18F7987C70D9AFAAE17DDCB09726",
     "HardShearCoarseGrowthWorkbookNative20261117": "40B29680E2E73033519883545091BD201DC109430D405151D8EC5EBF97B99302",
-    "HardShearCoarseGrowthSplitNative20261117": "F1D28250BD87A9F81445F8D650FF0F9E816433857B96DE0756FC0AECAA052461"
+    "HardShearCoarseGrowthSplitNative20261117": "F1D28250BD87A9F81445F8D650FF0F9E816433857B96DE0756FC0AECAA052461",
+    "HardShearCoarseGrowthCleanWorkbookNative20261117": "1B9A0181BE2E7BAD53058549EE33DB9B1703DF1C01C0ADA20293D32A3D266396",
+    "HardShearSameSectionASDCoarsePilot20261117": "67DE39B8362615DC3045BF8F0DF18D9859B75478EA8386F8751C4E2B78CAB904"
   },
   "cases": [
     {
@@ -2389,6 +2391,22 @@
       "script": "Verify-Portable.py",
       "arguments": ["{evidence}/HardShearCoarseGrowthWorkbookNative20261117.zip", "{evidence}/HardShearInstalledStockTiming20261117.zip"],
       "stdout_contains": "HARDSHEAR_WIDE_SPLIT_PORTABLE: VERIFIED_EVIDENCE; BOTH_ROUTES_CONFIRMED; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-clean-two-line-growth-candidate-saved-book-and-steel-crossing",
+      "journal_section": 527,
+      "archive": "HardShearCoarseGrowthCleanWorkbookNative20261117",
+      "script": "Verify-CleanGrowthPortable.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR CLEAN GROWTH PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-independent-matched-asd-on-identical-coarse-section-from-virgin",
+      "journal_section": 528,
+      "archive": "HardShearSameSectionASDCoarsePilot20261117",
+      "script": "Verify-CoarsePilot.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR_MATCHED_ASD_SAME_SECTION_OFFLINE_PASS 604097044ADD1349737742615B70C74AC7D8E801FCE14183840181A0116FFBCB 0.5"
     }
   ],
   "frozen_repositories": {
