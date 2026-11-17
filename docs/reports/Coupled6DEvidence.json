@@ -264,7 +264,8 @@
     "PanelJacobianColumnFirst20261117": "C24E80C272560006B8E117CC7AF1855E40093B36A1388995478106DE40B69627",
     "PanelFineCrackNormal20261117": "954C0B70FF88387229084BF7C284605CDB647AB629AFD9F7E601AA09727AB89E",
     "MVT2ReverseConcreteMaterial20261117": "E22671B7D47DAD52C911C9C38207324F95276875D50AD60901CB0CB3F980D23D",
-    "MVT2SpectralDamageControl20261117": "9D4046173E36EC993B3711D5F76D66E991A5D9D2AE5DC98AA76101829A3CD8CC"
+    "MVT2SpectralDamageControl20261117": "9D4046173E36EC993B3711D5F76D66E991A5D9D2AE5DC98AA76101829A3CD8CC",
+    "MVT2EffectivePlasticFlow20261117": "42D0340DACD7FE6E3A9BE3592DD6464219A6F58832F43061EC59999553E12220"
   },
   "cases": [
     {
@@ -2907,6 +2908,17 @@
       "stdout_contains": "MVT2 SPECTRAL DAMAGE NATIVE OFFLINE PASS 11475 9 6405",
       "outputs": {
         "SpectralDamageNativeProof.json": "D518B812C737E6B740B6218AE1D132C15245454A96F380ACBDAB1D456FD7E502"
+      }
+    },
+    {
+      "id": "mvt2-effective-plastic-flow-and-independent-tabulated-history",
+      "journal_section": 572,
+      "archive": "MVT2EffectivePlasticFlow20261117",
+      "script": "Verify-MVT2EffectiveBundle.py",
+      "arguments": ["--repo", "{repo}", "--report", "MVT2EffectiveBundleProof.json"],
+      "stdout_contains": "MVT2 FULL EFFECTIVE FLOW OFFLINE PASS 7650",
+      "outputs": {
+        "MVT2EffectiveBundleProof.json": "FBCAD61F24F1C399BFBFD17DB03347CB0743CCF3EC7FED9C6A7A5C2BA6B2C4E6"
       }
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "FFAA7BFCA573400274A0EE7858152475DA05715233869803A41436F6DB6B1CE9",
+  "manifest_sha256": "BC12E3E65D6B5709ACDE213C72EFCE64FD963193424C137949968AC171B0F16C",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 263,
+  "passed": 264,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2157,6 +2157,15 @@
         "SpectralDamageNativeProof.json": "D518B812C737E6B740B6218AE1D132C15245454A96F380ACBDAB1D456FD7E502"
       },
       "verified_stdout": "MVT2 SPECTRAL DAMAGE NATIVE OFFLINE PASS 11475 9 6405"
+    },
+    {
+      "id": "mvt2-effective-plastic-flow-and-independent-tabulated-history",
+      "journal_section": 572,
+      "archive": "MVT2EffectivePlasticFlow20261117",
+      "verified_outputs_sha256": {
+        "MVT2EffectiveBundleProof.json": "FBCAD61F24F1C399BFBFD17DB03347CB0743CCF3EC7FED9C6A7A5C2BA6B2C4E6"
+      },
+      "verified_stdout": "MVT2 FULL EFFECTIVE FLOW OFFLINE PASS 7650"
     }
   ]
 }
