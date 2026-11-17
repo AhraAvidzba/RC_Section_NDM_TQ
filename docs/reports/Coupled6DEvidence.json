@@ -285,7 +285,10 @@
     "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028",
     "KrylovFallbackNative20261117": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633",
     "ASDMaterialHistoryClosure20261117": "EEE550619B11A852744B8194608249FC654F9B3133789CB2115D360BBAF6251E",
-    "ASDSpectralTangentAndCrossDamage20261118": "F1F9C9D65C4B33A03FD6A53DEB5B5BA0637FA1235069AE09FE15B99720ACEF66"
+    "ASDSpectralTangentAndCrossDamage20261118": "F1F9C9D65C4B33A03FD6A53DEB5B5BA0637FA1235069AE09FE15B99720ACEF66",
+    "ASDResolutionSourceBooks20261118": "567B3B8117360BC69CFC8A3BACEB5CD800F06D1D856E54270DB2F98F5CED851E",
+    "ASDResolutionVBAContainers20261118": "78018DA6AF03FF424DBC15107DB5B0D45881342703468BFF5AE154C248D32E9C",
+    "ASDResolutionAndNativeFieldTransfer0220261118": "3B8C85E2CFED75747325232CE5BBEC0ABAB4D6E94A93FD9C2FC7E8D02F5FBEC5"
   },
   "cases": [
     {
@@ -3180,6 +3183,46 @@
       "stdout_contains": "ASD SPECTRAL TANGENTS AND CORRECTED CROSS DAMAGE VERIFIED; CAPACITY OPEN",
       "outputs": {
         "SpectralChecks.json": "F4E2FC1DC9219952C176174C4A897A90DCB2F250625983E888D27259579CAD18"
+      }
+    },
+    {
+      "id": "asd-resolution-field-transfer-native",
+      "journal_section": 593,
+      "archive": "ASDResolutionAndNativeFieldTransfer0220261118",
+      "script": "Verify-TestASDResolution.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "ResolutionNativeChecks.json"
+      ],
+      "stdout_contains": "RESOLUTION NATIVE VBA AND CLOSED EXCEL PROCESSES VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "ResolutionNativeChecks.json": "778F49F0BEC7C1E885D6E928A1EE586733B346FCA8C72B9D0723B11F5E6E81A7"
+      }
+    },
+    {
+      "id": "asd-resolution-field-transfer-mechanics",
+      "journal_section": 593,
+      "archive": "ASDResolutionAndNativeFieldTransfer0220261118",
+      "script": "Verify-TestASDResolution.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "ResolutionMechanicsChecks.json"
+      ],
+      "stdout_contains": "RESOLUTION STUDY AND NATIVE FIELD TRANSFER VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "ResolutionMechanicsChecks.json": "41DB6FBC31C9528584509F76CAC401D465AF2B3D23DACA3EAC30BD6C71734736"
       }
     }
   ],
