@@ -226,7 +226,8 @@
     "HardShearSameSectionASDStepSplit20261117": "11365D5BA1F390ACD3F92445DB4B98FCBB4EFB940506940637406DF6294076BB",
     "HardShearSameSectionASDOnePoint20261117": "10C445A3A22C7C6A4AF87E4FD181FA4708BA3191379E39F78746AC9CC387E87B",
     "HardShearLateSteelDiagnosticNative20261117": "4AB502FC1CA801C30AD5A0C31A618768C7A43D9CED9C95304F334AB4F9D62CF9",
-    "HardShearCoarseGrowthWorkbookRelease20261117": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63"
+    "HardShearCoarseGrowthWorkbookRelease20261117": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63",
+    "HardShearSameSectionASDDesignPaths20261117": "3197E52A738FC93C69488146D0C5A5DCCD84094366D7733717E2471645E2D5B0"
   },
   "cases": [
     {
@@ -2452,6 +2453,17 @@
       "script": "Verify-PublishedGrowth.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "HARDSHEAR PACKAGED RELEASE PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-asd-same-section-design-load-and-controlled-twist",
+      "journal_section": 534,
+      "archive": "HardShearSameSectionASDDesignPaths20261117",
+      "script": "Verify-ASDDesignPaths.py",
+      "arguments": ["--repo", "{repo}", "--report", "ASDDesignPathsProof.json"],
+      "stdout_contains": "HARDSHEAR ASD DESIGN PATHS OFFLINE PASS 99709284964C237DD4F1B7C03C49199691B47054D2E011B0F1B8228E62950360",
+      "outputs": {
+        "ASDDesignPathsProof.json": "653B9B5E4876D222939E9D37B12B539B6B5F307F22046F10CFFE942B98C08562"
+      }
     }
   ],
   "frozen_repositories": {

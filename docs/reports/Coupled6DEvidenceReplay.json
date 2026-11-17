@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "FDF9E7C5D90B65F1E48770D455A202CF6B7C2AD01503FC6760A2B41EAEDE223B",
+  "manifest_sha256": "31CA66CE81F9E2CC7F01B050DA223762288F65EBF23809FE9E5222F2F39A35A2",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 225,
+  "passed": 226,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1815,6 +1815,15 @@
       "archive": "HardShearCoarseGrowthWorkbookRelease20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "HARDSHEAR PACKAGED RELEASE PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-asd-same-section-design-load-and-controlled-twist",
+      "journal_section": 534,
+      "archive": "HardShearSameSectionASDDesignPaths20261117",
+      "verified_outputs_sha256": {
+        "ASDDesignPathsProof.json": "653B9B5E4876D222939E9D37B12B539B6B5F307F22046F10CFFE942B98C08562"
+      },
+      "verified_stdout": "HARDSHEAR ASD DESIGN PATHS OFFLINE PASS 99709284964C237DD4F1B7C03C49199691B47054D2E011B0F1B8228E62950360"
     }
   ]
 }
