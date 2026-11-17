@@ -259,7 +259,8 @@
     "MVT2H35CompressionRateNative20261117": "994A773813B2A2144B5A2F74DB5BED8115AD387C94730627854B05E0F8B8F0D2",
     "H35H45CompressionRateNative20261117": "A9119D786A7E14F831E68884903203D904FD2DA79FB7B5453229A082A44F626C",
     "MixedPanelDilationWeights20261117": "9287C5B83CB3EDF71E91C715229DA1B25A9BC9A1E7D283BD82D9A7FB48514335",
-    "PV25NormalChartAndPlaneStress20261117": "832C238395CDBC687230495F10D1FED61480AC62874BC70DB3ABAA7155B20B73"
+    "PV25NormalChartAndPlaneStress20261117": "832C238395CDBC687230495F10D1FED61480AC62874BC70DB3ABAA7155B20B73",
+    "PV25PlaneStressNativeWitness20261117": "A408438465B962629ACE0A6C79AE647DB8B30532C72D6DB493A96AE0BE3FB170"
   },
   "cases": [
     {
@@ -2847,6 +2848,17 @@
       "stdout_contains": "PV25 CHART AND INDEPENDENT PLANE STRESS PASS 106",
       "outputs": {
         "PV25ChartProof.json": "624391AF60B1F12D18C3E6BE5285993AB8A7AFCD7DDA672A9FE80FE74ADC1F9E"
+      }
+    },
+    {
+      "id": "pv25-native-equilibrium-past-peak-using-independent-deformation-predictor",
+      "journal_section": 567,
+      "archive": "PV25PlaneStressNativeWitness20261117",
+      "script": "Verify-PanelWitness.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "PV25NativeWitnessProof.json"],
+      "stdout_contains": "PV25 NATIVE WITNESS OFFLINE PASS 361",
+      "outputs": {
+        "PV25NativeWitnessProof.json": "E701CE611E4800349F78B0DBD106B71501DC35A0BB0BD5867DDEF1A644EED840"
       }
     }
   ],
