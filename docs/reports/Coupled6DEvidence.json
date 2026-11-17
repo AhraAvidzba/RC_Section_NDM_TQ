@@ -163,7 +163,10 @@
     "MVT2ArcRecoveryWorkbookRelease20261117": "6A76629D2C14789BDFDE0939CA9E8B384CE31E101E74BAC80597AF7F914FF9E8",
     "MVT2OpenSeesHeldTNewton2420261117": "2F7A8A5F21C91FA0122CCC24817069B8369D7654EC19271A5BA223742F7F6005",
     "HardShearArchiveSwitchAudit20261117": "C5C633E8C60C1DC3C8F900B0075F9E6B3274F3FFA68E1F5F05524B8B19D71D8A",
-    "MVT2OpenSeesHeldTQ1520261117": "0CF1E1AD6A6FC0F2DB821A0F49A871DBAD03FED4D5EA11EA2A262EA01AC2E745"
+    "MVT2OpenSeesHeldTQ1520261117": "0CF1E1AD6A6FC0F2DB821A0F49A871DBAD03FED4D5EA11EA2A262EA01AC2E745",
+    "MVT2NDMSignedWindow20261117": "F33926B1BC77BCD2E736DC39520CF66DCCA98CF630A51110D7C293FFE1861C25",
+    "MVT2SquareTorsionGrid20261117": "4940EEBF2C1B0BB5C5133C8A0EDBABFF845F1655BD19F4E96A554569E082D8C4",
+    "HardShearH9EquilibriumNative20261117": "A1D2C8D0D2FD7DEA397AF8846C024FE3961673AB59BA078D77AEF0475892912C"
   },
   "cases": [
     {
@@ -1871,6 +1874,46 @@
         "Replayed.json": "DF0891AA8B6391E34A7F266F07E200F1C58736759E7ED2EA4661F55A84686AB7"
       },
       "stdout_contains": "Q15 PROOF PASS 15.0 all_finer_steps_verified"
+    },
+    {
+      "id": "mvt2-ndm-signed-three-cuts-through-11-5625-kn",
+      "journal_section": 471,
+      "archive": "MVT2NDMSignedWindow20261117",
+      "script": "Verify-Cut.py",
+      "arguments": ["--root", "Exact11", "--refined", "Fine11", "--opens", "{evidence}/MVT2OpenSeesHeldTNewton2420261117.zip", "--out", "Replayed11.json"],
+      "outputs": {
+        "Replayed11.json": "DE7DC73557411F53539A1ECDC65D375DF786F626FF361764D7EE5A72BFE078DE"
+      },
+      "stdout_contains": "MVT2 SIGNED CUT PROOF PASS 14"
+    },
+    {
+      "id": "mvt2-ndm-signed-three-cuts-through-15-kn",
+      "journal_section": 471,
+      "archive": "MVT2NDMSignedWindow20261117",
+      "script": "Verify-Cut.py",
+      "arguments": ["--root", "Fine15", "--opens", "{evidence}/MVT2OpenSeesHeldTQ1520261117.zip", "--out", "Replayed15.json"],
+      "outputs": {
+        "Replayed15.json": "71BC690B1CF795BC3205CF76D5BCCF758781FCD9DADC1B21FD79DBF04FD3D16A"
+      },
+      "stdout_contains": "MVT2 SIGNED CUT PROOF PASS 25"
+    },
+    {
+      "id": "mvt2-native-square-torsion-quadrature-and-elastic-reference",
+      "journal_section": 472,
+      "archive": "MVT2SquareTorsionGrid20261117",
+      "script": "Verify-Grid.py",
+      "arguments": ["--signed", "{evidence}/MVT2NDMSignedWindow20261117.zip", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "DE345FD11496779A5C4C991AC0F560DAAD8456B5F35D60C3E7B7AAAFDC801210"
+      },
+      "stdout_contains": "MVT2 GRID PROOF PASS 12"
+    },
+    {
+      "id": "hard-shear-local-maximum-signed-secants-at-six-equilibria",
+      "journal_section": 473,
+      "archive": "HardShearH9EquilibriumNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR H9 EQUILIBRIUM PORTABLE VERIFIED D84FFD33C26BF9A6E4F66D931BC2FD38168DC996E6BA5DCD6DF7315944039FFA"
     }
   ],
   "frozen_repositories": {

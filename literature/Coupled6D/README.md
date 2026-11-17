@@ -7,6 +7,7 @@ PDF в этой папке — неизменённые копии из архи
 
 | Локальный файл | Библиография и источник | SHA-256 |
 | --- | --- | --- |
+| `Freddi-Murat-Paroni-2010-Saint-Venant.pdf` | L. Freddi, F. Murat, R. Paroni. *Saint-Venant’s theory for beams with multi-connected cross-section: justification and error estimate*. Уравнения (20)–(23) дают постановку функции напряжений Прандтля и интеграл крутильной жёсткости. Для однородного квадрата проверены два независимых ряда решения. [PDF в научном архиве SNS](https://cvgmt.sns.it/media/doc/paper/551/fmp-2010-published-version.pdf). | `07A88EC181256E615BA29456921DE86671266D261EEA09EC70177A62FD6FB6AB` |
 | `Poliotti-Bairan-2020-B-spline-section.pdf` | M. Poliotti, J. M. Bairán. *B-spline sectional model for general 3D effects in reinforced concrete elements*. Engineering Structures 207, 110200 (2020). [DOI](https://doi.org/10.1016/j.engstruct.2020.110200), [авторский PDF](https://upcommons.upc.edu/bitstreams/6ada7d69-15ee-4a9a-bc85-c32aeaa1ecfd/download). [Запись лицензии CC BY-NC-ND 4.0](https://agris.fao.org/search/en/providers/124988/records/6748869c7625988a371d1307). | `0fc6dde8b392b3444fadb6a1d770348df4b5861dbe8e4b766fbd4782dd06fd83` |
 | `Poliotti-Bairan-2019-Evolutive-dilatancy.pdf` | M. Poliotti, J. M. Bairán. *A new concrete plastic-damage model with an evolutive dilatancy parameter*. Engineering Structures 189, 541–549 (2019). [DOI](https://doi.org/10.1016/j.engstruct.2019.03.086), [карточка UPC](https://hdl.handle.net/2117/131799), [авторский PDF](https://upcommons.upc.edu/server/api/core/bitstreams/24ee0506-67b8-4f2b-84ef-9577d362bf21/content). | `55b25e1c0ef995543e8f7414f04be670b112c294a9c69d02c1ece20ec9e0a08d` |
 | `Osorio-Bustamante-2012-H45-Thesis.pdf` | E. F. Osorio Bustamante. *Efectos de los esfuerzos cortantes biaxiales en la respuesta sísmica de columnas de hormigón armado*. Диссертация UPC, 2012. Рис. 3-4 и табл. 3-2 содержат исходную кривую и свойства бетона H45. [Карточка UPC](https://hdl.handle.net/2117/94961), [авторский PDF](https://upcommons.upc.edu/server/api/core/bitstreams/c7391d0a-e542-4b51-afd2-2796fa29258e/content). | `07153ac566681cb55797dca3d0cdc7206fee4122fc9fa20ba9d8da52aba7c18d` |
@@ -63,6 +64,7 @@ PDF в этой папке — неизменённые копии из архи
 Из корня проекта:
 
 ```powershell
+curl.exe -fsSL 'https://cvgmt.sns.it/media/doc/paper/551/fmp-2010-published-version.pdf' -o 'literature/Coupled6D/Freddi-Murat-Paroni-2010-Saint-Venant.pdf'
 curl.exe -fsSL 'https://upcommons.upc.edu/bitstreams/6ada7d69-15ee-4a9a-bc85-c32aeaa1ecfd/download' -o 'literature/Coupled6D/Poliotti-Bairan-2020-B-spline-section.pdf'
 curl.exe -fsSL 'https://upcommons.upc.edu/server/api/core/bitstreams/24ee0506-67b8-4f2b-84ef-9577d362bf21/content' -o 'literature/Coupled6D/Poliotti-Bairan-2019-Evolutive-dilatancy.pdf'
 curl.exe -fsSL 'https://upcommons.upc.edu/server/api/core/bitstreams/c7391d0a-e542-4b51-afd2-2796fa29258e/content' -o 'literature/Coupled6D/Osorio-Bustamante-2012-H45-Thesis.pdf'
