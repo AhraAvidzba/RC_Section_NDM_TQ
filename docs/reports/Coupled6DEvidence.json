@@ -246,7 +246,10 @@
     "MVT2NativePublicationCutRecovery20261117": "3ADDC2837E6D63A8B31C6CD2314CB47387AC437C1C786DE7A304AC18C9F19309",
     "MVT2NativePublicationCutSplit20261117": "B90505E21FA5E7735B91374512602B901A4864F4F0C23D7191028F87268B8F46",
     "MVT2Cut396PrincipalSigns20261117": "1588EF69B15D6398613C4F96C526792BE31AAF1D46C857ECD116109C9AE51269",
-    "MVT2Cut396SpectralAttribution20261117": "6BF185C30FEEF4AE4687CAED5AA86D9FC09850FE82C3C8546AA659206BAF4B51"
+    "MVT2Cut396SpectralAttribution20261117": "6BF185C30FEEF4AE4687CAED5AA86D9FC09850FE82C3C8546AA659206BAF4B51",
+    "MVT2NativePublicationCutFollow20261117": "9F55DE3FC0B1B652DD1ED9683507423ADE4DF6AB3B008D9590EE1D9327F9864E",
+    "MVT2NativePublicationCutSequentialTwist20261117": "5958DB1E43D9FDFD6129A0CAA1DFDBD777A9EC67D74DBDE46E22E9E5C402E8ED",
+    "MVT2Cut396MaterialPredictor20261117": "9371CDC9B169CEDDE05776280399C2676F776033DC12F01F0F7C572C1031EF55"
   },
   "cases": [
     {
@@ -2691,6 +2694,39 @@
       "stdout_contains": "MVT2 CUT396 SPECTRAL SUBSTITUTION OFFLINE PASS 2",
       "outputs": {
         "Cut396SpectralProof.json": "6B2FAD7882E6D47129F4E62D03612B9D47FC865A176266F36713BC2F8F8EE130"
+      }
+    },
+    {
+      "id": "mvt2-native-tiny-force-steps-and-independent-twist-probes",
+      "journal_section": 554,
+      "archive": "MVT2NativePublicationCutFollow20261117",
+      "script": "Verify-NativeFollow.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "NativeFollowProof.json"],
+      "stdout_contains": "MVT2 NATIVE FOLLOW OFFLINE PASS 2 6",
+      "outputs": {
+        "NativeFollowProof.json": "AD62976A2BA3D264C58925A6A09EB62FFDA6F77BCA67322B63F1FE1CBFD77FC1"
+      }
+    },
+    {
+      "id": "mvt2-native-sequential-twist-local-maximum-and-refinement",
+      "journal_section": 555,
+      "archive": "MVT2NativePublicationCutSequentialTwist20261117",
+      "script": "Verify-SequentialTwist.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "SequentialTwistProof.json"],
+      "stdout_contains": "MVT2 SEQUENTIAL TWIST OFFLINE PASS 13",
+      "outputs": {
+        "SequentialTwistProof.json": "F1B1A58420BD51AF15F5DC86E0AA3831EF2B17A69FCF94BE26E806FE1B7C915F"
+      }
+    },
+    {
+      "id": "mvt2-asd-effective-predictor-and-tensile-compressive-history",
+      "journal_section": 556,
+      "archive": "MVT2Cut396MaterialPredictor20261117",
+      "script": "Check-Cut396Material.py",
+      "arguments": ["--repo", "{repo}", "--report", "Cut396MaterialProof.json"],
+      "stdout_contains": "MVT2 CUT396 MATERIAL HISTORY OFFLINE PASS 22",
+      "outputs": {
+        "Cut396MaterialProof.json": "02192BDC718E48569437E14D3E4E962790CD8D6C501F2014A7F12C72B9527B43"
       }
     }
   ],

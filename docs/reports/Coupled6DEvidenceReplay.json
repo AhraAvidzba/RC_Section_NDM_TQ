@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "A510ED2BEAFFC076A8BFBA249F8E8805178503EADAA32126989F4794C39F0E89",
+  "manifest_sha256": "EABF1F85FFBCBBABDFD1348DEF7C7977047E367DF1CADB0B4833C6910E20E26B",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 245,
+  "passed": 248,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1995,6 +1995,33 @@
         "Cut396SpectralProof.json": "6B2FAD7882E6D47129F4E62D03612B9D47FC865A176266F36713BC2F8F8EE130"
       },
       "verified_stdout": "MVT2 CUT396 SPECTRAL SUBSTITUTION OFFLINE PASS 2"
+    },
+    {
+      "id": "mvt2-native-tiny-force-steps-and-independent-twist-probes",
+      "journal_section": 554,
+      "archive": "MVT2NativePublicationCutFollow20261117",
+      "verified_outputs_sha256": {
+        "NativeFollowProof.json": "AD62976A2BA3D264C58925A6A09EB62FFDA6F77BCA67322B63F1FE1CBFD77FC1"
+      },
+      "verified_stdout": "MVT2 NATIVE FOLLOW OFFLINE PASS 2 6"
+    },
+    {
+      "id": "mvt2-native-sequential-twist-local-maximum-and-refinement",
+      "journal_section": 555,
+      "archive": "MVT2NativePublicationCutSequentialTwist20261117",
+      "verified_outputs_sha256": {
+        "SequentialTwistProof.json": "F1B1A58420BD51AF15F5DC86E0AA3831EF2B17A69FCF94BE26E806FE1B7C915F"
+      },
+      "verified_stdout": "MVT2 SEQUENTIAL TWIST OFFLINE PASS 13"
+    },
+    {
+      "id": "mvt2-asd-effective-predictor-and-tensile-compressive-history",
+      "journal_section": 556,
+      "archive": "MVT2Cut396MaterialPredictor20261117",
+      "verified_outputs_sha256": {
+        "Cut396MaterialProof.json": "02192BDC718E48569437E14D3E4E962790CD8D6C501F2014A7F12C72B9527B43"
+      },
+      "verified_stdout": "MVT2 CUT396 MATERIAL HISTORY OFFLINE PASS 22"
     }
   ]
 }
