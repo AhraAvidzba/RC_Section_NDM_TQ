@@ -42,6 +42,7 @@ Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
 Private Const STEP_GROWTH As Double = 1.25
 Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
+Private Const POST_PEAK_EXTENDED_RATIO As Double = 4# ' Верхний шаг после шести гладких приращений подряд.
 Private Const POST_PEAK_SECANT_TOLERANCE As Double = 0.02 ' Допустимое отклонение приращений поля и множителя от секущей.
 
 Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedResponse
@@ -209,6 +210,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If smoothTrial And mFollowingLocalPeak Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
             stepCeiling = nominal
             If smoothSteps >= 2 Then stepCeiling = POST_PEAK_STEP_RATIO * nominal
+            If smoothSteps >= 6 Then stepCeiling = POST_PEAK_EXTENDED_RATIO * nominal
             If increment > stepCeiling Then increment = stepCeiling
             If increment < stepCeiling / STEP_GROWTH Then increment = increment * STEP_GROWTH
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
