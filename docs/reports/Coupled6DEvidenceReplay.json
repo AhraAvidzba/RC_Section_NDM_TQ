@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "3B1D02770422D52DFEDCD17E927BCADB4C8637C9997E890AA980B4A3B62CD8E6",
+  "manifest_sha256": "F1055429B52956CF4230EC90273F5DD5B3F828F6E20072A6655386CC72862C04",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 157,
+  "passed": 160,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1321,6 +1321,33 @@
         "Replayed.json": "94D0F0A67C2C043F43FAAB241E81B2BA8E5B4E0E3079B7BB7DE12FB67AD76FC6"
       },
       "verified_stdout": "EXCEL SMOKE REPLAY PASS 94D0F0A67C2C043F43FAAB241E81B2BA8E5B4E0E3079B7BB7DE12FB67AD76FC6"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-newton24-accepts-formerly-failed-step",
+      "journal_section": 468,
+      "archive": "MVT2OpenSeesHeldTNewton2420261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "FC5D9E7235D78530484B410CCD97F48EFBF4780292D08991C07AFBE1420F4843"
+      },
+      "verified_stdout": "MVT2 NEWTON24 PROOF PASS 11.5625"
+    },
+    {
+      "id": "hard-shear-peaks-concrete-switch-projected-residual-intersection",
+      "journal_section": 469,
+      "archive": "HardShearArchiveSwitchAudit20261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "6BABCF751ADF0AF17312F013A55EC204C0559FCA2E236D86369278F8F5312D64"
+      },
+      "verified_stdout": "HARDSHEAR ARCHIVED SWITCH AUDITED"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-verified-through-15-kn",
+      "journal_section": 470,
+      "archive": "MVT2OpenSeesHeldTQ1520261117",
+      "verified_outputs_sha256": {
+        "Replayed.json": "DF0891AA8B6391E34A7F266F07E200F1C58736759E7ED2EA4661F55A84686AB7"
+      },
+      "verified_stdout": "Q15 PROOF PASS 15.0 all_finer_steps_verified"
     }
   ]
 }

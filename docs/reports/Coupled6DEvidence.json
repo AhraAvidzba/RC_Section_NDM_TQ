@@ -160,7 +160,10 @@
     "MVT2H26BridgeNegativeNative20261117": "E74F3B7BB1CA92298B9139A6706BF414C2349440A24B30DEE84453EC90326073",
     "MVT2H26BridgeTraceNative20261117": "B4AAD49712AFF7065005AE67133DDDD785AC53CE68E6647F5D50668F14F0B92D",
     "MVT2OpenSeesHeldTLineSearch20261117": "F145B06B77BDF0D1261C595FCC0F812CDBCB613DC92F327EC67040A8DD788654",
-    "MVT2ArcRecoveryWorkbookRelease20261117": "6A76629D2C14789BDFDE0939CA9E8B384CE31E101E74BAC80597AF7F914FF9E8"
+    "MVT2ArcRecoveryWorkbookRelease20261117": "6A76629D2C14789BDFDE0939CA9E8B384CE31E101E74BAC80597AF7F914FF9E8",
+    "MVT2OpenSeesHeldTNewton2420261117": "2F7A8A5F21C91FA0122CCC24817069B8369D7654EC19271A5BA223742F7F6005",
+    "HardShearArchiveSwitchAudit20261117": "C5C633E8C60C1DC3C8F900B0075F9E6B3274F3FFA68E1F5F05524B8B19D71D8A",
+    "MVT2OpenSeesHeldTQ1520261117": "0CF1E1AD6A6FC0F2DB821A0F49A871DBAD03FED4D5EA11EA2A262EA01AC2E745"
   },
   "cases": [
     {
@@ -1835,6 +1838,39 @@
         "Replayed.json": "94D0F0A67C2C043F43FAAB241E81B2BA8E5B4E0E3079B7BB7DE12FB67AD76FC6"
       },
       "stdout_contains": "EXCEL SMOKE REPLAY PASS 94D0F0A67C2C043F43FAAB241E81B2BA8E5B4E0E3079B7BB7DE12FB67AD76FC6"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-newton24-accepts-formerly-failed-step",
+      "journal_section": 468,
+      "archive": "MVT2OpenSeesHeldTNewton2420261117",
+      "script": "Verify-HeldTNewton24.py",
+      "arguments": ["--bundle", "{evidence}/MVT2OpenSeesHeldTNewton2420261117.zip", "--archives", "{evidence}", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "FC5D9E7235D78530484B410CCD97F48EFBF4780292D08991C07AFBE1420F4843"
+      },
+      "stdout_contains": "MVT2 NEWTON24 PROOF PASS 11.5625"
+    },
+    {
+      "id": "hard-shear-peaks-concrete-switch-projected-residual-intersection",
+      "journal_section": 469,
+      "archive": "HardShearArchiveSwitchAudit20261117",
+      "script": "Audit.py",
+      "arguments": ["--archives", "{evidence}", "--output", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "6BABCF751ADF0AF17312F013A55EC204C0559FCA2E236D86369278F8F5312D64"
+      },
+      "stdout_contains": "HARDSHEAR ARCHIVED SWITCH AUDITED"
+    },
+    {
+      "id": "mvt2-opensees-held-torsion-verified-through-15-kn",
+      "journal_section": 470,
+      "archive": "MVT2OpenSeesHeldTQ1520261117",
+      "script": "Verify-HeldTQ15.py",
+      "arguments": ["--bundle", "{evidence}/MVT2OpenSeesHeldTQ1520261117.zip", "--archives", "{evidence}", "--out", "Replayed.json"],
+      "outputs": {
+        "Replayed.json": "DF0891AA8B6391E34A7F266F07E200F1C58736759E7ED2EA4661F55A84686AB7"
+      },
+      "stdout_contains": "Q15 PROOF PASS 15.0 all_finer_steps_verified"
     }
   ],
   "frozen_repositories": {
