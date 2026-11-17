@@ -222,7 +222,10 @@
     "HardShearCoarseGrowthSplitNative20261117": "F1D28250BD87A9F81445F8D650FF0F9E816433857B96DE0756FC0AECAA052461",
     "HardShearCoarseGrowthCleanWorkbookNative20261117": "1B9A0181BE2E7BAD53058549EE33DB9B1703DF1C01C0ADA20293D32A3D266396",
     "HardShearSameSectionASDCoarsePilot20261117": "67DE39B8362615DC3045BF8F0DF18D9859B75478EA8386F8751C4E2B78CAB904",
-    "HardShearSameSectionASDCoarseFollow20261117": "F89FFBD0F47E05CBAC62CDF07F3318BC4AFB4DEDB86366FFEA9E70B93FCFFA50"
+    "HardShearSameSectionASDCoarseFollow20261117": "F89FFBD0F47E05CBAC62CDF07F3318BC4AFB4DEDB86366FFEA9E70B93FCFFA50",
+    "HardShearSameSectionASDStepSplit20261117": "11365D5BA1F390ACD3F92445DB4B98FCBB4EFB940506940637406DF6294076BB",
+    "HardShearSameSectionASDOnePoint20261117": "10C445A3A22C7C6A4AF87E4FD181FA4708BA3191379E39F78746AC9CC387E87B",
+    "HardShearLateSteelDiagnosticNative20261117": "4AB502FC1CA801C30AD5A0C31A618768C7A43D9CED9C95304F334AB4F9D62CF9"
   },
   "cases": [
     {
@@ -2416,6 +2419,30 @@
       "script": "Verify-CoarseFollow.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "HARDSHEAR_MATCHED_ASD_SAME_SECTION_FOLLOW_OFFLINE_PASS 6A11AE79D41F925149D36967FE38278D843895D172DD35529A1E83F3F9745922 0.875"
+    },
+    {
+      "id": "hardshear-matched-asd-same-section-one-versus-two-increments-after-softening",
+      "journal_section": 530,
+      "archive": "HardShearSameSectionASDStepSplit20261117",
+      "script": "Verify-ASDStepSplit.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR_ASD_STEP_SPLIT_OFFLINE_PASS 9B2C50C9C30A46465A37657A799A2FB56DC51102555B01ACF83839F9084A97EE"
+    },
+    {
+      "id": "hardshear-asd-repeat-strain-effect-reproduced-in-one-material-point",
+      "journal_section": 531,
+      "archive": "HardShearSameSectionASDOnePoint20261117",
+      "script": "Verify-ASDOnePoint.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR_ONE_ASD_MATERIAL_OFFLINE_PASS 82BB6FB8B4BC5D4F11181326E12909C0F3025FC9F48E966F190BE2A056D06FAC"
+    },
+    {
+      "id": "hardshear-large-step-late-transverse-steel-diagnostic-crossing-versus-two-halves",
+      "journal_section": 532,
+      "archive": "HardShearLateSteelDiagnosticNative20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["{evidence}/HardShearCoarseGrowthSplitNative20261117.zip", "{evidence}/HardShearCoarseGrowthWorkbookNative20261117.zip", "{evidence}/HardShearInstalledStockTiming20261117.zip"],
+      "stdout_contains": "HARDSHEAR_LATE_STEEL_PORTABLE: VERIFIED_EVIDENCE; FULL=LATE_NUMFAIL_NO_CAPACITY; HALF=LATE_NUMFAIL_NO_CAPACITY; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {

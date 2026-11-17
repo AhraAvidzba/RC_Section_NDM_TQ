@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "B29312BB6AE91A7BDA330C8B48E0B699A8D0DBD2CE193C871B66139E341E6786",
+  "manifest_sha256": "EABFCC5D5EB47D20F034739974737ADF595C8AF53D4A77EFCB268F7F130D2345",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 221,
+  "passed": 224,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1787,6 +1787,27 @@
       "archive": "HardShearSameSectionASDCoarseFollow20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "HARDSHEAR_MATCHED_ASD_SAME_SECTION_FOLLOW_OFFLINE_PASS 6A11AE79D41F925149D36967FE38278D843895D172DD35529A1E83F3F9745922 0.875"
+    },
+    {
+      "id": "hardshear-matched-asd-same-section-one-versus-two-increments-after-softening",
+      "journal_section": 530,
+      "archive": "HardShearSameSectionASDStepSplit20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_ASD_STEP_SPLIT_OFFLINE_PASS 9B2C50C9C30A46465A37657A799A2FB56DC51102555B01ACF83839F9084A97EE"
+    },
+    {
+      "id": "hardshear-asd-repeat-strain-effect-reproduced-in-one-material-point",
+      "journal_section": 531,
+      "archive": "HardShearSameSectionASDOnePoint20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_ONE_ASD_MATERIAL_OFFLINE_PASS 82BB6FB8B4BC5D4F11181326E12909C0F3025FC9F48E966F190BE2A056D06FAC"
+    },
+    {
+      "id": "hardshear-large-step-late-transverse-steel-diagnostic-crossing-versus-two-halves",
+      "journal_section": 532,
+      "archive": "HardShearLateSteelDiagnosticNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_LATE_STEEL_PORTABLE: VERIFIED_EVIDENCE; FULL=LATE_NUMFAIL_NO_CAPACITY; HALF=LATE_NUMFAIL_NO_CAPACITY; physical_limit_certified=False"
     }
   ]
 }
