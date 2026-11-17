@@ -166,7 +166,8 @@
     "MVT2OpenSeesHeldTQ1520261117": "0CF1E1AD6A6FC0F2DB821A0F49A871DBAD03FED4D5EA11EA2A262EA01AC2E745",
     "MVT2NDMSignedWindow20261117": "F33926B1BC77BCD2E736DC39520CF66DCCA98CF630A51110D7C293FFE1861C25",
     "MVT2SquareTorsionGrid20261117": "4940EEBF2C1B0BB5C5133C8A0EDBABFF845F1655BD19F4E96A554569E082D8C4",
-    "HardShearH9EquilibriumNative20261117": "A1D2C8D0D2FD7DEA397AF8846C024FE3961673AB59BA078D77AEF0475892912C"
+    "HardShearH9EquilibriumNative20261117": "A1D2C8D0D2FD7DEA397AF8846C024FE3961673AB59BA078D77AEF0475892912C",
+    "MVT2TorqueAdaptiveNative20261117": "FB9FD69DEA4E46AD564CD38F1BCD7E27240242D5B6C119538ACEDE6944ADD8CC"
   },
   "cases": [
     {
@@ -1914,6 +1915,28 @@
       "archive": "HardShearH9EquilibriumNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR H9 EQUILIBRIUM PORTABLE VERIFIED D84FFD33C26BF9A6E4F66D931BC2FD38168DC996E6BA5DCD6DF7315944039FFA"
+    },
+    {
+      "id": "mvt2-standard-adaptive-torsion-fine100-reaches-10-51",
+      "journal_section": 474,
+      "archive": "MVT2TorqueAdaptiveNative20261117",
+      "script": "Verify-Adaptive.py",
+      "arguments": ["--root", "Case10", "--grid", "{evidence}/MVT2SquareTorsionGrid20261117.zip", "--signed", "{evidence}/MVT2NDMSignedWindow20261117.zip", "--points", "10", "--out", "Replayed10.json"],
+      "outputs": {
+        "Replayed10.json": "1D883B569DE600B97F9C717E45546CB2B92E1F3892CA6FE52114FAC013797E89"
+      },
+      "stdout_contains": "MVT2 ADAPTIVE TORSION PROOF PASS 10.51"
+    },
+    {
+      "id": "mvt2-standard-adaptive-torsion-fine400-watchdog-prefix",
+      "journal_section": 474,
+      "archive": "MVT2TorqueAdaptiveNative20261117",
+      "script": "Verify-Adaptive.py",
+      "arguments": ["--root", "Case20", "--grid", "{evidence}/MVT2SquareTorsionGrid20261117.zip", "--signed", "{evidence}/MVT2NDMSignedWindow20261117.zip", "--points", "20", "--timed-out", "--out", "Replayed20.json"],
+      "outputs": {
+        "Replayed20.json": "58DF345D0BE0561553772C3996417EA1DCDF2A103BF2E97B0414B0C477CFDE14"
+      },
+      "stdout_contains": "MVT2 ADAPTIVE TORSION PROOF PASS 6.8315"
     }
   ],
   "frozen_repositories": {
