@@ -208,7 +208,9 @@
     "MVT2GaussASDNominalP7Crossing20261117": "EC3FD10733670B75F442AA6326228A62739BF8ABCEC3C58710E31DA647CAB6D3",
     "MVT2GaussASDNominalP7Adjacent20261117": "7DB48539D21CF598DC15FE1A6BB996479B6375DDA9EE658662C8B8AACA6B2EB8",
     "HardShearConsistentSeedNative20261117": "FD244F92D0DE287CF3FDF5A77F10B9B134401689D7BFA7F9A9F958F2C9607A47",
-    "HardShearG13SerialArcAttempt14DirectionNative20261117": "6CA5C64823399B7385635AA50F31C132A221164C47DE8D8E96B42DBC23037318"
+    "HardShearG13SerialArcAttempt14DirectionNative20261117": "6CA5C64823399B7385635AA50F31C132A221164C47DE8D8E96B42DBC23037318",
+    "HardShearG13ArcAttempt14HoldP31Native20261117": "645D47A4E2792F0B60FF9E4998B9653FD7047CB719D9F5CFC844FDA58BFDA058",
+    "MVT2GaussASDNominalP7KnotLevel20261117": "9C8DA4155BFC448FE6BAAF904A3D1DD1CAC28D6B9260ADA7D1E012F6F38B30C4"
   },
   "cases": [
     {
@@ -2290,6 +2292,22 @@
       "archive": "HardShearG13SerialArcAttempt14DirectionNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_ARC56_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_RADIUS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-serial-attempt14-plastic-side-direction-at-point-31-minus",
+      "journal_section": 516,
+      "archive": "HardShearG13ArcAttempt14HoldP31Native20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip"],
+      "stdout_contains": "HARDSHEAR_ARC31_PORTABLE: VERIFIED_EVIDENCE; BALANCED_SAME_STATION_BRANCH; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-h53-p7-tensile-equivalent-strain-exact-level-correction",
+      "journal_section": 517,
+      "archive": "MVT2GaussASDNominalP7KnotLevel20261117",
+      "script": "Verify-P7Knot.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 EXACT TENSILE KNOT LEVEL OFFLINE PASS"
     }
   ],
   "frozen_repositories": {
