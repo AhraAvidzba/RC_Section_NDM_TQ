@@ -221,7 +221,8 @@
     "HardShearCoarseGrowthWorkbookNative20261117": "40B29680E2E73033519883545091BD201DC109430D405151D8EC5EBF97B99302",
     "HardShearCoarseGrowthSplitNative20261117": "F1D28250BD87A9F81445F8D650FF0F9E816433857B96DE0756FC0AECAA052461",
     "HardShearCoarseGrowthCleanWorkbookNative20261117": "1B9A0181BE2E7BAD53058549EE33DB9B1703DF1C01C0ADA20293D32A3D266396",
-    "HardShearSameSectionASDCoarsePilot20261117": "67DE39B8362615DC3045BF8F0DF18D9859B75478EA8386F8751C4E2B78CAB904"
+    "HardShearSameSectionASDCoarsePilot20261117": "67DE39B8362615DC3045BF8F0DF18D9859B75478EA8386F8751C4E2B78CAB904",
+    "HardShearSameSectionASDCoarseFollow20261117": "F89FFBD0F47E05CBAC62CDF07F3318BC4AFB4DEDB86366FFEA9E70B93FCFFA50"
   },
   "cases": [
     {
@@ -2407,6 +2408,14 @@
       "script": "Verify-CoarsePilot.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "HARDSHEAR_MATCHED_ASD_SAME_SECTION_OFFLINE_PASS 604097044ADD1349737742615B70C74AC7D8E801FCE14183840181A0116FFBCB 0.5"
+    },
+    {
+      "id": "hardshear-matched-asd-same-section-nonlinear-continuation-and-zero-increment-readback",
+      "journal_section": 529,
+      "archive": "HardShearSameSectionASDCoarseFollow20261117",
+      "script": "Verify-CoarseFollow.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR_MATCHED_ASD_SAME_SECTION_FOLLOW_OFFLINE_PASS 6A11AE79D41F925149D36967FE38278D843895D172DD35529A1E83F3F9745922 0.875"
     }
   ],
   "frozen_repositories": {
