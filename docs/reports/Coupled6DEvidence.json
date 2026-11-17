@@ -242,7 +242,10 @@
     "MVT2PublicationCutTwist20261117": "BCF4262B8906B7BCBD521276288762CB83402FEC79E1137AA3EAE60D37944C78",
     "MVT2NativePublicationCutTimed20261117": "EBAB47A1CDA340FAFD23604939D8A88CF9DC3CCC4B9535CB155FF104739C054A",
     "MVT2MatchedNativeHistoryASD20261117": "BBE66E1B4D599DD5F50196F01083488C612AD6415441C3F7E539FF98BF4BB427",
-    "MVT2Cut396FixedStrainASD20261117": "66B681EF09F92BAD0F238CB838D5BCFD8DACDDB36D7041C454F76C49606B30F4"
+    "MVT2Cut396FixedStrainASD20261117": "66B681EF09F92BAD0F238CB838D5BCFD8DACDDB36D7041C454F76C49606B30F4",
+    "MVT2NativePublicationCutRecovery20261117": "3ADDC2837E6D63A8B31C6CD2314CB47387AC437C1C786DE7A304AC18C9F19309",
+    "MVT2NativePublicationCutSplit20261117": "B90505E21FA5E7735B91374512602B901A4864F4F0C23D7191028F87268B8F46",
+    "MVT2Cut396PrincipalSigns20261117": "1588EF69B15D6398613C4F96C526792BE31AAF1D46C857ECD116109C9AE51269"
   },
   "cases": [
     {
@@ -2643,6 +2646,39 @@
       "stdout_contains": "MVT2 CUT396 FIXED STRAIN OFFLINE PASS 22",
       "outputs": {
         "Cut396FixedStrainReplay.json": "8CADB493EFE80D8800AD0903FE50F9040FAD8AE3E4E8C2D5FA825C9A602DD5DC"
+      }
+    },
+    {
+      "id": "mvt2-native-publication-cut-paired-force-predictors-and-tangents",
+      "journal_section": 550,
+      "archive": "MVT2NativePublicationCutRecovery20261117",
+      "script": "Verify-NativeRecovery.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "NativeRecoveryProof.json"],
+      "stdout_contains": "MVT2 NATIVE RECOVERY OFFLINE PASS 22 0",
+      "outputs": {
+        "NativeRecoveryProof.json": "DA9450148DC2695868C716FF300D2538D8595A8E3BC930F4E62027FE6F9501E8"
+      }
+    },
+    {
+      "id": "mvt2-native-publication-cut-force-substeps-after-21875-n",
+      "journal_section": 551,
+      "archive": "MVT2NativePublicationCutSplit20261117",
+      "script": "Verify-NativeSplit.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "NativeSplitProof.json"],
+      "stdout_contains": "MVT2 NATIVE SPLIT OFFLINE PASS 6 22392.578125",
+      "outputs": {
+        "NativeSplitProof.json": "6A812FC56DFE40F0B879EC75F5C328EC060625D70B55F5D10198DBF8FEFAFC74"
+      }
+    },
+    {
+      "id": "mvt2-publication-cut-concrete-principal-sign-resultants",
+      "journal_section": 552,
+      "archive": "MVT2Cut396PrincipalSigns20261117",
+      "script": "Split-Cut396Principal.py",
+      "arguments": ["--repo", "{repo}", "--report", "Cut396PrincipalJacobiProof.json"],
+      "stdout_contains": "MVT2 CUT396 PRINCIPAL SIGN OFFLINE PASS 3",
+      "outputs": {
+        "Cut396PrincipalJacobiProof.json": "77054D7D70851F10F0E0EF4BB3BB2A4B5DF2A2197FB30A7759D8A9061E0D0D9F"
       }
     }
   ],
