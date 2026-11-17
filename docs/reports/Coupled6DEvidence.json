@@ -204,7 +204,8 @@
     "MVT2GaussASDNominalTransverse20261117": "151F9399FBC40330A38C825B1BE40DF9B56A9BBA8DFF86719E4A5C490FA23938",
     "HardShearPhysicalControlCandidateANative20261117": "26FB0245FC32FF26661A354684AD8C4B70DA5DCB1A1E274E0BF6462C05221C1E",
     "MVT2GaussASDNominalExpandedTrust20261117": "B40BA00D6EC17464F587A7A6BBE0B1E6D9BE4F867BB38915FEDD1C1CE704EA28",
-    "HardShearPhysicalControlCandidateBNative20261117": "EDE8F989348A06C21492DF840F7315C1DB5C4EF8C91719735B85D49A7A9E0F59"
+    "HardShearPhysicalControlCandidateBNative20261117": "EDE8F989348A06C21492DF840F7315C1DB5C4EF8C91719735B85D49A7A9E0F59",
+    "MVT2GaussASDNominalP7Crossing20261117": "EC3FD10733670B75F442AA6326228A62739BF8ABCEC3C58710E31DA647CAB6D3"
   },
   "cases": [
     {
@@ -2256,6 +2257,14 @@
       "archive": "HardShearPhysicalControlCandidateBNative20261117",
       "script": "Verify.py",
       "stdout_contains": "HARDSHEAR WORKING-ROUTE PHYSICAL CONTROL A/B PASS"
+    },
+    {
+      "id": "mvt2-h53-rejected-p7-crossing-and-signed-axial-gradient-decomposition",
+      "journal_section": 512,
+      "archive": "MVT2GaussASDNominalP7Crossing20261117",
+      "script": "Verify-P7.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 REJECTED P7 CROSSING OFFLINE PASS"
     }
   ],
   "frozen_repositories": {
