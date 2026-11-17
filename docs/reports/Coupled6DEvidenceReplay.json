@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "224D8B1085D3A68EE708BCD696871EDD2B146BCEBA0A25B23B0DD55F07B9D161",
+  "manifest_sha256": "552C45AF393D35E306B0BF660EB1C6522C4A6FD46B210D6F94CAF9213F8A2DDD",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 255,
+  "passed": 256,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2085,6 +2085,15 @@
         "CompressionRateMVT2Proof.json": "B4A84569C47560A028F5A85A34FAA96D42E41D628D8F679A84B76FD70781D283"
       },
       "verified_stdout": "MVT2 H35 COMPRESSION RATE OFFLINE PASS 14"
+    },
+    {
+      "id": "native-h35-h45-compression-rate-and-mvt2-saturation",
+      "journal_section": 564,
+      "archive": "H35H45CompressionRateNative20261117",
+      "verified_outputs_sha256": {
+        "RateCylindersProof.json": "933A174103DA99761D940C517F924E9F41E87B49A7670D31288A1F507604AA83"
+      },
+      "verified_stdout": "H35 H45 COMPRESSION RATE NATIVE OFFLINE PASS 2580"
     }
   ]
 }
