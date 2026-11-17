@@ -19,6 +19,8 @@ Option Explicit
 Private Const COMPONENT_COUNT As Long = 6
 Private Const GAUGE_COUNT As Long = 4
 Private Const MIN_FRACTION As Double = 0.0078125
+Private Const STEEL_MIN_FRACTION As Double = 0.000244140625 ' Дополнительные пробы силового шага после смены ветви стали.
+Private Const MAX_STEEL_FIELD_TANGENTS As Long = 2 ' Ограничивает дорогие разностные сборки одним силовым шагом.
 Private Const MIN_PROGRESS As Double = 0.0001
 Private Const SMALL_STRAIN_MAX_NORM As Double = 2# ' Локальная поправка завершает состояние вблизи допуска.
 Private Const SMALL_STRAIN_RADIUS As Double = 2.5 ' Радиус через силовую невязку в масштабированных столбцах.
@@ -44,6 +46,7 @@ Private mPlusResponse As ICoupledPointResponse, mMinusResponse As ICoupledPointR
 Private mUseSpatialHistory As Boolean
 Private mLastFailedSide As Long ' 0 — центральная точка, +1 и -1 — продольные точки.
 Private mSystem As CCoupledLinearSystem
+Private mSteelCorrector As CCoupledSteelCorrection
 Private mMeta As CResultMeta
 Private mAccepted() As Double, mCandidate() As Double, mTrialResultants() As Double
 Private mPointStrain(1 To COMPONENT_COUNT) As Double
@@ -76,6 +79,7 @@ Private mIterations As Long, mEvaluations As Long, mMaterialPoint As Long
 Private mMaterialFailures As Long, mLastFailedPoint As Long
 Private mGradientBuilds As Long
 Private mLocalGradientBuilds As Long
+Private mSteelBranchBuilds As Long, mSteelFieldTangents As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
 
@@ -102,6 +106,16 @@ Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As I
     Set mPlusResponse = plusSide: Set mMinusResponse = minusSide
     mUseSpatialHistory = Not (plusSide Is Nothing)
     Set mSystem = New CCoupledLinearSystem: Set mMeta = New CResultMeta
+    Set mSteelCorrector = Nothing
+    If mUseSpatialHistory And section.ConcretePointCount < mPointCount Then
+        If TypeOf response Is CCoupledReinforcedResponse And TypeOf plusSide Is CCoupledReinforcedResponse And _
+                TypeOf minusSide Is CCoupledReinforcedResponse Then
+            Dim center As CCoupledReinforcedResponse, positive As CCoupledReinforcedResponse, negative As CCoupledReinforcedResponse
+            Set center = response: Set positive = plusSide: Set negative = minusSide
+            Set mSteelCorrector = New CCoupledSteelCorrection
+            mSteelCorrector.Initialize section, center, positive, negative, SPATIAL_HALF_STEP
+        End If
+    End If
     mReferenceModulus = referenceModulus
     ResetHistory
 End Sub
@@ -497,6 +511,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mRecoveredControlReady = False: Erase mRecoveredProjection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
     mLocalGradientBuilds = 0
+    mSteelBranchBuilds = 0: mSteelFieldTangents = 0
     mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
     mLastNorm = 0#: mMinimumPivot = 0#
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
@@ -509,6 +524,8 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
     Dim useGradientTangent As Boolean, built As Boolean
+    Dim useSteelCorrection As Boolean, useConcreteFieldTangent As Boolean, minimumFraction As Double
+    useSteelCorrection = Not mControlActive And Not (mSteelCorrector Is Nothing)
     Dim currentLambda As Double, candidateLambda As Double
     currentLambda = initialLambda: candidateLambda = initialLambda
     If mControlActive Then SetControlledLoad currentLambda, load
@@ -584,6 +601,7 @@ RecomputeTangent:
             Exit Function
         End If
         mMinimumPivot = mSystem.MinimumPivot
+        If useSteelCorrection Then RefineSteelCorrection current, correction, useConcreteFieldTangent
         If mControlActive And (useGradientTangent Or mUseSpatialHistory) Then
             governingRow = LargestEquilibriumResidualRow()
             baseEquation = mResidual(governingRow)
@@ -591,7 +609,9 @@ RecomputeTangent:
         ReDim mCandidate(1 To mDegreeCount)
         fraction = 1#: accepted = False: hasValidTrial = False
         candidateTolerance = tolerance
-        Do While fraction >= MIN_FRACTION
+        minimumFraction = MIN_FRACTION
+        If mSteelBranchBuilds > 0 Then minimumFraction = STEEL_MIN_FRACTION
+        Do While fraction >= minimumFraction
             For i = 1 To mDegreeCount
                 mCandidate(i) = current(i) + fraction * correction(i)
             Next i
@@ -617,6 +637,11 @@ RecomputeTangent:
             fraction = fraction * 0.5
         Loop
         If Not accepted Then
+            If useSteelCorrection And mSteelBranchBuilds > 0 And Not useConcreteFieldTangent And _
+                    mSteelFieldTangents < MAX_STEEL_FIELD_TANGENTS Then
+                useConcreteFieldTangent = True ' Та же точка и та же принятая история, другой бетонный градиент.
+                GoTo RecomputeTangent
+            End If
             If Not mUseSpatialHistory And Not useGradientTangent And mSection.HasAxialGradient(current) Then
                 useGradientTangent = True
                 GoTo RecomputeTangent
@@ -690,6 +715,7 @@ RecomputeTangent:
             SolveStep = True
             Exit Function
         End If
+        useConcreteFieldTangent = False
         current = mCandidate
         currentLambda = candidateLambda
         tolerance = candidateTolerance
@@ -1160,6 +1186,19 @@ Private Function SolveCorrection(ByRef field() As Double, ByRef correction() As 
     correction(size) = -ControlResidual(field)
     SolveCorrection = mSystem.Solve(augmented, correction, size)
 End Function
+
+' Пересматривает ветви стали без изменения принятой истории и базовой матрицы.
+' После отказа локального направления использует касательную бетонного остатка.
+Private Sub RefineSteelCorrection(ByRef field() As Double, ByRef correction() As Double, ByVal useFieldTangent As Boolean)
+    If Not useFieldTangent Then
+        mSteelBranchBuilds = mSteelBranchBuilds + mSteelCorrector.Refine(field, mMatrix, mResidual, correction)
+        Exit Sub
+    End If
+    Dim concrete() As Double
+    mSteelFieldTangents = mSteelFieldTangents + 1
+    If Not mSteelCorrector.TryConcreteTangent(field, mExternal, concrete, mEvaluations) Then Exit Sub
+    mSteelBranchBuilds = mSteelBranchBuilds + mSteelCorrector.Refine(field, concrete, mResidual, correction, concreteMatrix:=True)
+End Sub
 
 ' Завершает близкую к равновесию пространственную пробу при том же
 ' управлении. Малая поправка нужна там, где демпфирование Ньютона
@@ -1852,4 +1891,8 @@ Private Function DiagnosticSummary() As String
     If mSameControlRecoveryTried Then DiagnosticSummary = DiagnosticSummary & "; проверен переход для исходной меры"
     If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)
+    If mSteelBranchBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
+        "; пересборок ветвей стали: " & CStr(mSteelBranchBuilds)
+    If mSteelFieldTangents > 0 Then DiagnosticSummary = DiagnosticSummary & _
+        "; разностных бетонных касательных по полю: " & CStr(mSteelFieldTangents)
 End Function

@@ -270,7 +270,8 @@
     "MVT2SteelTransition20261117": "089F916E0CDF42C5E72669E5CB34F4C5FF3936130D647CFDEE319812D3D821F3",
     "MVT2TabulatedActiveSteel20261117": "12AC8259874E45568C5B04BB110F4C17D18FDEBD617532A30DE34C262B999792",
     "MVT2TabulatedActiveSteelVBA20261117": "87CECC42511E773F37611E4749AFD4947C299F5853893715F284FA9F498789FB",
-    "MVT2NativeSteelBranches20261117": "6A77DEB08E746CF08833C747F39A4D837DC4C6C470C5CD24B89936DF6AF78D9C"
+    "MVT2NativeSteelBranches20261117": "6A77DEB08E746CF08833C747F39A4D837DC4C6C470C5CD24B89936DF6AF78D9C",
+    "MVT2IntegratedSteelCorrection20261117": "20D400686306651D3605A60FEF7B81D4838BF3A368591264243F74434AFC88DC"
   },
   "cases": [
     {
@@ -2979,6 +2980,17 @@
       "stdout_contains": "MVT2 NATIVE STEEL BRANCHES PASS 5 72812.5 72812.5 77625.0 75312.5 77625.0",
       "outputs": {
         "NativeSteelBranchesProof.json": "101E3CEB002659BECEDFD17919ECBA8F88C0FB854E2A381F483E38FF79E9F57E"
+      }
+    },
+    {
+      "id": "mvt2-integrated-steel-correction-and-eight-stock-regressions",
+      "journal_section": 578,
+      "archive": "MVT2IntegratedSteelCorrection20261117",
+      "script": "Verify-IntegratedSteelCorrection.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--out", "IntegratedSteelCorrectionProof.json"],
+      "stdout_contains": "MVT2 INTEGRATED STEEL CORRECTION PASS 77625.0 365",
+      "outputs": {
+        "IntegratedSteelCorrectionProof.json": "6D4954BBCE9327252C3B65691E6DE72E0582C06E9E916C6DD1EE95152BEFD3D3"
       }
     }
   ],

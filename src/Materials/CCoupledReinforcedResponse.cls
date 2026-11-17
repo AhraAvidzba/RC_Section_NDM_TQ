@@ -137,11 +137,7 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
     If ICoupledPointResponse_EvaluatePoint <> sfcNone Or point < mFirstSteel Then Exit Function
     Dim j As Long, k As Long, axialStrain As Double, axialStress As Double, axialTangent As Double
     Dim utilization As Double, plastic As Double, backstress As Double
-    For j = 1 To COMPONENT_COUNT
-        axialStrain = axialStrain + mDirection(j, point) * strain(j)
-    Next j
-    mSteel(point).EvaluateTrial axialStrain, mPlastic(point, mAcceptedBuffer), mBackstress(point, mAcceptedBuffer), _
-        axialStress, axialTangent, plastic, backstress
+    ReadSteelTrial point, strain, axialStrain, axialStress, axialTangent, plastic, backstress
     If recordTrial Then
         mPlastic(point, mTrialBuffer) = plastic: mBackstress(point, mTrialBuffer) = backstress
         mAxialStress(point, mTrialBuffer) = axialStress
@@ -167,6 +163,36 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         End If
     Next j
 End Function
+
+' Считывает только бетонный вклад, включая знак вытеснения под стержнем.
+' Используется для разностной касательной от фиксированной принятой истории.
+Friend Function ReadConcreteStress(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double) As ESolverFailureCode
+    Dim unusedTangent(1 To COMPONENT_COUNT, 1 To COMPONENT_COUNT) As Double, i As Long
+    ReadConcreteStress = mConcrete.EvaluatePoint(point, strain, stress, unusedTangent, ctmStressOnly, recordTrial:=False)
+    If ReadConcreteStress <> sfcNone Or point < mFirstSteel Then Exit Function
+    For i = 1 To COMPONENT_COUNT: stress(i) = -stress(i): Next i
+End Function
+
+' Считывает осевой отклик стали от принятого буфера без записи пробы.
+' Номер ветви равен знаку пластического приращения, ноль означает упругую ветвь.
+Friend Function ReadSteelBranch(ByVal point As Long, ByRef strain() As Double, ByRef axialStrain As Double, _
+        ByRef axialStress As Double, ByRef axialTangent As Double) As Long
+    Dim plastic As Double, backstress As Double
+    ReadSteelTrial point, strain, axialStrain, axialStress, axialTangent, plastic, backstress
+    ReadSteelBranch = Sgn(plastic - mPlastic(point, mAcceptedBuffer))
+End Function
+
+' Вычисляет скалярную пробу для полного отклика и для поправки касательной.
+Private Sub ReadSteelTrial(ByVal point As Long, ByRef strain() As Double, ByRef axialStrain As Double, _
+        ByRef axialStress As Double, ByRef axialTangent As Double, ByRef plastic As Double, ByRef backstress As Double)
+    Dim i As Long
+    axialStrain = 0#
+    For i = 1 To COMPONENT_COUNT
+        axialStrain = axialStrain + mDirection(i, point) * strain(i)
+    Next i
+    mSteel(point).EvaluateTrial axialStrain, mPlastic(point, mAcceptedBuffer), mBackstress(point, mAcceptedBuffer), _
+        axialStress, axialTangent, plastic, backstress
+End Sub
 
 ' Читает пробный критерий вытесненного или обычного бетона.
 ' Коэффициенты знака замещения учитываются в уравнениях, а не здесь.
