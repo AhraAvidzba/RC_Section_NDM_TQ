@@ -283,7 +283,8 @@
     "MVT2ExplicitASDCalibration20261117": "052DFAE3AFB8552D77434F0947C67D26375B4DBA6C1085E4D06271A7ED820EC5",
     "MVT2TorqueRecoveryAndFieldTangent20261117": "96CD6F7A847AC8937657E12D9E719EF59ABE72108FB999144C7F0255282ABBDF",
     "FieldTangentStockWorkbook20261117": "8AC09FECDF503978B79ED9B880AADA5CBB3C2779CCEEE14458100EAB14A12028",
-    "KrylovFallbackNative20261117": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633"
+    "KrylovFallbackNative20261117": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633",
+    "ASDMaterialHistoryClosure20261117": "EEE550619B11A852744B8194608249FC654F9B3133789CB2115D360BBAF6251E"
   },
   "cases": [
     {
@@ -3142,6 +3143,24 @@
       "stdout_contains": "KRYLOV FALLBACK VERIFIED 141 28 68; TARGET NOT REACHED; NOT INSTALLED",
       "outputs": {
         "KrylovFallbackChecks.json": "C373C298BFE454B46C4D301B98BFE9F59B56F06EA39C0CC260E6A91F12730733"
+      }
+    },
+    {
+      "id": "asd-history-integration-native-vba-and-pinned-reference-behavior",
+      "journal_section": 591,
+      "archive": "ASDMaterialHistoryClosure20261117",
+      "script": "Verify-TestMaterialIntegration.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "MaterialIntegrationChecks.json"
+      ],
+      "stdout_contains": "ASD MATERIAL HISTORY AND NATIVE VBA VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "MaterialIntegrationChecks.json": "5EF34DA63173E25C79235F69ECCF9D7ADAA162EAFB7DF452255FB8427909A354"
       }
     }
   ],

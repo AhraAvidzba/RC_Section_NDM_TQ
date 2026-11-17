@@ -1,0 +1,18 @@
+{
+  "reference_label": "OpenSees 3.8.0 material comparisons",
+  "source_url": "https://github.com/OpenSees/OpenSees/blob/6e55293513192aa05c7e1205e66a5a1a1ed088c4/SRC/material/nD/ASDConcrete3DMaterial.cpp",
+  "tag": "v3.8.0",
+  "tag_commit": "6e55293513192aa05c7e1205e66a5a1a1ed088c4",
+  "source_git_blob": "000c50a2f927ff05ef82f424c93dab20b62ba504",
+  "source_sha256": "210EADE9C167DA38FB5A7894570C64BA0CA35D9D9307A9818FDE485435EBEA31",
+  "runtime_reported_version": "3.8.0",
+  "python_package": "openseespywin 3.8.0.0",
+  "native_module_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+  "source_behavior_probe": {
+    "states": 24,
+    "separate_spectral_update_error_MPa": 4.440892098500626e-15,
+    "additional_compressive_mixing_prediction_error_MPa": 1.6941534367378805,
+    "whole_compute_source_correspondence_established": false
+  },
+  "limitation": "Совпадение поведения всего compute сохранённого исходника и двоичного модуля не установлено. Причина различия на уровне реализации или сборки открыта. Сопоставления фиксируют фактический ответ указанного нативного модуля; номер версии не заменяет его хеш."
+}
