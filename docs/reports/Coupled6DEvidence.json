@@ -187,7 +187,9 @@
     "MVT2GaussASDExtendedCutRays20261117": "D319B3DF22E8054815715B0A3F22663B2F1A815C428538EE15EDC9CBB80DE0E7",
     "HardShearSecantContinuationABNative20261117": "48C68360A56D8369CA7670F11DB8BD875D5F0C06BDD780D1B9E012D35EB34154",
     "MVT2GaussASDNominalPostyield20261117": "06A04F304206A58E5CB1B5527B57A1AED030E017C70C7D625B0C0CA9BBDD98ED",
-    "HardShearG13PrecisionNative20261117": "1B7C0461264D41BE516B206B2AD05931F1B2695256CE8A85BCAE2C92533391C7"
+    "HardShearG13PrecisionNative20261117": "1B7C0461264D41BE516B206B2AD05931F1B2695256CE8A85BCAE2C92533391C7",
+    "HardShearWorkbookProfile20261117": "14100CD7AE6ECF342D8179DCB963CB09E46BA644B406154DCF125F30D4758634",
+    "HardShearEnvelopeReuseNative20261117": "8B6E9D52AF5AAECC1682B247662B3E142AB56BFEDF8847DBF8A2C5FEE989F384"
   },
   "cases": [
     {
@@ -2114,6 +2116,21 @@
       "archive": "HardShearG13PrecisionNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_G13_PORTABLE: VERIFIED_EVIDENCE; COMPLETE; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-native-matched-equation-and-concrete-tangent-profile",
+      "journal_section": 495,
+      "archive": "HardShearWorkbookProfile20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["--stdout"],
+      "stdout_contains": "\"status\": \"PASS\""
+    },
+    {
+      "id": "hardshear-exact-concrete-envelope-reuse-native-candidate-and-stock",
+      "journal_section": 496,
+      "archive": "HardShearEnvelopeReuseNative20261117",
+      "script": "Verify-Candidate.py",
+      "stdout_contains": "ENVELOPE REUSE NATIVE VERIFIED"
     }
   ],
   "frozen_repositories": {
