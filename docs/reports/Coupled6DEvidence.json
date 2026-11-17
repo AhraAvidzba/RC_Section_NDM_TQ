@@ -215,7 +215,8 @@
     "HardShearG13Arc31AutoNative20261117": "CBC7CB1E5D33FF2DC18FAC4A37BB109FFC7B18804D3BD4000A89173BEA8F77BC",
     "HardShearG13Step14vs15Metric20261117": "3F8C3FB8D6D4A83618AC7A2A6AAEA6220F08D41BB46F826B390A188087E95172",
     "HardShearBranchSelectionWorkbookNative20261117": "658C6B292AE5A3001E47E4F8BFFEC34CF522889A293B8BE46380CD6235B5C35A",
-    "HardShearG13Arc31HalfNative20261117": "B0B056BB04E3E71879EB7538D3F48024CD3ED59BDE4DFED916B6A314BE71D53E"
+    "HardShearG13Arc31HalfNative20261117": "B0B056BB04E3E71879EB7538D3F48024CD3ED59BDE4DFED916B6A314BE71D53E",
+    "HardShearG13Arc31SteerNative20261117": "BFB46F391990F9A3D5A440C96B862D8E5BFC29B876EAB653A97B1BCE7DB7AA5A"
   },
   "cases": [
     {
@@ -2353,6 +2354,14 @@
       "script": "Verify-Portable.py",
       "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip", "{evidence}/HardShearG13Arc31ResumeNative20261117.zip", "{evidence}/HardShearG13Arc31AutoNative20261117.zip"],
       "stdout_contains": "HARDSHEAR_ARC31_HALF_PORTABLE: VERIFIED_EVIDENCE; TRY15_FULL=LOCALITY_OR_BALANCE; TRY15_HALF=REFUSED; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-rotate-next-control-projection-on-exact-history",
+      "journal_section": 523,
+      "archive": "HardShearG13Arc31SteerNative20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["{evidence}/HardShearG13SerialArcAttempt14DirectionNative20261117.zip", "{evidence}/HardShearG13Arc31ResumeNative20261117.zip", "{evidence}/HardShearG13Arc31AutoNative20261117.zip"],
+      "stdout_contains": "HARDSHEAR_ARC31_STEER_PORTABLE: VERIFIED_EVIDENCE; TRY15=REFUSED; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
