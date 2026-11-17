@@ -107,3 +107,25 @@ Get-ChildItem -LiteralPath 'literature/Coupled6D' -Filter '*.pdf' | Get-FileHash
 ```
 
 Для Tulonen–Laaksonen сверяйте SHA байтов от `%PDF-` до конца PDF. Если перед ним пришла MIME-оболочка, сохраните отдельно её PDF-часть без граничных строк. Локальная копия открывается без восстановления и содержит 18 страниц. На текущем компьютере папка `Tulonen2023` связана с архивом на диске D из-за свободного места на C. В другом рабочем дереве для проверки достаточно обычной папки с тем же PDF.
+
+## Первичные исходники и документация ASDConcrete3D
+
+Для проверки §586 сохранены полный исходник материала из тега OpenSees
+3.8.0 и официальная документация. Исходник позволяет воспроизвести
+автоматические кривые, их параметры энергии и длину построения;
+документация описывает команды пользовательских таблиц. Текст исходника
+сохранён с его авторской шапкой. Русская версия этих первичных материалов
+в проверке не использовалась.
+
+| Локальный файл | Источник | SHA-256 |
+| --- | --- | --- |
+| `OpenSees-3.8.0-ASDConcrete3DMaterial.cpp` | OpenSees, тег `v3.8.0`, `SRC/material/nD/ASDConcrete3DMaterial.cpp`. [Точный исходник](https://raw.githubusercontent.com/OpenSees/OpenSees/v3.8.0/SRC/material/nD/ASDConcrete3DMaterial.cpp). | `210eade9c167da38fb5a7894570c64ba0ca35d9d9307a9818fde485435ebea31` |
+| `OpenSees-ASDConcrete3D-Documentation-20261117.html` | OpenSees Documentation, *ASDConcrete3D Material*, копия от 17.11.2026. [Официальная страница](https://opensees.github.io/OpenSeesDocumentation/user/manual/material/ndMaterials/ASDConcrete3D.html). | `3e0d3928ab9fd79340fb94be77cc75937d62ad720119677406e7065413871fb6` |
+
+```powershell
+curl.exe -fsSL 'https://raw.githubusercontent.com/OpenSees/OpenSees/v3.8.0/SRC/material/nD/ASDConcrete3DMaterial.cpp' -o 'literature/Coupled6D/OpenSees-3.8.0-ASDConcrete3DMaterial.cpp'
+curl.exe -fsSL 'https://opensees.github.io/OpenSeesDocumentation/user/manual/material/ndMaterials/ASDConcrete3D.html' -o 'literature/Coupled6D/OpenSees-ASDConcrete3D-Documentation-20261117.html'
+```
+
+Официальная веб-страница может обновляться; для повтора §586 используется
+сохранённая копия с указанной контрольной суммой.
