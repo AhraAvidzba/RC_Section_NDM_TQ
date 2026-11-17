@@ -191,7 +191,11 @@
     "HardShearWorkbookProfile20261117": "14100CD7AE6ECF342D8179DCB963CB09E46BA644B406154DCF125F30D4758634",
     "HardShearEnvelopeReuseNative20261117": "8B6E9D52AF5AAECC1682B247662B3E142AB56BFEDF8847DBF8A2C5FEE989F384",
     "HardShearG14DirectionNative20261117": "596609AD534F382BE6FD06FCCBBBCCCF42D24A66236C34364D52164376AFCD02",
-    "MVT2GaussASDNominalDirectionalFollow20261117": "53E7D62932498F6EEC71BAA39120920B814E3F34410A245F818B4EB982501E69"
+    "MVT2GaussASDNominalDirectionalFollow20261117": "53E7D62932498F6EEC71BAA39120920B814E3F34410A245F818B4EB982501E69",
+    "HardShearG14CrossedRestartNative20261117": "256147D18D3652204ACCC0B76AAA362E6E06E5DDC3B80AA413E16D24FCE5B082",
+    "HardShearG14SubfloorNative20261117": "066E50516DD8267F96387437E50986156D45B73D788909DD1FF756110B1F523C",
+    "MVT2GaussASDNominalVectorBundle20261117": "24464DB3DCC38635B06DF165D5CB79C31DEF76BF2B50240795FAD8C5D18CCC6B",
+    "HardShearG14MaterialCoordinateNative20261117": "D9AA3D7A7A01DA49F7FE23C7EF7D3304BF8C407510DD978FA4449D8E7C5B8A8F"
   },
   "cases": [
     {
@@ -2148,6 +2152,35 @@
       "script": "Verify-Follow.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "MVT2 ASD DIRECTIONAL FOLLOW OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-g14-three-local-crossed-branch-warm-starts",
+      "journal_section": 499,
+      "archive": "HardShearG14CrossedRestartNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G14_RESTART_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-g14-subfloor-in-branch-full-equation-retest",
+      "journal_section": 500,
+      "archive": "HardShearG14SubfloorNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_SUBFLOOR_PORTABLE: VERIFIED_EVIDENCE; COMPLETE; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-asd-h53-signed-vector-and-bounded-measured-residual-bundle",
+      "journal_section": 501,
+      "archive": "MVT2GaussASDNominalVectorBundle20261117",
+      "script": "Verify-VectorEvidence.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 ASD VECTOR BUNDLE OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-g14-four-local-equilibria-on-either-side-of-concrete-trial-yield",
+      "journal_section": 502,
+      "archive": "HardShearG14MaterialCoordinateNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G14_MATERIAL_COORDINATE_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {

@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "7861C545A21C3B7CF1EFC9BE4D579FD50F690DD01FAB3127E26C56285BE51E3A",
+  "manifest_sha256": "012D2E9627A473AD30ABE1CEEEB92B9C1A1AA978862C13C841E44582741005F1",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 190,
+  "passed": 194,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1570,6 +1570,34 @@
       "archive": "MVT2GaussASDNominalDirectionalFollow20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "MVT2 ASD DIRECTIONAL FOLLOW OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-g14-three-local-crossed-branch-warm-starts",
+      "journal_section": 499,
+      "archive": "HardShearG14CrossedRestartNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_G14_RESTART_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-g14-subfloor-in-branch-full-equation-retest",
+      "journal_section": 500,
+      "archive": "HardShearG14SubfloorNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_SUBFLOOR_PORTABLE: VERIFIED_EVIDENCE; COMPLETE; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-asd-h53-signed-vector-and-bounded-measured-residual-bundle",
+      "journal_section": 501,
+      "archive": "MVT2GaussASDNominalVectorBundle20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD VECTOR BUNDLE OFFLINE PASS"
+    },
+    {
+      "id": "hardshear-g14-four-local-equilibria-on-either-side-of-concrete-trial-yield",
+      "journal_section": 502,
+      "archive": "HardShearG14MaterialCoordinateNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_G14_MATERIAL_COORDINATE_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
     }
   ]
 }
