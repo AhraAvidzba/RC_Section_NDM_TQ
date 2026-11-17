@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "31BBA76C919E1A0318A035EF3FDD4BDECA9D4A9EF0142CE2694592D01623F74A",
+  "manifest_sha256": "FFAA7BFCA573400274A0EE7858152475DA05715233869803A41436F6DB6B1CE9",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 262,
+  "passed": 263,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2148,6 +2148,15 @@
         "ReverseMaterialProof.json": "11A0605B0DE1A838EC696F1ED307DF34071DDA546186EB79FC50825AD7DE88C3"
       },
       "verified_stdout": "MVT2 REVERSE MATERIAL OFFLINE PASS 11475"
+    },
+    {
+      "id": "mvt2-spectral-damage-and-panel-equilibrium-native-control",
+      "journal_section": 571,
+      "archive": "MVT2SpectralDamageControl20261117",
+      "verified_outputs_sha256": {
+        "SpectralDamageNativeProof.json": "D518B812C737E6B740B6218AE1D132C15245454A96F380ACBDAB1D456FD7E502"
+      },
+      "verified_stdout": "MVT2 SPECTRAL DAMAGE NATIVE OFFLINE PASS 11475 9 6405"
     }
   ]
 }
