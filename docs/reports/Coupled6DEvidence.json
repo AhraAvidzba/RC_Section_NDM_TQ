@@ -257,7 +257,8 @@
     "MVT2NativePublicationCutDilation26Equilibrium20261117": "3ACA114CB255C978553604265B57040F2485317A88B6D08871F43D3FBABE1BD1",
     "H35UnconfinedNative20261117": "04D75B624D33A9CBD52FE58538C3C36CB03E1F0947AB2ED7BB94115E53E39C75",
     "MVT2H35CompressionRateNative20261117": "994A773813B2A2144B5A2F74DB5BED8115AD387C94730627854B05E0F8B8F0D2",
-    "H35H45CompressionRateNative20261117": "A9119D786A7E14F831E68884903203D904FD2DA79FB7B5453229A082A44F626C"
+    "H35H45CompressionRateNative20261117": "A9119D786A7E14F831E68884903203D904FD2DA79FB7B5453229A082A44F626C",
+    "MixedPanelDilationWeights20261117": "9287C5B83CB3EDF71E91C715229DA1B25A9BC9A1E7D283BD82D9A7FB48514335"
   },
   "cases": [
     {
@@ -2823,6 +2824,17 @@
       "stdout_contains": "H35 H45 COMPRESSION RATE NATIVE OFFLINE PASS 2580",
       "outputs": {
         "RateCylindersProof.json": "933A174103DA99761D940C517F924E9F41E87B49A7670D31288A1F507604AA83"
+      }
+    },
+    {
+      "id": "native-panel-weight-sensitivity-and-comparison-with-measured-shear",
+      "journal_section": 565,
+      "archive": "MixedPanelDilationWeights20261117",
+      "script": "Verify-MixedPanels.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--report", "MixedPanelsProof.json"],
+      "stdout_contains": "MIXED PANELS NATIVE OFFLINE PASS 1260 2173",
+      "outputs": {
+        "MixedPanelsProof.json": "ACF441B66C9ABF43012DACED1C29078DAB868DE69BD1AEAB0D6FFA4FA29583F5"
       }
     }
   ],

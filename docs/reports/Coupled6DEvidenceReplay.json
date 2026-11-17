@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "552C45AF393D35E306B0BF660EB1C6522C4A6FD46B210D6F94CAF9213F8A2DDD",
+  "manifest_sha256": "C04FB8C72B781D00CBB6BD6AE318EB926003E8B3FC0F52C409EC53B3B63D5C18",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 256,
+  "passed": 257,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2094,6 +2094,15 @@
         "RateCylindersProof.json": "933A174103DA99761D940C517F924E9F41E87B49A7670D31288A1F507604AA83"
       },
       "verified_stdout": "H35 H45 COMPRESSION RATE NATIVE OFFLINE PASS 2580"
+    },
+    {
+      "id": "native-panel-weight-sensitivity-and-comparison-with-measured-shear",
+      "journal_section": 565,
+      "archive": "MixedPanelDilationWeights20261117",
+      "verified_outputs_sha256": {
+        "MixedPanelsProof.json": "ACF441B66C9ABF43012DACED1C29078DAB868DE69BD1AEAB0D6FFA4FA29583F5"
+      },
+      "verified_stdout": "MIXED PANELS NATIVE OFFLINE PASS 1260 2173"
     }
   ]
 }
