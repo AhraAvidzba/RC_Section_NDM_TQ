@@ -236,7 +236,11 @@
     "MVT2LocalTraction20261117": "452C888BDE17C478A212A18E48035B3AA5FA247EC0F0A102665547C79F5DEBCF",
     "InstalledExplicitShearPaths20261117": "1B3A59DF0532E5D20AF84D02EB106B7F9D3F5EA039FCFC3DCCDDA8B1D6F7EFB3",
     "MVT2PublicationCut20261117": "6835F02B3D2ED944823DA808E3CC3BC24CCFBF87CDE9D615AB283954B46E8DAD",
-    "HardShearSameSectionASDSmallForceSteps20261117": "1D5F5D72A72E4DA4855E150525761D710BDFEAD84A2C29CF265C4A9EFD27C8B9"
+    "HardShearSameSectionASDSmallForceSteps20261117": "1D5F5D72A72E4DA4855E150525761D710BDFEAD84A2C29CF265C4A9EFD27C8B9",
+    "MVT2ConcreteCompression20261117": "5C53523A297D6A4827292AE62F09478BB14DCA4AF2A86BD0F08C97E5291A7669",
+    "MVT2Cut396ConcreteCompression20261117": "37597D94C3E8D55AB56CFA57A22131DA60721EC71206615E98F668E6B50D953E",
+    "MVT2PublicationCutTwist20261117": "BCF4262B8906B7BCBD521276288762CB83402FEC79E1137AA3EAE60D37944C78",
+    "MVT2NativePublicationCutTimed20261117": "EBAB47A1CDA340FAFD23604939D8A88CF9DC3CCC4B9535CB155FF104739C054A"
   },
   "cases": [
     {
@@ -2571,6 +2575,50 @@
       "stdout_contains": "HARDSHEAR ASD SMALL FORCE STEPS OFFLINE PASS 5B61217ED8545E7DC25807E5BF88D5466C2C644CC6D5B1CA5C6F47C327F5DAA5",
       "outputs": {
         "ASDSmallForceStepsProof.json": "AEB2CA7D6B53F3041DC1693021D64BFAA1876EA7403BFE237B6F10D218E13469"
+      }
+    },
+    {
+      "id": "mvt2-asd-compression-history-before-nominal-midspan-stop",
+      "journal_section": 544,
+      "archive": "MVT2ConcreteCompression20261117",
+      "script": "Verify-MVT2Compression.py",
+      "arguments": ["--repo", "{repo}", "--report", "MVT2CompressionProof.json"],
+      "stdout_contains": "MVT2 COMPRESSION HISTORY OFFLINE PASS 53",
+      "outputs": {
+        "MVT2CompressionProof.json": "D05ED308A99DD281D5D9F45F021A1B1980B490F9B38872B759ACC42DD4212228"
+      }
+    },
+    {
+      "id": "mvt2-asd-compression-history-at-publication-cut",
+      "journal_section": 545,
+      "archive": "MVT2Cut396ConcreteCompression20261117",
+      "script": "Verify-MVT2Cut396Compression.py",
+      "arguments": ["--repo", "{repo}", "--base", "{evidence}/MVT2ConcreteCompression20261117.zip", "--cut", "{evidence}/MVT2PublicationCut20261117.zip", "--report", "MVT2Cut396CompressionProof.json"],
+      "stdout_contains": "MVT2 CUT396 COMPRESSION OFFLINE PASS 41",
+      "outputs": {
+        "MVT2Cut396CompressionProof.json": "F46304C4225F366BD16594C51F260649C01B9A1B035558B93AB73AC48503ECB4"
+      }
+    },
+    {
+      "id": "mvt2-asd-publication-cut-controlled-twist-and-strain-repeat",
+      "journal_section": 546,
+      "archive": "MVT2PublicationCutTwist20261117",
+      "script": "Verify-Cut396Twist.py",
+      "arguments": ["--repo", "{repo}", "--report", "Cut396TwistProof.json"],
+      "stdout_contains": "MVT2 CUT396 TWIST OFFLINE PASS",
+      "outputs": {
+        "Cut396TwistProof.json": "4D575B33C3960CB3F6D6EA3148C8657F29569CD574143902D119F66D5101B77D"
+      }
+    },
+    {
+      "id": "mvt2-native-publication-cut-timed-equilibrium-prefix",
+      "journal_section": 547,
+      "archive": "MVT2NativePublicationCutTimed20261117",
+      "script": "Verify-NativePublicationCut.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--external", "{evidence}/MVT2PublicationCut20261117.zip", "--report", "NativePublicationCutProof.json"],
+      "stdout_contains": "MVT2 NATIVE PUBLICATION CUT TIMED PREFIX OFFLINE PASS 14",
+      "outputs": {
+        "NativePublicationCutProof.json": "DAC237A8485BEADB860111A7E22B496BC6F3795ABC20D05150167367EF78627A"
       }
     }
   ],
