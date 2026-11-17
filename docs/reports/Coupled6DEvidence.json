@@ -172,7 +172,9 @@
     "MVT2GaussSpanNative20261117": "71DC4A17F7E648043DF52F423C8419E74A93B96944F9501D48102E04CFDC14C2",
     "MVT2MixedAdaptiveNative20261117": "300ACEADD3033A627969BA1DBA7CB7EDC7FCD51632C4907CDA162758C8FDA990",
     "MVT2GaussMixedNative20261117": "A3EC01957BB5D9AC49A11C1D23678FE874D53367524C4F76192C16002212BC09",
-    "MVT2GaussTensorCaptureNative20261117": "D2DBF6FDE48CDB5997FD099056DEC49231EEABE6D018D817E809C3F951D801A1"
+    "MVT2GaussTensorCaptureNative20261117": "D2DBF6FDE48CDB5997FD099056DEC49231EEABE6D018D817E809C3F951D801A1",
+    "MVT2GaussFixedHistoryASD20261117": "56F7D14B51F60071DD6FD936663CEBEB3850045C842EDF1A947A54DB7FE7B4FB",
+    "HardShearNestedQuadratureNative20261117": "51EDBA769818A13DFF49853471B51904BC834D2D1F15EBE011807D4DAF6F88FC"
   },
   "cases": [
     {
@@ -1984,6 +1986,21 @@
       "script": "Replay-TensorCapture.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "MVT2 FIXED HISTORY NATIVE CAPTURE PASS 104F5BAD5351EDE4BA46A0F390253D2C1A8A1662C00FCE535FC0D90EBC24C5CC"
+    },
+    {
+      "id": "mvt2-same-accepted-tensor-history-two-asd-concrete-laws",
+      "journal_section": 480,
+      "archive": "MVT2GaussFixedHistoryASD20261117",
+      "script": "Verify-Replay.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 FIXED HISTORY OFFLINE PASS DD583CAF5C80D26AE2ED821D0E44C284E094FAB1559D66B7006374E5EF0F2F58"
+    },
+    {
+      "id": "hardshear-independent25-and100-quadrature-equilibria",
+      "journal_section": 481,
+      "archive": "HardShearNestedQuadratureNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_NESTED_QUADRATURE_PORTABLE: VERIFIED_EVIDENCE; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
