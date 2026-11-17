@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "6E0CEAE638B9A3847D5C2DF576114B5B02F539C574D4C28BF4C821105B23C6CC",
+  "manifest_sha256": "73191D7ECCA59F6072006018D7AEB516BA2870F041A9567E19B488F15AFFDB7F",
   "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 198,
+  "passed": 203,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1626,6 +1626,41 @@
       "archive": "HardShearG13SerialArcNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "HARDSHEAR_G13_SERIAL_ARC_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-g13-extended-serial-exact-first-eight-and-minimum-radius",
+      "journal_section": 507,
+      "archive": "HardShearG13SerialArcExtendedNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR_G13_SERIAL_EXTENDED_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_RADIUS; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-h53-same-material-measured-sign-cone-and-three-relinearizations",
+      "journal_section": 508,
+      "archive": "MVT2GaussASDNominalTransverse20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "MVT2 ASD CONE OFFLINE PASS 30C67609DDE22BFE898AD10DAD015E3CC64E16C28BB547141E253BD597E88842"
+    },
+    {
+      "id": "hardshear-native-working-route-physical-secants-after-numerical-stall",
+      "journal_section": 509,
+      "archive": "HardShearPhysicalControlCandidateANative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR WORKING-ROUTE PHYSICAL CONTROL A/B PASS"
+    },
+    {
+      "id": "mvt2-h53-three-guarded-doubled-radius-moves",
+      "journal_section": 510,
+      "archive": "MVT2GaussASDNominalExpandedTrust20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "C34E3D66B54C5AD57D680A6D678ED1EF68306890FC19D97ABE9C8BCB08C3F99D"
+    },
+    {
+      "id": "hardshear-native-working-route-physical-control-six-budget-neutral-probes",
+      "journal_section": 511,
+      "archive": "HardShearPhysicalControlCandidateBNative20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR WORKING-ROUTE PHYSICAL CONTROL A/B PASS"
     }
   ]
 }

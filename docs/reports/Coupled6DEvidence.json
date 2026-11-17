@@ -199,7 +199,12 @@
     "HardShearG14MaterialOrientation20261117": "742B4B6392E2D4FCCF68833300D31F601D4BCB1C9A7DFFC76E1F14544B8ECBF0",
     "HardShearG13PhysicalArcNative20261117": "5767488D18B48372CE68AC539B06C4E8368A50E009F226622E02E9F2DA74355D",
     "MVT2GaussASDNominalStationEvents20261117": "995411807958875B23F169688738FEE6E4EBDEDAF8EAE63789A1EE2BA7AF899A",
-    "HardShearG13SerialArcNative20261117": "9BBFF5A2536A5C82E87C78999131E85A9A3618904B23879E479B1F1BF4DC824B"
+    "HardShearG13SerialArcNative20261117": "9BBFF5A2536A5C82E87C78999131E85A9A3618904B23879E479B1F1BF4DC824B",
+    "HardShearG13SerialArcExtendedNative20261117": "FDE5A92997868C7708EE8E5C6767DAB362C48BC7258C0F64316D5D86C8FA46F6",
+    "MVT2GaussASDNominalTransverse20261117": "151F9399FBC40330A38C825B1BE40DF9B56A9BBA8DFF86719E4A5C490FA23938",
+    "HardShearPhysicalControlCandidateANative20261117": "26FB0245FC32FF26661A354684AD8C4B70DA5DCB1A1E274E0BF6462C05221C1E",
+    "MVT2GaussASDNominalExpandedTrust20261117": "B40BA00D6EC17464F587A7A6BBE0B1E6D9BE4F867BB38915FEDD1C1CE704EA28",
+    "HardShearPhysicalControlCandidateBNative20261117": "EDE8F989348A06C21492DF840F7315C1DB5C4EF8C91719735B85D49A7A9E0F59"
   },
   "cases": [
     {
@@ -2214,6 +2219,43 @@
       "archive": "HardShearG13SerialArcNative20261117",
       "script": "Verify-Portable.py",
       "stdout_contains": "HARDSHEAR_G13_SERIAL_ARC_PORTABLE: VERIFIED_EVIDENCE; PASS; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-g13-extended-serial-exact-first-eight-and-minimum-radius",
+      "journal_section": 507,
+      "archive": "HardShearG13SerialArcExtendedNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G13_SERIAL_EXTENDED_PORTABLE: VERIFIED_EVIDENCE; MINIMUM_RADIUS; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-h53-same-material-measured-sign-cone-and-three-relinearizations",
+      "journal_section": 508,
+      "archive": "MVT2GaussASDNominalTransverse20261117",
+      "script": "Verify-Cone.py",
+      "arguments": ["--repo", "{repo}", "--follow"],
+      "stdout_contains": "MVT2 ASD CONE OFFLINE PASS 30C67609DDE22BFE898AD10DAD015E3CC64E16C28BB547141E253BD597E88842"
+    },
+    {
+      "id": "hardshear-native-working-route-physical-secants-after-numerical-stall",
+      "journal_section": 509,
+      "archive": "HardShearPhysicalControlCandidateANative20261117",
+      "script": "Verify.py",
+      "stdout_contains": "HARDSHEAR WORKING-ROUTE PHYSICAL CONTROL A/B PASS"
+    },
+    {
+      "id": "mvt2-h53-three-guarded-doubled-radius-moves",
+      "journal_section": 510,
+      "archive": "MVT2GaussASDNominalExpandedTrust20261117",
+      "script": "Verify-Expanded.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "C34E3D66B54C5AD57D680A6D678ED1EF68306890FC19D97ABE9C8BCB08C3F99D"
+    },
+    {
+      "id": "hardshear-native-working-route-physical-control-six-budget-neutral-probes",
+      "journal_section": 511,
+      "archive": "HardShearPhysicalControlCandidateBNative20261117",
+      "script": "Verify.py",
+      "stdout_contains": "HARDSHEAR WORKING-ROUTE PHYSICAL CONTROL A/B PASS"
     }
   ],
   "frozen_repositories": {
