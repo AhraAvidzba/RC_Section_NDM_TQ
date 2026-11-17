@@ -1,8 +1,8 @@
 {
-  "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
+  "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
-    "workbook/output/VBA_All_Code.txt": "815680F95BDB321D7DF5374EAC9F9B1BAD4F4D0A9E628F09EC0BA11EE70AD90D"
+    "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
+    "workbook/output/VBA_All_Code.txt": "8F48A525BD7983304E7CB83874F4FBCE0F475C63ED4D210E2550353DE0F956EF"
   },
   "python_packages": [
     "numpy",
@@ -225,7 +225,8 @@
     "HardShearSameSectionASDCoarseFollow20261117": "F89FFBD0F47E05CBAC62CDF07F3318BC4AFB4DEDB86366FFEA9E70B93FCFFA50",
     "HardShearSameSectionASDStepSplit20261117": "11365D5BA1F390ACD3F92445DB4B98FCBB4EFB940506940637406DF6294076BB",
     "HardShearSameSectionASDOnePoint20261117": "10C445A3A22C7C6A4AF87E4FD181FA4708BA3191379E39F78746AC9CC387E87B",
-    "HardShearLateSteelDiagnosticNative20261117": "4AB502FC1CA801C30AD5A0C31A618768C7A43D9CED9C95304F334AB4F9D62CF9"
+    "HardShearLateSteelDiagnosticNative20261117": "4AB502FC1CA801C30AD5A0C31A618768C7A43D9CED9C95304F334AB4F9D62CF9",
+    "HardShearCoarseGrowthWorkbookRelease20261117": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63"
   },
   "cases": [
     {
@@ -2443,6 +2444,14 @@
       "script": "Verify-Portable.py",
       "arguments": ["{evidence}/HardShearCoarseGrowthSplitNative20261117.zip", "{evidence}/HardShearCoarseGrowthWorkbookNative20261117.zip", "{evidence}/HardShearInstalledStockTiming20261117.zip"],
       "stdout_contains": "HARDSHEAR_LATE_STEEL_PORTABLE: VERIFIED_EVIDENCE; FULL=LATE_NUMFAIL_NO_CAPACITY; HALF=LATE_NUMFAIL_NO_CAPACITY; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-smooth-post-peak-growth-installed-workbook-release",
+      "journal_section": 533,
+      "archive": "HardShearCoarseGrowthWorkbookRelease20261117",
+      "script": "Verify-PublishedGrowth.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "HARDSHEAR PACKAGED RELEASE PORTABLE VERIFIED"
     }
   ],
   "frozen_repositories": {

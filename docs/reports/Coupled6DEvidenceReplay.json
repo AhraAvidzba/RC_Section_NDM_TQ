@@ -1,9 +1,9 @@
 {
-  "manifest_sha256": "EABFCC5D5EB47D20F034739974737ADF595C8AF53D4A77EFCB268F7F130D2345",
-  "source_checkpoint": "709e7dfa16c192748fc2c6d999925bdbf9948a4c",
+  "manifest_sha256": "FDF9E7C5D90B65F1E48770D455A202CF6B7C2AD01503FC6760A2B41EAEDE223B",
+  "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
-    "workbook/output/RC_Section_NDM.xlsm": "245F3647A30ADAF86FB4ACAF135F70C7F01C730CA7E199463997453CF900E012",
-    "workbook/output/VBA_All_Code.txt": "815680F95BDB321D7DF5374EAC9F9B1BAD4F4D0A9E628F09EC0BA11EE70AD90D"
+    "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
+    "workbook/output/VBA_All_Code.txt": "8F48A525BD7983304E7CB83874F4FBCE0F475C63ED4D210E2550353DE0F956EF"
   },
   "frozen_revisions": {
     "repo_a0563": "aab6994d9be577564e4c8b17b4b556e6ee092d51",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 224,
+  "passed": 225,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1808,6 +1808,13 @@
       "archive": "HardShearLateSteelDiagnosticNative20261117",
       "verified_outputs_sha256": {},
       "verified_stdout": "HARDSHEAR_LATE_STEEL_PORTABLE: VERIFIED_EVIDENCE; FULL=LATE_NUMFAIL_NO_CAPACITY; HALF=LATE_NUMFAIL_NO_CAPACITY; physical_limit_certified=False"
+    },
+    {
+      "id": "hardshear-smooth-post-peak-growth-installed-workbook-release",
+      "journal_section": 533,
+      "archive": "HardShearCoarseGrowthWorkbookRelease20261117",
+      "verified_outputs_sha256": {},
+      "verified_stdout": "HARDSHEAR PACKAGED RELEASE PORTABLE VERIFIED"
     }
   ]
 }
