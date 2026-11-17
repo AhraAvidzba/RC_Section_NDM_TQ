@@ -218,7 +218,8 @@
     "HardShearG13Arc31HalfNative20261117": "B0B056BB04E3E71879EB7538D3F48024CD3ED59BDE4DFED916B6A314BE71D53E",
     "HardShearG13Arc31SteerNative20261117": "BFB46F391990F9A3D5A440C96B862D8E5BFC29B876EAB653A97B1BCE7DB7AA5A",
     "MVT2GaussASDNominalP7NaturalSwitch20261117": "0BF8235F231C8373331A5D1CD938DDA8DF4A18F7987C70D9AFAAE17DDCB09726",
-    "HardShearCoarseGrowthWorkbookNative20261117": "40B29680E2E73033519883545091BD201DC109430D405151D8EC5EBF97B99302"
+    "HardShearCoarseGrowthWorkbookNative20261117": "40B29680E2E73033519883545091BD201DC109430D405151D8EC5EBF97B99302",
+    "HardShearCoarseGrowthSplitNative20261117": "F1D28250BD87A9F81445F8D650FF0F9E816433857B96DE0756FC0AECAA052461"
   },
   "cases": [
     {
@@ -2380,6 +2381,14 @@
       "script": "Verify-GrowthPortable.py",
       "arguments": ["--repo", "{repo}"],
       "stdout_contains": "HARDSHEAR COARSE GROWTH PORTABLE VERIFIED"
+    },
+    {
+      "id": "hardshear-workbook-wide-step-compared-with-two-physical-half-steps",
+      "journal_section": 526,
+      "archive": "HardShearCoarseGrowthSplitNative20261117",
+      "script": "Verify-Portable.py",
+      "arguments": ["{evidence}/HardShearCoarseGrowthWorkbookNative20261117.zip", "{evidence}/HardShearInstalledStockTiming20261117.zip"],
+      "stdout_contains": "HARDSHEAR_WIDE_SPLIT_PORTABLE: VERIFIED_EVIDENCE; BOTH_ROUTES_CONFIRMED; physical_limit_certified=False"
     }
   ],
   "frozen_repositories": {
