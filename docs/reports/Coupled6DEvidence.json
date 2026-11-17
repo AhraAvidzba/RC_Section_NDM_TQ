@@ -189,7 +189,9 @@
     "MVT2GaussASDNominalPostyield20261117": "06A04F304206A58E5CB1B5527B57A1AED030E017C70C7D625B0C0CA9BBDD98ED",
     "HardShearG13PrecisionNative20261117": "1B7C0461264D41BE516B206B2AD05931F1B2695256CE8A85BCAE2C92533391C7",
     "HardShearWorkbookProfile20261117": "14100CD7AE6ECF342D8179DCB963CB09E46BA644B406154DCF125F30D4758634",
-    "HardShearEnvelopeReuseNative20261117": "8B6E9D52AF5AAECC1682B247662B3E142AB56BFEDF8847DBF8A2C5FEE989F384"
+    "HardShearEnvelopeReuseNative20261117": "8B6E9D52AF5AAECC1682B247662B3E142AB56BFEDF8847DBF8A2C5FEE989F384",
+    "HardShearG14DirectionNative20261117": "596609AD534F382BE6FD06FCCBBBCCCF42D24A66236C34364D52164376AFCD02",
+    "MVT2GaussASDNominalDirectionalFollow20261117": "53E7D62932498F6EEC71BAA39120920B814E3F34410A245F818B4EB982501E69"
   },
   "cases": [
     {
@@ -2131,6 +2133,21 @@
       "archive": "HardShearEnvelopeReuseNative20261117",
       "script": "Verify-Candidate.py",
       "stdout_contains": "ENVELOPE REUSE NATIVE VERIFIED"
+    },
+    {
+      "id": "hardshear-g14-rejected-direction-and-refined-tangent-witness",
+      "journal_section": 497,
+      "archive": "HardShearG14DirectionNative20261117",
+      "script": "Verify-Portable.py",
+      "stdout_contains": "HARDSHEAR_G14_DIRECTION_PORTABLE: VERIFIED_EVIDENCE; COMPLETE; physical_limit_certified=False"
+    },
+    {
+      "id": "mvt2-asd-nominal-actual-direction-bounded-correction-and-next-equilibria",
+      "journal_section": 498,
+      "archive": "MVT2GaussASDNominalDirectionalFollow20261117",
+      "script": "Verify-Follow.py",
+      "arguments": ["--repo", "{repo}"],
+      "stdout_contains": "MVT2 ASD DIRECTIONAL FOLLOW OFFLINE PASS"
     }
   ],
   "frozen_repositories": {
