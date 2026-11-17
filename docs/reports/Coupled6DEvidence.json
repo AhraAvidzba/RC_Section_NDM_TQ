@@ -230,7 +230,10 @@
     "HardShearSameSectionASDDesignPaths20261117": "3197E52A738FC93C69488146D0C5A5DCCD84094366D7733717E2471645E2D5B0",
     "HardShearSameSectionASDDrift20261117": "73B757C82B3AF3043A8FDE8B2D45E4C6787A02B891395B8CEEECC590A1B2C716",
     "HardShearInstalledFileSnapshot20261117": "B3A21A61EFB84850779510F72D273457251EDA2E8709F147422BC9A243A6DDC8",
-    "A2FigureFaceOrientation20261117": "D21688FC5FF2FD5E954F2DC775F14C801D028C007DB8DA1BB436ADA116B14AA0"
+    "A2FigureFaceOrientation20261117": "D21688FC5FF2FD5E954F2DC775F14C801D028C007DB8DA1BB436ADA116B14AA0",
+    "InstalledExplicitTorqueEvidence20261117": "A35CD010E5D833D4877E5D75B9B13409484F2BFE54ABA6BD996AF7CAB24B5235",
+    "A2LocalCrackTraction20261117": "E1563D7CFA7760BCAC24EFC5CA589FD4E7D0444D6CA5A74368F0940A44F68546",
+    "MVT2LocalTraction20261117": "452C888BDE17C478A212A18E48035B3AA5FA247EC0F0A102665547C79F5DEBCF"
   },
   "cases": [
     {
@@ -2499,6 +2502,39 @@
       "stdout_contains": "A2 FACE CRACK DIRECTION CONTROL OFFLINE PASS",
       "outputs": {
         "A2FaceComparison.json": "8190713B2723F711D5DE06B44C2F3B0C45182602E6CAC7F371AFA804D894A16B"
+      }
+    },
+    {
+      "id": "installed-directed-regressions-and-explicit-torque-with-offset",
+      "journal_section": 538,
+      "archive": "InstalledExplicitTorqueEvidence20261117",
+      "script": "Verify-NativeExplicitTorque.py",
+      "arguments": ["--repo", "{repo}", "--report", "ExplicitTorqueProof.json"],
+      "stdout_contains": "EXPLICIT TORQUE WORKBOOK EVIDENCE OFFLINE PASS",
+      "outputs": {
+        "ExplicitTorqueProof.json": "44AD622BB8AA34E2C6C8B1FBCD4755BB022846E4507A8ABCC4806819BB2BBFF1"
+      }
+    },
+    {
+      "id": "a2-open-crack-local-traction",
+      "journal_section": 539,
+      "archive": "A2LocalCrackTraction20261117",
+      "script": "Verify-A2CrackTraction.py",
+      "arguments": ["{evidence}/A2LaneABExactNative20261116.zip", "--report", "A2CrackTractionProof.json"],
+      "stdout_contains": "A2 LOCAL CRACK TRACTION OFFLINE PASS",
+      "outputs": {
+        "A2CrackTractionProof.json": "0247C72F1337B63FA4020230770AB89784058232342789E76976CB58DC7C4D2E"
+      }
+    },
+    {
+      "id": "mvt2-longitudinal-yield-and-concrete-traction-projection",
+      "journal_section": 540,
+      "archive": "MVT2LocalTraction20261117",
+      "script": "Verify-MVT2LocalTraction.py",
+      "arguments": ["--repo", "{repo}", "--report", "MVT2LocalTractionProof.json"],
+      "stdout_contains": "MVT2 LOCAL TRACTION OFFLINE PASS",
+      "outputs": {
+        "MVT2LocalTractionProof.json": "8156DCFB0650E4AF25FF1D50F105C97A5E5C3A7E9FAF5B3E7DFC4C37D8A2AD7F"
       }
     }
   ],

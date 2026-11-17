@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "567B4C52BAA6266F47FA71919C6999081B86C55892E962D9657069731087EF94",
+  "manifest_sha256": "6F2606E662EC0E9ED1CBC3299547C2AFFA5CCC172C801D82EC23AA06E3B5D698",
   "source_checkpoint": "0081ce2aee08b83f49c74dbe9c7d95a991ebd327",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "97F184A3FAF2419A083F4370CF374C45631CA387B2E5AC77426AF3E7A1ACB9A5",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 229,
+  "passed": 232,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -1851,6 +1851,33 @@
         "A2FaceComparison.json": "8190713B2723F711D5DE06B44C2F3B0C45182602E6CAC7F371AFA804D894A16B"
       },
       "verified_stdout": "A2 FACE CRACK DIRECTION CONTROL OFFLINE PASS"
+    },
+    {
+      "id": "installed-directed-regressions-and-explicit-torque-with-offset",
+      "journal_section": 538,
+      "archive": "InstalledExplicitTorqueEvidence20261117",
+      "verified_outputs_sha256": {
+        "ExplicitTorqueProof.json": "44AD622BB8AA34E2C6C8B1FBCD4755BB022846E4507A8ABCC4806819BB2BBFF1"
+      },
+      "verified_stdout": "EXPLICIT TORQUE WORKBOOK EVIDENCE OFFLINE PASS"
+    },
+    {
+      "id": "a2-open-crack-local-traction",
+      "journal_section": 539,
+      "archive": "A2LocalCrackTraction20261117",
+      "verified_outputs_sha256": {
+        "A2CrackTractionProof.json": "0247C72F1337B63FA4020230770AB89784058232342789E76976CB58DC7C4D2E"
+      },
+      "verified_stdout": "A2 LOCAL CRACK TRACTION OFFLINE PASS"
+    },
+    {
+      "id": "mvt2-longitudinal-yield-and-concrete-traction-projection",
+      "journal_section": 540,
+      "archive": "MVT2LocalTraction20261117",
+      "verified_outputs_sha256": {
+        "MVT2LocalTractionProof.json": "8156DCFB0650E4AF25FF1D50F105C97A5E5C3A7E9FAF5B3E7DFC4C37D8A2AD7F"
+      },
+      "verified_stdout": "MVT2 LOCAL TRACTION OFFLINE PASS"
     }
   ]
 }
