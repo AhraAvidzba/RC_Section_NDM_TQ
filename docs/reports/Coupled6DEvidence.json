@@ -311,7 +311,9 @@
     "ASDPrincipalPredictor20261118": "A710318F0D27A169832B28508E015217DEA0FE3F3D7C6F4601232589BC12E508",
     "CoupledSteelHistoryIntegrity20261118": "7E2DE3B9693E980D6FF039AF38CD156C72ED67FE5632590F76E3B1579A9FE76F",
     "CoupledClosedBranchCapacity20261118": "F2177698D7B60B9CDD5852EC0B443491B1BB3FC7648901525902A7B8F53E43EE",
-    "CoupledHardFieldControl20261118": "CDC30660560F67E7F4374BA83AF4C538161E35CCB6F5E3A97FAC8741875381BF"
+    "CoupledHardFieldControl20261118": "CDC30660560F67E7F4374BA83AF4C538161E35CCB6F5E3A97FAC8741875381BF",
+    "CoupledSmallCorrectionStudy20261118": "80D1FDCB4078C1D60F852CCF9C09DDDA20A417803660F71BCC398792727109FC",
+    "CoupledSmallCorrectionWorking20261118": "953E48EF0DD1452E3FA65AA23029CBFA1D23C639BA6D2E6DFD8CE94AD061F701"
   },
   "cases": [
     {
@@ -4117,6 +4119,111 @@
         "SpatialProof.json"
       ],
       "stdout_contains": "HARD FIELD MVT2 MATERIAL REPLAY ALL EQUILIBRIA AND 151 ORIGINAL FIELDS VERIFIED",
+      "outputs": {
+        "SpatialProof.json": "91E4BA03C13927A5CF50D6C066844D65D6B2798D2EA9E02D06DAB238ADA75B95"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-small-correction-study-native",
+      "journal_section": 612,
+      "archive": "CoupledSmallCorrectionStudy20261118",
+      "script": "Check-TestSmallCorrection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "SMALL CORRECTION ACTUAL VBA NATIVE REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "19FE4FE97E63F66CD35348637E2FEB1105616813E9CE1A5E12691B81EAB8416F"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-small-correction-study-mechanics",
+      "journal_section": 612,
+      "archive": "CoupledSmallCorrectionStudy20261118",
+      "script": "Check-TestSmallCorrection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SMALL CORRECTION SIX FORCES FULL EQUATIONS ORIENTATION AND ORIGINAL PREFIX VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "F0371FE02C1EB425A46C5545FC6068138E154FF043399785B63ADCE8E1476282"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-small-correction-working-native",
+      "journal_section": 612,
+      "archive": "CoupledSmallCorrectionWorking20261118",
+      "script": "Check-TestSmallCorrection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "SMALL CORRECTION ACTUAL VBA NATIVE REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "3955F7E3A59EC41843B1B87AD5AD11C3910636083D30CD3BCA9F50E0783BFB15"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-small-correction-working-mechanics",
+      "journal_section": 612,
+      "archive": "CoupledSmallCorrectionWorking20261118",
+      "script": "Check-TestSmallCorrection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SMALL CORRECTION SIX FORCES FULL EQUATIONS ORIENTATION AND ORIGINAL PREFIX VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "3D86F069C4009A1BBAA8D8D143806B338813B000A49D51674B66F1D2C2EC01FF"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-small-correction-working-spatial",
+      "journal_section": 612,
+      "archive": "CoupledSmallCorrectionWorking20261118",
+      "script": "Check-TestSmallCorrection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "spatial",
+        "--out",
+        "SpatialProof.json"
+      ],
+      "stdout_contains": "SMALL CORRECTION MVT2 MATERIAL ALL EQUILIBRIA AND 151 ORIGINAL FIELDS VERIFIED",
       "outputs": {
         "SpatialProof.json": "91E4BA03C13927A5CF50D6C066844D65D6B2798D2EA9E02D06DAB238ADA75B95"
       },

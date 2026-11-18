@@ -198,12 +198,15 @@ End Property
 ' Решает равновесие при управлении одной линейной мерой деформации.
 ' Множитель нагрузки определяется вместе с полем и возвращается только
 ' для сошедшейся пробы. Материал остаётся в принятом ранее состоянии.
+' После смены пространственной меры можно разрешить малую поправку CDP;
+' резерв не применяется к псевдодуге и не меняет допуск принятия.
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
         Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
-        Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#) As Boolean
+        Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
+        Optional ByVal allowSmallCorrection As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -226,7 +229,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     mConsistentControl = consistentControl And mUseSpatialHistory
     Dim load(1 To COMPONENT_COUNT) As Double
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
-        recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl)
+        recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
+        allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#))
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -846,7 +850,8 @@ End Sub
 Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
-        Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False) As Boolean
+        Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
+        Optional ByVal allowSmallCorrection As Boolean = False) As Boolean
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -980,7 +985,7 @@ RecomputeTangent:
                 useGradientTangent = True
                 GoTo RecomputeTangent
             End If
-            If mControlActive And mConsistentControl And norm <= SMALL_STRAIN_MAX_NORM * tolerance Then
+            If mControlActive And (mConsistentControl Or allowSmallCorrection) And norm <= SMALL_STRAIN_MAX_NORM * tolerance Then
                 Dim rejectedNorm As Double, rejectedCode As ESolverFailureCode
                 Dim rejectedPoint As Long, rejectedLastPoint As Long, rejectedSide As Long, rejectedFailures As Long
                 Dim rejectedLoad(1 To COMPONENT_COUNT) As Double, rejectedExternal() As Double
