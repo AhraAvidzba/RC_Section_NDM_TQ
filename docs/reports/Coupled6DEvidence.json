@@ -295,7 +295,8 @@
     "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395",
     "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1",
     "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13",
-    "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360"
+    "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360",
+    "SpatialFieldControlRecovery20261118": "39E04FF77B8845FCE4A3EBE0F091F1B1ABB44155FB9E3734E2906CD86D4A8539"
   },
   "cases": [
     {
@@ -3434,6 +3435,28 @@
       "stdout_contains": "GENERAL SHEAR ALL SIX EQUATIONS, MATERIAL HISTORIES AND RETAINED LOAD BOUNDS VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "F2BA0F94E9F65DBF6AD925468E42DA63726B5FE95F376DBDB09AFE2C4D8FB19A"
+      }
+    },
+    {
+      "id": "spatial-field-recovery-native",
+      "journal_section": 601,
+      "archive": "SpatialFieldControlRecovery20261118",
+      "script": "Check-TestFieldRecovery.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "FIELD RECOVERY EXACT VBA, NEGATIVE PROBES AND DIRECTED NATIVE REGRESSIONS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "375F09C5C103D480B31709F00B5F6BCF2287828851C114CFF5857C280869820A"
+      }
+    },
+    {
+      "id": "spatial-field-recovery-mechanics",
+      "journal_section": 601,
+      "archive": "SpatialFieldControlRecovery20261118",
+      "script": "Check-TestFieldRecovery.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "FIELD RECOVERY SIX EQUATIONS, REJECTED DIRECTION AND SEPARATE MATERIAL HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "9A31A89E1716626BA421D203F2544A472AF54BE5E565CC836C8F83D018B6CE9E"
       }
     }
   ],

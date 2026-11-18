@@ -191,6 +191,41 @@ Private Sub TestTransverseControl(ByVal folder As String, ByRef passed As Long, 
     direction(5) = 0#: direction(6) = 0#
     TestRecord Not solver.SelectTransverseDeformationControl(previous, current, direction, projection, control, increment, name), _
         "transverse absent variable shear retains general control selection", passed, failed, report
+    Dim gradient(1 To 6) As Double, side As Long, component As Long, value As Double, tensorWeight As Double, expectedSquare As Double
+    For point = 1 To UBound(area)
+        operators.PointStrain point, current, strain: operators.AxialGradientAtPoint point, current, gradient
+        For side = -1 To 1
+            For component = 1 To 6
+                value = strain(component) + CDbl(side) * 0.001 * gradient(component)
+                tensorWeight = 1#: If component > 3 Then tensorWeight = 0.5
+                expectedSquare = expectedSquare + area(point) * tensorWeight * value * value / (3# * 21600#)
+            Next component
+        Next side
+    Next point
+    expected = Sqr(expectedSquare)
+    ok = solver.SelectSpatialDirectionControl(previous, current, current, projection, control, increment)
+    TestRecord ok, "spatial direction measure exists", passed, failed, report
+    TestRecord Abs(control - expected) < 1E-12, "spatial measure independent three-station tensor norm", passed, failed, report
+    TestRecord Abs(increment - expected) < 1E-12, "spatial measure positive increment", passed, failed, report
+    error = 0#
+    For i = solver.PhysicalDegreeCount + 1 To operators.DegreeCount: error = GeomMax(error, Abs(projection(i))): Next i
+    TestRecord error = 0#, "spatial measure ignores gauge multipliers", passed, failed, report
+    reference = projection
+    Dim movement() As Double: movement = current
+    For i = 1 To solver.PhysicalDegreeCount: movement(i) = -1E+200 * current(i): Next i
+    ok = solver.SelectSpatialDirectionControl(previous, current, movement, projection, control, increment)
+    error = 0#
+    For i = 1 To UBound(projection): error = GeomMax(error, Abs(projection(i) - reference(i))): Next i
+    TestRecord ok And error < 1E-12, "spatial measure independent of direction scale and sign", passed, failed, report
+    ok = solver.SelectSpatialDirectionControl(current, previous, movement, projection, control, increment)
+    TestRecord ok And control = 0# And Abs(increment - expected) < 1E-12, "spatial reversed traversal retains positive increment", passed, failed, report
+    For i = 1 To solver.PhysicalDegreeCount: movement(i) = 0#: Next i
+    TestRecord Not solver.SelectSpatialDirectionControl(previous, current, movement, projection, control, increment), _
+        "spatial gauge-only direction is inapplicable", passed, failed, report
+    TestRecord Not solver.SelectSpatialDirectionControl(current, current, current, projection, control, increment), _
+        "spatial unchanged field has no forward measure", passed, failed, report
+    TestRecord Not solver.SelectRejectedDeformationControl(previous, current, projection, control, increment, name), _
+        "spatial recovery requires an actual rejected direction", passed, failed, report
     Dim fields As New Collection, trace As New CCoupledLoadTrace, continuation As New CCoupledDeformationContinuation
     Dim base(1 To 6) As Double, actual(1 To 6) As Double
     fields.Add previous: fields.Add current: trace.Add 1#, 0.8

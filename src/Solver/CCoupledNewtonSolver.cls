@@ -86,6 +86,7 @@ Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
 Private mArcLoadProjection As Double, mCurrentControlLambda As Double
 Private mWrongControlDirection As Boolean
+Private mHasRejectedDirection As Boolean, mRejectedDirection() As Double
 Private mBaseLoad() As Double, mLoadDirection() As Double
 Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
@@ -145,6 +146,7 @@ Friend Sub ResetHistory()
     End If
     ReDim mAccepted(1 To mDegreeCount)
     mCandidateReady = False
+    mHasRejectedDirection = False: Erase mRejectedDirection
     mMeta.Clear
 End Sub
 
@@ -544,6 +546,49 @@ Friend Function SelectTransverseDeformationControl(ByRef previous() As Double, B
     SelectTransverseDeformationControl = True
 End Function
 
+' Строит меру вдоль заданного направления в средней тензорной метрике трёх материальных станций.
+' Масштаб направления не влияет на проекцию; множители связей исключаются из метрики и ориентации.
+Friend Function SelectSpatialDirectionControl(ByRef previous() As Double, ByRef current() As Double, _
+        ByRef movement() As Double, ByRef projection() As Double, ByRef currentControl As Double, _
+        ByRef controlIncrement As Double) As Boolean
+    Dim i As Long, fieldScale As Double
+    For i = 1 To mGaugeStart - 1: fieldScale = GeomMax(fieldScale, Abs(movement(i))): Next i
+    If fieldScale = 0# Then Exit Function
+    Dim normalized() As Double, coefficients() As Double, square As Double, length As Double, change As Double
+    ReDim normalized(1 To mDegreeCount)
+    For i = 1 To mGaugeStart - 1: normalized(i) = movement(i) / fieldScale: Next i
+    mSection.CopySpatialStrainCoefficients SPATIAL_HALF_STEP, coefficients
+    square = ArcPhysicalSquare(coefficients, normalized, projection, True)
+    If square <= 0# Then Exit Function
+    length = Sqr(square)
+    For i = 1 To mGaugeStart - 1
+        projection(i) = projection(i) / length
+        change = change + projection(i) * (current(i) - previous(i))
+    Next i
+    If change = 0# Then Exit Function
+    currentControl = 0#: controlIncrement = Abs(change)
+    For i = 1 To mGaugeStart - 1
+        projection(i) = Sgn(change) * projection(i)
+        currentControl = currentControl + projection(i) * current(i)
+    Next i
+    SelectSpatialDirectionControl = True
+End Function
+
+' Выбирает меру по последней заблокированной поправке только из того же принятого состояния.
+' Направление служит параметризацией следующей пробы, а не принятым полем или признаком разрушения.
+Friend Function SelectRejectedDeformationControl(ByRef previous() As Double, ByRef current() As Double, _
+        ByRef projection() As Double, ByRef currentControl As Double, ByRef controlIncrement As Double, _
+        ByRef controlName As String) As Boolean
+    If Not mUseSpatialHistory Or Not mControlActive Or mCandidateReady Or Not mHasRejectedDirection Then Exit Function
+    If mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+    Dim i As Long
+    For i = 1 To mDegreeCount: If current(i) <> mAccepted(i) Then Exit Function
+    Next i
+    If Not SelectSpatialDirectionControl(previous, current, mRejectedDirection, projection, currentControl, controlIncrement) Then Exit Function
+    controlName = "пространственная мера по отвергнутой поправке"
+    SelectRejectedDeformationControl = True
+End Function
+
 ' После численного отказа уточнённого силового шага ищет ограниченный прогноз.
 ' Успех разрешает только полное повторное решение с исходной нагрузкой и бюджетом.
 Private Function TrySubspaceForceRecovery(ByRef load() As Double, _
@@ -723,6 +768,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     mWrongControlDirection = False
     mSameControlInitialFailure = vbNullString
     mRecoveredControlReady = False: Erase mRecoveredProjection
+    mHasRejectedDirection = False: Erase mRejectedDirection
     mIterations = 0: mEvaluations = 0: mMaterialPoint = 0: mGradientBuilds = 0
     mLocalGradientBuilds = 0
     mSteelBranchBuilds = 0: mSteelFieldTangents = 0
@@ -903,6 +949,9 @@ RecomputeTangent:
             mMeta.DiagnosticDetails = details
             If Len(mismatch) > 0 And mUseSpatialHistory Then
                 mWrongControlDirection = True
+                ReDim mRejectedDirection(1 To mDegreeCount)
+                For i = 1 To mGaugeStart - 1: mRejectedDirection(i) = correction(i): Next i
+                mHasRejectedDirection = True
                 If recoverYieldControl Then
                     SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
                         absoluteTolerance, relativeTolerance)
@@ -1621,6 +1670,7 @@ Friend Sub AcceptStep()
     AcceptMaterialTrials
     mAccepted = acceptedField
     mCandidateReady = False
+    mHasRejectedDirection = False: Erase mRejectedDirection
 End Sub
 
 ' Отбрасывает вычисленную пробу после поиска или пользовательской отмены.

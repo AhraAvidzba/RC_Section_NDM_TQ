@@ -44,6 +44,7 @@ Private Const STEP_GROWTH As Double = 1.25
 Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
 Private Const POST_PEAK_EXTENDED_RATIO As Double = 4# ' Верхний шаг после шести гладких приращений подряд.
 Private Const TRANSVERSE_STEP_RATIO As Double = 32# ' Ограничивает рост сдвигового шага относительно различимой начальной секущей.
+Private Const FIELD_CONTROL_CHANGE_LIMIT As Long = 2 ' Ограничивает попытки смены меры после заблокированного пространственного шага.
 Private Const POST_PEAK_SECANT_TOLERANCE As Double = 0.02 ' Допустимое отклонение приращений поля и множителя от секущей.
 
 Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedResponse
@@ -74,6 +75,7 @@ Private mCurrentResultants() As Double
 Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 Private mCurrentFields As Collection ' Принятый путь для воспроизводимой диагностики незавершённого поиска.
 Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
+Private mUsesFieldControl As Boolean, mFieldControlChanges As Long
 Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
 Private mObserver As ICoupledContinuationProgress
 
@@ -99,6 +101,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
     mUsesTransverseControl = False: mUnverifiedDecline = False
+    mUsesFieldControl = False: mFieldControlChanges = 0
     mUnverifiedReference = 0#: mUnverifiedDips = 0: mRecoveredDips = 0
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -170,7 +173,9 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If increment < minimum Then
             If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
-            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then Exit For
+            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then
+                If Not TryChangeStalledFieldControl(history, left, current, nominal, increment, minimum) Then Exit For
+            End If
         End If
         targetCoordinate = current.Coordinate + increment
         If targetCoordinate <= current.Coordinate Then Exit For
@@ -251,7 +256,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If increment < stepCeiling / STEP_GROWTH Then increment = increment * STEP_GROWTH
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
             Dim declinedField() As Double, declinedResultants() As Double
-            If reinforced And mUsesTransverseControl Then mSolver.CopyTrial declinedField, declinedResultants
+            If reinforced And (mUsesTransverseControl Or mUsesFieldControl) Then mSolver.CopyTrial declinedField, declinedResultants
             mSolver.DiscardStep
             If VerifyPeak(history, left, current, trial, reinforced) Then
                 If Not reinforced Then Exit Sub
@@ -263,7 +268,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                     StopSearch "Не удалось восстановить историю возрастающей ветви."
                     Exit Sub
                 End If
-                If reinforced And mUsesTransverseControl Then
+                If reinforced And (mUsesTransverseControl Or mUsesFieldControl) Then
                     Dim repeatSeed As Variant: repeatSeed = declinedField
                     If Probe(trial, trial.Lambda, initialField:=repeatSeed) Then
                         If UpdateTrialCoordinate(trial, current.Coordinate) And Not BeyondSteelLimit() And trial.Lambda > 0# Then
@@ -384,10 +389,36 @@ Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef lef
     If spacing <= 0# Or currentCoordinate + 0.5 * spacing <= currentCoordinate Then Exit Function
 
     mProjection = alternate: mPostPeakControlName = name
-    mUsesTransverseControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
     left.Coordinate = previousCoordinate: current.Coordinate = currentCoordinate
     nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
     TryChangePostPeakControl = True
+End Function
+
+' Меняет только параметризацию после численного отказа участка с неподтверждённым спадом нагрузки.
+' Последняя отвергнутая поправка не принимается; новая цель решается из полной неизменной истории.
+Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
+    If mFieldControlChanges >= FIELD_CONTROL_CHANGE_LIMIT Or mUnverifiedDips = 0 Then Exit Function
+    If Not mUnverifiedDecline Or mFollowingLocalPeak Then Exit Function
+    If Not mSolver.UsesSpatialHistory Or history.Count < 2 Or current.HistoryIndex <> history.Count Then Exit Function
+    Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
+    If code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
+    Dim previous() As Double, accepted() As Double, alternate() As Double, coordinate As Double, spacing As Double, name As String
+    previous = history(history.Count - 1): accepted = history(history.Count)
+    If Not mSolver.SelectRejectedDeformationControl(previous, accepted, alternate, coordinate, spacing, name) Then Exit Function
+    If spacing <= 0# Or coordinate + 0.5 * spacing <= coordinate Then Exit Function
+    mProjection = alternate: mControlName = name
+    mUsesTransverseControl = False: mUsesFieldControl = True: mUsesYieldControl = False
+    mFieldControlChanges = mFieldControlChanges + 1
+    left.HistoryIndex = history.Count - 1: left.Coordinate = coordinate - spacing
+    If Not mTrace Is Nothing Then
+        Dim fraction As Double
+        mTrace.ReadPoint left.HistoryIndex, fraction, left.Lambda
+    End If
+    current.Coordinate = coordinate
+    nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
+    TryChangeStalledFieldControl = True
 End Function
 
 ' Сравнивает приращения на двух соседних шагах одной нисходящей ветви.
@@ -564,7 +595,7 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     End If
     mProjection = projection: mControlName = "мера деформации у перехода бетона"
     mUsesYieldControl = True
-    mUsesTransverseControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
     current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
     increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     TryAdoptRecoveredControl = True
@@ -1018,6 +1049,7 @@ Private Function Details() As String
     If mUnverifiedDips > 0 Then Details = Details & "; неподтверждённых спадов: " & CStr(mUnverifiedDips) & _
         "; восстановлений после них: " & CStr(mRecoveredDips)
     If mUnverifiedDecline Then Details = Details & "; текущий спад не является подтверждённым физическим пределом"
+    If mFieldControlChanges > 0 Then Details = Details & "; смен пространственной меры после отказа: " & CStr(mFieldControlChanges)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
