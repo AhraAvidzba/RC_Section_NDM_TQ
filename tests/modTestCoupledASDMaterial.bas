@@ -24,7 +24,7 @@ End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Загружает закреплённые подготовленные ветви без файлового доступа рабочего материала.
-Private Function TestReadFlow(ByVal folder As String, ByVal name As String) As CCoupledASDFlow
+Public Function TestReadFlow(ByVal folder As String, ByVal name As String) As CCoupledASDFlow
     Dim handle As Integer, line As String, head As Variant, flow As New CCoupledASDFlow
     Dim tension As CCoupledConcreteBackbone, compression As CCoupledConcreteBackbone
     On Error GoTo Failed
@@ -154,7 +154,8 @@ Private Sub TestSectionAnalysis(ByVal folder As String, ByRef passed As Long, By
     Set grades = CreateObject("Scripting.Dictionary"): grades.Add "TestASDHoopGrade", steel
     Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
     Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec
-    analysis.Initialize section, layout, provider, 0.2, 0#, 0#, 0#, 0#, 0#, "A400", 30, supplementary, flow
+    Dim discretization As New CCoupledDiscretization: discretization.Initialize 2, 2, 5, True
+    analysis.Initialize section, layout, provider, 0.2, 0#, 0#, 0#, 0#, 0#, "A400", 30, supplementary, flow, discretization
     spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
     Dim loads As New CSectionLoadState, state As CSectionStateResult, meta As CResultMeta
     Dim field() As Double, resultants() As Double

@@ -16,6 +16,7 @@ Option Explicit
 ' Одноточечная квадратура по частям ячеек уточняется независимо от базиса.
 ' Данные создаются один раз на ревизию сечения и используются только на чтение.
 
+Private Const GAUSS_ORDER As Long = 5
 Private mSplineX As CCubicSplineBasis
 Private mSplineY As CCubicSplineBasis
 Private mRegion As CConcreteRegion
@@ -56,14 +57,18 @@ End Sub
 ' ненулевых функций и их производные. x/y приведены к численному началу.
 Friend Sub Prepare(ByVal pointsPerSpan As Long, ByRef x() As Double, ByRef y() As Double, _
         ByRef area() As Double, ByRef indices() As Long, ByRef values() As Double, _
-        ByRef gradientX() As Double, ByRef gradientY() As Double)
+        ByRef gradientX() As Double, ByRef gradientY() As Double, Optional ByVal useFullSpanGauss5 As Boolean = False)
     If mGeometry Is Nothing Then GeometryError "Бетонная область связанного расчёта не подготовлена."
     If pointsPerSpan < 4 Then GeometryError "Требуется не менее четырёх делений на интервал кубического базиса."
+    If useFullSpanGauss5 And pointsPerSpan <> GAUSS_ORDER Then _
+        GeometryError "Для квадратуры Гаусса по целому интервалу нужны пять узлов по каждой оси."
     Dim mesh As New CFiberMeshBuilder
     Dim stepX As Double, stepY As Double
     stepX = mGeometry.Width / ((mSplineX.Count - 3) * CDbl(pointsPerSpan))
     stepY = mGeometry.Height / ((mSplineY.Count - 3) * CDbl(pointsPerSpan))
     mesh.BuildMesh mGeometry, stepX, stepY, cellGeometry:="Contour"
+    Dim gaussX() As Double, gaussY() As Double, gaussArea() As Double
+    If useFullSpanGauss5 Then PrepareFullSpanGauss mesh, stepX, stepY, gaussX, gaussY, gaussArea
 
     Dim count As Long
     count = mesh.FiberCount
@@ -76,12 +81,17 @@ Friend Sub Prepare(ByVal pointsPerSpan As Long, ByRef x() As Double, ByRef y() A
     For i = 1 To count
         worldX = mesh.FiberX(i)
         worldY = mesh.FiberY(i)
+        area(i) = mesh.FiberArea(i)
+        If useFullSpanGauss5 Then
+            If gaussArea(i) > 0# Then
+                worldX = gaussX(i): worldY = gaussY(i): area(i) = gaussArea(i)
+            End If
+        End If
         If Not mGeometry.ContainsPoint(worldX, worldY) Then
             GeometryError "Центр ячейки связанного расчёта оказался вне бетона. Уточните квадратуру у границ отверстий."
         End If
         x(i) = worldX - mFrame.OriginX
         y(i) = worldY - mFrame.OriginY
-        area(i) = mesh.FiberArea(i)
         totalArea = totalArea + area(i)
         EvaluateShape x(i), y(i), localIndex, shape, dx, dy
         For k = 1 To 16
@@ -93,6 +103,96 @@ Friend Sub Prepare(ByVal pointsPerSpan As Long, ByRef x() As Double, ByRef y() A
     Next i
     If Abs(totalArea - mRegion.Area) > 1E-7 * mRegion.Area Then _
         GeometryError "Суммарная площадь ячеек связанного расчёта не совпадает с площадью бетонной области. Проверьте контуры и разрешение квадратуры."
+End Sub
+
+' Заменяет квадратуру целого интервала только после проверки всех исходных ячеек и новых узлов.
+' Пересечение любой границы, включая отверстие, сохраняет фактические контурные ячейки.
+Private Sub PrepareFullSpanGauss(ByVal mesh As CFiberMeshBuilder, ByVal stepX As Double, ByVal stepY As Double, _
+        ByRef gx() As Double, ByRef gy() As Double, ByRef weight() As Double)
+    Const GRID_MATCH As Double = 1E-7
+    Const AREA_MATCH As Double = 1E-8
+    Dim spansX As Long, spansY As Long, ix As Long, iy As Long, minX As Double, minY As Double
+    Dim intervalX As Double, intervalY As Double, startX As Double, startY As Double
+    spansX = mSplineX.Count - 3: spansY = mSplineY.Count - 3
+    minX = mGeometry.MinX: minY = mGeometry.MinY
+    intervalX = mGeometry.Width / spansX: intervalY = mGeometry.Height / spansY
+    Dim fullSpan() As Boolean, sourcePoint() As Long
+    ReDim fullSpan(1 To spansX, 1 To spansY)
+    ReDim sourcePoint(1 To GAUSS_ORDER, 1 To GAUSS_ORDER, 1 To spansX, 1 To spansY)
+    Dim slotX As Long, slotY As Long, count As Long
+    For iy = 1 To spansY
+        startY = minY + (iy - 1) * intervalY
+        For ix = 1 To spansX
+            startX = minX + (ix - 1) * intervalX
+            If Not mGeometry.MeshBoundaryCrossesCell(startX, startY, startX + intervalX, startY + intervalY) Then
+                fullSpan(ix, iy) = mGeometry.ContainsPoint(startX + 0.5 * intervalX, startY + 0.5 * intervalY)
+            End If
+        Next ix
+    Next iy
+
+    Dim i As Long, gridX As Double, gridY As Double, cellX As Long, cellY As Long, cellArea As Double
+    count = mesh.FiberCount: cellArea = stepX * stepY
+    ReDim gx(1 To count): ReDim gy(1 To count): ReDim weight(1 To count)
+    For i = 1 To count
+        gridX = (mesh.FiberX(i) - minX) / stepX: gridY = (mesh.FiberY(i) - minY) / stepY
+        cellX = CLng(Fix(gridX)): cellY = CLng(Fix(gridY))
+        If cellX >= 0 And cellX < GAUSS_ORDER * spansX And cellY >= 0 And cellY < GAUSS_ORDER * spansY Then
+            ix = 1 + cellX \ GAUSS_ORDER: iy = 1 + cellY \ GAUSS_ORDER
+            If fullSpan(ix, iy) Then
+                slotX = 1 + cellX Mod GAUSS_ORDER: slotY = 1 + cellY Mod GAUSS_ORDER
+                If Abs(gridX - cellX - 0.5) > GRID_MATCH Or Abs(gridY - cellY - 0.5) > GRID_MATCH Or _
+                        Abs(mesh.FiberArea(i) / cellArea - 1#) > AREA_MATCH Or sourcePoint(slotX, slotY, ix, iy) <> 0 Then
+                    fullSpan(ix, iy) = False
+                Else
+                    sourcePoint(slotX, slotY, ix, iy) = i
+                End If
+            End If
+        End If
+    Next i
+
+    Dim node(1 To GAUSS_ORDER) As Double, gaussWeight(1 To GAUSS_ORDER) As Double
+    Dim spanX(1 To GAUSS_ORDER) As Double, spanY(1 To GAUSS_ORDER) As Double, intervalArea As Double
+    GaussUnitRule node, gaussWeight
+    intervalArea = intervalX * intervalY
+    For iy = 1 To spansY
+        startY = minY + (iy - 1) * intervalY
+        For slotY = 1 To GAUSS_ORDER: spanY(slotY) = startY + node(slotY) * intervalY: Next slotY
+        For ix = 1 To spansX
+            If fullSpan(ix, iy) Then
+                startX = minX + (ix - 1) * intervalX
+                For slotX = 1 To GAUSS_ORDER: spanX(slotX) = startX + node(slotX) * intervalX: Next slotX
+                For slotY = 1 To GAUSS_ORDER
+                    For slotX = 1 To GAUSS_ORDER
+                        If sourcePoint(slotX, slotY, ix, iy) = 0 Or _
+                                Not mGeometry.ContainsPoint(spanX(slotX), spanY(slotY)) Then fullSpan(ix, iy) = False
+                    Next slotX
+                Next slotY
+                If fullSpan(ix, iy) Then
+                    For slotY = 1 To GAUSS_ORDER
+                        For slotX = 1 To GAUSS_ORDER
+                            i = sourcePoint(slotX, slotY, ix, iy)
+                            gx(i) = spanX(slotX): gy(i) = spanY(slotY)
+                            weight(i) = intervalArea * gaussWeight(slotX) * gaussWeight(slotY)
+                        Next slotX
+                    Next slotY
+                End If
+            End If
+        Next ix
+    Next iy
+End Sub
+
+' Строит пять узлов и весов на единичном интервале по точной формуле Гаусса–Лежандра.
+Private Sub GaussUnitRule(ByRef node() As Double, ByRef weight() As Double)
+    Dim innerNode As Double, outerNode As Double, radical As Double
+    radical = 2# * Sqr(10# / 7#)
+    outerNode = Sqr(5# + radical) / 3#: innerNode = Sqr(5# - radical) / 3#
+    node(1) = 0.5 * (1# - outerNode): node(5) = 1# - node(1)
+    node(2) = 0.5 * (1# - innerNode): node(4) = 1# - node(2)
+    node(3) = 0.5
+    radical = 13# * Sqr(70#)
+    weight(1) = (322# - radical) / 1800#: weight(5) = weight(1)
+    weight(2) = (322# + radical) / 1800#: weight(4) = weight(2)
+    weight(3) = 64# / 225#
 End Sub
 
 ' Вычисляет локальный тензорный базис в координатах численного начала.

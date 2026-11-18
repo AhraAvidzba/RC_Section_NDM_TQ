@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "FAED2DAF2B3E68C14E197BD36F12C5DF96000B5FD93E4B6F777A52F315D30E2F",
+  "manifest_sha256": "DBA0F4B7670AC412F7E738528C6CD38E8EB8DBE06091322D178C1DBF7B78C7AF",
   "source_checkpoint": "826221bfde2fef1e690c65745c0169ef4a342161",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 291,
+  "passed": 293,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2409,6 +2409,24 @@
         "WorkingASDChecks.json": "FC5CA8B23E2385B0AC8F34B0A7DDAC721A4D4471BFF0B7CC198EA728A027A9A3"
       },
       "verified_stdout": "WORKING ASD SOURCES AND DIRECTED REGRESSIONS VERIFIED; EXTERNAL MATERIAL SCOPE INCOMPLETE; CAPACITY OPEN"
+    },
+    {
+      "id": "production-gauss-asd-native",
+      "journal_section": 597,
+      "archive": "ProductionGaussAndASD20261118",
+      "verified_outputs_sha256": {
+        "ProductionGaussNativeChecks.json": "57838C6B72F1C38055261F00928F7A38E87C11B5A7B934C8A6AB3B3597F162D5"
+      },
+      "verified_stdout": "PRODUCTION GAUSS VBA AND ALL DIRECTED SCOPES VERIFIED; EXTERNAL RETRY INCOMPLETE; CAPACITY OPEN"
+    },
+    {
+      "id": "production-gauss-asd-mechanics",
+      "journal_section": 597,
+      "archive": "ProductionGaussAndASD20261118",
+      "verified_outputs_sha256": {
+        "ProductionGaussMechanicsChecks.json": "0A4BB5AAEB49973D1CED564E50706B34A78CFCAAAADEA34563CC9516CB5C743E"
+      },
+      "verified_stdout": "PRODUCTION MATERIAL MVT2 ALL SIX RESULTANTS AND 74 EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN"
     }
   ]
 }

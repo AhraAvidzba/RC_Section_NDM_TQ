@@ -31,6 +31,7 @@ Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели
 Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
 Private mDiagramCache As Object ' Точки фактических диаграмм для публикации одного набора характеристик.
 Private mASDFlow As CCoupledASDFlow ' Необязательный неизменяемый закон по явно подготовленным таблицам.
+Private mDiscretization As CCoupledDiscretization ' Общая неизменяемая точность всех сочетаний одного запуска.
 
 ' Принимает калибровку в мм, МПа и Н/мм, а размеры деформаций в долях единицы.
 ' Геометрия и диаграммы остаются неизменными между строками текущего пакета.
@@ -38,7 +39,7 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
         ByVal provider As CMaterialModelProvider, ByVal poisson As Double, ByVal gt As Double, ByVal gc As Double, _
         ByVal localizationLength As Double, ByVal yieldRatio As Double, ByVal peakStrain As Double, _
         ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing, _
-        Optional ByVal asdFlow As CCoupledASDFlow = Nothing)
+        Optional ByVal asdFlow As CCoupledASDFlow = Nothing, Optional ByVal discretization As CCoupledDiscretization = Nothing)
     If section Is Nothing Or transverse Is Nothing Or provider Is Nothing Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Передайте сечение, поперечное армирование и параметры материалов."
     If Not transverse.IsSpecified Then _
@@ -58,6 +59,13 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     mSteelClass = Trim$(steelClass): mMaxIterations = maxIterations
     Set mSupplementarySteel = supplementarySteel
     Set mASDFlow = asdFlow
+    If discretization Is Nothing Then
+        Set discretization = New CCoupledDiscretization
+        discretization.Initialize 1, 1, 5
+    ElseIf Not discretization.IsReady Then
+        Err.Raise 5, "CCoupledSectionAnalysis", "Подготовьте дискретизацию пространственного поля перед расчётом."
+    End If
+    Set mDiscretization = discretization
     Set mSteelCache = CreateObject("Scripting.Dictionary")
     Set mOperatorCache = CreateObject("Scripting.Dictionary")
     Set mDiagramCache = CreateObject("Scripting.Dictionary")
@@ -462,7 +470,9 @@ Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As O
         Set mOperators = mOperatorCache(key)
     Else
         Dim prepared As New CCoupledElasticState
-        prepared.PrepareModel mSection, mEb, mPoisson, 1, 1, 5, mTransverse, steelModels:=models, importedGrade:=mSteelClass
+        prepared.PrepareModel mSection, mEb, mPoisson, mDiscretization.SpansX, mDiscretization.SpansY, _
+            mDiscretization.PointsPerSpan, mTransverse, steelModels:=models, importedGrade:=mSteelClass, _
+            useFullSpanGauss5:=mDiscretization.UseFullSpanGauss5
         mOperatorCache.Add key, prepared
         Set mOperators = prepared
     End If

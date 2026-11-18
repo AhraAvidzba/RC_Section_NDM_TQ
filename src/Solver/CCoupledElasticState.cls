@@ -51,7 +51,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
         ByVal spansX As Long, ByVal spansY As Long, ByVal pointsPerSpan As Long, _
         Optional ByVal transverse As CTransverseRebarLayout = Nothing, _
         Optional ByVal steelModulus As Double = 0#, Optional ByVal steelModels As Object = Nothing, _
-        Optional ByVal importedGrade As String = vbNullString)
+        Optional ByVal importedGrade As String = vbNullString, Optional ByVal useFullSpanGauss5 As Boolean = False)
     Set mMeta = New CResultMeta
     mArea = 0#
     If modulus <= 0# Or poisson <= -1# Or poisson >= 0.5 Then
@@ -63,7 +63,7 @@ Public Sub PrepareModel(ByVal section As CSectionModel, ByVal modulus As Double,
     mLength = mQuadrature.Frame.LengthScale
     CoupledElasticTensor modulus, poisson, mElastic
     Dim indices() As Long, dx() As Double, dy() As Double
-    mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy
+    mQuadrature.Prepare pointsPerSpan, mX, mY, mWeight, indices, mShape, dx, dy, useFullSpanGauss5
     mConcreteCount = UBound(mWeight)
     mPointCount = mConcreteCount
     PrepareReinforcement section, transverse, steelModulus, steelModels, importedGrade, indices, dx, dy

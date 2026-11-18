@@ -291,7 +291,8 @@
     "ASDResolutionAndNativeFieldTransfer0220261118": "3B8C85E2CFED75747325232CE5BBEC0ABAB4D6E94A93FD9C2FC7E8D02F5FBEC5",
     "ASDReducedPredictorNative20261118": "144B075E2A7A207D0AFFE74664AED778D827A5C02A01F4D7DA0B54DE8F2BF461",
     "WorkingForceSubspace20261118": "FBEACD63457F041E473358613DA96FCA0AB1C8A79194BD226EE7D1F821CFCA3B",
-    "WorkingASDMaterialIntegration20261118": "834DD5A33866D4AE2267E90F0E0DBBCC495A859895EF9E1EEE748777ACB5CFF1"
+    "WorkingASDMaterialIntegration20261118": "834DD5A33866D4AE2267E90F0E0DBBCC495A859895EF9E1EEE748777ACB5CFF1",
+    "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395"
   },
   "cases": [
     {
@@ -3324,6 +3325,46 @@
       "stdout_contains": "WORKING ASD SOURCES AND DIRECTED REGRESSIONS VERIFIED; EXTERNAL MATERIAL SCOPE INCOMPLETE; CAPACITY OPEN",
       "outputs": {
         "WorkingASDChecks.json": "FC5CA8B23E2385B0AC8F34B0A7DDAC721A4D4471BFF0B7CC198EA728A027A9A3"
+      }
+    },
+    {
+      "id": "production-gauss-asd-native",
+      "journal_section": 597,
+      "archive": "ProductionGaussAndASD20261118",
+      "script": "Check-TestProductionGauss.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "ProductionGaussNativeChecks.json"
+      ],
+      "stdout_contains": "PRODUCTION GAUSS VBA AND ALL DIRECTED SCOPES VERIFIED; EXTERNAL RETRY INCOMPLETE; CAPACITY OPEN",
+      "outputs": {
+        "ProductionGaussNativeChecks.json": "57838C6B72F1C38055261F00928F7A38E87C11B5A7B934C8A6AB3B3597F162D5"
+      }
+    },
+    {
+      "id": "production-gauss-asd-mechanics",
+      "journal_section": 597,
+      "archive": "ProductionGaussAndASD20261118",
+      "script": "Check-TestProductionGauss.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "ProductionGaussMechanicsChecks.json"
+      ],
+      "stdout_contains": "PRODUCTION MATERIAL MVT2 ALL SIX RESULTANTS AND 74 EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "ProductionGaussMechanicsChecks.json": "0A4BB5AAEB49973D1CED564E50706B34A78CFCAAAADEA34563CC9516CB5C743E"
       }
     }
   ],

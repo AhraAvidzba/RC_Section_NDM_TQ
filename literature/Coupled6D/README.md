@@ -156,6 +156,21 @@ Git blob `06e9ef4e828af69806705f847e9983d176d56288`, SHA-256
 по этому заголовку. Значение по умолчанию `cdf` также указано в
 [официальной документации](https://opensees.github.io/OpenSeesDocumentation/user/manual/material/ndMaterials/ASDConcrete3D.html).
 
+## Диагностический интерфейс OpenSees
+
+Для диагностики внешнего материального контроля также сохранены
+первичные файлы интерфейса OpenSees 3.8.0. Они используются для
+проверки чтения внутренних переменных, не как новая модель бетона.
+В `OPS_NDGetResponse` вызов `setResponse` получает `opserr`, а созданный
+`Response` в этой функции не удаляется. Само наличие этого участка
+не устанавливает причину тайм-аутов расчёта; отрицательные запуски
+и их фактический объём приведены в §596–597 журнала.
+
+| Локальный файл | Первичный источник | SHA-256 |
+| --- | --- | --- |
+| `OpenSees-3.8.0-OpenSeesNDTestCommands.cpp` | OpenSees, тег `v3.8.0`, `SRC/interpreter/OpenSeesNDTestCommands.cpp`. [Исходник](https://raw.githubusercontent.com/OpenSees/OpenSees/v3.8.0/SRC/interpreter/OpenSeesNDTestCommands.cpp). Авторская шапка сохранена. | `6A128D53B374CBBF482EAA8CAD9FD98A182D18EA26047E92C64B28C469A5D3A1` |
+| `OpenSees-3.8.0-PythonStream.cpp` | OpenSees, тег `v3.8.0`, `SRC/interpreter/PythonStream.cpp`. [Исходник](https://raw.githubusercontent.com/OpenSees/OpenSees/v3.8.0/SRC/interpreter/PythonStream.cpp). | `A20EA31FC7FAEBECA8FC3825B5392DACA39CF769D9E47304A33CC04FBCC55C10` |
+
 ## GMRES и ускорение Ньютона
 
 Для §590 сохранена оригинальная статья Saad–Schultz. Использованы
