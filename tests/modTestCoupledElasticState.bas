@@ -1,4 +1,4 @@
-Attribute VB_Name = "modTestCoupledElasticState"
+﻿Attribute VB_Name = "modTestCoupledElasticState"
 Option Explicit
 
 ' ==========================================================================
@@ -1009,7 +1009,7 @@ End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Проверяет достижение предельной деформации арматуры до и после пика N.
-' На нисходящей ветви поздний предел не заменяет больший пройденный максимум.
+' Поздний предел завершает допустимую ветвь, а результат относится к уточнённому большему максимуму.
 Public Function RunTestCoupledDeformationSteelCrossing() As String
     Dim passed As Long, failed As Long, report As String
     On Error GoTo Failed
@@ -1023,13 +1023,30 @@ Failed:
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сверяет определяющий максимум закрытой арматурным событием ветви выше, ниже и около λ=1.
+' Контрольное кручение имеет постоянную и масштабируемую части; численный отказ до события не закрывает ветвь.
+Public Function RunTestCoupledClosedBranchPeak() As String
+    Dim passed As Long, failed As Long, report As String
+    On Error GoTo Failed
+    TestCoupledDeformationSteelCrossing 0.00125, 410000#, 396328.125, True, False, passed, failed, report, torque:=200000#
+    TestCoupledDeformationSteelCrossing 0.00125, 450000#, 396328.125, True, False, passed, failed, report, torque:=200000#
+    TestCoupledDeformationSteelCrossing 0.00125, 440000#, 396328.125, True, False, passed, failed, report, torque:=200000#
+    TestCoupledDeformationSteelCrossing 0.00125, 410000#, 396328.125, True, False, passed, failed, report, freezeAt:=0.00115, torque:=200000#
+    RunTestCoupledClosedBranchPeak = report & "TOTAL_COUPLED_CLOSED_BRANCH_PEAK: passed=" & passed & "; failed=" & failed
+    Exit Function
+Failed:
+    RunTestCoupledClosedBranchPeak = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Для прямоугольника 180×120 мм и центрального стержня 100 мм²
 ' N = 21500·(30000·ε − 10¹⁰·ε³) + 100·min(200000·ε, 100) в Н.
 ' После начала текучести постоянное усилие в стержне не сдвигает
 ' аналитический максимум N = 440000 Н при ε = 0,001.
 Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double, ByVal designForce As Double, _
         ByVal crossingForce As Double, ByVal afterPeak As Boolean, ByVal atDesignLoad As Boolean, _
-        ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String, Optional ByVal freezeAt As Double = 0#, _
+        Optional ByVal torque As Double = 0#)
     Const STEEL_AREA As Double = 100#
     Const NET_CONCRETE_AREA As Double = 21500#
     Const STEEL_MODULUS As Double = 200000#
@@ -1045,6 +1062,7 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     operators.PrepareModel section, 30000#, 0#, 1, 1, 5, steelModels:=models
     concrete.TestInitialize operators.PointCount
     concrete.TestUseDescendingAxialLaw
+    concrete.TestFreezeAxialTailAt = freezeAt
     Dim material As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
     material.Initialize operators, concrete, models
     solver.Initialize operators, material, 30000#
@@ -1053,6 +1071,8 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
     Dim history As New Collection, trace As New CCoupledLoadTrace, field() As Double, resultants() As Double
     ReDim control(1 To operators.DegreeCount)
     control(1) = 1#: direction(1) = designForce
+    direction(4) = torque
+    If torque <> 0# Then baseLoad(4) = 30000#
     Dim strain As Variant, eps As Double, lambda As Double, previousLambda As Double, initialLambda As Double
     Dim stress As Double, expected As Double
     For Each strain In Array(0.0004, 0.0006)
@@ -1075,20 +1095,59 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
         1.45, LAMBDA_TOLERANCE, 30, 1E-8, 1E-8, trace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, point As Long, limitFields As Collection
+    Dim peak As Double, accuracy As Double, designVerified As Boolean
+    If freezeAt > 0# Then
+        TestRecord meta.InternalStatus = rsNumericalFailure And branch.SteelEventPoint = 0, _
+            "numerical tail failure supplies no physical closing event " & meta.DiagnosticDetails, passed, failed, report
+        TestRecord Not branch.CopyPeak(peak, accuracy, designVerified) And Not branch.CopySteelLimit(low, high, point), _
+            "an open reinforced branch supplies no governing capacity", passed, failed, report
+        TestRecord InStr(1, meta.ResultComment, "локальный максимум", vbTextCompare) > 0, _
+            "a verified local maximum remains diagnostic before physical closure", passed, failed, report
+        TestRecord material.AcceptedSteelUtilization < 1#, "numerical failure is below the steel strain limit", passed, failed, report
+        Exit Sub
+    End If
     expected = crossingForce / designForce
     TestRecord branch.SteelEventPoint = operators.ConcretePointCount + 1, "central bar controls the localized event", passed, failed, report
     If afterPeak Then
-        TestRecord meta.InternalStatus = rsNumericalFailure And meta.ResultCode = rcNumericalFailure, _
-            "steel limit after a larger equilibrium keeps the capacity unresolved", passed, failed, report
-        TestExpectNear branch.BestAdmissibleLambda, 440000# / designForce, 0.001, _
-            "confirmed lower bound agrees with the earlier peak", passed, failed, report
-        TestRecord Not branch.CopySteelLimit(low, high, point) And Not branch.CopyLimitState(limitFields, resultants), _
-            "late steel limit supplies no governing capacity state", passed, failed, report
-        TestRecord InStr(1, meta.ResultComment, "Достигнута предельная деформация арматуры", vbTextCompare) > 0, _
-            "comment identifies the late steel event: " & meta.ResultComment, passed, failed, report
+        TestRecord meta.InternalStatus = rsSuccess And branch.CopyPeak(peak, accuracy, designVerified), _
+            "physical closure certifies the refined preceding peak " & meta.DiagnosticDetails, passed, failed, report
+        If peak <= 0# Then Exit Sub
+        TestRecord accuracy > 0# And accuracy <= LAMBDA_TOLERANCE And Abs(peak - 440000# / designForce) <= accuracy, _
+            "peak resolution covers the independent maximum at the requested tolerance", passed, failed, report
+        TestRecord Abs(branch.BestAdmissibleLambda - peak) <= accuracy, _
+            "no later admissible equilibrium exceeds the certified maximum", passed, failed, report
+        TestRecord Not branch.CopySteelLimit(low, high, point) And branch.CopyLimitState(limitFields, resultants), _
+            "late steel limit returns the earlier governing maximum state", passed, failed, report
+        TestRecord InStr(1, meta.ResultComment, "завершённой предельной деформацией арматуры", vbTextCompare) > 0, _
+            "comment identifies physical closure and its separate maximum", passed, failed, report
         TestRecord InStr(1, meta.DiagnosticDetails, "Арматурное событие: lambda до = ", vbTextCompare) > 0 And _
             InStr(1, meta.DiagnosticDetails, "Координата деформации", vbTextCompare) > 0, _
             "diagnostics resolve the late steel event in deformation coordinates", passed, failed, report
+        Dim capacity As New CCapacityResult, vector(1 To 6) As Double, expectedStatus As String
+        If designForce < 440000# Then
+            expectedStatus = "OK"
+        ElseIf designForce > 440000# Then
+            expectedStatus = "FAIL"
+        Else
+            expectedStatus = "NumFail"
+        End If
+        capacity.InitializeCoupledPeak peak, accuracy, designVerified, vector, "Auto", meta.DiagnosticDetails
+        TestRecord capacity.Status = expectedStatus, "capacity classifies the known maximum as " & expectedStatus, passed, failed, report
+        TestRecord designForce >= 440000# Or designVerified, "a safe design load is verified before the governing maximum", passed, failed, report
+        TestRecord designForce <= 440000# Or Not designVerified, "a load above the known maximum is not falsely verified", passed, failed, report
+        If Not limitFields Is Nothing Then
+            field = limitFields.Item(limitFields.Count)
+            TestRecord Abs(field(1) - 0.001) <= 0.00001 And field(1) < steelStrainLimit, _
+                "saved maximum strain precedes the closing steel rupture", passed, failed, report
+            TestRecord Abs(resultants(4) - baseLoad(4) - peak * direction(4)) <= 0.00001, _
+                "the same peak state balances the fixed and scaled torque", passed, failed, report
+            TestRecord solver.ReplayAcceptedFields(limitFields, limitFields.Count), "governing peak prefix replays", passed, failed, report
+            TestRecord material.AcceptedSteelUtilization <= 1# And concrete.TestAcceptedPeak < steelStrainLimit, _
+                "replayed governing history excludes the descending closing tail", passed, failed, report
+        Else
+            TestRecord False, "closed physical branch must retain its maximum state", passed, failed, report
+        End If
+        expected = 440000# / designForce
     ElseIf atDesignLoad Then
         TestRecord meta.InternalStatus = rsNumericalFailure And meta.ResultCode = rcNumericalFailure, _
             "event interval containing exact design load stays unresolved", passed, failed, report
@@ -1120,8 +1179,8 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
         TestRecord False, "traced branch contains only the seed fields", passed, failed, report
     Else
         saved.ReadPoint saved.Count, offsetFraction, tracedLambda
-        TestExpectNear tracedLambda, expected, LAMBDA_TOLERANCE + 1E-8, "trace ends at the refined crossing", passed, failed, report
-        TestRecord offsetFraction = 1# And (afterPeak And tracedLambda >= expected - 1E-8 Or _
+        TestExpectNear tracedLambda, expected, LAMBDA_TOLERANCE + 1E-8, "trace ends at the governing limit", passed, failed, report
+        TestRecord offsetFraction = 1# And (afterPeak And Abs(tracedLambda - expected) <= accuracy Or _
             Not afterPeak And tracedLambda <= expected + 1E-8), "trace retains the admissible side of the crossing", passed, failed, report
     End If
     TestRecord material.AcceptedSteelUtilization <= 1# + 1E-10, "no inadmissible material state committed", passed, failed, report
@@ -1144,7 +1203,9 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
         If stress > STEEL_YIELD Then stress = STEEL_YIELD
         expected = NET_CONCRETE_AREA * (30000# * field(1) - 1E+10# * field(1) ^ 3) + STEEL_AREA * stress
         saved.ReadPoint saved.Count, offsetFraction, tracedLambda
-        TestExpectNear expected, tracedLambda * designForce, 0.01, "last retained field independently equilibrates its saved load", passed, failed, report
+        TestRecord Abs(expected - tracedLambda * designForce) <= 0.01, _
+            "last retained field independently equilibrates its saved load actual=" & CStr(expected) & _
+            " expected=" & CStr(tracedLambda * designForce), passed, failed, report
     End If
 End Sub
 
@@ -4417,19 +4478,10 @@ Public Function RunTestCoupledRetainedShoulders() As String
     Dim branch As New CCoupledDeformationContinuation
     branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 1E-8, 1E-8, trace
     Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
-    TestRecord saved.Count = 5, "уточнённые поля заменяют грубое плечо", passed, failed, report
-    Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
-    Dim i As Long, offsetFraction As Double, greatest As Double
-    For i = 1 To GeomMin(saved.Count, 5)
-        saved.ReadPoint i, offsetFraction, factor
-        TestExpectNear factor, CDbl(expected(i - 1)), 1E-8, "множитель поля " & CStr(i), passed, failed, report
-        TestExpectNear offsetFraction, 1#, 1E-12, "постоянная часть поля " & CStr(i), passed, failed, report
-        greatest = GeomMax(greatest, factor)
-    Next i
-    TestExpectNear branch.BestAdmissibleLambda, greatest, 1E-8, _
-        "нижняя оценка включает все сохранённые равновесия", passed, failed, report
+    Dim greatest As Double
+    greatest = TestTwinPeakRetainedTrace(branch, solver, passed, failed, report)
     Dim meta As CResultMeta: Set meta = branch.ResultMeta
-    TestRecord InStr(1, meta.ResultComment, "локальный максимум при lambda = " & Format$(1.1, "0.000000")) > 0, _
+    TestRecord InStr(1, meta.ResultComment, "локальный максимум при lambda = ") > 0, _
         "в диагностике указан больший подтверждённый максимум", passed, failed, report
     TestRecord InStr(1, meta.DiagnosticDetails, "равновесие при lambda = 1 подтверждено: True", vbTextCompare) > 0, _
         "точное сочетание проверено из уточнённого восходящего участка", passed, failed, report
@@ -4440,7 +4492,6 @@ Public Function RunTestCoupledRetainedShoulders() As String
     TestRecord Not branch.CopyLimitState(limitFields, resultants), _
         "локальный пик не публикует предельное поле", passed, failed, report
     solver.CopyAccepted field
-    TestExpectNear field(1), 0.0007, 1E-12, "сохранено последнее допустимое поле правого плеча", passed, failed, report
     TestExpectNear concrete.TestAcceptedPeak, field(1), 1E-12, _
         "отклонённая проба не изменила принятую материальную историю", passed, failed, report
     TestRecord concrete.TestAcceptedSteps = saved.Count, "индексы истории и следа совпадают", passed, failed, report
@@ -4448,6 +4499,57 @@ Public Function RunTestCoupledRetainedShoulders() As String
     Exit Function
 Failed:
     RunTestCoupledRetainedShoulders = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Находит больший максимум заданного полинома из изолированного корня его производной на t в [2;3].
+' Деформация равна 0,0004+0,0001t; множитель равен (-218t⁴+1309t³-2428t²+1379t+450)/600.
+Private Function TestTwinPeakMaximum() As Double
+    Dim low As Double, high As Double, t As Double, slope As Double, i As Long
+    low = 2#: high = 3#
+    For i = 1 To 48
+        t = 0.5 * (low + high)
+        slope = ((-872# * t + 3927#) * t - 4856#) * t + 1379#
+        If slope > 0# Then low = t Else high = t
+    Next i
+    t = 0.5 * (low + high)
+    TestTwinPeakMaximum = (((-218# * t + 1309#) * t - 2428#) * t + 1379#) * t / 600# + 0.75
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет все сохранённые поля по явному закону, строгий ход деформации, максимум и точное принятое состояние.
+Private Function TestTwinPeakRetainedTrace(ByVal branch As CCoupledDeformationContinuation, ByVal solver As CCoupledNewtonSolver, _
+        ByRef passed As Long, ByRef failed As Long, ByRef report As String) As Double
+    Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
+    Dim fields As Collection: Set fields = branch.AcceptedFields
+    If saved Is Nothing Or fields Is Nothing Then
+        TestRecord False, "доступна полная уточнённая история полей и нагрузок", passed, failed, report
+        Exit Function
+    End If
+    TestRecord saved.Count = fields.Count And saved.Count > 2, "все уточнённые поля согласованы с нагрузочным следом", passed, failed, report
+    Dim i As Long, fraction As Double, factor As Double, previous As Double, t As Double, expected As Double
+    Dim field() As Double, accepted() As Double, same As Boolean
+    For i = 1 To GeomMin(saved.Count, fields.Count)
+        field = fields.Item(i): saved.ReadPoint i, fraction, factor
+        t = (field(1) - 0.0004) / 0.0001
+        expected = (((-218# * t + 1309#) * t - 2428#) * t + 1379#) * t / 600# + 0.75
+        TestRecord Abs(factor - expected) <= 0.000000001, "каждое сохранённое поле удовлетворяет независимому полиному " & CStr(i), passed, failed, report
+        TestRecord fraction = 1# And field(1) > previous, "каждое принятое поле продвигается при полной постоянной части " & CStr(i), passed, failed, report
+        report = report & "TEST_TWIN_PEAK_FIELD;" & CStr(i) & ";" & CStr(field(1)) & ";" & CStr(factor) & vbCrLf
+        previous = field(1)
+        TestTwinPeakRetainedTrace = GeomMax(TestTwinPeakRetainedTrace, factor)
+    Next i
+    TestRecord Abs(TestTwinPeakRetainedTrace - TestTwinPeakMaximum()) <= 0.0001, _
+        "уточнённый максимум совпадает с независимым корнем производной до 0.0001", passed, failed, report
+    TestRecord Abs(branch.BestAdmissibleLambda - TestTwinPeakRetainedTrace) <= 0.000000000001, _
+        "граница подтверждения равна максимуму всех сохранённых равновесий", passed, failed, report
+    solver.CopyAccepted accepted: same = (UBound(accepted) = UBound(field))
+    If same Then
+        For i = 1 To UBound(field)
+            If accepted(i) <> field(i) Then same = False: Exit For
+        Next i
+    End If
+    TestRecord same, "последнее сохранённое поле точно совпадает с принятым решателем", passed, failed, report
 End Function
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
@@ -4610,18 +4712,9 @@ Public Function RunTestCoupledDiscardedShoulder() As String
     Dim branch As New CCoupledDeformationContinuation
     branch.Trace solver, material, offset, direction, history, previous, lambda, resultants, 1.5, 0.0001, 30, 1E-8, 1E-8, trace
     Dim saved As CCoupledLoadTrace: Set saved = branch.SavedTrace
-    TestRecord saved.Count = 5, "итоговая история содержит четыре подшага", passed, failed, report
-    Dim expected As Variant: expected = Array(0.75, 0.82, 0.8, 1.1, 0.7)
-    Dim i As Long, offsetFraction As Double, greatest As Double
-    For i = 1 To GeomMin(saved.Count, 5)
-        saved.ReadPoint i, offsetFraction, factor
-        TestExpectNear factor, CDbl(expected(i - 1)), 1E-8, "множитель принятого поля " & CStr(i), passed, failed, report
-        TestExpectNear offsetFraction, 1#, 1E-12, "доля постоянной части " & CStr(i), passed, failed, report
-        greatest = GeomMax(greatest, factor)
-    Next i
-    TestExpectNear greatest, 1.1, 1E-8, "максимум уточнённой истории", passed, failed, report
-    TestExpectNear branch.BestAdmissibleLambda, greatest, 1E-8, _
-        "граница подтверждения принадлежит сохранённой истории", passed, failed, report
+    Dim greatest As Double
+    greatest = TestTwinPeakRetainedTrace(branch, solver, passed, failed, report)
+    TestRecord greatest < 1.2, "отменённый грубый множитель 1.2 не является сохранённой границей", passed, failed, report
 
     Dim meta As CResultMeta: Set meta = branch.ResultMeta
     Dim capacity As New CCapacityResult
@@ -4632,7 +4725,6 @@ Public Function RunTestCoupledDiscardedShoulder() As String
     TestExpectNear capacity.ConfirmedLowerLambda, greatest, 1E-8, _
         "публикуемая нижняя граница взята из принятой ветви", passed, failed, report
     solver.CopyAccepted field
-    TestExpectNear field(1), 0.0007, 1E-12, "состояние конца уточнённого плеча", passed, failed, report
     TestExpectNear concrete.TestAcceptedPeak, field(1), 1E-12, "материальная история совпадает с полем", passed, failed, report
     TestRecord concrete.TestAcceptedSteps = saved.Count, "история и след имеют одинаковое число шагов", passed, failed, report
     RunTestCoupledDiscardedShoulder = report & "TOTAL_COUPLED_DISCARDED_SHOULDER: passed=" & passed & "; failed=" & failed

@@ -309,7 +309,8 @@
     "ASDPrincipalTransitionDiagnosticsB20261118": "36DFCE6B52923D1B04C4E2CC922D97421C7D8CB98FD155809165650943B4166C",
     "ASDPrincipalTransitionIntegration20261118": "98519929F54D1911353C1877190D93BA2A65794BD8451A57E68CF3404CCB54A9",
     "ASDPrincipalPredictor20261118": "A710318F0D27A169832B28508E015217DEA0FE3F3D7C6F4601232589BC12E508",
-    "CoupledSteelHistoryIntegrity20261118": "7E2DE3B9693E980D6FF039AF38CD156C72ED67FE5632590F76E3B1579A9FE76F"
+    "CoupledSteelHistoryIntegrity20261118": "7E2DE3B9693E980D6FF039AF38CD156C72ED67FE5632590F76E3B1579A9FE76F",
+    "CoupledClosedBranchCapacity20261118": "F2177698D7B60B9CDD5852EC0B443491B1BB3FC7648901525902A7B8F53E43EE"
   },
   "cases": [
     {
@@ -3993,6 +3994,69 @@
         "MechanicsProof.json": "3549398BAAC56B6E8B35421ED8C8C476F00204F9A2F80F51575F435C69FDD009"
       },
       "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-closed-branch-native",
+      "journal_section": 610,
+      "archive": "CoupledClosedBranchCapacity20261118",
+      "script": "Check-TestClosedBranchPeak.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "CLOSED BRANCH NATIVE SOURCE NEGATIVE CONTROLS AND REGRESSIONS VERIFIED",
+      "outputs": {
+        "NativeProof.json": "5D5829D6C129C41CCA8B9889EAF8AA1F0996DF0D7E6E3F35613DAF37503226A5"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-closed-branch-mechanics",
+      "journal_section": 610,
+      "archive": "CoupledClosedBranchCapacity20261118",
+      "script": "Check-TestClosedBranchPeak.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "CLOSED BRANCH ANALYTICAL MAXIMUM PHYSICAL CLOSURE AND EVERY POLYNOMIAL FIELD VERIFIED",
+      "outputs": {
+        "MechanicsProof.json": "BA60575A503320D8CAB9FCB14BF03ADBBF3B953630CFB1376956F51570BEFE67"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-closed-branch-spatial",
+      "journal_section": 610,
+      "archive": "CoupledClosedBranchCapacity20261118",
+      "script": "Check-TestClosedBranchPeak.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "spatial",
+        "--out",
+        "SpatialProof.json"
+      ],
+      "stdout_contains": "CLOSED BRANCH SPATIAL EQUILIBRIA AND ORIGINAL 151 FIELDS RESTORED VERIFIED",
+      "outputs": {
+        "SpatialProof.json": "D9E7A256B2DAAE2704C9271133CD24283450D82174355C3B663328FF38514C78"
+      },
+      "timeout_seconds": 600
     }
   ],
   "frozen_repositories": {
