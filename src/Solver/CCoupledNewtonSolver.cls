@@ -589,6 +589,21 @@ Friend Function SelectSpatialDirectionControl(ByRef previous() As Double, ByRef 
     SelectSpatialDirectionControl = True
 End Function
 
+' Проверяет ход нового приращения вдоль предыдущей пространственной секущей в тензорной метрике трёх станций.
+' Это численная ориентация продолжения, не критерий разрушения; служебные множители связей не участвуют.
+Friend Function SpatialIncrementAdvances(ByRef previous() As Double, ByRef accepted() As Double, _
+        ByRef trial() As Double, ByRef signedAdvance As Double, ByRef referenceIncrement As Double) As Boolean
+    signedAdvance = 0#: referenceIncrement = 0#
+    Dim movement() As Double, projection() As Double, coordinate As Double, i As Long
+    ReDim movement(1 To mDegreeCount)
+    For i = 1 To mGaugeStart - 1: movement(i) = accepted(i) - previous(i): Next i
+    If Not SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, referenceIncrement) Then Exit Function
+    For i = 1 To mGaugeStart - 1
+        signedAdvance = signedAdvance + projection(i) * (trial(i) - accepted(i))
+    Next i
+    SpatialIncrementAdvances = (signedAdvance > 0#)
+End Function
+
 ' Выбирает меру по последней заблокированной поправке только из того же принятого состояния.
 ' Направление служит параметризацией следующей пробы, а не принятым полем или признаком разрушения.
 Friend Function SelectRejectedDeformationControl(ByRef previous() As Double, ByRef current() As Double, _

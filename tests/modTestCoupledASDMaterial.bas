@@ -224,6 +224,26 @@ Private Sub TestTransverseControl(ByVal folder As String, ByRef passed As Long, 
         "spatial gauge-only direction is inapplicable", passed, failed, report
     TestRecord Not solver.SelectSpatialDirectionControl(current, current, current, projection, control, increment), _
         "spatial unchanged field has no forward measure", passed, failed, report
+    Dim trial() As Double, advance As Double, referenceIncrement As Double, forwardAdvance As Double
+    trial = current
+    For i = 1 To solver.PhysicalDegreeCount: trial(i) = 2# * current(i): Next i
+    ok = solver.SpatialIncrementAdvances(previous, current, trial, advance, referenceIncrement)
+    TestRecord ok And Abs(advance - expected) < 0.000000000001 And Abs(referenceIncrement - expected) < 0.000000000001, _
+        "spatial forward increment uses independently integrated tensor metric", passed, failed, report
+    forwardAdvance = advance
+    For i = solver.PhysicalDegreeCount + 1 To operators.DegreeCount: trial(i) = -1E+200: Next i
+    ok = solver.SpatialIncrementAdvances(previous, current, trial, advance, referenceIncrement)
+    TestRecord ok And advance = forwardAdvance, "spatial forward orientation ignores gauge multipliers", passed, failed, report
+    TestRecord Not solver.SpatialIncrementAdvances(previous, current, current, advance, referenceIncrement) And advance = 0#, _
+        "spatial unchanged candidate does not advance", passed, failed, report
+    TestRecord Not solver.SpatialIncrementAdvances(previous, current, previous, advance, referenceIncrement) And advance < 0#, _
+        "spatial return to preceding field reverses orientation", passed, failed, report
+    trial = current
+    For i = solver.PhysicalDegreeCount + 1 To operators.DegreeCount: trial(i) = -1E+200: Next i
+    TestRecord Not solver.SpatialIncrementAdvances(previous, current, trial, advance, referenceIncrement) And advance = 0#, _
+        "spatial gauge-only candidate does not advance", passed, failed, report
+    TestRecord Not solver.SpatialIncrementAdvances(current, current, previous, advance, referenceIncrement) And referenceIncrement = 0#, _
+        "spatial repeated accepted fields do not define orientation", passed, failed, report
     TestRecord Not solver.SelectRejectedDeformationControl(previous, current, projection, control, increment, name), _
         "spatial recovery requires an actual rejected direction", passed, failed, report
     Dim fields As New Collection, trace As New CCoupledLoadTrace, continuation As New CCoupledDeformationContinuation

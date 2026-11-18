@@ -301,7 +301,9 @@
     "AnalyticASDTangent20261118": "5192BCB5A1A5FB91305ABA31BA1C06EFA2313E2B0F4A29E97E9128F773AA390F",
     "ASDSignTransitionProbes20261118": "014F7D92B07966887C687C24E4CEB4B1FF36C4FE638F3B8625198EEF801F7B2B",
     "ASDSignContinuationGuards20261118": "40269A4BC79CCB5A9B42B69AA2BE57DDD5C8310DCFF5C4807D6A8B2A2E3E160D",
-    "ASDSignRevision20261118": "5BE929B98682EFAB087E1986BB405F2EB04E53EE106E5754497F2AFC0CC89454"
+    "ASDSignRevision20261118": "5BE929B98682EFAB087E1986BB405F2EB04E53EE106E5754497F2AFC0CC89454",
+    "ASDSignOrientationDiagnostics20261118": "4189A4F680F3525EC7CB36DC2C5BEA0EA2723F722AB5FD75B4739FB59CE4B783",
+    "ASDOrientedContinuation20261118": "34CA8B9813E825B9F707F8D8B17199F3C565A6D013BF4F07B1AA56FD3900FB93"
   },
   "cases": [
     {
@@ -3630,6 +3632,88 @@
       "outputs": {
         "MechanicsProof.json": "868CD5BA1F627D13460062081C4A974CC08A5E3C3AFCBA57E636A0042A9F975F"
       }
+    },
+    {
+      "id": "asd-orientation-diagnostics-native",
+      "journal_section": 605,
+      "archive": "ASDSignOrientationDiagnostics20261118",
+      "script": "Check-TestSignOrientation.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "EXACT SIGN ORIENTATION VBA AND DIRECTED NATIVE OUTCOMES VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "EF66F5E74071B94A8D37AF14CD26DD634E1C9152E795B6F9429E593CF4E30551"
+      }
+    },
+    {
+      "id": "asd-orientation-diagnostics-mechanics",
+      "journal_section": 605,
+      "archive": "ASDSignOrientationDiagnostics20261118",
+      "script": "Check-TestSignOrientation.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SIX EQUILIBRIA AND TENSOR ORIENTATION INDEPENDENTLY VERIFIED; REVERSE BRANCH EXCLUDED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "A48232E62A14D03AEFD425B27287AC0A24416A225A06947C10DC4B6FF7CA4A21"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-orientation-final-native",
+      "journal_section": 605,
+      "archive": "ASDOrientedContinuation20261118",
+      "script": "Check-TestSignOrientation.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "EXACT SIGN ORIENTATION VBA AND DIRECTED NATIVE OUTCOMES VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "DECBAD2DBE19A6A62CC127B73109218A165E09EE94A913A6340F0864D55DF7BF"
+      }
+    },
+    {
+      "id": "asd-orientation-final-mechanics",
+      "journal_section": 605,
+      "archive": "ASDOrientedContinuation20261118",
+      "script": "Check-TestSignOrientation.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SIX EQUILIBRIA AND TENSOR ORIENTATION INDEPENDENTLY VERIFIED; REVERSE BRANCH EXCLUDED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "67B30B92E20A89ED16B4FFFA9DD982011607E6005D9679A28FE0E26494419F08"
+      },
+      "timeout_seconds": 300
     }
   ],
   "frozen_repositories": {

@@ -63,6 +63,7 @@ Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
+Private mSpatialReversalsRejected As Long
 Private mMaterialRecoveryRevision As Long, mMaterialRecoveryAtRevision As Long
 Private mFixedYieldRecoveryProbes As Long
 Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
@@ -100,6 +101,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
+    mSpatialReversalsRejected = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
@@ -211,6 +213,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If probed Then
             probed = UpdateTrialCoordinate(trial, current.Coordinate)
+            If probed And mSolver.HasPrincipalBoundaries Then
+                probed = SpatialTrialAdvances(history, current)
+                If Not probed Then mSolver.DiscardStep
+            End If
             lastNoProgress = Not probed
             If probed And mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then _
                 smoothTrial = FitsPostPeakSecant(history, left, current, trial)
@@ -613,6 +619,9 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     previousField = history(current.HistoryIndex - 1)
     acceptedField = history(current.HistoryIndex)
     mSolver.CopyTrial field, resultants
+    If mSolver.HasPrincipalBoundaries Then
+        If Not SpatialTrialAdvances(history, current) Then Exit Function
+    End If
     Dim i As Long, previousCoordinate As Double, oldCoordinate As Double, newCoordinate As Double
     For i = 1 To UBound(projection)
         previousCoordinate = previousCoordinate + projection(i) * previousField(i)
@@ -634,6 +643,20 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
     increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     TryAdoptRecoveredControl = True
+End Function
+
+' Проверяет направление полного пробного поля ASD, в том числе после уже выполненной смены управляющей координаты.
+' Отказ требует дробления шага либо другой параметризации и не устанавливает физический предел сечения.
+Private Function SpatialTrialAdvances(ByVal history As Collection, ByRef current As TBranchPoint) As Boolean
+    Dim previous() As Double, accepted() As Double, trial() As Double, resultants() As Double
+    previous = history(current.HistoryIndex - 1): accepted = history(current.HistoryIndex)
+    mSolver.CopyTrial trial, resultants
+    Dim signedAdvance As Double, referenceIncrement As Double
+    SpatialTrialAdvances = mSolver.SpatialIncrementAdvances(previous, accepted, trial, signedAdvance, referenceIncrement)
+    If SpatialTrialAdvances Then Exit Function
+    mSpatialReversalsRejected = mSpatialReversalsRejected + 1
+    mProbeDetails = "Равновесие ASD не продолжает направление предыдущего пространственного приращения." & _
+        " Ход по секущей: " & CStr(signedAdvance) & "; предыдущее приращение: " & CStr(referenceIncrement) & "."
 End Function
 
 ' Продвигает принятую материальную историю и фиксирует индекс её поля.
@@ -663,6 +686,13 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
     If Not UpdateTrialCoordinate(trial, current.Coordinate) Then
         StopSearch "Повторная проба после проверки заданных усилий не продвинулась по деформационной ветви."
         Exit Function
+    End If
+    If mSolver.HasPrincipalBoundaries Then
+        If Not SpatialTrialAdvances(mCurrentFields, current) Then
+            mSolver.DiscardStep
+            StopSearch "Повторная проба ASD не подтвердила направление прослеживаемой ветви."
+            Exit Function
+        End If
     End If
     If trial.Lambda > mMaximumLambda Then
         StopAtSearchBound
@@ -1101,6 +1131,7 @@ Private Function Details() As String
     If mFieldControlChanges > 0 Then Details = Details & "; смен пространственной меры после отказа: " & CStr(mFieldControlChanges)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
+    If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
