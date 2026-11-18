@@ -1125,6 +1125,27 @@ Private Sub TestCoupledDeformationSteelCrossing(ByVal steelStrainLimit As Double
             Not afterPeak And tracedLambda <= expected + 1E-8), "trace retains the admissible side of the crossing", passed, failed, report
     End If
     TestRecord material.AcceptedSteelUtilization <= 1# + 1E-10, "no inadmissible material state committed", passed, failed, report
+    ' Сохраняемый след и поля должны описывать все действительно принятые подшаги локализации, включая численно неопределённый исход.
+    Dim retained As Collection, acceptedField() As Double, sameField As Boolean, coordinate As Long
+    Set retained = branch.AcceptedFields
+    If retained Is Nothing Or saved Is Nothing Then
+        TestRecord False, "accepted steel-refinement state history is available", passed, failed, report
+    Else
+        TestRecord retained.Count = saved.Count, "accepted fields align with the complete load trace", passed, failed, report
+        field = retained(retained.Count): solver.CopyAccepted acceptedField
+        sameField = (UBound(field) = UBound(acceptedField))
+        If sameField Then
+            For coordinate = 1 To UBound(field)
+                If field(coordinate) <> acceptedField(coordinate) Then sameField = False: Exit For
+            Next coordinate
+        End If
+        TestRecord sameField, "last saved field exactly matches the committed solver state", passed, failed, report
+        stress = STEEL_MODULUS * field(1)
+        If stress > STEEL_YIELD Then stress = STEEL_YIELD
+        expected = NET_CONCRETE_AREA * (30000# * field(1) - 1E+10# * field(1) ^ 3) + STEEL_AREA * stress
+        saved.ReadPoint saved.Count, offsetFraction, tracedLambda
+        TestExpectNear expected, tracedLambda * designForce, 0.01, "last retained field independently equilibrates its saved load", passed, failed, report
+    End If
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

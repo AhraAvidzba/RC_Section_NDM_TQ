@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "0F9F5B0F4C0857E449DC2013346931BC93A62F33F263E4E692BAE9048600EDA4",
+  "manifest_sha256": "1B89C51A75F0CF6935B1AEB8D253418B5CD0090B706876425BA687F7F5CAC117",
   "source_checkpoint": "826221bfde2fef1e690c65745c0169ef4a342161",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 326,
+  "passed": 328,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2724,6 +2724,24 @@
         "PredictorProof.json": "DD16BCB670757EFD6A9E9BC992CD200AC8311E58420AA1ABFEDD786A7EFBA67E"
       },
       "verified_stdout": "READONLY EQUILIBRIUM NORMAL STEP PREDICTOR REUSE INDEPENDENTLY VERIFIED"
+    },
+    {
+      "id": "coupled-steel-history-native",
+      "journal_section": 609,
+      "archive": "CoupledSteelHistoryIntegrity20261118",
+      "verified_outputs_sha256": {
+        "NativeProof.json": "B18D7442C3D3B9282645B609C6A1B2A6842B9AA3DB6E2276067108DFC969D56B"
+      },
+      "verified_stdout": "STEEL HISTORY NATIVE SOURCE FRESHNESS NEGATIVE CONTROLS AND FIX VERIFIED"
+    },
+    {
+      "id": "coupled-steel-history-mechanics",
+      "journal_section": 609,
+      "archive": "CoupledSteelHistoryIntegrity20261118",
+      "verified_outputs_sha256": {
+        "MechanicsProof.json": "3549398BAAC56B6E8B35421ED8C8C476F00204F9A2F80F51575F435C69FDD009"
+      },
+      "verified_stdout": "STEEL HISTORY ANALYTICAL FORCES AND ALL 32 UNCHANGED PHYSICAL OUTCOMES VERIFIED"
     }
   ]
 }

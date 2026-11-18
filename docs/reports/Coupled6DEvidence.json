@@ -308,7 +308,8 @@
     "ASDPrincipalTransitionDiagnosticsA20261118": "5D3A745C0E7CB7FE949F0EAFEAD10B6C14E3B249F8B4A6009E6EA23649226BDD",
     "ASDPrincipalTransitionDiagnosticsB20261118": "36DFCE6B52923D1B04C4E2CC922D97421C7D8CB98FD155809165650943B4166C",
     "ASDPrincipalTransitionIntegration20261118": "98519929F54D1911353C1877190D93BA2A65794BD8451A57E68CF3404CCB54A9",
-    "ASDPrincipalPredictor20261118": "A710318F0D27A169832B28508E015217DEA0FE3F3D7C6F4601232589BC12E508"
+    "ASDPrincipalPredictor20261118": "A710318F0D27A169832B28508E015217DEA0FE3F3D7C6F4601232589BC12E508",
+    "CoupledSteelHistoryIntegrity20261118": "7E2DE3B9693E980D6FF039AF38CD156C72ED67FE5632590F76E3B1579A9FE76F"
   },
   "cases": [
     {
@@ -3948,6 +3949,48 @@
       "stdout_contains": "READONLY EQUILIBRIUM NORMAL STEP PREDICTOR REUSE INDEPENDENTLY VERIFIED",
       "outputs": {
         "PredictorProof.json": "DD16BCB670757EFD6A9E9BC992CD200AC8311E58420AA1ABFEDD786A7EFBA67E"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-steel-history-native",
+      "journal_section": 609,
+      "archive": "CoupledSteelHistoryIntegrity20261118",
+      "script": "Check-TestSteelHistory.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "STEEL HISTORY NATIVE SOURCE FRESHNESS NEGATIVE CONTROLS AND FIX VERIFIED",
+      "outputs": {
+        "NativeProof.json": "B18D7442C3D3B9282645B609C6A1B2A6842B9AA3DB6E2276067108DFC969D56B"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-steel-history-mechanics",
+      "journal_section": 609,
+      "archive": "CoupledSteelHistoryIntegrity20261118",
+      "script": "Check-TestSteelHistory.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "STEEL HISTORY ANALYTICAL FORCES AND ALL 32 UNCHANGED PHYSICAL OUTCOMES VERIFIED",
+      "outputs": {
+        "MechanicsProof.json": "3549398BAAC56B6E8B35421ED8C8C476F00204F9A2F80F51575F435C69FDD009"
       },
       "timeout_seconds": 300
     }

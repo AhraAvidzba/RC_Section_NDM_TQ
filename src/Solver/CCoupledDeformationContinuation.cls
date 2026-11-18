@@ -1044,15 +1044,17 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
     ElseIf lowerBound <= 1# And upperBound >= 1# Then
         reason = "Достигнута предельная деформация арматуры. Интервал её достижения охватывает расчётную нагрузку (lambda = 1)."
     End If
+    Dim i As Long
     If Len(reason) > 0 Then
+        For i = 1 To refined.Count: history.Add refined.Item(i): Next i ' Эти допустимые подшаги уже приняты материалом при уточнении интервала.
         If Not mTrace Is Nothing Then
             For Each factor In multipliers: mTrace.Add 1#, factor: Next factor
         End If
+        Set mCurrentFields = history: mCurrentResultants = actual
         StopSearch reason
     Else
         mSteelLow = low: mSteelHigh = high: mSteelPoint = eventState.CriticalPoint
         Set mLimitFields = New Collection
-        Dim i As Long
         For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
         For i = 1 To refined.Count: mLimitFields.Add refined.Item(i): Next i
         If Not mTrace Is Nothing Then
