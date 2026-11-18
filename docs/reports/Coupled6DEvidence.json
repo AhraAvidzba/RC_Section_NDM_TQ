@@ -303,7 +303,8 @@
     "ASDSignContinuationGuards20261118": "40269A4BC79CCB5A9B42B69AA2BE57DDD5C8310DCFF5C4807D6A8B2A2E3E160D",
     "ASDSignRevision20261118": "5BE929B98682EFAB087E1986BB405F2EB04E53EE106E5754497F2AFC0CC89454",
     "ASDSignOrientationDiagnostics20261118": "4189A4F680F3525EC7CB36DC2C5BEA0EA2723F722AB5FD75B4739FB59CE4B783",
-    "ASDOrientedContinuation20261118": "34CA8B9813E825B9F707F8D8B17199F3C565A6D013BF4F07B1AA56FD3900FB93"
+    "ASDOrientedContinuation20261118": "34CA8B9813E825B9F707F8D8B17199F3C565A6D013BF4F07B1AA56FD3900FB93",
+    "ASDOrientedCorner20261118": "6D0C3E6AE9892B0FBA40D4EC386AEB68C12C034D227EBC7760827F8362ED10F1"
   },
   "cases": [
     {
@@ -3712,6 +3713,48 @@
       "stdout_contains": "SIX EQUILIBRIA AND TENSOR ORIENTATION INDEPENDENTLY VERIFIED; REVERSE BRANCH EXCLUDED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "67B30B92E20A89ED16B4FFFA9DD982011607E6005D9679A28FE0E26494419F08"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-oriented-corner-native",
+      "journal_section": 606,
+      "archive": "ASDOrientedCorner20261118",
+      "script": "Check-TestOrientedCorner.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ORIENTED CORNER NATIVE SOURCES AND EXPECTED NEGATIVE OUTCOMES VERIFIED",
+      "outputs": {
+        "NativeProof.json": "DC3D189C89FEBC459A73C155F98B77A5EDB877586737CE0A901F76E7FA3F7ED6"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-oriented-corner-mechanics",
+      "journal_section": 606,
+      "archive": "ASDOrientedCorner20261118",
+      "script": "Check-TestOrientedCorner.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ORIENTED CORNER SIX EQUILIBRIA AND SEQUENTIAL HISTORY VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "E74B4D9238613EBAA957F744F583503714C3C016CE582B805DB743B9B4875AFA"
       },
       "timeout_seconds": 300
     }
