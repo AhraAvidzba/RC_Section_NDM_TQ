@@ -171,7 +171,8 @@ End Sub
 Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As Double, _
         ByVal torque As Double, ByVal qx As Double, ByVal qy As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByRef initialField As Variant, Optional ByVal retainDirectProof As Boolean = False) As Boolean
+        Optional ByRef initialField As Variant, Optional ByVal retainDirectProof As Boolean = False, _
+        Optional ByRef fallbackField As Variant) As Boolean
     Dim load(1 To COMPONENT_COUNT) As Double
     load(1) = force: load(2) = mx: load(3) = my
     load(4) = torque: load(5) = qx: load(6) = qy
@@ -183,6 +184,29 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
         initialField:=initialField, retainDirectProof:=retainDirectProof)
     If Not TryStep Then TryStep = TrySubspaceForceRecovery(load, absoluteTolerance, relativeTolerance, maxIterations, _
         initialField:=initialField, retainDirectProof:=retainDirectProof)
+    If Not TryStep And Not IsMissing(fallbackField) Then TryStep = TryAlternativeForceField(load, fallbackField, _
+        absoluteTolerance, relativeTolerance, maxIterations, retainDirectProof)
+End Function
+
+' Повторяет неудачную силовую пробу с независимым прогнозом только за оставшиеся итерации.
+' Прогноз меняет начальное поле; нагрузка, принятая история и критерии равновесия сохраняются.
+Private Function TryAlternativeForceField(ByRef load() As Double, ByRef prediction As Variant, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        ByVal retainDirectProof As Boolean) As Boolean
+    If mCandidateReady Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+    If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
+    Dim remaining As Long: remaining = maxIterations - mIterations
+    If remaining < 1 Then Exit Function
+    Dim beforeRetry As TSolveEffort, original As CResultMeta
+    ReadSolveEffort beforeRetry: Set original = mMeta.Clone
+    TryAlternativeForceField = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, remaining, _
+        initialField:=prediction, retainDirectProof:=retainDirectProof)
+    If Not TryAlternativeForceField Then TryAlternativeForceField = TrySubspaceForceRecovery(load, _
+        absoluteTolerance, relativeTolerance, remaining, initialField:=prediction, retainDirectProof:=retainDirectProof)
+    AddSolveEffort beforeRetry
+    Dim details As String
+    If TryAlternativeForceField Then details = "подтверждён межузловой прогноз" Else details = "межузловой прогноз не принят"
+    mMeta.DiagnosticDetails = DiagnosticSummary() & "; " & details & " | Исходная силовая проба: " & original.DiagnosticDetails
 End Function
 
 ' Сообщает, доступна ли согласованная касательная для пространственной истории материалов.

@@ -315,7 +315,9 @@
     "CoupledSmallCorrectionStudy20261118": "80D1FDCB4078C1D60F852CCF9C09DDDA20A417803660F71BCC398792727109FC",
     "CoupledSmallCorrectionWorking20261118": "953E48EF0DD1452E3FA65AA23029CBFA1D23C639BA6D2E6DFD8CE94AD061F701",
     "CoupledSpatialHalfSolves20261119": "A39A38F713FC3A8CED10C208A20B5407B4F25CC036740950C7EAF7328904DDC0",
-    "CoupledSpatialHalfSteps20261119": "ED29A1E723704A149E50C8E8A3D5C2887E44025EAF22CD1FF70AA406FC5A1B50"
+    "CoupledSpatialHalfSteps20261119": "ED29A1E723704A149E50C8E8A3D5C2887E44025EAF22CD1FF70AA406FC5A1B50",
+    "CoupledDesignLoadStudy20261119": "3F5AAED63326D74632D4ADAFB541F3259912078EAFEDDF9C271CD214D5689ECD",
+    "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30"
   },
   "cases": [
     {
@@ -4312,6 +4314,90 @@
       "stdout_contains": "SPATIAL STEP SIX FORCES AND FULL EQUATIONS VERIFIED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "B70B5487F10A7FB713464242621CB30EBF88FE008234140471ED0F0B7D5A1990"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-design-prediction-study-native",
+      "journal_section": 614,
+      "archive": "CoupledDesignLoadStudy20261119",
+      "script": "Check-TestDesignPrediction.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "DESIGN PREDICTION ACTUAL VBA REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "E022EF9171030AC7CA5C2B4D233AC41A415112BB6121F71F2F089150E6A31217"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-design-prediction-study-mechanics",
+      "journal_section": 614,
+      "archive": "CoupledDesignLoadStudy20261119",
+      "script": "Check-TestDesignPrediction.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "DESIGN PREDICTION EXACT LOAD ALL EQUATIONS HISTORY AND BUDGET VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "F52E6F2CC85DD99A9ED61D41CBF607090FCF8827744D50BAD567BD3332394CD1"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-design-prediction-working-native",
+      "journal_section": 614,
+      "archive": "CoupledDesignLoadWorking20261119",
+      "script": "Check-TestDesignPrediction.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "DESIGN PREDICTION ACTUAL VBA REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "542838E4E7C8017AECE3DF517F2936FF86E439A9C2FFA62FFC1E1066C631CCE1"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-design-prediction-working-mechanics",
+      "journal_section": 614,
+      "archive": "CoupledDesignLoadWorking20261119",
+      "script": "Check-TestDesignPrediction.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "DESIGN PREDICTION EXACT LOAD ALL EQUATIONS HISTORY AND BUDGET VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "65FDC364B001BD7FBB49718DF78999F49B61739181F1DBCBFA05E29875CFF73F"
       },
       "timeout_seconds": 300
     }

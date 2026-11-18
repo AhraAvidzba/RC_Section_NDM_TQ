@@ -734,7 +734,12 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
         ByVal targetCoordinate As Double, ByRef designVerified As Boolean, _
         Optional ByVal materialCoordinateProgress As Boolean = False) As Boolean
     Dim designCoordinate As Double
-    designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate)
+    Dim prediction As Variant
+    If DesignLoadPrediction(current, trial, prediction) Then
+        designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate, prediction)
+    Else
+        designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate)
+    End If
     trial.Coordinate = targetCoordinate
     If Not Probe(trial, current.Lambda, keepYieldControl:=True) Then
         StopSearch "Не удалось повторить пробу после проверки заданных усилий."
@@ -782,15 +787,37 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
     RepeatDesignTrial = True
 End Function
 
+' Готовит начальное поле точного сочетания между принятым левым и найденным правым узлами CDP.
+' Интерполяция не является решением и не переносит пробную историю материала.
+Private Function DesignLoadPrediction(ByRef left As TBranchPoint, ByRef right As TBranchPoint, ByRef prediction As Variant) As Boolean
+    If Not mSolver.UsesSpatialHistory Or mSolver.HasPrincipalBoundaries Then Exit Function
+    If right.Lambda <= left.Lambda Then Exit Function
+    Dim ratio As Double: ratio = (1# - left.Lambda) / (right.Lambda - left.Lambda)
+    If ratio < 0# Or ratio > 1# Then Exit Function
+    Dim first() As Double, last() As Double, actual() As Double, degree As Long
+    mSolver.CopyAccepted first: mSolver.CopyTrial last, actual
+    For degree = 1 To UBound(first)
+        last(degree) = first(degree) + ratio * (last(degree) - first(degree))
+    Next degree
+    prediction = last
+    DesignLoadPrediction = True
+End Function
+
 ' Проверяет точное lambda = 1 от левого плеча перед продвижением истории.
 ' Контрольная мера должна попасть внутрь проверяемого участка.
 Private Function VerifyDesignLoad(ByVal leftCoordinate As Double, ByVal rightCoordinate As Double, _
-        Optional ByRef coordinate As Double = 0#) As Boolean
+        Optional ByRef coordinate As Double = 0#, Optional ByRef prediction As Variant) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     Dim load(1 To COMPONENT_COUNT) As Double, i As Long
     For i = 1 To COMPONENT_COUNT: load(i) = mOffset(i) + mDirection(i): Next i
-    If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations) Then Exit Function
+    Dim solved As Boolean
+    If IsMissing(prediction) Then
+        solved = mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations)
+    Else
+        solved = mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mAbsTol, mRelTol, mMaxIterations, fallbackField:=prediction)
+    End If
+    If Not solved Then Exit Function
     Dim field() As Double, resultants() As Double
     mSolver.CopyTrial field, resultants
     coordinate = CoordinateOf(field)
