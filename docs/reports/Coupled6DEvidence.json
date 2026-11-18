@@ -313,7 +313,9 @@
     "CoupledClosedBranchCapacity20261118": "F2177698D7B60B9CDD5852EC0B443491B1BB3FC7648901525902A7B8F53E43EE",
     "CoupledHardFieldControl20261118": "CDC30660560F67E7F4374BA83AF4C538161E35CCB6F5E3A97FAC8741875381BF",
     "CoupledSmallCorrectionStudy20261118": "80D1FDCB4078C1D60F852CCF9C09DDDA20A417803660F71BCC398792727109FC",
-    "CoupledSmallCorrectionWorking20261118": "953E48EF0DD1452E3FA65AA23029CBFA1D23C639BA6D2E6DFD8CE94AD061F701"
+    "CoupledSmallCorrectionWorking20261118": "953E48EF0DD1452E3FA65AA23029CBFA1D23C639BA6D2E6DFD8CE94AD061F701",
+    "CoupledSpatialHalfSolves20261119": "A39A38F713FC3A8CED10C208A20B5407B4F25CC036740950C7EAF7328904DDC0",
+    "CoupledSpatialHalfSteps20261119": "ED29A1E723704A149E50C8E8A3D5C2887E44025EAF22CD1FF70AA406FC5A1B50"
   },
   "cases": [
     {
@@ -4228,6 +4230,90 @@
         "SpatialProof.json": "91E4BA03C13927A5CF50D6C066844D65D6B2798D2EA9E02D06DAB238ADA75B95"
       },
       "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-spatial-half-solves-native",
+      "journal_section": 613,
+      "archive": "CoupledSpatialHalfSolves20261119",
+      "script": "Check-TestSpatialHalfStep.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "SPATIAL STEP ACTUAL VBA NATIVE REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "8038B6A6CD43F5090B5FF5781AFEC6F6331B093E8437A849FEB089783BFC7E8B"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-spatial-half-solves-mechanics",
+      "journal_section": 613,
+      "archive": "CoupledSpatialHalfSolves20261119",
+      "script": "Check-TestSpatialHalfStep.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SPATIAL STEP SIX FORCES AND FULL EQUATIONS VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "8ADF75D1D5A5D0FD379593061155F4713A71243CB7AF58E966A39CFCECE96296"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-spatial-half-fixed-native",
+      "journal_section": 613,
+      "archive": "CoupledSpatialHalfSteps20261119",
+      "script": "Check-TestSpatialHalfStep.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "SPATIAL STEP ACTUAL VBA NATIVE REPORTS AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "B429E026B26E001469829D84CE8BCE032902DA271D4A5A2078B8970487F7D42B"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-spatial-half-fixed-mechanics",
+      "journal_section": 613,
+      "archive": "CoupledSpatialHalfSteps20261119",
+      "script": "Check-TestSpatialHalfStep.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "SPATIAL STEP SIX FORCES AND FULL EQUATIONS VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "B70B5487F10A7FB713464242621CB30EBF88FE008234140471ED0F0B7D5A1990"
+      },
+      "timeout_seconds": 300
     }
   ],
   "frozen_repositories": {
