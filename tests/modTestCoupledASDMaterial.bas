@@ -15,6 +15,7 @@ Public Function RunTestCoupledASDMaterial(ByVal folder As String) As String
     For Each name In Array("default", "ndm_uniaxial")
         TestMaterialHistory folder, CStr(name), passed, failed, report
     Next name
+    TestTransverseControl folder, passed, failed, report
     TestSectionAnalysis folder, passed, failed, report
     RunTestCoupledASDMaterial = report & "TOTAL_COUPLED_ASD_MATERIAL: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -131,6 +132,91 @@ Failed:
     If probeOutput <> 0 Then Close #probeOutput
     On Error GoTo 0
     Err.Raise number, "modTestCoupledASDMaterial.TestMaterialHistory", name & "/" & path & ": " & reason
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет средний сдвиг независимым интегралом деформаций, знаки, масштаб силы и исключение служебных координат.
+Private Sub TestTransverseControl(ByVal folder As String, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim geometry As CGeometryRegion, mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder, section As CSectionModel
+    Set geometry = TestFixtureBox(180#, 120#): mesh.BuildMesh geometry, 18#, 12#, cellGeometry:="Contour"
+    Set section = builder.BuildFromGenerated(mesh, Nothing): geometry.BuildContours section.Contours
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5
+    concrete.InitializeASD operators.PointCount, TestReadFlow(folder, "default")
+    solver.Initialize operators, concrete, 30000#
+    Dim quadrature As New CCoupledSectionQuadrature: quadrature.Initialize section, 1, 1
+    Dim x() As Double, y() As Double, area() As Double, indices() As Long, values() As Double, dx() As Double, dy() As Double
+    quadrature.Prepare 5, x, y, area, indices, values, dx, dy
+    If UBound(area) <> operators.ConcretePointCount Then Err.Raise 5, , "Не совпал порядок точек контрольной квадратуры."
+    Dim previous() As Double, current() As Double, direction(1 To 6) As Double, projection() As Double, reference() As Double
+    ReDim previous(1 To operators.DegreeCount): ReDim current(1 To operators.DegreeCount)
+    Dim i As Long, point As Long, strain(1 To 6) As Double, meanX As Double, meanY As Double
+    For i = 1 To solver.PhysicalDegreeCount: current(i) = 0.00001 * Sin(CDbl(i)): Next i
+    For i = solver.PhysicalDegreeCount + 1 To operators.DegreeCount: current(i) = 1000000#: Next i
+    For point = 1 To UBound(area)
+        operators.PointStrain point, current, strain
+        meanX = meanX + area(point) * strain(5) / 21600#: meanY = meanY + area(point) * strain(6) / 21600#
+    Next point
+    Dim choice As Long, expected As Double, control As Double, increment As Double, name As String, ok As Boolean, error As Double
+    For choice = 1 To 5
+        direction(1) = 9E+200: direction(4) = -7E+200
+        Select Case choice
+            Case 1: direction(5) = 1#: direction(6) = 0#: expected = meanX
+            Case 2: direction(5) = 0#: direction(6) = 1#: expected = meanY
+            Case 3: direction(5) = 3#: direction(6) = 4#: expected = 0.6 * meanX + 0.8 * meanY
+            Case 4: direction(5) = -3#: direction(6) = 4#: expected = -0.6 * meanX + 0.8 * meanY
+            Case 5: direction(5) = 3E+200: direction(6) = 4E+200: expected = 0.6 * meanX + 0.8 * meanY
+        End Select
+        ok = solver.SelectTransverseDeformationControl(previous, current, direction, projection, control, increment, name)
+        TestRecord ok And Abs(expected) > 0#, "transverse control exists " & CStr(choice), passed, failed, report
+        TestRecord Abs(control - Abs(expected)) < 0.000000000001, "transverse actual area mean " & CStr(choice), passed, failed, report
+        TestRecord Abs(increment - Abs(expected)) < 0.000000000001, "transverse positive increment " & CStr(choice), passed, failed, report
+        error = 0#
+        For i = solver.PhysicalDegreeCount + 1 To operators.DegreeCount: error = GeomMax(error, Abs(projection(i))): Next i
+        TestRecord error = 0#, "transverse control ignores gauge multipliers " & CStr(choice), passed, failed, report
+        If choice = 3 Then reference = projection
+        If choice = 5 Then
+            error = 0#
+            For i = 1 To UBound(projection): error = GeomMax(error, Abs(projection(i) - reference(i))): Next i
+            TestRecord error = 0#, "transverse direction invariant to large force scale", passed, failed, report
+        End If
+    Next choice
+    direction(5) = 3#: direction(6) = 4#
+    ok = solver.SelectTransverseDeformationControl(current, previous, direction, projection, control, increment, name)
+    error = 0#
+    For i = 1 To UBound(projection): error = GeomMax(error, Abs(projection(i) + reference(i))): Next i
+    TestRecord ok And control = 0# And increment > 0# And error = 0#, "transverse reverse traversal retains positive measure", passed, failed, report
+    TestRecord Not solver.SelectTransverseDeformationControl(current, current, direction, projection, control, increment, name), _
+        "transverse unchanged field has no progressing measure", passed, failed, report
+    direction(5) = 0#: direction(6) = 0#
+    TestRecord Not solver.SelectTransverseDeformationControl(previous, current, direction, projection, control, increment, name), _
+        "transverse absent variable shear retains general control selection", passed, failed, report
+    Dim fields As New Collection, trace As New CCoupledLoadTrace, continuation As New CCoupledDeformationContinuation
+    Dim base(1 To 6) As Double, actual(1 To 6) As Double
+    fields.Add previous: fields.Add current: trace.Add 1#, 0.8
+    continuation.Trace solver, Nothing, base, direction, fields, 0.8, 0.9, actual, 2#, 0.001, 4, 0.0000005, 0.0000005, trace
+    TestRecord continuation.ResultMeta.InternalStatus = rsNumericalFailure And _
+        InStr(continuation.ResultMeta.ResultComment, "Количество записей нагрузочной траектории") > 0, _
+        "continuation rejects mismatched load trace before evaluating fields", passed, failed, report
+    Dim cleanFields As New Collection, cleanTrace As New CCoupledLoadTrace, snapshot() As Double, observedActual() As Double
+    Dim factor As Variant, originalFirst As Double
+    For Each factor In Array(0.5, 1#)
+        If Not solver.TryStep(100# * factor, 0#, 0#, 0#, 0#, 0#, 0.0000005, 0.0000005, 4) Then _
+            Err.Raise 5, , "Не подтверждено упругое поле контрольного наблюдателя."
+        solver.CopyTrial snapshot, observedActual: solver.AcceptStep
+        cleanFields.Add snapshot: cleanTrace.Add 1#, CDbl(factor)
+        If factor = 0.5 Then originalFirst = snapshot(1)
+    Next factor
+    Erase direction: direction(1) = 100#
+    Dim observer As New CCoupledProgressObserverTest
+    observer.TestInitialize vbNullString, True
+    continuation.Trace solver, Nothing, base, direction, cleanFields, 0.5, 1#, observedActual, 1.1, 0.001, 4, _
+        0.0000005, 0.0000005, cleanTrace, observer
+    snapshot = cleanFields(1)
+    TestRecord observer.TestCallCount > 0, "continuation actually reports progress", passed, failed, report
+    TestRecord cleanFields.Count = 2 And snapshot(1) = originalFirst, "progress observer cannot modify accepted fields", passed, failed, report
+    TestRecord cleanTrace.Count = 2 And continuation.SavedTrace.Count = 2, "progress observer cannot modify load history", passed, failed, report
+    TestRecord continuation.ResultMeta.ResultCode = rcSearchBoundReached, "progress observer cannot assign a physical limit", passed, failed, report
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

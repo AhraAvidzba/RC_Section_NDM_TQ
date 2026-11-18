@@ -294,7 +294,8 @@
     "WorkingASDMaterialIntegration20261118": "834DD5A33866D4AE2267E90F0E0DBBCC495A859895EF9E1EEE748777ACB5CFF1",
     "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395",
     "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1",
-    "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13"
+    "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13",
+    "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360"
   },
   "cases": [
     {
@@ -3411,6 +3412,28 @@
       "stdout_contains": "SHEAR BRANCH ALL SIX RESULTANTS, ACTUAL CONTROL AND SEPARATE MATERIAL HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "DA306B2351BD8E0FD866B5FFFAAFC0E1D6F033C171D5A789A59F999AB0730C67"
+      }
+    },
+    {
+      "id": "general-shear-continuation-native",
+      "journal_section": 600,
+      "archive": "GeneralShearContinuation20261118",
+      "script": "Check-TestGeneralShear.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "GENERAL SHEAR EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "C4E04E60C129B7B6DB939856A507D1CEBCE6C948ADAC4B4CB68777ADD24D4878"
+      }
+    },
+    {
+      "id": "general-shear-continuation-mechanics",
+      "journal_section": 600,
+      "archive": "GeneralShearContinuation20261118",
+      "script": "Check-TestGeneralShear.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "GENERAL SHEAR ALL SIX EQUATIONS, MATERIAL HISTORIES AND RETAINED LOAD BOUNDS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "F2BA0F94E9F65DBF6AD925468E42DA63726B5FE95F376DBDB09AFE2C4D8FB19A"
       }
     }
   ],

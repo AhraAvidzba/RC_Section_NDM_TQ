@@ -514,6 +514,36 @@ Friend Function SelectDeformationControl(ByRef previous() As Double, ByRef curre
     SelectDeformationControl = True
 End Function
 
+' Выбирает средний инженерный сдвиг, сопряжённый направлению изменяемой поперечной силы.
+' Проекция не зависит от размера силы; отсутствие изменения сдвига сохраняет общий выбор меры.
+Friend Function SelectTransverseDeformationControl(ByRef previous() As Double, ByRef current() As Double, _
+        ByRef loadDirection() As Double, ByRef projection() As Double, ByRef currentControl As Double, _
+        ByRef controlIncrement As Double, ByRef controlName As String) As Boolean
+    If LBound(loadDirection) <> 1 Or UBound(loadDirection) <> COMPONENT_COUNT Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Для выбора сдвиговой меры передайте шесть компонент направления нагрузки."
+    Dim forceScale As Double, alongX As Double, alongY As Double, length As Double
+    forceScale = GeomMax(Abs(loadDirection(5)), Abs(loadDirection(6)))
+    If forceScale = 0# Then Exit Function
+    alongX = loadDirection(5) / forceScale: alongY = loadDirection(6) / forceScale
+    length = Sqr(alongX * alongX + alongY * alongY)
+    alongX = alongX / length: alongY = alongY / length
+    Dim shearX() As Double, shearY() As Double, i As Long, change As Double, signValue As Double
+    mSection.MeanShearProjections shearX, shearY
+    ReDim projection(1 To mDegreeCount)
+    For i = 1 To mGaugeStart - 1
+        projection(i) = alongX * shearX(i) + alongY * shearY(i)
+        change = change + projection(i) * (current(i) - previous(i))
+    Next i
+    If change = 0# Then Exit Function
+    signValue = Sgn(change): currentControl = 0#: controlIncrement = Abs(change)
+    For i = 1 To mGaugeStart - 1
+        projection(i) = signValue * projection(i)
+        currentControl = currentControl + projection(i) * current(i)
+    Next i
+    controlName = "средний инженерный сдвиг по направлению изменяемой поперечной силы"
+    SelectTransverseDeformationControl = True
+End Function
+
 ' После численного отказа уточнённого силового шага ищет ограниченный прогноз.
 ' Успех разрешает только полное повторное решение с исходной нагрузкой и бюджетом.
 Private Function TrySubspaceForceRecovery(ByRef load() As Double, _

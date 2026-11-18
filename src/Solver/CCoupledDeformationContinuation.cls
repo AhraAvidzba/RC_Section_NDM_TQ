@@ -43,6 +43,7 @@ Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
 Private Const STEP_GROWTH As Double = 1.25
 Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
 Private Const POST_PEAK_EXTENDED_RATIO As Double = 4# ' Верхний шаг после шести гладких приращений подряд.
+Private Const TRANSVERSE_STEP_RATIO As Double = 32# ' Ограничивает рост сдвигового шага относительно различимой начальной секущей.
 Private Const POST_PEAK_SECANT_TOLERANCE As Double = 0.02 ' Допустимое отклонение приращений поля и множителя от секущей.
 
 Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedResponse
@@ -72,6 +73,9 @@ Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
 Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 Private mCurrentFields As Collection ' Принятый путь для воспроизводимой диагностики незавершённого поиска.
+Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
+Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
+Private mObserver As ICoupledContinuationProgress
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -80,8 +84,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         ByRef offset() As Double, ByRef direction() As Double, ByVal history As Collection, _
         ByVal previousLambda As Double, ByVal currentLambda As Double, ByRef initialResultants() As Double, _
         ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, ByVal maximumIterations As Long, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, Optional ByVal loadTrace As CCoupledLoadTrace = Nothing)
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, Optional ByVal loadTrace As CCoupledLoadTrace = Nothing, _
+        Optional ByVal observer As ICoupledContinuationProgress = Nothing)
     Set mSolver = solver: Set mReinforcement = reinforcement
+    Set mObserver = observer
     mOffset = offset: mDirection = direction
     mMaxIterations = maximumIterations: mMaximumLambda = maximumLambda
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
@@ -92,6 +98,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
+    mUsesTransverseControl = False: mUnverifiedDecline = False
+    mUnverifiedReference = 0#: mUnverifiedDips = 0: mRecoveredDips = 0
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
     mLocalPeak = 0#: mLocalPeakAccuracy = 0#
@@ -113,6 +121,12 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         StopSearch "Для продолжения нужны две последовательные точки возрастающей силовой ветви."
         Exit Sub
     End If
+    If Not mTrace Is Nothing Then
+        If mTrace.Count <> history.Count Then
+            StopSearch "Количество записей нагрузочной траектории не совпадает с принятой историей полей."
+            Exit Sub
+        End If
+    End If
 
     Set mCurrentFields = history
     mDesignHistoryIndex = InitialDesignHistoryIndex(history.Count, previousLambda, currentLambda)
@@ -121,8 +135,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     Dim previousField() As Double, field() As Double, increment As Double, minimum As Double, nominal As Double
     left.HistoryIndex = history.Count - 1: left.Lambda = previousLambda
     current.HistoryIndex = history.Count: current.Lambda = currentLambda
+    SelectInitialAnchor history, current, left
     previousField = history(left.HistoryIndex): field = history(current.HistoryIndex)
-    If Not mSolver.SelectDeformationControl(previousField, field, mProjection, current.Coordinate, nominal, mControlName) Then
+    Dim selected As Boolean
+    If mSolver.UsesSpatialHistory Then selected = mSolver.SelectTransverseDeformationControl(previousField, field, _
+        mDirection, mProjection, current.Coordinate, nominal, mControlName)
+    mUsesTransverseControl = selected
+    If Not selected Then selected = mSolver.SelectDeformationControl(previousField, field, mProjection, current.Coordinate, nominal, mControlName)
+    If Not selected Then
         StopSearch "Не удалось выбрать меняющуюся меру деформации."
         Exit Sub
     End If
@@ -144,7 +164,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
         If mProbeCount >= PROBE_LIMIT Then Exit For
-        If attempt > STEP_LIMIT And mLocalPeak = 0# Then Exit For
+        If attempt > STEP_LIMIT And mLocalPeak = 0# And mUnverifiedDips = 0 Then
+            StopSearch "Достигнут лимит начального участка деформационного продолжения до обнаружения спада нагрузки."
+            Exit Sub
+        End If
         If increment < minimum Then
             If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
             If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then Exit For
@@ -155,8 +178,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         Set arcFields = Nothing
         If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
             Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
-        probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
-            arcFields:=arcFields)
+        Dim seed As Variant, seedLambda As Double
+        If PrepareSecantSeed(history, left, current, trial.Coordinate, seed, seedLambda) Then
+            probed = Probe(trial, seedLambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+                arcFields:=arcFields, initialField:=seed)
+        Else
+            probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+                arcFields:=arcFields)
+        End If
         lastProbeFailed = Not probed
         lastNoProgress = False
         changedControl = False: smoothTrial = False
@@ -189,7 +218,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             smoothSteps = 0
             increment = increment * 0.5
-        ElseIf mFollowingLocalPeak Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
+        ElseIf mFollowingLocalPeak Or mUnverifiedDecline Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
             If trial.Lambda <= 0# Then
                 mSolver.DiscardStep
                 StopSearch "После локального максимума множитель вышел из области положительной нагрузки."
@@ -210,13 +239,19 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
             left = current: current = trial
             If mFollowingLocalPeak Then CheckRecovery current.Lambda
+            If mUnverifiedDecline And current.Lambda > mUnverifiedReference + LoadResolution(mUnverifiedReference) Then
+                mUnverifiedDecline = False: mRecoveredDips = mRecoveredDips + 1
+            End If
             If smoothTrial And mFollowingLocalPeak Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
             stepCeiling = nominal
             If smoothSteps >= 2 Then stepCeiling = POST_PEAK_STEP_RATIO * nominal
             If smoothSteps >= 6 Then stepCeiling = POST_PEAK_EXTENDED_RATIO * nominal
+            If mUsesTransverseControl Then stepCeiling = TRANSVERSE_STEP_RATIO * nominal
             If increment > stepCeiling Then increment = stepCeiling
             If increment < stepCeiling / STEP_GROWTH Then increment = increment * STEP_GROWTH
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
+            Dim declinedField() As Double, declinedResultants() As Double
+            If reinforced And mUsesTransverseControl Then mSolver.CopyTrial declinedField, declinedResultants
             mSolver.DiscardStep
             If VerifyPeak(history, left, current, trial, reinforced) Then
                 If Not reinforced Then Exit Sub
@@ -228,7 +263,24 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                     StopSearch "Не удалось восстановить историю возрастающей ветви."
                     Exit Sub
                 End If
-                increment = increment * 0.5
+                If reinforced And mUsesTransverseControl Then
+                    Dim repeatSeed As Variant: repeatSeed = declinedField
+                    If Probe(trial, trial.Lambda, initialField:=repeatSeed) Then
+                        If UpdateTrialCoordinate(trial, current.Coordinate) And Not BeyondSteelLimit() And trial.Lambda > 0# Then
+                            mUnverifiedDecline = True: mUnverifiedReference = mBestLambda
+                            mUnverifiedDips = mUnverifiedDips + 1
+                            AcceptPoint history, trial
+                            left = current: current = trial
+                        Else
+                            mSolver.DiscardStep: increment = increment * 0.5
+                        End If
+                    Else
+                        lastProbeFailed = True
+                        increment = increment * 0.5
+                    End If
+                Else
+                    increment = increment * 0.5
+                End If
             End If
         Else
             mSolver.DiscardStep
@@ -241,6 +293,46 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         StopSearch "Деформационное продолжение остановилось до подтверждения физического предела."
     End If
 End Sub
+
+' Выбирает ближайшую принятую секущую с различимой нагрузкой, сохраняя все промежуточные состояния материала.
+' Запас восьми разрешений нагрузки не позволяет первому полушагу заведомо затеряться в её погрешности.
+Private Sub SelectInitialAnchor(ByVal history As Collection, ByRef current As TBranchPoint, ByRef left As TBranchPoint)
+    If mTrace Is Nothing Then Exit Sub
+    If mTrace.Count <> history.Count Then Exit Sub
+    If current.Lambda - left.Lambda > 8# * LoadResolution(current.Lambda) Then Exit Sub
+    Dim index As Long, fraction As Double, factor As Double
+    For index = current.HistoryIndex - 1 To 1 Step -1
+        mTrace.ReadPoint index, fraction, factor
+        If fraction <> 1# Or factor >= current.Lambda Then Exit Sub
+        If current.Lambda - factor > 8# * LoadResolution(current.Lambda) Then
+            left.HistoryIndex = index: left.Lambda = factor
+            Exit Sub
+        End If
+    Next index
+End Sub
+
+' Строит только начальное приближение из двух собственных полей; материал остаётся в последней принятой истории.
+' Координаты множителей связей не экстраполируются, нагрузка сохраняет заданные постоянную и переменную части.
+Private Function PrepareSecantSeed(ByVal history As Collection, ByRef left As TBranchPoint, ByRef current As TBranchPoint, _
+        ByVal target As Double, ByRef seed As Variant, ByRef factor As Double) As Boolean
+    If left.HistoryIndex < 1 Or left.HistoryIndex >= current.HistoryIndex Or current.HistoryIndex <> history.Count Then Exit Function
+    Dim previous() As Double, accepted() As Double, field() As Double, oldControl As Double, control As Double, ratio As Double, i As Long
+    previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
+    Dim previousLambda As Double: previousLambda = left.Lambda
+    If Not mTrace Is Nothing Then
+        Dim fraction As Double
+        previous = history(current.HistoryIndex - 1)
+        mTrace.ReadPoint current.HistoryIndex - 1, fraction, previousLambda
+        If fraction <> 1# Then Exit Function
+    End If
+    oldControl = CoordinateOf(previous): control = CoordinateOf(accepted)
+    If control <= oldControl Or target <= control Then Exit Function
+    ratio = (target - control) / (control - oldControl)
+    field = accepted
+    For i = 1 To mSolver.PhysicalDegreeCount: field(i) = accepted(i) + ratio * (accepted(i) - previous(i)): Next i
+    seed = field: factor = current.Lambda + ratio * (current.Lambda - previousLambda)
+    PrepareSecantSeed = True
+End Function
 
 ' Продолжает от уже проверенного правого плеча. Последняя уточняющая
 ' проходка завершилась именно в этом материальном состоянии.
@@ -292,6 +384,7 @@ Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef lef
     If spacing <= 0# Or currentCoordinate + 0.5 * spacing <= currentCoordinate Then Exit Function
 
     mProjection = alternate: mPostPeakControlName = name
+    mUsesTransverseControl = False
     left.Coordinate = previousCoordinate: current.Coordinate = currentCoordinate
     nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
     TryChangePostPeakControl = True
@@ -401,14 +494,15 @@ End Property
 ' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False, _
-        Optional ByVal arcFields As Collection = Nothing) As Boolean
+        Optional ByVal arcFields As Collection = Nothing, Optional ByRef initialField As Variant) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
+    NotifyProgress
     point.Uncertainty = 0#
     Dim solved As Boolean, recoverSameControl As Boolean
     recoverSameControl = keepYieldControl And mUsesYieldControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
-        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl, recoverSameControl)
+        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl, recoverSameControl, initialField:=initialField)
     If mSolver.SameControlRecoveryTried Then
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
@@ -429,6 +523,18 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     End If
     Probe = True
 End Function
+
+' Передаёт наблюдателю только независимые копии принятого пути, без пробных состояний и ввода-вывода ядра.
+' Полный снимок сохраняет смысл после замены хвоста при уточнении локального максимума.
+Private Sub NotifyProgress()
+    If mObserver Is Nothing Then Exit Sub
+    Dim fields As Collection, trace As CCoupledLoadTrace, sourceTrace As CCoupledLoadTrace, meta As CResultMeta
+    Set fields = AcceptedFields: Set sourceTrace = SavedTrace
+    If fields Is Nothing Or sourceTrace Is Nothing Then Exit Sub
+    Set trace = sourceTrace.CopyPrefix(sourceTrace.Count)
+    Set meta = mMeta.Clone: meta.DiagnosticDetails = Details()
+    mObserver.Report fields, trace, meta
+End Sub
 
 ' Принимает новую координату на возрастающем участке. Последнее
 ' принятое и найденное поля образуют пару в одной мере. Проверки
@@ -458,6 +564,7 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     End If
     mProjection = projection: mControlName = "мера деформации у перехода бетона"
     mUsesYieldControl = True
+    mUsesTransverseControl = False
     current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
     increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     TryAdoptRecoveredControl = True
@@ -708,7 +815,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
         fieldCount = peakIndex
         If keepRight Then fieldCount = index
         For j = 1 To left.HistoryIndex: limitFields.Add history.Item(j): Next j
-        retainedMaximum = mBestBeforeCurrent: designLeftIndex = 0 ' Префикс заканчивается левым полем грубой ветви.
+        retainedMaximum = PrefixMaximumLambda(left.HistoryIndex): designLeftIndex = 0 ' Удалённые промежуточные поля не остаются подтверждённой границей нагрузки.
         For j = 1 To fieldCount
             limitFields.Add refined.Item(j)
             retainedPreviousMaximum = retainedMaximum
@@ -728,6 +835,20 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
     End If
     ReplayShoulders = True
 
+End Function
+
+' Вычисляет подтверждённую нагрузку только по сохраняемому префиксу, включая максимум до локального спада.
+' Без журнала левое поле непосредственно предшествует текущему и используется сохранённая общая граница.
+Private Function PrefixMaximumLambda(ByVal lastIndex As Long) As Double
+    If mTrace Is Nothing Then
+        PrefixMaximumLambda = mBestBeforeCurrent
+        Exit Function
+    End If
+    Dim i As Long, fraction As Double, factor As Double
+    For i = 1 To lastIndex
+        mTrace.ReadPoint i, fraction, factor
+        If fraction = 1# And factor > PrefixMaximumLambda Then PrefixMaximumLambda = factor
+    Next i
 End Function
 
 ' Уточняет первое пересечение по возрастающей деформационной координате.
@@ -894,6 +1015,9 @@ End Sub
 Private Function Details() As String
     Details = "Мера деформации: " & mControlName & "; наибольший допустимый lambda: " & CStr(mBestLambda) & _
         "; равновесие при lambda = 1 подтверждено: " & CStr(mDesignHistoryIndex > 0) & "; проб: " & CStr(mProbeCount)
+    If mUnverifiedDips > 0 Then Details = Details & "; неподтверждённых спадов: " & CStr(mUnverifiedDips) & _
+        "; восстановлений после них: " & CStr(mRecoveredDips)
+    If mUnverifiedDecline Then Details = Details & "; текущий спад не является подтверждённым физическим пределом"
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
