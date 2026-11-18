@@ -292,7 +292,8 @@
     "ASDReducedPredictorNative20261118": "144B075E2A7A207D0AFFE74664AED778D827A5C02A01F4D7DA0B54DE8F2BF461",
     "WorkingForceSubspace20261118": "FBEACD63457F041E473358613DA96FCA0AB1C8A79194BD226EE7D1F821CFCA3B",
     "WorkingASDMaterialIntegration20261118": "834DD5A33866D4AE2267E90F0E0DBBCC495A859895EF9E1EEE748777ACB5CFF1",
-    "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395"
+    "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395",
+    "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1"
   },
   "cases": [
     {
@@ -3365,6 +3366,28 @@
       "stdout_contains": "PRODUCTION MATERIAL MVT2 ALL SIX RESULTANTS AND 74 EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "ProductionGaussMechanicsChecks.json": "0A4BB5AAEB49973D1CED564E50706B34A78CFCAAAADEA34563CC9516CB5C743E"
+      }
+    },
+    {
+      "id": "material-branch-roundoff-native",
+      "journal_section": 598,
+      "archive": "MaterialRoundoffContexts20261118",
+      "script": "Check-TestMaterialRoundoff.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "MATERIAL ROUNDOFF NATIVE SOURCE, CAPTURED CONTEXTS, NEGATIVE CONTROL AND DIRECTED REGRESSIONS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "1B1C028E99468D89AB76288F210256568571463CACC23BF7B6988628C1F43787"
+      }
+    },
+    {
+      "id": "material-branch-roundoff-mechanics",
+      "journal_section": 598,
+      "archive": "MaterialRoundoffContexts20261118",
+      "script": "Check-TestMaterialRoundoff.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "MATERIAL ROUNDOFF ALL SIX RESULTANTS, TENSORS AND INDEPENDENT HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "4E977A6DA4FD167BC02340BD4D759F460736ED5C87BE44CC8016DC869B05EA9B"
       }
     }
   ],

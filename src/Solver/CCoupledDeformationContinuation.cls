@@ -71,6 +71,7 @@ Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mCurrentResultants() As Double
 Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
+Private mCurrentFields As Collection ' Принятый путь для воспроизводимой диагностики незавершённого поиска.
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -99,6 +100,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mShoulderProbes = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
     Set mTrace = Nothing: Set mLimitTrace = Nothing
+    Set mCurrentFields = Nothing
     If Not loadTrace Is Nothing Then Set mTrace = loadTrace.CopyPrefix(loadTrace.Count)
     mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
@@ -112,6 +114,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         Exit Sub
     End If
 
+    Set mCurrentFields = history
     mDesignHistoryIndex = InitialDesignHistoryIndex(history.Count, previousLambda, currentLambda)
 
     Dim left As TBranchPoint, current As TBranchPoint, trial As TBranchPoint
@@ -245,12 +248,23 @@ Private Sub ResumeAfterLocalPeak(ByRef history As Collection, ByRef current As T
     mLocalPeak = mPeak.Lambda: mLocalPeakAccuracy = mPeakAccuracy
     mHasPeak = False: mFollowingLocalPeak = True
     Set history = mLimitFields
+    Set mCurrentFields = history
     Set mTrace = mLimitTrace: Set mLimitTrace = Nothing
     mCurrentResultants = mLimitResultants
     Set mLimitFields = Nothing: Erase mLimitResultants
     current = right
     mReusedRightPoints = mReusedRightPoints + current.HistoryIndex - mPeak.HistoryIndex
 End Sub
+
+' Возвращает независимую числовую копию принятого пути; незавершённый путь не становится предельным НДС.
+Friend Property Get AcceptedFields() As Collection
+    Dim source As Collection
+    If mHasPeak Or mSteelPoint > 0 Then Set source = mLimitFields Else Set source = mCurrentFields
+    If source Is Nothing Then Exit Property
+    Dim result As New Collection, i As Long, field() As Double
+    For i = 1 To source.Count: field = source(i): result.Add field: Next i
+    Set AcceptedFields = result
+End Property
 
 ' Один раз выбирает другую меру, если после подтверждённого спада
 ' численная проба потребовала шаг ниже минимального. Сохраняет принятое

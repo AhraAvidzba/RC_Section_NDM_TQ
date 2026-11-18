@@ -36,6 +36,7 @@ Private Type TConcreteHistory
 End Type
 
 Private Const N_COMPONENTS As Long = 6
+Private Const PLASTIC_ROUNDOFF As Double = 32# / (2# ^ 52) ' Относительный масштаб округления при восстановлении пластической деформации ASD.
 Private Const MATERIAL_ITERATIONS As Long = 70
 Private Const STATE_TOLERANCE As Double = 0.0000000005
 Private Const YIELD_TOLERANCE_RATIO As Double = 0.00000001 ' Единый допуск для возврата и повторной оценки принятой истории.
@@ -54,6 +55,7 @@ Private mElastic(1 To 6, 1 To 6) As Double
 Private mReturn As CCoupledConcreteReturn
 Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEnvelope
 Private mASDFlow As CCoupledASDFlow
+Private mLastFailure As CCoupledMaterialFailure
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
 Private mFrictionMax As Double, mDilationMax As Double
 Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
@@ -118,6 +120,11 @@ Friend Property Get LawIdentifier() As String
     If mASDFlow Is Nothing Then LawIdentifier = "Barcelona-CDP" Else LawIdentifier = mASDFlow.LawIdentifier
 End Property
 
+' Передаёт неизменяемый контекст последнего отказа; успешные пробы его не подменяют.
+Friend Property Get LastFailure() As CCoupledMaterialFailure
+    Set LastFailure = mLastFailure
+End Property
+
 ' Вычисляет одну пробу и её касательную. Возмущения вычисляются от
 ' того же принятого состояния, без изменения пробной истории.
 Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef strain() As Double, _
@@ -125,7 +132,8 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         Optional ByVal tangentMode As ECoupledTangentMode = ctmFull, _
         Optional ByVal recordTrial As Boolean = True) As ESolverFailureCode
     Dim updated As TConcreteHistory, virginElastic As Boolean, cachedMode As ECoupledTangentMode
-    Dim sameTrial As Boolean, i As Long, j As Long, baseSubsteps As Long
+    Dim sameTrial As Boolean, i As Long, j As Long, baseSubsteps As Long, failedComponent As Long
+    Dim failureStage As Long: failureStage = 1 ' Название этапа формируется только при фактическом отказе.
     Dim branchConsistent As Boolean
     branchConsistent = (tangentMode = ctmFullBranchConsistent Or tangentMode = ctmRefinedBranchConsistent)
     If branchConsistent And recordTrial Then
@@ -150,8 +158,9 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
             End If
         Next j
     Else
+        failureStage = 2
         If Not NonlinearTangent(point, strain, stress, tangent, tangentMode, cachedMode, recordTrial, _
-                updated, baseSubsteps) Then GoTo Failure
+                updated, baseSubsteps, failedComponent) Then GoTo Failure
     End If
 StoreTrial:
     If Not recordTrial Then Exit Function
@@ -163,8 +172,29 @@ StoreTrial:
     End If
     Exit Function
 Failure:
+    RememberFailure point, failureStage, failedComponent, tangentMode, strain
     ICoupledPointResponse_EvaluatePoint = sfcNumericalFailure
 End Function
+
+' Снимает вход и принятую историю, не меняя ни материальных буферов, ни статуса разрушения.
+Private Sub RememberFailure(ByVal point As Long, ByVal stage As Long, ByVal component As Long, _
+        ByVal mode As ECoupledTangentMode, ByRef requested() As Double)
+    Dim prior(1 To 6) As Double, effective(1 To 6) As Double, i As Long, j As Long
+    For i = 1 To 6: prior(i) = mHistory(point, mCommitted).Strain(i): Next i
+    If mASDFlow Is Nothing Then
+        For i = 1 To 6
+            For j = 1 To 6
+                effective(i) = effective(i) + mElastic(i, j) * (prior(j) - mHistory(point, mCommitted).Plastic(j))
+            Next j
+        Next i
+    Else
+        For i = 1 To 6: effective(i) = mHistory(point, mCommitted).Effective(i): Next i
+    End If
+    Dim snapshot As New CCoupledMaterialFailure
+    snapshot.Initialize point, mTrialEpoch, stage, component, mode, LawIdentifier, requested, prior, effective, _
+        mHistory(point, mCommitted).Tension, mHistory(point, mCommitted).Compression
+    Set mLastFailure = snapshot
+End Sub
 
 ' Сравнивает все шесть деформаций точно. Номер принятой истории исключает
 ' повторное использование после перестановки буферов или восстановления.
@@ -185,7 +215,8 @@ End Function
 ' существовать только односторонняя производная соседней ветви.
 Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double, _
         ByRef tangent() As Double, ByVal mode As ECoupledTangentMode, ByVal cachedMode As ECoupledTangentMode, _
-        ByVal recordTrial As Boolean, ByRef baseHistory As TConcreteHistory, ByVal baseSubsteps As Long) As Boolean
+        ByVal recordTrial As Boolean, ByRef baseHistory As TConcreteHistory, ByVal baseSubsteps As Long, _
+        ByRef failedComponent As Long) As Boolean
     Dim perturbed(1 To N_COMPONENTS) As Double, plus(1 To N_COMPONENTS) As Double, minus(1 To N_COMPONENTS) As Double
     Dim delta As Double, plusOk As Boolean, minusOk As Boolean, unused As Boolean, attempt As Long
     Dim scratch As TConcreteHistory, i As Long, j As Long, gradientColumn As Boolean
@@ -235,7 +266,7 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
                     delta = delta * 0.25 ' На границе ветвей уменьшаем только численное возмущение.
                 Next attempt
                 perturbed(j) = strain(j)
-                If Not plusOk And Not minusOk Then Exit Function
+                If Not plusOk And Not minusOk Then failedComponent = j: Exit Function
                 For i = 1 To N_COMPONENTS
                     If plusOk And minusOk Then
                         tangent(i, j) = (plus(i) - minus(i)) / (2# * delta)
@@ -324,10 +355,17 @@ End Function
 ' положительном множителе повреждения.
 Private Sub ReadBranchSigns(ByRef updated As TConcreteHistory, ByRef committed As TConcreteHistory, _
         ByRef plasticIncrement As Boolean, ByRef principalSign As Long)
-    Dim stress(1 To N_COMPONENTS) As Double, i As Long
+    Dim stress(1 To N_COMPONENTS) As Double, i As Long, strainScale As Double, threshold As Double
+    If Not mASDFlow Is Nothing Then
+        For i = 1 To N_COMPONENTS
+            strainScale = GeomMax(strainScale, GeomMax(Abs(updated.Strain(i)), Abs(committed.Strain(i))))
+            strainScale = GeomMax(strainScale, GeomMax(Abs(updated.Plastic(i)), Abs(committed.Plastic(i))))
+        Next i
+        threshold = PLASTIC_ROUNDOFF * strainScale ' Меняется только признак ветви, фактическая история не округляется.
+    End If
     plasticIncrement = False
     For i = 1 To N_COMPONENTS
-        If updated.Plastic(i) <> committed.Plastic(i) Then plasticIncrement = True
+        If Abs(updated.Plastic(i) - committed.Plastic(i)) > threshold Then plasticIncrement = True
         stress(i) = updated.Stress(i)
     Next i
     Dim trace As Double, q As Double, high As Double, middle As Double, low As Double
@@ -435,6 +473,7 @@ End Sub
 
 ' Выделяет пустые истории всех бетонных, включая замещённые, точек.
 Private Sub ICoupledPointResponse_ClearHistory()
+    Set mLastFailure = Nothing
     ReDim mHistory(1 To mPointCount, 1 To 2)
     ReDim mCachedEpoch(1 To mPointCount): ReDim mCachedMode(1 To mPointCount)
     ReDim mCachedTangent(1 To N_COMPONENTS, 1 To N_COMPONENTS, 1 To mPointCount)
