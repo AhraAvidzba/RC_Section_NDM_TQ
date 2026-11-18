@@ -293,7 +293,8 @@
     "WorkingForceSubspace20261118": "FBEACD63457F041E473358613DA96FCA0AB1C8A79194BD226EE7D1F821CFCA3B",
     "WorkingASDMaterialIntegration20261118": "834DD5A33866D4AE2267E90F0E0DBBCC495A859895EF9E1EEE748777ACB5CFF1",
     "ProductionGaussAndASD20261118": "322CBF36E5FD026CD3C7A2D852CF3BC0FF1E91A529B5FBBF8CD6186254B96395",
-    "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1"
+    "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1",
+    "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13"
   },
   "cases": [
     {
@@ -3388,6 +3389,28 @@
       "stdout_contains": "MATERIAL ROUNDOFF ALL SIX RESULTANTS, TENSORS AND INDEPENDENT HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "4E977A6DA4FD167BC02340BD4D759F460736ED5C87BE44CC8016DC869B05EA9B"
+      }
+    },
+    {
+      "id": "working-asd-shear-branch-native",
+      "journal_section": 599,
+      "archive": "WorkingASDShearBranch20261118",
+      "script": "Check-TestShearBranch.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "SHEAR BRANCH EXACT VBA, PRESERVED NEGATIVE CASES AND NATIVE SCOPES VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "FD61FCA834A64B62CC7C7065BCFBC462518CA68E8AA04674D7DB353547A62A8F"
+      }
+    },
+    {
+      "id": "working-asd-shear-branch-mechanics",
+      "journal_section": 599,
+      "archive": "WorkingASDShearBranch20261118",
+      "script": "Check-TestShearBranch.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "SHEAR BRANCH ALL SIX RESULTANTS, ACTUAL CONTROL AND SEPARATE MATERIAL HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "DA306B2351BD8E0FD866B5FFFAAFC0E1D6F033C171D5A789A59F999AB0730C67"
       }
     }
   ],
