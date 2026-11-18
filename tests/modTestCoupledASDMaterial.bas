@@ -235,10 +235,14 @@ Private Sub TestTransverseControl(ByVal folder As String, ByRef passed As Long, 
         "continuation rejects mismatched load trace before evaluating fields", passed, failed, report
     Dim cleanFields As New Collection, cleanTrace As New CCoupledLoadTrace, snapshot() As Double, observedActual() As Double
     Dim factor As Variant, originalFirst As Double
+    Dim acceptedRevision As Long
     For Each factor In Array(0.5, 1#)
+        acceptedRevision = solver.AcceptedRevision
         If Not solver.TryStep(100# * factor, 0#, 0#, 0#, 0#, 0#, 0.0000005, 0.0000005, 4) Then _
             Err.Raise 5, , "Не подтверждено упругое поле контрольного наблюдателя."
+        TestRecord solver.AcceptedRevision = acceptedRevision, "accepted revision unchanged by trial " & CStr(factor), passed, failed, report
         solver.CopyTrial snapshot, observedActual: solver.AcceptStep
+        TestRecord solver.AcceptedRevision = acceptedRevision + 1, "accepted revision advances on commit " & CStr(factor), passed, failed, report
         cleanFields.Add snapshot: cleanTrace.Add 1#, CDbl(factor)
         If factor = 0.5 Then originalFirst = snapshot(1)
     Next factor
@@ -252,6 +256,11 @@ Private Sub TestTransverseControl(ByVal folder As String, ByRef passed As Long, 
     TestRecord cleanFields.Count = 2 And snapshot(1) = originalFirst, "progress observer cannot modify accepted fields", passed, failed, report
     TestRecord cleanTrace.Count = 2 And continuation.SavedTrace.Count = 2, "progress observer cannot modify load history", passed, failed, report
     TestRecord continuation.ResultMeta.ResultCode = rcSearchBoundReached, "progress observer cannot assign a physical limit", passed, failed, report
+    acceptedRevision = solver.AcceptedRevision
+    If Not solver.ReplayAcceptedFields(cleanFields, cleanFields.Count) Then Err.Raise 5, , "Не восстановлена история проверки ревизий."
+    TestRecord solver.AcceptedRevision = acceptedRevision + 1 + cleanFields.Count, "accepted revision advances on full replay", passed, failed, report
+    acceptedRevision = solver.AcceptedRevision: solver.ResetHistory
+    TestRecord solver.AcceptedRevision = acceptedRevision + 1, "accepted revision advances on reset", passed, failed, report
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

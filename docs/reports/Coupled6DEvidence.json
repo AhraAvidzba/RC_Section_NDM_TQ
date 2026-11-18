@@ -296,7 +296,8 @@
     "MaterialRoundoffContexts20261118": "D3612530DD4E63751C5682F5B043939C662F59E642253A8BA337917824FB93C1",
     "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13",
     "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360",
-    "SpatialFieldControlRecovery20261118": "39E04FF77B8845FCE4A3EBE0F091F1B1ABB44155FB9E3734E2906CD86D4A8539"
+    "SpatialFieldControlRecovery20261118": "39E04FF77B8845FCE4A3EBE0F091F1B1ABB44155FB9E3734E2906CD86D4A8539",
+    "AcceptedRevisionContinuation20261118": "4C53BAF664BEF67F5486053F096D9E47B8F1439FFF53B663E972F67937353EFB"
   },
   "cases": [
     {
@@ -3457,6 +3458,28 @@
       "stdout_contains": "FIELD RECOVERY SIX EQUATIONS, REJECTED DIRECTION AND SEPARATE MATERIAL HISTORIES VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "9A31A89E1716626BA421D203F2544A472AF54BE5E565CC836C8F83D018B6CE9E"
+      }
+    },
+    {
+      "id": "accepted-revision-continuation-native",
+      "journal_section": 602,
+      "archive": "AcceptedRevisionContinuation20261118",
+      "script": "Check-TestAcceptedRevision.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "ACCEPTED REVISION EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; SMALL CORRECTION EXTENSION REJECTED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "88D035A8277880C95C3A538FE16C9404C337122979181401C78194E5FC056D00"
+      }
+    },
+    {
+      "id": "accepted-revision-continuation-mechanics",
+      "journal_section": 602,
+      "archive": "AcceptedRevisionContinuation20261118",
+      "script": "Check-TestAcceptedRevision.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "ACCEPTED REVISION ALL SIX EQUILIBRIA AND THREE-STATION LOCAL NONLINEARITY VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "38F6DE4F676F441C0019FE919572ADA707C60840B754E358F1A45CDB32943F9F"
       }
     }
   ],

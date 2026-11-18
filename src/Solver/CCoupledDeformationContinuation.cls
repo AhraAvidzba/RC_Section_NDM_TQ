@@ -44,7 +44,6 @@ Private Const STEP_GROWTH As Double = 1.25
 Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
 Private Const POST_PEAK_EXTENDED_RATIO As Double = 4# ' Верхний шаг после шести гладких приращений подряд.
 Private Const TRANSVERSE_STEP_RATIO As Double = 32# ' Ограничивает рост сдвигового шага относительно различимой начальной секущей.
-Private Const FIELD_CONTROL_CHANGE_LIMIT As Long = 2 ' Ограничивает попытки смены меры после заблокированного пространственного шага.
 Private Const POST_PEAK_SECANT_TOLERANCE As Double = 0.02 ' Допустимое отклонение приращений поля и множителя от секущей.
 
 Private mSolver As CCoupledNewtonSolver, mReinforcement As CCoupledReinforcedResponse
@@ -76,6 +75,7 @@ Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 Private mCurrentFields As Collection ' Принятый путь для воспроизводимой диагностики незавершённого поиска.
 Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
 Private mUsesFieldControl As Boolean, mFieldControlChanges As Long
+Private mLastFieldControlRevision As Long
 Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
 Private mObserver As ICoupledContinuationProgress
 
@@ -102,6 +102,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mUsesYieldControl = False
     mUsesTransverseControl = False: mUnverifiedDecline = False
     mUsesFieldControl = False: mFieldControlChanges = 0
+    mLastFieldControlRevision = -1
     mUnverifiedReference = 0#: mUnverifiedDips = 0: mRecoveredDips = 0
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -397,9 +398,11 @@ End Function
 
 ' Меняет только параметризацию после численного отказа участка с неподтверждённым спадом нагрузки.
 ' Последняя отвергнутая поправка не принимается; новая цель решается из полной неизменной истории.
+' На одну ревизию принятой истории разрешена одна смена; все пробы входят в общий бюджет.
 Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
-    If mFieldControlChanges >= FIELD_CONTROL_CHANGE_LIMIT Or mUnverifiedDips = 0 Then Exit Function
+    If mUnverifiedDips = 0 Then Exit Function
+    If mLastFieldControlRevision = mSolver.AcceptedRevision Then Exit Function
     If Not mUnverifiedDecline Or mFollowingLocalPeak Then Exit Function
     If Not mSolver.UsesSpatialHistory Or history.Count < 2 Or current.HistoryIndex <> history.Count Then Exit Function
     Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
@@ -411,6 +414,7 @@ Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef
     mProjection = alternate: mControlName = name
     mUsesTransverseControl = False: mUsesFieldControl = True: mUsesYieldControl = False
     mFieldControlChanges = mFieldControlChanges + 1
+    mLastFieldControlRevision = mSolver.AcceptedRevision
     left.HistoryIndex = history.Count - 1: left.Coordinate = coordinate - spacing
     If Not mTrace Is Nothing Then
         Dim fraction As Double

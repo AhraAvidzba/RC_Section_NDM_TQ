@@ -87,6 +87,7 @@ Private mControlProjection() As Double, mTargetControl As Double
 Private mArcLoadProjection As Double, mCurrentControlLambda As Double
 Private mWrongControlDirection As Boolean
 Private mHasRejectedDirection As Boolean, mRejectedDirection() As Double
+Private mAcceptedRevision As Long ' Ревизия всей принятой истории, включая восстановление и сброс.
 Private mBaseLoad() As Double, mLoadDirection() As Double
 Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
@@ -145,6 +146,7 @@ Friend Sub ResetHistory()
         mMinusResponse.ClearHistory
     End If
     ReDim mAccepted(1 To mDegreeCount)
+    mAcceptedRevision = mAcceptedRevision + 1
     mCandidateReady = False
     mHasRejectedDirection = False: Erase mRejectedDirection
     mMeta.Clear
@@ -947,11 +949,13 @@ RecomputeTangent:
                 details = details & "; ни одна уменьшенная поправка не дала материального отклика"
             End If
             mMeta.DiagnosticDetails = details
-            If Len(mismatch) > 0 And mUseSpatialHistory Then
-                mWrongControlDirection = True
+            If hasValidTrial And mControlActive And mUseSpatialHistory Then ' Максимум невязки может перейти в другую строку при верном знаке исходной.
                 ReDim mRejectedDirection(1 To mDegreeCount)
                 For i = 1 To mGaugeStart - 1: mRejectedDirection(i) = correction(i): Next i
                 mHasRejectedDirection = True
+            End If
+            If Len(mismatch) > 0 And mUseSpatialHistory Then
+                mWrongControlDirection = True
                 If recoverYieldControl Then
                     SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
                         absoluteTolerance, relativeTolerance)
@@ -1669,6 +1673,7 @@ Friend Sub AcceptStep()
     Dim acceptedField() As Double: acceptedField = mCandidate
     AcceptMaterialTrials
     mAccepted = acceptedField
+    mAcceptedRevision = mAcceptedRevision + 1
     mCandidateReady = False
     mHasRejectedDirection = False: Erase mRejectedDirection
 End Sub
@@ -1690,6 +1695,12 @@ Friend Sub CopyAccepted(ByRef field() As Double)
     field = mAccepted
 End Sub
 
+' Возвращает ревизию принятого состояния; пробные вычисления её не изменяют.
+' Восстановление истории создаёт новые ревизии, даже если итоговые координаты совпали.
+Friend Property Get AcceptedRevision() As Long
+    AcceptedRevision = mAcceptedRevision
+End Property
+
 ' Восстанавливает состояние после известных принятых полей. Напряжения
 ' и история вычисляются по той же последовательности без поиска НДС.
 ' Вызывающий передаёт поля этой секции с начала той же траектории.
@@ -1710,6 +1721,7 @@ Friend Function ReplayAcceptedFields(ByVal history As Collection, ByVal lastFiel
         Next point
         AcceptMaterialTrials
         mAccepted = field
+        mAcceptedRevision = mAcceptedRevision + 1
     Next index
     ReplayAcceptedFields = True
 End Function
