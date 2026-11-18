@@ -298,7 +298,10 @@
     "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360",
     "SpatialFieldControlRecovery20261118": "39E04FF77B8845FCE4A3EBE0F091F1B1ABB44155FB9E3734E2906CD86D4A8539",
     "AcceptedRevisionContinuation20261118": "4C53BAF664BEF67F5486053F096D9E47B8F1439FFF53B663E972F67937353EFB",
-    "AnalyticASDTangent20261118": "5192BCB5A1A5FB91305ABA31BA1C06EFA2313E2B0F4A29E97E9128F773AA390F"
+    "AnalyticASDTangent20261118": "5192BCB5A1A5FB91305ABA31BA1C06EFA2313E2B0F4A29E97E9128F773AA390F",
+    "ASDSignTransitionProbes20261118": "014F7D92B07966887C687C24E4CEB4B1FF36C4FE638F3B8625198EEF801F7B2B",
+    "ASDSignContinuationGuards20261118": "40269A4BC79CCB5A9B42B69AA2BE57DDD5C8310DCFF5C4807D6A8B2A2E3E160D",
+    "ASDSignRevision20261118": "5BE929B98682EFAB087E1986BB405F2EB04E53EE106E5754497F2AFC0CC89454"
   },
   "cases": [
     {
@@ -3503,6 +3506,129 @@
       "stdout_contains": "INDEPENDENT NATIVE TANGENTS AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "9D027EA4238F1851AA5AAA164B3F19813A5C9A814315712AC0BB787163B34559"
+      }
+    },
+    {
+      "id": "asd-sign-probes-native",
+      "journal_section": 604,
+      "archive": "ASDSignTransitionProbes20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "28075C080A6131A0C6D8CC3401199DE08D63C8AA3CBC05EDF95FBC588EB4B0A3"
+      }
+    },
+    {
+      "id": "asd-sign-probes-mechanics",
+      "timeout_seconds": 300,
+      "journal_section": 604,
+      "archive": "ASDSignTransitionProbes20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "0AB31AC451E6F96758E6B8B5C85B162936072A3F8A822D24D4EA0E88D8233C72"
+      }
+    },
+    {
+      "id": "asd-sign-guards-native",
+      "journal_section": 604,
+      "archive": "ASDSignContinuationGuards20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "ACC97A8CB578A1DED46E56F9EF0E5AD9C8B3C98FC4331944A4BC04B3281E7D1B"
+      }
+    },
+    {
+      "id": "asd-sign-guards-mechanics",
+      "timeout_seconds": 300,
+      "journal_section": 604,
+      "archive": "ASDSignContinuationGuards20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "3731CCB78EBF23C60EBB9951A0920E955A4148D8E2B9A8DAE4CD3C7B5D328048"
+      }
+    },
+    {
+      "id": "asd-sign-final-native",
+      "journal_section": 604,
+      "archive": "ASDSignRevision20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "50DFD3526596193C2CBD479F3043C12849B369B1AB2B9615F292145E077B913F"
+      }
+    },
+    {
+      "id": "asd-sign-final-mechanics",
+      "timeout_seconds": 300,
+      "journal_section": 604,
+      "archive": "ASDSignRevision20261118",
+      "script": "Check-TestASDTransitions.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "868CD5BA1F627D13460062081C4A974CC08A5E3C3AFCBA57E636A0042A9F975F"
       }
     }
   ],

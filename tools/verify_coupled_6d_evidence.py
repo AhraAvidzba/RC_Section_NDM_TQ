@@ -91,9 +91,12 @@ def replay_case(case, locations):
     command.extend(argument.format_map(locations) for argument in case.get("arguments", []))
     environment = os.environ.copy()
     environment.pop("PYTHONOPTIMIZE", None)  # Архивные сценарии проверяют результаты через assert.
+    timeout = case.get("timeout_seconds", 90)
+    if type(timeout) is not int or not 1 <= timeout <= 600:
+        raise ValueError(f"{case['id']}: время офлайн-проверки должно быть целым числом от 1 до 600 с")
     result = subprocess.run(
         command, cwd=archive, env=environment, capture_output=True,
-        encoding="utf-8", timeout=90, check=False,
+        encoding="utf-8", timeout=timeout, check=False,
     )
     if result.returncode or case.get("stdout_contains", "") not in result.stdout:
         detail = result.stderr.strip() or result.stdout.strip()

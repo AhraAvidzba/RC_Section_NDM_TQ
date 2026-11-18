@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "9DAAC6463C805011D4EB2E8563D9AB19BFC22A38B53FFB6AF9C8A26C2ACF772E",
+  "manifest_sha256": "475F85FD4B96E39A472F14D0C4013E6B7AC3CE5219E70D915031ACE9305BF272",
   "source_checkpoint": "826221bfde2fef1e690c65745c0169ef4a342161",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 305,
+  "passed": 311,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2535,6 +2535,60 @@
         "MechanicsProof.json": "9D027EA4238F1851AA5AAA164B3F19813A5C9A814315712AC0BB787163B34559"
       },
       "verified_stdout": "INDEPENDENT NATIVE TANGENTS AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-probes-native",
+      "journal_section": 604,
+      "archive": "ASDSignTransitionProbes20261118",
+      "verified_outputs_sha256": {
+        "NativeProof.json": "28075C080A6131A0C6D8CC3401199DE08D63C8AA3CBC05EDF95FBC588EB4B0A3"
+      },
+      "verified_stdout": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-probes-mechanics",
+      "journal_section": 604,
+      "archive": "ASDSignTransitionProbes20261118",
+      "verified_outputs_sha256": {
+        "MechanicsProof.json": "0AB31AC451E6F96758E6B8B5C85B162936072A3F8A822D24D4EA0E88D8233C72"
+      },
+      "verified_stdout": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-guards-native",
+      "journal_section": 604,
+      "archive": "ASDSignContinuationGuards20261118",
+      "verified_outputs_sha256": {
+        "NativeProof.json": "ACC97A8CB578A1DED46E56F9EF0E5AD9C8B3C98FC4331944A4BC04B3281E7D1B"
+      },
+      "verified_stdout": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-guards-mechanics",
+      "journal_section": 604,
+      "archive": "ASDSignContinuationGuards20261118",
+      "verified_outputs_sha256": {
+        "MechanicsProof.json": "3731CCB78EBF23C60EBB9951A0920E955A4148D8E2B9A8DAE4CD3C7B5D328048"
+      },
+      "verified_stdout": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-final-native",
+      "journal_section": 604,
+      "archive": "ASDSignRevision20261118",
+      "verified_outputs_sha256": {
+        "NativeProof.json": "50DFD3526596193C2CBD479F3043C12849B369B1AB2B9615F292145E077B913F"
+      },
+      "verified_stdout": "ASD TRANSITIONS EXACT VBA AND DIRECTED NATIVE REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN"
+    },
+    {
+      "id": "asd-sign-final-mechanics",
+      "journal_section": 604,
+      "archive": "ASDSignRevision20261118",
+      "verified_outputs_sha256": {
+        "MechanicsProof.json": "868CD5BA1F627D13460062081C4A974CC08A5E3C3AFCBA57E636A0042A9F975F"
+      },
+      "verified_stdout": "ASD TRANSITIONS MATERIAL BRANCHES AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN"
     }
   ]
 }

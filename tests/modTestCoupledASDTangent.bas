@@ -15,6 +15,7 @@ Public Function RunTestCoupledASDTangent(ByVal folder As String) As String
     TestBackboneSlopes passed, failed, report
     For Each name In Array("default", "ndm_uniaxial")
         TestTangentHistory folder, CStr(name), passed, failed, report
+        TestPrincipalBoundary folder, CStr(name), passed, failed, report
     Next name
     RunTestCoupledASDTangent = report & "TOTAL_COUPLED_ASD_TANGENT: passed=" & passed & "; failed=" & failed
     Exit Function
@@ -110,6 +111,77 @@ Failed:
     If output <> 0 Then Close #output
     On Error GoTo 0
     Err.Raise number, "modTestCoupledASDTangent.TestTangentHistory", reason
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет знаковые координаты, их градиенты, принятую историю и допустимую кратность двух других корней.
+Private Sub TestPrincipalBoundary(ByVal folder As String, ByVal name As String, ByRef passed As Long, _
+        ByRef failed As Long, ByRef report As String)
+    On Error GoTo Failed
+    Dim flow As CCoupledASDFlow: Set flow = modTestCoupledASDMaterial.TestReadFlow(folder, name)
+    Dim concrete As New CCoupledConcreteResponse, response As ICoupledPointResponse
+    concrete.InitializeASD 1, flow: Set response = concrete
+    Dim base(1 To 6) As Double, requested(1 To 6) As Double, prior(1 To 6) As Double, oldEffective(1 To 6) As Double
+    Dim zero(1 To 6) As Double, effective(1 To 6) As Double, nominal(1 To 6) As Double, plastic(1 To 6) As Double
+    Dim gradient(1 To 6) As Double, actualGradient(1 To 6) As Double, unused(1 To 6) As Double, perturbed(1 To 6) As Double
+    Dim tangent(1 To 6, 1 To 6) As Double, stress(1 To 6) As Double, t As Double, c As Double, dt As Double, dc As Double
+    Dim value As Double, actual As Double, plus As Double, minus As Double, error As Double, i As Long, j As Long, rank As Long, epoch As Long
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "/" & name & ".Boundary.csv" For Output As #handle
+    base(1) = 0.0001: base(2) = -0.0002: base(3) = 0.00015
+    base(4) = 0.00017: base(5) = -0.00013: base(6) = 0.00019
+    For epoch = 0 To 1
+        If epoch = 1 Then
+            If Not flow.TryStep(base, zero, zero, 0#, 0#, t, c, effective, nominal, plastic, dt, dc) Then Err.Raise 5, , "Нет принятой истории знаковой координаты."
+            If response.EvaluatePoint(1, base, stress, tangent, ctmStressOnly) <> sfcNone Then Err.Raise 5, , "Нет пробы принятой истории."
+            response.AcceptTrial
+            For i = 1 To 6: prior(i) = base(i): oldEffective(i) = effective(i): Next i
+        End If
+        For i = 1 To 6: requested(i) = base(i) + epoch * 0.00003 * i: Next i
+        For rank = 1 To 3
+            TestRecord flow.TryReadPrincipalBoundary(requested, prior, oldEffective, rank, value, gradient), _
+                name & " boundary available " & epoch & "/" & rank, passed, failed, report
+            Dim row As String
+            row = "BOUNDARY;" & name & ";" & epoch & ";" & rank & TestVector(requested) & TestVector(prior) & _
+                TestVector(oldEffective) & ";" & Trim$(Str$(value)) & TestVector(gradient)
+            Print #handle, row
+            error = 0#
+            For i = 1 To 6
+                For j = 1 To 6: perturbed(j) = requested(j): Next j
+                perturbed(i) = requested(i) + 0.0000000001
+                If Not flow.TryReadPrincipalBoundary(perturbed, prior, oldEffective, rank, plus, unused, False) Then Err.Raise 5, , "Нет положительной пробы границы."
+                perturbed(i) = requested(i) - 0.0000000001
+                If Not flow.TryReadPrincipalBoundary(perturbed, prior, oldEffective, rank, minus, unused, False) Then Err.Raise 5, , "Нет отрицательной пробы границы."
+                error = GeomMax(error, Abs(gradient(i) - (plus - minus) / 0.0000000002))
+            Next i
+            TestRecord error < 0.01, name & " boundary finite difference " & epoch & "/" & rank, passed, failed, report
+            If Not concrete.TryReadPrincipalBoundary(1, requested, rank, actual, actualGradient) Then Err.Raise 5, , "Нет координаты через оболочку."
+            error = Abs(value - actual)
+            For i = 1 To 6: error = GeomMax(error, Abs(gradient(i) - actualGradient(i))): Next i
+            TestRecord error < 0.000000001, name & " boundary committed history " & epoch & "/" & rank, passed, failed, report
+        Next rank
+    Next epoch
+    Close #handle: handle = 0
+    Erase requested
+    requested(1) = (3# - flow.Poisson) / flow.Modulus
+    requested(2) = (1# - 3# * flow.Poisson) / flow.Modulus
+    requested(3) = -4# * flow.Poisson / flow.Modulus
+    TestRecord flow.TryReadPrincipalBoundary(requested, zero, zero, 3, value, gradient) And Abs(value) < 0.000000000001, _
+        name & " zero principal has boundary gradient", passed, failed, report
+    requested(1) = 3# / flow.Modulus: requested(2) = -3# * flow.Poisson / flow.Modulus: requested(3) = requested(2)
+    TestRecord flow.TryReadPrincipalBoundary(requested, zero, zero, 1, value, gradient), _
+        name & " repeated other roots permit simple principal", passed, failed, report
+    TestRecord Not flow.TryReadPrincipalBoundary(requested, zero, zero, 3, value, gradient), _
+        name & " repeated selected root rejects gradient", passed, failed, report
+    TestRecord Not flow.TryReadPrincipalBoundary(requested, zero, zero, 0, value, gradient), _
+        name & " invalid principal rejected", passed, failed, report
+    Exit Sub
+Failed:
+    Dim number As Long, reason As String: number = Err.Number: reason = Err.Description
+    On Error Resume Next
+    If handle <> 0 Then Close #handle
+    On Error GoTo 0
+    Err.Raise number, "modTestCoupledASDTangent.TestPrincipalBoundary", reason
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------

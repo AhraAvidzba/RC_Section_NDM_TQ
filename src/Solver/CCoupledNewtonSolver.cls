@@ -37,6 +37,7 @@ Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходуе�
 Private Type TYieldStation
     Point As Long
     Side As Long
+    PrincipalIndex As Long ' 0 — поверхность CDP; 1..3 — главные напряжения прогноза ASD от старшего к младшему.
     FromValue As Double
     ToValue As Double
 End Type
@@ -460,6 +461,18 @@ Friend Function CopyRecoveredControl(ByRef projection() As Double) As Boolean
     projection = mRecoveredProjection
     CopyRecoveredControl = True
 End Function
+
+' Передаёт требование к касательной только для подтверждённой новой меры материального восстановления.
+Friend Property Get RecoveredControlRequiresBranchTangent() As Boolean
+    If mCandidateReady And mRecoveredControlReady Then RecoveredControlRequiresBranchTangent = mConsistentControl
+End Property
+
+' Сообщает о наличии знаковых границ у пространственного бетонного материала.
+Friend Property Get HasPrincipalBoundaries() As Boolean
+    If Not mUseSpatialHistory Or Not TypeOf mResponse Is CCoupledReinforcedResponse Then Exit Property
+    Dim response As CCoupledReinforcedResponse: Set response = mResponse
+    HasPrincipalBoundaries = response.HasPrincipalBoundaries
+End Property
 
 ' Сообщает, что после действительной смены ветви собиралось аварийное направление.
 Friend Property Get YieldRecoveryTried() As Boolean
@@ -957,8 +970,10 @@ RecomputeTangent:
             If Len(mismatch) > 0 And mUseSpatialHistory Then
                 mWrongControlDirection = True
                 If recoverYieldControl Then
+                    Dim recoveryIterationLimit As Long
+                    If HasPrincipalBoundaries Then recoveryIterationLimit = maxIterations
                     SolveStep = RecoverYieldStep(current, currentLambda, correction, trialFraction, tolerance, _
-                        absoluteTolerance, relativeTolerance)
+                        absoluteTolerance, relativeTolerance, recoveryIterationLimit)
                 ElseIf recoverSameControl And mControlActive And mConsistentControl And Not mSameControlRecoveryTried Then
                     If mIterations + 1 < maxIterations Then
                         mSameControlRecoveryTried = True
@@ -1117,9 +1132,14 @@ Private Function RecoverYieldStep(ByRef field() As Double, ByVal lambda As Doubl
             If EquilibriumNorm(load, result) <= trialTolerance And GaugesVerified(trialTolerance) Then
                 mRecoveredProjection = newProjection: mRecoveredControlReady = True
                 mCandidate = result
-                mConsistentControl = True
+                mConsistentControl = (station.PrincipalIndex = 0)
                 PublishCandidate trialLambda
-                mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие восстановлено после смены ветви бетона"
+                If station.PrincipalIndex = 0 Then
+                    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие восстановлено после смены ветви бетона"
+                Else
+                    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие восстановлено у знаковой границы ASD; точка: " & _
+                        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; главное напряжение: " & CStr(station.PrincipalIndex)
+                End If
                 RecoverYieldStep = True
                 Exit Function
             End If
@@ -1136,45 +1156,64 @@ Failed:
     Resume Restore
 End Function
 
-' Выбирает ближайшее пересечение на действительной отклонённой поправке.
-' Ftrial служит для скобки; фактические упругая и пластическая ветви
-' подтверждаются локальным возвратом без материального дробления.
+' Выбирает ближайшее пересечение CDP или знаковой границы ASD на действительной отклонённой поправке.
+' Для CDP дополнительно подтверждает смену упругой и пластической ветвей локальным возвратом.
 Private Function FirstYieldCrossing(ByRef field() As Double, ByRef ends() As Double, ByRef first As TYieldStation) As Boolean
     Dim probe As TYieldStation, fraction As Double, nearest As Double
-    Dim point As Long, side As Long
+    Dim point As Long, side As Long, principalIndex As Long
     nearest = 1#
     For point = 1 To mPointCount
         For side = -1 To 1
-            If ReadYieldCrossing(point, side, field, ends, probe) Then
-                If LocateYieldCoordinate(probe, field, ends, 0#, fraction) Then
-                    If Not FirstYieldCrossing Or fraction < nearest Then
-                        nearest = fraction: first = probe: FirstYieldCrossing = True
+            For principalIndex = 0 To 3
+                If ReadYieldCrossing(point, side, field, ends, probe, principalIndex) Then
+                    If LocateYieldCoordinate(probe, field, ends, 0#, fraction) Then
+                        If Not FirstYieldCrossing Or fraction < nearest Then
+                            nearest = fraction: first = probe: FirstYieldCrossing = True
+                        End If
                     End If
                 End If
-            End If
+            Next principalIndex
         Next side
     Next point
 End Function
 
-' Проверяет пересечение и сохраняет исходные значения в МПа.
+' Проверяет поверхность CDP или выбранную знаковую границу ASD и сохраняет исходные значения в МПа.
 Private Function ReadYieldCrossing(ByVal point As Long, ByVal side As Long, ByRef field() As Double, _
-        ByRef ends() As Double, ByRef station As TYieldStation) As Boolean
+        ByRef ends() As Double, ByRef station As TYieldStation, Optional ByVal principalIndex As Long = 0) As Boolean
     Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(side)
     Dim leftStrain(1 To COMPONENT_COUNT) As Double, rightStrain(1 To COMPONENT_COUNT) As Double
     Dim unused(1 To COMPONENT_COUNT) As Double, leftF As Double, rightF As Double
     YieldStrain point, side, field, leftStrain
     YieldStrain point, side, ends, rightStrain
-    If Not response.TryReadTrialYield(point, leftStrain, leftF, unused, False) Then Exit Function
-    If Not response.TryReadTrialYield(point, rightStrain, rightF, unused, False) Then Exit Function
+    If principalIndex > 0 Then
+        If Not response.TryReadPrincipalBoundary(point, leftStrain, principalIndex, leftF, unused, False) Then Exit Function
+        If Not response.TryReadPrincipalBoundary(point, rightStrain, principalIndex, rightF, unused, False) Then Exit Function
+    Else
+        If Not response.TryReadTrialYield(point, leftStrain, leftF, unused, False) Then Exit Function
+        If Not response.TryReadTrialYield(point, rightStrain, rightF, unused, False) Then Exit Function
+    End If
     If (leftF < 0#) = (rightF < 0#) Or leftF = 0# Or rightF = 0# Then Exit Function
-    Dim leftPlastic As Boolean, rightPlastic As Boolean, principal As Long, leftSteps As Long, rightSteps As Long
-    If Not response.TryReadConcreteBranch(point, leftStrain, leftPlastic, principal, leftSteps) Then Exit Function
-    If Not response.TryReadConcreteBranch(point, rightStrain, rightPlastic, principal, rightSteps) Then Exit Function
-    If leftSteps > 1 Or rightSteps > 1 Or leftPlastic = rightPlastic Then Exit Function
-    If leftPlastic <> (leftF > 0#) Or rightPlastic <> (rightF > 0#) Then Exit Function
-    station.Point = point: station.Side = side
+    If principalIndex = 0 Then
+        Dim leftPlastic As Boolean, rightPlastic As Boolean, principal As Long, leftSteps As Long, rightSteps As Long
+        If Not response.TryReadConcreteBranch(point, leftStrain, leftPlastic, principal, leftSteps) Then Exit Function
+        If Not response.TryReadConcreteBranch(point, rightStrain, rightPlastic, principal, rightSteps) Then Exit Function
+        If leftSteps > 1 Or rightSteps > 1 Or leftPlastic = rightPlastic Then Exit Function
+        If leftPlastic <> (leftF > 0#) Or rightPlastic <> (rightF > 0#) Then Exit Function
+    End If
+    station.Point = point: station.Side = side: station.PrincipalIndex = principalIndex
     station.FromValue = leftF: station.ToValue = rightF
     ReadYieldCrossing = True
+End Function
+
+' Читает координату и производную именно выбранной материальной границы без изменения принятой истории.
+Private Function ReadTransitionValue(ByRef station As TYieldStation, ByRef strain() As Double, ByRef value As Double, _
+        ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
+    If station.PrincipalIndex > 0 Then
+        ReadTransitionValue = response.TryReadPrincipalBoundary(station.Point, strain, station.PrincipalIndex, value, gradient, needGradient)
+    Else
+        ReadTransitionValue = response.TryReadTrialYield(station.Point, strain, value, gradient, needGradient)
+    End If
 End Function
 
 ' Передаёт бетон за центральной или боковой материальной историей.
@@ -1195,7 +1234,7 @@ Private Sub YieldStrain(ByVal point As Long, ByVal side As Long, ByRef field() A
     For i = 1 To COMPONENT_COUNT: strain(i) = strain(i) + side * SPATIAL_HALF_STEP * slope(i): Next i
 End Sub
 
-' Делит фактический отрезок до заданного Ftrial, лежащего между концами.
+' Делит фактический отрезок до заданной материальной координаты, лежащей между концами.
 Private Function LocateYieldCoordinate(ByRef station As TYieldStation, ByRef field() As Double, _
         ByRef ends() As Double, ByVal target As Double, ByRef fraction As Double) As Boolean
     Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
@@ -1208,7 +1247,7 @@ Private Function LocateYieldCoordinate(ByRef station As TYieldStation, ByRef fie
     For j = 1 To 40
         fraction = 0.5 * (low + high)
         For i = 1 To COMPONENT_COUNT: strain(i) = leftStrain(i) + fraction * (rightStrain(i) - leftStrain(i)): Next i
-        If Not response.TryReadTrialYield(station.Point, strain, value, unused, False) Then Exit Function
+        If Not ReadTransitionValue(station, strain, value, unused, False) Then Exit Function
         If Abs(value - target) <= YIELD_ROOT_TOLERANCE Then
             LocateYieldCoordinate = True
             Exit Function
@@ -1217,8 +1256,8 @@ Private Function LocateYieldCoordinate(ByRef station As TYieldStation, ByRef fie
     Next j
 End Function
 
-' Начинает на стороне исходного поля и при необходимости повторяет с
-' другой стороны. Малый отступ отделяет пробу от границы округления.
+' Для CDP начинает со стороны исходного поля, для ASD сначала проверяет сторону обнаруженного изменения знака.
+' Вторая сторона остаётся запасной пробой; малый отступ отделяет обе цели от границы округления.
 Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field() As Double, ByRef ends() As Double, _
         ByVal fromLambda As Double, ByVal toLambda As Double, ByVal tolerance As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal allowSuccessor As Boolean, _
@@ -1227,6 +1266,7 @@ Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field(
     Dim target As Double, fraction As Double, trial As Long, i As Long, anchor() As Double
     target = Sgn(station.FromValue) * GeomMin(0.125 * tolerance, _
         0.25 * GeomMin(Abs(station.FromValue), Abs(station.ToValue)))
+    If station.PrincipalIndex > 0 Then target = -target ' Повтор принятого состояния перед нулём не заменяет переход на соседнюю спектральную ветвь.
     ReDim anchor(1 To mDegreeCount)
     For trial = 1 To 2
         If iterationLimit > 0 And mIterations >= iterationLimit Then Exit Function
@@ -1242,8 +1282,8 @@ Private Function TraceYieldCrossing(ByRef station As TYieldStation, ByRef field(
     Next trial
 End Function
 
-' Ведёт короткую серию читающих проб при заданном Ftrial. Две правые
-' части одной факторизации задают поправку и направление вдоль Ftrial.
+' Ведёт короткую серию читающих проб при заданной материальной координате. Две правые
+' части одной факторизации задают поправку и направление её точного удержания.
 ' Следующая станция допускается по фактической ошибке текущего шага.
 Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef startField() As Double, _
         ByVal lambda As Double, ByVal target As Double, ByVal absoluteTolerance As Double, _
@@ -1264,7 +1304,7 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
             mIterations = mIterations + 1 ' Направляющая итерация расходует общий остаток, даже при отказе.
         End If
         SetControlledLoad lambda, load
-        If Not Evaluate(field, True, recordTrial:=False, consistentBranch:=True) Then Exit Function
+        If Not Evaluate(field, True, recordTrial:=False, consistentBranch:=(station.PrincipalIndex = 0)) Then Exit Function
         baseNorm = EquilibriumNorm(load, field)
         row = LargestEquilibriumResidualRow(): baseRow = mResidual(row)
         If Not YieldDirections(station, field, target, value, eventRow, correction, nullDirection) Then Exit Function
@@ -1312,14 +1352,14 @@ Private Function FollowYieldCoordinate(ByRef station As TYieldStation, ByRef sta
     Next iteration
 End Function
 
-' Заменяет одно уравнение управления градиентом Ftrial по полю.
+' Заменяет одно уравнение управления градиентом выбранной материальной координаты по полю.
 ' Четыре уравнения однозначности и столбец нагрузки сохраняются.
 Private Function YieldDirections(ByRef station As TYieldStation, ByRef field() As Double, ByVal target As Double, _
         ByRef value As Double, ByRef eventRow() As Double, ByRef correction() As Double, ByRef nullDirection() As Double) As Boolean
     Dim response As CCoupledReinforcedResponse: Set response = YieldResponse(station.Side)
     Dim strain(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
     YieldStrain station.Point, station.Side, field, strain
-    If Not response.TryReadTrialYield(station.Point, strain, value, gradient) Then Exit Function
+    If Not ReadTransitionValue(station, strain, value, gradient) Then Exit Function
     Dim size As Long, i As Long, j As Long, basis() As Double, augmented() As Double
     size = mDegreeCount + 1
     BuildControlledMatrix augmented, size
@@ -1338,7 +1378,7 @@ Private Function YieldDirections(ByRef station As TYieldStation, ByRef field() A
     YieldDirections = mSystem.SolveFactored(nullDirection)
 End Function
 
-' Удерживает фактический Ftrial на каждой доле поправки. Скалярная
+' Удерживает фактическую материальную координату на каждой доле поправки. Скалярная
 ' доводка вдоль нулевого направления сохраняет линейные силовые строки.
 Private Function ProjectYieldTrial(ByRef station As TYieldStation, ByVal target As Double, ByRef field() As Double, _
         ByRef correction() As Double, ByRef nullDirection() As Double, ByRef strainRate() As Double, _
@@ -1351,7 +1391,7 @@ Private Function ProjectYieldTrial(ByRef station As TYieldStation, ByVal target 
     For iteration = 1 To 7
         For i = 1 To mDegreeCount: trial(i) = field(i) + fraction * correction(i) + beta * nullDirection(i): Next i
         YieldStrain station.Point, station.Side, trial, strain
-        If Not response.TryReadTrialYield(station.Point, strain, value, gradient) Then Exit Function
+        If Not ReadTransitionValue(station, strain, value, gradient) Then Exit Function
         If Abs(value - target) <= YIELD_ROOT_TOLERANCE Then
             ProjectYieldTrial = True
             Exit Function
@@ -1369,20 +1409,22 @@ End Function
 Private Function FindYieldDeparture(ByRef held As TYieldStation, ByRef field() As Double, ByRef trial() As Double, _
         ByVal row As Long, ByVal mismatch As Double, ByRef selected As TYieldStation) As Boolean
     If mismatch = 0# Then Exit Function
-    Dim point As Long, side As Long, crossing As TYieldStation
+    Dim point As Long, side As Long, principalIndex As Long, crossing As TYieldStation
     Dim departure As Double, largest As Double
     For point = 1 To mPointCount
         For side = -1 To 1
-            If point <> held.Point Or side <> held.Side Then
-                If ReadYieldCrossing(point, side, field, trial, crossing) Then
-                    If YieldPointDeviation(crossing, field, trial, row, departure) Then
-                        If Sgn(departure) = Sgn(mismatch) And Abs(departure) > largest Then
-                            largest = Abs(departure): selected = crossing
-                            FindYieldDeparture = True
+            For principalIndex = 0 To 3
+                If point <> held.Point Or side <> held.Side Or principalIndex <> held.PrincipalIndex Then
+                    If ReadYieldCrossing(point, side, field, trial, crossing, principalIndex) Then
+                        If YieldPointDeviation(crossing, field, trial, row, departure) Then
+                            If Sgn(departure) = Sgn(mismatch) And Abs(departure) > largest Then
+                                largest = Abs(departure): selected = crossing
+                                FindYieldDeparture = True
+                            End If
                         End If
                     End If
                 End If
-            End If
+            Next principalIndex
         Next side
     Next point
 End Function

@@ -74,6 +74,14 @@ Friend Function TryTangent(ByRef strain() As Double, ByRef oldStrain() As Double
     TryTangent = mTangent.TryBuild(strain, oldStrain, oldEffective, oldT, oldC, stress, effective, newT, newC, tangent)
 End Function
 
+' Читает знаковую границу главного напряжения упругого прогноза; материал и история остаются неизменными.
+Friend Function TryReadPrincipalBoundary(ByRef strain() As Double, ByRef oldStrain() As Double, _
+        ByRef oldEffective() As Double, ByVal principalIndex As Long, ByRef value As Double, _
+        ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If mTangent Is Nothing Then Exit Function
+    TryReadPrincipalBoundary = mTangent.TryReadPrincipalBoundary(strain, oldStrain, oldEffective, principalIndex, value, gradient, needGradient)
+End Function
+
 ' Выполняет замкнутую пробу от переданного принятого состояния без его изменения.
 ' Отказ означает численную неудачу материала, а не физическое разрушение.
 Friend Function TryStep(ByRef strain() As Double, ByRef oldStrain() As Double, ByRef oldEffective() As Double, _

@@ -203,6 +203,21 @@ Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double,
     TryReadTrialYield = concrete.TryReadTrialYield(point, strain, value, gradient, needGradient)
 End Function
 
+' Передаёт наличие спектральных знаковых границ у бетонной составляющей.
+Friend Property Get HasPrincipalBoundaries() As Boolean
+    If Not TypeOf mConcrete Is CCoupledConcreteResponse Then Exit Property
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    HasPrincipalBoundaries = concrete.HasPrincipalBoundaries
+End Property
+
+' Читает знаковую границу ASD бетонной составляющей, включая вытесненный бетон стержня.
+Friend Function TryReadPrincipalBoundary(ByVal point As Long, ByRef strain() As Double, ByVal principalIndex As Long, _
+        ByRef value As Double, ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If Not TypeOf mConcrete Is CCoupledConcreteResponse Then Exit Function
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    TryReadPrincipalBoundary = concrete.TryReadPrincipalBoundary(point, strain, principalIndex, value, gradient, needGradient)
+End Function
+
 ' Читает фактическую ветвь бетонной составляющей от принятой истории
 ' без записи отклика бетона или стали в пробные буферы.
 Friend Function TryReadConcreteBranch(ByVal point As Long, ByRef strain() As Double, _

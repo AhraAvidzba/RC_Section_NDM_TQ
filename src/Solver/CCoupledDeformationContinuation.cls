@@ -37,7 +37,7 @@ Private Const COMPONENT_COUNT As Long = 6
 Private Const STEP_LIMIT As Long = 32
 Private Const PROBE_LIMIT As Long = 96 ' Общий предел проб продолжения, деления и повторного прохождения плеч.
 Private Const FIXED_YIELD_RECOVERY_LIMIT As Long = 4 ' Проверки перехода без смены меры за одно продолжение.
-Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Дорогие пробы с выбором другой меры при остановке.
+Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Для CDP на весь участок, для знаковых границ ASD на одну ревизию принятой истории; общий бюджет проб сохраняется.
 Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
 Private Const STEP_GROWTH As Double = 1.25
@@ -63,9 +63,11 @@ Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
 Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
+Private mMaterialRecoveryRevision As Long, mMaterialRecoveryAtRevision As Long
 Private mFixedYieldRecoveryProbes As Long
 Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
 Private mUsesYieldControl As Boolean
+Private mBranchTangentControl As Boolean ' Согласованные с ветвью разности нужны для восстановления CDP; спектральный ASD использует свою касательную.
 Private mPostPeakControlName As String, mPostPeakControlPoints As Long
 Private mPostPeakWidePoints As Long
 Private mLimitFields As Collection
@@ -98,8 +100,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
+    mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
+    mBranchTangentControl = False
     mUsesTransverseControl = False: mUnverifiedDecline = False
     mUsesFieldControl = False: mFieldControlChanges = 0
     mLastFieldControlRevision = -1
@@ -130,6 +134,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             StopSearch "Количество записей нагрузочной траектории не совпадает с принятой историей полей."
             Exit Sub
         End If
+        mBestBeforeCurrent = PrefixMaximumLambda(history.Count - 1)
+        mBestLambda = GeomMax(mBestBeforeCurrent, currentLambda) ' Сохраняемый префикс может содержать ранее пройденный локальный максимум.
     End If
 
     Set mCurrentFields = history
@@ -162,7 +168,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, unresolvedSteel As Boolean
     Dim targetCoordinate As Double
-    Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean
+    Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
     Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
@@ -185,11 +191,12 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
             Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
         Dim seed As Variant, seedLambda As Double
+        allowMaterialRecovery = MayRecoverMaterialBoundary()
         If PrepareSecantSeed(history, left, current, trial.Coordinate, seed, seedLambda) Then
-            probed = Probe(trial, seedLambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+            probed = Probe(trial, seedLambda, allowMaterialRecovery, _
                 arcFields:=arcFields, initialField:=seed)
         Else
-            probed = Probe(trial, current.Lambda, mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT And Not mFollowingLocalPeak, _
+            probed = Probe(trial, current.Lambda, allowMaterialRecovery, _
                 arcFields:=arcFields)
         End If
         lastProbeFailed = Not probed
@@ -224,7 +231,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             smoothSteps = 0
             increment = increment * 0.5
-        ElseIf mFollowingLocalPeak Or mUnverifiedDecline Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
+        ElseIf changedControl Or mFollowingLocalPeak Or mUnverifiedDecline Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
             If trial.Lambda <= 0# Then
                 mSolver.DiscardStep
                 StopSearch "После локального максимума множитель вышел из области положительной нагрузки."
@@ -232,7 +239,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
             designAtTrial = False
             If mDesignHistoryIndex = 0 And current.Lambda < 1# And trial.Lambda >= 1# And mProbeCount + 2 <= PROBE_LIMIT Then
-                If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial) Then Exit Sub
+                If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial, changedControl And mSolver.HasPrincipalBoundaries) Then Exit Sub
             End If
             AcceptPoint history, trial
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
@@ -413,6 +420,7 @@ Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef
     If spacing <= 0# Or coordinate + 0.5 * spacing <= coordinate Then Exit Function
     mProjection = alternate: mControlName = name
     mUsesTransverseControl = False: mUsesFieldControl = True: mUsesYieldControl = False
+    mBranchTangentControl = False
     mFieldControlChanges = mFieldControlChanges + 1
     mLastFieldControlRevision = mSolver.AcceptedRevision
     left.HistoryIndex = history.Count - 1: left.Coordinate = coordinate - spacing
@@ -525,6 +533,18 @@ Friend Property Get ResultMeta() As CResultMeta
     Set ResultMeta = mMeta.Clone
 End Property
 
+' Разрешает ограниченное число восстановлений на неизменной истории ASD; принятая новая история получает собственный запас попыток.
+' Для CDP действует общий предел участка. Каждое решение остаётся внутри общего бюджета деформационных проб.
+Private Function MayRecoverMaterialBoundary() As Boolean
+    If Not mSolver.HasPrincipalBoundaries Then
+        MayRecoverMaterialBoundary = (Not mFollowingLocalPeak And mYieldRecoveryProbes < YIELD_RECOVERY_LIMIT)
+    ElseIf mMaterialRecoveryRevision <> mSolver.AcceptedRevision Then
+        MayRecoverMaterialBoundary = True
+    Else
+        MayRecoverMaterialBoundary = (mMaterialRecoveryAtRevision < YIELD_RECOVERY_LIMIT)
+    End If
+End Function
+
 ' Решает пробу при заданной мере. Проверки продвижения и касательной
 ' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
@@ -535,13 +555,19 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     NotifyProgress
     point.Uncertainty = 0#
     Dim solved As Boolean, recoverSameControl As Boolean
-    recoverSameControl = keepYieldControl And mUsesYieldControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
+    recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
-        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mUsesYieldControl, recoverSameControl, initialField:=initialField)
+        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mBranchTangentControl, recoverSameControl, initialField:=initialField)
     If mSolver.SameControlRecoveryTried Then
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
         mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+        If mSolver.HasPrincipalBoundaries Then
+            If mMaterialRecoveryRevision <> mSolver.AcceptedRevision Then
+                mMaterialRecoveryRevision = mSolver.AcceptedRevision: mMaterialRecoveryAtRevision = 0
+            End If
+            mMaterialRecoveryAtRevision = mMaterialRecoveryAtRevision + 1
+        End If
     End If
     If Not solved And Not arcFields Is Nothing And mProbeCount + 2 <= PROBE_LIMIT Then
         Dim extraProbes As Long
@@ -571,13 +597,17 @@ Private Sub NotifyProgress()
     mObserver.Report fields, trace, meta
 End Sub
 
-' Принимает новую координату на возрастающем участке. Последнее
-' принятое и найденное поля образуют пару в одной мере. Проверки
-' плеч и предела арматуры продолжают использовать эту же меру.
+' Принимает новую координату подтверждённого материального перехода, даже когда изменение lambda меньше порога распознавания пика.
+' До наблюдаемого спада не допускает уменьшения нагрузки сверх этого порога; проверки плеч и стали сохраняют выбранную меру.
 Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef current As TBranchPoint, _
         ByRef trial As TBranchPoint, ByRef projection() As Double, ByRef nominal As Double, _
         ByRef increment As Double, ByRef minimum As Double) As Boolean
-    If trial.Lambda <= current.Lambda + LoadResolution(current.Lambda) Or trial.Lambda > mMaximumLambda Then Exit Function
+    If trial.Lambda <= 0# Or trial.Lambda > mMaximumLambda Then Exit Function
+    If Not mSolver.HasPrincipalBoundaries Then
+        If trial.Lambda <= current.Lambda + LoadResolution(current.Lambda) Then Exit Function
+    ElseIf Not mFollowingLocalPeak And Not mUnverifiedDecline Then
+        If trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then Exit Function
+    End If
     If BeyondSteelLimit() Then Exit Function
     Dim previousField() As Double, acceptedField() As Double, field() As Double, resultants() As Double
     previousField = history(current.HistoryIndex - 1)
@@ -599,6 +629,7 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     End If
     mProjection = projection: mControlName = "мера деформации у перехода бетона"
     mUsesYieldControl = True
+    mBranchTangentControl = mSolver.RecoveredControlRequiresBranchTangent
     mUsesTransverseControl = False: mUsesFieldControl = False
     current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
     increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
@@ -620,7 +651,8 @@ End Sub
 ' Повторяет правое поле после силовой пробы. Точка lambda = 1 должна
 ' принадлежать фактическому интервалу именно принятого повтора.
 Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As TBranchPoint, _
-        ByVal targetCoordinate As Double, ByRef designVerified As Boolean) As Boolean
+        ByVal targetCoordinate As Double, ByRef designVerified As Boolean, _
+        Optional ByVal materialCoordinateProgress As Boolean = False) As Boolean
     Dim designCoordinate As Double
     designVerified = VerifyDesignLoad(current.Coordinate, trial.Coordinate, designCoordinate)
     trial.Coordinate = targetCoordinate
@@ -636,10 +668,23 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
         StopAtSearchBound
         Exit Function
     End If
-    If trial.Lambda <= 0# Or (Not mFollowingLocalPeak And trial.Lambda <= current.Lambda + LoadResolution(current.Lambda)) Then
+    If trial.Lambda <= 0# Then
         mSolver.DiscardStep
         StopSearch "Повторная проба не подтвердила допустимое изменение множителя нагрузки."
         Exit Function
+    End If
+    If Not mFollowingLocalPeak Then
+        Dim admissibleChange As Boolean
+        If materialCoordinateProgress Then
+            admissibleChange = (trial.Lambda >= current.Lambda - LoadResolution(current.Lambda))
+        Else
+            admissibleChange = (trial.Lambda > current.Lambda + LoadResolution(current.Lambda))
+        End If
+        If Not admissibleChange Then
+            mSolver.DiscardStep
+            StopSearch "Повторная проба не подтвердила допустимое изменение множителя нагрузки."
+            Exit Function
+        End If
     End If
     If BeyondSteelLimit() Then
         mSolver.DiscardStep

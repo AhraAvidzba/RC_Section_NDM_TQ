@@ -367,6 +367,24 @@ Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double,
     TryReadTrialYield = True
 End Function
 
+' Сообщает, что подготовленный материал предоставляет знаковые границы спектрального прогноза.
+Friend Property Get HasPrincipalBoundaries() As Boolean
+    HasPrincipalBoundaries = Not (mASDFlow Is Nothing)
+End Property
+
+' Читает конкретную знаковую границу ASD из принятого эффективного тензора без обновления буферов.
+' Номер главного напряжения идёт от наибольшего к наименьшему; это не поверхность разрушения.
+Friend Function TryReadPrincipalBoundary(ByVal point As Long, ByRef strain() As Double, ByVal principalIndex As Long, _
+        ByRef value As Double, ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If mASDFlow Is Nothing Or point < 1 Or point > mPointCount Then Exit Function
+    Dim priorStrain(1 To 6) As Double, priorEffective(1 To 6) As Double, i As Long
+    For i = 1 To 6
+        priorStrain(i) = mHistory(point, mCommitted).Strain(i)
+        priorEffective(i) = mHistory(point, mCommitted).Effective(i)
+    Next i
+    TryReadPrincipalBoundary = mASDFlow.TryReadPrincipalBoundary(strain, priorStrain, priorEffective, principalIndex, value, gradient, needGradient)
+End Function
+
 ' Возвращает признаки фактически вычисленной пробы от принятой истории:
 ' пластическое приращение, знак старшего главного напряжения и подшаги.
 ' Ноль подшагов означает точное совпадение с принятой деформацией.

@@ -57,6 +57,48 @@ Friend Sub Initialize(ByVal tension As CCoupledConcreteBackbone, ByVal compressi
     mReady = True
 End Sub
 
+' Читает выбранное главное напряжение упругого прогноза и его градиент по инженерным деформациям.
+' Положительные множители ASD сохраняют его знак при замыкании; ноль является численной границей, не разрушением.
+Friend Function TryReadPrincipalBoundary(ByRef strain() As Double, ByRef oldStrain() As Double, _
+        ByRef oldEffective() As Double, ByVal principalIndex As Long, ByRef value As Double, _
+        ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If Not mReady Or principalIndex < 1 Or principalIndex > 3 Then Exit Function
+    Dim trial(1 To 6) As Double, volume As Double, i As Long, j As Long, k As Long
+    volume = mLame * ((strain(1) - oldStrain(1)) + (strain(2) - oldStrain(2)) + (strain(3) - oldStrain(3)))
+    For i = 1 To 3: trial(i) = oldEffective(i) + 2# * mG * (strain(i) - oldStrain(i)) + volume: Next i
+    For i = 4 To 6: trial(i) = oldEffective(i) + mG * (strain(i) - oldStrain(i)): Next i
+    Dim trace As Double, q As Double, values(1 To 3) As Double, magnitude As Double
+    CoupledStressInvariants trial, trace, q, values(1), values(2), values(3)
+    value = values(principalIndex)
+    If Not needGradient Then TryReadPrincipalBoundary = True: Exit Function
+    magnitude = GeomMax(1#, GeomMax(Abs(values(1)), Abs(values(3))))
+    j = principalIndex Mod 3 + 1: k = j Mod 3 + 1
+    If Abs(value - values(j)) <= PRINCIPAL_GAP_RATIO * magnitude Or _
+            Abs(value - values(k)) <= PRINCIPAL_GAP_RATIO * magnitude Then Exit Function
+    Dim tensor(1 To 3, 1 To 3) As Double, projector(1 To 3, 1 To 3) As Double
+    Dim a As Long, b As Long, c As Long, column As Long, denominator As Double, entry As Double
+    For i = 1 To 3: tensor(i, i) = trial(i): Next i
+    tensor(1, 2) = trial(4): tensor(2, 1) = trial(4)
+    tensor(1, 3) = trial(5): tensor(3, 1) = trial(5)
+    tensor(2, 3) = trial(6): tensor(3, 2) = trial(6)
+    denominator = (value - values(j)) * (value - values(k))
+    For a = 1 To 3
+        For b = 1 To 3
+            entry = -(values(j) + values(k)) * tensor(a, b)
+            For c = 1 To 3: entry = entry + tensor(a, c) * tensor(c, b): Next c
+            If a = b Then entry = entry + values(j) * values(k)
+            projector(a, b) = entry / denominator
+        Next b
+    Next a
+    For column = 1 To 6
+        gradient(column) = 0#
+        For a = 1 To 3
+            For b = 1 To 3: gradient(column) = gradient(column) + projector(a, b) * mElastic(a, b, column): Next b
+        Next a
+    Next column
+    TryReadPrincipalBoundary = True
+End Function
+
 ' Строит производную по инженерным деформациям только при согласовании с действительным замкнутым шагом.
 ' Отказ не означает отказ материала: вызывающий слой может собрать его разностную касательную.
 Friend Function TryBuild(ByRef strain() As Double, ByRef oldStrain() As Double, ByRef oldEffective() As Double, _
