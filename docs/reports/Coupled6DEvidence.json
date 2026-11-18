@@ -317,7 +317,8 @@
     "CoupledSpatialHalfSolves20261119": "A39A38F713FC3A8CED10C208A20B5407B4F25CC036740950C7EAF7328904DDC0",
     "CoupledSpatialHalfSteps20261119": "ED29A1E723704A149E50C8E8A3D5C2887E44025EAF22CD1FF70AA406FC5A1B50",
     "CoupledDesignLoadStudy20261119": "3F5AAED63326D74632D4ADAFB541F3259912078EAFEDDF9C271CD214D5689ECD",
-    "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30"
+    "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30",
+    "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3"
   },
   "cases": [
     {
@@ -4398,6 +4399,90 @@
       "stdout_contains": "DESIGN PREDICTION EXACT LOAD ALL EQUATIONS HISTORY AND BUDGET VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "65FDC364B001BD7FBB49718DF78999F49B61739181F1DBCBFA05E29875CFF73F"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-hybrid-stall-native",
+      "journal_section": 615,
+      "archive": "CoupledHybridStallControl20261119",
+      "script": "Check-TestHybridControl.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "HYBRID CONTROL ACTUAL VBA AND OWNED PROCESS CLOSURE VERIFIED",
+      "outputs": {
+        "NativeProof.json": "432DAA90EAC024FC860764903E3C0F52540FA1CD3C72EE7654FAF28D9495A93C"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-hybrid-stall-mechanics",
+      "journal_section": 615,
+      "archive": "CoupledHybridStallControl20261119",
+      "script": "Check-TestHybridControl.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "HYBRID CONTROL ALL EQUATIONS SIX FORCES AND OWN HISTORY VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "A6B5657F643BBC552D5194FFCDDB15D30680642C9034C679D692D1B295308031"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-hybrid-stall-tangent",
+      "journal_section": 615,
+      "archive": "CoupledHybridStallControl20261119",
+      "script": "Check-TestHybridControl.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "tangent",
+        "--out",
+        "TangentProof.json"
+      ],
+      "stdout_contains": "HYBRID CONTROL DIRECTIONAL TANGENT AND TRANSPOSE NEGATIVE CONTROL VERIFIED",
+      "outputs": {
+        "TangentProof.json": "6910326476FCBB29A5137F54036B6DD874F444CCDBB25615E3025D9B9AC6D5F1"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-hybrid-stall-protocol",
+      "journal_section": 615,
+      "archive": "CoupledHybridStallControl20261119",
+      "script": "Check-TestHybridControl.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "protocol",
+        "--out",
+        "ProtocolProof.json"
+      ],
+      "stdout_contains": "HYBRID CONTROL BINARY PROTOCOL AND NATIVE CANDIDATE ACCEPTANCE VERIFIED",
+      "outputs": {
+        "ProtocolProof.json": "732A251CB83F57622BC3DE72A2058E6D275DE159ED7AE330F48455F4EA4E34D8"
       },
       "timeout_seconds": 300
     }

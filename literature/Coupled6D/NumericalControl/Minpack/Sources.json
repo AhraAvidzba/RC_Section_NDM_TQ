@@ -1,0 +1,91 @@
+{
+  "commit": "64c5635addd72fb54f44db8546c191feeb70e338",
+  "repository": "https://github.com/devernay/cminpack",
+  "retrieved_utc": "2026-11-18T23:52:48.511951+00:00",
+  "sources": [
+    {
+      "file": "CopyrightMINPACK.txt",
+      "bytes": 2194,
+      "sha256": "8887036B1039E299EBCC8B95A73EA1538DF548393FB8462361C80BEA605A4FBE",
+      "git_blob": "ae7984daec98f7311b0a4e288583e24c9cd6a7bc",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/CopyrightMINPACK.txt"
+    },
+    {
+      "file": "README.md",
+      "bytes": 26104,
+      "sha256": "D3F5E35807DC27E9AD7E67D621B514EB1C0446CEFE2AEAC19BE9A1BB3B1DDAFB",
+      "git_blob": "a9d6140ecfd75af991e78b215d10582035d95313",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/README.md"
+    },
+    {
+      "file": "readme.txt",
+      "bytes": 689,
+      "sha256": "1038EC4D751E11A8E4E19639D29534D6668C26BEA177B32EA523C96A9411C117",
+      "git_blob": "fef98bf1907d7f53b05596e57b6c3fe34b74d058",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/readme.txt"
+    },
+    {
+      "file": "src/dogleg.c",
+      "bytes": 6755,
+      "sha256": "84D6850F4EC0FE1B95882A10E7E3EE687394625A8838D6357BE0F7438A68A285",
+      "git_blob": "e207b0b2cde8397a0d5bd7dd8ff9de27a41cf051",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/dogleg.c"
+    },
+    {
+      "file": "src/dpmpar.c",
+      "bytes": 6439,
+      "sha256": "EF255111DC84D1876FAA381DF78671FD9E27BCD8F12982457A167BCDE7A0C811",
+      "git_blob": "4ed7a2f597a68e1124caa909efabefa90b9625e2",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/dpmpar.c"
+    },
+    {
+      "file": "src/enorm.c",
+      "bytes": 8431,
+      "sha256": "CDB2B6E13201225FC315BF6274E7FB69355CB45A319D4CC65988A241CC59C3AE",
+      "git_blob": "621348aa6874f03d501b4f5fe3153b031925c409",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/enorm.c"
+    },
+    {
+      "file": "src/hybrj.c",
+      "bytes": 16842,
+      "sha256": "57D61217046A67237623E8E42431A96D7FCE62D959A5D023A676D376AE3EBC83",
+      "git_blob": "d8899a4b252f17b8cfda381971151e385e725e7b",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/hybrj.c"
+    },
+    {
+      "file": "src/qform.c",
+      "bytes": 4481,
+      "sha256": "1D4587472A67A816A5544F23DA90E48384FCE65B6683FE9D9BE005F75EFBE754",
+      "git_blob": "c42c00e4fe3f3a27a25dd0a73e561bb3af11dbd7",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/qform.c"
+    },
+    {
+      "file": "src/qrfac.c",
+      "bytes": 12653,
+      "sha256": "741C8C5B9C341764BE3FD3A47DEFBC6F2634740803051071012260B65F3CF3DD",
+      "git_blob": "7e7b06ac8f75ed3df8a897469a0efd57d2727a9f",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/qrfac.c"
+    },
+    {
+      "file": "src/r1mpyq.c",
+      "bytes": 3323,
+      "sha256": "51D4A863746F1911088DAFA13AFDA495209F283D593682CED83BA655AEE1B6CD",
+      "git_blob": "a7f5bc06cd3bbbce708022acecc188d0c571f3fc",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/r1mpyq.c"
+    },
+    {
+      "file": "src/r1updt.c",
+      "bytes": 6602,
+      "sha256": "8752F8988A6A6AC5BF4172CD8C389B2BEFCFEF0F2CE96EEB2F62D188891BFB89",
+      "git_blob": "2e6d149a9887d5139ca268edcc72834649cd3e0b",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/src/r1updt.c"
+    }
+  ],
+  "full_original_report_downloaded": false,
+  "report_download_failure": {
+    "url": "https://www.mcs.anl.gov/~more/ANL8074b.pdf",
+    "http_status": 403
+  },
+  "runtime_code_ported": false,
+  "license_file": "CopyrightMINPACK.txt"
+}
