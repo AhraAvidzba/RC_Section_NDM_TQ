@@ -25,6 +25,7 @@ Private Const CLOSURE_ITERATIONS As Long = 1024 ' Повреждённая ра�
 Private mTension As CCoupledConcreteBackbone, mCompression As CCoupledConcreteBackbone
 Private mModulus As Double, mPoisson As Double, mShear As Double, mLame As Double
 Private mStrengthRatio As Double, mBeta As Double, mReady As Boolean
+Private mTangent As CCoupledASDTangent
 
 ' Подключает две подготовленные ветви и согласованные упругие параметры один раз.
 Friend Sub Initialize(ByVal tension As CCoupledConcreteBackbone, ByVal compression As CCoupledConcreteBackbone, _
@@ -39,6 +40,8 @@ Friend Sub Initialize(ByVal tension As CCoupledConcreteBackbone, ByVal compressi
     mShear = modulus / (2# * (1# + poisson)): mLame = 2# * mShear * poisson / (1# - 2# * poisson)
     mStrengthRatio = GeomMax(5#, compression.PeakStress / tension.PeakStress)
     mBeta = (1# - ALPHA) * mStrengthRatio - (1# + ALPHA)
+    Set mTangent = New CCoupledASDTangent
+    mTangent.Initialize tension, compression, modulus, poisson, ALPHA, GAMMA, mStrengthRatio, CLOSURE_TOLERANCE, CLOSURE_ITERATIONS
     mReady = True
 End Sub
 
@@ -60,6 +63,15 @@ End Property
 ' Возвращает номинальную прочность выбранной ветви, МПа.
 Friend Function PeakStress(ByVal compression As Boolean) As Double
     If compression Then PeakStress = mCompression.PeakStress Else PeakStress = mTension.PeakStress
+End Function
+
+' Возвращает алгоритмическую касательную той же замкнутой пробы без изменения напряжений или истории.
+' False сохраняет возможность разностного вычисления при кратных корнях и негладкой границе.
+Friend Function TryTangent(ByRef strain() As Double, ByRef oldStrain() As Double, ByRef oldEffective() As Double, _
+        ByVal oldT As Double, ByVal oldC As Double, ByRef stress() As Double, ByRef effective() As Double, _
+        ByVal newT As Double, ByVal newC As Double, ByRef tangent() As Double) As Boolean
+    If mTangent Is Nothing Then Exit Function
+    TryTangent = mTangent.TryBuild(strain, oldStrain, oldEffective, oldT, oldC, stress, effective, newT, newC, tangent)
 End Function
 
 ' Выполняет замкнутую пробу от переданного принятого состояния без его изменения.

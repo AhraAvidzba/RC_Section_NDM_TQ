@@ -76,6 +76,19 @@ End Property
 
 ' Интерполирует обе ординаты одним поиском. За хвостом продолжает только неотрицательный наклон.
 Friend Sub Stresses(ByVal coordinate As Double, ByRef nominal As Double, ByRef effective As Double)
+    Dim nominalSlope As Double, effectiveSlope As Double
+    EvaluateCurve coordinate, nominal, effective, nominalSlope, effectiveSlope, False
+End Sub
+
+' Возвращает те же ординаты и наклоны фактически выбранных отрезков; за нижним уровнем наклон равен нулю.
+Friend Sub StressesAndSlopes(ByVal coordinate As Double, ByRef nominal As Double, ByRef effective As Double, _
+        ByRef nominalSlope As Double, ByRef effectiveSlope As Double)
+    EvaluateCurve coordinate, nominal, effective, nominalSlope, effectiveSlope, True
+End Sub
+
+' Выполняет общий поиск и интерполяцию; запрос производных не меняет ни отрезок, ни возвращаемые напряжения.
+Private Sub EvaluateCurve(ByVal coordinate As Double, ByRef nominal As Double, ByRef effective As Double, _
+        ByRef nominalSlope As Double, ByRef effectiveSlope As Double, ByVal needSlopes As Boolean)
     Dim left As Long, right As Long, middle As Long, fraction As Double, width As Double
     left = 2: right = mCount
     Do While left < right
@@ -87,10 +100,22 @@ Friend Sub Stresses(ByVal coordinate As Double, ByRef nominal As Double, ByRef e
         fraction = (coordinate - mStrain(right - 1)) / width
         nominal = mNominal(right - 1) + fraction * (mNominal(right) - mNominal(right - 1))
         effective = mEffective(right - 1) + fraction * (mEffective(right) - mEffective(right - 1))
+        If needSlopes Then
+            nominalSlope = (mNominal(right) - mNominal(right - 1)) / width
+            effectiveSlope = (mEffective(right) - mEffective(right - 1)) / width
+        End If
     Else
         fraction = (coordinate - mStrain(right)) / width
         nominal = mNominal(right) + fraction * GeomMax(0#, mNominal(right) - mNominal(right - 1))
         effective = mEffective(right) + fraction * GeomMax(0#, mEffective(right) - mEffective(right - 1))
+        If needSlopes Then
+            nominalSlope = GeomMax(0#, mNominal(right) - mNominal(right - 1)) / width
+            effectiveSlope = GeomMax(0#, mEffective(right) - mEffective(right - 1)) / width
+        End If
+    End If
+    If needSlopes Then
+        If nominal < mFloor Then nominalSlope = 0#
+        If effective < mFloor Then effectiveSlope = 0#
     End If
     nominal = GeomMax(mFloor, nominal): effective = GeomMax(mFloor, effective)
 End Sub

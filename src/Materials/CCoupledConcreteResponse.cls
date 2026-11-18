@@ -223,6 +223,20 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
     Dim branchConsistent As Boolean, basePlastic As Boolean, basePrincipalSign As Long, sideSubsteps As Long
     Dim atAcceptedPosition As Boolean, plusAdjacent As Boolean, minusAdjacent As Boolean
     branchConsistent = (mode = ctmFullBranchConsistent Or mode = ctmRefinedBranchConsistent)
+    If Not branchConsistent And Not mASDFlow Is Nothing And cachedMode <> ctmFull Then
+        If mode <> ctmAxialGradient Or cachedMode <> ctmAxialGradient Then
+            If TryASDTangent(point, strain, stress, tangent, baseHistory) Then
+                If recordTrial Then
+                    For j = 1 To N_COMPONENTS
+                        If mode <> ctmAxialGradient Or j = 3 Or j >= 5 Then
+                            For i = 1 To N_COMPONENTS: mCachedTangent(i, j, point) = tangent(i, j): Next i
+                        End If
+                    Next j
+                End If
+                NonlinearTangent = True: Exit Function
+            End If
+        End If
+    End If
     If branchConsistent Then
         ReadBranchSigns baseHistory, mHistory(point, mCommitted), basePlastic, basePrincipalSign
         atAcceptedPosition = (baseSubsteps = 0)
@@ -281,6 +295,21 @@ Private Function NonlinearTangent(ByVal point As Long, ByRef strain() As Double,
         End If
     Next j
     NonlinearTangent = True
+End Function
+
+' Передаёт неизменные копии принятого состояния и сверяемой пробы в спектральную производную.
+' У ASD нет деления материального приращения; отказ производной оставляет общий разностный путь.
+Private Function TryASDTangent(ByVal point As Long, ByRef strain() As Double, ByRef stress() As Double, _
+        ByRef tangent() As Double, ByRef updated As TConcreteHistory) As Boolean
+    Dim priorStrain(1 To 6) As Double, priorEffective(1 To 6) As Double, effective(1 To 6) As Double, i As Long
+    For i = 1 To 6
+        priorStrain(i) = mHistory(point, mCommitted).Strain(i)
+        priorEffective(i) = mHistory(point, mCommitted).Effective(i)
+        effective(i) = updated.Effective(i)
+    Next i
+    TryASDTangent = mASDFlow.TryTangent(strain, priorStrain, priorEffective, _
+        mHistory(point, mCommitted).Tension, mHistory(point, mCommitted).Compression, stress, effective, _
+        updated.Tension, updated.Compression, tangent)
 End Function
 
 ' Читает значение пробной поверхности Барселоны в МПа от принятой

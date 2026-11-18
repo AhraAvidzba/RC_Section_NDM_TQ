@@ -297,7 +297,8 @@
     "WorkingASDShearBranch20261118": "D4F92764AF988DB6259D4AA6FDC0E4411BFAF66BC61C8A674B02E55F7F5F3F13",
     "GeneralShearContinuation20261118": "2ADC6B2C6D33FE28E78ED34D49F561075304081BEED4E6AE4A5D4DB4FE154360",
     "SpatialFieldControlRecovery20261118": "39E04FF77B8845FCE4A3EBE0F091F1B1ABB44155FB9E3734E2906CD86D4A8539",
-    "AcceptedRevisionContinuation20261118": "4C53BAF664BEF67F5486053F096D9E47B8F1439FFF53B663E972F67937353EFB"
+    "AcceptedRevisionContinuation20261118": "4C53BAF664BEF67F5486053F096D9E47B8F1439FFF53B663E972F67937353EFB",
+    "AnalyticASDTangent20261118": "5192BCB5A1A5FB91305ABA31BA1C06EFA2313E2B0F4A29E97E9128F773AA390F"
   },
   "cases": [
     {
@@ -3480,6 +3481,28 @@
       "stdout_contains": "ACCEPTED REVISION ALL SIX EQUILIBRIA AND THREE-STATION LOCAL NONLINEARITY VERIFIED; PHYSICAL LIMIT OPEN",
       "outputs": {
         "MechanicsProof.json": "38F6DE4F676F441C0019FE919572ADA707C60840B754E358F1A45CDB32943F9F"
+      }
+    },
+    {
+      "id": "analytic-asd-tangent-native",
+      "journal_section": 603,
+      "archive": "AnalyticASDTangent20261118",
+      "script": "Check-TestAnalyticTangent.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "native", "--out", "NativeProof.json"],
+      "stdout_contains": "EXACT NATIVE ANALYTIC TANGENT AND DIRECTED REGRESSIONS VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "NativeProof.json": "3E5F2F1D4DA7EF82C74B852158441B7A8AFAB4AD21F60FAFDA5C946047DFD55B"
+      }
+    },
+    {
+      "id": "analytic-asd-tangent-mechanics",
+      "journal_section": 603,
+      "archive": "AnalyticASDTangent20261118",
+      "script": "Check-TestAnalyticTangent.py",
+      "arguments": ["--repo", "{repo}", "--root", ".", "--scope", "mechanics", "--out", "MechanicsProof.json"],
+      "stdout_contains": "INDEPENDENT NATIVE TANGENTS AND ALL SIX EQUILIBRIA VERIFIED; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "MechanicsProof.json": "9D027EA4238F1851AA5AAA164B3F19813A5C9A814315712AC0BB787163B34559"
       }
     }
   ],
