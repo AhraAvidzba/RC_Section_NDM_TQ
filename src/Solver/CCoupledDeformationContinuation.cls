@@ -68,6 +68,8 @@ Private mPrincipalCornerProbes As Long, mPrincipalCorners As Long
 Private mCornerAttemptRevision As Long, mCornerAttemptsAtRevision As Long
 Private mHasCornerReference As Boolean, mCornerReferenceRevision As Long
 Private mCornerDirection() As Double, mCornerLambdaDirection As Double, mCornerReferenceIncrement As Double
+Private mHasCornerProbe As Boolean, mCornerProbe() As Double, mCornerProbeLambda As Double, mCornerProbeCoordinate As Double
+Private mCornerProbeSeeds As Long
 Private mMaterialRecoveryRevision As Long, mMaterialRecoveryAtRevision As Long
 Private mFixedYieldRecoveryProbes As Long
 Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
@@ -107,6 +109,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
     mSpatialReversalsRejected = 0
     mPrincipalCornerProbes = 0: mPrincipalCorners = 0: mHasCornerReference = False
+    mHasCornerProbe = False: Erase mCornerProbe: mCornerProbeSeeds = 0
     mCornerAttemptRevision = -1: mCornerAttemptsAtRevision = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
@@ -362,6 +365,11 @@ Private Function PrepareSecantSeed(ByVal history As Collection, ByRef left As TB
     Dim previous() As Double, accepted() As Double, field() As Double, oldControl As Double, control As Double, ratio As Double, i As Long
     previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
     If mHasCornerReference And mCornerReferenceRevision = mSolver.AcceptedRevision Then
+        If mHasCornerProbe And target = mCornerProbeCoordinate Then
+            seed = mCornerProbe: factor = mCornerProbeLambda
+            mCornerProbeSeeds = mCornerProbeSeeds + 1
+            PrepareSecantSeed = True: Exit Function
+        End If
         control = CoordinateOf(accepted)
         Dim rate As Double
         For i = 1 To mSolver.PhysicalDegreeCount: rate = rate + mProjection(i) * mCornerDirection(i): Next i
@@ -699,7 +707,7 @@ End Function
 ' Продвигает принятую материальную историю и фиксирует индекс её поля.
 Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint)
     Dim field() As Double
-    mHasCornerReference = False
+    mHasCornerReference = False: mHasCornerProbe = False: Erase mCornerProbe
     mSolver.CopyTrial field, mCurrentResultants
     mSolver.AcceptStep
     history.Add field
@@ -1171,7 +1179,7 @@ Private Function Details() As String
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
     If mPrincipalCornerProbes > 0 Then Details = Details & "; проб спектрального угла: " & CStr(mPrincipalCornerProbes) & _
-        "; подтверждённых переходов: " & CStr(mPrincipalCorners)
+        "; подтверждённых переходов: " & CStr(mPrincipalCorners) & "; прогнозов из проверочного равновесия: " & CStr(mCornerProbeSeeds)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
@@ -1266,9 +1274,9 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     AcceptPoint history, point
     If designAtPoint Then mDesignHistoryIndex = point.HistoryIndex
     left = current: current = point
-    Dim coordinate As Double
+    Dim coordinate As Double, probe As Variant, probeLambda As Double
     If Not mSolver.TryPrincipalDepartureControl(transition, current.Lambda, mCornerDirection, mCornerLambdaDirection, projection, coordinate, _
-            maxIterations:=mMaxIterations) Then
+            linearizationField:=probe, linearizationLambda:=probeLambda, maxIterations:=mMaxIterations) Then
         mProbeDetails = "Не подтверждена касательная исходящей ветви после принятия материального перехода."
         Exit Function
     End If
@@ -1283,8 +1291,26 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     increment = nominal * MIN_STEP_RATIO: minimum = increment * MIN_STEP_RATIO
     mHasCornerReference = True: mCornerReferenceRevision = mSolver.AcceptedRevision
     mCornerReferenceIncrement = nominal
+    PreparePrincipalProbeSeed history, current, probe, probeLambda, increment
     TryCrossPrincipalCorner = True
 End Function
+
+' Использует уже найденное непринятое равновесие как прогноз обычной пробы, если оно продвигает исходящее направление.
+' Точный ключ связан с принятой ревизией через mHasCornerReference; материал, направление и пределы проверяются обычным Probe заново.
+Private Sub PreparePrincipalProbeSeed(ByVal history As Collection, ByRef current As TBranchPoint, _
+        ByRef probe As Variant, ByVal lambda As Double, ByRef increment As Double)
+    mHasCornerProbe = False
+    If IsEmpty(probe) Or lambda <= 0# Then Exit Sub
+    Dim field() As Double, accepted() As Double, previous() As Double
+    field = probe: accepted = history(current.HistoryIndex)
+    Dim coordinate As Double, spacing As Double, advance As Double, reference As Double
+    coordinate = CoordinateOf(field): spacing = coordinate - current.Coordinate
+    If spacing <= increment Or spacing > 0.25 * mCornerReferenceIncrement Then Exit Sub
+    ReadSpatialReference history, current.HistoryIndex, previous
+    If Not mSolver.SpatialIncrementAdvances(previous, accepted, field, advance, reference) Then Exit Sub
+    mCornerProbe = field: mCornerProbeLambda = lambda: mCornerProbeCoordinate = coordinate
+    mHasCornerProbe = True: increment = spacing
+End Sub
 
 ' После материального угла использует касательную именно принятой исходящей истории до первого обычного принятого шага.
 ' Это ориентир для проверки и прогноза, а не дополнительное принятое состояние материала.

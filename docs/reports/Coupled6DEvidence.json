@@ -307,7 +307,8 @@
     "ASDOrientedCorner20261118": "6D0C3E6AE9892B0FBA40D4EC386AEB68C12C034D227EBC7760827F8362ED10F1",
     "ASDPrincipalTransitionDiagnosticsA20261118": "5D3A745C0E7CB7FE949F0EAFEAD10B6C14E3B249F8B4A6009E6EA23649226BDD",
     "ASDPrincipalTransitionDiagnosticsB20261118": "36DFCE6B52923D1B04C4E2CC922D97421C7D8CB98FD155809165650943B4166C",
-    "ASDPrincipalTransitionIntegration20261118": "98519929F54D1911353C1877190D93BA2A65794BD8451A57E68CF3404CCB54A9"
+    "ASDPrincipalTransitionIntegration20261118": "98519929F54D1911353C1877190D93BA2A65794BD8451A57E68CF3404CCB54A9",
+    "ASDPrincipalPredictor20261118": "A710318F0D27A169832B28508E015217DEA0FE3F3D7C6F4601232589BC12E508"
   },
   "cases": [
     {
@@ -3884,6 +3885,69 @@
       "stdout_contains": "PRINCIPAL TRANSITION EQUILIBRIA HISTORY AND ONE SIDED DERIVATIVE VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "94FDD0E66031A48091E8F5FFC4422840F9C0AB563D879A0C6943E3A00B6C6176"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-predictor-native",
+      "journal_section": 608,
+      "archive": "ASDPrincipalPredictor20261118",
+      "script": "Check-TestPrincipalPredictor.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL PREDICTOR NATIVE SOURCES BUDGETS AND PROCESS CLOSURES VERIFIED",
+      "outputs": {
+        "NativeProof.json": "DE87653A89C448940E6DCBDE4AC3983A7702790FE2ED7DA5D4FF8E7742DDEDBA"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-predictor-long",
+      "journal_section": 608,
+      "archive": "ASDPrincipalPredictor20261118",
+      "script": "Check-TestPrincipalPredictor.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "long",
+        "--out",
+        "LongProof.json"
+      ],
+      "stdout_contains": "PRIVATE 233 STATE PATH ALL FOUR EVENT FACES AND NEGATIVE SCOPE CONTROL VERIFIED",
+      "outputs": {
+        "LongProof.json": "FEDC3212A2316C3A43048DD347BD58A429DDDA8C4BE0F8B3D0C8BF15FA31674D"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-predictor-predictor",
+      "journal_section": 608,
+      "archive": "ASDPrincipalPredictor20261118",
+      "script": "Check-TestPrincipalPredictor.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "predictor",
+        "--out",
+        "PredictorProof.json"
+      ],
+      "stdout_contains": "READONLY EQUILIBRIUM NORMAL STEP PREDICTOR REUSE INDEPENDENTLY VERIFIED",
+      "outputs": {
+        "PredictorProof.json": "DD16BCB670757EFD6A9E9BC992CD200AC8311E58420AA1ABFEDD786A7EFBA67E"
       },
       "timeout_seconds": 300
     }
