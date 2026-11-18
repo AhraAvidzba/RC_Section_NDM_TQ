@@ -304,7 +304,10 @@
     "ASDSignRevision20261118": "5BE929B98682EFAB087E1986BB405F2EB04E53EE106E5754497F2AFC0CC89454",
     "ASDSignOrientationDiagnostics20261118": "4189A4F680F3525EC7CB36DC2C5BEA0EA2723F722AB5FD75B4739FB59CE4B783",
     "ASDOrientedContinuation20261118": "34CA8B9813E825B9F707F8D8B17199F3C565A6D013BF4F07B1AA56FD3900FB93",
-    "ASDOrientedCorner20261118": "6D0C3E6AE9892B0FBA40D4EC386AEB68C12C034D227EBC7760827F8362ED10F1"
+    "ASDOrientedCorner20261118": "6D0C3E6AE9892B0FBA40D4EC386AEB68C12C034D227EBC7760827F8362ED10F1",
+    "ASDPrincipalTransitionDiagnosticsA20261118": "5D3A745C0E7CB7FE949F0EAFEAD10B6C14E3B249F8B4A6009E6EA23649226BDD",
+    "ASDPrincipalTransitionDiagnosticsB20261118": "36DFCE6B52923D1B04C4E2CC922D97421C7D8CB98FD155809165650943B4166C",
+    "ASDPrincipalTransitionIntegration20261118": "98519929F54D1911353C1877190D93BA2A65794BD8451A57E68CF3404CCB54A9"
   },
   "cases": [
     {
@@ -3755,6 +3758,132 @@
       "stdout_contains": "ORIENTED CORNER SIX EQUILIBRIA AND SEQUENTIAL HISTORY VERIFIED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "E74B4D9238613EBAA957F744F583503714C3C016CE582B805DB743B9B4875AFA"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-diagnosticsa-native",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionDiagnosticsA20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION NATIVE SOURCES AND NEGATIVE OUTCOMES VERIFIED",
+      "outputs": {
+        "NativeProof.json": "70A1B9DB8109A9C51014D6CE878FE7BBE9247D276BDF4A8FCE07912756D39F39"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-diagnosticsa-mechanics",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionDiagnosticsA20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION EQUILIBRIA HISTORY AND ONE SIDED DERIVATIVE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "0C45A812696DFA771DBFCFFD47B73E98EB16111D99DB39DF4F0E9035F4ED6CCB"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-diagnosticsb-native",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionDiagnosticsB20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION NATIVE SOURCES AND NEGATIVE OUTCOMES VERIFIED",
+      "outputs": {
+        "NativeProof.json": "26704499F5AAF1E64635BCD98992A84B1E22F0B43E15A2208C528275A109DD9D"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-diagnosticsb-mechanics",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionDiagnosticsB20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION EQUILIBRIA HISTORY AND ONE SIDED DERIVATIVE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "63DB02B49DF7B7DB952EEE493B0BA619AFEE6307B9AC7197220887A8F3CF1435"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-integration-native",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionIntegration20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION NATIVE SOURCES AND NEGATIVE OUTCOMES VERIFIED",
+      "outputs": {
+        "NativeProof.json": "4033A57316EA6D8DFB769364A7BE1C592EB682CAD899B1584E219EDC2F8C9961"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "asd-principal-transition-integration-mechanics",
+      "journal_section": 607,
+      "archive": "ASDPrincipalTransitionIntegration20261118",
+      "script": "Check-TestPrincipalTransition.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "PRINCIPAL TRANSITION EQUILIBRIA HISTORY AND ONE SIDED DERIVATIVE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "94FDD0E66031A48091E8F5FFC4422840F9C0AB563D879A0C6943E3A00B6C6176"
       },
       "timeout_seconds": 300
     }

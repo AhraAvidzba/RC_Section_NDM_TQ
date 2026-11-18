@@ -16,12 +16,39 @@ Public Function RunTestCoupledASDMaterial(ByVal folder As String) As String
         TestMaterialHistory folder, CStr(name), passed, failed, report
     Next name
     TestTransverseControl folder, passed, failed, report
+    TestPrincipalTransitionContext passed, failed, report
     TestSectionAnalysis folder, passed, failed, report
     RunTestCoupledASDMaterial = report & "TOTAL_COUPLED_ASD_MATERIAL: passed=" & passed & "; failed=" & failed
     Exit Function
 Failed:
     RunTestCoupledASDMaterial = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
 End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет точную привязку разрешения к принятой истории и независимость сохранённых полей от внешних массивов.
+Private Sub TestPrincipalTransitionContext(ByRef passed As Long, ByRef failed As Long, ByRef report As String)
+    Dim origin(1 To 3) As Double, face(1 To 3) As Double, incoming(1 To 3) As Double
+    origin(1) = 0.001: face(1) = 0.0011: incoming(1) = 0.00109
+    Dim prior() As Double, entry() As Double, copied() As Double, again() As Double, lambda As Double
+    prior = origin: entry = incoming
+    Dim context As New CCoupledPrincipalTransition
+    context.Initialize 7, 2, -1, 3, -1#, 0.000001, 0.0001, 1.2, 1.19, origin, face, incoming
+    origin(1) = 9#: face(1) = 9#: incoming(1) = 9#
+    TestRecord context.MatchesOrigin(7, prior), "principal context preserves original input copy", passed, failed, report
+    TestRecord Not context.MatchesOrigin(8, prior), "principal context rejects changed origin revision", passed, failed, report
+    TestRecord Not context.MatchesIncoming(7, entry), "principal context requires incoming acceptance", passed, failed, report
+    TestRecord context.MatchesIncoming(8, entry), "principal context identifies accepted incoming field", passed, failed, report
+    entry(1) = entry(1) + 0.000000000001
+    TestRecord Not context.MatchesIncoming(8, entry), "principal context does not round changed field", passed, failed, report
+    context.CopyFace copied, lambda: copied(1) = 8#: context.CopyFace again, lambda
+    TestRecord again(1) = 0.0011 And lambda = 1.2, "principal context returns independent face copy", passed, failed, report
+    Dim number As Long
+    On Error Resume Next
+    context.Initialize 7, 2, -1, 3, -1#, 0.000001, 0.0001, 1.2, 1.19, origin, face, incoming
+    number = Err.Number: Err.Clear
+    On Error GoTo 0
+    TestRecord number = 5, "principal context cannot be reinitialized", passed, failed, report
+End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Загружает закреплённые подготовленные ветви без файлового доступа рабочего материала.

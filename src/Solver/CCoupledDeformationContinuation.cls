@@ -64,6 +64,10 @@ Private mSteelEventPoint As Long, mSteelEventDetails As String
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mSpatialReversalsRejected As Long
+Private mPrincipalCornerProbes As Long, mPrincipalCorners As Long
+Private mCornerAttemptRevision As Long, mCornerAttemptsAtRevision As Long
+Private mHasCornerReference As Boolean, mCornerReferenceRevision As Long
+Private mCornerDirection() As Double, mCornerLambdaDirection As Double, mCornerReferenceIncrement As Double
 Private mMaterialRecoveryRevision As Long, mMaterialRecoveryAtRevision As Long
 Private mFixedYieldRecoveryProbes As Long
 Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
@@ -102,6 +106,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mSteelEventPoint = 0: mSteelEventDetails = vbNullString
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
     mSpatialReversalsRejected = 0
+    mPrincipalCornerProbes = 0: mPrincipalCorners = 0: mHasCornerReference = False
+    mCornerAttemptRevision = -1: mCornerAttemptsAtRevision = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
     mUsesYieldControl = False
@@ -182,7 +188,13 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If increment < minimum Then
             If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
-            If Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then
+            Dim enteredCorner As Boolean
+            If TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredCorner) Then
+                lastProbeFailed = False: lastNoProgress = False: smoothSteps = 0
+            ElseIf enteredCorner Then
+                StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
+                Exit Sub
+            ElseIf Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then
                 If Not TryChangeStalledFieldControl(history, left, current, nominal, increment, minimum) Then Exit For
             End If
         End If
@@ -223,7 +235,19 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If Not probed Then
             smoothSteps = 0
-            increment = increment * 0.5
+            Dim enteredAfterFailure As Boolean
+            If Not unresolvedSteel Then
+                If TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredAfterFailure) Then
+                    lastProbeFailed = False: lastNoProgress = False
+                ElseIf enteredAfterFailure Then
+                    StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
+                    Exit Sub
+                Else
+                    increment = increment * 0.5
+                End If
+            Else
+                increment = increment * 0.5
+            End If
         ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 And increment > nominal And Not smoothTrial Then
             If BeyondSteelLimit() Then unresolvedSteel = True ' Уточнение требует меньшей пробы на прослеженной ветви.
             mSolver.DiscardStep ' На прежнем размере можно пройти изменение наклона без экстраполяции ветви.
@@ -330,13 +354,24 @@ Private Sub SelectInitialAnchor(ByVal history As Collection, ByRef current As TB
     Next index
 End Sub
 
-' Строит только начальное приближение из двух собственных полей; материал остаётся в последней принятой истории.
-' Координаты множителей связей не экстраполируются, нагрузка сохраняет заданные постоянную и переменную части.
+' Готовит начальное приближение из собственных полей либо касательной принятого материального перехода без изменения истории.
+' Секущая использует механические координаты; касательная полной системы прогнозирует также вспомогательные множители связей.
 Private Function PrepareSecantSeed(ByVal history As Collection, ByRef left As TBranchPoint, ByRef current As TBranchPoint, _
         ByVal target As Double, ByRef seed As Variant, ByRef factor As Double) As Boolean
     If left.HistoryIndex < 1 Or left.HistoryIndex >= current.HistoryIndex Or current.HistoryIndex <> history.Count Then Exit Function
     Dim previous() As Double, accepted() As Double, field() As Double, oldControl As Double, control As Double, ratio As Double, i As Long
     previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
+    If mHasCornerReference And mCornerReferenceRevision = mSolver.AcceptedRevision Then
+        control = CoordinateOf(accepted)
+        Dim rate As Double
+        For i = 1 To mSolver.PhysicalDegreeCount: rate = rate + mProjection(i) * mCornerDirection(i): Next i
+        If target <= control Or rate <= 0# Then Exit Function
+        ratio = (target - control) / rate: field = accepted
+        For i = 1 To UBound(field): field(i) = accepted(i) + ratio * mCornerDirection(i): Next i ' Вспомогательные множители прогнозируются из полной касательной, не из материальных деформаций.
+        seed = field: factor = current.Lambda + ratio * mCornerLambdaDirection
+        PrepareSecantSeed = True
+        Exit Function
+    End If
     Dim previousLambda As Double: previousLambda = left.Lambda
     If Not mTrace Is Nothing Then
         Dim fraction As Double
@@ -649,11 +684,13 @@ End Function
 ' Отказ требует дробления шага либо другой параметризации и не устанавливает физический предел сечения.
 Private Function SpatialTrialAdvances(ByVal history As Collection, ByRef current As TBranchPoint) As Boolean
     Dim previous() As Double, accepted() As Double, trial() As Double, resultants() As Double
-    previous = history(current.HistoryIndex - 1): accepted = history(current.HistoryIndex)
+    ReadSpatialReference history, current.HistoryIndex, previous
+    accepted = history(current.HistoryIndex)
     mSolver.CopyTrial trial, resultants
     Dim signedAdvance As Double, referenceIncrement As Double
     SpatialTrialAdvances = mSolver.SpatialIncrementAdvances(previous, accepted, trial, signedAdvance, referenceIncrement)
     If SpatialTrialAdvances Then Exit Function
+    mSolver.PreserveRejectedSpatialTrial previous
     mSpatialReversalsRejected = mSpatialReversalsRejected + 1
     mProbeDetails = "Равновесие ASD не продолжает направление предыдущего пространственного приращения." & _
         " Ход по секущей: " & CStr(signedAdvance) & "; предыдущее приращение: " & CStr(referenceIncrement) & "."
@@ -662,6 +699,7 @@ End Function
 ' Продвигает принятую материальную историю и фиксирует индекс её поля.
 Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint)
     Dim field() As Double
+    mHasCornerReference = False
     mSolver.CopyTrial field, mCurrentResultants
     mSolver.AcceptStep
     history.Add field
@@ -1132,6 +1170,8 @@ Private Function Details() As String
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
+    If mPrincipalCornerProbes > 0 Then Details = Details & "; проб спектрального угла: " & CStr(mPrincipalCornerProbes) & _
+        "; подтверждённых переходов: " & CStr(mPrincipalCorners)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
@@ -1148,3 +1188,110 @@ Private Function Details() As String
     If Len(mSteelEventDetails) > 0 Then Details = Details & " | " & mSteelEventDetails
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
+
+' Проходит локальную знаковую границу двумя отдельными принятыми состояниями.
+' Разворот допускается только внутри решённого события; следующие обычные шаги снова проверяют пространственную ориентацию.
+Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, _
+        ByRef minimum As Double, ByRef entered As Boolean) As Boolean
+    entered = False
+    If Not mSolver.HasPrincipalTransitionSegment Or mProbeCount + 2 > PROBE_LIMIT Then Exit Function
+    Dim previous() As Double, accepted() As Double, incomingField() As Double, field() As Double, actual() As Double
+    ReadSpatialReference history, current.HistoryIndex, previous
+    accepted = history(current.HistoryIndex)
+    If Not mSolver.CanPreparePrincipalTransition(previous, current.Lambda, mAbsTol, mRelTol) Then Exit Function
+    If mCornerAttemptRevision <> mSolver.AcceptedRevision Then
+        mCornerAttemptRevision = mSolver.AcceptedRevision: mCornerAttemptsAtRevision = 0
+    End If
+    If mCornerAttemptsAtRevision >= YIELD_RECOVERY_LIMIT Then Exit Function
+    mCornerAttemptsAtRevision = mCornerAttemptsAtRevision + 1
+    Dim transition As CCoupledPrincipalTransition, projection() As Double, point As TBranchPoint
+    mProbeCount = mProbeCount + 1: mPrincipalCornerProbes = mPrincipalCornerProbes + 1: NotifyProgress
+    If Not mSolver.TryPreparePrincipalTransition(mOffset, mDirection, previous, current.Lambda, mAbsTol, mRelTol, _
+            mMaxIterations, transition, point.Lambda, projection) Then
+        mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
+        Exit Function
+    End If
+    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondSteelLimit() Then
+        mProbeDetails = "Входящая сторона материального перехода вышла за допустимую нагрузку или предел арматуры."
+        mSolver.DiscardStep
+        Exit Function
+    End If
+    If mDesignHistoryIndex = 0 And (current.Lambda - 1#) * (point.Lambda - 1#) <= 0# And Not mSolver.PrincipalDesignLoadVerified Then
+        mProbeDetails = "Переход через заданное сочетание требует отдельного подтверждения точного lambda=1."
+        mSolver.DiscardStep
+        Exit Function
+    End If
+    mSolver.CopyTrial incomingField, actual
+    Dim oldCoordinate As Double, newCoordinate As Double, i As Long, difference As Double
+    For i = 1 To mSolver.PhysicalDegreeCount
+        oldCoordinate = oldCoordinate + projection(i) * accepted(i)
+        newCoordinate = newCoordinate + projection(i) * incomingField(i)
+    Next i
+    difference = newCoordinate - oldCoordinate
+    If difference = 0# Then mSolver.DiscardStep: Exit Function
+    If difference < 0# Then
+        For i = 1 To UBound(projection): projection(i) = -projection(i): Next i
+        oldCoordinate = -oldCoordinate: newCoordinate = -newCoordinate
+    End If
+    mProjection = projection: current.Coordinate = oldCoordinate: point.Coordinate = newCoordinate
+    mUsesYieldControl = True: mBranchTangentControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
+    mControlName = "входящая мера спектрального угла"
+    nominal = Abs(difference): increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
+    Dim designAtPoint As Boolean: designAtPoint = mSolver.PrincipalDesignLoadVerified
+    AcceptPoint history, point
+    If designAtPoint Then mDesignHistoryIndex = point.HistoryIndex
+    left = current: current = point: entered = True
+
+    mProbeCount = mProbeCount + 1: mPrincipalCornerProbes = mPrincipalCornerProbes + 1: NotifyProgress
+    If Not mSolver.TryCompletePrincipalTransition(transition, mOffset, mDirection, current.Lambda, _
+            mMaxIterations, point.Lambda, projection, mAbsTol, mRelTol) Then
+        mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
+        Exit Function
+    End If
+    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondSteelLimit() Then
+        mProbeDetails = "Исходящая сторона материального перехода вышла за допустимую нагрузку или предел арматуры."
+        mSolver.DiscardStep
+        Exit Function
+    End If
+    If mDesignHistoryIndex = 0 And (current.Lambda - 1#) * (point.Lambda - 1#) <= 0# And Not mSolver.PrincipalDesignLoadVerified Then
+        mProbeDetails = "Исходящая сторона требует отдельного подтверждения точного lambda=1."
+        mSolver.DiscardStep
+        Exit Function
+    End If
+    mSolver.CopyTrial field, actual
+    point.Coordinate = CoordinateOf(field)
+    designAtPoint = mSolver.PrincipalDesignLoadVerified
+    AcceptPoint history, point
+    If designAtPoint Then mDesignHistoryIndex = point.HistoryIndex
+    left = current: current = point
+    Dim coordinate As Double
+    If Not mSolver.TryPrincipalDepartureControl(transition, current.Lambda, mCornerDirection, mCornerLambdaDirection, projection, coordinate, _
+            maxIterations:=mMaxIterations) Then
+        mProbeDetails = "Не подтверждена касательная исходящей ветви после принятия материального перехода."
+        Exit Function
+    End If
+    mProjection = projection: current.Coordinate = coordinate
+    left.Coordinate = CoordinateOf(incomingField)
+    mUsesYieldControl = False: mUsesFieldControl = True: mBranchTangentControl = False
+    mPostPeakControlName = vbNullString
+    mControlName = "пространственная мера после спектрального угла"
+    mPrincipalCorners = mPrincipalCorners + 1: mFieldControlChanges = mFieldControlChanges + 1
+    mLastFieldControlRevision = mSolver.AcceptedRevision
+    nominal = transition.ReferenceIncrement
+    increment = nominal * MIN_STEP_RATIO: minimum = increment * MIN_STEP_RATIO
+    mHasCornerReference = True: mCornerReferenceRevision = mSolver.AcceptedRevision
+    mCornerReferenceIncrement = nominal
+    TryCrossPrincipalCorner = True
+End Function
+
+' После материального угла использует касательную именно принятой исходящей истории до первого обычного принятого шага.
+' Это ориентир для проверки и прогноза, а не дополнительное принятое состояние материала.
+Private Sub ReadSpatialReference(ByVal history As Collection, ByVal index As Long, ByRef previous() As Double)
+    previous = history(index - 1)
+    If Not mHasCornerReference Or mCornerReferenceRevision <> mSolver.AcceptedRevision Then Exit Sub
+    previous = history(index)
+    Dim i As Long
+    For i = 1 To mSolver.PhysicalDegreeCount: previous(i) = previous(i) - mCornerReferenceIncrement * mCornerDirection(i): Next i
+End Sub
