@@ -370,6 +370,12 @@ Friend Property Get ConcretePointCount() As Long
     ConcretePointCount = mConcreteCount
 End Property
 
+' Сообщает о дополнительных узлах внутреннего поля сверх одного кубического интервала.
+' Признак относится к базису геометрии, а не к числу точек интегрирования.
+Friend Property Get HasRefinedField() As Boolean
+    HasRefinedField = (mQuadrature.BasisCount > SHAPE_COUNT)
+End Property
+
 ' Расшифровывает строку силового равновесия в журнале. Номер строки
 ' зависит от разрешения базиса. Ограничители перемещений идут после сил.
 Friend Function EquilibriumEquationDescription(ByVal row As Long) As String
@@ -866,6 +872,30 @@ End Sub
 Friend Sub CopyResultantResidualScales(ByRef area As Double, ByRef lengthScale As Double)
     area = mArea
     lengthScale = mLength
+End Sub
+
+' Строит квадратичное подпространство внутренних перемещений с сохранением
+' общих координат, продольных градиентов и четырёх множителей связей.
+' Геометрия и отверстия учитываются подготовленным отображением опор.
+Friend Sub CopyQuadraticProjection(ByRef projection() As Double)
+    Dim coefficients() As Double, basis As Long, active As Long, i As Long, component As Long
+    mQuadrature.CopyQuadraticCoefficients coefficients
+    ReDim projection(1 To 39, 1 To mDof)
+    For i = 1 To PLANE_DOF: projection(i, i) = 1#: Next i
+    For basis = 1 To UBound(mSupport)
+        active = mSupport(basis)
+        If active > 0 Then
+            For i = 1 To 9
+                For component = 1 To 3
+                    projection(4 + 3 * (i - 1) + component, 4 + 3 * (active - 1) + component) = coefficients(i, basis)
+                Next component
+            Next i
+        End If
+    Next basis
+    For i = 1 To PLANE_DOF
+        projection(31 + i, mGradientBase + i) = 1#
+        projection(35 + i, mGaugeBase + i) = 1#
+    Next i
 End Sub
 
 ' Проверяет независимые интегралы всех шести напряжений в масштабе МПа.

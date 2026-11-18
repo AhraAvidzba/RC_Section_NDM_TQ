@@ -289,7 +289,8 @@
     "ASDResolutionSourceBooks20261118": "567B3B8117360BC69CFC8A3BACEB5CD800F06D1D856E54270DB2F98F5CED851E",
     "ASDResolutionVBAContainers20261118": "78018DA6AF03FF424DBC15107DB5B0D45881342703468BFF5AE154C248D32E9C",
     "ASDResolutionAndNativeFieldTransfer0220261118": "3B8C85E2CFED75747325232CE5BBEC0ABAB4D6E94A93FD9C2FC7E8D02F5FBEC5",
-    "ASDReducedPredictorNative20261118": "144B075E2A7A207D0AFFE74664AED778D827A5C02A01F4D7DA0B54DE8F2BF461"
+    "ASDReducedPredictorNative20261118": "144B075E2A7A207D0AFFE74664AED778D827A5C02A01F4D7DA0B54DE8F2BF461",
+    "WorkingForceSubspace20261118": "FBEACD63457F041E473358613DA96FCA0AB1C8A79194BD226EE7D1F821CFCA3B"
   },
   "cases": [
     {
@@ -3264,6 +3265,46 @@
       "stdout_contains": "REDUCED PREDICTOR FULL EQUILIBRIUM AND GEOMETRY VERIFIED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "ReducedMechanicsChecks.json": "FB2F7E3A9FF9DB39FFEC7183DF61006FA5326E4B8C04F4742AD95841219992D5"
+      }
+    },
+    {
+      "id": "working-force-subspace-native",
+      "journal_section": 595,
+      "archive": "WorkingForceSubspace20261118",
+      "script": "Verify-TestWorkingSubspace.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "WorkingForceNativeChecks.json"
+      ],
+      "stdout_contains": "WORKING FORCE SUBSPACE NATIVE VBA AND CLOSED EXCEL VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "WorkingForceNativeChecks.json": "0F32C0E6F6961F92CE827B634A0FBBE8C9768C3571CAE428B07DBFFEA50BB5A8"
+      }
+    },
+    {
+      "id": "working-force-subspace-mechanics",
+      "journal_section": 595,
+      "archive": "WorkingForceSubspace20261118",
+      "script": "Verify-TestWorkingSubspace.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "WorkingForceMechanicsChecks.json"
+      ],
+      "stdout_contains": "WORKING FORCE SUBSPACE EQUILIBRIUM AND STOCK REGRESSIONS VERIFIED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "WorkingForceMechanicsChecks.json": "2646EC646179BD1FE27BB0C36E38166C5B5E2E50621DF3949685C111DD35D8DB"
       }
     }
   ],

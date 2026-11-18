@@ -59,6 +59,18 @@ Friend Function CoordinateCoefficient(ByVal basisIndex As Long) As Double
     CoordinateCoefficient = mMinimum + mLength * parameter
 End Function
 
+' Возвращает коэффициенты трёх квадратичных полиномов Бернштейна
+' в открытом кубическом базисе по нормированной координате оси.
+Friend Sub QuadraticCoefficients(ByVal basisIndex As Long, ByRef coefficients() As Double)
+    Dim a As Double, b As Double, c As Double, first As Double, second As Double
+    a = mKnots(basisIndex): b = mKnots(basisIndex + 1): c = mKnots(basisIndex + 2)
+    first = (a + b + c) / DEGREE
+    second = (a * b + a * c + b * c) / DEGREE ' Коэффициенты линейного и квадратичного членов определяются произведениями узлов.
+    ReDim coefficients(1 To DEGREE)
+    coefficients(1) = 1# - 2# * first + second
+    coefficients(2) = 2# * (first - second): coefficients(3) = second
+End Sub
+
 ' Возвращает начало блока из четырёх активных функций и их значения.
 ' Вызывающий передаёт два заранее выделенных массива с границами 1..4.
 Friend Sub Evaluate(ByVal coordinate As Double, ByRef firstIndex As Long, _

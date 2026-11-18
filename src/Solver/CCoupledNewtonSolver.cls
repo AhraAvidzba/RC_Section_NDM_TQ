@@ -32,12 +32,25 @@ Private Const GRADIENT_TANGENT_CHANGE_RATIO As Double = 0.1 ' Изменение
 Private Const YIELD_TRACE_ITERATIONS As Long = 3
 Private Const YIELD_DAMPING_STEPS As Long = 8
 Private Const YIELD_ROOT_TOLERANCE As Double = 0.000000000002 ' МПа в пробном критерии бетона.
+Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходует общий бюджет шага, оставляя итерацию полной системе.
 
 Private Type TYieldStation
     Point As Long
     Side As Long
     FromValue As Double
     ToValue As Double
+End Type
+
+Private Type TSolveEffort
+    Iterations As Long
+    Evaluations As Long
+    GradientBuilds As Long
+    LocalGradientBuilds As Long
+    SteelBranchBuilds As Long
+    SteelFieldTangents As Long
+    MaterialFailures As Long
+    LastFailedPoint As Long
+    LastFailedSide As Long
 End Type
 
 Private mSection As CCoupledElasticState
@@ -47,6 +60,8 @@ Private mUseSpatialHistory As Boolean
 Private mLastFailedSide As Long ' 0 — центральная точка, +1 и -1 — продольные точки.
 Private mSystem As CCoupledLinearSystem
 Private mSteelCorrector As CCoupledSteelCorrection
+Private mFieldSubspace As CCoupledFieldSubspace
+Private mSubspaceChecked As Boolean, mSubspaceRecoveryActive As Boolean
 Private mMeta As CResultMeta
 Private mAccepted() As Double, mCandidate() As Double, mTrialResultants() As Double
 Private mPointStrain(1 To COMPONENT_COUNT) As Double
@@ -106,6 +121,7 @@ Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As I
     Set mPlusResponse = plusSide: Set mMinusResponse = minusSide
     mUseSpatialHistory = Not (plusSide Is Nothing)
     Set mSystem = New CCoupledLinearSystem: Set mMeta = New CResultMeta
+    Set mFieldSubspace = Nothing: mSubspaceChecked = False: mSubspaceRecoveryActive = False
     Set mSteelCorrector = Nothing
     If mUseSpatialHistory And section.ConcretePointCount < mPointCount Then
         If TypeOf response Is CCoupledReinforcedResponse And TypeOf plusSide Is CCoupledReinforcedResponse And _
@@ -147,6 +163,8 @@ Friend Function TryStep(ByVal force As Double, ByVal mx As Double, ByVal my As D
     mArcLoadProjection = 0#
     mSection.LoadEquations force, mx, my, torque, qx, qy, mExternal
     TryStep = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, maxIterations, _
+        initialField:=initialField, retainDirectProof:=retainDirectProof)
+    If Not TryStep Then TryStep = TrySubspaceForceRecovery(load, absoluteTolerance, relativeTolerance, maxIterations, _
         initialField:=initialField, retainDirectProof:=retainDirectProof)
 End Function
 
@@ -495,6 +513,172 @@ Friend Function SelectDeformationControl(ByRef previous() As Double, ByRef curre
     End Select
     SelectDeformationControl = True
 End Function
+
+' После численного отказа уточнённого силового шага ищет ограниченный прогноз.
+' Успех разрешает только полное повторное решение с исходной нагрузкой и бюджетом.
+Private Function TrySubspaceForceRecovery(ByRef load() As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByRef initialField As Variant, Optional ByVal retainDirectProof As Boolean = False) As Boolean
+    If mControlActive Or Not mUseSpatialHistory Or mSubspaceRecoveryActive Or mCandidateReady Then Exit Function
+    If Not mSection.HasRefinedField Then Exit Function ' Прогноз ограничивает дополнительные пространственные моды уточнённого поля.
+    If mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+    If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
+    Dim remaining As Long: remaining = maxIterations - mIterations
+    If remaining < 2 Then Exit Function
+    If Not mSubspaceChecked Then
+        Dim prepared As New CCoupledFieldSubspace
+        If prepared.Prepare(mSection) Then Set mFieldSubspace = prepared
+        mSubspaceChecked = True
+    End If
+    If mFieldSubspace Is Nothing Then Exit Function
+
+    Dim original As CResultMeta, beforeRetry As TSolveEffort
+    Set original = mMeta.Clone
+    Dim external() As Double, residual() As Double, matrix() As Double, resultants() As Double
+    Dim originalNorm As Double, originalPivot As Double
+    Dim originalCode As ESolverFailureCode, originalPoint As Long, originalLastPoint As Long, originalSide As Long
+    external = mExternal: residual = mResidual: matrix = mMatrix: resultants = mTrialResultants
+    originalNorm = mLastNorm: originalPivot = mMinimumPivot
+    originalCode = mFailureCode: originalPoint = mMaterialPoint
+    originalLastPoint = mLastFailedPoint: originalSide = mLastFailedSide
+    Dim seed() As Double, predicted() As Double, initial As Variant
+    If IsMissing(initialField) Then seed = mAccepted Else seed = initialField
+    Dim auxiliaryIterations As Long, details As String, predictedReady As Boolean, predictionCharged As Boolean
+    Dim failureNumber As Long, failureSource As String, failureDescription As String
+    On Error GoTo RecoveryFailed
+    mSubspaceRecoveryActive = True
+    predictedReady = BuildSubspaceForcePrediction(seed, load, absoluteTolerance, relativeTolerance, _
+        GeomMin(SUBSPACE_ITERATIONS, remaining - 1), predicted, auxiliaryIterations, details)
+    mIterations = mIterations + auxiliaryIterations: predictionCharged = True
+    If predictedReady Then
+        ReadSolveEffort beforeRetry
+        initial = predicted
+        TrySubspaceForceRecovery = SolveStep(load, 0#, absoluteTolerance, relativeTolerance, _
+            maxIterations - mIterations, initialField:=initial, retainDirectProof:=retainDirectProof)
+        AddSolveEffort beforeRetry
+        If TrySubspaceForceRecovery Then
+            mMeta.DiagnosticDetails = DiagnosticSummary() & "; подтверждён квадратичный прогноз; " & details & _
+                " | Исходная численная проба: " & original.DiagnosticDetails
+            GoTo Finished
+        End If
+        If mMeta.InternalStatus <> rsNumericalFailure Then
+            mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & " | После квадратичного прогноза; " & details
+            GoTo Finished
+        End If
+        details = details & "; полная система не подтвердила прогноз"
+    End If
+
+RestoreFailure:
+    mCandidateReady = False: Set mMeta = original
+    mExternal = external: mResidual = residual: mMatrix = matrix: mTrialResultants = resultants
+    mLastNorm = originalNorm: mMinimumPivot = originalPivot
+    mFailureCode = originalCode: mMaterialPoint = originalPoint
+    If mLastFailedPoint = 0 Then mLastFailedPoint = originalLastPoint: mLastFailedSide = originalSide
+    mMeta.DiagnosticDetails = DiagnosticSummary() & "; квадратичный прогноз не принят; " & details & _
+        " | Исходная численная проба: " & original.DiagnosticDetails
+Finished:
+    mSubspaceRecoveryActive = False
+    Exit Function
+
+RecoveryFailed:
+    failureNumber = Err.Number: failureSource = Err.Source: failureDescription = Err.Description
+    If failureNumber = 6 Or failureNumber = 11 Then
+        If Not predictionCharged Then mIterations = mIterations + auxiliaryIterations
+        details = "не удалось вычислить конечный квадратичный прогноз: " & failureDescription
+        GoTo RestoreFailure
+    End If
+    mSubspaceRecoveryActive = False
+    Err.Raise failureNumber, failureSource, failureDescription
+End Function
+
+' Решает вспомогательные уравнения P-transpose r(Pv) при заданных шести усилиях.
+' История материальных станций только читается; прогноз не публикует равновесие.
+Private Function BuildSubspaceForcePrediction(ByRef seed() As Double, ByRef load() As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        ByRef predicted() As Double, ByRef iterations As Long, ByRef details As String) As Boolean
+    Erase predicted: iterations = 0
+    Dim coordinates() As Double, current() As Double, reduced() As Double, smallMatrix() As Double
+    Dim correction() As Double
+    If Not mFieldSubspace.TryCoordinates(seed, coordinates) Then
+        details = "не подготовлены координаты прогноза": Exit Function
+    End If
+    Dim count As Long, i As Long
+    count = mFieldSubspace.Count
+    Dim norm As Double, trialNorm As Double, tolerance As Double
+    Dim fraction As Double, accepted As Boolean, trialCoordinates() As Double, candidate() As Double
+    Dim system As New CCoupledLinearSystem
+    Do
+        mFieldSubspace.Expand coordinates, current
+        If Not Evaluate(current, True, True, recordTrial:=False) Then
+            details = "не получен материальный отклик прогноза": Exit Function
+        End If
+        norm = SubspaceForceResidualNorm(load, reduced)
+        tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+        details = "итераций прогноза: " & CStr(iterations) & "; ограниченная невязка, МПа: " & CStr(norm)
+        If norm <= tolerance Then
+            predicted = current
+            BuildSubspaceForcePrediction = True: Exit Function
+        End If
+        If iterations >= maxIterations Then
+            details = details & "; достигнут бюджет прогноза": Exit Function
+        End If
+        mFieldSubspace.PullMatrix mMatrix, smallMatrix
+        correction = reduced
+        For i = 1 To count
+            correction(i) = -reduced(i)
+        Next i
+        If Not system.Solve(smallMatrix, correction, count) Then
+            details = details & "; вырождена касательная прогноза": Exit Function
+        End If
+        ReDim trialCoordinates(1 To count)
+        fraction = 1#: accepted = False
+        Do While fraction >= STEEL_MIN_FRACTION
+            For i = 1 To count: trialCoordinates(i) = coordinates(i) + fraction * correction(i): Next i
+            mFieldSubspace.Expand trialCoordinates, candidate
+            If Evaluate(candidate, False, recordTrial:=False) Then
+                trialNorm = SubspaceForceResidualNorm(load, reduced)
+                If trialNorm < norm Then
+                    coordinates = trialCoordinates
+                    accepted = True: Exit Do
+                End If
+            End If
+            fraction = fraction * 0.5
+        Loop
+        iterations = iterations + 1 ' Неудачное направление тоже расходует общий бюджет шага.
+        If Not accepted Then
+            details = details & "; демпфирование не уменьшило ограниченную невязку": Exit Function
+        End If
+    Loop
+End Function
+
+' Объединяет ограниченные слабые уравнения, связи и независимые интегралы шести усилий.
+Private Function SubspaceForceResidualNorm(ByRef load() As Double, ByRef reduced() As Double) As Double
+    mFieldSubspace.PullVector mResidual, reduced
+    SubspaceForceResidualNorm = GeomMax(mFieldSubspace.ResidualNorm(reduced, mReferenceModulus), _
+        mSection.ResultantResidualNorm(mTrialResultants, load))
+End Function
+
+' Сохраняет затраты исходной пробы и прогноза перед полным повторным решением.
+Private Sub ReadSolveEffort(ByRef effort As TSolveEffort)
+    effort.Iterations = mIterations: effort.Evaluations = mEvaluations
+    effort.GradientBuilds = mGradientBuilds: effort.LocalGradientBuilds = mLocalGradientBuilds
+    effort.SteelBranchBuilds = mSteelBranchBuilds: effort.SteelFieldTangents = mSteelFieldTangents
+    effort.MaterialFailures = mMaterialFailures
+    effort.LastFailedPoint = mLastFailedPoint: effort.LastFailedSide = mLastFailedSide
+End Sub
+
+' Добавляет предыдущие затраты после повторного решения; счётчики не скрывают вспомогательную работу.
+Private Sub AddSolveEffort(ByRef effort As TSolveEffort)
+    mIterations = mIterations + effort.Iterations: mEvaluations = mEvaluations + effort.Evaluations
+    mGradientBuilds = mGradientBuilds + effort.GradientBuilds
+    mLocalGradientBuilds = mLocalGradientBuilds + effort.LocalGradientBuilds
+    mSteelBranchBuilds = mSteelBranchBuilds + effort.SteelBranchBuilds
+    mSteelFieldTangents = mSteelFieldTangents + effort.SteelFieldTangents
+    mMaterialFailures = mMaterialFailures + effort.MaterialFailures
+    If mLastFailedPoint = 0 And effort.MaterialFailures > 0 Then
+        mLastFailedPoint = effort.LastFailedPoint: mLastFailedSide = effort.LastFailedSide
+    End If
+End Sub
 
 ' Решает одну силовую или деформационно управляемую пробу с общей
 ' невязкой, ограничителями поправок и фиксацией материальных состояний.

@@ -140,6 +140,25 @@ Friend Sub CopyCoordinateCoefficients(ByRef alongX() As Double, ByRef alongY() A
     Next iy
 End Sub
 
+' Выражает девять тензорных квадратичных полиномов в полном кубическом
+' базисе. Геометрическое исключение неактивных опор выполняет потребитель.
+Friend Sub CopyQuadraticCoefficients(ByRef coefficients() As Double)
+    ReDim coefficients(1 To 9, 1 To BasisCount)
+    Dim ix As Long, iy As Long, a As Long, b As Long, index As Long
+    Dim alongX() As Double, alongY() As Double
+    For iy = 1 To mSplineY.Count
+        mSplineY.QuadraticCoefficients iy, alongY
+        For ix = 1 To mSplineX.Count
+            index = index + 1: mSplineX.QuadraticCoefficients ix, alongX
+            For b = 1 To 3
+                For a = 1 To 3
+                    coefficients(3 * (b - 1) + a, index) = alongX(a) * alongY(b)
+                Next a
+            Next b
+        Next ix
+    Next iy
+End Sub
+
 ' Возвращает отсортированные параметры деления аналитического сегмента
 ' линиями внутренних узлов обеих осей квадратуры.
 Friend Sub PathCuts(ByRef edge As TRegionEdge, ByRef cuts() As Double, ByRef count As Long)
