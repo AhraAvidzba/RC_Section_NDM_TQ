@@ -1095,6 +1095,11 @@ End Sub
 ' Возвращает спецификацию фактического закона, сохранённую в обеих таблицах.
 Private Function CoupledMaterialSpecKey(ByVal state As CSectionStateResult) As String
     CoupledMaterialSpecKey = state.MaterialSpec.ValueSetText & "|CoupledPlasticDamage|UseDiagram|CoupledSteel"
+    Dim curves As CCoupledMaterialSnapshot: Set curves = state.CoupledMaterialCurves
+    If Not curves Is Nothing Then
+        If curves.ConcreteLawIdentifier <> "Barcelona-CDP" Then _
+            CoupledMaterialSpecKey = CoupledMaterialSpecKey & "|" & curves.ConcreteLawIdentifier
+    End If
 End Function
 
 ' Идентифицирует кривые одного неизменяемого набора по профилю, состоянию и классу.
@@ -1480,7 +1485,7 @@ Private Sub PutCoupledMaterialLinks(ByRef data() As Variant, ByRef row As Long, 
     For series = 1 To curves.SeriesCount
         grade = curves.SteelClass(series)
         If Len(grade) = 0 Then
-            key = "ConcreteDiagramId": note = "Одноосная калибровка пространственного бетона."
+            key = "ConcreteDiagramId": note = "Одноосная калибровка пространственного бетона: " & curves.ConcreteLawIdentifier & "."
         Else
             key = "Rebar." & CStr(series - 1) & ".RebarDiagramId": note = "Кривая арматуры класса «" & grade & "»."
         End If

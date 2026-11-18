@@ -1,5 +1,5 @@
 {
-  "manifest_sha256": "C586499337CB3B57C90803BA75A0C6F58ACB4700327BA4B2C8871E740BA125D2",
+  "manifest_sha256": "FAED2DAF2B3E68C14E197BD36F12C5DF96000B5FD93E4B6F777A52F315D30E2F",
   "source_checkpoint": "826221bfde2fef1e690c65745c0169ef4a342161",
   "installed_inputs": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -16,7 +16,7 @@
     "PyMuPDF": "1.28.0"
   },
   "mode": "offline_replay_of_archived_evidence",
-  "passed": 290,
+  "passed": 291,
   "cases": [
     {
       "id": "hardshear-native-record",
@@ -2400,6 +2400,15 @@
         "WorkingForceMechanicsChecks.json": "2646EC646179BD1FE27BB0C36E38166C5B5E2E50621DF3949685C111DD35D8DB"
       },
       "verified_stdout": "WORKING FORCE SUBSPACE EQUILIBRIUM AND STOCK REGRESSIONS VERIFIED; PHYSICAL CAPACITY OPEN"
+    },
+    {
+      "id": "working-asd-material-integration",
+      "journal_section": 596,
+      "archive": "WorkingASDMaterialIntegration20261118",
+      "verified_outputs_sha256": {
+        "WorkingASDChecks.json": "FC5CA8B23E2385B0AC8F34B0A7DDAC721A4D4471BFF0B7CC198EA728A027A9A3"
+      },
+      "verified_stdout": "WORKING ASD SOURCES AND DIRECTED REGRESSIONS VERIFIED; EXTERNAL MATERIAL SCOPE INCOMPLETE; CAPACITY OPEN"
     }
   ]
 }

@@ -48,13 +48,66 @@ Public Sub CoupledStressInvariants(ByRef stress() As Double, ByRef trace As Doub
         maxPrincipal = mean: midPrincipal = mean: minPrincipal = mean
         Exit Sub
     End If
+    If xy = 0# And xz = 0# And yz = 0# Then
+        OrderPrincipal stress(1), stress(2), stress(3), maxPrincipal, midPrincipal, minPrincipal
+        Exit Sub
+    End If
     sx = sx / p: sy = sy / p: sz = sz / p
     xy = xy / p: xz = xz / p: yz = yz / p
     determinant = sx * (sy * sz - yz * yz) - xy * (xy * sz - xz * yz) + xz * (xy * yz - xz * sy)
+    If Abs(determinant * 0.5) > 0.99999999 Then
+        StablePrincipal stress, maxPrincipal, midPrincipal, minPrincipal
+        Exit Sub
+    End If
     theta = ThirdAcos(determinant * 0.5)
     maxPrincipal = mean + 2# * p * Cos(theta)
     minPrincipal = mean + 2# * p * Cos(theta + 2# * GEOM_PI / 3#)
     midPrincipal = trace - maxPrincipal - minPrincipal
+End Sub
+
+' Упорядочивает три действительных значения без потери точного нуля одноосного состояния.
+Private Sub OrderPrincipal(ByVal a As Double, ByVal b As Double, ByVal c As Double, _
+        ByRef high As Double, ByRef middle As Double, ByRef low As Double)
+    high = GeomMax(a, GeomMax(b, c)): low = GeomMin(a, GeomMin(b, c))
+    If a >= GeomMin(b, c) And a <= GeomMax(b, c) Then
+        middle = a
+    ElseIf b >= GeomMin(a, c) And b <= GeomMax(a, c) Then
+        middle = b
+    Else
+        middle = c
+    End If
+End Sub
+
+' Вычисляет близкие корни симметричного тензора поворотами Якоби.
+' В окрестности кратного корня тригонометрическая формула теряет точность
+' как квадратный корень машинной ошибки и может создать ложное растяжение.
+Private Sub StablePrincipal(ByRef stress() As Double, ByRef high As Double, ByRef middle As Double, ByRef low As Double)
+    Dim a(1 To 3, 1 To 3) As Double, tensorScale As Double, i As Long, j As Long, k As Long, iteration As Long
+    For i = 1 To 6: tensorScale = GeomMax(tensorScale, Abs(stress(i))): Next i
+    For i = 1 To 3: a(i, i) = stress(i) / tensorScale: Next i
+    a(1, 2) = stress(4) / tensorScale: a(1, 3) = stress(5) / tensorScale: a(2, 3) = stress(6) / tensorScale
+    a(2, 1) = a(1, 2): a(3, 1) = a(1, 3): a(3, 2) = a(2, 3)
+    Dim offDiagonal As Double, tau As Double, t As Double, cosine As Double, sine As Double, first As Double, second As Double
+    For iteration = 1 To 32
+        i = 1: j = 2: offDiagonal = Abs(a(1, 2))
+        If Abs(a(1, 3)) > offDiagonal Then i = 1: j = 3: offDiagonal = Abs(a(1, 3))
+        If Abs(a(2, 3)) > offDiagonal Then i = 2: j = 3: offDiagonal = Abs(a(2, 3))
+        If offDiagonal <= 0.0000000000000001 Then Exit For
+        tau = (a(j, j) - a(i, i)) / (2# * a(i, j))
+        t = 1# / (Abs(tau) + Sqr(1# + tau * tau))
+        If tau < 0# Then t = -t
+        cosine = 1# / Sqr(1# + t * t): sine = t * cosine
+        a(i, i) = a(i, i) - t * a(i, j): a(j, j) = a(j, j) + t * a(i, j)
+        a(i, j) = 0#: a(j, i) = 0#
+        For k = 1 To 3
+            If k <> i And k <> j Then
+                first = a(k, i): second = a(k, j)
+                a(k, i) = cosine * first - sine * second: a(i, k) = a(k, i)
+                a(k, j) = sine * first + cosine * second: a(j, k) = a(k, j)
+            End If
+        Next k
+    Next iteration
+    OrderPrincipal tensorScale * a(1, 1), tensorScale * a(2, 2), tensorScale * a(3, 3), high, middle, low
 End Sub
 
 ' Вычисляет acos(x)/3 для спектральной формулы, ограничивая погрешность det.

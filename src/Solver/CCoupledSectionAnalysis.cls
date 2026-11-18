@@ -30,26 +30,34 @@ Private mEb As Double, mCenterX As Double, mCenterY As Double
 Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели по набору характеристик, ссылки применённых классов.
 Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
 Private mDiagramCache As Object ' Точки фактических диаграмм для публикации одного набора характеристик.
+Private mASDFlow As CCoupledASDFlow ' Необязательный неизменяемый закон по явно подготовленным таблицам.
 
 ' Принимает калибровку в мм, МПа и Н/мм, а размеры деформаций в долях единицы.
 ' Геометрия и диаграммы остаются неизменными между строками текущего пакета.
 Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTransverseRebarLayout, _
         ByVal provider As CMaterialModelProvider, ByVal poisson As Double, ByVal gt As Double, ByVal gc As Double, _
         ByVal localizationLength As Double, ByVal yieldRatio As Double, ByVal peakStrain As Double, _
-        ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing)
+        ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing, _
+        Optional ByVal asdFlow As CCoupledASDFlow = Nothing)
     If section Is Nothing Or transverse Is Nothing Or provider Is Nothing Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Передайте сечение, поперечное армирование и параметры материалов."
     If Not transverse.IsSpecified Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "В блоке Transverse задайте поперечную арматуру или выберите «Нет»."
-    If poisson < 0# Or poisson >= 0.5 Or gt <= 0# Or gc <= 0# Or localizationLength <= 0# Or _
-            yieldRatio <= 0# Or yieldRatio >= 1# Or peakStrain <= 0# Or maxIterations < 1 Then _
-        Err.Raise 5, "CCoupledSectionAnalysis", "Проверьте коэффициент Пуассона, энергии, характерную длину и параметры пика бетона."
+    If poisson < 0# Or poisson >= 0.5 Or maxIterations < 1 Then _
+        Err.Raise 5, "CCoupledSectionAnalysis", "Проверьте коэффициент Пуассона и число итераций связанного расчёта."
+    If asdFlow Is Nothing Then
+        If gt <= 0# Or gc <= 0# Or localizationLength <= 0# Or yieldRatio <= 0# Or yieldRatio >= 1# Or peakStrain <= 0# Then _
+            Err.Raise 5, "CCoupledSectionAnalysis", "Проверьте энергии, характерную длину и параметры пика бетона."
+    ElseIf asdFlow.Modulus <= 0# Or asdFlow.Poisson <> poisson Then
+        Err.Raise 5, "CCoupledSectionAnalysis", "Упругие параметры подготовленного спектрального закона не согласованы с расчётом."
+    End If
     Set mSection = section: Set mTransverse = transverse: Set mProvider = provider
     mRevision = section.Revision: mProviderRevision = provider.Revision
     mPoisson = poisson: mGt = gt: mGc = gc: mLength = localizationLength
     mYieldRatio = yieldRatio: mPeakStrain = peakStrain
     mSteelClass = Trim$(steelClass): mMaxIterations = maxIterations
     Set mSupplementarySteel = supplementarySteel
+    Set mASDFlow = asdFlow
     Set mSteelCache = CreateObject("Scripting.Dictionary")
     Set mOperatorCache = CreateObject("Scripting.Dictionary")
     Set mDiagramCache = CreateObject("Scripting.Dictionary")
@@ -307,6 +315,11 @@ Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concret
     If meta.InternalStatus <> rsUnset Then Exit Function
     fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
     ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
+    If Not mASDFlow Is Nothing Then
+        If Abs(fc - mASDFlow.PeakStress(True)) > 0.000000000001 * GeomMax(1#, Abs(fc)) Or _
+                Abs(ft - mASDFlow.PeakStress(False)) > 0.000000000001 * GeomMax(1#, Abs(ft)) Then _
+            Err.Raise 5, "CCoupledSectionAnalysis", "Прочности профиля не совпадают с подготовленными спектральными ветвями бетона."
+    End If
     InitializePointResponse concrete, response, fc, ft, models
     Exit Function
 
@@ -324,8 +337,19 @@ End Function
 ' общие операторы геометрии и неизменяемые диаграммы всех классов стали.
 Private Sub InitializePointResponse(ByVal concrete As CCoupledConcreteResponse, ByVal response As CCoupledReinforcedResponse, _
         ByVal fc As Double, ByVal ft As Double, ByVal models As Object)
-    concrete.Initialize mOperators.PointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    InitializeConcrete concrete, mOperators.PointCount, fc, ft
     response.Initialize mOperators, concrete, models
+End Sub
+
+' Применяет один и тот же закон к центральной, боковым и выходным историям.
+' Параметры энергии CDP не читаются при явно переданных табличных ветвях ASD.
+Private Sub InitializeConcrete(ByVal concrete As CCoupledConcreteResponse, ByVal pointCount As Long, _
+        ByVal fc As Double, ByVal ft As Double)
+    If mASDFlow Is Nothing Then
+        concrete.Initialize pointCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    Else
+        concrete.InitializeASD pointCount, mASDFlow
+    End If
 End Sub
 
 ' Подключает центральную и две боковые истории. Боковые точки участвуют
@@ -363,7 +387,7 @@ Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVa
         ByVal meta As CResultMeta, ByRef warning As String, Optional ByVal governingTransversePoint As Long = 0, _
         Optional ByVal transverseMeta As CResultMeta = Nothing) As CSectionStateResult
     Dim observer As New CCoupledConcreteResponse, fields As New CCoupledFieldSnapshot
-    observer.Initialize mSection.ConcreteCount, mEb, mPoisson, mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+    InitializeConcrete observer, mSection.ConcreteCount, fc, ft
     fields.Capture mSection, mOperators, history, observer, concrete, reinforcement, warning
     Dim fieldMeta As CResultMeta: Set fieldMeta = meta.Clone
     If Len(warning) > 0 Then AppendStateWarning fieldMeta, warning
@@ -430,6 +454,10 @@ End Sub
 Private Sub PrepareOperators(ByVal spec As CMaterialModelSpec, ByVal models As Object)
     Dim key As String: key = spec.ValueSetText
     mEb = mProvider.ConcreteElasticModulusFromSpec(spec)
+    If Not mASDFlow Is Nothing Then
+        If mEb <> mASDFlow.Modulus Then Err.Raise 5, "CCoupledSectionAnalysis", _
+            "Модуль бетона профиля не совпадает с модулем подготовленного спектрального закона."
+    End If
     If mOperatorCache.Exists(key) Then
         Set mOperators = mOperatorCache(key)
     Else

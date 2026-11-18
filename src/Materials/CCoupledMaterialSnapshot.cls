@@ -18,12 +18,14 @@ Option Explicit
 
 Private mSeries As Collection ' Каждая запись: класс стали либо пустота для бетона, деформации, напряжения.
 Private mPoints As Long
+Private mConcreteLaw As String
 
 ' Снимает диаграммы из фактически использованных экземпляров моделей.
 ' Диаграммы передаются всем сочетаниям одинакового набора как неизменяемые.
 Friend Sub Initialize(ByVal concrete As CCoupledConcreteResponse, ByVal modulus As Double, ByVal steel As Object)
     If Not mSeries Is Nothing Then Err.Raise 5, "CCoupledMaterialSnapshot", "Диаграммы уже сохранены."
     Set mSeries = New Collection
+    mConcreteLaw = concrete.LawIdentifier
     Dim compressionStrain() As Double, compressionStress() As Double
     Dim tensionStrain() As Double, tensionStress() As Double
     Dim strain() As Double, stress() As Double
@@ -58,6 +60,11 @@ End Sub
 ' Число сохранённых материалов, включая бетон и применённые классы стали.
 Friend Property Get SeriesCount() As Long
     SeriesCount = mSeries.Count
+End Property
+
+' Обозначает фактический пространственный закон, которому принадлежат кривые.
+Friend Property Get ConcreteLawIdentifier() As String
+    ConcreteLawIdentifier = mConcreteLaw
 End Property
 
 ' Возвращает число строк всех кривых для размерности общего массива отчёта.

@@ -22,6 +22,7 @@ Implements ICoupledPointResponse
 Private Type TConcreteHistory
     Strain(1 To 6) As Double ' Полная деформация принятой точки для локального деления шага.
     Stress(1 To 6) As Double ' Напряжения той же принятой точки при точно нулевом приращении.
+    Effective(1 To 6) As Double ' Эффективный тензор спектрального закона при той же принятой деформации.
     Plastic(1 To 6) As Double
     Tension As Double
     Compression As Double
@@ -52,6 +53,7 @@ Private mCachedTangent() As Double ' Столбцы касательной по�
 Private mElastic(1 To 6, 1 To 6) As Double
 Private mReturn As CCoupledConcreteReturn
 Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEnvelope
+Private mASDFlow As CCoupledASDFlow
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
 Private mFrictionMax As Double, mDilationMax As Double
 Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
@@ -77,6 +79,7 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     If fc0 / ft * (1# - alpha) < 1# + alpha Then _
         InvalidInput "Соотношение начальных прочностей несовместимо с поверхностью текучести."
 
+    Set mASDFlow = Nothing
     Set mReturn = New CCoupledConcreteReturn
     mReturn.Initialize modulus, poisson, alpha, gamma, eccentricity
     CoupledElasticTensor modulus, poisson, mElastic
@@ -96,6 +99,24 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     mPointCount = pointCount
     ICoupledPointResponse_ClearHistory
 End Sub
+
+' Подключает неизменяемый спектральный закон с собственными таблицами.
+' Касательные, пробные буферы и восстановление полей используют общий контракт материала.
+Friend Sub InitializeASD(ByVal pointCount As Long, ByVal flow As CCoupledASDFlow)
+    If flow Is Nothing Then InvalidInput "Подготовьте спектральный закон бетона."
+    If pointCount < 1 Or flow.Modulus <= 0# Then InvalidInput "Проверьте число точек и готовность спектрального бетона."
+    Set mASDFlow = flow
+    Set mReturn = Nothing: Set mTension = Nothing: Set mCompression = Nothing
+    CoupledElasticTensor flow.Modulus, flow.Poisson, mElastic
+    mFt = flow.PeakStress(False): mFc = flow.PeakStress(True)
+    mPointCount = pointCount
+    ICoupledPointResponse_ClearHistory
+End Sub
+
+' Возвращает обозначение применённого пространственного закона, отдельно от одноосных диаграмм.
+Friend Property Get LawIdentifier() As String
+    If mASDFlow Is Nothing Then LawIdentifier = "Barcelona-CDP" Else LawIdentifier = mASDFlow.LawIdentifier
+End Property
 
 ' Вычисляет одну пробу и её касательную. Возмущения вычисляются от
 ' того же принятого состояния, без изменения пробной истории.
@@ -236,6 +257,7 @@ End Function
 ' девиаторе и простом старшем главном напряжении вне границы знака.
 Friend Function TryReadTrialYield(ByVal point As Long, ByRef strain() As Double, ByRef value As Double, _
         ByRef gradient() As Double, Optional ByVal needGradient As Boolean = True) As Boolean
+    If Not mASDFlow Is Nothing Then Exit Function ' Скалярная поверхность возврата CDP не является границей спектрального обновления.
     If point < 1 Or point > mPointCount Then Exit Function
     Dim c As TConcreteHistory: c = mHistory(point, mCommitted)
     Dim effective(1 To N_COMPONENTS) As Double, i As Long, j As Long
@@ -365,6 +387,7 @@ Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As
         UpdateWithSubsteps = True
         Exit Function
     End If
+    If Not mASDFlow Is Nothing Then Exit Function ' Спектральный шаг замыкается при фиксированной деформации, без скрытой смены пути её приращения.
     Dim divisions As Long, stepIndex As Long, intermediate(1 To N_COMPONENTS) As Double
     Dim history As TConcreteHistory, fraction As Double, succeeded As Boolean
     divisions = 2
@@ -418,9 +441,11 @@ Private Sub ICoupledPointResponse_ClearHistory()
     mCommitted = 1: mTrial = 2
     mTrialEpoch = 1
     Dim point As Long, initial As TConcreteHistory, unusedStress As Double
-    initial.ElasticTangentExact = True
-    mTension.Evaluate 0#, unusedStress, initial.TensionCohesion, initial.TensionDamage, initial.TensionEnergy
-    mCompression.Evaluate 0#, unusedStress, initial.CompressionCohesion, initial.CompressionDamage, initial.CompressionEnergy
+    initial.ElasticTangentExact = (mASDFlow Is Nothing)
+    If mASDFlow Is Nothing Then
+        mTension.Evaluate 0#, unusedStress, initial.TensionCohesion, initial.TensionDamage, initial.TensionEnergy
+        mCompression.Evaluate 0#, unusedStress, initial.CompressionCohesion, initial.CompressionDamage, initial.CompressionEnergy
+    End If
     For point = 1 To mPointCount: mHistory(point, mCommitted) = initial: Next point
 End Sub
 
@@ -434,6 +459,11 @@ End Sub
 ' Отрицательная ветвь передаётся от начала к хвосту сжатия.
 Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal modulus As Double, _
         ByRef strain() As Double, ByRef stress() As Double)
+    If Not mASDFlow Is Nothing Then
+        If modulus <> mASDFlow.Modulus Then InvalidInput "Модуль вывода диаграммы не совпадает с фактическим спектральным материалом."
+        mASDFlow.CopyCurve compression, strain, stress
+        Exit Sub
+    End If
     If compression Then
         mCompression.CopyCalibrationPoints modulus, -1#, strain, stress
     Else
@@ -441,16 +471,27 @@ Friend Sub CopyCalibrationPoints(ByVal compression As Boolean, ByVal modulus As 
     End If
 End Sub
 
-' Возвращает физические меры повреждения принятой точки для диагностики.
+' Возвращает меры повреждения принятой точки для диагностики: доли энергии CDP
+' или факторы потери жёсткости спектрального закона. Это не критерий разрушения сечения.
 Friend Sub AcceptedPointDamage(ByVal point As Long, ByRef tensionEnergy As Double, ByRef compressionEnergy As Double)
-    tensionEnergy = mHistory(point, mCommitted).TensionEnergy
-    compressionEnergy = mHistory(point, mCommitted).CompressionEnergy
+    If mASDFlow Is Nothing Then
+        tensionEnergy = mHistory(point, mCommitted).TensionEnergy
+        compressionEnergy = mHistory(point, mCommitted).CompressionEnergy
+    Else
+        tensionEnergy = mHistory(point, mCommitted).TensionDamage
+        compressionEnergy = mHistory(point, mCommitted).CompressionDamage
+    End If
 End Sub
 
 ' Находит совместную пробу пластического возврата, энергий и дилатансии.
 ' Фиксированная точка чувствительных ветвей проверяется до выхода.
 Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
         ByRef updated As TConcreteHistory, ByRef apparent() As Double, ByRef virginElastic As Boolean) As Boolean
+    If Not mASDFlow Is Nothing Then
+        virginElastic = False
+        UpdatePoint = UpdateASDPoint(strain, committed, updated, apparent)
+        Exit Function
+    End If
     Dim elastic(1 To N_COMPONENTS) As Double, effective(1 To N_COMPONENTS) As Double
     Dim increment(1 To N_COMPONENTS) As Double
     Dim i As Long, j As Long, strainX As Double, strainY As Double, strainZ As Double
@@ -576,6 +617,20 @@ Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcr
     updated.TensionDamage = dt: updated.CompressionDamage = dc
     updated.TensionEnergy = kt: updated.CompressionEnergy = kc
     UpdatePoint = True
+End Function
+
+' Передаёт спектральному закону копии принятого тензора и координат истории.
+' Неудачная проба не изменяет ни принятый, ни подготовленный общий материал.
+Private Function UpdateASDPoint(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
+        ByRef updated As TConcreteHistory, ByRef apparent() As Double) As Boolean
+    Dim priorStrain(1 To 6) As Double, priorEffective(1 To 6) As Double
+    Dim effective(1 To 6) As Double, plastic(1 To 6) As Double, i As Long
+    updated = committed
+    For i = 1 To 6: priorStrain(i) = committed.Strain(i): priorEffective(i) = committed.Effective(i): Next i
+    If Not mASDFlow.TryStep(strain, priorStrain, priorEffective, committed.Tension, committed.Compression, _
+            updated.Tension, updated.Compression, effective, apparent, plastic, updated.TensionDamage, updated.CompressionDamage) Then Exit Function
+    For i = 1 To 6: updated.Effective(i) = effective(i): updated.Plastic(i) = plastic(i): Next i
+    UpdateASDPoint = True
 End Function
 
 ' Сверяет изменение объёмной деформации с тем же допуском поверхности.
