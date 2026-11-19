@@ -320,7 +320,8 @@
     "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30",
     "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3",
     "CoupledOwnHybridTransfer20261119": "1F59DB5FB3A00F035B10399458A852F015BB9930B456FB7083A907BD9DAFFD63",
-    "CoupledLocalHybridIntegration20261119": "666E3B8E3BFBC8544A3C124D1F51B481778B46F3F1FEF4EAE623DFA51D43D1CE"
+    "CoupledLocalHybridIntegration20261119": "666E3B8E3BFBC8544A3C124D1F51B481778B46F3F1FEF4EAE623DFA51D43D1CE",
+    "CoupledResolvedLoadStep20261119": "AA3D390480F2AAD9651E61AAEB7746CBAF7AB160373F3C9B22E8244000DBF4B6"
   },
   "cases": [
     {
@@ -4590,6 +4591,69 @@
       "stdout_contains": "LOCAL HYBRID API EQUILIBRIUM HISTORY BUDGET SENSITIVITY AND SAVED STOCK LOAD PATH VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "259F1912CA7A45CFC2BD418B6C65DC8A18789362171FBCD4659DA468941B7A6B"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-resolved-load-step-native",
+      "journal_section": 618,
+      "archive": "CoupledResolvedLoadStep20261119",
+      "script": "Check-TestResolvedLoadHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "RESOLVED LOAD STEP FIVE EXECUTED VBA BOOKS REGRESSIONS AND EXPECTED TEST LOGGER FAILURE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "B5191344D6125774876B9FFC19BDE10D0C272703BCFEB8094F0B6B1697586BF5"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-resolved-load-step-mechanics",
+      "journal_section": 618,
+      "archive": "CoupledResolvedLoadStep20261119",
+      "script": "Check-TestResolvedLoadHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "RESOLVED LOAD STEP AUTOMATIC BOOK REACHED THE VERIFIED EQUILIBRIUM; PRIOR EXIT CAUSE AND ORIGINAL PREFIX VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "C4B76A2D9F59520FE802E1B8B8A05F8728F5C5381C14530841C1A25260E4C20A"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-resolved-load-step-matrix",
+      "journal_section": 618,
+      "archive": "CoupledResolvedLoadStep20261119",
+      "script": "Check-TestResolvedLoadHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "matrix",
+        "--out",
+        "MatrixProof.json"
+      ],
+      "stdout_contains": "RESOLVED LOAD STEP COMPLETE JACOBIAN AND LEGACY DIRECTION MISMATCH INDEPENDENTLY VERIFIED",
+      "outputs": {
+        "MatrixProof.json": "0CB1082E29A76ECBF8442AD4F21E495236C9A96C8A426C05C99F4B2273421596"
       },
       "timeout_seconds": 300
     }

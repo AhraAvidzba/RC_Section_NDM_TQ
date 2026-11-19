@@ -89,7 +89,11 @@ Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
 Private mUsesFieldControl As Boolean, mFieldControlChanges As Long
 Private mLastFieldControlRevision As Long
 Private mLastHybridRevision As Long, mLastHybridProjection() As Double
+Private mLastHybridTarget As Double
 Private mHybridRecoveryProbes As Long, mHybridRecoveredPoints As Long
+Private mFailedProbeRevision As Long, mFailedProbeProjection() As Double
+Private mFailedProbeTarget As Double, mFailedProbeCode As EResultCode
+Private mUnresolvedLoadRetries As Long
 Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
 Private mObserver As ICoupledContinuationProgress
 
@@ -126,7 +130,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mUsesFieldControl = False: mFieldControlChanges = 0
     mLastFieldControlRevision = -1
     mLastHybridRevision = -1: Erase mLastHybridProjection
+    mLastHybridTarget = 0#
     mHybridRecoveryProbes = 0: mHybridRecoveredPoints = 0
+    mFailedProbeRevision = -1: Erase mFailedProbeProjection
+    mFailedProbeTarget = 0#: mFailedProbeCode = rcNone: mUnresolvedLoadRetries = 0
     mUnverifiedReference = 0#: mUnverifiedDips = 0: mRecoveredDips = 0
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -186,7 +193,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     minimum = increment * MIN_STEP_RATIO
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
-    Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, unresolvedSteel As Boolean, hybridRecovery As Boolean
+    Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, lastLoadUnresolved As Boolean
+    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
@@ -200,9 +208,9 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             Exit Sub
         End If
         If increment < minimum Then
-            If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
+            If Not (lastProbeFailed Or lastNoProgress Or lastLoadUnresolved) Or unresolvedSteel Then Exit For
             Dim enteredCorner As Boolean
-            If PrepareHybridRecovery(lastProbeFailed, increment) Then
+            If PrepareHybridRecovery(lastProbeFailed, lastLoadUnresolved, current.Coordinate, increment) Then
                 hybridRecovery = True
             ElseIf TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredCorner) Then
                 lastProbeFailed = False: lastNoProgress = False: smoothSteps = 0
@@ -229,7 +237,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 arcFields:=arcFields, allowHybridRecovery:=hybridRecovery)
         End If
         lastProbeFailed = Not probed
-        lastNoProgress = False
+        lastNoProgress = False: lastLoadUnresolved = False
         changedControl = False: smoothTrial = False
         If probed Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
@@ -348,6 +356,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 End If
             End If
         Else
+            lastLoadUnresolved = True ' Дальнейшее деление уже сошедшегося шага не делает малое изменение lambda различимым.
             mSolver.DiscardStep
             increment = increment * 0.5
         End If
@@ -500,23 +509,40 @@ Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef
     TryChangeStalledFieldControl = True
 End Function
 
-' Запрашивает один повтор последнего неудачного малого шага для неизменной истории и проекции.
-' Обычное деление уже исчерпано; найденный корень всё равно проверяется на направление и допустимость перед принятием.
-Private Function PrepareHybridRecovery(ByVal lastProbeFailed As Boolean, ByRef increment As Double) As Boolean
-    If Not lastProbeFailed Or Not mSolver.SupportsHybridRecovery Then Exit Function
-    Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
+' Запрашивает один повтор конкретной цели для неизменной истории и проекции после исчерпания деления.
+' Если сошедшийся меньший шаг не различает нагрузку, повторяет только ранее численно отвергнутую большую цель.
+' Условия равновесия, направления и материала проверяются обычной приёмкой; неуточнённый предел стали не обходится.
+Private Function PrepareHybridRecovery(ByVal lastProbeFailed As Boolean, ByVal lastLoadUnresolved As Boolean, _
+        ByVal acceptedCoordinate As Double, ByRef increment As Double) As Boolean
+    If Not mSolver.SupportsHybridRecovery Then Exit Function
+    Dim code As EResultCode, target As Double, sameProjection As Boolean, i As Long
+    If lastProbeFailed Then
+        code = mSolver.ResultMeta.ResultCode
+        target = acceptedCoordinate + 2# * increment
+    ElseIf lastLoadUnresolved Then
+        If mFailedProbeRevision <> mSolver.AcceptedRevision Then Exit Function
+        If mFailedProbeTarget <= acceptedCoordinate + 2# * increment Then Exit Function
+        For i = 1 To UBound(mProjection)
+            If mFailedProbeProjection(i) <> mProjection(i) Then Exit Function
+        Next i
+        code = mFailedProbeCode: target = mFailedProbeTarget
+    Else
+        Exit Function
+    End If
     If code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
-    Dim sameProjection As Boolean, i As Long
+    If target <= acceptedCoordinate Then Exit Function
     If mLastHybridRevision = mSolver.AcceptedRevision Then
         sameProjection = True
         For i = 1 To UBound(mProjection)
             If mLastHybridProjection(i) <> mProjection(i) Then sameProjection = False: Exit For
         Next i
-        If sameProjection Then Exit Function
+        If sameProjection And target = mLastHybridTarget Then Exit Function ' Другая правая часть задаёт другую задачу, даже при той же истории и проекции.
     End If
     mLastHybridRevision = mSolver.AcceptedRevision: mLastHybridProjection = mProjection
+    mLastHybridTarget = target
     mHybridRecoveryProbes = mHybridRecoveryProbes + 1
-    increment = increment * 2# ' Возвращается размер последней отвергнутой пробы, а не новая более крупная цель.
+    If lastLoadUnresolved Then mUnresolvedLoadRetries = mUnresolvedLoadRetries + 1
+    increment = target - acceptedCoordinate ' Возвращается конкретная отвергнутая цель, новая экстраполяция нагрузки не вводится.
     PrepareHybridRecovery = True
 End Function
 
@@ -669,6 +695,8 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     End If
     If Not solved Then
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
+        mFailedProbeRevision = mSolver.AcceptedRevision: mFailedProbeProjection = mProjection
+        mFailedProbeTarget = point.Coordinate: mFailedProbeCode = mSolver.ResultMeta.ResultCode
         Exit Function
     End If
     Probe = True
@@ -1337,7 +1365,9 @@ Private Function Details() As String
     If mUnverifiedDecline Then Details = Details & "; текущий спад не является подтверждённым физическим пределом"
     If mFieldControlChanges > 0 Then Details = Details & "; смен пространственной меры после отказа: " & CStr(mFieldControlChanges)
     If mHybridRecoveryProbes > 0 Then Details = Details & "; проб полного разностного резерва после деления шага: " & _
-        CStr(mHybridRecoveryProbes) & "; принято после него: " & CStr(mHybridRecoveredPoints)
+        CStr(mHybridRecoveryProbes) & "; принято после него: " & CStr(mHybridRecoveredPoints) & _
+        "; последняя цель резерва: " & CStr(mLastHybridTarget)
+    If mUnresolvedLoadRetries > 0 Then Details = Details & "; повторов после неразличимого изменения lambda: " & CStr(mUnresolvedLoadRetries)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
