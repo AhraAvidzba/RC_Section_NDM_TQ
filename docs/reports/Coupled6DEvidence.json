@@ -325,7 +325,8 @@
     "CoupledActualReverseStudies20261119": "95933BF56658AD215D715DC8ED5F3AA11DDC0120530EF6DAE092481D3CE545B2",
     "CoupledConditionedSecant20261119": "699B697E5366E34D851E003321CED4B51D334814E857E6B88FC7FE6083A5798C",
     "CoupledReturnPrecisionStudies20261119": "8CC2A69CE2F17EF08A5BF0F5492CB98DD2FB0F98DBF3E391BF24AEB18EAC3057",
-    "CoupledDefaultRecovery20261119": "561CEDB7A30001FD75BE318B7D3C4749BB66E1ACBA22FD41DD4ED82F8CB45868"
+    "CoupledDefaultRecovery20261119": "561CEDB7A30001FD75BE318B7D3C4749BB66E1ACBA22FD41DD4ED82F8CB45868",
+    "CoupledNewtonBranchStudies20261119": "5455C069A9C9B4FF763E5E0BF176C4898277D104EAA292B85B57B2D761D81115"
   },
   "cases": [
     {
@@ -4826,6 +4827,48 @@
       "stdout_contains": "DEFAULT RECOVERY ORIGINAL 26 FIELDS AND SAVED EXCEL VERIFIED; EXPENSIVE DEFAULT DISABLED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "2137ACEDB1372AEFCFE0DDF4319524163BC1E7F6596EBCBB95C5DE1123AAC4CE"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-newton-branch-studies-native",
+      "journal_section": 623,
+      "archive": "CoupledNewtonBranchStudies20261119",
+      "script": "Check-TestNewtonStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "THREE NEWTON STUDY ACTUAL VBA PROJECTS AND HISTORY CHECKS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "ADE43DC9202F7E8A6950EADED80D0C2611CC0AE2A0B406037D7673E4C205F112"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-newton-branch-studies-mechanics",
+      "journal_section": 623,
+      "archive": "CoupledNewtonBranchStudies20261119",
+      "script": "Check-TestNewtonStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "NEWTON COMPLETE EQUATIONS AND MATERIAL BRANCH LOCALIZATION VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "A6E98F8C34CFC4ACCFB188F943CCC61F4DB636BDA46AC9E67FF19D22E607A316"
       },
       "timeout_seconds": 300
     }
