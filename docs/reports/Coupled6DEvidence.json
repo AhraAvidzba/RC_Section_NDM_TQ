@@ -319,7 +319,8 @@
     "CoupledDesignLoadStudy20261119": "3F5AAED63326D74632D4ADAFB541F3259912078EAFEDDF9C271CD214D5689ECD",
     "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30",
     "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3",
-    "CoupledOwnHybridTransfer20261119": "1F59DB5FB3A00F035B10399458A852F015BB9930B456FB7083A907BD9DAFFD63"
+    "CoupledOwnHybridTransfer20261119": "1F59DB5FB3A00F035B10399458A852F015BB9930B456FB7083A907BD9DAFFD63",
+    "CoupledLocalHybridIntegration20261119": "666E3B8E3BFBC8544A3C124D1F51B481778B46F3F1FEF4EAE623DFA51D43D1CE"
   },
   "cases": [
     {
@@ -4547,6 +4548,48 @@
       "stdout_contains": "OWN VBA HYBRID EVERY QR AND RANK ONE UPDATE INDEPENDENTLY VERIFIED",
       "outputs": {
         "AlgebraProof.json": "012A39102CBBFA64313B94AF19E11E8157C4A25BBB082C7C024EF3C40BCB4F4A"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-local-hybrid-native",
+      "journal_section": 617,
+      "archive": "CoupledLocalHybridIntegration20261119",
+      "script": "Check-TestLocalHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "LOCAL HYBRID FOUR ACTUAL VBA BOOKS NATIVE REGRESSIONS AND NEGATIVE STUDY VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "8327435E6B51507341779F381494E449D02ED8E9980A0F51F9AD4FC2DCEBE663"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-local-hybrid-mechanics",
+      "journal_section": 617,
+      "archive": "CoupledLocalHybridIntegration20261119",
+      "script": "Check-TestLocalHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "LOCAL HYBRID API EQUILIBRIUM HISTORY BUDGET SENSITIVITY AND SAVED STOCK LOAD PATH VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "259F1912CA7A45CFC2BD418B6C65DC8A18789362171FBCD4659DA468941B7A6B"
       },
       "timeout_seconds": 300
     }

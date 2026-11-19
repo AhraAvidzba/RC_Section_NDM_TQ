@@ -149,6 +149,9 @@ Finished:
     End If
     Exit Function
 ArithmeticFailure:
+    Dim errorNumber As Long, errorSource As String, errorDescription As String
+    errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
+    If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
     mStopCode = -2
     Resume Finished
 End Function
@@ -221,6 +224,12 @@ End Property
 ' Возвращает максимальную компоненту лучшей фактически вычисленной невязки.
 Friend Property Get BestResidual() As Double
     BestResidual = mBestNorm
+End Property
+
+' Сообщает о наличии хотя бы одной полностью вычисленной невязки и соответствующей лучшей точки.
+' Сам факт обращения к интерфейсу не означает, что тот вернул пригодный отклик.
+Friend Property Get HasBestPoint() As Boolean
+    HasBestPoint = mHasBest
 End Property
 
 ' Возвращает число фактически выполненных повторных стартов после остановки по слабому прогрессу или точности.

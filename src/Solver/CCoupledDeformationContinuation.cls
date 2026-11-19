@@ -88,6 +88,8 @@ Private mCurrentFields As Collection ' Принятый путь для восп
 Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
 Private mUsesFieldControl As Boolean, mFieldControlChanges As Long
 Private mLastFieldControlRevision As Long
+Private mLastHybridRevision As Long, mLastHybridProjection() As Double
+Private mHybridRecoveryProbes As Long, mHybridRecoveredPoints As Long
 Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
 Private mObserver As ICoupledContinuationProgress
 
@@ -123,6 +125,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mUsesTransverseControl = False: mUnverifiedDecline = False
     mUsesFieldControl = False: mFieldControlChanges = 0
     mLastFieldControlRevision = -1
+    mLastHybridRevision = -1: Erase mLastHybridProjection
+    mHybridRecoveryProbes = 0: mHybridRecoveredPoints = 0
     mUnverifiedReference = 0#: mUnverifiedDips = 0: mRecoveredDips = 0
     mPostPeakControlName = vbNullString: mPostPeakControlPoints = 0
     mPostPeakWidePoints = 0
@@ -182,13 +186,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     minimum = increment * MIN_STEP_RATIO
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
-    Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, unresolvedSteel As Boolean
+    Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, unresolvedSteel As Boolean, hybridRecovery As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
     Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
+        hybridRecovery = False
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If attempt > STEP_LIMIT And mLocalPeak = 0# And mUnverifiedDips = 0 Then
             StopSearch "Достигнут лимит начального участка деформационного продолжения до обнаружения спада нагрузки."
@@ -197,7 +202,9 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         If increment < minimum Then
             If Not (lastProbeFailed Or lastNoProgress) Or unresolvedSteel Then Exit For
             Dim enteredCorner As Boolean
-            If TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredCorner) Then
+            If PrepareHybridRecovery(lastProbeFailed, increment) Then
+                hybridRecovery = True
+            ElseIf TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredCorner) Then
                 lastProbeFailed = False: lastNoProgress = False: smoothSteps = 0
             ElseIf enteredCorner Then
                 StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
@@ -216,10 +223,10 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         allowMaterialRecovery = MayRecoverMaterialBoundary()
         If PrepareSecantSeed(history, left, current, trial.Coordinate, seed, seedLambda) Then
             probed = Probe(trial, seedLambda, allowMaterialRecovery, _
-                arcFields:=arcFields, initialField:=seed)
+                arcFields:=arcFields, initialField:=seed, allowHybridRecovery:=hybridRecovery)
         Else
             probed = Probe(trial, current.Lambda, allowMaterialRecovery, _
-                arcFields:=arcFields)
+                arcFields:=arcFields, allowHybridRecovery:=hybridRecovery)
         End If
         lastProbeFailed = Not probed
         lastNoProgress = False
@@ -233,7 +240,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If probed Then
             probed = UpdateTrialCoordinate(trial, current.Coordinate)
-            If probed And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0) Then
+            If probed And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0 Or hybridRecovery) Then
                 probed = SpatialTrialAdvances(history, current)
                 If Not probed Then mSolver.DiscardStep
             End If
@@ -280,6 +287,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial, changedControl And mSolver.HasPrincipalBoundaries) Then Exit Sub
             End If
             AcceptPoint history, trial
+            If hybridRecovery Then mHybridRecoveredPoints = mHybridRecoveredPoints + 1
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
             unresolvedSteel = False
             If changedControl Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
@@ -492,6 +500,26 @@ Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef
     TryChangeStalledFieldControl = True
 End Function
 
+' Запрашивает один повтор последнего неудачного малого шага для неизменной истории и проекции.
+' Обычное деление уже исчерпано; найденный корень всё равно проверяется на направление и допустимость перед принятием.
+Private Function PrepareHybridRecovery(ByVal lastProbeFailed As Boolean, ByRef increment As Double) As Boolean
+    If Not lastProbeFailed Or Not mSolver.SupportsHybridRecovery Then Exit Function
+    Dim code As EResultCode: code = mSolver.ResultMeta.ResultCode
+    If code <> rcNumericalFailure And code <> rcSingularTangent Then Exit Function
+    Dim sameProjection As Boolean, i As Long
+    If mLastHybridRevision = mSolver.AcceptedRevision Then
+        sameProjection = True
+        For i = 1 To UBound(mProjection)
+            If mLastHybridProjection(i) <> mProjection(i) Then sameProjection = False: Exit For
+        Next i
+        If sameProjection Then Exit Function
+    End If
+    mLastHybridRevision = mSolver.AcceptedRevision: mLastHybridProjection = mProjection
+    mHybridRecoveryProbes = mHybridRecoveryProbes + 1
+    increment = increment * 2# ' Возвращается размер последней отвергнутой пробы, а не новая более крупная цель.
+    PrepareHybridRecovery = True
+End Function
+
 ' Сравнивает приращения на двух соседних шагах одной нисходящей ветви.
 ' Не меняет ни поля, ни историю. Рост шага возможен при устойчивых
 ' наклонах нагрузки и механического поля.
@@ -608,7 +636,8 @@ End Function
 ' выполняются после выбора действующей проекции.
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False, _
-        Optional ByVal arcFields As Collection = Nothing, Optional ByRef initialField As Variant) As Boolean
+        Optional ByVal arcFields As Collection = Nothing, Optional ByRef initialField As Variant, _
+        Optional ByVal allowHybridRecovery As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     mProbeCount = mProbeCount + 1
     NotifyProgress
@@ -617,7 +646,7 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
         point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mBranchTangentControl, recoverSameControl, _
-        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0))
+        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery)
     If mSolver.SameControlRecoveryTried Then
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
@@ -1307,6 +1336,8 @@ Private Function Details() As String
         "; восстановлений после них: " & CStr(mRecoveredDips)
     If mUnverifiedDecline Then Details = Details & "; текущий спад не является подтверждённым физическим пределом"
     If mFieldControlChanges > 0 Then Details = Details & "; смен пространственной меры после отказа: " & CStr(mFieldControlChanges)
+    If mHybridRecoveryProbes > 0 Then Details = Details & "; проб полного разностного резерва после деления шага: " & _
+        CStr(mHybridRecoveryProbes) & "; принято после него: " & CStr(mHybridRecoveredPoints)
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)

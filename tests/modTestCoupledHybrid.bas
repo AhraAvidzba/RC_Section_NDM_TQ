@@ -52,7 +52,14 @@ Public Function RunTestCoupledHybrid() As String
     TestCheck Not solved And solver.FunctionCalls = 1 And solver.Restarts = 0, "restart cannot bypass exhausted budget", report, passed, failedCount
     adapter.InitializeTest "NoResponse"
     solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 0.2, solution)
-    TestCheck Not solved And solver.StopCode = -1, "absent response is not physical failure", report, passed, failedCount
+    TestCheck Not solved And solver.StopCode = -1 And Not solver.HasBestPoint, "absent response is not physical failure", report, passed, failedCount
+    adapter.InitializeTest "Cancel"
+    On Error Resume Next
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 0.2, solution)
+    Dim cancelNumber As Long: cancelNumber = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18, "cancellation propagates to caller", report, passed, failedCount
     adapter.InitializeTest "BadDimensions"
     solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 0.2, solution)
     TestCheck Not solved And solver.StopCode = -1, "wrong dimensions rejected", report, passed, failedCount

@@ -33,6 +33,7 @@ End Property
 Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Double, ByVal withJacobian As Boolean, _
         ByRef residual() As Double, ByRef jacobian() As Double) As Boolean
     mEvaluationCallsTest = mEvaluationCallsTest + 1
+    If mMode = "Cancel" Then Err.Raise 18, "CHybridEquationsTest", "Тестовая отмена расчёта."
     If mMode = "NoResponse" Then Exit Function
     Dim count As Long: count = UBound(coordinates)
     ReDim residual(1 To count)

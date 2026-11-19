@@ -15,6 +15,7 @@ Option Explicit
 ' Использует те же геометрические операторы, что и упругий расчёт.
 ' Каждая проба демпфирования пересчитывает весь остаток. С боковыми
 ' историями градиент напряжений определяется по двум продольным точкам.
+Implements ICoupledEquationSystem
 
 Private Const COMPONENT_COUNT As Long = 6
 Private Const GAUGE_COUNT As Long = 4
@@ -35,6 +36,9 @@ Private Const YIELD_ROOT_TOLERANCE As Double = 0.000000000002 ' МПа в про
 Private Const PRINCIPAL_EVENT_TOLERANCE As Double = 0.000000001 ' МПа: общая точка проверяется строже штатного равновесия.
 Private Const PRINCIPAL_EVENT_RADIUS As Double = 0.25 ' Радиус локальной доводки в долях предыдущего механического приращения.
 Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходует общий бюджет шага, оставляя итерацию полной системе.
+Private Const HYBRID_DIFFERENCE_STEP As Double = 0.000001 ' Относительный шаг производной полной системы в подготовленных координатах.
+Private Const HYBRID_STRAIN_SCALE As Double = 0.00001 ' Единичное перемещение численной координаты ограничено этой компонентой деформации.
+Private Const HYBRID_AUXILIARY_SCALE As Double = 0.01 ' Масштаб множителей связей и lambda, без изменения их уравнений.
 
 Private Type TYieldStation
     Point As Long
@@ -54,6 +58,9 @@ Private Type TSolveEffort
     MaterialFailures As Long
     LastFailedPoint As Long
     LastFailedSide As Long
+    HybridSteps As Long
+    HybridMatrices As Long
+    HybridEvaluations As Long
 End Type
 
 Private mSection As CCoupledElasticState
@@ -110,6 +117,9 @@ Private mLocalGradientBuilds As Long
 Private mSteelBranchBuilds As Long, mSteelFieldTangents As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
+Private mHybridActive As Boolean, mHybridScalesReady As Boolean
+Private mHybridOriginRevision As Long, mHybridSeed() As Double, mHybridScales() As Double
+Private mHybridSteps As Long, mHybridMatrices As Long, mHybridEvaluations As Long
 
 ' Подключает сечение и независимую центральную историю. Две отдельные
 ' боковые истории включают секущий продольный градиент напряжений.
@@ -146,6 +156,7 @@ Friend Sub Initialize(ByVal section As CCoupledElasticState, ByVal response As I
         End If
     End If
     mReferenceModulus = referenceModulus
+    mHybridScalesReady = False: Erase mHybridScales
     ResetHistory
 End Sub
 
@@ -223,14 +234,15 @@ End Property
 ' Множитель нагрузки определяется вместе с полем и возвращается только
 ' для сошедшейся пробы. Материал остаётся в принятом ранее состоянии.
 ' После смены пространственной меры можно разрешить малую поправку CDP;
-' резерв не применяется к псевдодуге и не меняет допуск принятия.
+' полный разностный резерв включается явно после исчерпания деления шага.
+' Оба резерва не применяются к псевдодуге и не меняют допуск принятия.
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
         Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
-        Optional ByVal allowSmallCorrection As Boolean = False) As Boolean
+        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -254,7 +266,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     Dim load(1 To COMPONENT_COUNT) As Double
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
         recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
-        allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#))
+        allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#), _
+        allowHybridRecovery:=allowHybridRecovery)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -839,6 +852,7 @@ Private Sub ReadSolveEffort(ByRef effort As TSolveEffort)
     effort.SteelBranchBuilds = mSteelBranchBuilds: effort.SteelFieldTangents = mSteelFieldTangents
     effort.MaterialFailures = mMaterialFailures
     effort.LastFailedPoint = mLastFailedPoint: effort.LastFailedSide = mLastFailedSide
+    effort.HybridSteps = mHybridSteps: effort.HybridMatrices = mHybridMatrices: effort.HybridEvaluations = mHybridEvaluations
 End Sub
 
 ' Добавляет предыдущие затраты после повторного решения; счётчики не скрывают вспомогательную работу.
@@ -848,6 +862,8 @@ Private Sub AddSolveEffort(ByRef effort As TSolveEffort)
     mLocalGradientBuilds = mLocalGradientBuilds + effort.LocalGradientBuilds
     mSteelBranchBuilds = mSteelBranchBuilds + effort.SteelBranchBuilds
     mSteelFieldTangents = mSteelFieldTangents + effort.SteelFieldTangents
+    mHybridSteps = mHybridSteps + effort.HybridSteps: mHybridMatrices = mHybridMatrices + effort.HybridMatrices
+    mHybridEvaluations = mHybridEvaluations + effort.HybridEvaluations
     mMaterialFailures = mMaterialFailures + effort.MaterialFailures
     If mLastFailedPoint = 0 And effort.MaterialFailures > 0 Then
         mLastFailedPoint = effort.LastFailedPoint: mLastFailedSide = effort.LastFailedSide
@@ -867,6 +883,7 @@ Private Sub ResetSolveState()
     mLocalGradientBuilds = 0: mSteelBranchBuilds = 0: mSteelFieldTangents = 0
     mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
     mLastNorm = 0#: mMinimumPivot = 0#
+    mHybridSteps = 0: mHybridMatrices = 0: mHybridEvaluations = 0
 End Sub
 
 ' Решает одну силовую или деформационно управляемую пробу с общей
@@ -875,7 +892,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
         Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
-        Optional ByVal allowSmallCorrection As Boolean = False) As Boolean
+        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False) As Boolean
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -1080,6 +1097,8 @@ RecomputeTangent:
                     End If
                 End If
             End If
+            If Not SolveStep And allowHybridRecovery Then SolveStep = TryHybridControlledField(current, currentLambda, load, _
+                absoluteTolerance, relativeTolerance, maxIterations)
             Exit Function
         End If
         mIterations = mIterations + 1
@@ -1105,6 +1124,157 @@ EvaluationFailed:
     Else
         RecordFailure sfcInternalError, "Ошибка сборки связанного равновесия. " & description
     End If
+End Function
+
+' Проверяет явно запрошенный гибридный резерв после численного отказа демпфирования пространственного CDP.
+' Каждая dogleg-поправка расходует остаток maxIterations; все разностные чтения входят в mEvaluations.
+' Для спектральных границ ASD и псевдодуги сохраняются их собственные правила продолжения.
+Private Function TryHybridControlledField(ByRef current() As Double, ByVal initialLambda As Double, ByRef load() As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long) As Boolean
+    If Not mControlActive Or mArcLoadProjection <> 0# Or Not SupportsHybridRecovery Then Exit Function
+    If mCandidateReady Or mHybridActive Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+    If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
+    Dim remaining As Long: remaining = maxIterations - mIterations
+    If remaining < 2 Then Exit Function ' Отклонённая поправка Ньютона и хотя бы одна новая поправка делят общий лимит.
+    Dim original As CResultMeta: Set original = mMeta.Clone
+    Dim external() As Double, residual() As Double, matrix() As Double, resultants() As Double
+    Dim originalNorm As Double, originalLambda As Double, originalCode As ESolverFailureCode, originalPoint As Long
+    external = mExternal: residual = mResidual: matrix = mMatrix: resultants = mTrialResultants
+    originalNorm = mLastNorm: originalLambda = mCurrentControlLambda: originalCode = mFailureCode: originalPoint = mMaterialPoint
+    Dim originalLoad(1 To COMPONENT_COUNT) As Double, i As Long
+    For i = 1 To COMPONENT_COUNT: originalLoad(i) = load(i): Next i
+    On Error GoTo Failed
+    If Not PrepareHybridScales() Then GoTo RestoreFailure
+    mIterations = mIterations + 1: remaining = remaining - 1 ' Учитывается уже вычисленная, но отвергнутая поправка Ньютона.
+    Dim size As Long: size = mDegreeCount + 1
+    ReDim mHybridSeed(1 To size)
+    For i = 1 To mDegreeCount: mHybridSeed(i) = current(i): Next i
+    mHybridSeed(size) = initialLambda: mHybridOriginRevision = mAcceptedRevision
+    Dim coordinates() As Double, solution() As Double, field() As Double
+    ReDim coordinates(1 To size): ReDim field(1 To mDegreeCount)
+    Dim hybrid As New CCoupledHybridSolver, equations As ICoupledEquationSystem
+    Set equations = Me
+    Dim functionLimit As Long: functionLimit = CLng(CDbl(remaining + 1) * (2# * size + 1#) + remaining)
+    mHybridActive = True
+    Dim converged As Boolean
+    converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, GeomMin(absoluteTolerance, 0.0000000001), _
+        0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP)
+    mHybridActive = False
+    mIterations = mIterations + hybrid.Steps
+    mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls
+    mHybridEvaluations = mHybridEvaluations + hybrid.FunctionCalls
+    If mFailureCode <> sfcNone And mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+        RecordFailure mFailureCode, "Материальная проба глобальной касательной не может быть исправлена уменьшением поправки."
+        Exit Function
+    End If
+    If Not hybrid.HasBestPoint Then GoTo RestoreFailure
+    For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * solution(i): Next i
+    Dim lambda As Double: lambda = mHybridSeed(size) + mHybridScales(size) * solution(size)
+    If mAcceptedRevision <> mHybridOriginRevision Then Err.Raise 5, "CCoupledNewtonSolver", "Принятая история изменилась во время гибридного решения."
+    SetControlledLoad lambda, load
+    If Not Evaluate(field, False) Then
+        If mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+            RecordFailure mFailureCode, "Не удалось записать материальную пробу итогового гибридного поля."
+            Exit Function
+        End If
+        GoTo RestoreFailure
+    End If
+    Dim tolerance As Double: tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    If EquilibriumNorm(load, field) > tolerance Or Not GaugesVerified(tolerance) Then GoTo RestoreFailure
+    mCandidate = field: PublishCandidate lambda
+    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие подтверждено после гибридного резерва" & _
+        " | Исходная численная проба: " & original.DiagnosticDetails
+    TryHybridControlledField = True
+    Exit Function
+RestoreFailure:
+    mHybridActive = False: mCandidateReady = False: Set mMeta = original
+    mExternal = external: mResidual = residual: mMatrix = matrix: mTrialResultants = resultants
+    mLastNorm = originalNorm: mCurrentControlLambda = originalLambda: mFailureCode = originalCode: mMaterialPoint = originalPoint
+    For i = 1 To COMPONENT_COUNT: load(i) = originalLoad(i): Next i
+    If mHybridEvaluations > 0 Then mMeta.DiagnosticDetails = DiagnosticSummary() & _
+        "; гибридный резерв не подтвердил равновесие | Исходная численная проба: " & original.DiagnosticDetails
+    Exit Function
+Failed:
+    Dim errorNumber As Long, errorSource As String, errorDescription As String
+    errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
+    mHybridActive = False
+    If errorNumber = 6 Or errorNumber = 11 Then Resume RestoreFailure
+    Err.Raise errorNumber, errorSource, errorDescription
+End Function
+
+' Разрешает контроллеру запросить полный разностный резерв только для пространственной истории без спектральных границ.
+' Псевдодуга и действующая мера дополнительно проверяются в самой управляемой пробе.
+Friend Property Get SupportsHybridRecovery() As Boolean
+    If Not mUseSpatialHistory Then Exit Property
+    SupportsHybridRecovery = Not (HybridResponseHasPrincipalBoundaries(mResponse) Or _
+        HybridResponseHasPrincipalBoundaries(mPlusResponse) Or HybridResponseHasPrincipalBoundaries(mMinusResponse))
+End Property
+
+' Проверяет ограничение резерва для отдельной центральной или боковой истории, с арматурой и без неё.
+Private Function HybridResponseHasPrincipalBoundaries(ByVal response As ICoupledPointResponse) As Boolean
+    If response Is Nothing Then Exit Function
+    If TypeOf response Is CCoupledReinforcedResponse Then
+        Dim reinforced As CCoupledReinforcedResponse: Set reinforced = response
+        HybridResponseHasPrincipalBoundaries = reinforced.HasPrincipalBoundaries
+    ElseIf TypeOf response Is CCoupledConcreteResponse Then
+        Dim concrete As CCoupledConcreteResponse: Set concrete = response
+        HybridResponseHasPrincipalBoundaries = concrete.HasPrincipalBoundaries
+    End If
+End Function
+
+' Готовит неизменные масштабы геометрических координат только при первом запросе резерва.
+' Повторная Initialize сбрасывает подготовку; нагрузка и материальная история в масштабы не входят.
+Private Function PrepareHybridScales() As Boolean
+    If mHybridScalesReady Then PrepareHybridScales = True: Exit Function
+    ReDim mHybridScales(1 To mDegreeCount + 1)
+    Dim unit() As Double: ReDim unit(1 To mDegreeCount)
+    Dim strain(1 To COMPONENT_COUNT) As Double, slope(1 To COMPONENT_COUNT) As Double
+    Dim degree As Long, point As Long, component As Long, largest As Double
+    For degree = 1 To mGaugeStart - 1
+        unit(degree) = 1#: largest = 0#
+        For point = 1 To mPointCount
+            mSection.PointStrain point, unit, strain: mSection.AxialGradientAtPoint point, unit, slope
+            For component = 1 To COMPONENT_COUNT
+                largest = GeomMax(largest, Abs(strain(component)) + SPATIAL_HALF_STEP * Abs(slope(component)))
+            Next component
+        Next point
+        If largest = 0# Then Exit Function
+        mHybridScales(degree) = HYBRID_STRAIN_SCALE / largest: unit(degree) = 0#
+    Next degree
+    For degree = mGaugeStart To mDegreeCount + 1: mHybridScales(degree) = HYBRID_AUXILIARY_SCALE: Next degree
+    mHybridScalesReady = True: PrepareHybridScales = True
+End Function
+
+' Читающий интерфейс полной управляемой системы в подготовленных координатах.
+' Пробы не записывают материал; итоговый кандидат проходит отдельную штатную проверку перед публикацией.
+Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Double, ByVal withJacobian As Boolean, _
+        ByRef residual() As Double, ByRef jacobian() As Double) As Boolean
+    If Not mHybridActive Or mAcceptedRevision <> mHybridOriginRevision Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Нет действующего неизменённого контекста гибридной пробы."
+    Dim size As Long: size = mDegreeCount + 1
+    If LBound(coordinates) <> 1 Or UBound(coordinates) <> size Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Размер гибридной координаты не совпадает с системой равновесия."
+    Dim field() As Double, load(1 To COMPONENT_COUNT) As Double, lambda As Double, i As Long, j As Long
+    ReDim field(1 To mDegreeCount): ReDim residual(1 To size)
+    For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * coordinates(i): Next i
+    lambda = mHybridSeed(size) + mHybridScales(size) * coordinates(size)
+    SetControlledLoad lambda, load
+    If Not Evaluate(field, withJacobian, recordTrial:=False) Then Exit Function
+    For i = 1 To mDegreeCount
+        residual(i) = mResidual(i)
+        If i >= mGaugeStart Then residual(i) = residual(i) * mReferenceModulus
+    Next i
+    residual(size) = ControlResidual(field)
+    If withJacobian Then
+        BuildControlledMatrix jacobian, size
+        For j = 1 To size
+            For i = 1 To size
+                jacobian(j, i) = jacobian(j, i) * mHybridScales(j)
+                If i >= mGaugeStart And i <= mDegreeCount Then jacobian(j, i) = jacobian(j, i) * mReferenceModulus
+            Next i
+        Next j
+    End If
+    ICoupledEquationSystem_TryEvaluate = True
 End Function
 
 ' Проверяет поправку служебного множителя без записи материальной пробы.
@@ -2326,6 +2496,8 @@ Private Function DiagnosticSummary() As String
         "; пересборок ветвей стали: " & CStr(mSteelBranchBuilds)
     If mSteelFieldTangents > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; разностных бетонных касательных по полю: " & CStr(mSteelFieldTangents)
+    If mHybridEvaluations > 0 Then DiagnosticSummary = DiagnosticSummary & "; гибридных поправок: " & CStr(mHybridSteps) & _
+        "; глобальных касательных: " & CStr(mHybridMatrices) & "; разностных и прочих гибридных проб: " & CStr(mHybridEvaluations)
 End Function
 
 ' Выбирает границу по действительному отклонённому отрезку и решает общую точку и входящую сторону от одной истории.
