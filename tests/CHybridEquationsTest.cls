@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -72,6 +72,12 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
         Case "NoRoot"
             residual(1) = coordinates(1) ^ 2 + 1#
             If withJacobian Then jacobian(1, 1) = 2# * coordinates(1)
+        Case "Hinge"
+            residual(1) = coordinates(1) - 1#: residual(2) = Abs(coordinates(2))
+            If withJacobian Then jacobian(1, 1) = 1#: jacobian(2, 2) = Sgn(coordinates(2))
+        Case "HingeCurve"
+            residual(1) = coordinates(1) ^ 2 - 1#: residual(2) = coordinates(2) + 0.5 * Abs(coordinates(2))
+            If withJacobian Then jacobian(1, 1) = 2# * coordinates(1): jacobian(2, 2) = 1# + 0.5 * Sgn(coordinates(2))
         Case "Degenerate"
             residual(1) = coordinates(1) + coordinates(2) - 3#: residual(2) = 2# * residual(1)
             If withJacobian Then

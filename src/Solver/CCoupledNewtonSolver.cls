@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -16,6 +16,7 @@ Option Explicit
 ' Каждая проба демпфирования пересчитывает весь остаток. С боковыми
 ' историями градиент напряжений определяется по двум продольным точкам.
 Implements ICoupledEquationSystem
+Implements ICoupledDifferenceObserver
 
 Private Const COMPONENT_COUNT As Long = 6
 Private Const GAUGE_COUNT As Long = 4
@@ -39,6 +40,7 @@ Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходуе�
 Private Const HYBRID_DIFFERENCE_STEP As Double = 0.000001 ' Относительный шаг производной полной системы в подготовленных координатах.
 Private Const HYBRID_STRAIN_SCALE As Double = 0.00001 ' Единичное перемещение численной координаты ограничено этой компонентой деформации.
 Private Const HYBRID_AUXILIARY_SCALE As Double = 0.01 ' Масштаб множителей связей и lambda, без изменения их уравнений.
+Private Const MATERIAL_RECOVERY_RESERVE As Long = 4 ' Часть общего бюджета для перехода после наблюдённого разностного пересечения.
 
 Private Type TYieldStation
     Point As Long
@@ -91,6 +93,7 @@ Private mYieldRecoveryTried As Boolean, mSameControlRecoveryTried As Boolean
 Private mRecoveredControlReady As Boolean
 Private mSameControlInitialFailure As String
 Private mRecoveredProjection() As Double
+Private mRecoveredControlUncertainty As Double
 Private mConsistentControl As Boolean
 Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
@@ -245,7 +248,7 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
-        Optional ByVal conditionHybridRecovery As Boolean = False) As Boolean
+        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -270,7 +273,7 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
         recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
         allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#), _
-        allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery)
+        allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery, referenceLambda:=referenceLambda)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -517,9 +520,11 @@ Private Function ArcFieldIsLocal(ByRef coefficients() As Double, ByRef projectio
 End Function
 
 ' Возвращает новую линейную меру только для подтверждённой пробы восстановления.
-Friend Function CopyRecoveredControl(ByRef projection() As Double) As Boolean
+Friend Function CopyRecoveredControl(ByRef projection() As Double, Optional ByRef uncertainty As Double) As Boolean
+    uncertainty = 0#
     If Not mCandidateReady Or Not mRecoveredControlReady Then Exit Function
     projection = mRecoveredProjection
+    uncertainty = mRecoveredControlUncertainty
     CopyRecoveredControl = True
 End Function
 
@@ -878,7 +883,7 @@ Private Sub ResetSolveState()
     mDirectProofMatrix = False: mMeta.Clear: mCandidateReady = False
     mYieldRecoveryTried = False: mSameControlRecoveryTried = False: mWrongControlDirection = False
     mSameControlInitialFailure = vbNullString
-    mRecoveredControlReady = False: Erase mRecoveredProjection
+    mRecoveredControlReady = False: mRecoveredControlUncertainty = 0#: Erase mRecoveredProjection
     mHasRejectedDirection = False: Erase mRejectedDirection
     mHasTransitionSegment = False: mPrincipalIncomingCandidate = False: mPrincipalDesignVerified = False
     mPrincipalOutgoingCandidate = False: Set mPrincipalDeparture = Nothing
@@ -896,7 +901,7 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
         Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
-        Optional ByVal conditionHybridRecovery As Boolean = False) As Boolean
+        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#) As Boolean
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -923,6 +928,8 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
             Exit Function
         End If
     End If
+    Dim controlPrediction As Variant
+    If mControlActive Then controlPrediction = current ' Первоначальный прогноз сохраняется отдельно от неудачных поправок того же шага.
     Do
 RecomputeTangent:
         If mControlActive Then SetControlledLoad currentLambda, load
@@ -1102,7 +1109,7 @@ RecomputeTangent:
                 End If
             End If
             If Not SolveStep And allowHybridRecovery Then SolveStep = TryHybridControlledField(current, currentLambda, load, _
-                absoluteTolerance, relativeTolerance, maxIterations, conditionHybridRecovery)
+                absoluteTolerance, relativeTolerance, maxIterations, conditionHybridRecovery, controlPrediction, initialLambda, referenceLambda)
             Exit Function
         End If
         mIterations = mIterations + 1
@@ -1137,7 +1144,8 @@ End Function
 ' Гибридная норма проверяется на заданном абсолютном допуске; публикация поля отдельно проверяет полное равновесие и однозначность.
 Private Function TryHybridControlledField(ByRef current() As Double, ByVal initialLambda As Double, ByRef load() As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByVal conditionRecovery As Boolean = False) As Boolean
+        Optional ByVal conditionRecovery As Boolean = False, Optional ByRef prediction As Variant, Optional ByVal predictionLambda As Double = 0#, _
+        Optional ByVal referenceLambda As Double = 0#) As Boolean
     If Not mControlActive Or mArcLoadProjection <> 0# Or Not SupportsHybridRecovery Then Exit Function
     If mCandidateReady Or mHybridActive Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
     If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
@@ -1162,11 +1170,20 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     Dim hybrid As New CCoupledHybridSolver, equations As ICoupledEquationSystem
     Set equations = Me
     Dim functionLimit As Long: functionLimit = CLng(CDbl(remaining + 1) * (2# * size + 1#) + remaining)
+    Dim reserved As Long, ordinarySteps As Long, ordinaryCalls As Long
+    If referenceLambda > 0# And remaining >= 4 Then
+        If TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
+                TypeOf mMinusResponse Is CCoupledReinforcedResponse Then reserved = GeomMin(MATERIAL_RECOVERY_RESERVE, remaining \ 2)
+    End If
+    ordinarySteps = remaining - reserved: ordinaryCalls = functionLimit - reserved * (2 * size + 2)
     ActivateHybridContext
     Dim converged As Boolean
-    converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, absoluteTolerance, _
+    Dim observer As ICoupledDifferenceObserver
+    If reserved > 0 Then Set observer = Me
+    converged = hybrid.TrySolve(equations, coordinates, ordinaryCalls, ordinarySteps, absoluteTolerance, _
         0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
-        automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery)
+        automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery, captureDifferenceBracket:=(reserved > 0), _
+        differenceObserver:=observer, completeNewtonLineSearch:=(reserved > 0))
     mHybridActive = False
     mIterations = mIterations + hybrid.Steps
     mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls
@@ -1188,7 +1205,28 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
         GoTo RestoreFailure
     End If
     Dim tolerance As Double: tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
-    If EquilibriumNorm(load, field) > tolerance Or Not GaugesVerified(tolerance) Then GoTo RestoreFailure
+    Dim unresolved As Boolean
+    If referenceLambda > 0# Then unresolved = (lambda <= referenceLambda + 8# * relativeTolerance * (1# + Abs(referenceLambda)))
+    If EquilibriumNorm(load, field) > tolerance Or Not GaugesVerified(tolerance) Or unresolved Then
+        If unresolved Then original.DiagnosticDetails = original.DiagnosticDetails & "; пробный множитель не даёт различимого приращения от принятого lambda: " & CStr(referenceLambda)
+        If referenceLambda > 0# And Not IsMissing(prediction) Then
+            If Not IsEmpty(prediction) Then
+                Dim materialDetails As String
+                If TryDifferenceMaterialField(hybrid, prediction, predictionLambda, load, absoluteTolerance, relativeTolerance, _
+                        maxIterations, functionLimit - hybrid.FunctionCalls - 1, referenceLambda, materialDetails) Then
+                    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & " | Исходная численная проба: " & original.DiagnosticDetails
+                    TryHybridControlledField = True
+                    Exit Function
+                End If
+                If Len(materialDetails) > 0 Then original.DiagnosticDetails = original.DiagnosticDetails & " | " & materialDetails
+                If mFailureCode <> sfcNone And mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+                    RecordFailure mFailureCode, "Материальная проба разностного перехода не дала допустимого отклика."
+                    Exit Function
+                End If
+            End If
+        End If
+        GoTo RestoreFailure
+    End If
     mCandidate = field: PublishCandidate lambda
     mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; равновесие подтверждено после гибридного резерва" & _
         " | Исходная численная проба: " & original.DiagnosticDetails
@@ -1208,6 +1246,153 @@ Failed:
     mHybridActive = False
     If errorNumber = 6 Or errorNumber = 11 Then Resume RestoreFailure
     Err.Raise errorNumber, errorSource, errorDescription
+End Function
+
+' Использует фактически вычисленное разностное пересечение и исходный прогноз только в оставшемся бюджете того же шага.
+' История не принимается; новый контроль публикуется после полной силовой проверки и оценки точности lambda.
+Private Function TryDifferenceMaterialField(ByVal observed As CCoupledHybridSolver, ByRef prediction As Variant, _
+        ByVal predictionLambda As Double, ByRef load() As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maxIterations As Long, ByVal functionBudget As Long, ByVal referenceLambda As Double, ByRef details As String) As Boolean
+    details = vbNullString
+    If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
+            TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
+    Dim remaining As Long: remaining = maxIterations - mIterations
+    Dim size As Long: size = mDegreeCount + 1
+    details = "Материальный резерв: осталось поправок " & CStr(remaining) & "; чтений " & CStr(functionBudget)
+    If remaining < 2 Or functionBudget < 2 * size + 4 Then Exit Function
+    Dim before() As Double, after() As Double, score As Double, column As Long, i As Long
+    If Not observed.CopyDifferenceBracket(before, after, score, column) Then
+        details = details & "; подтверждённого разностного пересечения нет"
+        Exit Function
+    End If
+    Dim first() As Double, last() As Double, seed() As Double
+    ReDim first(1 To mDegreeCount): ReDim last(1 To mDegreeCount)
+    seed = prediction
+    If LBound(seed) <> 1 Or UBound(seed) <> mDegreeCount Then Err.Raise 5, "CCoupledNewtonSolver", "Размер прогноза материального перехода не совпадает с полем."
+    For i = 1 To mDegreeCount
+        first(i) = mHybridSeed(i) + mHybridScales(i) * before(i)
+        last(i) = mHybridSeed(i) + mHybridScales(i) * after(i)
+    Next i
+    Dim station As TYieldStation
+    If Not FirstYieldCrossing(first, last, station) Then Exit Function
+    Dim target As Double
+    If Not PredictedMaterialLevel(station, seed, target) Then Exit Function
+    details = "Разностный переход: точка " & CStr(station.Point) & "; станция " & CStr(station.Side) & "; столбец " & CStr(column) & _
+        "; уровень, МПа: " & CStr(target) & "; осталось поправок: " & CStr(remaining)
+    Dim originalProjection() As Double, originalTarget As Double, originalConsistent As Boolean
+    originalProjection = mControlProjection: originalTarget = mTargetControl: originalConsistent = mConsistentControl
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    On Error GoTo Failed
+    ReDim mHybridSeed(1 To size)
+    For i = 1 To mDegreeCount: mHybridSeed(i) = seed(i): Next i
+    mHybridSeed(size) = predictionLambda: mHybridOriginRevision = mAcceptedRevision
+    ActivateHybridContext
+    Dim scalar As ICoupledScalarConstraint: Set scalar = CreateMaterialConstraint(station.Point, station.Side, station.PrincipalIndex, target)
+    If scalar Is Nothing Then GoTo Restore
+    Dim zero() As Double, gradient() As Double, value As Double, largest As Double
+    ReDim zero(1 To size)
+    If Not scalar.TryEvaluate(zero, True, value, gradient) Then GoTo Restore
+    For i = 1 To mGaugeStart - 1: largest = GeomMax(largest, Abs(gradient(i))): Next i
+    If largest = 0# Then GoTo Restore
+    Dim projected As New CCoupledConstraintEquations, equations As ICoupledEquationSystem
+    projected.Initialize Me, scalar, zero, YIELD_ROOT_TOLERANCE, 16
+    Set equations = projected
+    Dim solver As New CCoupledHybridSolver, solution() As Double, mapped() As Double, solved As Boolean
+    solved = solver.TrySolve(equations, zero, functionBudget - 2, remaining, absoluteTolerance, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, automaticScaling:=True, freshJacobian:=True)
+    mIterations = mIterations + solver.Steps
+    mHybridSteps = mHybridSteps + solver.Steps: mHybridMatrices = mHybridMatrices + solver.JacobianCalls
+    mHybridEvaluations = mHybridEvaluations + solver.FunctionCalls
+    details = details & "; использовано поправок: " & CStr(solver.Steps) & "; чтений: " & CStr(solver.FunctionCalls) & _
+        "; лучшая невязка, МПа: " & CStr(solver.BestResidual)
+    If Not solver.HasBestPoint Then GoTo Restore
+    If Not projected.TryMap(solution, mapped) Then GoTo Restore
+    If Not scalar.TryEvaluate(mapped, True, value, gradient) Then GoTo Restore
+    Dim field() As Double, projection() As Double, lambda As Double, coordinate As Double
+    ReDim field(1 To mDegreeCount): ReDim projection(1 To mDegreeCount)
+    For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * mapped(i): Next i
+    lambda = mHybridSeed(size) + mHybridScales(size) * mapped(size)
+    For i = 1 To mGaugeStart - 1
+        projection(i) = gradient(i) / (mHybridScales(i) * mReferenceModulus)
+        coordinate = coordinate + projection(i) * field(i)
+    Next i
+    mHybridActive = False: mControlProjection = projection: mTargetControl = coordinate
+    mConsistentControl = (station.PrincipalIndex = 0)
+    SetControlledLoad lambda, load
+    If Not Evaluate(field, False) Then GoTo Restore
+    Dim tolerance As Double: tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    If EquilibriumNorm(load, field) > tolerance Or Not GaugesVerified(tolerance) Then GoTo Restore
+    mCandidate = field: PublishCandidate lambda
+    Dim uncertainty As Double
+    If Not TrialLambdaUncertainty(absoluteTolerance, relativeTolerance, uncertainty) Then GoTo Restore
+    If referenceLambda > 0# Then
+        If lambda <= referenceLambda + 8# * relativeTolerance * (1# + Abs(referenceLambda)) + uncertainty Then GoTo Restore
+    End If
+    mRecoveredProjection = projection: mRecoveredControlReady = True: mRecoveredControlUncertainty = uncertainty
+    mYieldRecoveryTried = True
+    mMeta.DiagnosticDetails = DiagnosticSummary() & "; равновесие восстановлено по разностному материальному переходу; точка: " & _
+        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; материальная координата, МПа: " & CStr(target)
+    TryDifferenceMaterialField = True
+    Exit Function
+Restore:
+    mHybridActive = False: mCandidateReady = False: mRecoveredControlReady = False: mRecoveredControlUncertainty = 0#
+    mControlProjection = originalProjection: mTargetControl = originalTarget: mConsistentControl = originalConsistent
+    On Error GoTo 0
+    If errorNumber <> 0 Then Err.Raise errorNumber, errorSource, errorText
+    Exit Function
+Failed:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    Resume Restore
+End Function
+
+' Подтверждает материалом разностную пробу в действующем контексте; обычные уравнения и принятая история остаются неизменными.
+Private Function ICoupledDifferenceObserver_AcceptBracket(ByRef before() As Double, ByRef after() As Double) As Boolean
+    If Not mHybridActive Or mAcceptedRevision <> mHybridOriginRevision Then Exit Function
+    If Not (TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
+            TypeOf mMinusResponse Is CCoupledReinforcedResponse) Then Exit Function
+    Dim first() As Double, last() As Double, i As Long
+    ReDim first(1 To mDegreeCount): ReDim last(1 To mDegreeCount)
+    For i = 1 To mDegreeCount
+        first(i) = mHybridSeed(i) + mHybridScales(i) * before(i)
+        last(i) = mHybridSeed(i) + mHybridScales(i) * after(i)
+    Next i
+    Dim station As TYieldStation, point As Long, side As Long
+    For point = 1 To mSection.ConcretePointCount
+        For side = -1 To 1
+            If ReadYieldCrossing(point, side, first, last, station) Then
+                ICoupledDifferenceObserver_AcceptBracket = True
+                Exit Function
+            End If
+        Next side
+    Next point
+End Function
+
+' Переносит размер исходного прогноза на выбранную координату по максимальному нагружению действительных бетонных точек.
+' Это численная мера шага; она не меняет диаграммы, направление силовой траектории или критерии предельного состояния.
+Private Function PredictedMaterialLevel(ByRef selected As TYieldStation, ByRef prediction() As Double, ByRef target As Double) As Boolean
+    Dim strain(1 To COMPONENT_COUNT) As Double, unused(1 To COMPONENT_COUNT) As Double, before As Double, after As Double
+    YieldStrain selected.Point, selected.Side, mAccepted, strain
+    If Not ReadTransitionValue(selected, strain, before, unused, False) Then Exit Function
+    YieldStrain selected.Point, selected.Side, prediction, strain
+    If Not ReadTransitionValue(selected, strain, after, unused, False) Then Exit Function
+    Dim direction As Double: direction = Sgn(after - before)
+    If direction = 0# Then Exit Function
+    Dim largest As Double, loading As Double, probe As TYieldStation, point As Long, side As Long, acceptedValue As Double
+    acceptedValue = before
+    For point = 1 To mSection.ConcretePointCount
+        For side = -1 To 1
+            probe.Point = point: probe.Side = side: probe.PrincipalIndex = selected.PrincipalIndex
+            YieldStrain point, side, mAccepted, strain
+            If Not ReadTransitionValue(probe, strain, before, unused, False) Then Exit Function
+            YieldStrain point, side, prediction, strain
+            If Not ReadTransitionValue(probe, strain, after, unused, False) Then Exit Function
+            loading = direction * (after - before)
+            If loading > largest Then largest = loading
+        Next side
+    Next point
+    If largest <= 0# Then Exit Function
+    target = acceptedValue + direction * largest
+    PredictedMaterialLevel = True
 End Function
 
 ' Разрешает контроллеру запросить полный разностный резерв только для пространственной истории без спектральных границ.
@@ -1399,7 +1584,7 @@ Private Function TrySameControlSeed(ByRef field() As Double, ByRef lambda As Dou
     field = mCandidate: lambda = mTrialLambda
     mControlProjection = originalProjection: mTargetControl = originalTarget
     DiscardStep
-    mRecoveredControlReady = False: Erase mRecoveredProjection
+    mRecoveredControlReady = False: mRecoveredControlUncertainty = 0#: Erase mRecoveredProjection
     TrySameControlSeed = True
 End Function
 

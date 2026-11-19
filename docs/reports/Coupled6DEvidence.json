@@ -332,7 +332,8 @@
     "CoupledYieldSequence20261119": "B50C24E011F5C1A60A7A88B1C9C76C8E3298C9A97AE43341F454430FCA8E2351",
     "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8",
     "CoupledOriginalAccuracy20261119": "7B1AAE74E0F3BFDA8F857DCC09DF3A383FAD4EA048C367727A30F386F96F819E",
-    "CoupledControlStopping20261119": "A62B0818B5640A4C1F676AA24FE5E58E8D8645BEA7DC903063F36CEC17F1C364"
+    "CoupledControlStopping20261119": "A62B0818B5640A4C1F676AA24FE5E58E8D8645BEA7DC903063F36CEC17F1C364",
+    "CoupledLiveDifference20261119": "A25C39136BAC32AAE3CB3EAFD1A4F8B9F70A222B8CE9D2061757FD14C9E8903C"
   },
   "cases": [
     {
@@ -5127,6 +5128,48 @@
       "stdout_contains": "ALL MATERIAL GRADIENTS NEGATIVE CONDITION SELECTION AND REQUESTED HYBRID STOPPING VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "4AC1FBF425CAF66DC219D1BABCEDC5A4E80FFA6432C2062B1A2756A7E3FA096E"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-live-difference-native",
+      "journal_section": 630,
+      "archive": "CoupledLiveDifference20261119",
+      "script": "Check-TestLiveDifference.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ACTUAL VBA 649 TARGETED ASSERTIONS LIVE STEP STOCK TIMEOUT AND DISABLED DEFAULT VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "27DF490FB07B6D369C2922455A388101704CA897243D6B1126B9E7D64FA436FB"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-live-difference-mechanics",
+      "journal_section": 630,
+      "archive": "CoupledLiveDifference20261119",
+      "script": "Check-TestLiveDifference.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "LIVE AUTOMATIC MATERIAL STEP ALL EQUATIONS AND NEGATIVE WHOLE SEARCH VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "955557E2FD56EE8F5007AF499C3CAEDEC0D3639A1983FD473161B7179C7D936E"
       },
       "timeout_seconds": 300
     }

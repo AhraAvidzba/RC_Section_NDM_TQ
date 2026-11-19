@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -28,6 +28,8 @@ Private mFunctionCalls As Long, mJacobianCalls As Long, mSteps As Long, mAccepte
 Private mBestNorm As Double, mBest() As Double, mBestResidual() As Double
 Private mHasBest As Boolean
 Private mRestarts As Long
+Private mHasDifferenceBracket As Boolean, mDifferenceBefore() As Double, mDifferenceAfter() As Double
+Private mDifferenceScore As Double, mDifferenceColumn As Long
 
 ' Ищет равновесие в масштабированных координатах и возвращает лучшую фактически вычисленную точку.
 ' Успех требует заданной максимальной невязки; малый шаг HYBRJ сам по себе успехом не считается.
@@ -35,20 +37,33 @@ Private mRestarts As Long
 ' При relativeDifferenceStep>0 касательная строится центральной разностью полной системы;
 ' каждая внутренняя разностная проба входит в общий maxEvaluations и счётчик FunctionCalls.
 ' automaticScaling и freshJacobian меняют только численную стратегию; критерий невязки и общие бюджеты сохраняются.
+' captureDifferenceBracket сохраняет две вычисленные разностные пробы без дополнительных обращений к отклику.
+' completeNewtonLineSearch выбирает полный разностный Newton с поиском убывания по Армихо в тех же бюджетах.
 Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByRef solution() As Double, _
         Optional ByVal maxRestarts As Long = 0, Optional ByVal relativeDifferenceStep As Double = 0#, _
-        Optional ByVal automaticScaling As Boolean = False, Optional ByVal freshJacobian As Boolean = False) As Boolean
+        Optional ByVal automaticScaling As Boolean = False, Optional ByVal freshJacobian As Boolean = False, _
+        Optional ByVal captureDifferenceBracket As Boolean = False, Optional ByVal differenceObserver As ICoupledDifferenceObserver = Nothing, _
+        Optional ByVal completeNewtonLineSearch As Boolean = False) As Boolean
     mRestarts = 0
+    mHasDifferenceBracket = False: mDifferenceScore = 0#: mDifferenceColumn = 0
+    Erase mDifferenceBefore: Erase mDifferenceAfter
     If maxRestarts < 0 Then Err.Raise 5, "CCoupledHybridSolver", "Число повторных стартов не может быть отрицательным."
     If relativeDifferenceStep < 0# Then Err.Raise 5, "CCoupledHybridSolver", "Шаг численного дифференцирования не может быть отрицательным."
+    If completeNewtonLineSearch And relativeDifferenceStep = 0# Then _
+        Err.Raise 5, "CCoupledHybridSolver", "Для полного разностного Newton требуется положительный шаг дифференцирования."
     Dim start() As Double, usedFunctions As Long, usedJacobians As Long, usedSteps As Long, usedAccepted As Long
     Dim solved As Boolean, attempt As Long
     start = initial
     For attempt = 0 To maxRestarts
-        solved = SolveFrom(equations, start, maxEvaluations - usedFunctions, maxSteps - usedSteps, _
-            residualTolerance, stepTolerance, initialRadius, relativeDifferenceStep, solution, automaticScaling, freshJacobian)
+        If completeNewtonLineSearch Then
+            solved = SolveNewtonFrom(equations, start, maxEvaluations - usedFunctions, maxSteps - usedSteps, _
+                residualTolerance, relativeDifferenceStep, solution, captureDifferenceBracket, differenceObserver)
+        Else
+            solved = SolveFrom(equations, start, maxEvaluations - usedFunctions, maxSteps - usedSteps, _
+                residualTolerance, stepTolerance, initialRadius, relativeDifferenceStep, solution, automaticScaling, freshJacobian, captureDifferenceBracket, differenceObserver)
+        End If
         usedFunctions = usedFunctions + mFunctionCalls: usedJacobians = usedJacobians + mJacobianCalls
         usedSteps = usedSteps + mSteps: usedAccepted = usedAccepted + mAccepted
         If solved Or Not mHasBest Or attempt = maxRestarts Then Exit For
@@ -60,11 +75,70 @@ Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initia
     TrySolve = solved
 End Function
 
+' Восстанавливает полную касательную на каждом принятом поле; до 21 доли одной поправки проверяются по фактической норме.
+' Ни уменьшение шага, ни отказ линейной системы не объявляются физическим пределом; каждая проба расходует общий бюджет.
+Private Function SolveNewtonFrom(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
+        ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, ByVal relativeStep As Double, _
+        ByRef solution() As Double, ByVal captureBracket As Boolean, ByVal observer As ICoupledDifferenceObserver) As Boolean
+    On Error GoTo ArithmeticFailure
+    mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mStopCode = 0
+    mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
+    If equations Is Nothing Then Exit Function
+    Dim count As Long: count = UBound(initial)
+    If LBound(initial) <> 1 Or count < 1 Or maxEvaluations < 1 Or maxSteps < 1 Or residualTolerance < 0# Then Exit Function
+    Dim x() As Double, residual() As Double, matrix() As Double, correction() As Double, trial() As Double, nextResidual() As Double
+    x = initial
+    If Not ReadResidual(equations, x, residual, matrix, count) Then GoTo Finished
+    Dim algebra As New CCoupledHybridFactorization, linear As New CCoupledLinearSystem
+    Dim baseNorm As Double, norm As Double, alpha As Double, division As Long, i As Long, accepted As Boolean
+    Do
+        If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+        If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
+        mJacobianCalls = mJacobianCalls + 1
+        If Not BuildDifferenceJacobian(equations, x, residual, relativeStep, maxEvaluations, matrix, count, captureBracket, observer) Then Exit Do
+        ReDim correction(1 To count)
+        For i = 1 To count: correction(i) = -residual(i): Next i
+        If Not linear.Solve(matrix, correction, count) Then mStopCode = 3: Exit Do
+        baseNorm = algebra.VectorNorm(residual, 1, count): alpha = 1#: accepted = False
+        mSteps = mSteps + 1
+        For division = 0 To 20
+            If mFunctionCalls >= maxEvaluations Then mStopCode = 2: Exit For
+            trial = x
+            For i = 1 To count: trial(i) = x(i) + alpha * correction(i): Next i
+            If ReadResidual(equations, trial, nextResidual, matrix, count) Then
+                norm = algebra.VectorNorm(nextResidual, 1, count)
+                If norm <= (1# - 0.0001 * alpha) * baseNorm Then
+                    x = trial: residual = nextResidual: mAccepted = mAccepted + 1: accepted = True
+                    Exit For
+                End If
+            ElseIf mStopCode <> -1 Then
+                Exit For
+            Else
+                mStopCode = 0 ' Отсутствие отклика одной доли не исключает меньшую долю той же поправки.
+            End If
+            alpha = alpha * 0.5
+        Next division
+        If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+        If mStopCode <> 0 Then Exit Do
+        If Not accepted Then mStopCode = 5: Exit Do
+    Loop
+Finished:
+    If mHasBest Then solution = mBest: SolveNewtonFrom = (mBestNorm <= residualTolerance)
+    Exit Function
+ArithmeticFailure:
+    Dim errorNumber As Long, errorSource As String, errorDescription As String
+    errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
+    If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
+    mStopCode = -2
+    Resume Finished
+End Function
+
 ' Выполняет один HYBRJ без принятия истории материалов. Повторный старт разрешает только внешний ограниченный цикл.
 Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByVal relativeDifferenceStep As Double, _
-        ByRef solution() As Double, ByVal automaticScaling As Boolean, ByVal freshJacobian As Boolean) As Boolean
+        ByRef solution() As Double, ByVal automaticScaling As Boolean, ByVal freshJacobian As Boolean, _
+        ByVal captureDifferenceBracket As Boolean, ByVal differenceObserver As ICoupledDifferenceObserver) As Boolean
     On Error GoTo ArithmeticFailure
     mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mStopCode = 0
     mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
@@ -91,7 +165,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
         If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
         mJacobianCalls = mJacobianCalls + 1
         If relativeDifferenceStep > 0# Then
-            If Not BuildDifferenceJacobian(equations, x, relativeDifferenceStep, maxEvaluations, matrix, count) Then Exit Do
+            If Not BuildDifferenceJacobian(equations, x, residual, relativeDifferenceStep, maxEvaluations, matrix, count, captureDifferenceBracket, differenceObserver) Then Exit Do
         Else
             If Not equations.TryEvaluate(x, True, residual, matrix) Then mStopCode = -1: Exit Do
         End If
@@ -191,10 +265,13 @@ End Function
 ' Строит касательную неизменённой полной невязки; пробные точки не принимают материальную историю.
 ' Недостающий бюджет останавливает построение до следующей пары, не публикуя частичную матрицу.
 Private Function BuildDifferenceJacobian(ByVal equations As ICoupledEquationSystem, ByRef x() As Double, _
-        ByVal relativeStep As Double, ByVal maximumCalls As Long, ByRef matrix() As Double, ByVal count As Long) As Boolean
+        ByRef baseResidual() As Double, ByVal relativeStep As Double, ByVal maximumCalls As Long, _
+        ByRef matrix() As Double, ByVal count As Long, ByVal captureBracket As Boolean, ByVal observer As ICoupledDifferenceObserver) As Boolean
     ReDim matrix(1 To count, 1 To count)
     Dim point() As Double, plus() As Double, minus() As Double, unusedMatrix() As Double
     Dim column As Long, row As Long, delta As Double
+    Dim asymmetry() As Double, steps() As Double
+    If captureBracket Then ReDim asymmetry(1 To count, 1 To count): ReDim steps(1 To count)
     For column = 1 To count
         If mFunctionCalls + 2 > maximumCalls Then mStopCode = 2: Exit Function
         delta = relativeStep * (1# + Abs(x(column)))
@@ -204,8 +281,53 @@ Private Function BuildDifferenceJacobian(ByVal equations As ICoupledEquationSyst
         point(column) = x(column) - delta
         If Not ReadResidual(equations, point, minus, unusedMatrix, count) Then Exit Function
         For row = 1 To count: matrix(column, row) = (plus(row) - minus(row)) / (2# * delta): Next row
+        If captureBracket Then
+            steps(column) = delta
+            For row = 1 To count: asymmetry(column, row) = ((plus(row) - baseResidual(row)) + (minus(row) - baseResidual(row))) / delta: Next row
+        End If
     Next column
+    If captureBracket Then RecordDifferenceBracket x, steps, asymmetry, matrix, count, observer
     BuildDifferenceJacobian = True
+End Function
+
+' Сохраняет наиболее асимметричный столбец только полностью построенной матрицы, без новых вызовов функции или изменения решения.
+Private Sub RecordDifferenceBracket(ByRef x() As Double, ByRef steps() As Double, ByRef asymmetry() As Double, _
+        ByRef matrix() As Double, ByVal count As Long, ByVal observer As ICoupledDifferenceObserver)
+    If observer Is Nothing Then
+        mHasDifferenceBracket = False: mDifferenceScore = 0#: mDifferenceColumn = 0
+        Erase mDifferenceBefore: Erase mDifferenceAfter
+    End If
+    Dim norms As New CCoupledHybridFactorization, rowNorm() As Double, values() As Double, i As Long, j As Long
+    ReDim rowNorm(1 To count): ReDim values(1 To count)
+    For i = 1 To count
+        For j = 1 To count: values(j) = matrix(j, i): Next j
+        rowNorm(i) = norms.VectorNorm(values, 1, count)
+        If rowNorm(i) = 0# Then rowNorm(i) = 1# ' Нулевая линейная строка не скрывает наблюдавшуюся нелинейность.
+    Next i
+    Dim score As Double, best As Double, before() As Double, after() As Double, accepted As Boolean
+    For j = 1 To count
+        For i = 1 To count: values(i) = asymmetry(j, i) / rowNorm(i): Next i
+        score = norms.VectorNorm(values, 1, count)
+        If score > best Then
+            before = x: after = x
+            before(j) = x(j) - steps(j): after(j) = x(j) + steps(j)
+            accepted = True
+            If Not observer Is Nothing Then accepted = observer.AcceptBracket(before, after)
+            If accepted Then
+                mDifferenceBefore = before: mDifferenceAfter = after
+                mDifferenceScore = score: mDifferenceColumn = j: mHasDifferenceBracket = True: best = score
+            End If
+        End If
+    Next j
+End Sub
+
+' Копирует наиболее асимметричную подтверждённую пробу последней подходящей полной матрицы текущего TrySolve.
+' Это диагностическое пересечение; наличие пробы само по себе не подтверждает равновесие или смену физической ветви.
+Friend Function CopyDifferenceBracket(ByRef before() As Double, ByRef after() As Double, ByRef score As Double, ByRef column As Long) As Boolean
+    Erase before: Erase after: score = 0#: column = 0
+    If Not mHasDifferenceBracket Then Exit Function
+    before = mDifferenceBefore: after = mDifferenceAfter: score = mDifferenceScore: column = mDifferenceColumn
+    CopyDifferenceBracket = True
 End Function
 
 ' Вычисляет одну невязку и сохраняет точную лучшую точку без округления ключей или координат.

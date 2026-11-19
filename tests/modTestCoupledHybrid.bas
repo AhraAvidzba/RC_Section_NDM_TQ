@@ -1,4 +1,4 @@
-Attribute VB_Name = "modTestCoupledHybrid"
+﻿Attribute VB_Name = "modTestCoupledHybrid"
 Option Explicit
 
 ' ==========================================================================
@@ -94,6 +94,102 @@ Public Function RunTestCoupledHybrid() As String
     ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
     solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, automaticScaling:=True, freshJacobian:=True)
     TestCheck Not solved And solver.BestResidual >= 1#, "automatic scale does not create nonexistent root", report, passed, failedCount
+    Dim bracketBefore() As Double, bracketAfter() As Double, bracketScore As Double, bracketColumn As Long
+    Dim plain() As Double, plainCalls As Long, plainSteps As Long, plainSolved As Boolean
+    ReDim initial(1 To 2): initial(1) = 0#: initial(2) = 0#: adapter.InitializeTest "Hinge"
+    plainSolved = solver.TrySolve(equations, initial, 500, 50, 0.0000000001, 0.00000000001, 0.2, plain, relativeDifferenceStep:=0.000001)
+    plainCalls = solver.FunctionCalls: plainSteps = solver.Steps
+    adapter.InitializeTest "Hinge"
+    solved = solver.TrySolve(equations, initial, 500, 50, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, captureDifferenceBracket:=True)
+    TestCheck solved = plainSolved And solver.FunctionCalls = plainCalls And solver.Steps = plainSteps, _
+        "difference observer preserves convergence and all evaluation budgets", report, passed, failedCount
+    TestCheck solution(1) = plain(1) And solution(2) = plain(2), "difference observer preserves exact solution", report, passed, failedCount
+    TestCheck solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn), _
+        "fully evaluated nonsmooth stencil retained", report, passed, failedCount
+    TestCheck bracketColumn = 2 And bracketBefore(2) < 0# And bracketAfter(2) > 0# And bracketBefore(1) = bracketAfter(1), _
+        "observed bracket crosses actual hinge in selected column", report, passed, failedCount
+    bracketBefore(1) = 123#
+    TestCheck solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn) And bracketBefore(1) <> 123#, _
+        "returned bracket is an independent copy", report, passed, failedCount
+    adapter.InitializeTest "Hinge"
+    solved = solver.TrySolve(equations, initial, 2, 50, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, captureDifferenceBracket:=True)
+    TestCheck Not solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn) And solver.FunctionCalls <= 2, _
+        "incomplete matrix exposes no stale bracket", report, passed, failedCount
+    adapter.InitializeTest "Linear"
+    solved = solver.TrySolve(equations, initial, 500, 50, 0.0000000001, 0.00000000001, 0.2, solution, relativeDifferenceStep:=0.000001)
+    TestCheck Not solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn), _
+        "disabled observer clears prior solve bracket", report, passed, failedCount
+    Dim bracketObserver As New CHybridDifferenceObserverTest, observer As ICoupledDifferenceObserver
+    Set observer = bracketObserver
+    initial(1) = 0.5: initial(2) = 0#: adapter.InitializeTest "HingeCurve"
+    plainSolved = solver.TrySolve(equations, initial, 1000, 50, 0.0000000001, 0.00000000001, 0.2, plain, _
+        relativeDifferenceStep:=0.000001, freshJacobian:=True)
+    plainCalls = solver.FunctionCalls: plainSteps = solver.Steps
+    bracketObserver.InitializeTest True, True: adapter.InitializeTest "HingeCurve"
+    solved = solver.TrySolve(equations, initial, 1000, 50, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, freshJacobian:=True, captureDifferenceBracket:=True, differenceObserver:=observer)
+    TestCheck solved And plainSolved And Abs(solution(1) - 1#) < 0.000000001 And solution(2) = 0#, _
+        "confirmed observer retains known nonlinear root", report, passed, failedCount
+    TestCheck solution(1) = plain(1) And solution(2) = plain(2) And solver.FunctionCalls = plainCalls And solver.Steps = plainSteps, _
+        "confirmation preserves exact solution and original function budget", report, passed, failedCount
+    TestCheck bracketObserver.AcceptedTest = 1 And bracketObserver.CallsTest > 1 And solver.JacobianCalls > 1, _
+        "confirmation rejects later complete matrix probes", report, passed, failedCount
+    TestCheck solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn), _
+        "confirmed bracket survives later matrices without accepted crossings", report, passed, failedCount
+    TestCheck bracketColumn = 2 And bracketObserver.MatchesFirstTest(bracketBefore, bracketAfter), _
+        "retained confirmed bracket equals first observed Double coordinates", report, passed, failedCount
+    bracketObserver.InitializeTest False: adapter.InitializeTest "HingeCurve"
+    solved = solver.TrySolve(equations, initial, 1000, 50, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, freshJacobian:=True, captureDifferenceBracket:=True, differenceObserver:=observer)
+    TestCheck solved And bracketObserver.CallsTest > 0 And bracketObserver.AcceptedTest = 0 And _
+        Not solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn), _
+        "rejected crossings expose no previous solve bracket", report, passed, failedCount
+    TestCheck solution(1) = plain(1) And solution(2) = plain(2) And solver.FunctionCalls = plainCalls And solver.Steps = plainSteps, _
+        "rejecting observer preserves exact solution and budgets", report, passed, failedCount
+    bracketObserver.InitializeTest True: adapter.InitializeTest "HingeCurve"
+    solved = solver.TrySolve(equations, initial, 2, 50, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, captureDifferenceBracket:=True, differenceObserver:=observer)
+    TestCheck Not solved And bracketObserver.CallsTest = 0 And _
+        Not solver.CopyDifferenceBracket(bracketBefore, bracketAfter, bracketScore, bracketColumn), _
+        "partial matrix never calls confirmation observer", report, passed, failedCount
+    ReDim initial(1 To 2): adapter.InitializeTest "Linear"
+    solved = solver.TrySolve(equations, initial, 200, 20, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.000000001 And Abs(solution(2) + 2#) < 0.000000001, _
+        "complete Newton nonsymmetric known root", report, passed, failedCount
+    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest And solver.AcceptedSteps > 0, _
+        "complete Newton actual full function calls counted", report, passed, failedCount
+    initial(1) = -1.2: initial(2) = 1#: adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.000000001 And Abs(solution(2) - 1#) < 0.000000001, _
+        "complete Newton Armijo Rosenbrock root", report, passed, failedCount
+    TestCheck solver.FunctionCalls > 1 + 4 * solver.JacobianCalls + solver.Steps And solver.FunctionCalls = adapter.EvaluationCallsTest, _
+        "complete Newton backtracking uses counted function probes", report, passed, failedCount
+    adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 4, 100, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.FunctionCalls <= 4 And solver.FunctionCalls = adapter.EvaluationCallsTest And solver.Steps = 0, _
+        "complete Newton partial full matrix preserves function budget", report, passed, failedCount
+    adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 1000, 1, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.Steps = 1 And solver.StopCode = 2, _
+        "complete Newton all line probes share one correction budget", report, passed, failedCount
+    ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.BestResidual >= 1# And solver.FunctionCalls <= 1000 And solver.Steps <= 100, _
+        "complete Newton does not create nonexistent real root", report, passed, failedCount
+    adapter.InitializeTest "Cancel"
+    On Error Resume Next
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, completeNewtonLineSearch:=True)
+    cancelNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18, "complete Newton propagates cancellation", report, passed, failedCount
     Dim algebra As New CCoupledHybridFactorization, values(1 To 2) As Double
     values(1) = 1E+200: values(2) = 1E+200
     TestCheck Abs(algebra.VectorNorm(values, 1, 2) / 1E+200 - Sqr(2#)) < 0.000000000001, "large finite norm", report, passed, failedCount
