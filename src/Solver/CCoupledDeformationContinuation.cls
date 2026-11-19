@@ -87,8 +87,6 @@ Private mTrace As CCoupledLoadTrace, mLimitTrace As CCoupledLoadTrace
 Private mCurrentFields As Collection ' Принятый путь для воспроизводимой диагностики незавершённого поиска.
 Private mUsesTransverseControl As Boolean, mUnverifiedDecline As Boolean
 Private mUsesFieldControl As Boolean, mFieldControlChanges As Long
-Private mUsesSecantControl As Boolean, mSecantControlChanges As Long, mUnresolvedLoadPoints As Long
-Private mLastSecantControlRevision As Long ' Полная принятая секущая выбирается не более одного раза для той же истории.
 Private mLastFieldControlRevision As Long
 Private mLastHybridRevision As Long, mLastHybridProjection() As Double
 Private mLastHybridTarget As Double
@@ -130,7 +128,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mBranchTangentControl = False
     mUsesTransverseControl = False: mUnverifiedDecline = False
     mUsesFieldControl = False: mFieldControlChanges = 0
-    mUsesSecantControl = False: mSecantControlChanges = 0: mUnresolvedLoadPoints = 0: mLastSecantControlRevision = 0
     mLastFieldControlRevision = -1
     mLastHybridRevision = -1: Erase mLastHybridProjection
     mLastHybridTarget = 0#
@@ -197,7 +194,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, lastLoadUnresolved As Boolean
-    Dim lastSpatialReverse As Boolean
     Dim unresolvedSteel As Boolean, hybridRecovery As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
@@ -216,8 +212,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             Dim enteredCorner As Boolean
             If PrepareHybridRecovery(lastProbeFailed, lastLoadUnresolved, current.Coordinate, increment) Then
                 hybridRecovery = True
-            ElseIf TryChangeSpatialSecantControl(history, left, current, nominal, increment, minimum, lastSpatialReverse) Then
-                lastProbeFailed = False: lastNoProgress = False: lastLoadUnresolved = False: lastSpatialReverse = False
             ElseIf TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredCorner) Then
                 lastProbeFailed = False: lastNoProgress = False: smoothSteps = 0
             ElseIf enteredCorner Then
@@ -244,7 +238,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         lastProbeFailed = Not probed
         lastNoProgress = False: lastLoadUnresolved = False
-        lastSpatialReverse = False
         changedControl = False: smoothTrial = False
         If probed Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
@@ -257,7 +250,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             probed = UpdateTrialCoordinate(trial, current.Coordinate)
             If probed And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0 Or hybridRecovery) Then
                 probed = SpatialTrialAdvances(history, current)
-                lastSpatialReverse = Not probed
                 If Not probed Then mSolver.DiscardStep
             End If
             lastNoProgress = Not probed
@@ -292,8 +284,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If ResolveSteelCrossing(history, current, trial) Then Exit Sub
             smoothSteps = 0
             increment = increment * 0.5
-        ElseIf changedControl Or mFollowingLocalPeak Or mUnverifiedDecline Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Or _
-                (mUsesSecantControl And Abs(trial.Lambda - current.Lambda) <= LoadResolution(current.Lambda)) Then
+        ElseIf changedControl Or mFollowingLocalPeak Or mUnverifiedDecline Or trial.Lambda > current.Lambda + LoadResolution(current.Lambda) Then
             If trial.Lambda <= 0# Then
                 mSolver.DiscardStep
                 StopSearch "После локального максимума множитель вышел из области положительной нагрузки."
@@ -303,8 +294,6 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If mDesignHistoryIndex = 0 And current.Lambda < 1# And trial.Lambda >= 1# And mProbeCount + 2 <= PROBE_LIMIT Then
                 If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial, changedControl And mSolver.HasPrincipalBoundaries) Then Exit Sub
             End If
-            If mUsesSecantControl And Abs(trial.Lambda - current.Lambda) <= LoadResolution(current.Lambda) Then _
-                mUnresolvedLoadPoints = mUnresolvedLoadPoints + 1 ' Подтверждено продвижение поля; рост нагрузки и предел этим не подтверждаются.
             AcceptPoint history, trial
             If hybridRecovery Then mHybridRecoveredPoints = mHybridRecoveredPoints + 1
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
@@ -485,40 +474,10 @@ Private Function TryChangePostPeakControl(ByVal history As Collection, ByRef lef
     If spacing <= 0# Or currentCoordinate + 0.5 * spacing <= currentCoordinate Then Exit Function
 
     mProjection = alternate: mPostPeakControlName = name
-    mUsesTransverseControl = False: mUsesFieldControl = False: mUsesSecantControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
     left.Coordinate = previousCoordinate: current.Coordinate = currentCoordinate
     nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
     TryChangePostPeakControl = True
-End Function
-
-' Меняет вырожденную параметризацию после сошедшихся обратных полей и исчерпания деления шага.
-' Полная принятая секущая задаёт согласованную меру трёх станций; новая проба проходит те же силы, связи, сталь и ориентацию.
-' Повтор на той же истории запрещён, все решения расходуют общий лимит продолжения.
-Private Function TryChangeSpatialSecantControl(ByVal history As Collection, ByRef left As TBranchPoint, _
-        ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double, _
-        ByVal afterSpatialReverse As Boolean) As Boolean
-    If Not afterSpatialReverse Or mFollowingLocalPeak Then Exit Function
-    If Not mSolver.SupportsHybridRecovery Or mLastSecantControlRevision = mSolver.AcceptedRevision Then Exit Function
-    If history.Count < 2 Or current.HistoryIndex <> history.Count Then Exit Function
-    Dim previous() As Double, accepted() As Double, movement() As Double, alternate() As Double
-    Dim coordinate As Double, spacing As Double, i As Long
-    previous = history(history.Count - 1): accepted = history(history.Count): movement = accepted
-    For i = 1 To UBound(movement): movement(i) = accepted(i) - previous(i): Next i
-    If Not mSolver.SelectSpatialDirectionControl(previous, accepted, movement, alternate, coordinate, spacing) Then Exit Function
-    If spacing <= 0# Or coordinate + 0.5 * spacing <= coordinate Then Exit Function
-    mProjection = alternate: mControlName = "полная принятая пространственная секущая"
-    mUsesSecantControl = True: mUsesFieldControl = True: mUsesTransverseControl = False: mUsesYieldControl = False
-    mBranchTangentControl = False
-    mLastSecantControlRevision = mSolver.AcceptedRevision: mLastFieldControlRevision = mSolver.AcceptedRevision
-    mSecantControlChanges = mSecantControlChanges + 1: mFieldControlChanges = mFieldControlChanges + 1
-    left.HistoryIndex = history.Count - 1: left.Coordinate = coordinate - spacing
-    If Not mTrace Is Nothing Then
-        Dim fraction As Double
-        mTrace.ReadPoint left.HistoryIndex, fraction, left.Lambda
-    End If
-    current.Coordinate = coordinate
-    nominal = spacing: increment = 0.5 * spacing: minimum = increment * MIN_STEP_RATIO
-    TryChangeSpatialSecantControl = True
 End Function
 
 ' Меняет параметризацию после численного отказа до локального максимума или на неподтверждённом спаде нагрузки.
@@ -536,7 +495,7 @@ Private Function TryChangeStalledFieldControl(ByVal history As Collection, ByRef
     If Not mSolver.SelectRejectedDeformationControl(previous, accepted, alternate, coordinate, spacing, name) Then Exit Function
     If spacing <= 0# Or coordinate + 0.5 * spacing <= coordinate Then Exit Function
     mProjection = alternate: mControlName = name
-    mUsesTransverseControl = False: mUsesFieldControl = True: mUsesYieldControl = False: mUsesSecantControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = True: mUsesYieldControl = False
     mBranchTangentControl = False
     mFieldControlChanges = mFieldControlChanges + 1
     mLastFieldControlRevision = mSolver.AcceptedRevision
@@ -713,8 +672,7 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
         point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mBranchTangentControl, recoverSameControl, _
-        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), _
-        allowHybridRecovery:=(allowHybridRecovery Or mUsesSecantControl), conditionHybridRecovery:=mUsesSecantControl)
+        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery)
     If mSolver.SameControlRecoveryTried Then
         mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
     ElseIf mSolver.YieldRecoveryTried Then
@@ -792,7 +750,7 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     mProjection = projection: mControlName = "мера деформации у перехода бетона"
     mUsesYieldControl = True
     mBranchTangentControl = mSolver.RecoveredControlRequiresBranchTangent
-    mUsesTransverseControl = False: mUsesFieldControl = False: mUsesSecantControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
     current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
     increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     TryAdoptRecoveredControl = True
@@ -1406,8 +1364,6 @@ Private Function Details() As String
         "; восстановлений после них: " & CStr(mRecoveredDips)
     If mUnverifiedDecline Then Details = Details & "; текущий спад не является подтверждённым физическим пределом"
     If mFieldControlChanges > 0 Then Details = Details & "; смен пространственной меры после отказа: " & CStr(mFieldControlChanges)
-    If mSecantControlChanges > 0 Then Details = Details & "; переходов к полной секущей: " & CStr(mSecantControlChanges)
-    If mUnresolvedLoadPoints > 0 Then Details = Details & "; продвижений поля при неразличимом изменении нагрузки: " & CStr(mUnresolvedLoadPoints)
     If mHybridRecoveryProbes > 0 Then Details = Details & "; проб полного разностного резерва после деления шага: " & _
         CStr(mHybridRecoveryProbes) & "; принято после него: " & CStr(mHybridRecoveredPoints) & _
         "; последняя цель резерва: " & CStr(mLastHybridTarget)
@@ -1481,7 +1437,7 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     End If
     mProjection = projection: current.Coordinate = oldCoordinate: point.Coordinate = newCoordinate
     mUsesYieldControl = True: mBranchTangentControl = False
-    mUsesTransverseControl = False: mUsesFieldControl = False: mUsesSecantControl = False
+    mUsesTransverseControl = False: mUsesFieldControl = False
     mControlName = "входящая мера спектрального угла"
     nominal = Abs(difference): increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     Dim designAtPoint As Boolean: designAtPoint = mSolver.PrincipalDesignLoadVerified
@@ -1519,7 +1475,7 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     End If
     mProjection = projection: current.Coordinate = coordinate
     left.Coordinate = CoordinateOf(incomingField)
-    mUsesYieldControl = False: mUsesFieldControl = True: mUsesSecantControl = False: mBranchTangentControl = False
+    mUsesYieldControl = False: mUsesFieldControl = True: mBranchTangentControl = False
     mPostPeakControlName = vbNullString
     mControlName = "пространственная мера после спектрального угла"
     mPrincipalCorners = mPrincipalCorners + 1: mFieldControlChanges = mFieldControlChanges + 1

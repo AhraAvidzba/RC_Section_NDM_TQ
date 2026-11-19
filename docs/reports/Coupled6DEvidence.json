@@ -324,7 +324,8 @@
     "CoupledResolvedLoadStep20261119": "AA3D390480F2AAD9651E61AAEB7746CBAF7AB160373F3C9B22E8244000DBF4B6",
     "CoupledActualReverseStudies20261119": "95933BF56658AD215D715DC8ED5F3AA11DDC0120530EF6DAE092481D3CE545B2",
     "CoupledConditionedSecant20261119": "699B697E5366E34D851E003321CED4B51D334814E857E6B88FC7FE6083A5798C",
-    "CoupledReturnPrecisionStudies20261119": "8CC2A69CE2F17EF08A5BF0F5492CB98DD2FB0F98DBF3E391BF24AEB18EAC3057"
+    "CoupledReturnPrecisionStudies20261119": "8CC2A69CE2F17EF08A5BF0F5492CB98DD2FB0F98DBF3E391BF24AEB18EAC3057",
+    "CoupledDefaultRecovery20261119": "561CEDB7A30001FD75BE318B7D3C4749BB66E1ACBA22FD41DD4ED82F8CB45868"
   },
   "cases": [
     {
@@ -4783,6 +4784,48 @@
       "stdout_contains": "RETURN STUDIES COMMON HISTORY EQUILIBRIA AND NEGATIVE STRICT OUTCOMES VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "C8B9F6AEBF364384FD6126FED141C30F77AD35028A3A73C6C28DBBB13B728D79"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-default-recovery-native",
+      "journal_section": 622,
+      "archive": "CoupledDefaultRecovery20261119",
+      "script": "Check-TestDefaultRecovery.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "DEFAULT RECOVERY ACTUAL VBA AND DIRECTED REGRESSIONS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "87DE4CD42D78836D817565D9C1AA353CD105A823486960BF4F94492B49A28639"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-default-recovery-mechanics",
+      "journal_section": 622,
+      "archive": "CoupledDefaultRecovery20261119",
+      "script": "Check-TestDefaultRecovery.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "DEFAULT RECOVERY ORIGINAL 26 FIELDS AND SAVED EXCEL VERIFIED; EXPENSIVE DEFAULT DISABLED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "2137ACEDB1372AEFCFE0DDF4319524163BC1E7F6596EBCBB95C5DE1123AAC4CE"
       },
       "timeout_seconds": 300
     }
