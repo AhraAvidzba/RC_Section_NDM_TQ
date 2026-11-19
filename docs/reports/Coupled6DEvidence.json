@@ -333,7 +333,8 @@
     "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8",
     "CoupledOriginalAccuracy20261119": "7B1AAE74E0F3BFDA8F857DCC09DF3A383FAD4EA048C367727A30F386F96F819E",
     "CoupledControlStopping20261119": "A62B0818B5640A4C1F676AA24FE5E58E8D8645BEA7DC903063F36CEC17F1C364",
-    "CoupledLiveDifference20261119": "A25C39136BAC32AAE3CB3EAFD1A4F8B9F70A222B8CE9D2061757FD14C9E8903C"
+    "CoupledLiveDifference20261119": "A25C39136BAC32AAE3CB3EAFD1A4F8B9F70A222B8CE9D2061757FD14C9E8903C",
+    "CoupledFieldPath20261119": "6BD9DDBEE10B8C240F18512A5D49B312338B25F471B9549AF69E00A292143759"
   },
   "cases": [
     {
@@ -5172,6 +5173,48 @@
         "MechanicsProof.json": "955557E2FD56EE8F5007AF499C3CAEDEC0D3639A1983FD473161B7179C7D936E"
       },
       "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-field-path-native",
+      "journal_section": 631,
+      "archive": "CoupledFieldPath20261119",
+      "script": "Check-TestFieldPath.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "FIELD PATH NATIVE PROOF PASS",
+      "outputs": {
+        "NativeProof.json": "D58A6F22D4E10DD5F24C4B0ACDBCDA09537334B4D87E2697A80A816651552FB8"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-field-path-mechanics",
+      "journal_section": 631,
+      "archive": "CoupledFieldPath20261119",
+      "script": "Check-TestFieldPath.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "FIELD PATH MECHANICS PROOF PASS",
+      "outputs": {
+        "MechanicsProof.json": "379C7958F196D6C9A12F1B0E4D66B9D66DAC5AEAF54B3DD2EE1C59A7DE463564"
+      },
+      "timeout_seconds": 600
     }
   ],
   "frozen_repositories": {
