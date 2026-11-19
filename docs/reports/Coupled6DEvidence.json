@@ -335,7 +335,8 @@
     "CoupledControlStopping20261119": "A62B0818B5640A4C1F676AA24FE5E58E8D8645BEA7DC903063F36CEC17F1C364",
     "CoupledLiveDifference20261119": "A25C39136BAC32AAE3CB3EAFD1A4F8B9F70A222B8CE9D2061757FD14C9E8903C",
     "CoupledFieldPath20261119": "6BD9DDBEE10B8C240F18512A5D49B312338B25F471B9549AF69E00A292143759",
-    "CoupledExactVBAReference20261119": "C30EF07F171A5C2ACB6657DF0949A2FDD56C4BE0A77F0E694E96167397CE43AC"
+    "CoupledExactVBAReference20261119": "C30EF07F171A5C2ACB6657DF0949A2FDD56C4BE0A77F0E694E96167397CE43AC",
+    "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47"
   },
   "cases": [
     {
@@ -5233,6 +5234,25 @@
       "stdout_contains": "EXACT VBA REFERENCE PROOF PASS; CAPACITY OPEN",
       "outputs": {
         "ReferenceProof.json": "40E321DC9E496AB3D6CAE5AD684A34EF50046E091786E0A9C427214238D2AA53"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-material-event-connected-outgoing",
+      "journal_section": 633,
+      "archive": "CoupledMaterialEvent20261120",
+      "script": "Check-TestMaterialEventEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "MaterialEventProof.json"
+      ],
+      "stdout_contains": "MATERIAL EVENT PROOF PASS; CAPACITY OPEN; REVERSED STATES NOT ADMITTED",
+      "outputs": {
+        "MaterialEventProof.json": "40FC185F7D4955463D3359A90E91ABF1C7FAD4A3E63400A7B4CFB95EFE2BC3F5"
       },
       "timeout_seconds": 600
     }
