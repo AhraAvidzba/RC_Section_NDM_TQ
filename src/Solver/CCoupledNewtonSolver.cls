@@ -118,6 +118,7 @@ Private mSteelBranchBuilds As Long, mSteelFieldTangents As Long
 Private mReferenceModulus As Double, mLastNorm As Double, mMinimumPivot As Double
 Private mFailureCode As ESolverFailureCode
 Private mHybridActive As Boolean, mHybridScalesReady As Boolean
+Private mEquationContext As Long
 Private mHybridOriginRevision As Long, mHybridSeed() As Double, mHybridScales() As Double
 Private mHybridSteps As Long, mHybridMatrices As Long, mHybridEvaluations As Long
 
@@ -1160,7 +1161,7 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     Dim hybrid As New CCoupledHybridSolver, equations As ICoupledEquationSystem
     Set equations = Me
     Dim functionLimit As Long: functionLimit = CLng(CDbl(remaining + 1) * (2# * size + 1#) + remaining)
-    mHybridActive = True
+    ActivateHybridContext
     Dim converged As Boolean
     converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, GeomMin(absoluteTolerance, 0.0000000001), _
         0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
@@ -1281,6 +1282,40 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
         Next j
     End If
     ICoupledEquationSystem_TryEvaluate = True
+End Function
+
+' Открывает новую личность читающих уравнений; счётчик не сбрасывается при повторной подготовке того же объекта решателя.
+Private Sub ActivateHybridContext()
+    If mEquationContext = 2147483647 Then Err.Raise 6, "CCoupledNewtonSolver", "Исчерпан счётчик контекстов читающих уравнений."
+    mEquationContext = mEquationContext + 1: mHybridActive = True
+End Sub
+
+' Возвращает личность только действующего неизменённого контекста нормированных уравнений.
+Friend Property Get EquationContext() As Long
+    If mHybridActive And mAcceptedRevision = mHybridOriginRevision Then EquationContext = mEquationContext
+End Property
+
+' Проверяет контекст и историю без округлённых ключей или повторного использования изменяемого состояния.
+Friend Function MatchesEquationContext(ByVal context As Long, ByVal revision As Long) As Boolean
+    MatchesEquationContext = (context > 0 And EquationContext = context And mAcceptedRevision = revision)
+End Function
+
+' Готовит координату явно выбранной материальной границы; автоматический выбор события выполняется вызывающим алгоритмом.
+Friend Function CreateMaterialConstraint(ByVal point As Long, ByVal side As Long, ByVal principal As Long, _
+        ByVal target As Double) As ICoupledScalarConstraint
+    If EquationContext = 0 Then Err.Raise 5, "CCoupledNewtonSolver", "Для материальной координаты не открыта читающая система уравнений."
+    If Abs(side) > 1 Then Err.Raise 5, "CCoupledNewtonSolver", "Станция материальной координаты должна быть центральной, левой или правой."
+    Dim selected As ICoupledPointResponse
+    Select Case side
+        Case -1: Set selected = mMinusResponse
+        Case 0: Set selected = mResponse
+        Case 1: Set selected = mPlusResponse
+    End Select
+    If Not (TypeOf selected Is CCoupledReinforcedResponse) Then Exit Function
+    Dim response As CCoupledReinforcedResponse: Set response = selected
+    Dim constraint As New CCoupledMaterialConstraint
+    constraint.Initialize Me, mSection, response, point, side * SPATIAL_HALF_STEP, principal, mHybridSeed, mHybridScales, target
+    Set CreateMaterialConstraint = constraint
 End Function
 
 ' Проверяет поправку служебного множителя без записи материальной пробы.

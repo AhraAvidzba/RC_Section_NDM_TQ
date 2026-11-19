@@ -329,7 +329,8 @@
     "CoupledNewtonBranchStudies20261119": "5455C069A9C9B4FF763E5E0BF176C4898277D104EAA292B85B57B2D761D81115",
     "CoupledOutgoingYieldStudies20261119": "72A595E5E5572E928A622E7B0C9B911B56C2B4DE57069C1226971CC44B7F2330",
     "CoupledYieldProjectionStudies20261119": "CBD245E8FFA7577B495EF723A0D055D215ABCF9A7A629AE93B89A3ABE2B3B823",
-    "CoupledYieldSequence20261119": "B50C24E011F5C1A60A7A88B1C9C76C8E3298C9A97AE43341F454430FCA8E2351"
+    "CoupledYieldSequence20261119": "B50C24E011F5C1A60A7A88B1C9C76C8E3298C9A97AE43341F454430FCA8E2351",
+    "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8"
   },
   "cases": [
     {
@@ -4998,6 +4999,48 @@
       "stdout_contains": "FOUR SEQUENTIAL STRICT COUPLED EQUILIBRIA MATERIAL HISTORY AND ALL EQUATIONS VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "674A6870EAD065AA4F3B5965C3BFBCAE472FB19A8C8341E86024FA64F2944575"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-generic-constraint-native",
+      "journal_section": 627,
+      "archive": "CoupledGenericConstraint20261119",
+      "script": "Check-TestGenericConstraint.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "THREE GENERIC CONSTRAINT VBA PROJECTS AND 430 TARGETED ASSERTIONS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "98AB6E337C6BB012E19E25F0CE524CA5B82FDDF4C0323151FE3BEE144529E88A"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-generic-constraint-mechanics",
+      "journal_section": 627,
+      "archive": "CoupledGenericConstraint20261119",
+      "script": "Check-TestGenericConstraint.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "GENERIC CONSTRAINT EQUATIONS SEQUENTIAL HISTORY AND ORDINARY BRIDGE INDEPENDENTLY VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "923DB70CA51335DDA8CE168812D1CA12FA06393B66030F1F25B0D11B32A64B97"
       },
       "timeout_seconds": 300
     }
