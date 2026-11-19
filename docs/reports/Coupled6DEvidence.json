@@ -327,7 +327,8 @@
     "CoupledReturnPrecisionStudies20261119": "8CC2A69CE2F17EF08A5BF0F5492CB98DD2FB0F98DBF3E391BF24AEB18EAC3057",
     "CoupledDefaultRecovery20261119": "561CEDB7A30001FD75BE318B7D3C4749BB66E1ACBA22FD41DD4ED82F8CB45868",
     "CoupledNewtonBranchStudies20261119": "5455C069A9C9B4FF763E5E0BF176C4898277D104EAA292B85B57B2D761D81115",
-    "CoupledOutgoingYieldStudies20261119": "72A595E5E5572E928A622E7B0C9B911B56C2B4DE57069C1226971CC44B7F2330"
+    "CoupledOutgoingYieldStudies20261119": "72A595E5E5572E928A622E7B0C9B911B56C2B4DE57069C1226971CC44B7F2330",
+    "CoupledYieldProjectionStudies20261119": "CBD245E8FFA7577B495EF723A0D055D215ABCF9A7A629AE93B89A3ABE2B3B823"
   },
   "cases": [
     {
@@ -4912,6 +4913,48 @@
       "stdout_contains": "OUTGOING MODELS LOCAL CONTINUITY AND NONLINEAR YIELD COORDINATES VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "0DB0738F2241EA01FA03731F20771D17414B03074B143CE2AD3767E9697AB8BF"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-yield-projection-studies-native",
+      "journal_section": 625,
+      "archive": "CoupledYieldProjectionStudies20261119",
+      "script": "Check-TestYieldProjection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "FOUR ACTUAL YIELD PROJECTION VBA PROJECTS AND OWNED PROCESS CLOSURES VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "9F085B242AD52041F2CA9441E319C9618364716E03278CCBC11F1F79B412B98A"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-yield-projection-studies-mechanics",
+      "journal_section": 625,
+      "archive": "CoupledYieldProjectionStudies20261119",
+      "script": "Check-TestYieldProjection.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "YIELD PRECISION NONLINEAR ELIMINATION AND OUTGOING EQUATIONS INDEPENDENTLY VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "17A3BE315EE48D081BFEDA70972C1B81C27B5EC9663561238532FC3D36EADEDA"
       },
       "timeout_seconds": 300
     }
