@@ -323,7 +323,8 @@
     "CoupledLocalHybridIntegration20261119": "666E3B8E3BFBC8544A3C124D1F51B481778B46F3F1FEF4EAE623DFA51D43D1CE",
     "CoupledResolvedLoadStep20261119": "AA3D390480F2AAD9651E61AAEB7746CBAF7AB160373F3C9B22E8244000DBF4B6",
     "CoupledActualReverseStudies20261119": "95933BF56658AD215D715DC8ED5F3AA11DDC0120530EF6DAE092481D3CE545B2",
-    "CoupledConditionedSecant20261119": "699B697E5366E34D851E003321CED4B51D334814E857E6B88FC7FE6083A5798C"
+    "CoupledConditionedSecant20261119": "699B697E5366E34D851E003321CED4B51D334814E857E6B88FC7FE6083A5798C",
+    "CoupledReturnPrecisionStudies20261119": "8CC2A69CE2F17EF08A5BF0F5492CB98DD2FB0F98DBF3E391BF24AEB18EAC3057"
   },
   "cases": [
     {
@@ -4740,6 +4741,48 @@
       "stdout_contains": "CONDITIONED SECANT FULL FIELDS AND ACTUAL AUTOMATIC ADVANCE VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "AF1F6E7C28872EF6D8B12A198923A239D66B3D6E14A8654897B53B6DA6755F98"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-return-precision-studies-native",
+      "journal_section": 621,
+      "archive": "CoupledReturnPrecisionStudies20261119",
+      "script": "Check-TestReturnStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "RETURN STUDIES FOUR NATIVE BOOKS AND EXPECTED TEST PREPARATION FAILURE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "8DC9C24CBA929D02D91D98AA83EC06C9C314610D842D070A6E4DF3AE16756150"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-return-precision-studies-mechanics",
+      "journal_section": 621,
+      "archive": "CoupledReturnPrecisionStudies20261119",
+      "script": "Check-TestReturnStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "RETURN STUDIES COMMON HISTORY EQUILIBRIA AND NEGATIVE STRICT OUTCOMES VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "C8B9F6AEBF364384FD6126FED141C30F77AD35028A3A73C6C28DBBB13B728D79"
       },
       "timeout_seconds": 300
     }
