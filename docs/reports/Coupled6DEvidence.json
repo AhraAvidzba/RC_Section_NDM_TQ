@@ -321,7 +321,8 @@
     "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3",
     "CoupledOwnHybridTransfer20261119": "1F59DB5FB3A00F035B10399458A852F015BB9930B456FB7083A907BD9DAFFD63",
     "CoupledLocalHybridIntegration20261119": "666E3B8E3BFBC8544A3C124D1F51B481778B46F3F1FEF4EAE623DFA51D43D1CE",
-    "CoupledResolvedLoadStep20261119": "AA3D390480F2AAD9651E61AAEB7746CBAF7AB160373F3C9B22E8244000DBF4B6"
+    "CoupledResolvedLoadStep20261119": "AA3D390480F2AAD9651E61AAEB7746CBAF7AB160373F3C9B22E8244000DBF4B6",
+    "CoupledActualReverseStudies20261119": "95933BF56658AD215D715DC8ED5F3AA11DDC0120530EF6DAE092481D3CE545B2"
   },
   "cases": [
     {
@@ -4654,6 +4655,48 @@
       "stdout_contains": "RESOLVED LOAD STEP COMPLETE JACOBIAN AND LEGACY DIRECTION MISMATCH INDEPENDENTLY VERIFIED",
       "outputs": {
         "MatrixProof.json": "0CB1082E29A76ECBF8442AD4F21E495236C9A96C8A426C05C99F4B2273421596"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-actual-reverse-native",
+      "journal_section": 619,
+      "archive": "CoupledActualReverseStudies20261119",
+      "script": "Check-TestReverseStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ACTUAL REVERSE THREE NATIVE BOOKS AND CLOSURE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "8F29389854B37532D2AE86754A4023F06379DD0C471EFA5E7064E83603D908D1"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-actual-reverse-mechanics",
+      "journal_section": 619,
+      "archive": "CoupledActualReverseStudies20261119",
+      "script": "Check-TestReverseStudies.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ACTUAL AUTOMATIC 26 FIELDS EXACT LOADS AND NEGATIVE POLISH SECANT STUDIES VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "EB5FC371445B548852AC2F98C32FED1591C492EA138A3DDACA0035219F90036D"
       },
       "timeout_seconds": 300
     }
