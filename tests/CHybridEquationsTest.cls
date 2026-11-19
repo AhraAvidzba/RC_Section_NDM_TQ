@@ -51,6 +51,13 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
             If withJacobian Then
                 jacobian(1, 1) = -20# * coordinates(1): jacobian(2, 1) = 10#: jacobian(1, 2) = -1#
             End If
+        Case "ScaledRosenbrock"
+            Dim first As Double, second As Double
+            first = 1000# * coordinates(1): second = 0.001 * coordinates(2)
+            residual(1) = 10# * (second - first ^ 2): residual(2) = 1# - first
+            If withJacobian Then
+                jacobian(1, 1) = -20000# * first: jacobian(2, 1) = 0.01: jacobian(1, 2) = -1000#
+            End If
         Case "Tridiagonal"
             For i = 1 To count
                 residual(i) = (3# - 2# * coordinates(i)) * coordinates(i) + 1#

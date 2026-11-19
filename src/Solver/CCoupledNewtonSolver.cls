@@ -236,13 +236,15 @@ End Property
 ' После смены пространственной меры можно разрешить малую поправку CDP;
 ' полный разностный резерв включается явно после исчерпания деления шага.
 ' Оба резерва не применяются к псевдодуге и не меняют допуск принятия.
+' conditionHybridRecovery включает норму столбцов и свежую полную касательную только явно выбранного резерва.
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
         ByVal maxIterations As Long, Optional ByVal recoverYieldControl As Boolean = False, _
         Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
-        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False) As Boolean
+        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
+        Optional ByVal conditionHybridRecovery As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -267,7 +269,7 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
         recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
         allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#), _
-        allowHybridRecovery:=allowHybridRecovery)
+        allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -892,7 +894,8 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
         Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
-        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False) As Boolean
+        Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
+        Optional ByVal conditionHybridRecovery As Boolean = False) As Boolean
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -1098,7 +1101,7 @@ RecomputeTangent:
                 End If
             End If
             If Not SolveStep And allowHybridRecovery Then SolveStep = TryHybridControlledField(current, currentLambda, load, _
-                absoluteTolerance, relativeTolerance, maxIterations)
+                absoluteTolerance, relativeTolerance, maxIterations, conditionHybridRecovery)
             Exit Function
         End If
         mIterations = mIterations + 1
@@ -1129,8 +1132,10 @@ End Function
 ' Проверяет явно запрошенный гибридный резерв после численного отказа демпфирования пространственного CDP.
 ' Каждая dogleg-поправка расходует остаток maxIterations; все разностные чтения входят в mEvaluations.
 ' Для спектральных границ ASD и псевдодуги сохраняются их собственные правила продолжения.
+' При conditionRecovery используется диагональная метрика полной матрицы и её обновление после принятой поправки.
 Private Function TryHybridControlledField(ByRef current() As Double, ByVal initialLambda As Double, ByRef load() As Double, _
-        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long) As Boolean
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByVal conditionRecovery As Boolean = False) As Boolean
     If Not mControlActive Or mArcLoadProjection <> 0# Or Not SupportsHybridRecovery Then Exit Function
     If mCandidateReady Or mHybridActive Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
     If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
@@ -1158,7 +1163,8 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     mHybridActive = True
     Dim converged As Boolean
     converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, GeomMin(absoluteTolerance, 0.0000000001), _
-        0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP)
+        0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
+        automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery)
     mHybridActive = False
     mIterations = mIterations + hybrid.Steps
     mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls

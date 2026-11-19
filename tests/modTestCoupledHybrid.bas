@@ -75,6 +75,25 @@ Public Function RunTestCoupledHybrid() As String
     solved = solver.TrySolve(equations, initial, 4, 20, 0.0000000001, 0.00000000001, 0.2, solution, relativeDifferenceStep:=0.000001)
     TestCheck Not solved And solver.FunctionCalls <= 4 And solver.FunctionCalls = adapter.EvaluationCallsTest And solver.Steps = 0 And solver.StopCode = 2, _
         "partial difference matrix respects budget", report, passed, failedCount
+    ReDim initial(1 To 2): initial(1) = -0.0012: initial(2) = 1000#: adapter.InitializeTest "ScaledRosenbrock"
+    solved = solver.TrySolve(equations, initial, 300, 300, 0.0000000001, 0.00000000001, 0.2, solution, automaticScaling:=True)
+    TestCheck solved And Abs(1000# * solution(1) - 1#) < 0.00000001 And Abs(0.001 * solution(2) - 1#) < 0.00000001, _
+        "automatic scale anisotropic Rosenbrock known root", report, passed, failedCount
+    adapter.InitializeTest "ScaledRosenbrock"
+    solved = solver.TrySolve(equations, initial, 10000, 100, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, automaticScaling:=True, freshJacobian:=True)
+    TestCheck solved And Abs(1000# * solution(1) - 1#) < 0.00000001 And Abs(0.001 * solution(2) - 1#) < 0.00000001, _
+        "fresh full matrix anisotropic Rosenbrock known root", report, passed, failedCount
+    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest And solver.Steps <= 100, _
+        "automatic scale all full matrix probes and steps counted", report, passed, failedCount
+    adapter.InitializeTest "ScaledRosenbrock"
+    solved = solver.TrySolve(equations, initial, 4, 20, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, automaticScaling:=True, freshJacobian:=True)
+    TestCheck Not solved And solver.FunctionCalls <= 4 And solver.FunctionCalls = adapter.EvaluationCallsTest And solver.Steps = 0, _
+        "automatic scale partial matrix respects budget", report, passed, failedCount
+    ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, automaticScaling:=True, freshJacobian:=True)
+    TestCheck Not solved And solver.BestResidual >= 1#, "automatic scale does not create nonexistent root", report, passed, failedCount
     Dim algebra As New CCoupledHybridFactorization, values(1 To 2) As Double
     values(1) = 1E+200: values(2) = 1E+200
     TestCheck Abs(algebra.VectorNorm(values, 1, 2) / 1E+200 - Sqr(2#)) < 0.000000000001, "large finite norm", report, passed, failedCount

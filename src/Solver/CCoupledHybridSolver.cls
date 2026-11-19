@@ -12,9 +12,11 @@ Option Explicit
 ' ==========================================================================
 ' Гибридный метод Пауэлла для квадратной системы нелинейных уравнений
 ' ==========================================================================
-' Перенос HYBRJ MINPACK/CMinpack с внешним масштабированием координат
-' (mode=2, diag=1). Полная касательная чередуется с секущим обновлением
-' QR ранга один; радиус dogleg меняется по фактическому снижению невязки.
+' Перенос HYBRJ MINPACK/CMinpack с внешним масштабированием координат.
+' По умолчанию mode=2, diag=1; automaticScaling включает норму столбцов
+' mode=1 через эквивалентную замену координат QR. freshJacobian обновляет
+' полную касательную после принятой поправки вместо обновления ранга один.
+' Радиус dogleg меняется по фактическому снижению невязки.
 ' Источник и полная лицензия: literature/Coupled6D/NumericalControl/Minpack,
 ' ревизия 64c5635addd72fb54f44db8546c191feeb70e338, CopyrightMINPACK.txt.
 ' This product includes software developed by the University of Chicago,
@@ -32,10 +34,12 @@ Private mRestarts As Long
 ' maxEvaluations ограничивает вызовы функции, maxSteps — все dogleg-поправки, включая отвергнутые.
 ' При relativeDifferenceStep>0 касательная строится центральной разностью полной системы;
 ' каждая внутренняя разностная проба входит в общий maxEvaluations и счётчик FunctionCalls.
+' automaticScaling и freshJacobian меняют только численную стратегию; критерий невязки и общие бюджеты сохраняются.
 Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByRef solution() As Double, _
-        Optional ByVal maxRestarts As Long = 0, Optional ByVal relativeDifferenceStep As Double = 0#) As Boolean
+        Optional ByVal maxRestarts As Long = 0, Optional ByVal relativeDifferenceStep As Double = 0#, _
+        Optional ByVal automaticScaling As Boolean = False, Optional ByVal freshJacobian As Boolean = False) As Boolean
     mRestarts = 0
     If maxRestarts < 0 Then Err.Raise 5, "CCoupledHybridSolver", "Число повторных стартов не может быть отрицательным."
     If relativeDifferenceStep < 0# Then Err.Raise 5, "CCoupledHybridSolver", "Шаг численного дифференцирования не может быть отрицательным."
@@ -44,7 +48,7 @@ Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initia
     start = initial
     For attempt = 0 To maxRestarts
         solved = SolveFrom(equations, start, maxEvaluations - usedFunctions, maxSteps - usedSteps, _
-            residualTolerance, stepTolerance, initialRadius, relativeDifferenceStep, solution)
+            residualTolerance, stepTolerance, initialRadius, relativeDifferenceStep, solution, automaticScaling, freshJacobian)
         usedFunctions = usedFunctions + mFunctionCalls: usedJacobians = usedJacobians + mJacobianCalls
         usedSteps = usedSteps + mSteps: usedAccepted = usedAccepted + mAccepted
         If solved Or Not mHasBest Or attempt = maxRestarts Then Exit For
@@ -60,7 +64,7 @@ End Function
 Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByVal relativeDifferenceStep As Double, _
-        ByRef solution() As Double) As Boolean
+        ByRef solution() As Double, ByVal automaticScaling As Boolean, ByVal freshJacobian As Boolean) As Boolean
     On Error GoTo ArithmeticFailure
     mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mStopCode = 0
     mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
@@ -78,6 +82,9 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
     Dim goodRadius As Long, badRadius As Long, slowSteps As Long, slowMatrices As Long
     Dim actualReduction As Double, predictedReduction As Double, ratio As Double, estimate As Double
     Dim fresh As Boolean, first As Boolean, accepted As Boolean, i As Long
+    Dim diagonal() As Double, workMetric() As Double, diagonalReady As Boolean
+    ReDim diagonal(1 To count): ReDim workMetric(1 To count)
+    For i = 1 To count: diagonal(i) = 1#: Next i
     first = True
     Do
         If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
@@ -89,17 +96,18 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             If Not equations.TryEvaluate(x, True, residual, matrix) Then mStopCode = -1: Exit Do
         End If
         If Not ValidDimensions(residual, matrix, count) Then mStopCode = -1: Exit Do
+        If automaticScaling Then ScaleJacobianColumns matrix, diagonal, workMetric, count, diagonalReady, algebra
         algebra.Factor matrix, residual, count
         fresh = True
         If first Then
-            xnorm = algebra.VectorNorm(x, 1, count): radius = initialRadius * xnorm
+            xnorm = ScaledCoordinateNorm(x, diagonal, workMetric, count, algebra): radius = initialRadius * xnorm
             If radius = 0# Then radius = initialRadius
         End If
         Do
             If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
             algebra.Dogleg radius, movement
             ReDim trial(1 To count)
-            For i = 1 To count: movement(i) = -movement(i): trial(i) = x(i) + movement(i): Next i
+            For i = 1 To count: movement(i) = -movement(i): trial(i) = x(i) + movement(i) / diagonal(i): Next i
             movementNorm = algebra.VectorNorm(movement, 1, count)
             If first Then radius = GeomMin(radius, movementNorm)
             mSteps = mSteps + 1
@@ -122,7 +130,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             accepted = (ratio >= 0.0001)
             If accepted Then
                 x = trial: residual = nextResidual: norm = nextNorm
-                xnorm = algebra.VectorNorm(x, 1, count): mAccepted = mAccepted + 1: first = False
+                xnorm = ScaledCoordinateNorm(x, diagonal, workMetric, count, algebra): mAccepted = mAccepted + 1: first = False
             End If
             slowSteps = slowSteps + 1
             If actualReduction >= 0.001 Then slowSteps = 0
@@ -137,6 +145,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             If mStopCode <> 0 Then Exit Do
             If badRadius = 2 Then Exit Do
             If movementNorm = 0# Then mStopCode = 3: Exit Do
+            If freshJacobian And accepted Then Exit Do ' Следующая линеаризация учитывает фактические активные ветви материала.
             algebra.Update movement, nextResidual, model, movementNorm, accepted
             fresh = False
         Loop
@@ -154,6 +163,29 @@ ArithmeticFailure:
     If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
     mStopCode = -2
     Resume Finished
+End Function
+
+' Нормирует столбцы по монотонной диагонали HYBRJ mode=1. QR и его секущее
+' обновление работают в координатах z=D*x; исходные x и невязка не меняются.
+Private Sub ScaleJacobianColumns(ByRef matrix() As Double, ByRef diagonal() As Double, ByRef work() As Double, _
+        ByVal count As Long, ByRef ready As Boolean, ByVal algebra As CCoupledHybridFactorization)
+    Dim column As Long, row As Long, magnitude As Double
+    For column = 1 To count
+        For row = 1 To count: work(row) = matrix(column, row): Next row
+        magnitude = algebra.VectorNorm(work, 1, count)
+        If magnitude = 0# Then magnitude = 1# ' Нулевая производная не задаёт нулевую метрику координаты.
+        If ready Then diagonal(column) = GeomMax(diagonal(column), magnitude) Else diagonal(column) = magnitude
+        For row = 1 To count: matrix(column, row) = matrix(column, row) / diagonal(column): Next row
+    Next column
+    ready = True
+End Sub
+
+' Считает длину координаты в той же диагональной метрике, что ограничивает dogleg-поправку.
+Private Function ScaledCoordinateNorm(ByRef values() As Double, ByRef diagonal() As Double, ByRef work() As Double, _
+        ByVal count As Long, ByVal algebra As CCoupledHybridFactorization) As Double
+    Dim i As Long
+    For i = 1 To count: work(i) = diagonal(i) * values(i): Next i
+    ScaledCoordinateNorm = algebra.VectorNorm(work, 1, count)
 End Function
 
 ' Строит касательную неизменённой полной невязки; пробные точки не принимают материальную историю.
