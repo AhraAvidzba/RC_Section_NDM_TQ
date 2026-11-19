@@ -18,3 +18,5 @@ literature/Coupled6D/OpenSees-ASDConcrete3D-Documentation-20261117.html -text -d
 literature/Coupled6D/OpenSees-3.8.0-KrylovAccelerator.cpp -text -diff
 literature/Coupled6D/OpenSees-3.8.0-OpenSeesNDTestCommands.cpp -text -diff
 literature/Coupled6D/OpenSees-3.8.0-PythonStream.cpp -text -diff
+# Первичные численные исходники и документация сохраняют исходные байты при checkout.
+literature/Coupled6D/NumericalControl/** -text -diff
