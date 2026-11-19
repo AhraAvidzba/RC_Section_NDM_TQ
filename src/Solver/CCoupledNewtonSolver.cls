@@ -1134,6 +1134,7 @@ End Function
 ' Каждая dogleg-поправка расходует остаток maxIterations; все разностные чтения входят в mEvaluations.
 ' Для спектральных границ ASD и псевдодуги сохраняются их собственные правила продолжения.
 ' При conditionRecovery используется диагональная метрика полной матрицы и её обновление после принятой поправки.
+' Гибридная норма проверяется на заданном абсолютном допуске; публикация поля отдельно проверяет полное равновесие и однозначность.
 Private Function TryHybridControlledField(ByRef current() As Double, ByVal initialLambda As Double, ByRef load() As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
         Optional ByVal conditionRecovery As Boolean = False) As Boolean
@@ -1163,7 +1164,7 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     Dim functionLimit As Long: functionLimit = CLng(CDbl(remaining + 1) * (2# * size + 1#) + remaining)
     ActivateHybridContext
     Dim converged As Boolean
-    converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, GeomMin(absoluteTolerance, 0.0000000001), _
+    converged = hybrid.TrySolve(equations, coordinates, functionLimit, remaining, absoluteTolerance, _
         0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
         automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery)
     mHybridActive = False

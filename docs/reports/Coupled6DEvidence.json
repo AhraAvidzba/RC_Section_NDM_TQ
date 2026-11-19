@@ -331,7 +331,8 @@
     "CoupledYieldProjectionStudies20261119": "CBD245E8FFA7577B495EF723A0D055D215ABCF9A7A629AE93B89A3ABE2B3B823",
     "CoupledYieldSequence20261119": "B50C24E011F5C1A60A7A88B1C9C76C8E3298C9A97AE43341F454430FCA8E2351",
     "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8",
-    "CoupledOriginalAccuracy20261119": "7B1AAE74E0F3BFDA8F857DCC09DF3A383FAD4EA048C367727A30F386F96F819E"
+    "CoupledOriginalAccuracy20261119": "7B1AAE74E0F3BFDA8F857DCC09DF3A383FAD4EA048C367727A30F386F96F819E",
+    "CoupledControlStopping20261119": "A62B0818B5640A4C1F676AA24FE5E58E8D8645BEA7DC903063F36CEC17F1C364"
   },
   "cases": [
     {
@@ -5084,6 +5085,48 @@
       "stdout_contains": "ORIGINAL MATERIAL ACCURACY LOAD RESOLUTION CUTBACKS AND AUTOMATIC COORDINATE VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "5A93B74590BA57D2943C4999D60ED3130D7C7980BBDB8AF0922D2239B6A04EA0"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-control-stopping-native",
+      "journal_section": 629,
+      "archive": "CoupledControlStopping20261119",
+      "script": "Check-TestControlStopping.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "ACTUAL VBA 475 TARGETED ASSERTIONS AND SAVED REOPENED RESULTS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "9BB8DD2D7554428D8F255B429F681AA7FD5C91608045A10EFC1177ABDFA7120C"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-control-stopping-mechanics",
+      "journal_section": 629,
+      "archive": "CoupledControlStopping20261119",
+      "script": "Check-TestControlStopping.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ALL MATERIAL GRADIENTS NEGATIVE CONDITION SELECTION AND REQUESTED HYBRID STOPPING VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "4AC1FBF425CAF66DC219D1BABCEDC5A4E80FFA6432C2062B1A2756A7E3FA096E"
       },
       "timeout_seconds": 300
     }
