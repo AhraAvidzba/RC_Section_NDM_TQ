@@ -330,7 +330,8 @@
     "CoupledOutgoingYieldStudies20261119": "72A595E5E5572E928A622E7B0C9B911B56C2B4DE57069C1226971CC44B7F2330",
     "CoupledYieldProjectionStudies20261119": "CBD245E8FFA7577B495EF723A0D055D215ABCF9A7A629AE93B89A3ABE2B3B823",
     "CoupledYieldSequence20261119": "B50C24E011F5C1A60A7A88B1C9C76C8E3298C9A97AE43341F454430FCA8E2351",
-    "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8"
+    "CoupledGenericConstraint20261119": "6B42A807B289364A784465F736EBFF1323CE0BB4146DCD722652F6773E5FD8F8",
+    "CoupledOriginalAccuracy20261119": "7B1AAE74E0F3BFDA8F857DCC09DF3A383FAD4EA048C367727A30F386F96F819E"
   },
   "cases": [
     {
@@ -5041,6 +5042,48 @@
       "stdout_contains": "GENERIC CONSTRAINT EQUATIONS SEQUENTIAL HISTORY AND ORDINARY BRIDGE INDEPENDENTLY VERIFIED; CAPACITY OPEN",
       "outputs": {
         "MechanicsProof.json": "923DB70CA51335DDA8CE168812D1CA12FA06393B66030F1F25B0D11B32A64B97"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-original-material-accuracy-native",
+      "journal_section": 628,
+      "archive": "CoupledOriginalAccuracy20261119",
+      "script": "Check-TestOriginalAccuracy.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "FOUR ACTUAL VBA PROJECTS AND ORIGINAL MATERIAL METHODS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "NativeProof.json": "700DCA8781FCDC36A40C287C8FEA189E31DF75DC33C1EEA5DD8D712EE165478E"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-original-material-accuracy-mechanics",
+      "journal_section": 628,
+      "archive": "CoupledOriginalAccuracy20261119",
+      "script": "Check-TestOriginalAccuracy.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "ORIGINAL MATERIAL ACCURACY LOAD RESOLUTION CUTBACKS AND AUTOMATIC COORDINATE VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "5A93B74590BA57D2943C4999D60ED3130D7C7980BBDB8AF0922D2239B6A04EA0"
       },
       "timeout_seconds": 300
     }
