@@ -318,7 +318,8 @@
     "CoupledSpatialHalfSteps20261119": "ED29A1E723704A149E50C8E8A3D5C2887E44025EAF22CD1FF70AA406FC5A1B50",
     "CoupledDesignLoadStudy20261119": "3F5AAED63326D74632D4ADAFB541F3259912078EAFEDDF9C271CD214D5689ECD",
     "CoupledDesignLoadWorking20261119": "A041180F70DBD0E1F7A6A32BAC4256DACF89484A2EA44325E87481F863D82A30",
-    "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3"
+    "CoupledHybridStallControl20261119": "078F40F2E1C2120BE493068F187AE128299B72EA02A24DC34762DE6317DD5FE3",
+    "CoupledOwnHybridTransfer20261119": "1F59DB5FB3A00F035B10399458A852F015BB9930B456FB7083A907BD9DAFFD63"
   },
   "cases": [
     {
@@ -4483,6 +4484,69 @@
       "stdout_contains": "HYBRID CONTROL BINARY PROTOCOL AND NATIVE CANDIDATE ACCEPTANCE VERIFIED",
       "outputs": {
         "ProtocolProof.json": "732A251CB83F57622BC3DE72A2058E6D275DE159ED7AE330F48455F4EA4E34D8"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-own-hybrid-native",
+      "journal_section": 616,
+      "archive": "CoupledOwnHybridTransfer20261119",
+      "script": "Check-TestOwnVBAHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "native",
+        "--out",
+        "NativeProof.json"
+      ],
+      "stdout_contains": "OWN VBA HYBRID SIX ACTUAL BOOKS AND EXPECTED FAILED ATTEMPTS VERIFIED",
+      "outputs": {
+        "NativeProof.json": "9EB6B846899C36D98D2A373CF7177E49771D12E9F707A343DE22BF7BC128978B"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-own-hybrid-mechanics",
+      "journal_section": 616,
+      "archive": "CoupledOwnHybridTransfer20261119",
+      "script": "Check-TestOwnVBAHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "mechanics",
+        "--out",
+        "MechanicsProof.json"
+      ],
+      "stdout_contains": "OWN VBA HYBRID GLOBAL POINT ALL EQUATIONS AND INDEPENDENT ROOTS VERIFIED; CAPACITY OPEN",
+      "outputs": {
+        "MechanicsProof.json": "FAC67584726853C9C8D4B9516EC581D769634C4F5EE6FF5868C80A7466323AF6"
+      },
+      "timeout_seconds": 300
+    },
+    {
+      "id": "coupled-own-hybrid-algebra",
+      "journal_section": 616,
+      "archive": "CoupledOwnHybridTransfer20261119",
+      "script": "Check-TestOwnVBAHybrid.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--scope",
+        "algebra",
+        "--out",
+        "AlgebraProof.json"
+      ],
+      "stdout_contains": "OWN VBA HYBRID EVERY QR AND RANK ONE UPDATE INDEPENDENTLY VERIFIED",
+      "outputs": {
+        "AlgebraProof.json": "012A39102CBBFA64313B94AF19E11E8157C4A25BBB082C7C024EF3C40BCB4F4A"
       },
       "timeout_seconds": 300
     }

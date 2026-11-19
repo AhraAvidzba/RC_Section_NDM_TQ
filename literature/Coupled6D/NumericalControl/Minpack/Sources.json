@@ -1,7 +1,7 @@
 {
   "commit": "64c5635addd72fb54f44db8546c191feeb70e338",
   "repository": "https://github.com/devernay/cminpack",
-  "retrieved_utc": "2026-11-18T23:52:48.511951+00:00",
+  "retrieved_utc": "2026-11-19T01:17:38.681027+00:00",
   "sources": [
     {
       "file": "CopyrightMINPACK.txt",
@@ -16,6 +16,20 @@
       "sha256": "D3F5E35807DC27E9AD7E67D621B514EB1C0446CEFE2AEAC19BE9A1BB3B1DDAFB",
       "git_blob": "a9d6140ecfd75af991e78b215d10582035d95313",
       "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/README.md"
+    },
+    {
+      "file": "docs/hybrj_.html",
+      "bytes": 11731,
+      "sha256": "456529EFAC60804C316B85CC1DF5C3C42E05DDC32FE6ABFE7227AD31DB66C483",
+      "git_blob": "14451a5d4c8175fa6470e1991c35aadb97ac4fcc",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/docs/hybrj_.html"
+    },
+    {
+      "file": "examples/thybrjc.c",
+      "bytes": 3954,
+      "sha256": "19C232292C262ECE4D9E3EF75BC63BDD6E769981B789C251ED8EC99142D37AE8",
+      "git_blob": "fd252914a4c9ffd8626baa821ee144324dced845",
+      "url": "https://raw.githubusercontent.com/devernay/cminpack/64c5635addd72fb54f44db8546c191feeb70e338/examples/thybrjc.c"
     },
     {
       "file": "readme.txt",
@@ -86,6 +100,8 @@
     "url": "https://www.mcs.anl.gov/~more/ANL8074b.pdf",
     "http_status": 403
   },
-  "runtime_code_ported": false,
+  "runtime_code_ported": true,
+  "production_continuation_connected": false,
+  "implementation_status_date": "2026-11-19",
   "license_file": "CopyrightMINPACK.txt"
 }
