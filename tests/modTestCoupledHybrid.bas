@@ -223,6 +223,30 @@ Public Function RunTestCoupledHybrid() As String
     adapter.InitializeTest "BadDimensions"
     solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
     TestCheck Not solved And solver.StopCode = -1, "supplied matrix Newton rejects invalid dimensions", report, passed, failedCount
+    Dim difference() As Double
+    ReDim initial(1 To 2): initial(1) = 0.4: initial(2) = -0.7: adapter.InitializeTest "Linear"
+    solved = solver.TryLinearizeByDifferences(equations, initial, 0.000001, 5, difference)
+    TestCheck solved And Abs(difference(1, 1) - 3#) < 0.000001 And Abs(difference(2, 1) - 2#) < 0.000001 And _
+        Abs(difference(1, 2) - 1#) < 0.000001 And Abs(difference(2, 2) - 4#) < 0.000001, _
+        "read-only full difference linearization matches nonsymmetric analytic matrix", report, passed, failedCount
+    TestCheck solver.FunctionCalls = 5 And solver.JacobianCalls = 1 And solver.Steps = 0 And adapter.EvaluationCallsTest = 5, _
+        "difference linearization counts every actual callback without nonlinear corrections", report, passed, failedCount
+    TestCheck initial(1) = 0.4 And initial(2) = -0.7, "difference linearization preserves input coordinates", report, passed, failedCount
+    adapter.InitializeTest "Linear"
+    solved = solver.TryLinearizeByDifferences(equations, initial, 0.000001, 4, difference)
+    TestCheck Not solved And solver.FunctionCalls = 0 And solver.StopCode = 2, "insufficient complete matrix budget prevents callbacks", report, passed, failedCount
+    adapter.InitializeTest "BadDimensions"
+    solved = solver.TryLinearizeByDifferences(equations, initial, 0.000001, 5, difference)
+    TestCheck Not solved And solver.FunctionCalls = 1 And solver.StopCode = -1, "difference linearization rejects invalid residual dimensions", report, passed, failedCount
+    adapter.InitializeTest "NoResponse"
+    solved = solver.TryLinearizeByDifferences(equations, initial, 0.000001, 5, difference)
+    TestCheck Not solved And solver.FunctionCalls = 1 And solver.StopCode = -1, "difference linearization rejects missing response", report, passed, failedCount
+    adapter.InitializeTest "Cancel"
+    On Error Resume Next
+    solved = solver.TryLinearizeByDifferences(equations, initial, 0.000001, 5, difference)
+    cancelNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18, "difference linearization propagates cancellation", report, passed, failedCount
     Dim algebra As New CCoupledHybridFactorization, values(1 To 2) As Double
     values(1) = 1E+200: values(2) = 1E+200
     TestCheck Abs(algebra.VectorNorm(values, 1, 2) / 1E+200 - Sqr(2#)) < 0.000000000001, "large finite norm", report, passed, failedCount

@@ -129,6 +129,10 @@ Private mEquationContext As Long
 Private mHybridOriginRevision As Long, mHybridSeed() As Double, mHybridScales() As Double
 Private mHybridSteps As Long, mHybridMatrices As Long, mHybridEvaluations As Long
 Private mEnvelope As CCoupledEnvelopeEquations, mEnvelopeHalfConfirmed As Boolean, mEnvelopeDetails As String
+Private mEnvelopeControl As Boolean, mEnvelopeTarget As Double
+Private mEnvelopePairRevision As Long, mEnvelopePairReady As Boolean
+Private mEnvelopeBefore As Double, mEnvelopeAfter As Double, mEnvelopePreviousField() As Double
+Private mEnvelopePath() As Double, mEnvelopePathCount As Long, mEnvelopePathReady As Boolean
 
 ' Подключает сечение и независимую центральную историю. Две отдельные
 ' боковые истории включают секущий продольный градиент напряжений.
@@ -179,6 +183,8 @@ Friend Sub ResetHistory()
     End If
     ReDim mAccepted(1 To mDegreeCount)
     mAcceptedRevision = mAcceptedRevision + 1
+    mEnvelopePairReady = False: mEnvelopeControl = False: Erase mEnvelopePreviousField
+    mEnvelopePathCount = 0: mEnvelopePathReady = True: Erase mEnvelopePath
     mCandidateReady = False
     mHasRejectedDirection = False: Erase mRejectedDirection
     mHasTransitionSegment = False: Set mPrincipalTransition = Nothing: mPrincipalIncomingCandidate = False
@@ -902,6 +908,7 @@ Private Sub ResetSolveState()
     mHybridSteps = 0: mHybridMatrices = 0: mHybridEvaluations = 0
     mMaterialEventDetails = vbNullString
     mEnvelopeHalfConfirmed = False: mEnvelopeDetails = vbNullString
+    mEnvelopeControl = False
 End Sub
 
 ' Решает одну силовую или деформационно управляемую пробу с общей
@@ -1551,6 +1558,47 @@ Friend Function TryReadEnvelopeCoordinate(ByVal accepted As Boolean, ByRef value
     TryReadEnvelopeCoordinate = mEnvelope.TryBufferedCoordinate(accepted, value)
 End Function
 
+' Возвращает две последовательные принятые H и независимое предыдущее поле той же ревизии, включая восстановленную историю.
+' Пара не вычисляется из старого поля при новой истории: она снимается из буферов перед каждым принятием.
+Friend Function TryAcceptedEnvelopeSegment(ByRef previous() As Double, ByRef before As Double, ByRef after As Double) As Boolean
+    If Not mEnvelopePairReady Or mEnvelopePairRevision <> mAcceptedRevision Then Exit Function
+    previous = mEnvelopePreviousField: before = mEnvelopeBefore: after = mEnvelopeAfter
+    TryAcceptedEnvelopeSegment = True
+End Function
+
+' Читает H принятой позиции текущего полного пути без повторного возврата материала.
+' Вызывающий сохраняет порядок всех принятых полей; сброс и воспроизведение пути полностью заменяют этот численный журнал.
+Friend Function TryReadAcceptedEnvelopeAt(ByVal index As Long, ByVal expectedCount As Long, ByRef value As Double) As Boolean
+    If Not mEnvelopePathReady Or Not mEnvelopePairReady Or mEnvelopePairRevision <> mAcceptedRevision Then Exit Function
+    If expectedCount <> mEnvelopePathCount Or index < 1 Or index > mEnvelopePathCount Then Exit Function
+    value = mEnvelopePath(index): TryReadAcceptedEnvelopeAt = True
+End Function
+
+' Читает H заданного поля от текущей принятой истории без изменения пробных буферов; вызывающий отвечает за выбор этой истории.
+Friend Function TryEnvelopeCoordinateAt(ByRef field() As Double, ByRef value As Double) As Boolean
+    If Not PrepareEnvelopeCoordinate() Then Exit Function
+    TryEnvelopeCoordinateAt = mEnvelope.TryCoordinate(field, value)
+End Function
+
+' Снимает точную пару до обмена материальных буферов. Неудача отключает только прогноз H, не меняя принимаемое равновесие.
+Private Sub PrepareAcceptedEnvelopeSegment()
+    mEnvelopePathCount = mEnvelopePathCount + 1
+    mEnvelopePairReady = False
+    If Not PrepareEnvelopeCoordinate() Then mEnvelopePathReady = False: Exit Sub
+    If Not mEnvelope.TryBufferedCoordinate(True, mEnvelopeBefore) Then mEnvelopePathReady = False: Exit Sub
+    If Not mEnvelope.TryBufferedCoordinate(False, mEnvelopeAfter) Then mEnvelopePathReady = False: Exit Sub
+    mEnvelopePreviousField = mAccepted: mEnvelopePairRevision = mAcceptedRevision + 1
+    mEnvelopePairReady = True
+    If mEnvelopePathReady Then
+        If mEnvelopePathCount = 1 Then
+            ReDim mEnvelopePath(1 To 32)
+        ElseIf mEnvelopePathCount > UBound(mEnvelopePath) Then
+            ReDim Preserve mEnvelopePath(1 To 2 * UBound(mEnvelopePath)) ' Рост буфера не копирует весь путь при каждом принятии.
+        End If
+        mEnvelopePath(mEnvelopePathCount) = mEnvelopeAfter
+    End If
+End Sub
+
 ' Даёт исходный уровень H и его разрешение при фактической принятой нагрузке; материала и истории не меняет.
 Friend Function TryEnvelopeControlState(ByRef baseLoad() As Double, ByRef direction() As Double, ByVal lambda As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByRef value As Double, ByRef resolution As Double) As Boolean
@@ -1578,7 +1626,7 @@ Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As
     ReDim mHybridSeed(1 To size)
     Dim i As Long
     For i = 1 To mDegreeCount: mHybridSeed(i) = seed(i): Next i
-    mHybridSeed(size) = seedLambda: mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
+    mHybridSeed(size) = BalancedEnvelopeSeed(seed, seedLambda): mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
     On Error GoTo Failed
     Dim wrapper As CCoupledEnvelopeEquations, equations As ICoupledEquationSystem
     Dim zero() As Double, solution() As Double, residual() As Double, matrix() As Double, maximum As Double
@@ -1586,6 +1634,7 @@ Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As
     Dim solver As CCoupledHybridSolver, solved As Boolean, pass As Long, budget As Long, usedSteps As Long
     Dim maximumCalls As Long, usedCalls As Long, calls As Long, ownMatrix As Boolean, method As String
     maximumCalls = CLng((2# * size + 1#) * (remaining + 1#) + remaining)
+    usedCalls = 1 ' Читающая сборка для согласования начального lambda входит в тот же бюджет, что и остальные пробы H.
     For pass = 1 To 2
         budget = remaining - usedSteps
         If budget < 1 Or maximumCalls - usedCalls < 2 Then Exit For
@@ -1632,12 +1681,29 @@ Failed:
     If number <> 6 And number <> 11 Then Err.Raise number, source, reason
 End Function
 
+' Согласует только начальный множитель с фактической силовой невязкой прогнозного поля, не меняя само поле или историю.
+' Ортогональная проекция на направление нагрузки минимизирует её квадратичную норму; это прогноз, не приёмка равновесия.
+Private Function BalancedEnvelopeSeed(ByRef field() As Double, ByVal factor As Double) As Double
+    BalancedEnvelopeSeed = factor
+    Dim load(1 To COMPONENT_COUNT) As Double, directionScale As Double, numerator As Double, denominator As Double, i As Long
+    SetControlledLoad factor, load
+    mHybridEvaluations = mHybridEvaluations + 1
+    If Not Evaluate(field, False, recordTrial:=False) Then Exit Function
+    For i = 1 To mGaugeStart - 1: directionScale = GeomMax(directionScale, Abs(mDirectionEquations(i))): Next i
+    If directionScale <= 0# Then Exit Function
+    For i = 1 To mGaugeStart - 1
+        numerator = numerator + (mDirectionEquations(i) / directionScale) * (mResidual(i) / directionScale)
+        denominator = denominator + (mDirectionEquations(i) / directionScale) ^ 2
+    Next i
+    If factor + numerator / denominator > 0# Then BalancedEnvelopeSeed = factor + numerator / denominator
+End Function
+
 ' Находит равновесие с ростом H. При обратной пространственной секущей требует отдельного половинного уровня от той же истории.
 ' Общий бюджет итераций делится между двумя размерами; итоговое поле заново заполняет все материальные буферы.
 Friend Function TryEnvelopeStep(ByRef baseLoad() As Double, ByRef direction() As Double, ByRef previous() As Double, _
         ByVal acceptedLambda As Double, ByRef seed() As Double, ByVal seedLambda As Double, ByVal target As Double, _
         ByRef lambda As Double, ByRef projection() As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
-        ByVal maxIterations As Long, ByRef probes As Long) As Boolean
+        ByVal maxIterations As Long, ByRef probes As Long, Optional ByVal retainEnvelopeControl As Boolean = False) As Boolean
     probes = 0
     If mCandidateReady Or mHybridActive Then Err.Raise 5, "CCoupledNewtonSolver", "Не завершена предыдущая проба материального управления."
     If Not PrepareEnvelopeCoordinate() Then Exit Function
@@ -1691,6 +1757,17 @@ Friend Function TryEnvelopeStep(ByRef baseLoad() As Double, ByRef direction() As
     Dim actualCoordinate As Double
     If Not mEnvelope.TryBufferedCoordinate(False, actualCoordinate) Then GoTo Unsuccessful
     If Abs(actualCoordinate - target) * mEnvelope.RowScale > tolerance Or actualCoordinate <= baseline Then GoTo Unsuccessful
+    If retainEnvelopeControl Then
+        Dim gradient() As Double
+        If Not mEnvelope.TryCoordinateGradient(full, gradient) Then GoTo Unsuccessful
+        mTargetControl = 0#
+        For i = 1 To mDegreeCount
+            mControlProjection(i) = 0#
+            If i < mGaugeStart Then mControlProjection(i) = gradient(i) * mEnvelope.RowScale / mReferenceModulus
+            mTargetControl = mTargetControl + mControlProjection(i) * full(i)
+        Next i
+        projection = mControlProjection: mEnvelopeTarget = target: mEnvelopeControl = True
+    End If
     lambda = fullLambda
     mMeta.DiagnosticDetails = DiagnosticSummary() & " | Материальное продолжение" & mEnvelopeDetails
     TryEnvelopeStep = True
@@ -2372,7 +2449,12 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
         ByRef uncertainty As Double) As Boolean
     RequireCandidate
     If Not mControlActive Then Exit Function
-    If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory, consistentBranch:=mConsistentControl) Then
+    If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory, _
+            consistentBranch:=mConsistentControl, refinedBranch:=mEnvelopeControl) Then
+        If mEnvelopeControl Then
+            TrialLambdaUncertainty = TryEnvelopeDifferenceUncertainty(absoluteTolerance, relativeTolerance, uncertainty)
+            If TrialLambdaUncertainty Then Exit Function
+        End If
         mCandidateReady = False
         Exit Function
     End If
@@ -2391,7 +2473,10 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
     ReDim weights(1 To size)
     weights(size) = 1#
     Dim adjoint As New CCoupledLinearSystem
-    If Not adjoint.Solve(matrix, weights, size) Then Exit Function
+    If Not adjoint.Solve(matrix, weights, size) Then
+        If mEnvelopeControl Then TrialLambdaUncertainty = TryEnvelopeDifferenceUncertainty(absoluteTolerance, relativeTolerance, uncertainty)
+        Exit Function
+    End If
     Dim norm As Double, residual As Double
     norm = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
     For i = 1 To mDegreeCount
@@ -2400,11 +2485,64 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
         If residual > norm Then norm = residual
     Next i
     residual = Abs(ControlResidual(mCandidate))
+    If mEnvelopeControl Then
+        Dim coordinate As Double
+        If Not mEnvelope.TryCoordinate(mCandidate, coordinate) Then Exit Function
+        residual = Abs(coordinate - mEnvelopeTarget) * mEnvelope.RowScale
+    End If
     If residual > norm Then norm = residual
     uncertainty = 0#
     For i = 1 To size: uncertainty = uncertainty + Abs(weights(i)): Next i
     uncertainty = uncertainty * norm + 2E-12 * (1# + Abs(mTrialLambda))
     TrialLambdaUncertainty = True
+End Function
+
+' Оценивает ту же погрешность через разности полной системы H, когда локальная касательная или её сопряжённое решение недоступны.
+' Невязка и все материальные истории остаются исходными; подготовка ограничена одной полной разностной матрицей и итоговым повтором.
+Private Function TryEnvelopeDifferenceUncertainty(ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByRef uncertainty As Double) As Boolean
+    If Not PrepareHybridScales() Then Exit Function
+    On Error GoTo Failed
+    Dim size As Long, i As Long, j As Long: size = mDegreeCount + 1
+    ReDim mHybridSeed(1 To size)
+    For i = 1 To mDegreeCount: mHybridSeed(i) = mCandidate(i): Next i
+    mHybridSeed(size) = mTrialLambda: mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
+    Dim wrapper As CCoupledEnvelopeEquations: Set wrapper = mEnvelope.AtTarget(Me, mEnvelopeTarget)
+    Dim equations As ICoupledEquationSystem: Set equations = wrapper
+    Dim zero() As Double, matrix() As Double, residual() As Double, unused() As Double, weights() As Double
+    ReDim zero(1 To size)
+    Dim linearizer As New CCoupledHybridSolver, built As Boolean
+    built = linearizer.TryLinearizeByDifferences(equations, zero, HYBRID_DIFFERENCE_STEP, 2 * size + 1, matrix)
+    mHybridEvaluations = mHybridEvaluations + linearizer.FunctionCalls: mHybridMatrices = mHybridMatrices + linearizer.JacobianCalls
+    If Not built Then GoTo Finished
+    mHybridEvaluations = mHybridEvaluations + 1
+    If Not equations.TryEvaluate(zero, False, residual, unused) Then GoTo Finished
+    Dim norm As Double, tolerance As Double, temp As Double
+    tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    For i = 1 To size: norm = GeomMax(norm, Abs(residual(i))): Next i
+    If norm > tolerance Then GoTo Finished
+    For i = 1 To size
+        For j = i + 1 To size
+            temp = matrix(j, i): matrix(j, i) = matrix(i, j): matrix(i, j) = temp
+        Next j
+    Next i
+    ReDim weights(1 To size): weights(size) = mHybridScales(size) ' Сопряжённая правая часть восстанавливает физическое приращение lambda из нормированной координаты.
+    Dim adjoint As New CCoupledLinearSystem
+    If Not adjoint.Solve(matrix, weights, size) Then GoTo Finished
+    uncertainty = 0#
+    For i = 1 To size: uncertainty = uncertainty + Abs(weights(i)): Next i
+    uncertainty = uncertainty * tolerance + 2E-12 * (1# + Abs(mTrialLambda))
+    mEnvelopeDetails = mEnvelopeDetails & "; погрешность lambda по полной разностной касательной"
+    mMeta.DiagnosticDetails = DiagnosticSummary() & " | Материальное продолжение" & mEnvelopeDetails
+    TryEnvelopeDifferenceUncertainty = True
+Finished:
+    mHybridActive = False
+    Exit Function
+Failed:
+    Dim number As Long, source As String, reason As String
+    number = Err.Number: source = Err.Source: reason = Err.Description
+    mHybridActive = False
+    If number <> 6 And number <> 11 Then Err.Raise number, source, reason
 End Function
 
 ' Приводит невязку контролируемой деформации к масштабу силовых уравнений.
@@ -2433,6 +2571,7 @@ Friend Sub AcceptStep()
         End If
     End If
     Dim acceptedField() As Double: acceptedField = mCandidate
+    PrepareAcceptedEnvelopeSegment
     AcceptMaterialTrials
     mAccepted = acceptedField
     mAcceptedRevision = mAcceptedRevision + 1
@@ -2475,6 +2614,11 @@ Friend Property Get AcceptedRevision() As Long
     AcceptedRevision = mAcceptedRevision
 End Property
 
+' Возвращает число поправок последней пробы; адаптация следующего численного шага не изменяет критерии её приёмки.
+Friend Property Get IterationCount() As Long
+    IterationCount = mIterations
+End Property
+
 ' Восстанавливает состояние после известных принятых полей. Напряжения
 ' и история вычисляются по той же последовательности без поиска НДС.
 ' Вызывающий передаёт поля этой секции с начала той же траектории.
@@ -2493,6 +2637,7 @@ Friend Function ReplayAcceptedFields(ByVal history As Collection, ByVal lastFiel
                 Exit Function
             End If
         Next point
+        PrepareAcceptedEnvelopeSegment
         AcceptMaterialTrials
         mAccepted = field
         mAcceptedRevision = mAcceptedRevision + 1

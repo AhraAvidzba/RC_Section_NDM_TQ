@@ -31,6 +31,23 @@ Private mRestarts As Long
 Private mHasDifferenceBracket As Boolean, mDifferenceBefore() As Double, mDifferenceAfter() As Double
 Private mDifferenceScore As Double, mDifferenceColumn As Long
 
+' Строит только разностную касательную полной системы от неизменной точки, переиспользуя тот же контроль парных проб и размеров.
+' Неполная матрица не публикуется; число вызовов ограничено maximumCalls, входные координаты не меняются.
+Friend Function TryLinearizeByDifferences(ByVal equations As ICoupledEquationSystem, ByRef coordinates() As Double, _
+        ByVal relativeStep As Double, ByVal maximumCalls As Long, ByRef matrix() As Double) As Boolean
+    Erase matrix
+    mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mStopCode = 0
+    mHasBest = False: mHasDifferenceBracket = False: Erase mBest: Erase mBestResidual
+    If LBound(coordinates) <> 1 Or relativeStep <= 0# Then Err.Raise 5, "CCoupledHybridSolver", "Для разностной касательной нужны координаты с индекса 1 и положительный шаг."
+    Dim count As Long: count = UBound(coordinates)
+    If count < 1 Or maximumCalls < 2# * count + 1# Then mStopCode = 2: Exit Function
+    Dim residual() As Double, unused() As Double, completed() As Double
+    If Not ReadResidual(equations, coordinates, residual, unused, count) Then Exit Function
+    mJacobianCalls = 1
+    If Not BuildDifferenceJacobian(equations, coordinates, residual, relativeStep, maximumCalls, completed, count, False, Nothing) Then Exit Function
+    matrix = completed: mStopCode = 1: TryLinearizeByDifferences = True
+End Function
+
 ' Ищет равновесие в масштабированных координатах и возвращает лучшую фактически вычисленную точку.
 ' Успех требует заданной максимальной невязки; малый шаг HYBRJ сам по себе успехом не считается.
 ' maxEvaluations ограничивает вызовы функции, maxSteps — все dogleg-поправки, включая отвергнутые.
