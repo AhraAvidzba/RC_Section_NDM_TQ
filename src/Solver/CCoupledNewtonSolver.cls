@@ -1652,37 +1652,47 @@ Friend Property Get EnvelopeTurnVerified() As Boolean
 End Property
 
 ' Решает один уровень H от неизменной истории собственной касательной, затем разностным резервом.
-' Первый способ получает половину оставшихся итераций; оба способа и итоговая проверка используют общий бюджет вызовов.
+' При увеличенном шаге соседний уровень может дать новый прогноз; его решение не принимается в историю.
+' Все способы, соседний уровень и итоговая проверка расходуют общий бюджет итераций и вызовов.
 Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As Double, ByVal target As Double, _
-        ByVal tolerance As Double, ByVal remaining As Long, ByRef field() As Double, ByRef lambda As Double) As Boolean
+        ByVal tolerance As Double, ByVal remaining As Long, ByRef field() As Double, ByRef lambda As Double, _
+        Optional ByVal ownOnly As Boolean = False, Optional ByVal maximumFunctionCalls As Long = 0) As Boolean
     If remaining < 1 Or Not PrepareHybridScales() Then Exit Function
     Dim size As Long: size = mDegreeCount + 1
-    ReDim mHybridSeed(1 To size)
     Dim i As Long
-    For i = 1 To mDegreeCount: mHybridSeed(i) = seed(i): Next i
-    mHybridSeed(size) = BalancedEnvelopeSeed(seed, seedLambda): mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
     On Error GoTo Failed
     Dim wrapper As CCoupledEnvelopeEquations, equations As ICoupledEquationSystem
     Dim zero() As Double, solution() As Double, residual() As Double, matrix() As Double, maximum As Double
     ReDim zero(1 To size)
     Dim solver As CCoupledHybridSolver, solved As Boolean, pass As Long, budget As Long, usedSteps As Long
     Dim maximumCalls As Long, usedCalls As Long, calls As Long, ownMatrix As Boolean, method As String
+    Dim growthSeedReady As Boolean, functionBudget As Long
     maximumCalls = CLng((2# * size + 1#) * (remaining + 1#) + remaining)
+    If maximumFunctionCalls > 0 Then maximumCalls = GeomMin(maximumCalls, maximumFunctionCalls)
+    If maximumCalls < 3 Then Exit Function
+    PrepareEnvelopeEquationSeed seed, seedLambda
     usedCalls = 1 ' Читающая сборка для согласования начального lambda входит в тот же бюджет, что и остальные пробы H.
-    For pass = 1 To 2
+    For pass = 1 To 3
+        If pass > 1 And ownOnly Then Exit For
+        If pass = 3 And Not growthSeedReady Then Exit For
+        If pass = 2 Then growthSeedReady = TryEnvelopeNeighborPrediction(seed, seedLambda, target, tolerance, _
+            remaining, maximumCalls, usedSteps, usedCalls)
         budget = remaining - usedSteps
         If budget < 1 Or maximumCalls - usedCalls < 2 Then Exit For
-        ownMatrix = (pass = 1)
-        If ownMatrix Then budget = GeomMax(1, budget \ 2) ' Разностный резерв не получает заново уже потраченные итерации.
+        ownMatrix = (pass = 1 Or (pass = 2 And growthSeedReady))
+        If pass = 1 And Not ownOnly Then budget = GeomMax(1, budget \ 2) ' Разностный резерв не получает заново уже потраченные итерации.
+        functionBudget = maximumCalls - usedCalls - 1
+        If ownMatrix Then functionBudget = functionBudget - budget ' Собственная матрица делает один дополнительный физический вызов на каждую поправку.
+        If functionBudget < 1 Then Exit For
         Set wrapper = mEnvelope.AtTarget(Me, target, ownMatrix): Set equations = wrapper
         Set solver = New CCoupledHybridSolver
         If ownMatrix Then
             method = "собственная касательная"
-            solved = solver.TrySolve(equations, zero, maximumCalls - usedCalls - 1, budget, _
+            solved = solver.TrySolve(equations, zero, functionBudget, budget, _
                 tolerance, 0.00000000001, 0.2, solution, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
         Else
             method = "разностный резерв"
-            solved = solver.TrySolve(equations, zero, maximumCalls - usedCalls - 1, budget, _
+            solved = solver.TrySolve(equations, zero, functionBudget, budget, _
                 tolerance, 0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
                 automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
         End If
@@ -1691,6 +1701,7 @@ Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As
         usedCalls = usedCalls + calls
         mIterations = mIterations + solver.Steps: mHybridSteps = mHybridSteps + solver.Steps
         mHybridMatrices = mHybridMatrices + solver.JacobianCalls: mHybridEvaluations = mHybridEvaluations + calls
+        If solver.HasBestPoint Then mLastNorm = solver.BestResidual
         mEnvelopeDetails = mEnvelopeDetails & "; цель H " & CStr(target) & " МПа, " & method & ", остановка " & CStr(solver.StopCode) & _
             ", невязка " & CStr(solver.BestResidual) & " МПа"
         If solved And solver.HasBestPoint Then
@@ -1713,6 +1724,58 @@ Failed:
     number = Err.Number: source = Err.Source: reason = Err.Description
     mHybridActive = False
     If number <> 6 And number <> 11 Then Err.Raise number, source, reason
+End Function
+
+' Открывает читающий H-контекст из заданного прогноза; принятая история и общая траектория нагрузок сохраняются.
+' Согласование начального lambda расходует один физический вызов, учитываемый вызывающим методом.
+Private Sub PrepareEnvelopeEquationSeed(ByRef seed() As Double, ByVal lambda As Double)
+    ReDim mHybridSeed(1 To mDegreeCount + 1)
+    Dim i As Long
+    For i = 1 To mDegreeCount: mHybridSeed(i) = seed(i): Next i
+    mHybridSeed(mDegreeCount + 1) = BalancedEnvelopeSeed(seed, lambda)
+    mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
+End Sub
+
+' После отказа увеличенного H-шага повторяет последний принятый прирост только для получения начального приближения.
+' Соседнее равновесие проверяется от той же истории, без AcceptStep; обратное приращение и превышение предела стали исключены.
+' Расход дочернего решения и восстановления контекста вычитается из бюджетов исходной цели, включая неудачную попытку.
+Private Function TryEnvelopeNeighborPrediction(ByRef seed() As Double, ByVal seedLambda As Double, ByVal target As Double, _
+        ByVal tolerance As Double, ByVal remaining As Long, ByVal maximumCalls As Long, _
+        ByRef usedSteps As Long, ByRef usedCalls As Long) As Boolean
+    If Not mEnvelopePairReady Or mEnvelopePairRevision <> mAcceptedRevision Then Exit Function
+    Dim spacing As Double: spacing = mEnvelopeAfter - mEnvelopeBefore
+    Dim requested As Double: requested = target - mEnvelopeAfter
+    If spacing <= 2# * tolerance / mEnvelope.RowScale Or requested - spacing <= 2# * tolerance / mEnvelope.RowScale Then Exit Function
+    Dim budget As Long: budget = GeomMin(GeomMax(1, remaining \ 2), remaining - usedSteps - 1)
+    If budget < 1 Or maximumCalls - usedCalls < 6 Then Exit Function
+    Dim prediction() As Double, neighbor() As Double, neighborLambda As Double, i As Long
+    prediction = mAccepted
+    For i = 1 To mGaugeStart - 1: prediction(i) = mAccepted(i) + (mAccepted(i) - mEnvelopePreviousField(i)): Next i
+    Dim beforeSteps As Long, beforeCalls As Long, solved As Boolean
+    beforeSteps = mIterations: beforeCalls = mHybridEvaluations
+    mHybridActive = False
+    solved = SolveEnvelopeTarget(prediction, seedLambda, mEnvelopeAfter + spacing, tolerance, budget, neighbor, neighborLambda, _
+        ownOnly:=True, maximumFunctionCalls:=maximumCalls - usedCalls - 3)
+    If solved And neighborLambda > 0# Then
+        mHybridEvaluations = mHybridEvaluations + 1
+        solved = PrincipalSteelWithinLimits(neighbor)
+        If solved Then
+            Dim advance As Double, reference As Double
+            solved = SpatialIncrementAdvances(mEnvelopePreviousField, mAccepted, neighbor, advance, reference)
+        End If
+    Else
+        solved = False
+    End If
+    If solved Then
+        PrepareEnvelopeEquationSeed neighbor, neighborLambda
+        mEnvelopeDetails = mEnvelopeDetails & "; соседний уровень H использован только как начальное приближение исходной цели"
+    Else
+        PrepareEnvelopeEquationSeed seed, seedLambda
+        mEnvelopeDetails = mEnvelopeDetails & "; соседнее начальное приближение H не подтверждено"
+    End If
+    usedSteps = usedSteps + mIterations - beforeSteps
+    usedCalls = usedCalls + mHybridEvaluations - beforeCalls
+    TryEnvelopeNeighborPrediction = solved
 End Function
 
 ' Согласует только начальный множитель с фактической силовой невязкой прогнозного поля, не меняя само поле или историю.
