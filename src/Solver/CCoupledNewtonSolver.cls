@@ -255,6 +255,7 @@ End Property
 ' полный разностный резерв включается явно после исчерпания деления шага.
 ' Оба резерва не применяются к псевдодуге и не меняют допуск принятия.
 ' conditionHybridRecovery включает норму столбцов и свежую полную касательную только явно выбранного резерва.
+' allowRefinedRestart разрешает повтор исходного прогноза для подтверждённой исходящей материальной меры.
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
@@ -262,7 +263,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         Optional ByVal consistentControl As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
-        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#) As Boolean
+        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#, _
+        Optional ByVal allowRefinedRestart As Boolean = False) As Boolean
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -287,7 +289,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
     TryDeformationStep = SolveStep(load, initialLambda, absoluteTolerance, relativeTolerance, maxIterations, _
         recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
         allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#), _
-        allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery, referenceLambda:=referenceLambda)
+        allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery, referenceLambda:=referenceLambda, _
+        allowRefinedRestart:=allowRefinedRestart)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -921,7 +924,8 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByRef initialField As Variant, _
         Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
-        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#) As Boolean
+        Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#, _
+        Optional ByVal allowRefinedRestart As Boolean = False) As Boolean
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -932,7 +936,8 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Dim candidateNorm As Double, candidateTolerance As Double, fraction As Double, i As Long, accepted As Boolean
     Dim bestTrialNorm As Double, hasValidTrial As Boolean
     Dim governingRow As Long, baseEquation As Double, trialEquation As Double, trialFraction As Double
-    Dim useGradientTangent As Boolean, built As Boolean
+    Dim useGradientTangent As Boolean, built As Boolean, refinedStartUsed As Boolean, startedRefined As Boolean
+    startedRefined = mRefinedControlTangent
     Dim useSteelCorrection As Boolean, useConcreteFieldTangent As Boolean, minimumFraction As Double
     useSteelCorrection = Not mControlActive And Not (mSteelCorrector Is Nothing)
     Dim currentLambda As Double, candidateLambda As Double
@@ -1113,6 +1118,14 @@ RecomputeTangent:
                     mIterations = mIterations + 1 ' Отклонённая поправка расходует общий бюджет перед уточнением матрицы той же пробы.
                     GoTo RecomputeTangent
                 End If
+            End If
+            If allowRefinedRestart And mControlActive And mUseSpatialHistory And Not mConsistentControl And mArcLoadProjection = 0# And _
+                    Not startedRefined And Not refinedStartUsed And SupportsHybridRecovery And mIterations + 1 < maxIterations Then
+                refinedStartUsed = True
+                RestartRefinedControlPrediction controlPrediction, initialLambda, details, current, currentLambda
+                GoTo RecomputeTangent
+            End If
+            If Len(mismatch) > 0 And mUseSpatialHistory Then
                 mWrongControlDirection = True
                 If recoverYieldControl Then
                     Dim recoveryIterationLimit As Long
@@ -1162,6 +1175,18 @@ EvaluationFailed:
         RecordFailure sfcInternalError, "Ошибка сборки связанного равновесия. " & description
     End If
 End Function
+
+' Повторяет первоначальный прогноз той же управляемой CDP-пробы после отказа поиска доли.
+' История, проекция и цель сохраняются; отклонённая поправка расходует одну итерацию общего бюджета.
+' Материальные скобки той же принятой ревизии сохраняются; критерии силового и кинематического равновесия не меняются.
+Private Sub RestartRefinedControlPrediction(ByRef prediction As Variant, ByVal initialLambda As Double, _
+        ByVal failureDetails As String, ByRef current() As Double, ByRef currentLambda As Double)
+    current = prediction: currentLambda = initialLambda
+    mIterations = mIterations + 1
+    mRefinedControlTangent = True
+    mRefinedControlReason = "; повтор исходного прогноза после отказа поиска доли | Исходная проба: " & failureDetails
+    mMeta.Clear: mFailureCode = sfcNone: mCandidateReady = False: mWrongControlDirection = False
+End Sub
 
 ' Проверяет явно запрошенный гибридный резерв после численного отказа демпфирования пространственного CDP.
 ' Каждая dogleg-поправка расходует остаток maxIterations; все разностные чтения входят в mEvaluations.
@@ -3096,7 +3121,7 @@ Private Function DiagnosticSummary() As String
     If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)
     If mRefinedControlTangent Then DiagnosticSummary = DiagnosticSummary & _
-        "; пространственная касательная уточнена после расхождения направления" & mRefinedControlReason
+        "; пространственная касательная уточнена" & mRefinedControlReason
     If mSteelBranchBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; пересборок ветвей стали: " & CStr(mSteelBranchBuilds)
     If mSteelFieldTangents > 0 Then DiagnosticSummary = DiagnosticSummary & _
