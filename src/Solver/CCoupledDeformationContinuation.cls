@@ -218,7 +218,18 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
                 Exit Sub
             ElseIf Not TryChangePostPeakControl(history, left, current, nominal, increment, minimum, lastNoProgress) Then
-                If Not TryChangeStalledFieldControl(history, left, current, nominal, increment, minimum) Then Exit For
+                If Not TryChangeStalledFieldControl(history, left, current, nominal, increment, minimum) Then
+                    If mSolver.HasPrincipalBoundaries Then Exit For
+                    Dim enteredMaterialReserve As Boolean
+                    If TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredMaterialReserve, True) Then
+                        lastProbeFailed = False: lastNoProgress = False: smoothSteps = 0
+                    ElseIf enteredMaterialReserve Then
+                        StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
+                        Exit Sub
+                    Else
+                        Exit For
+                    End If
+                End If
             End If
         End If
         targetCoordinate = current.Coordinate + increment
@@ -1371,7 +1382,7 @@ Private Function Details() As String
     If mYieldRecoveryProbes > 0 Then Details = Details & "; проб смены меры: " & CStr(mYieldRecoveryProbes) & _
         "; принято после смены меры: " & CStr(mYieldRecoveredPoints)
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
-    If mPrincipalCornerProbes > 0 Then Details = Details & "; проб спектрального угла: " & CStr(mPrincipalCornerProbes) & _
+    If mPrincipalCornerProbes > 0 Then Details = Details & "; проб материального перехода: " & CStr(mPrincipalCornerProbes) & _
         "; подтверждённых переходов: " & CStr(mPrincipalCorners) & "; прогнозов из проверочного равновесия: " & CStr(mCornerProbeSeeds)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
@@ -1390,13 +1401,14 @@ Private Function Details() As String
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
 
-' Проходит локальную знаковую границу двумя отдельными принятыми состояниями.
+' Проходит локальную материальную границу двумя отдельными принятыми состояниями.
 ' Разворот допускается только внутри решённого события; следующие обычные шаги снова проверяют пространственную ориентацию.
 Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef current As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, _
-        ByRef minimum As Double, ByRef entered As Boolean) As Boolean
+        ByRef minimum As Double, ByRef entered As Boolean, Optional ByVal afterStepExhaustion As Boolean = False) As Boolean
     entered = False
     If Not mSolver.HasPrincipalTransitionSegment Or mProbeCount + 2 > PROBE_LIMIT Then Exit Function
+    If Not mSolver.HasPrincipalBoundaries And Not afterStepExhaustion Then Exit Function ' CDP-событие не заменяет доступные деление шага и смену пространственной меры.
     Dim previous() As Double, accepted() As Double, incomingField() As Double, field() As Double, actual() As Double
     ReadSpatialReference history, current.HistoryIndex, previous
     accepted = history(current.HistoryIndex)
@@ -1438,7 +1450,7 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     mProjection = projection: current.Coordinate = oldCoordinate: point.Coordinate = newCoordinate
     mUsesYieldControl = True: mBranchTangentControl = False
     mUsesTransverseControl = False: mUsesFieldControl = False
-    mControlName = "входящая мера спектрального угла"
+    mControlName = "входящая мера материального перехода"
     nominal = Abs(difference): increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
     Dim designAtPoint As Boolean: designAtPoint = mSolver.PrincipalDesignLoadVerified
     AcceptPoint history, point
@@ -1477,13 +1489,17 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
     left.Coordinate = CoordinateOf(incomingField)
     mUsesYieldControl = False: mUsesFieldControl = True: mBranchTangentControl = False
     mPostPeakControlName = vbNullString
-    mControlName = "пространственная мера после спектрального угла"
+    mControlName = "пространственная мера после материального перехода"
     mPrincipalCorners = mPrincipalCorners + 1: mFieldControlChanges = mFieldControlChanges + 1
     mLastFieldControlRevision = mSolver.AcceptedRevision
     nominal = transition.ReferenceIncrement
     increment = nominal * MIN_STEP_RATIO: minimum = increment * MIN_STEP_RATIO
     mHasCornerReference = True: mCornerReferenceRevision = mSolver.AcceptedRevision
     mCornerReferenceIncrement = nominal
+    If transition.PrincipalIndex = 0 And current.Lambda < left.Lambda And Not mFollowingLocalPeak Then
+        mUnverifiedDecline = True: mUnverifiedReference = mBestLambda
+        mUnverifiedDips = mUnverifiedDips + 1 ' Спад после решённого события требует продолжения ветви и не подтверждает предельную нагрузку.
+    End If
     PreparePrincipalProbeSeed history, current, probe, probeLambda, increment
     TryCrossPrincipalCorner = True
 End Function

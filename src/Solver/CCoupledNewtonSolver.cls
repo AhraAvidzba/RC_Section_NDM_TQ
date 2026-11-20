@@ -35,6 +35,9 @@ Private Const YIELD_TRACE_ITERATIONS As Long = 3
 Private Const YIELD_DAMPING_STEPS As Long = 8
 Private Const YIELD_ROOT_TOLERANCE As Double = 0.000000000002 ' МПа в пробном критерии бетона.
 Private Const PRINCIPAL_EVENT_TOLERANCE As Double = 0.000000001 ' МПа: общая точка проверяется строже штатного равновесия.
+Private Const YIELD_EVENT_TOLERANCE As Double = 0.0000000001 ' МПа: численная доводка события без изменения силовой приёмки.
+Private Const YIELD_EVENT_HALF_ERROR As Double = 0.005 ' Относительная проверка связности полным и половинным шагом.
+Private Const YIELD_EVENT_RADIUS As Double = 1# ' Исходящая CDP-проба ограничена предыдущим механическим шагом; точка события — четвертью.
 Private Const PRINCIPAL_EVENT_RADIUS As Double = 0.25 ' Радиус локальной доводки в долях предыдущего механического приращения.
 Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходует общий бюджет шага, оставляя итерацию полной системе.
 Private Const HYBRID_DIFFERENCE_STEP As Double = 0.000001 ' Относительный шаг производной полной системы в подготовленных координатах.
@@ -109,6 +112,7 @@ Private mPrincipalDesignField() As Double, mPrincipalDesignResultants() As Doubl
 Private mPrincipalOutgoingCandidate As Boolean, mDepartureRevision As Long
 Private mPrincipalDeparture As CCoupledPrincipalTransition
 Private mPrincipalBaseLoad() As Double, mPrincipalLoadDirection() As Double
+Private mMaterialEventDetails As String ' Ограниченная диагностика точных CDP-проб одного события.
 Private mBaseLoad() As Double, mLoadDirection() As Double
 Private mBaseEquations() As Double, mDirectionEquations() As Double
 Private mTrialLambda As Double
@@ -680,9 +684,11 @@ Friend Sub PreserveRejectedSpatialTrial(ByRef previous() As Double)
     mTransitionRevision = mAcceptedRevision: mHasTransitionSegment = True
 End Sub
 
-' Сообщает о действительном отклонённом отрезке той же принятой истории, пригодном для выбора спектральной границы.
+' Сообщает об отклонённой пробе той же истории, после которой разрешён выбор материального события.
 Friend Property Get HasPrincipalTransitionSegment() As Boolean
-    HasPrincipalTransitionSegment = mHasTransitionSegment And mTransitionRevision = mAcceptedRevision And HasPrincipalBoundaries
+    HasPrincipalTransitionSegment = mHasTransitionSegment And mTransitionRevision = mAcceptedRevision And mUseSpatialHistory
+    If HasPrincipalTransitionSegment Then HasPrincipalTransitionSegment = (TypeOf mResponse Is CCoupledReinforcedResponse And _
+        TypeOf mPlusResponse Is CCoupledReinforcedResponse And TypeOf mMinusResponse Is CCoupledReinforcedResponse)
 End Property
 
 ' Отбирает материальное событие до расходования новой пробы продолжения; сама граница ещё требует полного решения равновесия.
@@ -892,6 +898,7 @@ Private Sub ResetSolveState()
     mMaterialFailures = 0: mLastFailedPoint = 0: mLastFailedSide = 0
     mLastNorm = 0#: mMinimumPivot = 0#
     mHybridSteps = 0: mHybridMatrices = 0: mHybridEvaluations = 0
+    mMaterialEventDetails = vbNullString
 End Sub
 
 ' Решает одну силовую или деформационно управляемую пробу с общей
@@ -2725,9 +2732,11 @@ Private Function DiagnosticSummary() As String
         "; разностных бетонных касательных по полю: " & CStr(mSteelFieldTangents)
     If mHybridEvaluations > 0 Then DiagnosticSummary = DiagnosticSummary & "; гибридных поправок: " & CStr(mHybridSteps) & _
         "; глобальных касательных: " & CStr(mHybridMatrices) & "; разностных и прочих гибридных проб: " & CStr(mHybridEvaluations)
+    If Len(mMaterialEventDetails) > 0 Then DiagnosticSummary = DiagnosticSummary & " | " & mMaterialEventDetails
 End Function
 
-' Выбирает границу по действительному отклонённому отрезку и решает общую точку и входящую сторону от одной истории.
+' Выбирает материальную границу после отклонённой пробы и решает входящее равновесие от принятой истории.
+' Для CDP принимается точное начало пластичности; для ASD отдельно решается входящая сторона знаковой границы.
 ' Радиус определяется предыдущим механическим шагом; выбранный номер точки не зависит от формы сечения.
 Friend Function TryPreparePrincipalTransition(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef previous() As Double, ByVal currentLambda As Double, ByVal absoluteTolerance As Double, _
@@ -2735,13 +2744,12 @@ Friend Function TryPreparePrincipalTransition(ByRef baseLoad() As Double, ByRef 
         ByRef trialLambda As Double, ByRef projection() As Double) As Boolean
     Set transition = Nothing
     If Not mPrincipalTransition Is Nothing Then Exit Function
-    If Not HasPrincipalBoundaries Or Not mHasTransitionSegment Or mTransitionRevision <> mAcceptedRevision Then Exit Function
+    If Not HasPrincipalTransitionSegment Then Exit Function
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 3 Or currentLambda <= 0# Then Exit Function
     If Not SamePrincipalLoadPath(baseLoad, direction, mBaseLoad, mLoadDirection) Then Exit Function
     Dim station As TYieldStation
     If Not SelectPrincipalTransitionStation(previous, station, _
             PrincipalCandidateTolerance(currentLambda, absoluteTolerance, relativeTolerance)) Then Exit Function
-    If station.PrincipalIndex = 0 Then Exit Function
     Dim strain(1 To COMPONENT_COUNT) As Double, unused(1 To COMPONENT_COUNT) As Double, value As Double
     YieldStrain station.Point, station.Side, mAccepted, strain
     If Not ReadTransitionValue(station, strain, value, unused, False) Then Exit Function
@@ -2764,16 +2772,28 @@ Friend Function TryPreparePrincipalTransition(ByRef baseLoad() As Double, ByRef 
     gap = GeomMin(0.25 * Abs(value), 0.125 * EquilibriumTolerance(absoluteTolerance, relativeTolerance))
     If gap <= 16# * YIELD_ROOT_TOLERANCE Then GoTo Unsuccessful
     tolerance = GeomMin(PRINCIPAL_EVENT_TOLERANCE, 0.125 * gap)
+    If station.PrincipalIndex = 0 Then
+        gap = 3# * EquilibriumTolerance(absoluteTolerance, relativeTolerance) ' Материальное приращение отличимо от силового допуска; два размера проверяются независимо.
+        tolerance = GeomMin(YIELD_EVENT_TOLERANCE, 0.125 * gap)
+    End If
     radius = PRINCIPAL_EVENT_RADIUS * reference
     Dim face() As Double, incoming() As Double, faceLambda As Double
     On Error GoTo Failed
-    If Not FollowPrincipalCoordinate(station, mAccepted, currentLambda, 0#, tolerance, maxIterations, _
+    Dim faceSeed() As Double: faceSeed = mAccepted
+    If station.PrincipalIndex = 0 Then
+        If Not YieldEventPrediction(previous, station, faceSeed) Then GoTo Unsuccessful
+    End If
+    If Not FollowPrincipalCoordinate(station, faceSeed, currentLambda, 0#, tolerance, maxIterations, _
             mAccepted, radius, face, faceLambda, projection) Then GoTo Unsuccessful
     If Not PrincipalSteelWithinLimits(face) Then GoTo Unsuccessful
     Dim advance As Double, oldIncrement As Double
     If Not SpatialIncrementAdvances(previous, mAccepted, face, advance, oldIncrement) Then GoTo Unsuccessful
-    If Not FollowPrincipalCoordinate(station, face, faceLambda, Sgn(value) * gap, tolerance, maxIterations, _
-            mAccepted, radius, incoming, trialLambda, projection) Then GoTo Unsuccessful
+    If station.PrincipalIndex = 0 Then
+        incoming = face: trialLambda = faceLambda ' Начало пластичности принимается до решения исходящей ветви с новой историей.
+    Else
+        If Not FollowPrincipalCoordinate(station, face, faceLambda, Sgn(value) * gap, tolerance, maxIterations, _
+                mAccepted, radius, incoming, trialLambda, projection) Then GoTo Unsuccessful
+    End If
     If Not SpatialIncrementAdvances(previous, mAccepted, incoming, advance, oldIncrement) Then GoTo Unsuccessful
     Dim designVerified As Boolean
     If Not VerifyPrincipalDesignLoad(station, mAccepted, currentLambda, incoming, trialLambda, radius, _
@@ -2785,8 +2805,8 @@ Friend Function TryPreparePrincipalTransition(ByRef baseLoad() As Double, ByRef 
     Set mPrincipalTransition = prepared: Set transition = prepared
     mPrincipalBaseLoad = baseLoad: mPrincipalLoadDirection = direction
     mPrincipalIncomingCandidate = True: mPrincipalDesignVerified = designVerified
-    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; подтверждена входящая сторона спектрального угла; точка: " & _
-        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; главное напряжение: " & CStr(station.PrincipalIndex)
+    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; подтверждено входящее материальное событие; точка: " & _
+        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; координата (0 — CDP, 1..3 — ASD): " & CStr(station.PrincipalIndex)
     TryPreparePrincipalTransition = True
     Exit Function
 Unsuccessful:
@@ -2798,7 +2818,7 @@ Unsuccessful:
     mTransitionFrom = segmentFrom: mTransitionTo = segmentTo: mTransitionRevision = mAcceptedRevision
     mHasTransitionSegment = True: Set mPrincipalTransition = Nothing: mPrincipalIncomingCandidate = False
     Set mMeta = originalMeta
-    mMeta.DiagnosticDetails = "Не подтверждено входящее равновесие спектрального угла; " & failureDetails & _
+    mMeta.DiagnosticDetails = "Не подтверждено входящее равновесие материального события; " & failureDetails & _
         " | Исходная проба: " & originalMeta.DiagnosticDetails
     Exit Function
 Failed:
@@ -2826,7 +2846,9 @@ Friend Function TryCompletePrincipalTransition(ByVal transition As CCoupledPrinc
     mControlActive = False: mArcLoadProjection = 0#: mConsistentControl = False
     Dim tolerance As Double, radius As Double, face() As Double, faceLambda As Double, outgoing() As Double
     tolerance = GeomMin(PRINCIPAL_EVENT_TOLERANCE, 0.125 * transition.PrincipalGap)
+    If station.PrincipalIndex = 0 Then tolerance = GeomMin(tolerance, YIELD_EVENT_TOLERANCE)
     radius = PRINCIPAL_EVENT_RADIUS * transition.ReferenceIncrement
+    If station.PrincipalIndex = 0 Then radius = YIELD_EVENT_RADIUS * transition.ReferenceIncrement
     On Error GoTo Failed
     If Not FollowPrincipalCoordinate(station, mAccepted, currentLambda, 0#, tolerance, maxIterations, _
             mAccepted, radius, face, faceLambda, projection) Then GoTo Unsuccessful
@@ -2834,15 +2856,37 @@ Friend Function TryCompletePrincipalTransition(ByVal transition As CCoupledPrinc
     Dim originalFace() As Double, originalLambda As Double
     transition.CopyFace originalFace, originalLambda
     If SpatialFieldDistance(originalFace, face) > radius Then GoTo Unsuccessful
-    If Not FollowPrincipalCoordinate(station, face, faceLambda, -transition.IncomingSign * transition.PrincipalGap, _
+    Dim outgoingSeed() As Double, origin() As Double, seedDegree As Long
+    outgoingSeed = face
+    If station.PrincipalIndex = 0 Then
+        transition.CopyOrigin origin
+        For seedDegree = 1 To mGaugeStart - 1: outgoingSeed(seedDegree) = face(seedDegree) + face(seedDegree) - origin(seedDegree): Next seedDegree
+    End If
+    If Not FollowPrincipalCoordinate(station, outgoingSeed, faceLambda, -transition.IncomingSign * transition.PrincipalGap, _
             tolerance, maxIterations, mAccepted, radius, outgoing, trialLambda, projection) Then GoTo Unsuccessful
+    If station.PrincipalIndex = 0 Then
+        Dim halfField() As Double, halfLambda As Double, halfSeed() As Double, doubled() As Double, stepLength As Double, i As Long
+        halfSeed = face
+        For i = 1 To mDegreeCount: halfSeed(i) = 0.5 * (face(i) + outgoing(i)): Next i ' Прогноз половинного шага отдельно подтверждается нелинейными уравнениями от той же истории.
+        If Not FollowPrincipalCoordinate(station, halfSeed, 0.5 * (faceLambda + trialLambda), -0.5 * transition.IncomingSign * transition.PrincipalGap, _
+                tolerance, maxIterations, mAccepted, radius, halfField, halfLambda, projection) Then GoTo Unsuccessful
+        stepLength = SpatialFieldDistance(face, outgoing)
+        If stepLength <= 0# Then GoTo Unsuccessful
+        doubled = halfField
+        For i = 1 To mGaugeStart - 1: doubled(i) = 2# * halfField(i) - face(i): Next i
+        If SpatialFieldDistance(doubled, outgoing) > YIELD_EVENT_HALF_ERROR * stepLength Then GoTo Unsuccessful
+        If Abs(trialLambda - faceLambda) > 0.000000000001 * (1# + Abs(faceLambda)) Then
+            If Abs(2# * (halfLambda - faceLambda) - (trialLambda - faceLambda)) > _
+                    YIELD_EVENT_HALF_ERROR * Abs(trialLambda - faceLambda) Then GoTo Unsuccessful
+        End If
+    End If
     Dim designVerified As Boolean
     If Not VerifyPrincipalDesignLoad(station, mAccepted, currentLambda, outgoing, trialLambda, radius, _
             absoluteTolerance, relativeTolerance, maxIterations, designVerified) Then GoTo Unsuccessful
     If Not PublishPrincipalCandidate(outgoing, trialLambda, projection, tolerance) Then GoTo Unsuccessful
     mPrincipalDesignVerified = designVerified: mPrincipalOutgoingCandidate = True
-    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; подтверждена исходящая сторона спектрального угла; точка: " & _
-        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; главное напряжение: " & CStr(station.PrincipalIndex)
+    mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & "; подтверждена исходящая сторона материального события; точка: " & _
+        CStr(station.Point) & "; станция: " & CStr(station.Side) & "; координата (0 — CDP, 1..3 — ASD): " & CStr(station.PrincipalIndex)
     TryCompletePrincipalTransition = True
     Exit Function
 Unsuccessful:
@@ -2867,7 +2911,7 @@ Friend Function CopyPrincipalDesignState(ByRef field() As Double, ByRef resultan
 End Function
 
 ' При пересечении единицы отдельно решает заданные усилия от той же принятой истории в остатке бюджета.
-' Читающая силовая проба не принимает материал и должна остаться между спектральными координатами концов.
+' Читающая силовая проба не принимает материал и должна остаться между материальными координатами концов.
 Private Function VerifyPrincipalDesignLoad(ByRef station As TYieldStation, ByRef first() As Double, _
         ByVal firstLambda As Double, ByRef last() As Double, ByVal lastLambda As Double, ByVal radius As Double, _
         ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByVal maxIterations As Long, _
@@ -2906,12 +2950,18 @@ Private Function VerifyPrincipalDesignLoad(ByRef station As TYieldStation, ByRef
     VerifyPrincipalDesignLoad = verified
 End Function
 
-' Решает G=0 и одну спектральную координату расширенным Ньютоном с общим бюджетом итераций.
+' Решает G=0 при заданной материальной координате в общем бюджете итераций.
+' ASD использует расширенный Ньютон, CDP — имеющееся нелинейное исключение координаты с полной разностной касательной.
 ' Читающие пробы и поиск доли не принимают историю; радиус исключает скачок к удалённому равновесию.
 Private Function FollowPrincipalCoordinate(ByRef station As TYieldStation, ByRef initial() As Double, _
         ByVal initialLambda As Double, ByVal target As Double, ByVal tolerance As Double, ByVal maxIterations As Long, _
         ByRef anchor() As Double, ByVal radius As Double, ByRef result() As Double, _
         ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
+    If station.PrincipalIndex = 0 Then
+        FollowPrincipalCoordinate = FollowYieldEventCoordinate(station, initial, initialLambda, target, tolerance, _
+            maxIterations, anchor, radius, result, resultLambda, projection)
+        Exit Function
+    End If
     Dim field() As Double, trial() As Double, correction() As Double, nullDirection() As Double, eventRow() As Double
     Dim load(1 To COMPONENT_COUNT) As Double, strain(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
     Dim value As Double, baseNorm As Double, trialNorm As Double, fraction As Double, trialLambda As Double
@@ -3002,6 +3052,10 @@ End Function
 ' Линейная оценка ограничена радиусом локальной доводки и сама не подтверждает ни переход, ни разрушение.
 Private Function SelectPrincipalTransitionStation(ByRef previous() As Double, ByRef station As TYieldStation, _
         ByVal tolerance As Double) As Boolean
+    If Not HasPrincipalBoundaries Then
+        SelectPrincipalTransitionStation = SelectYieldEventStation(previous, station)
+        Exit Function
+    End If
     If FirstYieldCrossing(mAccepted, mTransitionFrom, station) Then SelectPrincipalTransitionStation = True: Exit Function
     If FirstYieldCrossing(mAccepted, mTransitionTo, station) Then SelectPrincipalTransitionStation = True: Exit Function
     Dim movement() As Double, point As Long, side As Long, principal As Long, i As Long
@@ -3077,6 +3131,11 @@ Friend Function TryPrincipalDepartureControl(ByVal transition As CCoupledPrincip
         Optional ByRef linearizationLambda As Double = 0#, Optional ByVal maxIterations As Long = 32) As Boolean
     If transition Is Nothing Or mPrincipalDeparture Is Nothing Then Exit Function
     If Not (transition Is mPrincipalDeparture) Or mDepartureRevision <> mAcceptedRevision Or lambda <> mTrialLambda Then Exit Function
+    If transition.PrincipalIndex = 0 Then
+        TryPrincipalDepartureControl = TryYieldEventDeparture(transition, lambda, movement, lambdaDirection, projection, _
+            coordinate, linearizationField, linearizationLambda, maxIterations)
+        Exit Function
+    End If
     Dim station As TYieldStation, strain(1 To COMPONENT_COUNT) As Double, gradient(1 To COMPONENT_COUNT) As Double
     station.Point = transition.Point: station.Side = transition.Side: station.PrincipalIndex = transition.PrincipalIndex
     YieldStrain station.Point, station.Side, mAccepted, strain
@@ -3109,6 +3168,137 @@ Friend Function TryPrincipalDepartureControl(ByVal transition As CCoupledPrincip
     If Not IsMissing(linearizationField) Then linearizationField = probe
     linearizationLambda = probeLambda
     TryPrincipalDepartureControl = True
+Finished:
+    mControlActive = wasControlled
+    Exit Function
+Failed:
+    Dim number As Long, source As String, reason As String
+    number = Err.Number: source = Err.Source: reason = Err.Description
+    mControlActive = wasControlled
+    If number <> 6 And number <> 11 Then Err.Raise number, source, reason
+End Function
+
+' Выбирает первое новое начало пластичности на положительной принятой секущей внутри локального радиуса.
+' Уже пластически нагружаемые точки и разгрузочные пересечения не заменяют новое событие.
+Private Function SelectYieldEventStation(ByRef previous() As Double, ByRef station As TYieldStation) As Boolean
+    Dim ends() As Double, point As Long, side As Long, i As Long, candidate As TYieldStation
+    Dim fraction As Double, nearest As Double: nearest = 1#
+    ends = mAccepted
+    For i = 1 To mGaugeStart - 1: ends(i) = mAccepted(i) + PRINCIPAL_EVENT_RADIUS * (mAccepted(i) - previous(i)): Next i
+    For point = 1 To mPointCount
+        For side = -1 To 1
+            If ReadYieldCrossing(point, side, mAccepted, ends, candidate) Then
+                If candidate.FromValue < -16# * YIELD_ROOT_TOLERANCE And candidate.ToValue > 0# Then
+                    If LocateYieldCoordinate(candidate, mAccepted, ends, 0#, fraction) Then
+                        If Not SelectYieldEventStation Or fraction < nearest Then
+                            station = candidate: nearest = fraction: SelectYieldEventStation = True
+                        End If
+                    End If
+                End If
+            End If
+        Next side
+    Next point
+End Function
+
+' Строит только начальный прогноз по двум принятым полям; полученное поле ещё не считается равновесным.
+Private Function YieldEventPrediction(ByRef previous() As Double, ByRef station As TYieldStation, ByRef field() As Double) As Boolean
+    Dim ends() As Double, fraction As Double, i As Long
+    ends = mAccepted
+    For i = 1 To mGaugeStart - 1: ends(i) = mAccepted(i) + PRINCIPAL_EVENT_RADIUS * (mAccepted(i) - previous(i)): Next i
+    If Not LocateYieldCoordinate(station, mAccepted, ends, 0#, fraction) Then Exit Function
+    field = mAccepted
+    For i = 1 To mGaugeStart - 1: field(i) = mAccepted(i) + fraction * (ends(i) - mAccepted(i)): Next i
+    YieldEventPrediction = True
+End Function
+
+' Решает силовые уравнения на поверхности CDP имеющимся адаптером и полной разностной касательной.
+' Безразмерная строка исключённой координаты не подменяет отдельные проверки сил, связей и материального уровня.
+Private Function FollowYieldEventCoordinate(ByRef station As TYieldStation, ByRef initial() As Double, _
+        ByVal initialLambda As Double, ByVal target As Double, ByVal tolerance As Double, ByVal maxIterations As Long, _
+        ByRef anchor() As Double, ByVal radius As Double, ByRef result() As Double, _
+        ByRef resultLambda As Double, ByRef projection() As Double) As Boolean
+    Dim remaining As Long: remaining = maxIterations - mIterations
+    If remaining < 1 Or mHybridActive Or Not PrepareHybridScales() Then Exit Function
+    Dim size As Long: size = mDegreeCount + 1
+    ReDim mHybridSeed(1 To size)
+    Dim i As Long
+    For i = 1 To mDegreeCount: mHybridSeed(i) = initial(i): Next i
+    mHybridSeed(size) = initialLambda: mHybridOriginRevision = mAcceptedRevision
+    ActivateHybridContext
+    On Error GoTo Failed
+    Dim scalar As ICoupledScalarConstraint: Set scalar = CreateMaterialConstraint(station.Point, station.Side, 0, target)
+    If scalar Is Nothing Then GoTo Finished
+    Dim zero() As Double: ReDim zero(1 To size)
+    Dim projected As New CCoupledConstraintEquations, equations As ICoupledEquationSystem
+    projected.Initialize Me, scalar, zero, YIELD_ROOT_TOLERANCE, 16
+    Set equations = projected
+    Dim solver As New CCoupledHybridSolver, solution() As Double, mapped() As Double, solved As Boolean
+    Dim functionBudget As Long: functionBudget = CLng((2# * size + 1#) * (remaining + 1#) + remaining)
+    solved = solver.TrySolve(equations, zero, functionBudget, remaining, tolerance, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
+    mIterations = mIterations + solver.Steps
+    mHybridSteps = mHybridSteps + solver.Steps: mHybridMatrices = mHybridMatrices + solver.JacobianCalls
+    mHybridEvaluations = mHybridEvaluations + solver.FunctionCalls
+    mMaterialEventDetails = mMaterialEventDetails & "; CDP точка " & CStr(station.Point) & ", станция " & CStr(station.Side) & _
+        ", цель " & CStr(target) & " МПа, остановка " & CStr(solver.StopCode) & ", невязка " & CStr(solver.BestResidual) & " МПа"
+    If Not solver.HasBestPoint Then GoTo Finished
+    If Not projected.TryMap(solution, mapped) Then GoTo Finished
+    Dim value As Double, gradient() As Double
+    If Not scalar.TryEvaluate(mapped, True, value, gradient) Then GoTo Finished
+    If Abs(value) > YIELD_ROOT_TOLERANCE Or Abs(solution(projected.Pivot)) > tolerance Then GoTo Finished
+    ReDim result(1 To mDegreeCount): ReDim projection(1 To mDegreeCount)
+    For i = 1 To mDegreeCount: result(i) = mHybridSeed(i) + mHybridScales(i) * mapped(i): Next i
+    resultLambda = mHybridSeed(size) + mHybridScales(size) * mapped(size)
+    For i = 1 To mGaugeStart - 1: projection(i) = gradient(i) / (mHybridScales(i) * mReferenceModulus): Next i
+    mHybridActive = False
+    Dim load(1 To COMPONENT_COUNT) As Double
+    SetControlledLoad resultLambda, load
+    If resultLambda <= 0# Or SpatialFieldDistance(anchor, result) > radius Then GoTo Finished
+    If Not Evaluate(result, False, recordTrial:=False) Then GoTo Finished
+    If EquilibriumNorm(load, result) > tolerance Or Not GaugesVerified(tolerance) Then GoTo Finished
+    FollowYieldEventCoordinate = True
+Finished:
+    mHybridActive = False
+    Exit Function
+Failed:
+    Dim number As Long, source As String, reason As String
+    number = Err.Number: source = Err.Source: reason = Err.Description
+    mHybridActive = False
+    If number <> 6 And number <> 11 Then Err.Raise number, source, reason
+End Function
+
+' После принятия исходящего поля решает ещё одну локальную пробу от новой истории и берёт её секущую как ориентир.
+' Ориентир привязан к принятой ревизии вызывающим контроллером и не является дополнительным принятым состоянием.
+Private Function TryYieldEventDeparture(ByVal transition As CCoupledPrincipalTransition, ByVal lambda As Double, _
+        ByRef movement() As Double, ByRef lambdaDirection As Double, ByRef projection() As Double, ByRef coordinate As Double, _
+        ByRef linearizationField As Variant, ByRef linearizationLambda As Double, ByVal maxIterations As Long) As Boolean
+    Dim station As TYieldStation: station.Point = transition.Point: station.Side = transition.Side
+    Dim strain(1 To COMPONENT_COUNT) As Double, unused(1 To COMPONENT_COUNT) As Double, value As Double
+    YieldStrain station.Point, station.Side, mAccepted, strain
+    If Not ReadTransitionValue(station, strain, value, unused, False) Then Exit Function
+    Dim wasControlled As Boolean: wasControlled = mControlActive
+    mControlActive = False
+    On Error GoTo Failed
+    Dim probe() As Double, probeLambda As Double, tolerance As Double, seed() As Double, incoming() As Double, incomingLambda As Double, degree As Long
+    tolerance = GeomMin(YIELD_EVENT_TOLERANCE, 0.125 * transition.PrincipalGap)
+    transition.CopyIncoming incoming, incomingLambda
+    seed = mAccepted
+    For degree = 1 To mDegreeCount: seed(degree) = mAccepted(degree) + mAccepted(degree) - incoming(degree): Next degree
+    If Not FollowYieldEventCoordinate(station, seed, 2# * lambda - incomingLambda, value - transition.IncomingSign * transition.PrincipalGap, _
+            tolerance, maxIterations, mAccepted, YIELD_EVENT_RADIUS * transition.ReferenceIncrement, _
+            probe, probeLambda, projection) Then GoTo Finished
+    Dim i As Long, length As Double, probeCoordinate As Double
+    ReDim movement(1 To mDegreeCount)
+    For i = 1 To mGaugeStart - 1: movement(i) = probe(i) - mAccepted(i): Next i
+    If Not SelectSpatialDirectionControl(mAccepted, probe, movement, projection, probeCoordinate, length) Then GoTo Finished
+    coordinate = 0#
+    For i = 1 To mDegreeCount
+        movement(i) = movement(i) / length
+        coordinate = coordinate + projection(i) * mAccepted(i)
+    Next i
+    lambdaDirection = (probeLambda - lambda) / length
+    linearizationField = probe: linearizationLambda = probeLambda
+    TryYieldEventDeparture = True
 Finished:
     mControlActive = wasControlled
     Exit Function

@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ==========================================================================
-' Неизменяемый контекст локального перехода через знаковую границу бетона
+' Неизменяемый контекст локального перехода через материальную границу бетона
 ' ==========================================================================
 ' Общая точка и входящее равновесие вычисляются от одной принятой истории.
 ' Исходящая сторона требует отдельного решения после принятия входящей.
@@ -27,7 +27,7 @@ Friend Sub Initialize(ByVal revision As Long, ByVal point As Long, ByVal side As
         ByVal faceLambda As Double, ByVal incomingLambda As Double, ByRef origin() As Double, _
         ByRef face() As Double, ByRef incoming() As Double)
     If mPoint <> 0 Then Err.Raise 5, "CCoupledPrincipalTransition", "Контекст материального перехода неизменяем."
-    If revision < 0 Or point < 1 Or Abs(side) > 1 Or principal < 1 Or principal > 3 Or _
+    If revision < 0 Or point < 1 Or Abs(side) > 1 Or principal < 0 Or principal > 3 Or _
             Abs(incomingSign) <> 1# Or gap <= 0# Or referenceIncrement <= 0# Or _
             faceLambda <= 0# Or incomingLambda <= 0# Then _
         Err.Raise 5, "CCoupledPrincipalTransition", "Непригодны координата или история материального перехода."
@@ -50,7 +50,7 @@ Friend Property Get Side() As Long
     Side = mSide
 End Property
 
-' Возвращает индекс главного напряжения прогноза от старшего к младшему.
+' Возвращает 0 для поверхности CDP или индекс 1..3 главного напряжения прогноза ASD.
 Friend Property Get PrincipalIndex() As Long
     PrincipalIndex = mPrincipal
 End Property
@@ -60,7 +60,7 @@ Friend Property Get IncomingSign() As Double
     IncomingSign = mSign
 End Property
 
-' Возвращает положительный зазор от нулевого главного напряжения, МПа.
+' Возвращает положительный зазор от нулевой материальной координаты, МПа.
 Friend Property Get PrincipalGap() As Double
     PrincipalGap = mGap
 End Property
@@ -85,6 +85,11 @@ End Function
 ' Копирует общую точку, не передавая изменяемую ссылку на контекст.
 Friend Sub CopyFace(ByRef field() As Double, ByRef lambda As Double)
     field = mFace: lambda = mFaceLambda
+End Sub
+
+' Копирует исходное принятое поле для прогноза после достижения материального события.
+Friend Sub CopyOrigin(ByRef field() As Double)
+    field = mOrigin
 End Sub
 
 ' Копирует входящее равновесие для проверки принятого материального состояния.

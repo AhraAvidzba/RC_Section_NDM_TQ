@@ -336,7 +336,8 @@
     "CoupledLiveDifference20261119": "A25C39136BAC32AAE3CB3EAFD1A4F8B9F70A222B8CE9D2061757FD14C9E8903C",
     "CoupledFieldPath20261119": "6BD9DDBEE10B8C240F18512A5D49B312338B25F471B9549AF69E00A292143759",
     "CoupledExactVBAReference20261119": "C30EF07F171A5C2ACB6657DF0949A2FDD56C4BE0A77F0E694E96167397CE43AC",
-    "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47"
+    "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47",
+    "CoupledWorkingMaterialEvent20261120": "97D1E6985BA1FFF56369377AACDB315E1A4AFD6ACCAEB955720FE75DFE5A5F68"
   },
   "cases": [
     {
@@ -5253,6 +5254,25 @@
       "stdout_contains": "MATERIAL EVENT PROOF PASS; CAPACITY OPEN; REVERSED STATES NOT ADMITTED",
       "outputs": {
         "MaterialEventProof.json": "40FC185F7D4955463D3359A90E91ABF1C7FAD4A3E63400A7B4CFB95EFE2BC3F5"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-working-material-event-integration",
+      "journal_section": 634,
+      "archive": "CoupledWorkingMaterialEvent20261120",
+      "script": "Check-TestWorkingMaterialEvent.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "WorkingMaterialEventProof.json"
+      ],
+      "stdout_contains": "WORKING MATERIAL EVENT PASS; STOCK BASELINE PRESERVED; CAPACITY OPEN",
+      "outputs": {
+        "WorkingMaterialEventProof.json": "E91B1C98DB04F56C3C71FFC715926F8B2D64E83745B113BCE33085483EF18BF8"
       },
       "timeout_seconds": 600
     }
