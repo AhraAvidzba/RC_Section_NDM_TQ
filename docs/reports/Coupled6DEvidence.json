@@ -342,7 +342,8 @@
     "CoupledMaterialBranchControl20261120": "BF863E1A22CE3B35C289CD864F99F063BF54EA0D159BC6309040D833B3932B24",
     "CoupledWorkingEnvelope20261120": "2AED8D4DCEAAAB6A794EB23F19764B6080D7D8BCA911D038C03E2F5040B5E425",
     "CoupledEnvelopeStepSensitivity20261120": "8D1E63C0D0CE6E429A1638BDC926049EC34FD768B675EBEDB0DA8BC10004A9BF",
-    "CoupledEnvelopeFailureDiagnosis20261120": "E7B26A9E0616769AB319C496C83D372A543766F9A8ABC4D2FEEEDCB02D7680E3"
+    "CoupledEnvelopeFailureDiagnosis20261120": "E7B26A9E0616769AB319C496C83D372A543766F9A8ABC4D2FEEEDCB02D7680E3",
+    "CoupledPoint6MaterialEvent20261120": "ABC63B33C2F55C904300EE0667E48CB5663445A8D5AE9795D5B33E6C67E85186"
   },
   "cases": [
     {
@@ -5373,6 +5374,25 @@
       "stdout_contains": "ENVELOPE FAILURE EVIDENCE VERIFIED; THREE INTERMEDIATE EQUILIBRIA; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "EnvelopeFailureEvidenceProof.json": "D77A25D908DBB1670AEFEFCB6008CD5BE06A1C020C06E50DCAED2E49A8A21D44"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-point6-material-event",
+      "journal_section": 640,
+      "archive": "CoupledPoint6MaterialEvent20261120",
+      "script": "Check-TestPoint6EventEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "Point6EventEvidenceProof.json"
+      ],
+      "stdout_contains": "POINT6 MATERIAL EVENT EVIDENCE VERIFIED; REAL HALF HISTORY FORWARD; PHYSICAL LIMIT OPEN",
+      "outputs": {
+        "Point6EventEvidenceProof.json": "A4AAFB945B62FFFC6F77EBAB21EA3788CF8B1BE33A976C41B7DA4E2EBC8151F5"
       },
       "timeout_seconds": 600
     }
