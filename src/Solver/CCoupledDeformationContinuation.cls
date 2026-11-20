@@ -99,6 +99,9 @@ Private mFailedProbeTarget As Double, mFailedProbeCode As EResultCode
 Private mUnresolvedLoadRetries As Long
 Private mUnverifiedReference As Double, mUnverifiedDips As Long, mRecoveredDips As Long
 Private mObserver As ICoupledContinuationProgress
+Private mEnvelopePrevious As Double, mEnvelopeCurrent As Double, mEnvelopeLastIncrement As Double
+Private mEnvelopeHistoryIndex As Long, mEnvelopeAttemptRevision As Long, mEnvelopeAttemptsAtRevision As Long
+Private mEnvelopeProbes As Long, mEnvelopeRecoveries As Long
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -126,6 +129,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mHasCornerProbe = False: Erase mCornerProbe: mCornerProbeSeeds = 0
     mMaterialGrowthActive = False: Erase mMaterialGrowthProjection
     mMaterialStepExpansions = 0: mMaterialMaximumStep = 0#
+    mEnvelopePrevious = 0#: mEnvelopeCurrent = 0#: mEnvelopeLastIncrement = 0#: mEnvelopeHistoryIndex = 0
+    mEnvelopeAttemptRevision = -1: mEnvelopeAttemptsAtRevision = 0: mEnvelopeProbes = 0: mEnvelopeRecoveries = 0
     mCornerAttemptRevision = -1: mCornerAttemptsAtRevision = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
@@ -199,14 +204,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, lastLoadUnresolved As Boolean
-    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean
+    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean, envelopeRecovered As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
     Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
-        hybridRecovery = False
+        hybridRecovery = False: envelopeRecovered = False
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If attempt > STEP_LIMIT And mLocalPeak = 0# And mUnverifiedDips = 0 Then
             StopSearch "Достигнут лимит начального участка деформационного продолжения до обнаружения спада нагрузки."
@@ -232,44 +237,57 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                         StopSearch "Материальный переход не удалось завершить с проверенным направлением продолжения."
                         Exit Sub
                     Else
-                        Exit For
+                        envelopeRecovered = TryEnvelopeRecovery(history, left, current, trial, nominal, increment, minimum)
+                        If Not envelopeRecovered Then Exit For
                     End If
                 End If
             End If
         End If
-        targetCoordinate = current.Coordinate + increment
-        If targetCoordinate <= current.Coordinate Then Exit For
-        trial.Coordinate = targetCoordinate
-        Set arcFields = Nothing
-        If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
-            Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
         Dim seed As Variant, seedLambda As Double
-        allowMaterialRecovery = MayRecoverMaterialBoundary()
-        If PrepareSecantSeed(history, left, current, trial.Coordinate, seed, seedLambda) Then
-            probed = Probe(trial, seedLambda, allowMaterialRecovery, _
-                arcFields:=arcFields, initialField:=seed, allowHybridRecovery:=hybridRecovery)
+        If envelopeRecovered Then
+            targetCoordinate = trial.Coordinate: probed = True
         Else
-            probed = Probe(trial, current.Lambda, allowMaterialRecovery, _
-                arcFields:=arcFields, allowHybridRecovery:=hybridRecovery)
+            targetCoordinate = current.Coordinate + increment
+            If targetCoordinate <= current.Coordinate Then Exit For
+            trial.Coordinate = targetCoordinate
+            Set arcFields = Nothing
+            If Not mArcRecoveryTried And Not mUsesYieldControl And Not mFollowingLocalPeak And mDesignHistoryIndex > 0 Then _
+                Set arcFields = history ' Повтор точного lambda=1 уже принят, поэтому новая цель не перерешается.
+            allowMaterialRecovery = MayRecoverMaterialBoundary()
+            If PrepareSecantSeed(history, left, current, trial.Coordinate, seed, seedLambda) Then
+                probed = Probe(trial, seedLambda, allowMaterialRecovery, _
+                    arcFields:=arcFields, initialField:=seed, allowHybridRecovery:=hybridRecovery)
+            Else
+                probed = Probe(trial, current.Lambda, allowMaterialRecovery, _
+                    arcFields:=arcFields, allowHybridRecovery:=hybridRecovery)
+            End If
         End If
         lastProbeFailed = Not probed
         lastNoProgress = False: lastLoadUnresolved = False
-        changedControl = False: smoothTrial = False
-        If probed Then
+        changedControl = envelopeRecovered: smoothTrial = False
+        If probed And Not envelopeRecovered Then
             If mSolver.CopyRecoveredControl(recoveryProjection) Then
                 probed = TryAdoptRecoveredControl(history, current, trial, recoveryProjection, nominal, increment, minimum)
                 changedControl = probed
                 If probed Then targetCoordinate = trial.Coordinate Else mSolver.DiscardStep
             End If
         End If
+        If probed And reinforced And Not envelopeRecovered Then
+            If Not BeyondSteelLimit() And IsEnvelopeUnloading(current, trial) Then
+                mSolver.DiscardStep
+                envelopeRecovered = TryEnvelopeRecovery(history, left, current, trial, nominal, increment, minimum)
+                probed = envelopeRecovered: changedControl = envelopeRecovered
+                If probed Then targetCoordinate = trial.Coordinate Else lastProbeFailed = True
+            End If
+        End If
         If probed Then
             probed = UpdateTrialCoordinate(trial, current.Coordinate)
-            If probed And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0 Or hybridRecovery) Then
+            If probed And Not envelopeRecovered And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0 Or hybridRecovery) Then
                 probed = SpatialTrialAdvances(history, current)
                 If Not probed Then mSolver.DiscardStep
             End If
             lastNoProgress = Not probed
-            If probed Then
+            If probed And Not envelopeRecovered Then
                 If IsMaterialGrowthControl() Then
                     smoothTrial = FitsMaterialGrowthSecant(history, left, current, trial)
                 ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then
@@ -847,6 +865,13 @@ Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint
     Dim field() As Double
     mHasCornerReference = False: mHasCornerProbe = False: Erase mCornerProbe
     mSolver.CopyTrial field, mCurrentResultants
+    Dim before As Double, after As Double
+    If mSolver.TryReadEnvelopeCoordinate(True, before) Then
+        If mSolver.TryReadEnvelopeCoordinate(False, after) Then
+            mEnvelopePrevious = before: mEnvelopeCurrent = after: mEnvelopeHistoryIndex = history.Count + 1
+            If after > before Then mEnvelopeLastIncrement = after - before
+        End If
+    End If
     mSolver.AcceptStep
     history.Add field
     If Not mTrace Is Nothing Then mTrace.Add 1#, point.Lambda
@@ -854,6 +879,78 @@ Private Sub AcceptPoint(ByVal history As Collection, ByRef point As TBranchPoint
     mBestBeforeCurrent = mBestLambda
     mBestLambda = GeomMax(mBestLambda, point.Lambda)
 End Sub
+
+' Выделяет снижение нагрузки без дальнейшего развития огибающих; это повод сменить параметризацию, не признак разрушения.
+Private Function IsEnvelopeUnloading(ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
+    If trial.Lambda >= current.Lambda - LoadResolution(current.Lambda) Then Exit Function
+    Dim accepted As Double, candidate As Double
+    If Not mSolver.TryReadEnvelopeCoordinate(True, accepted) Then Exit Function
+    If accepted <= 0# Then Exit Function
+    If Not mSolver.TryReadEnvelopeCoordinate(False, candidate) Then Exit Function
+    IsEnvelopeUnloading = (candidate <= accepted)
+End Function
+
+' После исчерпания обычного шага либо на разгрузке ищет растущую материальную координату от той же истории.
+' Принимает только новый кандидат; сталь, граница поиска и точное сочетание проверяются общим циклом до записи истории.
+Private Function TryEnvelopeRecovery(ByVal history As Collection, ByRef left As TBranchPoint, ByRef current As TBranchPoint, _
+        ByRef trial As TBranchPoint, ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
+    If mReinforcement Is Nothing Then Exit Function
+    If Not mReinforcement.HasSteel Or mSolver.HasPrincipalBoundaries Or mProbeCount + 2 > PROBE_LIMIT Then Exit Function
+    Dim baseline As Double, resolution As Double
+    If Not mSolver.TryEnvelopeControlState(mOffset, mDirection, current.Lambda, mAbsTol, mRelTol, baseline, resolution) Then Exit Function
+    If baseline <= 0# Then Exit Function
+    If mEnvelopeAttemptRevision <> mSolver.AcceptedRevision Then
+        mEnvelopeAttemptRevision = mSolver.AcceptedRevision: mEnvelopeAttemptsAtRevision = 0
+    End If
+    Dim desired As Double: desired = GeomMax(mEnvelopeLastIncrement, 4# * resolution)
+    Dim previous() As Double, accepted() As Double, seed() As Double, projection() As Double, field() As Double, actual() As Double
+    ReadSpatialReference history, current.HistoryIndex, previous
+    accepted = history(current.HistoryIndex)
+    Dim ratio As Double, factor As Double, probes As Long, degree As Long, previousFactor As Double, fraction As Double
+    previousFactor = left.Lambda
+    If Not mTrace Is Nothing Then mTrace.ReadPoint current.HistoryIndex - 1, fraction, previousFactor
+    Do While mEnvelopeAttemptsAtRevision < YIELD_RECOVERY_LIMIT And desired > 2# * resolution And mProbeCount + 2 <= PROBE_LIMIT
+        mEnvelopeAttemptsAtRevision = mEnvelopeAttemptsAtRevision + 1
+        ratio = 0#
+        If mEnvelopeHistoryIndex = history.Count And mEnvelopeCurrent = baseline And mEnvelopeCurrent > mEnvelopePrevious Then _
+            ratio = GeomMin(1024#, desired / (mEnvelopeCurrent - mEnvelopePrevious))
+        seed = accepted
+        Dim last() As Double: last = history(current.HistoryIndex - 1)
+        For degree = 1 To mSolver.PhysicalDegreeCount: seed(degree) = accepted(degree) + ratio * (accepted(degree) - last(degree)): Next degree
+        factor = current.Lambda + ratio * (current.Lambda - previousFactor)
+        mProbeCount = mProbeCount + 1: NotifyProgress
+        trial.Uncertainty = 0#
+        If mSolver.TryEnvelopeStep(mOffset, mDirection, previous, current.Lambda, seed, factor, baseline + desired, _
+                trial.Lambda, projection, mAbsTol, mRelTol, mMaxIterations, probes) Then
+            mProbeCount = mProbeCount + GeomMax(0, probes - 1): mEnvelopeProbes = mEnvelopeProbes + probes
+            mSolver.CopyTrial field, actual
+            Dim oldCoordinate As Double, newCoordinate As Double
+            For degree = 1 To mSolver.PhysicalDegreeCount
+                oldCoordinate = oldCoordinate + projection(degree) * accepted(degree)
+                newCoordinate = newCoordinate + projection(degree) * field(degree)
+            Next degree
+            If newCoordinate <= oldCoordinate Then mSolver.DiscardStep: Exit Function
+            mProjection = projection: current.Coordinate = oldCoordinate: trial.Coordinate = newCoordinate
+            last = history(left.HistoryIndex): left.Coordinate = CoordinateOf(last)
+            nominal = newCoordinate - oldCoordinate: increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
+            mUsesYieldControl = False: mUsesFieldControl = True: mUsesTransverseControl = False: mBranchTangentControl = False
+            mHasCornerReference = False: mHasCornerProbe = False: Erase mCornerProbe
+            mPostPeakControlName = vbNullString: mControlName = "пространственная мера после материального управления"
+            mMaterialGrowthActive = True: mMaterialGrowthProjection = mProjection
+            mFieldControlChanges = mFieldControlChanges + 1: mLastFieldControlRevision = mSolver.AcceptedRevision
+            If trial.Lambda < current.Lambda - LoadResolution(current.Lambda) And Not mFollowingLocalPeak Then
+                If Not mUnverifiedDecline Then mUnverifiedDips = mUnverifiedDips + 1
+                mUnverifiedDecline = True: mUnverifiedReference = GeomMax(mUnverifiedReference, mBestLambda)
+            End If
+            mEnvelopeRecoveries = mEnvelopeRecoveries + 1
+            TryEnvelopeRecovery = True
+            Exit Function
+        End If
+        mProbeCount = mProbeCount + GeomMax(0, probes - 1): mEnvelopeProbes = mEnvelopeProbes + probes
+        mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
+        mSolver.DiscardStep: desired = desired * 0.5
+    Loop
+End Function
 
 ' Повторяет правое поле после силовой пробы. Точка lambda = 1 должна
 ' принадлежать фактическому интервалу именно принятого повтора.
@@ -1445,6 +1542,8 @@ Private Function Details() As String
         "; подтверждённых переходов: " & CStr(mPrincipalCorners) & "; прогнозов из проверочного равновесия: " & CStr(mCornerProbeSeeds)
     If mMaterialGrowthActive Then Details = Details & "; расширений шага CDP: " & CStr(mMaterialStepExpansions) & _
         "; наибольший принятый шаг после CDP: " & CStr(mMaterialMaximumStep)
+    If mEnvelopeProbes > 0 Then Details = Details & "; проб материальной координаты: " & CStr(mEnvelopeProbes) & _
+        "; восстановлений по ней: " & CStr(mEnvelopeRecoveries)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _

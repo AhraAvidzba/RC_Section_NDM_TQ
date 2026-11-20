@@ -57,6 +57,7 @@ Private mTension As CCoupledConcreteEnvelope, mCompression As CCoupledConcreteEn
 Private mASDFlow As CCoupledASDFlow
 Private mLastFailure As CCoupledMaterialFailure
 Private mFt As Double, mFc As Double, mAlpha As Double, mGamma As Double
+Private mTensionEnergyDensity As Double, mCompressionEnergyDensity As Double
 Private mFrictionMax As Double, mDilationMax As Double
 Private mPressureModulus As Double ' 3K: изменение давления от одинакового приращения трёх нормальных деформаций.
 Private mApexPotentialOffset As Double ' Эксцентриситет потенциала, умноженный на ft, МПа.
@@ -94,6 +95,7 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     plasticPeak = peakCompression - fc / ((1# - compressDamage) * modulus)
     mTension.Initialize ft, ft, 0#, gt, localizationLength, 0.5, halfTension
     mCompression.Initialize fc0, fc, plasticPeak, gc, localizationLength, compressDamage, plasticPeak
+    mTensionEnergyDensity = gt / localizationLength: mCompressionEnergyDensity = gc / localizationLength
     mAlpha = alpha: mGamma = gamma
     mFt = ft: mFc = fc
     mApexPotentialOffset = eccentricity * ft
@@ -119,6 +121,33 @@ End Sub
 Friend Property Get LawIdentifier() As String
     If mASDFlow Is Nothing Then LawIdentifier = "Barcelona-CDP" Else LawIdentifier = mASDFlow.LawIdentifier
 End Property
+
+' Возвращает масштаб CDP-координаты огибающих; ноль означает неприменимость к текущему закону.
+Friend Property Get EnvelopeReferenceStress() As Double
+    If mASDFlow Is Nothing And mPointCount > 0 Then EnvelopeReferenceStress = mFt
+End Property
+
+' Читает координату огибающих в МПа из принятого либо полностью подготовленного пробного буфера.
+' Пробный буфер допустим только после успешного расчёта всего кандидата; координата не является критерием разрушения.
+Friend Function TryReadBufferedEnvelope(ByVal point As Long, ByVal accepted As Boolean, ByRef value As Double) As Boolean
+    If EnvelopeReferenceStress <= 0# Then Exit Function
+    If point < 1 Or point > mPointCount Then InvalidInput "Точка координаты огибающих находится вне подготовленного материала."
+    Dim buffer As Long: buffer = mTrial
+    If accepted Then buffer = mCommitted
+    value = mTensionEnergyDensity * mHistory(point, buffer).TensionEnergy + _
+        mCompressionEnergyDensity * mHistory(point, buffer).CompressionEnergy
+    TryReadBufferedEnvelope = True
+End Function
+
+' Вычисляет ту же пробную координату от принятой истории без изменения буферов, включая внутреннее деление шага.
+Friend Function TryReadEnvelope(ByVal point As Long, ByRef strain() As Double, ByRef value As Double) As Boolean
+    If EnvelopeReferenceStress <= 0# Then Exit Function
+    If point < 1 Or point > mPointCount Then InvalidInput "Точка координаты огибающих находится вне подготовленного материала."
+    Dim updated As TConcreteHistory, stress(1 To N_COMPONENTS) As Double, elastic As Boolean, substeps As Long
+    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, elastic, substeps) Then Exit Function
+    value = mTensionEnergyDensity * updated.TensionEnergy + mCompressionEnergyDensity * updated.CompressionEnergy
+    TryReadEnvelope = True
+End Function
 
 ' Передаёт неизменяемый контекст последнего отказа; успешные пробы его не подменяют.
 Friend Property Get LastFailure() As CCoupledMaterialFailure

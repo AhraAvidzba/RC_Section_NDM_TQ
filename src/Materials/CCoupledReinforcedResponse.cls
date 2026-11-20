@@ -34,6 +34,28 @@ Private mTrialTransverseUtilization As Double, mAcceptedTransverseUtilization As
 Private mTrialLongitudinalUtilization As Double, mAcceptedLongitudinalUtilization As Double
 Private mTrialLongitudinalPoint As Long, mAcceptedLongitudinalPoint As Long
 
+' Передаёт масштаб координаты только для бетонного закона с подготовленными энергиями огибающих.
+Friend Property Get EnvelopeReferenceStress() As Double
+    If Not (TypeOf mConcrete Is CCoupledConcreteResponse) Then Exit Property
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    EnvelopeReferenceStress = concrete.EnvelopeReferenceStress
+End Property
+
+' Читает координату исходного бетона; вытесненный под сталью бетон не меняет правило бетонной квадратуры.
+' Пробный буфер читает только владелец полностью проверенного кандидата.
+Friend Function TryReadBufferedEnvelope(ByVal point As Long, ByVal accepted As Boolean, ByRef value As Double) As Boolean
+    If Not (TypeOf mConcrete Is CCoupledConcreteResponse) Then Exit Function
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    TryReadBufferedEnvelope = concrete.TryReadBufferedEnvelope(point, accepted, value)
+End Function
+
+' Делегирует чтение пробной координаты исходному бетонному закону без записи истории бетона и стали.
+Friend Function TryReadEnvelope(ByVal point As Long, ByRef strain() As Double, ByRef value As Double) As Boolean
+    If Not (TypeOf mConcrete Is CCoupledConcreteResponse) Then Exit Function
+    Dim concrete As CCoupledConcreteResponse: Set concrete = mConcrete
+    TryReadEnvelope = concrete.TryReadEnvelope(point, strain, value)
+End Function
+
 ' Один раз сопоставляет точкам их диаграммы и проекции.
 ' Models индексируется классом стали, указанным в сформированной геометрии.
 Friend Sub Initialize(ByVal operators As CCoupledElasticState, ByVal concrete As ICoupledPointResponse, _

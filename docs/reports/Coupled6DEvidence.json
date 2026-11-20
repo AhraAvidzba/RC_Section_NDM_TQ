@@ -339,7 +339,8 @@
     "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47",
     "CoupledWorkingMaterialEvent20261120": "97D1E6985BA1FFF56369377AACDB315E1A4AFD6ACCAEB955720FE75DFE5A5F68",
     "CoupledMaterialStepGrowth20261120": "D5D85FE0173D18A2974CFF68E2CE4A1651C4B8B322CB741C1EA2CDD0EA7058B7",
-    "CoupledMaterialBranchControl20261120": "BF863E1A22CE3B35C289CD864F99F063BF54EA0D159BC6309040D833B3932B24"
+    "CoupledMaterialBranchControl20261120": "BF863E1A22CE3B35C289CD864F99F063BF54EA0D159BC6309040D833B3932B24",
+    "CoupledWorkingEnvelope20261120": "2AED8D4DCEAAAB6A794EB23F19764B6080D7D8BCA911D038C03E2F5040B5E425"
   },
   "cases": [
     {
@@ -5313,6 +5314,25 @@
       "stdout_contains": "MATERIAL BRANCH EVIDENCE PASS; PHYSICAL CAPACITY AND PRODUCTION INTEGRATION OPEN",
       "outputs": {
         "MaterialBranchEvidenceProof.json": "30B7AC0F6EDCED9CB6DE2596619E251E7416C7B4B5D98D6DBA445083F86ADD94"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-working-envelope",
+      "journal_section": 637,
+      "archive": "CoupledWorkingEnvelope20261120",
+      "script": "Check-TestWorkingEnvelopeEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "WorkingEnvelopeEvidenceProof.json"
+      ],
+      "stdout_contains": "WORKING ENVELOPE EVIDENCE PASS; STOCK NUMFAIL RETAINED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "WorkingEnvelopeEvidenceProof.json": "2C0276AE7C63EA21FC9F80D427D517CA1F81B935BC4F3BD30D1590B7A3A78E39"
       },
       "timeout_seconds": 600
     }
