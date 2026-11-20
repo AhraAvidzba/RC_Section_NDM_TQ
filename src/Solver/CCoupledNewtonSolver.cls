@@ -3605,13 +3605,23 @@ Private Function FollowYieldEventCoordinate(ByRef station As TYieldStation, ByRe
     Set equations = projected
     Dim solver As New CCoupledHybridSolver, solution() As Double, mapped() As Double, solved As Boolean
     Dim functionBudget As Long: functionBudget = CLng((2# * size + 1#) * (remaining + 1#) + remaining)
-    solved = solver.TrySolve(equations, zero, functionBudget, remaining, tolerance, 0.00000000001, 0.2, solution, _
-        relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
-    mIterations = mIterations + solver.Steps
-    mHybridSteps = mHybridSteps + solver.Steps: mHybridMatrices = mHybridMatrices + solver.JacobianCalls
-    mHybridEvaluations = mHybridEvaluations + solver.FunctionCalls
-    mMaterialEventDetails = mMaterialEventDetails & "; CDP точка " & CStr(station.Point) & ", станция " & CStr(station.Side) & _
-        ", цель " & CStr(target) & " МПа, остановка " & CStr(solver.StopCode) & ", невязка " & CStr(solver.BestResidual) & " МПа"
+    Dim start() As Double, differenceStep As Double, attempt As Long
+    start = zero: differenceStep = HYBRID_DIFFERENCE_STEP
+    For attempt = 0 To 1
+        solved = solver.TrySolve(equations, start, functionBudget, remaining, tolerance, 0.00000000001, 0.2, solution, _
+            relativeDifferenceStep:=differenceStep, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
+        mIterations = mIterations + solver.Steps
+        mHybridSteps = mHybridSteps + solver.Steps: mHybridMatrices = mHybridMatrices + solver.JacobianCalls
+        mHybridEvaluations = mHybridEvaluations + solver.FunctionCalls
+        mMaterialEventDetails = mMaterialEventDetails & "; CDP точка " & CStr(station.Point) & ", станция " & CStr(station.Side) & _
+            ", цель " & CStr(target) & " МПа, шаг производных " & CStr(differenceStep) & ", остановка " & CStr(solver.StopCode) & _
+            ", невязка " & CStr(solver.BestResidual) & " МПа"
+        If solved Or Not solver.HasBestPoint Or attempt = 1 Then Exit For
+        If solver.StopCode <> 3 And solver.StopCode <> 5 Then Exit For
+        remaining = remaining - solver.Steps: functionBudget = functionBudget - solver.FunctionCalls
+        If remaining < 1 Or functionBudget < 1 Then Exit For
+        start = solution: differenceStep = 0.1 * differenceStep ' После застоя уточняется только разностная матрица от той же истории; остаток общего бюджета сохраняется.
+    Next attempt
     If Not solver.HasBestPoint Then GoTo Finished
     If Not projected.TryMap(solution, mapped) Then GoTo Finished
     Dim value As Double, gradient() As Double

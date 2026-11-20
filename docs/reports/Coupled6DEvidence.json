@@ -350,7 +350,8 @@
     "CoupledHGradient20261120": "DDBD62632C49D577F0381379FF693C5303916C758D27D8293348249C24C755BC",
     "CoupledHBackend20261120": "795758AE9909EE8D26354A88D23140B48BC579545CED10291EA1113466F5195F",
     "CoupledPersistentH20261120": "A4025AEB718986624F9CCE9DFB8C6C4EAB40F7D3813A5B701B3D8BAB6FE37B10",
-    "CoupledGSpatialTangent20261120": "7581626FD6E29BD1F7530FBC6675A4BDDB8738452E4C340D5D88BB5C57BD48E3"
+    "CoupledGSpatialTangent20261120": "7581626FD6E29BD1F7530FBC6675A4BDDB8738452E4C340D5D88BB5C57BD48E3",
+    "CoupledOutgoingCDP20261120": "E556B4F1645E9EA96D5C213B5D66881065A59FE8AC6AF89205B8BAEC0787E4EC"
   },
   "cases": [
     {
@@ -5529,6 +5530,23 @@
       "stdout_contains": "G SPATIAL EXACT FAILURE AND ADAPTIVE CORRECTION VERIFIED; FULL COUPLED GOAL OPEN",
       "outputs": {
         "GSpatialEvidenceProof.json": "43046D418ED6C52C6A19528E77408FE5180E8727BCE18A95904F43EE42D25913"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-outgoing-cdp-event",
+      "journal_section": 648,
+      "archive": "CoupledOutgoingCDP20261120",
+      "script": "Check-TestOutgoingEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        "."
+      ],
+      "stdout_contains": "OUTGOING CDP TRANSITION AND SHARED BUDGET VERIFIED; FULL COUPLED GOAL OPEN",
+      "outputs": {
+        "OutgoingEvidenceProof.json": "FBDAB056A9AFDC5EA5079AC32B4BE3DA8FDBBADB422144BCE2F842AD436BDF5B"
       },
       "timeout_seconds": 600
     }
