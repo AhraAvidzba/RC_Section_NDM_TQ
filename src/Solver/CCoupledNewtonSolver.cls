@@ -1059,6 +1059,12 @@ RecomputeTangent:
                 useConcreteFieldTangent = True ' Та же точка и та же принятая история, другой бетонный градиент.
                 GoTo RecomputeTangent
             End If
+            If Not mControlActive And mUseSpatialHistory And Not mRefinedControlTangent And _
+                    SupportsHybridRecovery And mIterations + 1 < maxIterations Then
+                mRefinedControlTangent = True: mRefinedControlReason = " после отказа силового направления"
+                mIterations = mIterations + 1 ' Отклонённое направление расходует общий бюджет перед уточнением той же пробы.
+                GoTo RecomputeTangent
+            End If
             If Not mUseSpatialHistory And Not useGradientTangent And mSection.HasAxialGradient(current) Then
                 useGradientTangent = True
                 GoTo RecomputeTangent
