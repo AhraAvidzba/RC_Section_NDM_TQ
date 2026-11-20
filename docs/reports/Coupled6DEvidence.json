@@ -344,7 +344,8 @@
     "CoupledEnvelopeStepSensitivity20261120": "8D1E63C0D0CE6E429A1638BDC926049EC34FD768B675EBEDB0DA8BC10004A9BF",
     "CoupledEnvelopeFailureDiagnosis20261120": "E7B26A9E0616769AB319C496C83D372A543766F9A8ABC4D2FEEEDCB02D7680E3",
     "CoupledPoint6MaterialEvent20261120": "ABC63B33C2F55C904300EE0667E48CB5663445A8D5AE9795D5B33E6C67E85186",
-    "CoupledStrictEventCompletion20261120": "54633C1763351530B5B90ED48EC151481ADBB11D91E0345ACB22B1E3801D0040"
+    "CoupledStrictEventCompletion20261120": "54633C1763351530B5B90ED48EC151481ADBB11D91E0345ACB22B1E3801D0040",
+    "CoupledHSequenceFromHalf20261120": "24E88CF40079A90DF88D2F3C65927546AD2553399FB73E9B5FD6C5375AAC9E3F"
   },
   "cases": [
     {
@@ -5413,6 +5414,25 @@
       "stdout_contains": "STRICT EVENT COMPLETION VERIFIED; ORIGINAL CRITERIA; INDEPENDENT204; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "StrictEventEvidenceProof.json": "9B1469D0AC453AE0395D2BF60B16C7573CE2C441D697E552FA4DFFA5E307E18C"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-h-sequence-from-half",
+      "journal_section": 642,
+      "archive": "CoupledHSequenceFromHalf20261120",
+      "script": "Check-TestHSequenceEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "HSequenceEvidenceProof.json"
+      ],
+      "stdout_contains": "H SEQUENCE VERIFIED; EXACT209 HANDOFF; ORIGINAL WORKING CORE; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "HSequenceEvidenceProof.json": "8D9073FF68156EBFD6F239AC1275ADB5B7FE161006D7D1B3147CF96DA1ABE6E7"
       },
       "timeout_seconds": 600
     }
