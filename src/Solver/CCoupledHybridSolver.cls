@@ -38,7 +38,8 @@ Private mDifferenceScore As Double, mDifferenceColumn As Long
 ' каждая внутренняя разностная проба входит в общий maxEvaluations и счётчик FunctionCalls.
 ' automaticScaling и freshJacobian меняют только численную стратегию; критерий невязки и общие бюджеты сохраняются.
 ' captureDifferenceBracket сохраняет две вычисленные разностные пробы без дополнительных обращений к отклику.
-' completeNewtonLineSearch выбирает полный разностный Newton с поиском убывания по Армихо в тех же бюджетах.
+' completeNewtonLineSearch выбирает Newton с поиском убывания по Армихо в тех же бюджетах;
+' при нулевом шаге используется матрица уравнений, при положительном — глобальная центральная разность.
 Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByRef solution() As Double, _
@@ -51,8 +52,6 @@ Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initia
     Erase mDifferenceBefore: Erase mDifferenceAfter
     If maxRestarts < 0 Then Err.Raise 5, "CCoupledHybridSolver", "Число повторных стартов не может быть отрицательным."
     If relativeDifferenceStep < 0# Then Err.Raise 5, "CCoupledHybridSolver", "Шаг численного дифференцирования не может быть отрицательным."
-    If completeNewtonLineSearch And relativeDifferenceStep = 0# Then _
-        Err.Raise 5, "CCoupledHybridSolver", "Для полного разностного Newton требуется положительный шаг дифференцирования."
     Dim start() As Double, usedFunctions As Long, usedJacobians As Long, usedSteps As Long, usedAccepted As Long
     Dim solved As Boolean, attempt As Long
     start = initial
@@ -95,7 +94,12 @@ Private Function SolveNewtonFrom(ByVal equations As ICoupledEquationSystem, ByRe
         If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
         If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
         mJacobianCalls = mJacobianCalls + 1
-        If Not BuildDifferenceJacobian(equations, x, residual, relativeStep, maxEvaluations, matrix, count, captureBracket, observer) Then Exit Do
+        If relativeStep > 0# Then
+            If Not BuildDifferenceJacobian(equations, x, residual, relativeStep, maxEvaluations, matrix, count, captureBracket, observer) Then Exit Do
+        Else
+            If Not equations.TryEvaluate(x, True, residual, matrix) Then mStopCode = -1: Exit Do
+        End If
+        If Not ValidDimensions(residual, matrix, count) Then mStopCode = -1: Exit Do
         ReDim correction(1 To count)
         For i = 1 To count: correction(i) = -residual(i): Next i
         If Not linear.Solve(matrix, correction, count) Then mStopCode = 3: Exit Do

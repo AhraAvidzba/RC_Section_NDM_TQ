@@ -1569,7 +1569,8 @@ Friend Property Get EnvelopeTurnVerified() As Boolean
     EnvelopeTurnVerified = mCandidateReady And mEnvelopeHalfConfirmed
 End Property
 
-' Решает один уровень H общей разностной системой от неизменной истории; все затраты входят в счётчики владельца.
+' Решает один уровень H от неизменной истории собственной касательной, затем разностным резервом.
+' Первый способ получает половину оставшихся итераций; оба способа и итоговая проверка используют общий бюджет вызовов.
 Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As Double, ByVal target As Double, _
         ByVal tolerance As Double, ByVal remaining As Long, ByRef field() As Double, ByRef lambda As Double) As Boolean
     If remaining < 1 Or Not PrepareHybridScales() Then Exit Function
@@ -1579,25 +1580,49 @@ Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As
     For i = 1 To mDegreeCount: mHybridSeed(i) = seed(i): Next i
     mHybridSeed(size) = seedLambda: mHybridOriginRevision = mAcceptedRevision: ActivateHybridContext
     On Error GoTo Failed
-    Dim wrapper As CCoupledEnvelopeEquations: Set wrapper = mEnvelope.AtTarget(Me, target)
-    Dim equations As ICoupledEquationSystem: Set equations = wrapper
+    Dim wrapper As CCoupledEnvelopeEquations, equations As ICoupledEquationSystem
     Dim zero() As Double, solution() As Double, residual() As Double, matrix() As Double, maximum As Double
     ReDim zero(1 To size)
-    Dim solver As New CCoupledHybridSolver, solved As Boolean
-    solved = solver.TrySolve(equations, zero, CLng((2# * size + 1#) * (remaining + 1#) + remaining), remaining, _
-        tolerance, 0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
-        automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
-    mIterations = mIterations + solver.Steps: mHybridSteps = mHybridSteps + solver.Steps
-    mHybridMatrices = mHybridMatrices + solver.JacobianCalls: mHybridEvaluations = mHybridEvaluations + solver.FunctionCalls
-    mEnvelopeDetails = mEnvelopeDetails & "; цель H " & CStr(target) & " МПа, остановка " & CStr(solver.StopCode) & _
-        ", невязка " & CStr(solver.BestResidual) & " МПа"
-    If Not solved Or Not solver.HasBestPoint Then GoTo Finished
-    If Not equations.TryEvaluate(solution, False, residual, matrix) Then GoTo Finished
-    For i = 1 To size: maximum = GeomMax(maximum, Abs(residual(i))): Next i
-    If maximum > tolerance Then GoTo Finished
-    ReadEquationField solution, field, lambda
-    SolveEnvelopeTarget = True
-Finished:
+    Dim solver As CCoupledHybridSolver, solved As Boolean, pass As Long, budget As Long, usedSteps As Long
+    Dim maximumCalls As Long, usedCalls As Long, calls As Long, ownMatrix As Boolean, method As String
+    maximumCalls = CLng((2# * size + 1#) * (remaining + 1#) + remaining)
+    For pass = 1 To 2
+        budget = remaining - usedSteps
+        If budget < 1 Or maximumCalls - usedCalls < 2 Then Exit For
+        ownMatrix = (pass = 1)
+        If ownMatrix Then budget = GeomMax(1, budget \ 2) ' Разностный резерв не получает заново уже потраченные итерации.
+        Set wrapper = mEnvelope.AtTarget(Me, target, ownMatrix): Set equations = wrapper
+        Set solver = New CCoupledHybridSolver
+        If ownMatrix Then
+            method = "собственная касательная"
+            solved = solver.TrySolve(equations, zero, maximumCalls - usedCalls - 1, budget, _
+                tolerance, 0.00000000001, 0.2, solution, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
+        Else
+            method = "разностный резерв"
+            solved = solver.TrySolve(equations, zero, maximumCalls - usedCalls - 1, budget, _
+                tolerance, 0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
+                automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=True)
+        End If
+        usedSteps = usedSteps + solver.Steps: calls = solver.FunctionCalls
+        If ownMatrix Then calls = calls + solver.JacobianCalls ' Собственная матрица также заново вычисляет полную физическую невязку.
+        usedCalls = usedCalls + calls
+        mIterations = mIterations + solver.Steps: mHybridSteps = mHybridSteps + solver.Steps
+        mHybridMatrices = mHybridMatrices + solver.JacobianCalls: mHybridEvaluations = mHybridEvaluations + calls
+        mEnvelopeDetails = mEnvelopeDetails & "; цель H " & CStr(target) & " МПа, " & method & ", остановка " & CStr(solver.StopCode) & _
+            ", невязка " & CStr(solver.BestResidual) & " МПа"
+        If solved And solver.HasBestPoint Then
+            usedCalls = usedCalls + 1: mHybridEvaluations = mHybridEvaluations + 1
+            If equations.TryEvaluate(solution, False, residual, matrix) Then
+                maximum = 0#
+                For i = 1 To size: maximum = GeomMax(maximum, Abs(residual(i))): Next i
+                If maximum <= tolerance Then
+                    ReadEquationField solution, field, lambda
+                    SolveEnvelopeTarget = True
+                    Exit For
+                End If
+            End If
+        End If
+    Next pass
     mHybridActive = False
     Exit Function
 Failed:

@@ -190,6 +190,39 @@ Public Function RunTestCoupledHybrid() As String
     cancelNumber = Err.Number: Err.Clear
     On Error GoTo Failed
     TestCheck cancelNumber = 18, "complete Newton propagates cancellation", report, passed, failedCount
+    ReDim initial(1 To 2): adapter.InitializeTest "Linear"
+    solved = solver.TrySolve(equations, initial, 200, 20, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.000000001 And Abs(solution(2) + 2#) < 0.000000001, _
+        "supplied matrix Newton nonsymmetric known root", report, passed, failedCount
+    TestCheck solver.FunctionCalls + solver.JacobianCalls = adapter.EvaluationCallsTest, _
+        "supplied matrix Newton actual function and matrix calls counted", report, passed, failedCount
+    initial(1) = -1.2: initial(2) = 1#: adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.000000001 And Abs(solution(2) - 1#) < 0.000000001, _
+        "supplied matrix Newton Armijo Rosenbrock root", report, passed, failedCount
+    TestCheck solver.FunctionCalls > 1 + solver.Steps And solver.FunctionCalls + solver.JacobianCalls = adapter.EvaluationCallsTest, _
+        "supplied matrix Newton backtracking and callback totals", report, passed, failedCount
+    adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 1, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.FunctionCalls = 1 And solver.JacobianCalls = 0 And solver.Steps = 0 And solver.StopCode = 2, _
+        "supplied matrix Newton exhausted function budget prevents matrix request", report, passed, failedCount
+    adapter.InitializeTest "Rosenbrock"
+    solved = solver.TrySolve(equations, initial, 1000, 1, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.Steps = 1 And solver.StopCode = 2, _
+        "supplied matrix Newton all line probes share correction budget", report, passed, failedCount
+    ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.BestResidual >= 1# And solver.FunctionCalls <= 1000 And solver.Steps <= 100, _
+        "supplied matrix Newton cannot create nonexistent root", report, passed, failedCount
+    adapter.InitializeTest "Cancel"
+    On Error Resume Next
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    cancelNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18, "supplied matrix Newton propagates cancellation", report, passed, failedCount
+    adapter.InitializeTest "BadDimensions"
+    solved = solver.TrySolve(equations, initial, 1000, 100, 0.0000000001, 0.00000000001, 0.2, solution, completeNewtonLineSearch:=True)
+    TestCheck Not solved And solver.StopCode = -1, "supplied matrix Newton rejects invalid dimensions", report, passed, failedCount
     Dim algebra As New CCoupledHybridFactorization, values(1 To 2) As Double
     values(1) = 1E+200: values(2) = 1E+200
     TestCheck Abs(algebra.VectorNorm(values, 1, 2) / 1E+200 - Sqr(2#)) < 0.000000000001, "large finite norm", report, passed, failedCount
