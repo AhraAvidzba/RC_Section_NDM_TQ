@@ -358,7 +358,8 @@
     "CoupledH92Continuation20261120": "3E20B3A53FCB54CB3C13784ADB66B2AC52EDB88A5D73725C1944B45CBFB575A8",
     "CoupledGradientResidual20261120": "84C2B38363D196FCA8CC54AF6C31B1794696B4FD2C0BEE378A773EA2FBD91285",
     "CoupledHMatrixBranches20261120": "A089B6A51C693981F3625FDE3EABC1AA379E18709D871C0C29CFFCE6AC9AB139",
-    "CoupledForceTangentRecovery20261121": "D5188C586D0CF3AF09D8DB56259D5D28C38DC6EC97F9340370962D099F011749"
+    "CoupledForceTangentRecovery20261121": "D5188C586D0CF3AF09D8DB56259D5D28C38DC6EC97F9340370962D099F011749",
+    "CoupledAdaptiveHContinuation20261121": "575922A04D5E431BC5FD92D883371FDB1B7344B80E91DD67311AAB22ED447B91"
   },
   "cases": [
     {
@@ -5673,6 +5674,23 @@
       "stdout_contains": "WORKING FORCE TANGENT RECOVERY, BUDGETS AND REAL BOOK VERIFIED; FULL CAPACITY OPEN",
       "outputs": {
         "ForceTangentEvidenceProof.json": "B6F08AABF44C99DD5FB9CB9FC76AB5E093ECB34A385BA1532B2BD77983988BA0"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-adaptive-H-continuation",
+      "journal_section": 656,
+      "archive": "CoupledAdaptiveHContinuation20261121",
+      "script": "Check-TestAdaptiveHEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        "."
+      ],
+      "stdout_contains": "ADAPTIVE H FOUR STATES AND COLD FAILURE VERIFIED; MAXIMUM LOAD UNCHANGED; FULL GOAL OPEN",
+      "outputs": {
+        "AdaptiveHEvidenceProof.json": "363D6A325B69B1B3B05BFCED64975187C616F3A4C092D5E311530F2F846D0611"
       },
       "timeout_seconds": 600
     }
