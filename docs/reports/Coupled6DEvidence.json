@@ -341,7 +341,8 @@
     "CoupledMaterialStepGrowth20261120": "D5D85FE0173D18A2974CFF68E2CE4A1651C4B8B322CB741C1EA2CDD0EA7058B7",
     "CoupledMaterialBranchControl20261120": "BF863E1A22CE3B35C289CD864F99F063BF54EA0D159BC6309040D833B3932B24",
     "CoupledWorkingEnvelope20261120": "2AED8D4DCEAAAB6A794EB23F19764B6080D7D8BCA911D038C03E2F5040B5E425",
-    "CoupledEnvelopeStepSensitivity20261120": "8D1E63C0D0CE6E429A1638BDC926049EC34FD768B675EBEDB0DA8BC10004A9BF"
+    "CoupledEnvelopeStepSensitivity20261120": "8D1E63C0D0CE6E429A1638BDC926049EC34FD768B675EBEDB0DA8BC10004A9BF",
+    "CoupledEnvelopeFailureDiagnosis20261120": "E7B26A9E0616769AB319C496C83D372A543766F9A8ABC4D2FEEEDCB02D7680E3"
   },
   "cases": [
     {
@@ -5353,6 +5354,25 @@
       "stdout_contains": "ENVELOPE SENSITIVITY EVIDENCE VERIFIED; EARLY POLICY REJECTED; PHYSICAL CAPACITY OPEN",
       "outputs": {
         "EnvelopeSensitivityEvidenceProof.json": "50782B0F725F539E33E2C52E4E2F1996CC4F5C2D647439489DD12F0F6E0E2F09"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-envelope-failure-diagnosis",
+      "journal_section": 639,
+      "archive": "CoupledEnvelopeFailureDiagnosis20261120",
+      "script": "Check-TestEnvelopeFailureEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "EnvelopeFailureEvidenceProof.json"
+      ],
+      "stdout_contains": "ENVELOPE FAILURE EVIDENCE VERIFIED; THREE INTERMEDIATE EQUILIBRIA; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "EnvelopeFailureEvidenceProof.json": "D77A25D908DBB1670AEFEFCB6008CD5BE06A1C020C06E50DCAED2E49A8A21D44"
       },
       "timeout_seconds": 600
     }
