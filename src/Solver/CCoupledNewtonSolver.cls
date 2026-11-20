@@ -1452,6 +1452,19 @@ End Function
 ' Пробы не записывают материал; итоговый кандидат проходит отдельную штатную проверку перед публикацией.
 Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Double, ByVal withJacobian As Boolean, _
         ByRef residual() As Double, ByRef jacobian() As Double) As Boolean
+    ICoupledEquationSystem_TryEvaluate = ReadEquationSystem(coordinates, withJacobian, residual, jacobian, False)
+End Function
+
+' Строит читающую касательную на той же материальной ветви с уменьшенным локальным возмущением.
+' Уточнение меняет только производную; невязка, история и условия силовой приёмки сохраняются.
+Friend Function TryReadBranchLinearization(ByRef coordinates() As Double, ByRef residual() As Double, _
+        ByRef jacobian() As Double) As Boolean
+    TryReadBranchLinearization = ReadEquationSystem(coordinates, True, residual, jacobian, True)
+End Function
+
+' Собирает нормированные уравнения одного неизменного контекста; уточнённая ветвь применяется только к запрошенной касательной.
+Private Function ReadEquationSystem(ByRef coordinates() As Double, ByVal withJacobian As Boolean, _
+        ByRef residual() As Double, ByRef jacobian() As Double, ByVal refinedBranch As Boolean) As Boolean
     If Not mHybridActive Or mAcceptedRevision <> mHybridOriginRevision Then _
         Err.Raise 5, "CCoupledNewtonSolver", "Нет действующего неизменённого контекста гибридной пробы."
     Dim size As Long: size = mDegreeCount + 1
@@ -1462,7 +1475,7 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
     For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * coordinates(i): Next i
     lambda = mHybridSeed(size) + mHybridScales(size) * coordinates(size)
     SetControlledLoad lambda, load
-    If Not Evaluate(field, withJacobian, recordTrial:=False) Then Exit Function
+    If Not Evaluate(field, withJacobian, recordTrial:=False, consistentBranch:=refinedBranch, refinedBranch:=refinedBranch) Then Exit Function
     For i = 1 To mDegreeCount
         residual(i) = mResidual(i)
         If i >= mGaugeStart Then residual(i) = residual(i) * mReferenceModulus
@@ -1477,7 +1490,7 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
             Next i
         Next j
     End If
-    ICoupledEquationSystem_TryEvaluate = True
+    ReadEquationSystem = True
 End Function
 
 ' Открывает новую личность читающих уравнений; счётчик не сбрасывается при повторной подготовке того же объекта решателя.
@@ -1506,6 +1519,14 @@ Friend Sub ReadEquationField(ByRef coordinates() As Double, ByRef field() As Dou
     For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * coordinates(i): Next i
     factor = mHybridSeed(mDegreeCount + 1) + mHybridScales(mDegreeCount + 1) * coordinates(mDegreeCount + 1)
 End Sub
+
+' Передаёт масштаб одной нормированной координаты только из действующего неизменённого контекста.
+' Он используется при преобразовании производной физической управляющей величины в строку общей матрицы.
+Friend Function EquationCoordinateScale(ByVal degree As Long) As Double
+    If EquationContext = 0 Then Err.Raise 5, "CCoupledNewtonSolver", "Нет действующего контекста масштаба координаты."
+    If degree < 1 Or degree > mDegreeCount + 1 Then Err.Raise 5, "CCoupledNewtonSolver", "Индекс масштаба координаты вне системы равновесия."
+    EquationCoordinateScale = mHybridScales(degree)
+End Function
 
 ' Подготавливает геометрические веса численной координаты только для трёх CDP-историй одного сечения.
 Private Function PrepareEnvelopeCoordinate() As Boolean
