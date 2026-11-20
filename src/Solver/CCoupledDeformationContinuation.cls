@@ -41,6 +41,7 @@ Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Для CDP на весь уча
 Private Const MIN_STEP_RATIO As Double = 0.015625
 Private Const NEAR_ONE_TOLERANCE As Double = 0.0001
 Private Const STEP_GROWTH As Double = 1.25
+Private Const MATERIAL_STEP_GROWTH As Double = 1.25
 Private Const POST_PEAK_STEP_RATIO As Double = 2# ' Верхний шаг относительно шага, выбранного при смене меры.
 Private Const POST_PEAK_EXTENDED_RATIO As Double = 4# ' Верхний шаг после шести гладких приращений подряд.
 Private Const TRANSVERSE_STEP_RATIO As Double = 32# ' Ограничивает рост сдвигового шага относительно различимой начальной секущей.
@@ -73,6 +74,8 @@ Private mHasCornerReference As Boolean, mCornerReferenceRevision As Long
 Private mCornerDirection() As Double, mCornerLambdaDirection As Double, mCornerReferenceIncrement As Double
 Private mHasCornerProbe As Boolean, mCornerProbe() As Double, mCornerProbeLambda As Double, mCornerProbeCoordinate As Double
 Private mCornerProbeSeeds As Long
+Private mMaterialGrowthActive As Boolean, mMaterialGrowthProjection() As Double
+Private mMaterialStepExpansions As Long, mMaterialMaximumStep As Double
 Private mMaterialRecoveryRevision As Long, mMaterialRecoveryAtRevision As Long
 Private mFixedYieldRecoveryProbes As Long
 Private mArcRecoveryTried As Boolean, mArcRecoveryProbes As Long
@@ -121,6 +124,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mSpatialReversalsRejected = 0
     mPrincipalCornerProbes = 0: mPrincipalCorners = 0: mHasCornerReference = False
     mHasCornerProbe = False: Erase mCornerProbe: mCornerProbeSeeds = 0
+    mMaterialGrowthActive = False: Erase mMaterialGrowthProjection
+    mMaterialStepExpansions = 0: mMaterialMaximumStep = 0#
     mCornerAttemptRevision = -1: mCornerAttemptsAtRevision = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
@@ -264,8 +269,13 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If Not probed Then mSolver.DiscardStep
             End If
             lastNoProgress = Not probed
-            If probed And mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then _
-                smoothTrial = FitsPostPeakSecant(history, left, current, trial)
+            If probed Then
+                If IsMaterialGrowthControl() Then
+                    smoothTrial = FitsMaterialGrowthSecant(history, left, current, trial)
+                ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then
+                    smoothTrial = FitsPostPeakSecant(history, left, current, trial)
+                End If
+            End If
         End If
         If Not probed Then
             smoothSteps = 0
@@ -282,7 +292,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             Else
                 increment = increment * 0.5
             End If
-        ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 And increment > nominal And Not smoothTrial Then
+        ElseIf (IsMaterialGrowthControl() Or (mFollowingLocalPeak And Len(mPostPeakControlName) > 0)) And increment > nominal And Not smoothTrial Then
             If BeyondSteelLimit() Then unresolvedSteel = True ' Уточнение требует меньшей пробы на прослеженной ветви.
             mSolver.DiscardStep ' На прежнем размере можно пройти изменение наклона без экстраполяции ветви.
             smoothSteps = 0
@@ -305,6 +315,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If mDesignHistoryIndex = 0 And current.Lambda < 1# And trial.Lambda >= 1# And mProbeCount + 2 <= PROBE_LIMIT Then
                 If Not RepeatDesignTrial(current, trial, targetCoordinate, designAtTrial, changedControl And mSolver.HasPrincipalBoundaries) Then Exit Sub
             End If
+            Dim acceptedIncrement As Double: acceptedIncrement = trial.Coordinate - current.Coordinate
             AcceptPoint history, trial
             If hybridRecovery Then mHybridRecoveredPoints = mHybridRecoveredPoints + 1
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
@@ -320,13 +331,28 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If mUnverifiedDecline And current.Lambda > mUnverifiedReference + LoadResolution(mUnverifiedReference) Then
                 mUnverifiedDecline = False: mRecoveredDips = mRecoveredDips + 1
             End If
-            If smoothTrial And mFollowingLocalPeak Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
+            If smoothTrial And (mFollowingLocalPeak Or IsMaterialGrowthControl()) Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
             stepCeiling = nominal
-            If smoothSteps >= 2 Then stepCeiling = POST_PEAK_STEP_RATIO * nominal
-            If smoothSteps >= 6 Then stepCeiling = POST_PEAK_EXTENDED_RATIO * nominal
+            If IsMaterialGrowthControl() Then
+                increment = acceptedIncrement ' Доверенный масштаб и следующая цель относятся к фактически принятому полю, а не к прогнозу.
+                mMaterialMaximumStep = GeomMax(mMaterialMaximumStep, increment)
+                If smoothSteps >= 2 Then
+                    If increment > nominal Then mMaterialStepExpansions = mMaterialStepExpansions + 1
+                    nominal = GeomMax(nominal, increment) ' Новый доверенный масштаб получен из принятого равновесия с малой ошибкой прогноза.
+                    minimum = nominal * MIN_STEP_RATIO * MIN_STEP_RATIO
+                    stepCeiling = MATERIAL_STEP_GROWTH * nominal
+                End If
+            Else
+                If smoothSteps >= 2 Then stepCeiling = POST_PEAK_STEP_RATIO * nominal
+                If smoothSteps >= 6 Then stepCeiling = POST_PEAK_EXTENDED_RATIO * nominal
+            End If
             If mUsesTransverseControl Then stepCeiling = TRANSVERSE_STEP_RATIO * nominal
             If increment > stepCeiling Then increment = stepCeiling
-            If increment < stepCeiling / STEP_GROWTH Then increment = increment * STEP_GROWTH
+            If IsMaterialGrowthControl() And smoothSteps >= 2 Then
+                increment = GeomMin(stepCeiling, increment * MATERIAL_STEP_GROWTH)
+            ElseIf increment < stepCeiling / STEP_GROWTH Then
+                increment = increment * STEP_GROWTH
+            End If
         ElseIf trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
             Dim declinedField() As Double, declinedResultants() As Double
             If reinforced And (mUsesTransverseControl Or mUsesFieldControl) Then mSolver.CopyTrial declinedField, declinedResultants
@@ -574,6 +600,39 @@ Private Function FitsPostPeakSecant(ByVal history As Collection, ByRef left As T
     previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
     mSolver.CopyTrial field, resultants
     FitsPostPeakSecant = FitsMechanicalSecant(previous, accepted, field, mSolver.PhysicalDegreeCount, ratio)
+End Function
+
+' Разрешает адаптацию только для той же точной пространственной меры, установленной проверенным CDP-переходом.
+' Смена меры автоматически прекращает этот режим; принятые состояния материала здесь не кэшируются.
+Private Function IsMaterialGrowthControl() As Boolean
+    If Not mMaterialGrowthActive Or Not mUsesFieldControl Then Exit Function
+    Dim i As Long
+    For i = 1 To UBound(mProjection)
+        If mProjection(i) <> mMaterialGrowthProjection(i) Then Exit Function
+    Next i
+    IsMaterialGrowthControl = True
+End Function
+
+' Проверяет прогноз принятой секущей по тензорной метрике трёх станций и множителю нагрузки.
+' Неразличимое изменение lambda не препятствует росту шага; это проверка прогноза, а не ослабление силового равновесия.
+Private Function FitsMaterialGrowthSecant(ByVal history As Collection, ByRef left As TBranchPoint, _
+        ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
+    If left.HistoryIndex <> current.HistoryIndex - 1 Or trial.Lambda <= 0# Then Exit Function
+    Dim spacing As Double: spacing = current.Coordinate - left.Coordinate
+    If spacing <= 0# Then Exit Function
+    Dim ratio As Double: ratio = (trial.Coordinate - current.Coordinate) / spacing
+    If ratio <= 0# Then Exit Function
+    Dim predictedLoad As Double: predictedLoad = ratio * (current.Lambda - left.Lambda)
+    If Abs(trial.Lambda - current.Lambda - predictedLoad) > _
+            GeomMax(Abs(predictedLoad) * POST_PEAK_SECANT_TOLERANCE, LoadResolution(current.Lambda)) Then Exit Function
+    Dim previous() As Double, accepted() As Double, field() As Double, predicted() As Double, resultants() As Double, i As Long
+    previous = history(left.HistoryIndex): accepted = history(current.HistoryIndex)
+    mSolver.CopyTrial field, resultants
+    predicted = accepted
+    For i = 1 To mSolver.PhysicalDegreeCount: predicted(i) = accepted(i) + ratio * (accepted(i) - previous(i)): Next i
+    Dim expectedLength As Double: expectedLength = mSolver.SpatialFieldDistance(accepted, predicted)
+    If expectedLength <= 0# Then Exit Function
+    FitsMaterialGrowthSecant = (mSolver.SpatialFieldDistance(field, predicted) <= POST_PEAK_SECANT_TOLERANCE * expectedLength)
 End Function
 
 ' Проверяет относительное отклонение механических приращений от секущей.
@@ -1384,6 +1443,8 @@ Private Function Details() As String
     If mSpatialReversalsRejected > 0 Then Details = Details & "; обратных пространственных приращений отклонено: " & CStr(mSpatialReversalsRejected)
     If mPrincipalCornerProbes > 0 Then Details = Details & "; проб материального перехода: " & CStr(mPrincipalCornerProbes) & _
         "; подтверждённых переходов: " & CStr(mPrincipalCorners) & "; прогнозов из проверочного равновесия: " & CStr(mCornerProbeSeeds)
+    If mMaterialGrowthActive Then Details = Details & "; расширений шага CDP: " & CStr(mMaterialStepExpansions) & _
+        "; наибольший принятый шаг после CDP: " & CStr(mMaterialMaximumStep)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
@@ -1500,21 +1561,26 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
         mUnverifiedDecline = True: mUnverifiedReference = mBestLambda
         mUnverifiedDips = mUnverifiedDips + 1 ' Спад после решённого события требует продолжения ветви и не подтверждает предельную нагрузку.
     End If
-    PreparePrincipalProbeSeed history, current, probe, probeLambda, increment
+    Dim probeRadius As Double: probeRadius = 0.25 * nominal
+    If transition.PrincipalIndex = 0 Then
+        mMaterialGrowthActive = True: mMaterialGrowthProjection = mProjection
+        probeRadius = nominal ' Радиус проверочной CDP-пробы совпадает с радиусом её нативного решения.
+    End If
+    PreparePrincipalProbeSeed history, current, probe, probeLambda, increment, probeRadius
     TryCrossPrincipalCorner = True
 End Function
 
 ' Использует уже найденное непринятое равновесие как прогноз обычной пробы, если оно продвигает исходящее направление.
 ' Точный ключ связан с принятой ревизией через mHasCornerReference; материал, направление и пределы проверяются обычным Probe заново.
 Private Sub PreparePrincipalProbeSeed(ByVal history As Collection, ByRef current As TBranchPoint, _
-        ByRef probe As Variant, ByVal lambda As Double, ByRef increment As Double)
+        ByRef probe As Variant, ByVal lambda As Double, ByRef increment As Double, ByVal maximumSpacing As Double)
     mHasCornerProbe = False
     If IsEmpty(probe) Or lambda <= 0# Then Exit Sub
     Dim field() As Double, accepted() As Double, previous() As Double
     field = probe: accepted = history(current.HistoryIndex)
     Dim coordinate As Double, spacing As Double, advance As Double, reference As Double
     coordinate = CoordinateOf(field): spacing = coordinate - current.Coordinate
-    If spacing <= increment Or spacing > 0.25 * mCornerReferenceIncrement Then Exit Sub
+    If spacing <= increment Or spacing > maximumSpacing Then Exit Sub
     ReadSpatialReference history, current.HistoryIndex, previous
     If Not mSolver.SpatialIncrementAdvances(previous, accepted, field, advance, reference) Then Exit Sub
     mCornerProbe = field: mCornerProbeLambda = lambda: mCornerProbeCoordinate = coordinate

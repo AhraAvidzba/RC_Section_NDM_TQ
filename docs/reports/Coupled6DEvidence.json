@@ -337,7 +337,8 @@
     "CoupledFieldPath20261119": "6BD9DDBEE10B8C240F18512A5D49B312338B25F471B9549AF69E00A292143759",
     "CoupledExactVBAReference20261119": "C30EF07F171A5C2ACB6657DF0949A2FDD56C4BE0A77F0E694E96167397CE43AC",
     "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47",
-    "CoupledWorkingMaterialEvent20261120": "97D1E6985BA1FFF56369377AACDB315E1A4AFD6ACCAEB955720FE75DFE5A5F68"
+    "CoupledWorkingMaterialEvent20261120": "97D1E6985BA1FFF56369377AACDB315E1A4AFD6ACCAEB955720FE75DFE5A5F68",
+    "CoupledMaterialStepGrowth20261120": "D5D85FE0173D18A2974CFF68E2CE4A1651C4B8B322CB741C1EA2CDD0EA7058B7"
   },
   "cases": [
     {
@@ -5273,6 +5274,25 @@
       "stdout_contains": "WORKING MATERIAL EVENT PASS; STOCK BASELINE PRESERVED; CAPACITY OPEN",
       "outputs": {
         "WorkingMaterialEventProof.json": "E91B1C98DB04F56C3C71FFC715926F8B2D64E83745B113BCE33085483EF18BF8"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-material-step-growth",
+      "journal_section": 635,
+      "archive": "CoupledMaterialStepGrowth20261120",
+      "script": "Check-TestMaterialGrowthEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "MaterialGrowthProof.json"
+      ],
+      "stdout_contains": "MATERIAL STEP GROWTH EVIDENCE PASS; RELOAD OBSERVED; CAPACITY OPEN",
+      "outputs": {
+        "MaterialGrowthProof.json": "109616674BC265E90C153C4CEA8ADBBFBD84EFE2FFCEC0B0698B58CAAC5FE1BB"
       },
       "timeout_seconds": 600
     }

@@ -3027,7 +3027,7 @@ Private Function PublishPrincipalCandidate(ByRef field() As Double, ByVal lambda
 End Function
 
 ' Вычисляет механическое расстояние в общей тензорной метрике трёх станций без множителей связей.
-Private Function SpatialFieldDistance(ByRef first() As Double, ByRef second() As Double) As Double
+Friend Function SpatialFieldDistance(ByRef first() As Double, ByRef second() As Double) As Double
     Dim movement() As Double, coefficients() As Double, unused() As Double, i As Long, square As Double
     ReDim movement(1 To mDegreeCount)
     For i = 1 To mGaugeStart - 1: movement(i) = second(i) - first(i): Next i
