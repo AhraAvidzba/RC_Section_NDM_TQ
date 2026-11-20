@@ -338,7 +338,8 @@
     "CoupledExactVBAReference20261119": "C30EF07F171A5C2ACB6657DF0949A2FDD56C4BE0A77F0E694E96167397CE43AC",
     "CoupledMaterialEvent20261120": "7C87131E7B4570BEA899A1B742CA4E17EF4F1640F3145D990920FE359DAE1F47",
     "CoupledWorkingMaterialEvent20261120": "97D1E6985BA1FFF56369377AACDB315E1A4AFD6ACCAEB955720FE75DFE5A5F68",
-    "CoupledMaterialStepGrowth20261120": "D5D85FE0173D18A2974CFF68E2CE4A1651C4B8B322CB741C1EA2CDD0EA7058B7"
+    "CoupledMaterialStepGrowth20261120": "D5D85FE0173D18A2974CFF68E2CE4A1651C4B8B322CB741C1EA2CDD0EA7058B7",
+    "CoupledMaterialBranchControl20261120": "BF863E1A22CE3B35C289CD864F99F063BF54EA0D159BC6309040D833B3932B24"
   },
   "cases": [
     {
@@ -5293,6 +5294,25 @@
       "stdout_contains": "MATERIAL STEP GROWTH EVIDENCE PASS; RELOAD OBSERVED; CAPACITY OPEN",
       "outputs": {
         "MaterialGrowthProof.json": "109616674BC265E90C153C4CEA8ADBBFBD84EFE2FFCEC0B0698B58CAAC5FE1BB"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-material-envelope-branch",
+      "journal_section": 636,
+      "archive": "CoupledMaterialBranchControl20261120",
+      "script": "Check-TestMaterialBranchEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        ".",
+        "--out",
+        "MaterialBranchEvidenceProof.json"
+      ],
+      "stdout_contains": "MATERIAL BRANCH EVIDENCE PASS; PHYSICAL CAPACITY AND PRODUCTION INTEGRATION OPEN",
+      "outputs": {
+        "MaterialBranchEvidenceProof.json": "30B7AC0F6EDCED9CB6DE2596619E251E7416C7B4B5D98D6DBA445083F86ADD94"
       },
       "timeout_seconds": 600
     }
