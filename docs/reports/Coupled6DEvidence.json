@@ -355,7 +355,8 @@
     "CoupledRefinedRestart20261120": "958B0F89BE87653975C847E79CAA055DC2DEC3B98DCE1B08515AB13730D63767",
     "CoupledLocalPeakBudget20261120": "51D1CFCB55B51350CCA8F3B697B95999DA52C32920CB4F82F4D1D055541237CE",
     "CoupledHNeighborSeed20261120": "734EB99B2634FA9869344B1752AC173B972A4247C57B215182EBA87BB6270931",
-    "CoupledH92Continuation20261120": "3E20B3A53FCB54CB3C13784ADB66B2AC52EDB88A5D73725C1944B45CBFB575A8"
+    "CoupledH92Continuation20261120": "3E20B3A53FCB54CB3C13784ADB66B2AC52EDB88A5D73725C1944B45CBFB575A8",
+    "CoupledGradientResidual20261120": "84C2B38363D196FCA8CC54AF6C31B1794696B4FD2C0BEE378A773EA2FBD91285"
   },
   "cases": [
     {
@@ -5619,6 +5620,23 @@
       "stdout_contains": "H92 CONTINUATION AND CONTROLLED NUMERICS VERIFIED; HISTORICAL PEAK PRESERVED; FULL GOAL OPEN",
       "outputs": {
         "H92EvidenceProof.json": "BFEFF76FBC4EB06204C66C6E27C77097C5AFCD6FD45CCA2852FF5E5267D5D547"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-gradient-residual",
+      "journal_section": 653,
+      "archive": "CoupledGradientResidual20261120",
+      "script": "Check-TestGradientResidualEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        "."
+      ],
+      "stdout_contains": "GRADIENT EQUILIBRIUM RESIDUAL AND LOCAL PRECISION VERIFIED; FULL CAPACITY OPEN",
+      "outputs": {
+        "GradientResidualEvidenceProof.json": "16AFA4F71C78B2E24874EECB1B4B25CF86166025C4C8083F67071B94F919BDB9"
       },
       "timeout_seconds": 600
     }
