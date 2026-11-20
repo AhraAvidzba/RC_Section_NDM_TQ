@@ -349,7 +349,8 @@
     "CoupledHPeakStepRefinement20261120": "4EB7B407C08005E7F4AA0573AEEDF684E10D05DF4F54AD6FF8DA0D1D9D3916AE",
     "CoupledHGradient20261120": "DDBD62632C49D577F0381379FF693C5303916C758D27D8293348249C24C755BC",
     "CoupledHBackend20261120": "795758AE9909EE8D26354A88D23140B48BC579545CED10291EA1113466F5195F",
-    "CoupledPersistentH20261120": "A4025AEB718986624F9CCE9DFB8C6C4EAB40F7D3813A5B701B3D8BAB6FE37B10"
+    "CoupledPersistentH20261120": "A4025AEB718986624F9CCE9DFB8C6C4EAB40F7D3813A5B701B3D8BAB6FE37B10",
+    "CoupledGSpatialTangent20261120": "7581626FD6E29BD1F7530FBC6675A4BDDB8738452E4C340D5D88BB5C57BD48E3"
   },
   "cases": [
     {
@@ -5511,6 +5512,23 @@
       "stdout_contains": "PERSISTENT H EVIDENCE VERIFIED; KNOWN fc*A PEAK PASSES; FULL COUPLED GOAL OPEN",
       "outputs": {
         "PersistentHEvidenceProof.json": "85EF17B7330F4F073F0AAD699CA72E614B6576A92691E446CA11ACF272E0B306"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-g-spatial-tangent",
+      "journal_section": 647,
+      "archive": "CoupledGSpatialTangent20261120",
+      "script": "Check-TestGSpatialEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        "."
+      ],
+      "stdout_contains": "G SPATIAL EXACT FAILURE AND ADAPTIVE CORRECTION VERIFIED; FULL COUPLED GOAL OPEN",
+      "outputs": {
+        "GSpatialEvidenceProof.json": "43046D418ED6C52C6A19528E77408FE5180E8727BCE18A95904F43EE42D25913"
       },
       "timeout_seconds": 600
     }

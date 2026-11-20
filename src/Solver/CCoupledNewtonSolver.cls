@@ -98,6 +98,7 @@ Private mSameControlInitialFailure As String
 Private mRecoveredProjection() As Double
 Private mRecoveredControlUncertainty As Double
 Private mConsistentControl As Boolean
+Private mRefinedControlTangent As Boolean, mRefinedControlReason As String
 Private mControlActive As Boolean
 Private mControlProjection() As Double, mTargetControl As Double
 Private mArcLoadProjection As Double, mCurrentControlLambda As Double
@@ -185,6 +186,7 @@ Friend Sub ResetHistory()
     mAcceptedRevision = mAcceptedRevision + 1
     mEnvelopePairReady = False: mEnvelopeControl = False: Erase mEnvelopePreviousField
     mEnvelopePathCount = 0: mEnvelopePathReady = True: Erase mEnvelopePath
+    mRefinedControlTangent = False: mRefinedControlReason = vbNullString
     mCandidateReady = False
     mHasRejectedDirection = False: Erase mRejectedDirection
     mHasTransitionSegment = False: Set mPrincipalTransition = Nothing: mPrincipalIncomingCandidate = False
@@ -909,6 +911,7 @@ Private Sub ResetSolveState()
     mMaterialEventDetails = vbNullString
     mEnvelopeHalfConfirmed = False: mEnvelopeDetails = vbNullString
     mEnvelopeControl = False
+    mRefinedControlTangent = False: mRefinedControlReason = vbNullString
 End Sub
 
 ' Решает одну силовую или деформационно управляемую пробу с общей
@@ -950,8 +953,9 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
     Do
 RecomputeTangent:
         If mControlActive Then SetControlledLoad currentLambda, load
-        built = Evaluate(current, True, useGradientTangent, Not mConsistentControl, mConsistentControl)
-        If Not built And mConsistentControl And mFailureCode = sfcNumericalFailure Then
+        built = Evaluate(current, True, useGradientTangent, Not (mConsistentControl Or mRefinedControlTangent), _
+            mConsistentControl, mRefinedControlTangent)
+        If Not built And (mConsistentControl Or mRefinedControlTangent) And mFailureCode = sfcNumericalFailure Then
             built = Evaluate(current, True, useGradientTangent, recordTrial:=False) ' Например, при вырождении односторонних разностей в другой точке.
         End If
         If Not built Then
@@ -978,7 +982,7 @@ RecomputeTangent:
             If TryWarpGaugeEquilibrium(current, load, tolerance) Then norm = mLastNorm
         End If
         If norm <= tolerance Then
-            If mConsistentControl Then
+            If mConsistentControl Or mRefinedControlTangent Then
                 If Not Evaluate(current, False) Then
                     RecordFailure mFailureCode, "Не удалось записать пробу подтверждённого равновесия."
                     Exit Function
@@ -1104,6 +1108,11 @@ RecomputeTangent:
                 mTransitionRevision = mAcceptedRevision: mHasTransitionSegment = True
             End If
             If Len(mismatch) > 0 And mUseSpatialHistory Then
+                If Not mConsistentControl And Not mRefinedControlTangent And SupportsHybridRecovery And mIterations + 1 < maxIterations Then
+                    mRefinedControlTangent = True: mRefinedControlReason = mismatch
+                    mIterations = mIterations + 1 ' Отклонённая поправка расходует общий бюджет перед уточнением матрицы той же пробы.
+                    GoTo RecomputeTangent
+                End If
                 mWrongControlDirection = True
                 If recoverYieldControl Then
                     Dim recoveryIterationLimit As Long
@@ -2450,7 +2459,7 @@ Friend Function TrialLambdaUncertainty(ByVal absoluteTolerance As Double, ByVal 
     RequireCandidate
     If Not mControlActive Then Exit Function
     If Not Evaluate(mCandidate, True, True, recordTrial:=Not mUseSpatialHistory, _
-            consistentBranch:=mConsistentControl, refinedBranch:=mEnvelopeControl) Then
+            consistentBranch:=mConsistentControl, refinedBranch:=(mEnvelopeControl Or mRefinedControlTangent)) Then
         If mEnvelopeControl Then
             TrialLambdaUncertainty = TryEnvelopeDifferenceUncertainty(absoluteTolerance, relativeTolerance, uncertainty)
             If TrialLambdaUncertainty Then Exit Function
@@ -3086,6 +3095,8 @@ Private Function DiagnosticSummary() As String
     If mSameControlRecoveryTried Then DiagnosticSummary = DiagnosticSummary & "; проверен переход для исходной меры"
     If mLocalGradientBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; локальных производных градиента напряжений: " & CStr(mLocalGradientBuilds)
+    If mRefinedControlTangent Then DiagnosticSummary = DiagnosticSummary & _
+        "; пространственная касательная уточнена после расхождения направления" & mRefinedControlReason
     If mSteelBranchBuilds > 0 Then DiagnosticSummary = DiagnosticSummary & _
         "; пересборок ветвей стали: " & CStr(mSteelBranchBuilds)
     If mSteelFieldTangents > 0 Then DiagnosticSummary = DiagnosticSummary & _
