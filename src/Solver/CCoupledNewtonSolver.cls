@@ -3234,12 +3234,13 @@ Friend Function TryPreparePrincipalTransition(ByRef baseLoad() As Double, ByRef 
     mControlActive = False: mArcLoadProjection = 0#: mConsistentControl = False
     Dim load(1 To COMPONENT_COUNT) As Double, gap As Double, tolerance As Double, radius As Double
     SetControlledLoad currentLambda, load
-    gap = GeomMin(0.25 * Abs(value), 0.125 * EquilibriumTolerance(absoluteTolerance, relativeTolerance))
-    If gap <= 16# * YIELD_ROOT_TOLERANCE Then GoTo Unsuccessful
-    tolerance = GeomMin(PRINCIPAL_EVENT_TOLERANCE, 0.125 * gap)
     If station.PrincipalIndex = 0 Then
         gap = 3# * EquilibriumTolerance(absoluteTolerance, relativeTolerance) ' Материальное приращение отличимо от силового допуска; два размера проверяются независимо.
         tolerance = GeomMin(YIELD_EVENT_TOLERANCE, 0.125 * gap)
+    Else
+        gap = GeomMin(0.25 * Abs(value), 0.125 * EquilibriumTolerance(absoluteTolerance, relativeTolerance))
+        If gap <= 16# * YIELD_ROOT_TOLERANCE Then GoTo Unsuccessful
+        tolerance = GeomMin(PRINCIPAL_EVENT_TOLERANCE, 0.125 * gap)
     End If
     radius = PRINCIPAL_EVENT_RADIUS * reference
     Dim face() As Double, incoming() As Double, faceLambda As Double

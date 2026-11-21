@@ -359,7 +359,8 @@
     "CoupledGradientResidual20261120": "84C2B38363D196FCA8CC54AF6C31B1794696B4FD2C0BEE378A773EA2FBD91285",
     "CoupledHMatrixBranches20261120": "A089B6A51C693981F3625FDE3EABC1AA379E18709D871C0C29CFFCE6AC9AB139",
     "CoupledForceTangentRecovery20261121": "D5188C586D0CF3AF09D8DB56259D5D28C38DC6EC97F9340370962D099F011749",
-    "CoupledAdaptiveHContinuation20261121": "575922A04D5E431BC5FD92D883371FDB1B7344B80E91DD67311AAB22ED447B91"
+    "CoupledAdaptiveHContinuation20261121": "575922A04D5E431BC5FD92D883371FDB1B7344B80E91DD67311AAB22ED447B91",
+    "CoupledCDPEventGate20261121": "4375657925ECA56D48350D79F7595C7DD20C51254657559187BBCE608CE50475"
   },
   "cases": [
     {
@@ -5684,13 +5685,30 @@
       "script": "Check-TestAdaptiveHEvidence.py",
       "arguments": [
         "--repo",
-        "{repo}",
+        "{repo_2ef8880}",
         "--root",
         "."
       ],
       "stdout_contains": "ADAPTIVE H FOUR STATES AND COLD FAILURE VERIFIED; MAXIMUM LOAD UNCHANGED; FULL GOAL OPEN",
       "outputs": {
         "AdaptiveHEvidenceProof.json": "363D6A325B69B1B3B05BFCED64975187C616F3A4C092D5E311530F2F846D0611"
+      },
+      "timeout_seconds": 600
+    },
+    {
+      "id": "coupled-CDP-event-gate",
+      "journal_section": 657,
+      "archive": "CoupledCDPEventGate20261121",
+      "script": "Check-TestCDPEventEvidence.py",
+      "arguments": [
+        "--repo",
+        "{repo}",
+        "--root",
+        "."
+      ],
+      "stdout_contains": "WORKING CDP EVENT GATE AND SAVED BOOK VERIFIED; LOWER LOAD UNCHANGED; PHYSICAL CAPACITY OPEN",
+      "outputs": {
+        "CDPEventEvidenceProof.json": "01B504A913EEC3FFE20EBD65389A16B017DD1202E8D743E4144863E6C8A2A962"
       },
       "timeout_seconds": 600
     }
@@ -5729,6 +5747,21 @@
         "src/Solver/CCoupledLoadContinuation.cls": "5D2622AA0E14CD5A61B6A630A9288EC349779774097B2B2D8061A7757C6E1C03",
         "src/Solver/CCoupledNewtonSolver.cls": "BCB78ED1EA9337AFA5818C1683D67E8D99648423510D2AA87E8050C97732A58B",
         "src/Solver/CCoupledSectionAnalysis.cls": "BE2288D25F5880AE7A8CCADD8A38AD28840FC75C7020054B11828F783D91064B"
+      }
+    },
+    "repo_2ef8880": {
+      "revision": "2ef88801c2d6e29d81bde5ee7838945dd0d30d62",
+      "files": {
+        "src/Materials/CCoupledConcreteResponse.cls": "0A6BC95D43BB63E4300BE13D0C4AA12FF0FAECA6F8B96D4F397B43C966A5BE61",
+        "src/Materials/CCoupledReinforcedResponse.cls": "A0E58E4E1AEEF95666957B4E7D3314A6900414379947E7E7501FB64C2B8C0770",
+        "src/Solver/CCoupledNewtonSolver.cls": "181453D951EE51D12553656213A09553D895A344E64C865BE272A44E93ABA892",
+        "src/Solver/CCoupledDeformationContinuation.cls": "2E7E7B61175E55337005101BF680CDADDF5DFAA1D0D1EBCDAF46500AD83105AA",
+        "src/Solver/CCoupledEnvelopeEquations.cls": "73013D635D1FA21DD2B808191AFA1903067A6C32AAEE05D7D1A4C210D642428D",
+        "src/Solver/CCoupledHybridSolver.cls": "0FBB0562F230078EE40495A06B262EA580D9021A8A9FC7DD0F1F3914BB58C5BF",
+        "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+        "docs/regression/Coupled6D/KrylovFallbackNative20261117.zip": "C31C5EFABADD5CB81A790C4E5432DBCCDBAE587D3A4639D666881ACCA2BDD633",
+        "docs/regression/Coupled6D/HardShearCoarseGrowthWorkbookRelease20261117.zip": "6931A477A1D64FD38EE5134197B54646A68A7E28C475DBA969D7807883336D63",
+        "docs/regression/Coupled6D/MVT2ArcRecoveryWorkbookRelease20261117.zip": "6A76629D2C14789BDFDE0939CA9E8B384CE31E101E74BAC80597AF7F914FF9E8"
       }
     }
   }
