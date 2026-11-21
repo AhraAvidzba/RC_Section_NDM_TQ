@@ -1723,8 +1723,18 @@ Private Function SolveEnvelopeTarget(ByRef seed() As Double, ByVal seedLambda As
                 For i = 1 To size: maximum = GeomMax(maximum, Abs(residual(i))): Next i
                 If maximum <= tolerance Then
                     ReadEquationField solution, field, lambda
-                    SolveEnvelopeTarget = True
-                    Exit For
+                    Dim load(1 To COMPONENT_COUNT) As Double, forceNorm As Double
+                    SetControlledLoad lambda, load
+                    forceNorm = mSection.ResultantResidualNorm(mTrialResultants, load)
+                    If forceNorm > tolerance Then
+                        mEnvelopeDetails = mEnvelopeDetails & "; силовые интегралы требуют уточнения: " & CStr(forceNorm) & " МПа"
+                        solved = TryEnvelopeResultantCorrection(equations, solution, tolerance, remaining, maximumCalls, usedSteps, usedCalls)
+                    End If
+                    If solved Then
+                        ReadEquationField solution, field, lambda
+                        SolveEnvelopeTarget = True
+                        Exit For
+                    End If
                 End If
             End If
         End If
@@ -2486,10 +2496,9 @@ End Function
 Private Function BuildSmallStrainSystem(ByRef field() As Double, ByRef load() As Double, ByVal tolerance As Double, _
         ByRef force() As Double, ByRef forceResidual() As Double, ByRef equality() As Double, _
         ByRef equalityResidual() As Double, ByRef scales() As Double) As Boolean
-    Dim matrix() As Double, residual() As Double, projection() As Double
-    Dim size As Long, weakRows As Long, i As Long, j As Long, k As Long, row As Long
-    Dim maximum As Double, factor As Double, normalized As Double, direct As Double, area As Double, lengthScale As Double
-    size = mDegreeCount + 1: weakRows = mGaugeStart - 1
+    Dim matrix() As Double, residual() As Double
+    Dim size As Long, i As Long, j As Long
+    size = mDegreeCount + 1
     BuildControlledMatrix matrix, size
     ReDim residual(1 To size), scales(1 To size)
     For i = 1 To mDegreeCount
@@ -2502,6 +2511,19 @@ Private Function BuildSmallStrainSystem(ByRef field() As Double, ByRef load() As
             matrix(j, i) = matrix(j, i) * mReferenceModulus
         Next j
     Next i
+    BuildSmallStrainSystem = PrepareSmallStrainSystem(matrix, residual, load, tolerance, _
+        force, forceResidual, equality, equalityResidual, scales)
+End Function
+
+' Собирает ограничения малой поправки из уже нормированных силовых строк и выбранного уравнения управления.
+Private Function PrepareSmallStrainSystem(ByRef matrix() As Double, ByRef residual() As Double, _
+        ByRef load() As Double, ByVal tolerance As Double, ByRef force() As Double, ByRef forceResidual() As Double, _
+        ByRef equality() As Double, ByRef equalityResidual() As Double, ByRef scales() As Double) As Boolean
+    Dim projection() As Double
+    Dim size As Long, weakRows As Long, i As Long, j As Long, k As Long, row As Long
+    Dim maximum As Double, factor As Double, normalized As Double, direct As Double, area As Double, lengthScale As Double
+    size = mDegreeCount + 1: weakRows = mGaugeStart - 1
+    ReDim scales(1 To size)
     For j = 1 To size
         maximum = 0#
         For i = 1 To size
@@ -2551,7 +2573,7 @@ Private Function BuildSmallStrainSystem(ByRef field() As Double, ByRef load() As
         If Abs(normalized - direct) > 0.001 * tolerance Then Exit Function ' Проверяем замыкание проекции на исходном поле.
         forceResidual(row) = direct
     Next k
-    BuildSmallStrainSystem = True
+    PrepareSmallStrainSystem = True
 End Function
 
 ' Добавляет неизвестный множитель и уравнение управления деформацией.
@@ -3817,4 +3839,54 @@ Failed:
     number = Err.Number: source = Err.Source: reason = Err.Description
     mControlActive = wasControlled
     If number <> 6 And number <> 11 Then Err.Raise number, source, reason
+End Function
+
+
+' Уточняет шесть силовых интегралов при малой невязке базиса, сохраняя H и кинематические связи.
+' Существующий оптимизатор минимизирует изменение деформаций; каждая касательная и проба входят в общий бюджет.
+Private Function TryEnvelopeResultantCorrection(ByVal equations As ICoupledEquationSystem, ByRef coordinates() As Double, _
+        ByVal tolerance As Double, ByVal maximumSteps As Long, ByVal maximumCalls As Long, _
+        ByRef usedSteps As Long, ByRef usedCalls As Long) As Boolean
+    If usedSteps >= maximumSteps Or maximumCalls - usedCalls < 2 Then Exit Function
+    Dim matrix() As Double, residual() As Double, field() As Double, load(1 To COMPONENT_COUNT) As Double, lambda As Double
+    Dim force() As Double, forceResidual() As Double, equality() As Double, equalityResidual() As Double, scales() As Double
+    Dim physicalStrain() As Double, strain() As Double, correction() As Double, trial() As Double, unused() As Double
+    Dim size As Long, i As Long, row As Long, norm As Double, maximum As Double, fraction As Double
+    size = mDegreeCount + 1
+    usedCalls = usedCalls + 1: mHybridEvaluations = mHybridEvaluations + 1: mHybridMatrices = mHybridMatrices + 1
+    If Not equations.TryEvaluate(coordinates, True, residual, matrix) Then Exit Function
+    ReadEquationField coordinates, field, lambda: SetControlledLoad lambda, load
+    For i = 1 To size: norm = GeomMax(norm, Abs(residual(i))): Next i
+    norm = GeomMax(norm, mSection.ResultantResidualNorm(mTrialResultants, load))
+    If norm > SMALL_STRAIN_MAX_NORM * tolerance Then Exit Function
+    If Not PrepareSmallStrainSystem(matrix, residual, load, tolerance, force, forceResidual, equality, equalityResidual, scales) Then Exit Function
+    mSection.CopySpatialStrainCoefficients SPATIAL_HALF_STEP, physicalStrain
+    ReDim strain(1 To size, 1 To UBound(physicalStrain, 2))
+    For row = 1 To UBound(strain, 2)
+        For i = 1 To mDegreeCount
+            strain(i, row) = physicalStrain(i, row) * mHybridScales(i) / scales(i)
+        Next i
+    Next row
+    usedSteps = usedSteps + 1: mIterations = mIterations + 1: mHybridSteps = mHybridSteps + 1
+    Dim optimizer As New CCoupledStepOptimizer
+    If Not optimizer.TryMinimizeStrain(force, forceResidual, equality, equalityResidual, strain, _
+            SMALL_STRAIN_RADIUS * norm, SMALL_STRAIN_FORCE_FRACTION * tolerance, correction) Then Exit Function
+    ReDim trial(1 To size)
+    fraction = 1#
+    Do While fraction >= 0.125 And usedCalls < maximumCalls
+        For i = 1 To size: trial(i) = coordinates(i) + fraction * correction(i) / scales(i): Next i
+        usedCalls = usedCalls + 1: mHybridEvaluations = mHybridEvaluations + 1
+        If equations.TryEvaluate(trial, False, residual, unused) Then
+            ReadEquationField trial, field, lambda: SetControlledLoad lambda, load
+            maximum = mSection.ResultantResidualNorm(mTrialResultants, load)
+            For i = 1 To size: maximum = GeomMax(maximum, Abs(residual(i))): Next i
+            mLastNorm = maximum
+            If maximum <= tolerance Then
+                coordinates = trial: TryEnvelopeResultantCorrection = True
+                mEnvelopeDetails = mEnvelopeDetails & "; силовые интегралы и H уточнены малой деформационной поправкой, невязка " & CStr(maximum) & " МПа"
+                Exit Function
+            End If
+        End If
+        fraction = fraction * 0.5
+    Loop
 End Function
