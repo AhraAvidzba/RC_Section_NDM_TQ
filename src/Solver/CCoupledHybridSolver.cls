@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ==========================================================================
-' Гибридный метод Пауэлла для квадратной системы нелинейных уравнений
+' Гибридный метод Пауэлла и доверительное решение квадратных уравнений
 ' ==========================================================================
 ' Перенос HYBRJ MINPACK/CMinpack с внешним масштабированием координат.
 ' По умолчанию mode=2, diag=1; automaticScaling включает норму столбцов
@@ -411,3 +411,116 @@ End Property
 Friend Property Get Restarts() As Long
     Restarts = mRestarts
 End Property
+
+' Решает исходные квадратные уравнения свежей касательной и полной регуляризованной поправкой в доверительной области.
+' Использует регуляризацию Морэ(1977), §3,5; радиус меняется по фактическому и прогнозному снижению суммы квадратов.
+' Все пробные поправки и чтения функции входят в заданные бюджеты; малый градиент и малый шаг не заменяют конечного допуска невязки.
+Friend Function TrySolveLeastSquaresTrust(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
+        ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
+        ByRef solution() As Double, Optional ByVal relativeDifferenceStep As Double = 0.000001, _
+        Optional ByVal initialRadius As Double = 1#) As Boolean
+    On Error GoTo ArithmeticFailure
+    mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mRestarts = 0: mStopCode = 0
+    mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
+    If equations Is Nothing Then Exit Function
+    Dim count As Long: count = UBound(initial)
+    If LBound(initial) <> 1 Or count < 1 Or maxEvaluations < 1 Or maxSteps < 1 Or _
+            residualTolerance < 0# Or relativeDifferenceStep < 0# Or initialRadius <= 0# Then Err.Raise 5, _
+            "CCoupledHybridSolver", "Проверьте размеры, бюджеты, допуск и радиус доверительной численной пробы."
+    Dim x() As Double, residual() As Double, matrix() As Double, unused() As Double, trial() As Double, nextResidual() As Double
+    Dim diagonal() As Double, work() As Double, gradient() As Double, movement() As Double, model() As Double
+    ReDim diagonal(1 To count): ReDim work(1 To count): ReDim gradient(1 To count): ReDim model(1 To count)
+    x = initial
+    If Not ReadResidual(equations, x, residual, unused, count) Then GoTo Finished
+    Dim algebra As New CCoupledHybridFactorization
+    Dim radius As Double, nextRadius As Double, parameter As Double, parameterIterations As Long
+    Dim scalingReady As Boolean, radiusReady As Boolean, i As Long, j As Long, valid As Boolean, accepted As Boolean
+    Dim norm As Double, nextNorm As Double, stepNorm As Double, cost As Double, nextCost As Double
+    Dim actualReduction As Double, predictedReduction As Double, ratio As Double, total As Double
+    Dim originalResidual() As Double
+    Do
+        If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+        If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
+        mJacobianCalls = mJacobianCalls + 1
+        If relativeDifferenceStep > 0# Then
+            If Not BuildDifferenceJacobian(equations, x, residual, relativeDifferenceStep, maxEvaluations, matrix, count, False, Nothing) Then Exit Do
+        Else
+            originalResidual = residual
+            mFunctionCalls = mFunctionCalls + 1
+            If Not equations.TryEvaluate(x, True, residual, matrix) Then mStopCode = -1: Exit Do
+            For i = 1 To count
+                If residual(i) <> originalResidual(i) Then mStopCode = -1: Exit Do
+            Next i
+            If mStopCode <> 0 Then Exit Do
+        End If
+        If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+        If Not ValidDimensions(residual, matrix, count) Then mStopCode = -1: Exit Do
+        ScaleJacobianColumns matrix, diagonal, work, count, scalingReady, algebra
+        If Not radiusReady Then
+            radius = ScaledCoordinateNorm(x, diagonal, work, count, algebra)
+            If radius = 0# Then radius = initialRadius
+            radiusReady = True
+        End If
+        For j = 1 To count
+            gradient(j) = 0#
+            For i = 1 To count: gradient(j) = gradient(j) + matrix(j, i) * residual(i): Next i
+        Next j
+        algebra.Factor matrix, residual, count, True
+        norm = algebra.VectorNorm(residual, 1, count): cost = 0.5 * norm * norm
+        accepted = False
+        Do
+            If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
+            If Not algebra.TryLeastSquaresRadius(radius, parameter, movement, parameterIterations) Then mStopCode = 3: Exit Do
+            stepNorm = algebra.VectorNorm(movement, 1, count)
+            If stepNorm = 0# Then mStopCode = 3: Exit Do
+            predictedReduction = 0#
+            For i = 1 To count
+                total = 0#
+                For j = 1 To count: total = total + matrix(j, i) * movement(j): Next j
+                model(i) = total
+                predictedReduction = predictedReduction - gradient(i) * movement(i)
+            Next i
+            total = algebra.VectorNorm(model, 1, count)
+            predictedReduction = predictedReduction - 0.5 * total * total
+            trial = x
+            For i = 1 To count: trial(i) = x(i) + movement(i) / diagonal(i): Next i
+            mSteps = mSteps + 1
+            valid = ReadResidual(equations, trial, nextResidual, unused, count)
+            actualReduction = 0#: ratio = 0#: nextNorm = 0#: nextCost = 0#
+            If valid Then
+                nextNorm = algebra.VectorNorm(nextResidual, 1, count): nextCost = 0.5 * nextNorm * nextNorm
+                actualReduction = cost - nextCost
+                If predictedReduction > 0# Then ratio = actualReduction / predictedReduction
+                If predictedReduction = 0# And actualReduction = 0# Then ratio = 1#
+            ElseIf mStopCode = -1 Then
+                mStopCode = 0 ' Отсутствие отклика одной пробы разрешает меньшую область от той же принятой истории.
+            Else
+                Exit Do
+            End If
+            nextRadius = radius
+            If Not valid Or ratio < 0.25 Then
+                nextRadius = 0.25 * stepNorm
+            ElseIf ratio > 0.75 And stepNorm > 0.95 * radius Then
+                nextRadius = 2# * radius
+            End If
+            accepted = (valid And actualReduction > 0#)
+             If accepted Then
+                x = trial: residual = nextResidual: mAccepted = mAccepted + 1
+            End If
+            If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+            If nextRadius <= 0# Then mStopCode = 3: Exit Do
+            parameter = parameter * (radius / nextRadius): radius = nextRadius
+            If accepted Then Exit Do
+        Loop
+        If mStopCode <> 0 Then Exit Do
+    Loop
+Finished:
+    If mHasBest Then solution = mBest: TrySolveLeastSquaresTrust = (mBestNorm <= residualTolerance)
+    Exit Function
+ArithmeticFailure:
+    Dim number As Long, source As String, description As String
+    number = Err.Number: source = Err.Source: description = Err.Description
+    If number <> 6 And number <> 11 Then Err.Raise number, source, description
+    mStopCode = -2
+    Resume Finished
+End Function

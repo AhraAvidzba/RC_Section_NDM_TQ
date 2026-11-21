@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -10,29 +10,36 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ==========================================================================
-' QR и dogleg для гибридного метода решения полного равновесия
+' QR, dogleg и регуляризованная поправка для полного равновесия
 ' ==========================================================================
-' Перенос квадратной ветви MINPACK/CMinpack: qrfac без перестановок,
+' Перенос квадратной ветви MINPACK/CMinpack: qrfac с необязательными перестановками,
 ' qform, dogleg, r1updt, r1mpyq. Масштаб координат задан снаружи (diag=1).
 ' Источник: literature/Coupled6D/NumericalControl/Minpack, ревизия
 ' 64c5635addd72fb54f44db8546c191feeb70e338; полная лицензия
 ' CopyrightMINPACK.txt хранится там же и сопровождает распространение.
 ' This product includes software developed by the University of Chicago,
 ' as Operator of Argonne National Laboratory.
+' Регуляризованная поправка: Морэ(1977), §3,5, lmpar/qrsolv той же ревизии MINPACK.
+' Численная регуляризация не меняет материал и не определяет физическое разрушение.
 ' Первый индекс матрицы — столбец; R упакована последовательно по строкам.
 
 Private Const MACHINE_EPSILON As Double = 2# ^ (-52)
 Private Const INVERSE_MAXIMUM As Double = (2# ^ (-1022)) / 4# ' IEEE Double: округлённое 1/DBL_MAX без потери цифр при экспорте VBE.
 Private mCount As Long, mQ() As Double, mR() As Double, mQtf() As Double
+Private mColumnOrder() As Long, mPivoted As Boolean
 
 ' Вычисляет QR исходной матрицы и Q^T*f, не меняя входные массивы.
-Friend Sub Factor(ByRef matrix() As Double, ByRef residual() As Double, ByVal count As Long)
-    mCount = count: mQ = matrix: mQtf = residual
+' Перестановки разрешены для регуляризованного решения; dogleg и обновление ранга один требуют исходного порядка столбцов.
+Friend Sub Factor(ByRef matrix() As Double, ByRef residual() As Double, ByVal count As Long, Optional ByVal pivotColumns As Boolean = False)
+    mCount = count: mQ = matrix: mQtf = residual: mPivoted = pivotColumns
     ReDim mR(1 To CLng(CDbl(count) * (count + 1) / 2#))
     Dim diagonal() As Double, work() As Double
     ReDim diagonal(1 To count): ReDim work(1 To count)
     Dim i As Long, j As Long, k As Long, position As Long, total As Double, magnitude As Double, multiplier As Double
+    ReDim mColumnOrder(1 To count)
+    For i = 1 To count: mColumnOrder(i) = i: Next i
     For j = 1 To count
+        If pivotColumns Then PivotLeastSquaresColumns j
         For i = j To count: work(i) = mQ(j, i): Next i
         magnitude = VectorNorm(work, j, count)
         If magnitude <> 0# Then
@@ -88,6 +95,7 @@ End Sub
 ' Находит положительный dogleg-вектор R*d=Q^T*f внутри заданного радиуса.
 ' Решатель меняет знак d для шага поиска корня; здесь сохранён знак MINPACK.
 Friend Sub Dogleg(ByVal radius As Double, ByRef direction() As Double)
+    If mPivoted Then Err.Raise 5, "CCoupledHybridFactorization", "Для dogleg и секущего обновления требуется QR без перестановок столбцов."
     Dim gradient() As Double, work() As Double
     ReDim direction(1 To mCount): ReDim gradient(1 To mCount): ReDim work(1 To mCount)
     Dim i As Long, j As Long, k As Long, position As Long, diagonal As Long, total As Double, divisor As Double
@@ -142,6 +150,7 @@ End Sub
 ' Вычисляет Q^T*f+R*step, то есть невязку линейной модели в ортогональных координатах.
 Friend Sub ModelResidual(ByRef movement() As Double, ByRef residual() As Double)
     ReDim residual(1 To mCount)
+    If mPivoted Then Err.Raise 5, "CCoupledHybridFactorization", "Для dogleg и секущего обновления требуется QR без перестановок столбцов."
     Dim i As Long, j As Long, position As Long, total As Double: position = 1
     For i = 1 To mCount
         total = 0#
@@ -154,6 +163,7 @@ End Sub
 ' Невязка новой точки участвует и при отвергнутом шаге, как в исходном HYBRJ.
 Friend Sub Update(ByRef movement() As Double, ByRef residual() As Double, ByRef model() As Double, _
         ByVal movementNorm As Double, ByVal accepted As Boolean)
+    If mPivoted Then Err.Raise 5, "CCoupledHybridFactorization", "Для dogleg и секущего обновления требуется QR без перестановок столбцов."
     Dim u() As Double, v() As Double, work() As Double
     ReDim u(1 To mCount): ReDim v(1 To mCount): ReDim work(1 To mCount)
     Dim i As Long, j As Long, total As Double
@@ -332,3 +342,155 @@ End Function
 ' (INCLUDING NEGLIGENCE OR STRICT LIABILITY), OR OTHERWISE,
 ' EVEN IF ANY OF SAID PARTIES HAS BEEN WARNED OF THE
 ' POSSIBILITY OF SUCH LOSS OR DAMAGES.
+
+' Выбирает наибольший оставшийся столбец QR по норме его необнулённого хвоста; предыдущие отражения сохраняются.
+Private Sub PivotLeastSquaresColumns(ByVal first As Long)
+    Dim column As Long, row As Long, selected As Long, magnitude As Double, largest As Double
+    Dim work() As Double: ReDim work(1 To mCount)
+    largest = -1#: selected = first
+    For column = first To mCount
+        For row = first To mCount: work(row) = mQ(column, row): Next row
+        magnitude = VectorNorm(work, first, mCount)
+        If magnitude > largest Then largest = magnitude: selected = column
+    Next column
+    If selected = first Then Exit Sub
+    Dim value As Double, order As Long
+    For row = 1 To mCount
+        value = mQ(first, row): mQ(first, row) = mQ(selected, row): mQ(selected, row) = value
+    Next row
+    order = mColumnOrder(first): mColumnOrder(first) = mColumnOrder(selected): mColumnOrder(selected) = order
+End Sub
+
+' Решает min(||J*p+f||^2+parameter*||p||^2) через готовый QR и добавленные диагональные строки; parameter — численная регуляризация.
+' Положительное направление p уже включает знак минус правой части; исходные R,Q^T*f и порядок столбцов не меняются.
+Friend Function TryDampedStep(ByVal parameter As Double, ByRef direction() As Double, ByRef normDerivative As Double) As Boolean
+    Erase direction: normDerivative = 0#
+    If mCount < 1 Or parameter < 0# Then Err.Raise 5, "CCoupledHybridFactorization", "Для регуляризованной пробы нужны QR и неотрицательный параметр."
+    On Error GoTo ArithmeticFailure
+    Dim triangle() As Double, rhs() As Double, workRow() As Double, ordered() As Double, inverse() As Double
+    ReDim triangle(1 To mCount, 1 To mCount): ReDim rhs(1 To mCount): ReDim workRow(1 To mCount)
+    ReDim ordered(1 To mCount): ReDim inverse(1 To mCount)
+    Dim row As Long, column As Long, position As Long, first As Long, k As Long, largest As Double
+    For row = 1 To mCount
+        rhs(row) = -mQtf(row)
+        For column = row To mCount
+            position = position + 1: triangle(column, row) = mR(position)
+            largest = GeomMax(largest, Abs(mR(position)))
+        Next column
+    Next row
+    If parameter = 0# Then
+        For row = 1 To mCount
+            If Abs(triangle(row, row)) <= MACHINE_EPSILON * mCount * largest Then Exit Function
+        Next row
+    Else
+        Dim diagonal As Double, extra As Double, length As Double, cosine As Double, sine As Double, value As Double
+        diagonal = Sqr(parameter)
+        For first = 1 To mCount
+            For column = first To mCount: workRow(column) = 0#: Next column
+            workRow(first) = diagonal: extra = 0#
+            For k = first To mCount
+                If workRow(k) <> 0# Then
+                    length = HypotenuseLeastSquares(triangle(k, k), workRow(k))
+                    If length = 0# Then Exit Function
+                    cosine = triangle(k, k) / length: sine = workRow(k) / length
+                    triangle(k, k) = length
+                    For column = k + 1 To mCount
+                        value = cosine * triangle(column, k) + sine * workRow(column)
+                        workRow(column) = -sine * triangle(column, k) + cosine * workRow(column)
+                        triangle(column, k) = value
+                    Next column
+                    value = cosine * rhs(k) + sine * extra
+                    extra = -sine * rhs(k) + cosine * extra: rhs(k) = value
+                End If
+            Next k
+        Next first
+    End If
+    Dim total As Double
+    For row = mCount To 1 Step -1
+        If triangle(row, row) = 0# Then Exit Function
+        total = rhs(row)
+        For column = row + 1 To mCount: total = total - triangle(column, row) * ordered(column): Next column
+        ordered(row) = total / triangle(row, row)
+    Next row
+    Dim norm As Double, inverseNorm As Double
+    norm = VectorNorm(ordered, 1, mCount)
+    If norm > 0# Then
+        For row = 1 To mCount
+            total = ordered(row)
+            For column = 1 To row - 1: total = total - triangle(row, column) * inverse(column): Next column
+            inverse(row) = total / triangle(row, row)
+        Next row
+        inverseNorm = VectorNorm(inverse, 1, mCount)
+        normDerivative = -(inverseNorm / norm) * inverseNorm ' Производная ||p|| по параметру регуляризации, без формирования J^T*J.
+    End If
+    ReDim direction(1 To mCount)
+    For column = 1 To mCount: direction(mColumnOrder(column)) = ordered(column): Next column
+    TryDampedStep = True
+    Exit Function
+ArithmeticFailure:
+    If Err.Number <> 6 And Err.Number <> 11 Then Err.Raise Err.Number, Err.Source, Err.Description
+    Erase direction: normDerivative = 0#
+End Function
+
+' Выбирает регуляризацию для заданного радиуса по Морэ(1977),§5; масштаб координат должен быть включён в исходную матрицу до QR.
+' Не определяет равновесие нелинейной задачи: ограничивает только одну линейную поправку в доверительной области.
+Friend Function TryLeastSquaresRadius(ByVal radius As Double, ByRef parameter As Double, _
+        ByRef direction() As Double, ByRef iterations As Long) As Boolean
+    Erase direction: iterations = 0
+    If mCount < 1 Or radius <= 0# Or parameter < 0# Then Err.Raise 5, "CCoupledHybridFactorization", "Для доверительной пробы нужны QR, положительный радиус и неотрицательная регуляризация."
+    On Error GoTo ArithmeticFailure
+    Dim gradient() As Double: ReDim gradient(1 To mCount)
+    Dim row As Long, column As Long, position As Long
+    For row = 1 To mCount
+        For column = row To mCount
+            position = position + 1: gradient(column) = gradient(column) + mR(position) * mQtf(row)
+        Next column
+    Next row
+    Dim upper As Double: upper = VectorNorm(gradient, 1, mCount) / radius
+    If upper = 0# Then
+        ReDim direction(1 To mCount): parameter = 0#: TryLeastSquaresRadius = True
+        Exit Function
+    End If
+    Dim derivative As Double, norm As Double, phi As Double, lower As Double, fullRank As Boolean
+    fullRank = TryDampedStep(0#, direction, derivative)
+    If fullRank Then
+        norm = VectorNorm(direction, 1, mCount)
+        If norm <= radius Then parameter = 0#: TryLeastSquaresRadius = True: Exit Function
+        If derivative >= 0# Then Exit Function
+        lower = -(norm - radius) / derivative
+    End If
+    If Not fullRank And parameter = 0# Then parameter = GeomMax(0.001 * upper, Sqr(lower) * Sqr(upper))
+    Dim ratio As Double, attempt As Long
+    For attempt = 1 To 10
+        iterations = attempt
+        If parameter < lower Or parameter > upper Then parameter = GeomMax(0.001 * upper, Sqr(lower) * Sqr(upper))
+        If Not TryDampedStep(parameter, direction, derivative) Then Exit Function
+        norm = VectorNorm(direction, 1, mCount): phi = norm - radius
+        If norm = 0# Or derivative >= 0# Then Exit Function
+        If phi < 0# Then upper = parameter
+        ratio = phi / derivative
+        lower = GeomMax(lower, parameter - ratio)
+        parameter = parameter - (norm / radius) * ratio
+        If Abs(phi) < 0.01 * radius Then Exit For
+    Next attempt
+    If parameter < 0# Then Exit Function
+    If Not TryDampedStep(parameter, direction, derivative) Then Exit Function
+    norm = VectorNorm(direction, 1, mCount)
+    If norm = 0# Then Exit Function
+    For column = 1 To mCount: direction(column) = direction(column) * (radius / norm): Next column
+    TryLeastSquaresRadius = True
+    Exit Function
+ArithmeticFailure:
+    If Err.Number <> 6 And Err.Number <> 11 Then Err.Raise Err.Number, Err.Source, Err.Description
+    Erase direction
+End Function
+
+' Вычисляет длину пары без возведения большого входного числа в квадрат.
+Private Function HypotenuseLeastSquares(ByVal first As Double, ByVal second As Double) As Double
+    first = Abs(first): second = Abs(second)
+    If first < second Then
+        If second > 0# Then HypotenuseLeastSquares = second * Sqr(1# + (first / second) ^ 2)
+    ElseIf first > 0# Then
+        HypotenuseLeastSquares = first * Sqr(1# + (second / first) ^ 2)
+    End If
+End Function
