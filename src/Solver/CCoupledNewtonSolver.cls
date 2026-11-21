@@ -36,7 +36,7 @@ Private Const YIELD_DAMPING_STEPS As Long = 8
 Private Const YIELD_ROOT_TOLERANCE As Double = 0.000000000002 ' МПа в пробном критерии бетона.
 Private Const PRINCIPAL_EVENT_TOLERANCE As Double = 0.000000001 ' МПа: общая точка проверяется строже штатного равновесия.
 Private Const YIELD_EVENT_TOLERANCE As Double = 0.0000000001 ' МПа: численная доводка события без изменения силовой приёмки.
-Private Const YIELD_EVENT_HALF_ERROR As Double = 0.005 ' Относительная проверка связности полным и половинным шагом.
+Private Const YIELD_EVENT_HALF_ERROR As Double = 0.005 ' Относительный допуск согласованности состояний материального перехода.
 Private Const YIELD_EVENT_RADIUS As Double = 1# ' Исходящая CDP-проба ограничена предыдущим механическим шагом; точка события — четвертью.
 Private Const PRINCIPAL_EVENT_RADIUS As Double = 0.25 ' Радиус локальной доводки в долях предыдущего механического приращения.
 Private Const SUBSPACE_ITERATIONS As Long = 8 ' Прогноз расходует общий бюджет шага, оставляя итерацию полной системе.
@@ -3294,6 +3294,7 @@ End Function
 
 ' Решает исходящую сторону только после принятия сохранённого входящего поля.
 ' Общая точка повторно проверяется уже с новой историей; чужой или устаревший контекст не используется.
+' При нелинейном половинном прогнозе повторно решает полный уровень; сравнивает конечные равновесия в общем бюджете.
 Friend Function TryCompletePrincipalTransition(ByVal transition As CCoupledPrincipalTransition, _
         ByRef baseLoad() As Double, ByRef direction() As Double, ByVal currentLambda As Double, _
         ByVal maxIterations As Long, ByRef trialLambda As Double, ByRef projection() As Double, _
@@ -3340,10 +3341,22 @@ Friend Function TryCompletePrincipalTransition(ByVal transition As CCoupledPrinc
         If stepLength <= 0# Then GoTo Unsuccessful
         doubled = halfField
         For i = 1 To mGaugeStart - 1: doubled(i) = 2# * halfField(i) - face(i): Next i
-        If SpatialFieldDistance(doubled, outgoing) > YIELD_EVENT_HALF_ERROR * stepLength Then GoTo Unsuccessful
+        Dim repeatRequired As Boolean
+        repeatRequired = (SpatialFieldDistance(doubled, outgoing) > YIELD_EVENT_HALF_ERROR * stepLength)
         If Abs(trialLambda - faceLambda) > 0.000000000001 * (1# + Abs(faceLambda)) Then
             If Abs(2# * (halfLambda - faceLambda) - (trialLambda - faceLambda)) > _
-                    YIELD_EVENT_HALF_ERROR * Abs(trialLambda - faceLambda) Then GoTo Unsuccessful
+                    YIELD_EVENT_HALF_ERROR * Abs(trialLambda - faceLambda) Then repeatRequired = True
+        End If
+        If repeatRequired Then
+            Dim confirmed() As Double, confirmedLambda As Double, predictedLambda As Double
+            predictedLambda = 2# * halfLambda - faceLambda ' Половинное равновесие задаёт прогноз того же полного материального уровня.
+            If Not FollowPrincipalCoordinate(station, doubled, predictedLambda, -transition.IncomingSign * transition.PrincipalGap, _
+                    tolerance, maxIterations, mAccepted, radius, confirmed, confirmedLambda, projection) Then GoTo Unsuccessful
+            If SpatialFieldDistance(confirmed, outgoing) > YIELD_EVENT_HALF_ERROR * stepLength Then GoTo Unsuccessful
+            If Abs(trialLambda - faceLambda) > 0.000000000001 * (1# + Abs(faceLambda)) Then
+                If Abs(confirmedLambda - trialLambda) > YIELD_EVENT_HALF_ERROR * Abs(trialLambda - faceLambda) Then GoTo Unsuccessful
+            End If
+            outgoing = confirmed: trialLambda = confirmedLambda
         End If
     End If
     Dim designVerified As Boolean
