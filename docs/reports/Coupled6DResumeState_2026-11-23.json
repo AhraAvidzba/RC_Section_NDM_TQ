@@ -1,0 +1,64 @@
+{
+  "AGENTS_sha256": "D4372F89DF95880D55DC2EF75CC84D36819C1AD772A20533D0CF73DE2467E271",
+  "cold96_seconds": 448.046875,
+  "cold_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearResearch38420261123",
+  "cold_scope": "original96 global probes, original30 iterations for all normal solves; H alone gets explicit16 extra only after all three original H methods fail; first near point retained without stopping legacy methods; no material or physical-tolerance change",
+  "compiled_workbook_sha256": "7EF08F90C9145978454CA018AD47F688655586EA5CF0D6621F9AFBEC922F2354",
+  "compiler_and_source_finalize_sessions_terminal": [
+    26432,
+    33364
+  ],
+  "completed96_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPostFailureCold9620261123",
+  "current_goal_turn_classification": "progress: cold96 terminal, actual saved book28/255 verified,95 snapshots and whole checkpoint log bit exact, independent60-state replay,384 source verified and extended cold experiment started",
+  "exact_entire_checkpoint_bytes": true,
+  "goal_status_required": "active",
+  "independent60_state_equilibrium_verified": true,
+  "input_preflight": {
+    "case_count": 41,
+    "mismatches": [],
+    "not_a_clean_archive_replay": true,
+    "prepared_inputs_checked": 10663,
+    "terminal_exec_session": 70713
+  },
+  "last_completed_snapshot_comparison": {
+    "exact_baseline_prefix": 8,
+    "snapshots": 8,
+    "states": 8
+  },
+  "main_changed": false,
+  "native_excel_PID": 29332,
+  "native_excel_utc_start_ticks": 639310634702512451,
+  "native_started_local": "2026-11-23T23:44:38+03:00",
+  "native_watchdog_seconds": 1800,
+  "previous_goal_turn_classification": "progress: safe pause checkpoint340febd saved and pushed, completed paired native H99 validation, then explicit pause",
+  "prior665_seconds": 373.046875,
+  "prior96_result": "neutral, not improvement: lower1.109225820167928, DirectOK CapacityNumFail due overall probe budget",
+  "proofs_current": {
+    "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPostFailureCold9620261123\\ColdRetainedNearReportProof.json": "3587C7375253C49433FE9C59BBAB1DC710265470E2188211D99020E947F13D32",
+    "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPostFailureCold9620261123\\PostFailureCold96Proof.json": "246FD46483597411EDBBB79A0A4EE6E95683195A5AB698FFF0C6741AAE72D8A0",
+    "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearReplay6020261123\\CurrentColdHistoryProof.json": "4A2BA25AFFEDA6A6E6B0022FC9B9015B37040CAF5AA046660DD9ED4C5384F1DA"
+  },
+  "released_workbook_modified": false,
+  "remaining_work": [
+    "Poll exec17057 to actual terminal. Never restart merely because a wait times out. Root Cold666RetainedNearResearch38420261123, one directed cold run, watchdog1800s; actual current ownership is in Native/HBackendStock.txt and Ownership.json. Original production96 unchanged; private384 cap plus H30+16.",
+    "When terminal preserve current actual saved/reopened workbook under NEW name RetainedNearResearch384ActualSavedWorkbook.xlsm. Inherited FullMeritCold96ActualSavedWorkbook.xlsm belongs to preceding96 case and MUST NOT be used as this runs output.",
+    "Compare extended first95 raw snapshots and whole checkpoint prefix to actual96 case. Then compare late path to Corrected665ColdResearch38420261121, not only to the short96 path. Do not assume CapacityNumFail or success; inspect native outcome.",
+    "Independent replay Stage-TestRawTrajectoryReplay/Finalize-TestRawTrajectoryReplay/Run-TestPersistentHController/Check-TestCurrentColdHistory succeeded for60; can reuse for actual new extended path. Exact sources compared to source case.",
+    "If watchdog timeout retain all partial data and exact PID/ticks closure, not physical failure and no blind restart.",
+    "Archive666 is still pending. Collector is a draft; add current96, replay60 and current384. Prior41 case10663 input preflight passed. Do not weaken raw physical acceptance or use same-output gate as evidence of progress in capacity.",
+    "Do not forget full six-force scope and physical failure/global capacity, concrete limits/allLoadPath/external and material validation, workbook/CAD/end-to-end10s. No production numerical changes have been promoted."
+  ],
+  "replay60_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearReplay6020261123",
+  "specific_live_exec_session_to_revalidate": 17057,
+  "terminal_sessions_this_turn": [
+    37411,
+    89564,
+    41657,
+    84362,
+    79019,
+    16903
+  ],
+  "timing_comparison_is_not_causal": true,
+  "working_commit": "340febdefd1d6bf8a427d38b70a604d8942262c1",
+  "working_numerical_sources_modified": false
+}
