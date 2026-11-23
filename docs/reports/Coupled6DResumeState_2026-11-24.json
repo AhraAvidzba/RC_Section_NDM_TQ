@@ -5,8 +5,8 @@
     "PID": null,
     "utcStartTicks": null
   },
-  "current_phase": "MidpointValidationTerminalNoLiveJobs",
-  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelSeedMidpoints10320261124",
+  "current_phase": "FixedSecondHalfValidatedNoLiveJobs",
+  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelFixedHalf10420261124",
   "entire_goal_completed": false,
   "established_facts": [
     "384 research run timed out1800; exact own Excel closed;169 complete snapshots/103 states, max lambda1.1093511588217642; no final saved/reopened book.",
@@ -21,8 +21,11 @@
     "Retry compiler3088 terminal exit0; all255sources and254other parent components verified by source finalizer55374. Source17916A6EDE4714D4F02A71AD91086CF7FC33B04AB560F119ACC75592B0307DBB.",
     "Two native launch attempts under PowerShell7 stopped before any Excel: watchdog expects PSHOME/powershell.exe. Direct WindowsPowerShell5.1 executable invocation actually launched native session36645, owned Excel20352/ticks639310701061736018.",
     "Native36645 terminal exit0; all6roots independently verified, one positive-forward resolved candidate at fraction.001/secant: lambda1.1092711488183795, H growth1.4844100700202052e-8. Not a certified continuation step or capacity.",
-    "Current intermediate-level case reuses exact compiled book17916A6E..., no imports and no reused mutable history. Fractions.00025,.0005,.00075, constant/secant each. Historical inherited proof was renamed explicitly before any current-result claim.",
-    "Midpoint native77292 terminal exit0; all6roots verified. All3secant roots positive-forward with H growth, lambda1.1093142483518108/1.109299655405757/1.109285432787821; all3constant roots reverse/H frozen. Each root starts from103, not sequential history. Two-half comparison still required; capacity open."
+    "Midpoint case reused exact compiled book17916A6E..., no imports and no reused mutable history. Fractions.00025,.0005,.00075, constant/secant each. Historical inherited proof was renamed explicitly before any current-result claim.",
+    "Midpoint native77292 terminal exit0; all6roots verified. All3secant roots positive-forward with H growth, lambda1.1093142483518108/1.109299655405757/1.109285432787821; all3constant roots reverse/H frozen. Each root starts from103, not sequential history. Two-half comparison still required; capacity open.",
+    "Fixed-projection second-half case adds actual midpoint field as104th accepted input, preserving all103 original Double fields. Projection/point/limit come from original validated selector, not new auto-selection. Only Testmodule changed;31-info/8-vector format0003 includes native lambda sensitivity and both before/after effort counters.",
+    "Fixed-half compile91464 and source finalize63944 terminal exit0; all255sources and254other parent components checked. A prior PowerShell5 parser failure happened before Excel creation due missing UTF8 BOM; BOM-only repair pinned separately. No failed scientific result was discarded.",
+    "Fixed-half native45087 terminal exit0; all6root105-fields verified. All6forward geometrically, only3secant roots grow H. Full vs2halves lambda difference-8.985134192229793e-9; tensor RMS difference1.586628139299529e-11, relative to full increment0.0002279589704967415. Native endpoint linearized lambda uncertainty3.531905920494709e-5; coarse uncertainty not measured. No capacity certification."
   ],
   "goal_status_required": "active",
   "main_changed": false,
@@ -44,24 +47,29 @@
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainLocal10320261124\\SteelStrainLocalProof.json",
       "sha256": "8C6607BE6C85096E0FDD79DC34CB3D4B4ED934E4AAB614F182D9C11007AFC12B"
     },
-    "steel_directed_current": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelSeedMidpoints10320261124\\SteelStrainSeedProof.json",
-      "sha256": "0C1777D21E39C3ACF0CE4712BBF45D1D1CA7F7A8A770EFD2C36506D9ED9FF3E7"
+    "steel_fixed_half": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelFixedHalf10420261124\\SteelFixedHalfProof.json",
+      "sha256": "305249A6CA740465C3EF80000A78C1A577670C5A4930209780E62020ED85CEBF"
     },
     "steel_initial_paired_seeds6": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainSeed103Retry20261124\\SteelStrainSeedProof.json",
       "sha256": "4D70EF30813265E9D4DB5DB4DC8F81DA96636618D25DDE693A99AB5156BC5589"
+    },
+    "steel_midpoints_completed": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelSeedMidpoints10320261124\\SteelStrainSeedProof.json",
+      "sha256": "0C1777D21E39C3ACF0CE4712BBF45D1D1CA7F7A8A770EFD2C36506D9ED9FF3E7"
     },
     "timeout384": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearResearch38420261123\\RetainedNear384TimeoutProof.json",
       "sha256": "BD91AD8F4963A305DEA108ACED37CFD217DBA6434B54149C272DE27CE6D34EA9"
     }
   },
-  "quota_last_observed_remaining_percent": 7,
+  "quota_last_observed_remaining_percent": 6,
   "released_workbook_modified": false,
   "remaining_work": [
     "Resume only the exact active exec session if non-null; never restart a live compiler because observation timed out.",
-    "Current immutable midpoint run requires no compiler. Poll only active_exec_session; on native exit0 execute pinned ValidationScripts/Check-TestSteelStrainSeed.py against Cold667SteelStrainLocal10320261124. All255source coverage is via exact compiled-byte reuse of verified parent, not a claimed fresh import.",
+    "All currently launched work terminal. Fixed-half proof complete; no live native/compile to restart. Current report and Git checkpoint should preserve exact proof hash and next controller investigation.",
+    "Next code investigation: PrepareSecantSeed explicitly disables predictor immediately after H departure and overwrites selected anchor with last pair. Do not blindly remove protection: inspect recovery control flow and test targeted candidate. Current probes demonstrate seed effect for steel projection, not yet causality for stock spatial projection.",
     "Before native launch check total RAM/commit and exact compile closure. Keep all preparation hashes and all255-source checks.",
     "Study control resolution, actual seed, branch geometry and CDP energy growth. No solved root or lambda drop alone certifies capacity.",
     "No blind timeout/probe increase. Need finite valid material criterion or verified determining maximum and finite numerical termination.",
@@ -83,14 +91,17 @@
     3088,
     55374,
     36645,
-    77292
+    77292,
+    91464,
+    63944,
+    45087
   ],
-  "updated_local": "2026-11-24T01:54:12.982758+03:00",
+  "updated_local": "2026-11-24T02:18:11.093587+03:00",
   "user_pause_condition": {
     "action": "Only at actual account remaining<=3%: finish already running stages, save evidence, call update_goal(paused).",
     "pause_now_requested": false,
     "remaining_percent_at_or_below": 3
   },
-  "working_commit": "f5bf9a6",
+  "working_commit": "f375e38",
   "working_numerical_sources_modified": false
 }
