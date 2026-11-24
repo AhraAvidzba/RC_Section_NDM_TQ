@@ -52,17 +52,56 @@
     "source_validation_session54421_exit0": true
   },
   "current673": {
-    "compiled_book_sha256": "406B16817CB1D7C1E7399984F572CAC31AD294CF9F71A118EF7212489535BDE2",
+    "cases": [
+      {
+        "mode": 0,
+        "positive_forward_original_control_candidate": false,
+        "solved": true
+      },
+      {
+        "mode": 3,
+        "positive_forward_original_control_candidate": true,
+        "solved": true
+      }
+    ],
     "compiler_PID30100_closed": true,
     "compiler_session55564_exit0": true,
     "future_root_used_only_for_diagnostic_seed": true,
-    "native_launched": false,
+    "native_identity": {
+      "PID": 32724,
+      "utcStartTicks": 639310947625344175
+    },
+    "native_launched": true,
     "online_algorithm_certified": false,
-    "source_validation_session38875_exit0": true,
     "terminal": true
   },
-  "current_goal_turn_classification": "progress:actual671 two equilibria one forward candidate;672 first half failed, no production promotion;673 compiled and255sourcechecked but NOT numerically launched;ONQ008 and sources saved;all started jobs terminal;requested3percent pause checkpoint",
-  "current_phase": "SafeCheckpointAt3PercentBeforeRequestedPause",
+  "current674": {
+    "compiler_session97233_exit0": true,
+    "full_combination10seconds_not_verified": true,
+    "guide_and_return_fields_exact_controls": true,
+    "guide_not_committed": true,
+    "known_future_input_not_read": true,
+    "native_identity": {
+      "PID": 18552,
+      "utcStartTicks": 639310954163051782
+    },
+    "native_launched": true,
+    "native_session2378_exit0": true,
+    "only_test_module_imported": true,
+    "original_control_return_verified": true,
+    "other254_exact_parent_except_VBE_identifier_case": true,
+    "own_native_closed": true,
+    "primary_budget": 30,
+    "primary_iterations": 7,
+    "source_audit_session80035_exit0": true,
+    "source_book_sha256": "F1E2EED87088057CE7139C61E953BB696B1FD00B00E85D0F95382BF343E843F5",
+    "source_components_checked": 255,
+    "terminal": true,
+    "total_local_solver_seconds": 3.720703125,
+    "total_primary_iterations": 7
+  },
+  "current_goal_turn_classification": "progress:673 existence of forward midpoint proven;674 computes guide from accepted history then returns original goal,7/30iterations,history revision442exact,all147fields/equations/6forcesverified,bothfieldsbitidenticalcontrols;implementation/coldstart/physicalcapacity remain open",
+  "current_phase": "ComputedGuide674VerifiedCheckpoint",
   "current_step_refinement": {
     "input_states": 146,
     "native_identity": {
@@ -78,7 +117,7 @@
     "watchdog_seconds": 600,
     "working_materials_and_tolerances_unchanged": true
   },
-  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold673SteelMidSeed146_20261124",
+  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold674OnlineSteelGuide146_20261124",
   "eligibility_first_compile_failure": {
     "error": "RPC_E_SYS_CALL_FAILED at Close after Save; exact own closure Absent; no numerical test launched",
     "exit_code": 1,
@@ -118,27 +157,27 @@
   "full_acceptance_completed": false,
   "git_checkpoint": {
     "branch": "codex/coupled-6d",
-    "commit": "92e43068846a149d1dc45e724cc3cb38c2852a68",
+    "commit": "adead5898f908ea1f48c181827c22841c2322108",
     "main_unchanged": true,
     "pushed": false,
     "release_workbook_unchanged": true
   },
-  "goal_status_at_snapshot": "active_until_update_goal",
-  "goal_status_required": "paused",
+  "goal_status_at_snapshot": "active",
+  "goal_status_required": "active",
   "main_changed": false,
   "native_unit_terminal": {
     "exit_code": 0,
     "session": 65086
   },
   "ndm_observer_changed": false,
-  "new_pause_checkpoint_commit_pending": true,
+  "new_pause_checkpoint_commit_pending": false,
   "next_action": {
-    "before_launch": "Recheck prepared file pins, compiled hash, native-not-launched condition, free RAM and commit headroom; do not replay completed671 or672.",
-    "diagnostic_future_seed_not_available_to_online_algorithm": true,
-    "native_command": "& 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe' -NoProfile -ExecutionPolicy Bypass -File './tmp/material-consistency/Run-TestPersistentHController.ps1' -Root 'D:/CodexScratch/RC_Section_NDM_TQ/Cold673SteelMidSeed146_20261124' -Phase Controller",
-    "physical_capacity_still_open": true,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold673SteelMidSeed146_20261124",
-    "validator": "tmp/material-consistency/Check-TestSteelMidSeedDiagnostic.py --root <673> --parent <671>"
+    "concrete_criterion_ONQ008_open": true,
+    "entire_original_scope_preserved": true,
+    "full_acceptance_not_authorized_by_directed_tests": true,
+    "full_cold_from_zero_still_required": true,
+    "postcracking_control": "Real CDP and perfectly plastic steel,netAc21168/As432,Eb30000/Es200000,ft3/fy400,Gt0.12/l125:analytical first peak72144N and later peak172967.56279474715N;native RC test still required;first cracking must not terminate the section.",
+    "priority": "Implement tested computed-guide recovery in working continuation with original control,immutable accepted history,shared30iterations and correctly charged global probes;verify affected paths,then cold-from-zero."
   },
   "pause_condition": {
     "remaining_percent": 3,
@@ -146,6 +185,7 @@
     "used_percent": 97
   },
   "pause_condition_reached": true,
+  "pause_request_revoked_by_explicit_resume": true,
   "physical_capacity_certified": false,
   "previous_Trace_terminal": {
     "best_lambda": 1.12041519510758,
@@ -230,9 +270,17 @@
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold672SteelFirstHalf146_20261124\\SteelRefinementProof.json",
       "sha256": "70B4D96111F01C56637A11D742E15CC1A9030180AB7921C90998011E680AE989"
     },
+    "midpoint_seed_diagnostic": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold673SteelMidSeed146_20261124\\SteelMidSeedDiagnosticProof.json",
+      "sha256": "651A6ADD64B85D8BC4FA838F250C9247BBFAE5328FEC7E6792112D689A673297"
+    },
     "newton_existing_method_scope": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668SpatialRecoveryCapture10320261124\\NewtonMethodScope.json",
       "sha256": "976937382644F0DBAC68B801049AE64EC56201194300C2F093AE0B76D86F804F"
+    },
+    "online_steel_guide": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold674OnlineSteelGuide146_20261124\\OnlineSteelGuideProof.json",
+      "sha256": "C0CD59002444A9ED25A1DFA57FFFD405126B3DB65C97604C037E8D5C48C7FCF7"
     },
     "postpeak": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold671PostPeakSteel146_20261124\\PostPeakSteelProof.json",
@@ -307,9 +355,9 @@
     "Archive666 scientific clean replay/registry closure open;667-670 evidence not silently registered. Full long acceptance still needs scoped consent, no subagents authorized.",
     "Pause only at actual account remaining<=3percent after started jobs terminal/checkpoint; latest observed remaining is quota_last_observed_remaining_percent. No reset credits available."
   ],
-  "requested_pause_to_be_applied_after_checkpoint": true,
-  "schema": "SteelMidSeedDiagnosticResume1",
-  "snapshot_kind": "precommit evidence; final checkpoint commit is in private continuation state and Git history",
+  "requested_pause_to_be_applied_after_checkpoint": false,
+  "schema": "OnlineSteelGuideResume1",
+  "snapshot_kind": "precommit active evidence; final checkpoint commit is in private continuation state and Git history",
   "terminal_prior_sessions": [
     1628,
     2720,
@@ -353,19 +401,22 @@
     72287,
     77292,
     78203,
+    80035,
     85066,
+    85437,
     87156,
     91454,
     91464,
     91875,
-    92479
+    92479,
+    97233
   ],
-  "updated_local": "2026-11-24T05:54:18.922057+03:00",
+  "updated_local": "2026-11-24T08:51:43.604279+03:00",
   "user_pause_condition": {
     "action": "Only at actual account remaining<=3%: finish already running stages, save evidence, call update_goal(paused).",
     "pause_now_requested": false,
     "remaining_percent_at_or_below": 3
   },
-  "working_commit": "92e43068846a149d1dc45e724cc3cb38c2852a68",
+  "working_commit": "adead5898f908ea1f48c181827c22841c2322108",
   "working_numerical_sources_modified": false
 }
