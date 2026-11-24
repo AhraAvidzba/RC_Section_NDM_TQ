@@ -1,13 +1,27 @@
 {
-  "active_exec_session": 45282,
+  "active_exec_session": 28317,
   "active_jobs": [
     {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold712PriorDilationCapacity_20261124",
-      "session": 45282,
-      "stage": "directed native material diagnosis"
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold713SmallLoadContinuation_20261124",
+      "session": 28317,
+      "stage": "native automatic small-load continuation"
     }
   ],
   "all_started_stages_terminal": false,
+  "automatic712": {
+    "accepted_states": 57,
+    "lower_lambda": 1.44119480550414,
+    "native": {
+      "failed": 1,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 18,
+      "timeout600": false
+    },
+    "physical_capacity_certified": false,
+    "probes": 96,
+    "proof": "docs/reports/evidence/Coupled6DPriorDilationCapacity_2026-11-24/PriorDilationCapacityProof.json"
+  },
   "branch": "codex/coupled-6d",
   "entire_goal_completed": false,
   "full_acceptance_not_run": true,
@@ -45,7 +59,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Finish existing712 compiler, verify actual sources, run automatic capacity from two elastic initial states with exact697 adaptive controller and711 material, default assembled tangent. Preserve96 probes/30 iterations/.001 accuracy; do not infer failure from NumFail. Then real coldall6/HardShear and full original scope.",
+  "next_action": "Poll existing session28317 only.713 accepts converged forward spatial steps with small lambda change and detects cumulative decline from accepted maximum; coarse local peak before verified design remains subject to original final precision. Preserve observer/checkpoints and all negative outcomes. Independently verify all fields and final event/peak if found, then focused regressions before production promotion; original full scope remains open.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -229,6 +243,7 @@
     38101,
     38699,
     40717,
+    45282,
     45411,
     48427,
     50535,
@@ -242,6 +257,7 @@
     72043,
     73975,
     76344,
+    77140,
     80666,
     84774,
     86272,
@@ -251,7 +267,7 @@
     99831,
     99841
   ],
-  "updated_local": "2026-11-24T20:34:06.296818+03:00",
+  "updated_local": "2026-11-24T20:44:56.583981+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
