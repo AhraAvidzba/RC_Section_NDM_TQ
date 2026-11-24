@@ -1,0 +1,10 @@
+SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold718ControlledLoadBalance_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 5EE76C1F86B79E2FE7F8979944B2CEAE1BA43DB21838E8498E2FB5B0C7B8179C
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold718ControlledLoadBalance_20261124\Temp\RC_NDM_ModeSuite_3206dbe292f145dd8be9e598ff54e9c1\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TOTAL_COUPLED_ENVELOPE_CONTROL: passed=26; failed=0
+MODE_AFTER_SUITE: No
+FAIL: уточнённый максимум совпадает с независимым корнем производной до 0.0001
+TOTAL_COUPLED_RETAINED_SHOULDERS: passed=21; failed=1
+MODE_AFTER_SUITE: No
+SOURCE_UNCHANGED: True

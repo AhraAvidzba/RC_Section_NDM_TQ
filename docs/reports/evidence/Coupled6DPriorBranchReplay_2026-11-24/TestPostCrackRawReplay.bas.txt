@@ -1,0 +1,72 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Воспроизводит точные сохранённые поля либо исследует один следующий прямой шаг; предел и новый холодный запуск не назначает.
+Public Function RunTestPostCrackRawReplay(ByVal evidenceRoot As String) As String
+    RunTestPostCrackRawReplay = RunTestCoupledPostCrackTension(evidenceRoot, False, False, 0, True)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Переиспользует созданную штатным тестом геометрию, три материала и экспорт; исходные Double читаются без округления.
+Private Function TestReplayPostCrackRaw(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByRef concrete() As CCoupledConcreteResponse, ByRef response() As CCoupledReinforcedResponse, _
+        ByVal calibration As Variant, ByVal options As Variant, ByRef offset() As Double, ByRef direction() As Double, _
+        ByRef projection() As Double, ByVal evidenceRoot As String) As String
+    Dim sides As New Collection
+    sides.Add concrete(1): sides.Add response(1): sides.Add concrete(3): sides.Add response(3)
+    Set mReverseSnapshotsTest = New Collection: mHardPreparedPathTest = evidenceRoot & "\Native\PostCrackRawReplay"
+    TestExportSpatialReverses solver, operators, concrete(2), response(2), sides, calibration, options, offset, direction
+    Dim handle As Integer: handle = FreeFile
+    Open evidenceRoot & "\Input\PostCrackReplay.bin" For Binary Access Read As #handle
+    Dim magic As String * 16, size As Long, count As Long
+    Get #handle, , magic: Get #handle, , size
+    If magic <> "NDMPOSTREPLAY001" Or size <> operators.DegreeCount Then Err.Raise 5, , "Неверный заголовок точного повторения."
+    TestPolishSameVector TestReadPolishVector(handle), calibration, "материал"
+    TestPolishSameVector TestReadPolishVector(handle), options, "расчётные параметры"
+    TestPolishSameVector TestReadPolishVector(handle), offset, "постоянная нагрузка"
+    TestPolishSameVector TestReadPolishVector(handle), direction, "траектория нагрузки"
+    Get #handle, , count
+    If count < 2 Or count > 1000 Then Err.Raise 5, , "Неверное число повторяемых состояний."
+    Dim fields As New Collection, trace As New CCoupledLoadTrace
+    Dim index As Long, field() As Double, fraction As Double, factor As Double
+    For index = 1 To count
+        Get #handle, , fraction: Get #handle, , factor: field = TestReadPolishVector(handle)
+        If UBound(field) <> size Or fraction <> 1# Then Err.Raise 5, , "Непригодное состояние точного повторения."
+        fields.Add field: trace.Add fraction, factor
+    Next index
+    If Seek(handle) <> LOF(handle) + 1 Then Err.Raise 5, , "Лишние данные точного повторения."
+    Close #handle
+    Open evidenceRoot & "\Input\PostCrackReplayOptions.bin" For Binary Access Read As #handle
+    Dim settings() As Double: settings = TestReadPolishVector(handle)
+    If UBound(settings) <> 3 Or Seek(handle) <> LOF(handle) + 1 Then Err.Raise 5, , "Неверные параметры повторения."
+    Close #handle
+    Dim mode As Long: mode = CLng(settings(1))
+    If settings(1) <> mode Or (mode <> 0 And mode <> 1) Then Err.Raise 5, , "Неизвестный режим точного повторения."
+    Dim report As String
+    If mode = 0 Then
+        TestExportSpatialReverses solver, operators, concrete(2), response(2), sides, calibration, options, offset, direction, fields, trace
+        report = "REPLAY_ONLY: exact accepted fields; no continuation or capacity search" & vbCrLf
+    Else
+        Dim target As Double: target = settings(2)
+        Dim maximum As Long: maximum = CLng(settings(3))
+        If settings(3) <> maximum Or maximum < 1 Or maximum > 30 Then Err.Raise 5, , "Неверный лимит прямой пробы."
+        If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена точная исходная история."
+        Dim previous() As Double, accepted() As Double, seed As Variant, ratio As Double, previousFactor As Double, trialFactor As Double
+        previous = fields(fields.Count - 1): accepted = fields(fields.Count)
+        If target <= accepted(1) Or accepted(1) <= previous(1) Then Err.Raise 5, , "Цель прямой пробы должна продолжать исходную продольную деформацию."
+        trace.ReadPoint fields.Count - 1, fraction, previousFactor
+        ratio = (target - accepted(1)) / (accepted(1) - previous(1)): seed = accepted
+        For index = 1 To solver.PhysicalDegreeCount: seed(index) = accepted(index) + ratio * (accepted(index) - previous(index)): Next index
+        factor = factor + ratio * (factor - previousFactor)
+        Dim revision As Long: revision = solver.AcceptedRevision
+        Dim solved As Boolean, actual() As Double
+        solved = solver.TryDeformationStep(offset, direction, projection, target, factor, trialFactor, CDbl(options(3)), CDbl(options(4)), maximum, _
+            consistentControl:=True, initialField:=seed, allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True, allowRefinedRestart:=True)
+        If solver.AcceptedRevision <> revision Then Err.Raise 5, , "Прямая диагностическая проба изменила принятую историю."
+        report = "DIRECT_PROBE: solved=" & CStr(solved) & "; target=" & TestOnsetNumber(target) & "; guide=False; physical_capacity_certified=False" & vbCrLf & solver.ResultMeta.DiagnosticDetails & vbCrLf
+        If solved Then
+            solver.CopyTrial field, actual: fields.Add field: trace.Add 1#, trialFactor
+            Set mReverseFieldsTest = fields: Set mReverseTraceTest = trace
+            TestExportReverseCandidate 999
+        End If
+    End If
+    TestReplayPostCrackRaw = report & "TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=" & CStr(count) & "; mode=" & CStr(mode) & "; numerical_outcome_recorded_not_asserted; capacity_certified=False"
+End Function

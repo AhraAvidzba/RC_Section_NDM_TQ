@@ -1,10 +1,15 @@
 {
-  "active_exec_session": 66134,
+  "active_exec_session": 78535,
   "active_jobs": [
     {
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold718ControlledLoadBalance_20261124",
-      "session": 66134,
-      "stage": "native fixed-field lambda balance"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold723PriorBranchCapacity_20261124",
+      "session": 78535,
+      "stage": "cold automatic capacity723"
+    },
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold724PriorBranchSteelEnd_20261124",
+      "session": 26138,
+      "stage": "native original21 plus4 targets to steel limit .02"
     }
   ],
   "all_started_stages_terminal": false,
@@ -59,7 +64,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Poll existing66134;718 reuses lambda-only balance before strain Newton while preserving material717,controller717,force tolerances,30iterations/96probes and all equilibrium checks. Independently verify entire curve,including late homogeneous-reference miss from717,and physical end/peak if reached. No production promotion before focused regressions and real coldall6/HardShear. Full original scope active.",
+  "next_action": "Poll78535 and26138 actual native handles;723 originalcold96/30 and724 prescribed25 to .02. Material723 regressions87/0 terminal. Do not infer capacity from successful macro or predetermined curve; independently verify full fields and analytical force.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -103,7 +108,44 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: critical tightening reaches known uniaxial maximum to5.83e-7lambda,64fields independently verified; final precision/steel event still fail and one late homogeneous-reference miss retained; exact scalar balance718 now live",
+  "previous_goal_turn_classification": "progress: exact65 native replay exposes35 analytical misses despite equilibrium; same direct step reproduces82.11N error; prior-history full-step material variant722 passes original21 curve194/0 and independent all21mechanics without loosening tolerances; automatic723 pending.",
+  "prior_branch_replay": {
+    "capacity718_last_states": 65,
+    "capacity718_timed_out": true,
+    "direct721_error_N": 82.11066169300466,
+    "direct721_solved": true,
+    "evidence": "docs/reports/evidence/Coupled6DPriorBranchReplay_2026-11-24",
+    "local_peak718": 1.4413956606360803,
+    "local_peak718_accuracy": 0.000964932314739052,
+    "physical_capacity_certified": false,
+    "prescribed722": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 194,
+      "timeout600": false
+    },
+    "prescribed722_max_force_error_N": 0.0004281057699699886,
+    "prescribed722_points": 21,
+    "regression719": {
+      "failed": 0,
+      "macros": 3,
+      "own_process_closed": true,
+      "passed": 105,
+      "timeout600": false
+    },
+    "replay720": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "replay720_all65_equilibrium_verified": true,
+    "replay720_analytical_misses": 35,
+    "replay720_max_force_error_N": 117.62937015507487,
+    "working_material_unchanged": true
+  },
   "prior_pause_revoked_by_explicit_resume": true,
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
@@ -155,7 +197,7 @@
       "40 original linear SVD cases and new interior rank-deficient cases",
       "full prescribed real CDP and steel curve",
       "cold HardShear and all LoadPath",
-      "finite concrete physical-limit contract ONQ-008",
+      "finite concrete physical-limit contract ONQ-012",
       "full original workbook acceptance and performance"
     ],
     "only_rank_factorization_changed_between_analytic_runs": true,
@@ -199,7 +241,7 @@
   "remaining_work": [
     "Completed original40 and8new native linear cases plus213working regression assertions. Next finish full prescribed CDP+steel postcracking curve and known ultimate; no material criteria relaxed.",
     "Finish complete prescribed CDP+steel postcracking curve and automatic known ultimate; do not equate first crack or NumFail to destruction.",
-    "Resolve concrete finite physical-limit contract ONQ-008; preserve material/history/equilibrium and do not invent damage cutoff.",
+    "Resolve concrete finite physical-limit contract ONQ-012; preserve material/history/equilibrium and do not invent damage cutoff.",
     "Own stable NDS and confirmed ultimate for arbitrary geometry and N,Mx,My,T,Qx,Qy; cold HardShear, all LoadPath/Auto/All6, independent/external matched materials and tests.",
     "Preserve distinct longitudinal/transverse grades, compact hoop input and reserve/failure/output/status, actual diagrams, existing NM/crack/stability behavior, CAD export and deformation visualization.",
     "Actual rebuilt release and complete scoped acceptance incl Excel validation/reopen, CAD and FocusedValidationPlan; separate consent for longest full suites according to AGENTS.md.",
@@ -267,7 +309,11 @@
   },
   "subsequent_experiments_authorized_by_pause_revocation": true,
   "terminal_sessions_this_stage": [
+    2450,
+    4763,
+    10530,
     11153,
+    11192,
     16147,
     16181,
     18956,
@@ -277,14 +323,17 @@
     25261,
     28317,
     28797,
+    29563,
     33931,
     37183,
     38101,
     38699,
+    39957,
     40717,
     45282,
     45411,
     48427,
+    49056,
     50535,
     51591,
     52416,
@@ -294,24 +343,31 @@
     57786,
     58105,
     60225,
+    60275,
+    61911,
+    66134,
     68966,
     70831,
     72043,
     73975,
     76344,
+    76431,
     77140,
+    77326,
     78149,
     80580,
     80666,
     84774,
+    86004,
     86272,
     87359,
     94068,
     97029,
     99831,
-    99841
+    99841,
+    99863
   ],
-  "updated_local": "2026-11-24T21:27:08.417738+03:00",
+  "updated_local": "2026-11-24T22:14:47.776505+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
