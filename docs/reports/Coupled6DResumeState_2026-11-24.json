@@ -2,40 +2,37 @@
   "AGENTS_sha256": "D4372F89DF95880D55DC2EF75CC84D36819C1AD772A20533D0CF73DE2467E271",
   "active_exec_session": null,
   "actual_Trace_native_identity": {
-    "PID": 30404,
-    "utcStartTicks": 639310788580925134
+    "PID": 26928,
+    "utcStartTicks": 639310802808713184
   },
   "actual_Trace_terminal": {
-    "best_lambda": 1.12041519510758,
+    "actual_stop_comment": "Подтверждён локальный максимум при lambda = 1.121026. Предельное состояние железобетонного сечения не установлено. Остатка общего бюджета недостаточно для следующего материального шага с обязательной проверкой поворота. Допустимое равновесие подтверждено до lambda = 1.121026.",
+    "best_lambda": 1.12102609132239,
     "exit_code": 0,
     "physical_capacity_certified": false,
-    "reserve_accepted": 1,
-    "reserve_attempts": 1,
-    "session": 87156,
-    "solver_seconds": 231.8037109375,
-    "states": 118
+    "session": 3920,
+    "solver_seconds": 441.9208984375,
+    "states": 146
   },
   "actual_current_Newton_controller_regression": {
-    "accuracy": 0.000205355378626816,
     "exit_code": 0,
-    "expected_peak": 0.9,
     "failed": 0,
-    "known_concrete_peak": 0.899897825923778,
     "own_process_closed": true,
     "passed": 26,
-    "session": 63925
+    "session": 78203
   },
+  "all_calculation_jobs_terminal": true,
   "candidate_source": "src/Solver/CCoupledDeformationContinuation.cls",
-  "candidate_source_sha256": "D2ECF9A43EE396C409A00A316DFACA613B178CEFFC66FBDD0B6E3957B3926DED",
+  "candidate_source_sha256": "844E58BC700B90B30A2594EA5FBCBD35C56867C84B2B438A1B747A8AE839B382",
   "compile_identity": {
-    "PID": 31188,
+    "PID": 24216,
     "terminal": true,
-    "utcStartTicks": 639310784001264205
+    "utcStartTicks": 639310801804228389
   },
   "compile_retry_reason": "First21776 terminal exit1: COM RPC_E_SYS_CALL_FAILED at book.Close after Save; exact own156/ticks639310774529823010 closed. Original case preserved. Fresh retry same numerical sources, no live restart.",
-  "current_goal_turn_classification": "progress: corrected reserve reached/admitted by actual Trace;118equilibria/6forces independently verified;19original snapshots byte-identical; actual current Newton/controller known-concrete regression26/0; next stop initial STEP_LIMIT32 identified; physical capacity open",
-  "current_phase": "CorrectedEligibilityTraceAnd26RegressionVerifiedCheckpointReady",
-  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124",
+  "current_goal_turn_classification": "progress: initial32guard corrected; actual Trace146equilibria/28additional,36old snapshots exact,118priorfields preserved; localmaximum1.12102609132239 and25postpeak states to1.09533730272841;95of96budget; physicalcapacity open; currentbook knownconcrete regression26/0 and all own processes terminal",
+  "current_phase": "ContinuedMaterial146And26RegressionVerified",
+  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124",
   "eligibility_first_compile_failure": {
     "error": "RPC_E_SYS_CALL_FAILED at Close after Save; exact own closure Absent; no numerical test launched",
     "exit_code": 1,
@@ -64,6 +61,21 @@
     "Fixed-half compile91464 and source finalize63944 terminal exit0; all255sources and254other parent components checked. A prior PowerShell5 parser failure happened before Excel creation due missing UTF8 BOM; BOM-only repair pinned separately. No failed scientific result was discarded.",
     "Fixed-half native45087 terminal exit0; all6root105-fields verified. All6forward geometrically, only3secant roots grow H. Full vs2halves lambda difference-8.985134192229793e-9; tensor RMS difference1.586628139299529e-11, relative to full increment0.0002279589704967415. Native endpoint linearized lambda uncertainty3.531905920494709e-5; coarse uncertainty not measured. No capacity certification."
   ],
+  "first670_compile_failure": {
+    "closure": "Absent",
+    "error": "RPC_E_SYS_CALL_FAILED on Close after Save; no numerical run",
+    "exit_code": 1,
+    "own_PID": 32640,
+    "own_utcStartTicks": 639310799573097680,
+    "session": 56516
+  },
+  "git_checkpoint": {
+    "branch": "codex/coupled-6d",
+    "commit": "a83f0b8",
+    "main_unchanged": true,
+    "pushed": true,
+    "release_workbook_unchanged": true
+  },
   "goal_status_required": "active",
   "main_changed": false,
   "native_unit_terminal": {
@@ -71,7 +83,27 @@
     "session": 65086
   },
   "physical_capacity_certified": false,
-  "previous_goal_turn_classification": "progress: terminal native65086 and independent104-state reserve/adoption proof completed; current material contract inspected; no full Trace/capacity claim",
+  "previous_Trace_terminal": {
+    "best_lambda": 1.12041519510758,
+    "exit_code": 0,
+    "physical_capacity_certified": false,
+    "reserve_accepted": 1,
+    "reserve_attempts": 1,
+    "session": 87156,
+    "solver_seconds": 231.8037109375,
+    "states": 118
+  },
+  "previous_checkpoint_regression": {
+    "accuracy": 0.000205355378626816,
+    "exit_code": 0,
+    "expected_peak": 0.9,
+    "failed": 0,
+    "known_concrete_peak": 0.899897825923778,
+    "own_process_closed": true,
+    "passed": 26,
+    "session": 63925
+  },
+  "previous_goal_turn_classification": "progress:118equilibria verified, actual140Newton regression26/0, checkpointa83f0b8 pushed; Git maintenance65559 now terminal0",
   "proofs_current": {
     "actual_Trace_current140_method_scope": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\WorkingNewtonMethodScope.json",
@@ -100,6 +132,22 @@
     "cold96": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPostFailureCold9620261123\\PostFailureCold96Proof.json",
       "sha256": "246FD46483597411EDBBB79A0A4EE6E95683195A5AB698FFF0C6741AAE72D8A0"
+    },
+    "continued_material_actual_sources": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\PointTraceSourceComposition.json",
+      "sha256": "A9D40BD47A14AA9CA64D0D9855067DAC83D23311EF74DB6D109EBDB3BB683340"
+    },
+    "continued_material_peak_analysis": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\ContinuedMaterialPeakAnalysis.json",
+      "sha256": "2A83B21D6E79BCDDE246E70D3798A99BB0F08A4E80B423889D7B371C680357AB"
+    },
+    "continued_material_regression": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\Native\\PersistentHUnit.txt",
+      "sha256": "A53F6BFBEE84CC3597BAB24B657487FEFE0E9253D37356FF2DCBB838626D1F99"
+    },
+    "continued_material_result": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\ContinuedMaterialBudgetProof.json",
+      "sha256": "24EF19EF2719F8B1758AA510A39FCDD7FFE0E101E88EFF1ABC512B914B3153F3"
     },
     "corrected_eligibility_Trace_result": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\DepartureEligibilityTraceProof.json",
@@ -162,28 +210,23 @@
       "sha256": "25FCB7F7C7716A70E358EAD70B8ACED2C2B5EAAA30C08EC7E3AF377E8BA681FF"
     }
   },
-  "quota_last_observed_remaining_percent": 5,
+  "quota_last_observed_remaining_percent": 4,
   "released_workbook_modified": false,
   "remaining_work": [
-    "Poll only active_exec_session when non-null; current_phase and compile_identity identify the actual job. Never restart on observation timeout. Prior70307/17796/13899 all terminal exit0.",
-    "Actual first Trace13899 verified:103states unchanged/19snapshots/4failedH/141.69921875s solver, status6/code10, reserve0. Four H failures did not set departure revision, so original guard was unreachable here. Working guard now also permits one reserve after all4H attempts on SAME accepted revision; active H and incomplete attempts remain forbidden.",
-    "EligibilityRetry compile92479 and finalizer58621 terminal0:255total/254others exact parent except identifier case. Working Newton140 and test unchanged. Private release of VBE references before Save/Close completed successfully; errors still fail, witness pinned. Own31188/ticks639310784001264205 closed. Source book/main unchanged.",
-    "Corrected Trace87156 terminal0, independently verified118states/15new/one reserve admitted/lambda1.12041519510758/231.8037109375s solver; no peak/steel limit, status6/code10. Actual saved book33DA9095E1158FA293C1397D7DEF98AF10C3EDA7D5CC04328B735DAE7D737AA4 all255 verified, one import/254parentothers; current140Newton methods.",
-    "Final validator EligibilityValidationFinal/Check-TestDepartureEligibilityTrace.py passed. Original validator required last observer snapshot equal final118fields; actual Report-before-probe contract yields117observerfields+one finalaccepted. All117exactprefix and additional118th full equilibrium verified. Original7scripts retained separately; physical tolerances unchanged.",
-    "Actual working-Newton/controller regression63925 terminal0:26/0, knownconcrete peak0.899897825923778 versus0.9, accuracy0.000205355378626816; own process closed. Earlier parentV8 regression also26/0 but separate scope. No live jobs after this phase.",
-    "NEXT NUMERICAL BLOCK: final COMMENT says initial STEP_LIMIT32 reached before decline, despite one accepted material recovery and15newstates. Existing exemption only mUsesEnvelopeControl or mEnvelopeDepartures>0 misses recovery after failed H (departures0). After checkpoint consider adding mDepartureRecoveredPoints=0 to initial-limit predicate; keep global96 and primary30, test actual path/cold start. Do not change material failure criteria or call this32step stop capacity.",
-    "Run bounded native actual Trace via explicit WindowsPowerShell5.1 Run-TestPersistentHController.ps1 -Root directed_root. First replay103history, no post-H injection, no chosen future field/materialpoint. Global96 and primary30 unchanged; watchdog600. This is resumed history, NOT cold-from-zero.",
-    "After native terminal exit0 run Check-TestDepartureEligibilityTrace.py with closed helper set. It requires actual reserve>=1 AND admitted>=1 and independently checks full equations/gauges/6forces, prefix/observer, current140methods/controller. A numerical stop with reserve0 does NOT prove corrected reachability.",
-    "If watchdog times out preserve complete observer snapshots and exact own PID closure; do not treat timeout as fracture. Independently replay any useful new prefix before claiming it.",
-    "Finish actual working-Newton known-concrete/directed regression as appropriate, cold-from-zero, all LoadPaths, concrete criterion, external controls and real output workbook. Do not deploy candidate or claim capacity from local unit.",
-    "Record668/669 source/API/strict original-control failure/actual recovered-control adoption and26/0 unit in docs/reports and Git checkpoint; main and released workbook unchanged until validated.",
-    "Archive666 scientific clean replay/registry closure open;667/668/669 not silently registered. Full authorized acceptance, CAD and10s target still required.",
-    "Pause only at actual account remaining<=3percent after started stages finish and checkpoint. Last5percent, no pause now; no subagents/full acceptance authorized."
+    "Poll ONLY active_exec_session when non-null. First compiler56516 terminal1/own32640 closed; retry50899 terminal0/own24216/ticks639310801804228389 closed, sourcefinalizer52983 terminal0. Trace3920 terminal0 and unit78203 terminal0/26pass. Never restart on observation timeout. Prior65559 Git maintenance terminal0; a83f0b8 pushed.",
+    "Actual source check completed:onecontrollerimport/255actualcomponents/254parentothers,140workingNewton methods unchanged. Private compiler skips duplicate enumeration only for empty retirement, releases VBE refs, adds unsaved OWN blank close anchor; Save/Close errors still fail. Witnesses pinned, numerical VBA unchanged by private driver.",
+    "Verified670:146states from103prefix,28more than669; all118parentfields exact published precision,36old snapshots byte-identical, all equations/gauges/6forces independently verified, no new spatial reversals. Actual localmaximum1.12102609132239/nativeaccuracy0.000400174722778108,25postpeak states to1.09533730272841.95probes of96; nextHrequires2. Solver441.9208984375s, status6/code10, CopyPeak/SteelLimitFalse. Book0F747693FC27436EC479B2049D0AF6032E23BE554BB7165F6125D54C5AC198C7.",
+    "NEXT PHYSICS: do NOT blindly increase budgets. Inspect finite physical termination and full material contract: WithinPhysicalRange currently steel-only; 3Dconcrete cutoff incomplete. Research primary sources/save used literature/prefer Russian, derive criterion for chosen material with explicit assumptions and normative provenance, not arbitrary damage threshold or first crack. Independently verify peak shoulders/history/intermediate transition states and demonstrate determining/global event before calling capacity.",
+    "Actual selected-state analysis: peak121 concrete principal strain[-0.0002845657469750855,0.00044391757185445555], steel strain-limit ratio0.0039691620093904; end146 [-0.0003188948574932719,0.0004687691691337081], steelratio0.00485148966317889. These ratios are NOT load reserve; no concrete failure inferred. H rises0.00018051926932517848 to0.00022763715047543554MPa after peak.",
+    "Then actual cold-from-zero, full LoadPaths/materials/steel event/external controls and real workbook/CAD/10s complete combination target. Full original scope and docs/reports/Coupled6DAcceptance.md authoritative.146fieldreplay starts from103priorhistory, NOT full cold run; material integration remains nativeVBA. No completion from local test.",
+    "Archive666 scientific clean replay/registry closure open;667-670 evidence not silently registered. Full long acceptance still needs scoped consent, no subagents authorized.",
+    "Pause only at actual account remaining<=3percent after started jobs terminal/checkpoint; latest observed remaining is quota_last_observed_remaining_percent. No reset credits available."
   ],
-  "schema": "WorkingDepartureRecoveryResume1",
+  "schema": "ContinuedMaterialBudgetResume1",
   "terminal_prior_sessions": [
     2720,
     3088,
+    3920,
     4126,
     11277,
     13899,
@@ -201,18 +244,23 @@
     39903,
     45087,
     50571,
+    50899,
+    52983,
     53665,
     53933,
     55374,
+    56516,
     58621,
     62557,
     63925,
     63944,
     65086,
+    65559,
     70307,
     71765,
     72287,
     77292,
+    78203,
     85066,
     87156,
     91454,
@@ -220,12 +268,12 @@
     91875,
     92479
   ],
-  "updated_local": "2026-11-24T04:11:47.166297+03:00",
+  "updated_local": "2026-11-24T04:41:54.711098+03:00",
   "user_pause_condition": {
     "action": "Only at actual account remaining<=3%: finish already running stages, save evidence, call update_goal(paused).",
     "pause_now_requested": false,
     "remaining_percent_at_or_below": 3
   },
-  "working_commit": "6c75c75",
+  "working_commit": "a83f0b8",
   "working_numerical_sources_modified": true
 }

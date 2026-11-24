@@ -227,7 +227,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             StopSearch "Остатка общего бюджета недостаточно для следующего материального шага с обязательной проверкой поворота."
             Exit Sub
         End If
-        If attempt > STEP_LIMIT And mLocalPeak = 0# And mUnverifiedDips = 0 And Not mUsesEnvelopeControl And mEnvelopeDepartures = 0 Then
+        If attempt > STEP_LIMIT And mLocalPeak = 0# And mUnverifiedDips = 0 And Not mUsesEnvelopeControl And _
+                mEnvelopeDepartures = 0 And mDepartureRecoveredPoints = 0 Then ' Принятый материальный переход завершает начальный участок; общий бюджет проб продолжает действовать.
             StopSearch "Достигнут лимит начального участка деформационного продолжения до обнаружения спада нагрузки."
             Exit Sub
         End If
