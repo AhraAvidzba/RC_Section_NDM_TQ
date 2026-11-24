@@ -1,15 +1,10 @@
 {
-  "active_exec_session": 78535,
+  "active_exec_session": 10205,
   "active_jobs": [
     {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold723PriorBranchCapacity_20261124",
-      "session": 78535,
-      "stage": "cold automatic capacity723"
-    },
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold724PriorBranchSteelEnd_20261124",
-      "session": 26138,
-      "stage": "native original21 plus4 targets to steel limit .02"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold728FastShoulderWitness_20261124",
+      "session": 10205,
+      "stage": "same original critical shoulder quality; immediate outcome and final-field witness"
     }
   ],
   "all_started_stages_terminal": false,
@@ -64,7 +59,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Poll78535 and26138 actual native handles;723 originalcold96/30 and724 prescribed25 to .02. Material723 regressions87/0 terminal. Do not infer capacity from successful macro or predetermined curve; independently verify full fields and analytical force.",
+  "next_action": "Poll10205 same native handle.727 numericalquality phase ended140.55s but180s timeout during full diagnostic export, no final totals; original logs retained.728 same numerical core saves outcome immediately and exports only final field after exact verified prefix. Then run Check-TestShoulderWitness.py.729 prepared script (not staged or run) can tighten local CDP tolerances100x only after frozen prefix; do not launch until728 witness checked. Original full6 goal active.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -108,7 +103,68 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: exact65 native replay exposes35 analytical misses despite equilibrium; same direct step reproduces82.11N error; prior-history full-step material variant722 passes original21 curve194/0 and independent all21mechanics without loosening tolerances; automatic723 pending.",
+  "prescribed_steel_end": {
+    "all25_states_independently_verified": true,
+    "all_original21_history_bits_exact": true,
+    "automatic723": {
+      "analytical_misses_in_source_prefix": 32,
+      "final_capacity_result_not_produced": true,
+      "independent_all53_equilibrium_via726_verified": true,
+      "independent_full_field_verification_pending": false,
+      "last_strain": 0.0020576067907149276,
+      "maximum_accepted_lambda": 1.4412094586307924,
+      "maximum_analytical_force_error_N": 132.81984026636928,
+      "native": {
+        "failed": 0,
+        "macros": 0,
+        "own_process_closed": true,
+        "passed": 0,
+        "timeout600": true
+      },
+      "physical_capacity_certified": false,
+      "source_raw_history": {
+        "bytes": 841488,
+        "complete_bytes": 841488,
+        "incomplete_tail_bytes": 0,
+        "original_binary_Double": true,
+        "sha256": "49DB03A4ABA2DE296D15AC3FEA3C54EE10C5A52F225814F6114CC595BCB230A7"
+      },
+      "source_states": 53
+    },
+    "maximum_force_error_N": 0.0004281057699699886,
+    "next_direct726_error_N": 0.1818975797505118,
+    "next_direct726_solved": true,
+    "physical_capacity_certified": false,
+    "proof": "docs/reports/evidence/Coupled6DPrescribedSteelEnd_2026-11-24",
+    "six_force_HardShear_Direct_comparison": {
+      "baseline_native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 19,
+        "timeout600": false
+      },
+      "baseline_seconds": 10.4296875,
+      "both_direct_states_OK": true,
+      "candidate_seconds": 17.25,
+      "one_run_per_variant": true,
+      "only_material_changed": true,
+      "performance_target_met": false,
+      "ratio": 1.6539325842696628,
+      "sequential_same_test_and_controller": true,
+      "statistically_established_speed_ratio": false
+    },
+    "steel725_limit_reached": 0.02,
+    "steel725_native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 230,
+      "timeout600": false
+    },
+    "working_material_unchanged": true
+  },
+  "previous_goal_turn_classification": "progress: prescribed curve reaches existing steel limit .02 with230/0 and25 independent mechanics checks; cold723 still timesout600 and has32 analytical misses; exact53prefix and next ordinary step independently verified in726; actual six-force HardShear DirectOK19/0 takes17.25s vs10.43s prior material. Critical shoulder accuracy now isolated rather than repeating cold search.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -309,6 +365,7 @@
   },
   "subsequent_experiments_authorized_by_pause_revocation": true,
   "terminal_sessions_this_stage": [
+    1109,
     2450,
     4763,
     10530,
@@ -316,20 +373,28 @@
     11192,
     16147,
     16181,
+    16553,
     18956,
     21859,
     23111,
     24444,
+    24703,
     25261,
+    26138,
     28317,
     28797,
     29563,
+    31421,
+    32063,
     33931,
+    34937,
     37183,
     38101,
     38699,
     39957,
     40717,
+    40742,
+    42094,
     45282,
     45411,
     48427,
@@ -345,6 +410,7 @@
     60225,
     60275,
     61911,
+    64786,
     66134,
     68966,
     70831,
@@ -355,19 +421,22 @@
     77140,
     77326,
     78149,
+    78535,
     80580,
     80666,
     84774,
     86004,
     86272,
+    86451,
     87359,
+    92701,
     94068,
     97029,
     99831,
     99841,
     99863
   ],
-  "updated_local": "2026-11-24T22:14:47.776505+03:00",
+  "updated_local": "2026-11-24T22:41:47.993464+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

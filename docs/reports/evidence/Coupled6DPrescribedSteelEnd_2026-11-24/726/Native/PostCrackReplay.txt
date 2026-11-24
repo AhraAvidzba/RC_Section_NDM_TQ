@@ -1,0 +1,18 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold726PostYieldProfile_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 2C246F9B798AEE9E738DC9C33BA472A6C705E70F7B329D1184598A597AFC98A9
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold726PostYieldProfile_20261124\Temp\RC_NDM_ModeSuite_5d538506a0cc4a23922091335efb039e\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=23144; startTicks=639311450606704268
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:24:27
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=23144; workingSet=145285120; privateBytes=102318080; cpu=78.625
+DIRECT_PROBE: solved=True; target=2.22023711658775E-03; guide=False; physical_capacity_certified=False
+Итерации: 1; пробы: 2; невязка, МПа: 4.04856084419449E-06; мин. ведущий элемент: 0; множитель уточнён без изменения поля деформаций
+TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=53; mode=1; numerical_outcome_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold726PostYieldProfile_20261124\Temp\RC_NDM_ModeSuite_5d538506a0cc4a23922091335efb039e\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:25:40
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True
