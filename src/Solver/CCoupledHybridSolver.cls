@@ -464,6 +464,7 @@ Friend Function TrySolveLeastSquaresTrust(ByVal equations As ICoupledEquationSys
         Optional ByVal initialRadius As Double = 1#) As Boolean
     On Error GoTo ArithmeticFailure
     mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mRestarts = 0: mStopCode = 0
+    mArithmeticDiagnostic = vbNullString
     mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
     If equations Is Nothing Then Exit Function
     Dim count As Long: count = UBound(initial)
@@ -480,7 +481,7 @@ Friend Function TrySolveLeastSquaresTrust(ByVal equations As ICoupledEquationSys
     Dim scalingReady As Boolean, radiusReady As Boolean, i As Long, j As Long, valid As Boolean, accepted As Boolean
     Dim norm As Double, nextNorm As Double, stepNorm As Double, cost As Double, nextCost As Double
     Dim actualReduction As Double, predictedReduction As Double, ratio As Double, total As Double
-    Dim originalResidual() As Double
+    Dim originalResidual() As Double, trialUnavailable As Boolean
     Do
         If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
         If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
@@ -528,14 +529,14 @@ Friend Function TrySolveLeastSquaresTrust(ByVal equations As ICoupledEquationSys
             trial = x
             For i = 1 To count: trial(i) = x(i) + movement(i) / diagonal(i): Next i
             mSteps = mSteps + 1
-            valid = ReadResidual(equations, trial, nextResidual, unused, count)
+            valid = ReadTrialResidual(equations, trial, nextResidual, unused, count, trialUnavailable)
             actualReduction = 0#: ratio = 0#: nextNorm = 0#: nextCost = 0#
             If valid Then
                 nextNorm = algebra.VectorNorm(nextResidual, 1, count): nextCost = 0.5 * nextNorm * nextNorm
                 actualReduction = cost - nextCost
                 If predictedReduction > 0# Then ratio = actualReduction / predictedReduction
                 If predictedReduction = 0# And actualReduction = 0# Then ratio = 1#
-            ElseIf mStopCode = -1 Then
+            ElseIf trialUnavailable Then
                 mStopCode = 0 ' Отсутствие отклика одной пробы разрешает меньшую область от той же принятой истории.
             Else
                 Exit Do

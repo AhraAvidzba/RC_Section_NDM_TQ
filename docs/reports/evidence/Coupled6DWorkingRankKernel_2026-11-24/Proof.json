@@ -1,0 +1,50 @@
+{
+  "actual_book_components_verified": 255,
+  "actual_book_sha256": "4C5637A6D3AC402FBE39517DD5B18921924BD50654F87BEC3D167CF3BD2640D4",
+  "entire_goal_completed": false,
+  "evidence_files_sha256": {
+    "Check-TestRankTrustLinear.py": "62428CA42BE747AABBABD8381E49C199A7654E3ECDD1451B6A1E118A270FB6C6",
+    "CompilePointClosure.json": "C7BC9BBF28CA6E72C300382F177206E54986646DAD346FC44A40C2AECB9B61C1",
+    "PointTraceSourceComposition.json": "92FDD3447EA5AC3BF2B7145A97942793E539874774948F5E22CA0AFFAA8D85D6",
+    "RankTrustLinearProof.json": "FE9ED806E2EDD18CBC64A40DEC65C68692797898B0E5640478650E8C00BE0C59",
+    "Record-TestWorkingRankKernel.py": "03EFA03347B004EF0197F79A964933D3A2AB5F5BAB836F8B73954435423D14E0",
+    "Stage-TestRankTrustLinear.py": "5F42F431C1D4E67E9B6D031F1C431FB759D3C00E2E47324F09290EFFECE0ACF4",
+    "Stage-TestWorkingRankKernel.py": "0A704E17C8267DCE78CC207D8F70B0FA6A7762D5EC0C820FB7B06E29CE1DE135",
+    "TrustStep.txt": "D54EFEF0A0FBD0550AFE204EF7BFC507BF0B20869CE186ECF4B3D93FE74FFE3F",
+    "TrustStep.txt.ProcessClosure.json": "265D8C2A6E64D540A96CB6EF16154813FBCFF12E09452346B0360D459D5D365E",
+    "TrustStepCases.json": "30ABDB27D5CC1040AF66A3D084918225DF08286183C59069C3F52EB057972881",
+    "TrustStepResults.bin": "AEEBB008E97D797A901D1D077C376AD8DA389539F1FE0912AFBDE5E349AC55D4",
+    "TrustSteps.bin": "28E1E6BEC36A0372F59A396779CA8EEA074CDF220CF5EF7C61C4FD26C6A39C85",
+    "WorkingRank.txt": "0B1B8A19670A08EACE7F56D98A98C09D67250468ED7661AC5348932E590D540D",
+    "WorkingRank.txt.ProcessClosure.json": "FF1B49E61D53EAAB36138EDCDC170009E7834FBCEDEC7044B0807AB0BA99AF7E"
+  },
+  "full_acceptance_completed": false,
+  "linear_cases_independently_verified": 48,
+  "native_linear_output_record": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "native_regression": {
+    "failed": 0,
+    "macros": 5,
+    "own_process_closed": true,
+    "passed": 213,
+    "timeout600": false
+  },
+  "new_cold_HardShear_not_run": true,
+  "original40_criteria_and_binary_body_unchanged": true,
+  "physical_capacity_certified": false,
+  "primary_source": "literature/Coupled6D/NumericalControl/Minpack/src/lmpar.c",
+  "private_rectangular_QR_extension_not_promoted": true,
+  "private_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold699WorkingRankKernel_20261124",
+  "working_controller_and_Newton_unchanged": true,
+  "working_sources_sha256": {
+    "src/Solver/CCoupledHybridFactorization.cls": "F3FB0D79F581B7B49E0F9832BD4613DB2EBA3DA4C4C06B1B5CBA45EA1E26BE1A",
+    "src/Solver/CCoupledHybridSolver.cls": "27E95669C39EB438079C39A383459A7C10A91E131E0E5901ED5C84296AD71AD2",
+    "tests/CHybridEquationsTest.cls": "2C746CA6F2F77E6ACCFB3EE906E8539C6EFFFE645B4D43C2A537B44E8D614617",
+    "tests/modTestCoupledHybrid.bas": "433DDAFAE22980919D5E6FF779D1DAE7D8417369F78D58F0B4A61F8270537DFD"
+  }
+}

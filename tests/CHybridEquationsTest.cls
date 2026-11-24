@@ -47,6 +47,20 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
     If withJacobian Then ReDim jacobian(1 To count, 1 To count)
     Dim i As Long
     Select Case mMode
+        Case "LMUnavailable", "LMOverflow", "LMDivision", "LMCancel", "LMWrongDimensions"
+            If coordinates(1) < 0.5 Then
+                mUnavailableCallsTest = mUnavailableCallsTest + 1
+                If mMode = "LMOverflow" Then Err.Raise 6, "CHybridEquationsTest", "Тестовое переполнение LM-пробы."
+                If mMode = "LMDivision" Then Err.Raise 11, "CHybridEquationsTest", "Тестовое деление на ноль LM-пробы."
+                If mMode = "LMCancel" Then Err.Raise 18, "CHybridEquationsTest", "Тестовая отмена LM-пробы."
+                If mMode = "LMWrongDimensions" Then
+                    ReDim residual(1 To count + 1)
+                    ICoupledEquationSystem_TryEvaluate = True
+                End If
+                Exit Function
+            End If
+            residual(1) = Sqr(coordinates(1)) - 1#
+            If withJacobian Then jacobian(1, 1) = 0.5 / Sqr(coordinates(1))
         Case "DomainSqrt", "TrialDimensions", "OverflowTrial", "DivisionTrial", "CancelTrial"
             If coordinates(1) <= 0# Then
                 mUnavailableCallsTest = mUnavailableCallsTest + 1

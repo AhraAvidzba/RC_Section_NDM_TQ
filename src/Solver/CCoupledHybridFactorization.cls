@@ -453,6 +453,11 @@ Friend Function TryLeastSquaresRadius(ByVal radius As Double, ByRef parameter As
     End If
     Dim derivative As Double, norm As Double, phi As Double, lower As Double, fullRank As Boolean
     fullRank = TryDampedStep(0#, direction, derivative)
+    If Not fullRank Then
+        If Not TryUndampedRankStep(direction) Then Exit Function
+        norm = VectorNorm(direction, 1, mCount)
+        If norm <= radius Then parameter = 0#: TryLeastSquaresRadius = True: Exit Function
+    End If
     If fullRank Then
         norm = VectorNorm(direction, 1, mCount)
         If norm <= radius Then parameter = 0#: TryLeastSquaresRadius = True: Exit Function
@@ -465,7 +470,9 @@ Friend Function TryLeastSquaresRadius(ByVal radius As Double, ByRef parameter As
         iterations = attempt
         If parameter < lower Or parameter > upper Then parameter = GeomMax(0.001 * upper, Sqr(lower) * Sqr(upper))
         If Not TryDampedStep(parameter, direction, derivative) Then Exit Function
+        Dim previousPhi As Double: previousPhi = phi
         norm = VectorNorm(direction, 1, mCount): phi = norm - radius
+        If lower = 0# And phi <= previousPhi And previousPhi < 0# Then TryLeastSquaresRadius = True: Exit Function
         If norm = 0# Or derivative >= 0# Then Exit Function
         If phi < 0# Then upper = parameter
         ratio = phi / derivative
@@ -493,4 +500,33 @@ Private Function HypotenuseLeastSquares(ByVal first As Double, ByVal second As D
     ElseIf first > 0# Then
         HypotenuseLeastSquares = first * Sqr(1# + (second / first) ^ 2)
     End If
+End Function
+
+
+' Вычисляет базовое решение вырожденной задачи наименьших квадратов в переставленном QR по lmpar MINPACK.
+' Свободные координаты равны нулю; конечное нелинейное равновесие проверяет вызывающий решатель.
+Private Function TryUndampedRankStep(ByRef direction() As Double) As Boolean
+    Erase direction
+    If Not mPivoted Then Exit Function
+    Dim triangle() As Double, ordered() As Double
+    ReDim triangle(1 To mCount, 1 To mCount): ReDim ordered(1 To mCount)
+    Dim row As Long, column As Long, position As Long, rank As Long, largest As Double, total As Double
+    For row = 1 To mCount
+        For column = row To mCount
+            position = position + 1: triangle(column, row) = mR(position)
+            largest = GeomMax(largest, Abs(mR(position)))
+        Next column
+    Next row
+    rank = mCount
+    For row = 1 To mCount
+        If Abs(triangle(row, row)) <= MACHINE_EPSILON * mCount * largest Then rank = row - 1: Exit For
+    Next row
+    For row = rank To 1 Step -1
+        total = -mQtf(row)
+        For column = row + 1 To rank: total = total - triangle(column, row) * ordered(column): Next column
+        ordered(row) = total / triangle(row, row)
+    Next row
+    ReDim direction(1 To mCount)
+    For column = 1 To mCount: direction(mColumnOrder(column)) = ordered(column): Next column
+    TryUndampedRankStep = True
 End Function
