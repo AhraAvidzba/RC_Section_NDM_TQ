@@ -6,12 +6,28 @@
   "entire_goal_completed": false,
   "full_acceptance_not_run": true,
   "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
-  "goal_status": "active; explicit user resume after checkpoint20f3aa6",
+  "goal_status": "active",
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
   "main_unchanged": "3e7da82d3391a90aab8678054584f259eda30fe7",
+  "material_integration702": {
+    "automatic_substeps_both_sides_of_jump": 1,
+    "fixed_divisions_with_local_root": [
+      16,
+      2,
+      32,
+      4,
+      64,
+      8
+    ],
+    "local_root_not_section_capacity": true,
+    "material_methods_unchanged": true,
+    "observed_stress_jump_MPa": 1.044934788783551,
+    "original11_history_exact": true,
+    "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
+  },
   "ndm_unchanged": true,
-  "next_action": "Inspect scalar lateral stress of actual CDP at epsilon_zz0.0008 from accepted11 cold history; establish a strict material root before another full-system candidate. Keep arbitrary-section/all6 scope.",
+  "next_action": "Investigate local UpdatePoint branch selection/cohesion/dilation at failed epsilon_zz0.0008. One-step map jumps while2..64substeps recover same uniaxial root. Test a consistent local continuation/predictor or error-controlled integration; do not blindly force2substeps or relax global tolerances. Then full curve and actual cold capacity/all6 original scope.",
   "no_new_experiments_added_after_pause_request": true,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -43,7 +59,7 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: exact working kernel213/0,48native linear cases independently verified, actual255VBA components checked",
+  "previous_goal_turn_classification": "progress: exact working kernel213/0+48SVD; material jump1.044934788MPa reproduced at same accepted11; local roots exist for2..64substeps",
   "prior_pause_revoked_by_explicit_resume": true,
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
@@ -155,24 +171,29 @@
   "terminal_sessions_this_stage": [
     16147,
     16181,
+    21859,
     28797,
     33931,
+    37183,
     38101,
     45411,
     52416,
     73975,
     86272,
     87359,
+    94068,
+    97029,
     99831
   ],
-  "updated_local": "2026-11-24T19:12:24.953608+03:00",
+  "updated_local": "2026-11-24T19:25:59.379216+03:00",
+  "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
     "checkpoint": "02622b5",
     "failed": 0,
     "passed": 88
   },
-  "working_numerical_sources_modified": true,
+  "working_numerical_sources_modified": false,
   "working_rank_kernel": {
     "actual_book_components_verified": 255,
     "actual_book_sha256": "4C5637A6D3AC402FBE39517DD5B18921924BD50654F87BEC3D167CF3BD2640D4",

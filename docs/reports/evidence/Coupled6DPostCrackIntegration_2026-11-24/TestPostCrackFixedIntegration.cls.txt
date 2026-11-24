@@ -1,0 +1,24 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает исходный локальный интегратор либо ту же последовательность с заданным числом дроблений; принятую историю не меняет.
+Friend Function ReadPostCrackUpdateTest(ByRef strain() As Double, ByRef stress() As Double, _
+        ByVal divisions As Long, ByRef substeps As Long) As Boolean
+    If divisions < 0 Or divisions > 64 Or Not mASDFlow Is Nothing Then Exit Function
+    Dim updated As TConcreteHistory, prior As TConcreteHistory, virgin As Boolean
+    If divisions = 0 Then
+        ReadPostCrackUpdateTest = UpdateWithSubsteps(strain, mHistory(1, mCommitted), updated, stress, virgin, substeps)
+        Exit Function
+    End If
+    prior = mHistory(1, mCommitted)
+    Dim intermediate(1 To 6) As Double, stepIndex As Long, component As Long, fraction As Double
+    For stepIndex = 1 To divisions
+        fraction = CDbl(stepIndex) / divisions
+        For component = 1 To 6
+            intermediate(component) = mHistory(1, mCommitted).Strain(component) + fraction * (strain(component) - mHistory(1, mCommitted).Strain(component))
+            If stepIndex = divisions Then intermediate(component) = strain(component)
+        Next component
+        If Not UpdatePoint(intermediate, prior, updated, stress, virgin) Then Exit Function
+        prior = updated
+    Next stepIndex
+    substeps = divisions: ReadPostCrackUpdateTest = True
+End Function

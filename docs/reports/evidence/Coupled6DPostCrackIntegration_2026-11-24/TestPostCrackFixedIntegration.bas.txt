@@ -1,0 +1,76 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Исследует знак бокового напряжения и записывает каждое уточнение; фиксированные дробления меняют только численное интегрирование пробы.
+Private Sub TestPostCrackLateralProbe(ByVal concrete As CCoupledConcreteResponse, ByVal operators As CCoupledElasticState, _
+        ByRef accepted() As Double, ByRef prediction As Variant, ByVal target As Double, ByVal folder As String, _
+        ByRef report As String, ByRef passed As Long, ByRef failed As Long)
+    Dim before(1 To 6) As Double, after(1 To 6) As Double, strain(1 To 6) As Double, stress(1 To 6) As Double
+    concrete.CopyAcceptedStress 1, before: operators.PointStrain 1, accepted, strain
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\LateralFixedIntegration.csv" For Output As #handle
+    Print #handle, "kind;divisions;index;epsilon_lateral;available;substeps;sigma_xx;sigma_yy;sigma_zz;sigma_xy;sigma_xz;sigma_yz"
+    Print #handle, "ACCEPTED;0;0;" & TestOnsetNumber(strain(1)) & ";1;0" & TestHardPreparedVector(before)
+    Dim divisions As Variant, index As Long, previousValid As Boolean, valid As Boolean, component As Long
+    Dim value As Double, previousValue As Double, previousStress As Double, root As Double, found As Boolean, unchanged As Boolean
+    For Each divisions In Array(0, 2, 4, 8, 16, 32, 64)
+        mLateralDivisionsTest = CLng(divisions): previousValid = False
+        For index = -10 To 20
+            value = index * 0.0000025
+            valid = TestPostCrackLateralResponse(concrete, value, target, stress)
+            If valid Then
+                Print #handle, "SAMPLE;" & divisions & ";" & index & ";" & TestOnsetNumber(value) & ";1;" & mLateralSubstepsTest & TestHardPreparedVector(stress)
+                If previousValid Then
+                    If Sgn(previousStress) <> Sgn(stress(1)) Then
+                        If TestPostCrackLateralRoot(concrete, previousValue, value, previousStress, target, root, stress, handle) Then
+                            found = True
+                            Print #handle, "ROOT;" & divisions & ";" & index & ";" & TestOnsetNumber(root) & ";1;" & mLateralSubstepsTest & TestHardPreparedVector(stress)
+                        End If
+                    End If
+                End If
+                If Not TestPostCrackLateralResponse(concrete, value, target, stress) Then Err.Raise 5, , "Повтор локальной пробы изменил доступность отклика."
+                previousValue = value: previousStress = stress(1)
+            Else
+                Print #handle, "SAMPLE;" & divisions & ";" & index & ";" & TestOnsetNumber(value) & ";0;" & mLateralSubstepsTest
+            End If
+            previousValid = valid
+        Next index
+    Next divisions
+    Close #handle
+    concrete.CopyAcceptedStress 1, after: unchanged = True
+    For component = 1 To 6: If before(component) <> after(component) Then unchanged = False
+    Next component
+    TestRecord unchanged, "читающее сравнение дроблений не изменило принятые напряжения", passed, failed, report
+    TestRecord found, "найден материальный корень хотя бы при одном числе дроблений; это не предел сечения", passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вычисляет пробу напрямую тем же локальным интегратором и сообщает фактическое число дроблений.
+Private Function TestPostCrackLateralResponse(ByVal concrete As CCoupledConcreteResponse, ByVal lateral As Double, _
+        ByVal axial As Double, ByRef stress() As Double) As Boolean
+    On Error GoTo Failed
+    Dim strain(1 To 6) As Double
+    strain(1) = lateral: strain(2) = lateral: strain(3) = axial: mLateralSubstepsTest = 0
+    TestPostCrackLateralResponse = concrete.ReadPostCrackUpdateTest(strain, stress, mLateralDivisionsTest, mLateralSubstepsTest)
+    Exit Function
+Failed:
+    Dim number As Long, source As String, description As String
+    number = Err.Number: source = Err.Source: description = Err.Description
+    If number <> 6 And number <> 11 Then Err.Raise number, source, description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет каждую фактическую пробу внутри знакопеременного интервала; скачок или невычислимый отклик не считается корнем.
+Private Function TestPostCrackLateralRoot(ByVal concrete As CCoupledConcreteResponse, ByVal left As Double, ByVal right As Double, _
+        ByVal leftStress As Double, ByVal axial As Double, ByRef root As Double, ByRef stress() As Double, ByVal handle As Integer) As Boolean
+    Dim attempt As Long
+    For attempt = 1 To 48
+        root = 0.5 * (left + right)
+        If Not TestPostCrackLateralResponse(concrete, root, axial, stress) Then
+            Print #handle, "BISECT;" & mLateralDivisionsTest & ";" & attempt & ";" & TestOnsetNumber(root) & ";0;" & mLateralSubstepsTest
+            Exit Function
+        End If
+        Print #handle, "BISECT;" & mLateralDivisionsTest & ";" & attempt & ";" & TestOnsetNumber(root) & ";1;" & mLateralSubstepsTest & TestHardPreparedVector(stress)
+        If Abs(stress(1)) <= 0.00000001 And Abs(stress(2)) <= 0.00000001 Then TestPostCrackLateralRoot = True: Exit Function
+        If Sgn(stress(1)) = Sgn(leftStress) Then left = root: leftStress = stress(1) Else right = root
+    Next attempt
+End Function

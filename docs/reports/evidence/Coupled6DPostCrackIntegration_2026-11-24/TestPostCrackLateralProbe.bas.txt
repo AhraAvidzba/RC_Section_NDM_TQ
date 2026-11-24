@@ -1,0 +1,77 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Исследует реальный CDP от одной принятой истории при одинаковых двух поперечных деформациях и фиксированной продольной.
+' Это контроль существования локального отклика, а не замена общего равновесия сечения или критерий его разрушения.
+Private Sub TestPostCrackLateralProbe(ByVal concrete As CCoupledConcreteResponse, ByVal operators As CCoupledElasticState, _
+        ByRef accepted() As Double, ByRef prediction As Variant, ByVal target As Double, ByVal folder As String, _
+        ByRef report As String, ByRef passed As Long, ByRef failed As Long)
+    Dim response As ICoupledPointResponse: Set response = concrete
+    Dim before(1 To 6) As Double, after(1 To 6) As Double, strain(1 To 6) As Double, stress(1 To 6) As Double
+    concrete.CopyAcceptedStress 1, before
+    Dim seed() As Double: seed = prediction
+    operators.PointStrain 1, seed, strain
+    Dim guess As Double: guess = 0.5 * (strain(1) + strain(2))
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\LateralProbe.csv" For Output As #handle
+    Print #handle, "kind;grid;index;epsilon_lateral;available;sigma_xx;sigma_yy;sigma_zz;sigma_xy;sigma_xz;sigma_yz"
+    Print #handle, "ACCEPTED;0;0;" & TestOnsetNumber(accepted(1)) & ";1" & TestHardPreparedVector(before)
+    Dim grid As Long, index As Long, value As Double, previousValue As Double, previousStress As Double
+    Dim valid As Boolean, previousValid As Boolean, root As Double, found As Boolean, component As Long, unchanged As Boolean
+    For grid = 1 To 2
+        previousValid = False
+        For index = -80 To 80
+            If grid = 1 Then value = index * 0.0000125 Else value = guess + index * 0.00000001
+            valid = TestPostCrackLateralResponse(response, value, target, stress)
+            If valid Then
+                Print #handle, "SAMPLE;" & grid & ";" & index & ";" & TestOnsetNumber(value) & ";1" & TestHardPreparedVector(stress)
+                If previousValid Then
+                    If Sgn(previousStress) <> Sgn(stress(1)) Then
+                        If TestPostCrackLateralRoot(response, previousValue, value, previousStress, target, root, stress) Then
+                            found = True
+                            Print #handle, "ROOT;" & grid & ";" & index & ";" & TestOnsetNumber(root) & ";1" & TestHardPreparedVector(stress)
+                        End If
+                    End If
+                End If
+                If Not TestPostCrackLateralResponse(response, value, target, stress) Then Err.Raise 5, , "Повтор той же локальной пробы изменил доступность отклика."
+                previousStress = stress(1): previousValue = value
+            Else
+                Print #handle, "SAMPLE;" & grid & ";" & index & ";" & TestOnsetNumber(value) & ";0"
+            End If
+            previousValid = valid
+        Next index
+    Next grid
+    Close #handle
+    concrete.CopyAcceptedStress 1, after: unchanged = True
+    For component = 1 To 6: If before(component) <> after(component) Then unchanged = False
+    Next component
+    TestRecord unchanged, "локальные читающие пробы не меняют принятые напряжения", passed, failed, report
+    TestRecord found, "найден локальный материальный корень с нулевыми боковыми напряжениями при epsilon_zz=" & CStr(target), passed, failed, report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает ровно одну материальную пробу; арифметически недоступная точка не равна разрушению и не меняет историю.
+Private Function TestPostCrackLateralResponse(ByVal response As ICoupledPointResponse, ByVal lateral As Double, _
+        ByVal axial As Double, ByRef stress() As Double) As Boolean
+    On Error GoTo Failed
+    Dim strain(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    strain(1) = lateral: strain(2) = lateral: strain(3) = axial
+    TestPostCrackLateralResponse = (response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly, False) = sfcNone)
+    Exit Function
+Failed:
+    Dim number As Long, source As String, description As String
+    number = Err.Number: source = Err.Source: description = Err.Description
+    If number <> 6 And number <> 11 Then Err.Raise number, source, description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Уточняет только фактически доступный знакопеременный интервал; корень принимается по фактическим двум боковым напряжениям.
+Private Function TestPostCrackLateralRoot(ByVal response As ICoupledPointResponse, ByVal left As Double, ByVal right As Double, _
+        ByVal leftStress As Double, ByVal axial As Double, ByRef root As Double, ByRef stress() As Double) As Boolean
+    Dim attempt As Long
+    For attempt = 1 To 48
+        root = 0.5 * (left + right)
+        If Not TestPostCrackLateralResponse(response, root, axial, stress) Then Exit Function
+        If Abs(stress(1)) <= 0.00000001 And Abs(stress(2)) <= 0.00000001 Then TestPostCrackLateralRoot = True: Exit Function
+        If Sgn(stress(1)) = Sgn(leftStress) Then left = root: leftStress = stress(1) Else right = root
+    Next attempt
+End Function
