@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html xmlns:mml = "http://www.w3.org/1998/Math/MathML" lang = "en"><head><meta charset = "UTF-8"/><meta name = "copyright" content = "(C) Copyright 2020"/><meta name = "DC.rights.owner" content = "(C) Copyright 2020"/><meta name = "DC.type" content = "reference"/><meta name = "abstract" content = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model."/><meta name = "description" content = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model."/><meta name = "DC.relation" scheme = "URI" content = "simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity"/><meta name = "DC.relation" scheme = "URI" content = "simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening"/><meta name = "DC.relation" scheme = "URI" content = "simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening"/><meta name = "DC.relation" scheme = "URI" content = "simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage"/><meta name = "DC.relation" scheme = "URI" content = "simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEMATRefMap/simamat-c-concretedamaged.htm#simamat-c-concretedamaged"/><meta name = "DC.format" content = "HTML5"/><meta name = "DC.identifier" content = "simakey-r-concretefailure"/><meta name = "DC.language" content = "en"/><link rel = "stylesheet" type = "text/css" href = "../DSDocUI_XML34.css"/><title>*CONCRETE FAILURE</title>
+<script type = "text/javascript" src = "../DSDocUI_Highlight34.js">
+  	/* */
+  	</script><script type = "text/javascript" src = "../MathJax/MathJax.js?config=DS-default,local/local">
+  		/* */
+  		</script></head><body onLoad = "highlightSearchTerms();" id = "simakey-r-concretefailure">
+<a name = "hj-top"> </a><table class = "table1" id = "table11"><tr><td><table class = "DocHeader"><tr><td class = "DocHeader1" colspan = "2"><h1><span class = "ph ph gen-from-keysectiontitle">*</span><span class = "keyword keyword abqkeyword">CONCRETE FAILURE</span></h1></td></tr><tr><td class = "DocHeader4" colspan = "2"/></tr><tr><td class = "DocHeader3"><table class = "DocHeaderIntro" id = "table12"><tr><td class = "Intro1Only"><p class = "header"><p class = "abstract abstract"><span class = "shortdesc shortdesc keyworddef">Specify material failure
+  criteria and allow element deletion for the concrete damaged plasticity
+  material model.</span>
+ 
+  <p>This option is used to define material failure criteria for the concrete damaged plasticity
+      material model. The <a class = "xref xref" href = "simakey-r-concretefailure.htm#simakey-r-concretefailure" title = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model."><span class = "keyword keyword abqkeyword">CONCRETE FAILURE</span></a> option must be used
+      in conjunction with the <a class = "xref xref" href = "simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity" title = "Define flow potential, yield surface, and viscosity parameters for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE DAMAGED PLASTICITY</span></a>, <a class = "xref xref" href = "simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening" title = "Define postcracking properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION STIFFENING</span></a>, and <a class = "xref xref" href = "simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening" title = "Define hardening in compression for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION HARDENING</span></a>
+      options. In addition, the option can be used with the <a class = "xref xref" href = "simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a> and/or
+      <a class = "xref xref" href = "simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage" title = "Define compression damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION DAMAGE</span></a> option to specify
+      material failure criteria based on tensile and/or compressive stiffness degradation damage,
+      respectively. </p></p>
+<p>This page discusses: </p><ul><li><a href = "#simakey-r-concretefailure__simakey-r-concretefailure-paramsoptional" id = "toc_rg" title = "">Optional parameters</a></li><li><a href = "#simakey-r-concretefailure__simakey-r-concretefailure-datadesc1" id = "toc_rg" title = "">Data lines if
+the tensile failure is defined based on a tensile cracking strain criterion (<span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span>)</a></li><li><a href = "#simakey-r-concretefailure__simakey-r-concretefailure-datadesc2" id = "toc_rg" title = "">Data lines if
+the tensile failure is defined based on a tensile cracking displacement
+criterion (<span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span>)</a></li></ul>
+</p></td></tr></table></td><td class = "DocHeader2"><table class = "DocTopicsSeeAlso" id = "table13"><tr><td class = "TopicsTitle">See Also</td></tr><tr><td><a title = "Define flow potential, yield surface, and viscosity parameters for the concrete damaged plasticity model." href = "simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity">*CONCRETE DAMAGED PLASTICITY</a></td></tr><tr><td><a title = "Define postcracking properties for the concrete damaged plasticity model." href = "simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening">*CONCRETE TENSION STIFFENING</a></td></tr><tr><td><a title = "Define hardening in compression for the concrete damaged plasticity model." href = "simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening">*CONCRETE COMPRESSION HARDENING</a></td></tr><tr><td><a title = "Define postcracking damage properties for the concrete damaged plasticity model." href = "simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage">*CONCRETE TENSION DAMAGE</a></td></tr><tr><td><a title = "Define compression damage properties for the concrete damaged plasticity model." href = "simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage">*CONCRETE COMPRESSION DAMAGE</a></td></tr></table><table class = "DocTopicsInOtherGuides" id = "table14"><tr><td height = "8px"/></tr><tr><td class = "TopicsTitleNormal">In Other Guides</td></tr><tr><td><a href = "../SIMACAEMATRefMap/simamat-c-concretedamaged.htm#simamat-c-concretedamaged">Concrete Damaged Plasticity</a></td></tr></table></td></tr></table> 
+
+<div class = "body refbody body refbody abqkeysectionbody"> 
+<div class = "section keygroup kwkeygroup"> 
+<p class = "p keysentry abqproductname"><span class = "keyclass gen-from-abqproductname">Products</span><span class = "ph key exp">Abaqus/Explicit</span></p> <p class = "p keysentry kwtype"><span class = "keyclass gen-from-kwtype">Type</span><span class = "ph key model-data">Model data</span></p> 
+<p class = "p keysentry kwlevel"><span class = "keyclass gen-from-kwlevel">Level</span><span class = "ph key modellevel">Model</span></p> </div> 
+<div class = "section section paramsoptional" id = "simakey-r-concretefailure__simakey-r-concretefailure-paramsoptional"><h2 class = "title sectiontitle title gen-from-paramsoptional">Optional parameters</h2><dl class = "dl dl paramlist"> 
+<dt class = "dt dlterm dt paramhead"><span class = "ph ph abqparameter">DEPENDENCIES</span> </dt><dd class = "dd dd paramlistitem"> 
+<p> Set this parameter equal to the number of field variable dependencies
+  included in the definition of the failure criteria, in addition to temperature.
+  If this parameter is omitted, it is assumed that the failure criteria are
+  constant or depend only on temperature. See 
+  <a class = "xref xref" href = "../SIMACAEMATRefMap/simamat-c-materialdata.htm#simamat-c-materialdata" title = "Each material definition can contain multiple material behaviors, as required, to specify the complete material behavior.">Material Data Definition</a>
+  for more information. 
+</p> </dd>
+<dt class = "dt dlterm dt paramhead"><span class = "ph ph abqparameter">TYPE</span> </dt><dd class = "dd dd paramlistitem"> 
+<p> Set <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span> (default) to specify the tensile failure based on a tensile
+  cracking strain criterion. 
+</p> 
+<p> Set <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span> to specify the tensile failure based on a tensile cracking
+  displacement criterion. 
+</p> </dd></dl></div>
+ 
+<div class = "section section section datadesc" id = "simakey-r-concretefailure__simakey-r-concretefailure-datadesc1"><h2 class = "title sectiontitle title datadesctitle">Data lines if
+the tensile failure is defined based on a tensile cracking strain criterion (<span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span>)</h2> <dl class = "dl dl datalines"><dt class = "dt dlterm dt datalinetitle">First
+line</dt><dd class = "dd dd datalinebody"><ol class = "ol ol dataitemlist"> 
+<li class = "li dataitem paramvaluetype(none)"> 
+<p>Tensile cracking strain at failure, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>.
+  
+</p></li><li class = "li li dataitem"> 
+<p>Compressive inelastic (crushing) strain at failure,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>.
+  
+</p></li><li class = "li li dataitem"> 
+<p>Tensile damage variable at failure, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow></msub><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>,
+  if the 
+  <a class = "xref xref" href = "simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a> option is specified for the material. 
+</p></li><li class = "li li dataitem"><p>Compressive damage variable at failure, <span class = "ph inlineequation ph inlineequation">
+                    <math class = "- topic/foreign ">
+                      <mrow class = "- topic/foreign ">
+                        <msub class = "- topic/foreign ">
+                          <mrow class = "- topic/foreign ">
+                            <mo class = "- topic/foreign ">(</mo>
+                            <msub class = "- topic/foreign ">
+                              <mrow class = "- topic/foreign ">
+                                <mi class = "- topic/foreign ">d</mi>
+                              </mrow>
+                              <mrow class = "- topic/foreign ">
+                                <mi class = "- topic/foreign ">c</mi>
+                              </mrow>
+                            </msub>
+                            <mo class = "- topic/foreign ">)</mo>
+                          </mrow>
+                          <mrow class = "- topic/foreign ">
+                            <mi class = "- topic/foreign ">f</mi>
+                          </mrow>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </span>, if the <a class = "xref xref" href = "simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage" title = "Define compression damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION DAMAGE</span></a>
+                  option is specified for the material. </p></li><li class = "li li dataitem"> 
+<p>Temperature. 
+</p></li><li class = "li li dataitem"> 
+<p>First field variable. 
+</p></li><li class = "li li dataitem"> 
+<p>Second field variable. 
+</p></li><li class = "li li dataitem"> 
+<p>Etc., up to three field variables. 
+</p></li></ol> 
+<p>A material failure criterion is considered only if the corresponding data
+  line entry is positive. 
+</p></dd> <dt class = "dt dlterm dt datalinetitle">Second line (only
+needed if the <span class = "ph ph abqparameter">DEPENDENCIES</span> parameter has a value greater than three)</dt> 
+<dd class = "dd dd datalinebody"><ol class = "ol ol dataitemlist"> <li class = "li dataitem paramvaluetype(none)"> 
+<p>Fourth field variable. 
+</p></li><li class = "li li dataitem"> 
+<p> Etc., up to eight field variables per line. 
+</p></li></ol><p>Repeat this data line as often
+as necessary to define the material failure criteria as a function of
+temperature and other predefined field variables.
+</p></dd></dl></div>
+ 
+<div class = "section section section datadesc" id = "simakey-r-concretefailure__simakey-r-concretefailure-datadesc2"><h2 class = "title sectiontitle title datadesctitle">Data lines if
+the tensile failure is defined based on a tensile cracking displacement
+criterion (<span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span>)</h2> <dl class = "dl dl datalines"><dt class = "dt dlterm dt datalinetitle">First
+line</dt><dd class = "dd dd datalinebody"><ol class = "ol ol dataitemlist"> 
+<li class = "li dataitem paramvaluetype(none)"> 
+<p>Tensile cracking displacement at failure, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>.
+  (Units of <span class = "ph ph units">L</span>.) 
+</p></li><li class = "li li dataitem"> 
+<p>Compressive inelastic (crushing) strain at failure,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>.
+  
+</p></li><li class = "li li dataitem"> 
+<p>Tensile damage variable at failure, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow></msub><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>,
+  if the 
+  <a class = "xref xref" href = "simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a> option is specified for the material. 
+</p></li><li class = "li li dataitem"><p>Compressive damage variable at failure, <span class = "ph inlineequation ph inlineequation">
+                    <math class = "- topic/foreign ">
+                      <mrow class = "- topic/foreign ">
+                        <msub class = "- topic/foreign ">
+                          <mrow class = "- topic/foreign ">
+                            <mo class = "- topic/foreign ">(</mo>
+                            <msub class = "- topic/foreign ">
+                              <mrow class = "- topic/foreign ">
+                                <mi class = "- topic/foreign ">d</mi>
+                              </mrow>
+                              <mrow class = "- topic/foreign ">
+                                <mi class = "- topic/foreign ">c</mi>
+                              </mrow>
+                            </msub>
+                            <mo class = "- topic/foreign ">)</mo>
+                          </mrow>
+                          <mrow class = "- topic/foreign ">
+                            <mi class = "- topic/foreign ">f</mi>
+                          </mrow>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </span>, if the <a class = "xref xref" href = "simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage" title = "Define compression damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION DAMAGE</span></a>
+                  option is specified for the material. </p></li><li class = "li li dataitem"> 
+<p>Temperature. 
+</p></li><li class = "li li dataitem"> 
+<p>First field variable. 
+</p></li><li class = "li li dataitem"> 
+<p>Second field variable. 
+</p></li><li class = "li li dataitem"> 
+<p>Etc., up to three field variables. 
+</p> </li></ol> 
+<p>A material failure criterion is considered only if the corresponding data
+  line entry is positive. 
+</p></dd> <dt class = "dt dlterm dt datalinetitle">Second line (only
+needed if the <span class = "ph ph abqparameter">DEPENDENCIES</span> parameter has a value greater than three)</dt> 
+<dd class = "dd dd datalinebody"><ol class = "ol ol dataitemlist"> <li class = "li dataitem paramvaluetype(none)"> 
+<p>Fourth field variable. 
+</p></li><li class = "li li dataitem"> 
+<p> Etc., up to eight field variables per line. 
+</p></li></ol><p>Repeat this data line as often
+as necessary to define the material failure criteria as a function of
+temperature and other predefined field variables.
+</p></dd></dl></div>
+</div>
+
+
+<div class = "related-links related-links"/></td></tr></table><script type = "text/javascript" src = "../DSDocUI_Bottom34.js">/* */</script></body>
+</html>

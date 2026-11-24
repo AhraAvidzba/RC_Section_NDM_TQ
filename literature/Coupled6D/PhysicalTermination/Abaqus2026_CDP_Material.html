@@ -1,0 +1,1066 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html xmlns:mml = "http://www.w3.org/1998/Math/MathML" lang = "en"><head><meta charset = "UTF-8"/><meta name = "copyright" content = "(C) Copyright 2020"/><meta name = "DC.rights.owner" content = "(C) Copyright 2020"/><meta name = "DC.type" content = "concept"/><meta name = "DC.relation" scheme = "URI" content = "simamat-c-library.htm"/><meta name = "DC.relation" scheme = "URI" content = "simamat-c-plastic.htm"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAEKEYRefMap/simakey-r-concretefailure.htm#simakey-r-concretefailure"/><meta name = "DC.relation" scheme = "URI" content = "../SIMACAECAERefMap/simacae-m-PrpMechanicalPlasticConcretedamaged-sb.htm"/><meta name = "DC.format" content = "HTML5"/><meta name = "DC.identifier" content = "simamat-c-concretedamaged"/><meta name = "DC.language" content = "en"/><link rel = "stylesheet" type = "text/css" href = "../DSDocUI_XML34.css"/><title>Concrete Damaged Plasticity</title>
+<script type = "text/javascript" src = "../DSDocUI_Highlight34.js">
+  	/* */
+  	</script><script type = "text/javascript" src = "../MathJax/MathJax.js?config=DS-default,local/local">
+  		/* */
+  		</script></head><body onLoad = "highlightSearchTerms();" id = "simamat-c-concretedamaged">
+<a name = "hj-top"> </a><table class = "table1" id = "table11"><tr><td><table class = "DocHeader"><tr><td class = "DocHeader1" colspan = "2"><h1>Concrete Damaged Plasticity</h1></td></tr><tr><td class = "DocHeader4" colspan = "2"/></tr><tr><td class = "DocHeader3"><table class = "DocHeaderIntro" id = "table12"><tr><td class = "Intro1Only"><p class = "abstract abstract"> 
+  <p>The concrete damaged plasticity model in 
+	 <span class = "ph ph">Abaqus</span>:
+	 
+  </p> 
+  <ul class = "ul ul"> 
+	 <li class = "li li"> 
+		<p>provides a general capability for modeling concrete and other
+		  quasi-brittle materials in all types of structures (beams, trusses, shells, and
+		  solids); 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>uses concepts of isotropic damaged elasticity in combination with
+		  isotropic tensile and compressive plasticity to represent the inelastic
+		  behavior of concrete; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>can be used for plain concrete, even though it is intended primarily
+		  for the analysis of reinforced concrete structures; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>can be used with rebar to model concrete reinforcement; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>is designed for applications in which concrete is subjected to
+		  monotonic, cyclic, and/or dynamic loading under low confining pressures; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>consists of the combination of nonassociated multi-hardening
+		  plasticity and scalar (isotropic) damaged elasticity to describe the
+		  irreversible damage that occurs during the fracturing process; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>allows user control of stiffness recovery effects during cyclic load
+		  reversals; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>allows removal of elements based on material failure criteria; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>can be defined to be sensitive to the rate of straining; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>can be used in conjunction with a viscoplastic regularization of the
+		  constitutive equations in 
+		  <span class = "ph ph">Abaqus/Standard</span>
+		  to improve the convergence rate in the softening regime; 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>requires that the elastic behavior of the material be isotropic and
+		  linear (see 
+		  <a class = "xref xref" href = "simamat-c-linearelastic.htm#simamat-c-linearelastic-isotropic">Defining Isotropic Elasticity</a>);
+		  and 
+		</p> 
+	 </li> 
+	 <li class = "li li"> 
+		<p>is defined in detail in 
+		  <a class = "xref xref" href = "../SIMACAETHERefMap/simathe-c-concretedamaged.htm" title = "This section describes the concrete damaged plasticity model provided in Abaqus for the analysis of concrete and other quasi-brittle materials.">Damaged plasticity model for concrete and other quasi-brittle materials</a>.
+		  
+		</p> 
+	 </li> 
+  </ul> 
+  <p>See 
+	 <a class = "xref xref" href = "simamat-c-plastic.htm" title = "The material library in Abaqus includes several models of inelastic behavior.">Inelastic Behavior</a>
+	 for a discussion of the concrete models available in 
+	 <span class = "ph ph">Abaqus</span>.
+	 
+  </p> 
+  <p>This page discusses: </p><ul><li><a href = "#simamat-c-concretedamaged-t-MechanicalBehavior-sma-topic1" id = "toc_rg" title = "">Mechanical Behavior</a></li><li><a href = "#simamat-c-concretedamaged-t-Reinforcement-sma-topic5" id = "toc_rg" title = "">Reinforcement</a></li><li><a href = "#simamat-c-concretedamaged-tensionstiffening" id = "toc_rg" title = "">Defining Tension Stiffening</a></li><li><a href = "#simamat-c-concretedamaged-compressivehardening" id = "toc_rg" title = "">Defining Compressive Behavior</a></li><li><a href = "#simamat-c-concretedamaged-damage" id = "toc_rg" title = "">Defining Damage and Stiffness Recovery</a></li><li><a href = "#simamat-c-concretedamaged-t-conretefailure" id = "toc_rg" title = "">Defining Material Failure Criteria in    <span class = "ph ph">Abaqus/Explicit</span></a></li><li><a href = "#simamat-c-concretedamaged-t-RateDependence-sma-topic14" id = "toc_rg" title = "">Rate Dependence</a></li><li><a href = "#simamat-c-concretedamaged-t-ConcretePlasticity-sma-topic15" id = "toc_rg" title = "">Concrete Plasticity</a></li><li><a href = "#simamat-c-concretedamaged-t-MaterialDamping-sma-topic21" id = "toc_rg" title = "">Material Damping</a></li><li><a href = "#simamat-c-concretedamaged-t-VisualizationOfldquocrackDirectionsrdquo-sma-topic22" id = "toc_rg" title = "">Visualization of “Crack Directions”</a></li><li><a href = "#simamat-c-concretedamaged-t-elemsect1" id = "toc_rg" title = "">Elements</a></li><li><a href = "#simamat-c-concretedamaged-t-outputsect1" id = "toc_rg" title = "">Output</a></li><li><a href = "#simamat-c-concretedamaged-t-bibliography-c1" id = "toc_rg" title = "">References</a></li></ul>
+</p></td></tr></table></td><td class = "DocHeader2"><table class = "DocTopicsSeeAlso" id = "table13"><tr><td class = "TopicsTitle">See Also</td></tr><tr><td><a title = "The material library in Abaqus is intended to provide comprehensive coverage of both linear and nonlinear, isotropic and anisotropic material behaviors." href = "simamat-c-library.htm">About the Material Library</a></td></tr><tr><td><a title = "The material library in Abaqus includes several models of inelastic behavior." href = "simamat-c-plastic.htm">Inelastic Behavior</a></td></tr></table><table class = "DocTopicsInOtherGuides" id = "table14"><tr><td height = "8px"/></tr><tr><td class = "TopicsTitleNormal">In Other Guides</td></tr><tr><td><a title = "Define flow potential, yield surface, and viscosity parameters for the concrete damaged plasticity model." href = "../SIMACAEKEYRefMap/simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity">*CONCRETE DAMAGED PLASTICITY</a></td></tr><tr><td><a title = "Define postcracking properties for the concrete damaged plasticity model." href = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening">*CONCRETE TENSION STIFFENING</a></td></tr><tr><td><a title = "Define hardening in compression for the concrete damaged plasticity model." href = "../SIMACAEKEYRefMap/simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening">*CONCRETE COMPRESSION HARDENING</a></td></tr><tr><td><a title = "Define postcracking damage properties for the concrete damaged plasticity model." href = "../SIMACAEKEYRefMap/simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage">*CONCRETE TENSION DAMAGE</a></td></tr><tr><td><a title = "Define compression damage properties for the concrete damaged plasticity model." href = "../SIMACAEKEYRefMap/simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage">*CONCRETE COMPRESSION DAMAGE</a></td></tr><tr><td><a title = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model." href = "../SIMACAEKEYRefMap/simakey-r-concretefailure.htm#simakey-r-concretefailure">*CONCRETE FAILURE</a></td></tr><tr><td><a title = "The concrete damaged plasticity model provides a general capability for modeling concrete and other quasi-brittle materials in all types of structures." href = "../SIMACAECAERefMap/simacae-m-PrpMechanicalPlasticConcretedamaged-sb.htm">Defining concrete damaged plasticity</a></td></tr></table></td></tr></table> 
+
+<div class = "body conbody body conbody abqmaterialsection-body"> 
+<div class = "section keygroup smakeygroup"> 
+<p class = "p keysentry abqproductname"><span class = "keyclass gen-from-abqproductname">Products</span><span class = "ph key std">Abaqus/Standard</span><span class = "ph key exp">Abaqus/Explicit</span><span class = "ph key cae">Abaqus/CAE</span></p></div></div>
+ 
+<div class = "related-links related-links"/> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title2" id = "simamat-c-concretedamaged-t-MechanicalBehavior-sma-topic1"> 
+<h2 class = "title topictitle2 title">Mechanical Behavior</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The model is a continuum, plasticity-based, damage model for concrete. It
+  assumes that the main two failure mechanisms are tensile cracking and
+  compressive crushing of the concrete material. The evolution of the yield (or
+  failure) surface is controlled by two hardening variables,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>,
+  linked to failure mechanisms under tension and compression loading,
+  respectively. We refer to <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  as tensile and compressive equivalent plastic strains, respectively. The
+  following sections discuss the main assumptions about the mechanical behavior
+  of concrete. 
+</p></div>
+ 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title3" id = "simamat-c-concretedamaged-t-UniaxialTensionAndCompressionStressBehavior-sma-topic1">
+
+<h3 class = "title topictitle3 title">Uniaxial Tension and Compression Stress Behavior</h3>
+<div class = "body conbody body conbody sma-topic-body">
+
+<p>The model assumes that the uniaxial tensile and compressive response of
+  concrete is characterized by damaged plasticity, as shown in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-UniaxialTensionAndCompressionStressBehavior-sma-topic1__simamat-c-concrete-uniaxial">Figure 1</a>.
+  
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-UniaxialTensionAndCompressionStressBehavior-sma-topic1__simamat-c-concrete-uniaxial"><span class = "figcap">Figure 1. Response of concrete to uniaxial loading in tension (a) and
+	 compression (b).</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-uniaxial.png"/><br/> 
+   
+</figure> 
+<p>Under uniaxial tension the stress-strain response follows a linear elastic
+  relationship until the value of the failure stress, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></math></span>,
+  is reached. The failure stress corresponds to the onset of micro-cracking in
+  the concrete material. Beyond the failure stress the formation of micro-cracks
+  is represented macroscopically with a softening stress-strain response, which
+  induces strain localization in the concrete structure. Under uniaxial
+  compression the response is linear until the value of initial yield,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></math></span>.
+  In the plastic regime the response is typically characterized by stress
+  hardening followed by strain softening beyond the ultimate stress,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">u</mi></mrow></msub></math></span>.
+  This representation, although somewhat simplified, captures the main features
+  of the response of concrete. 
+</p> 
+<p>It is assumed that the uniaxial stress-strain curves can be converted into
+  stress versus plastic-strain curves. (This conversion is performed
+  automatically by 
+  <span class = "ph ph">Abaqus</span>
+  from the user-provided stress versus “inelastic” strain data, as explained
+  below.) Thus, 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>where the subscripts <span class = "ph ph sma-emphasis">t</span> and
+  <span class = "ph ph sma-emphasis">c</span> refer to tension and compression, respectively;
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  are the equivalent plastic strains, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  are the equivalent plastic strain rates, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi></math></span>
+  is the temperature, and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub><mo class = "- topic/foreign ">,</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">,</mo><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">,</mo><mi mathvariant = "normal" class = "- topic/foreign ">…</mi><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span>
+  are other predefined field variables. 
+</p> 
+<p>As shown in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-UniaxialTensionAndCompressionStressBehavior-sma-topic1__simamat-c-concrete-uniaxial">Figure 1</a>,
+  when the concrete specimen is unloaded from any point on the strain softening
+  branch of the stress-strain curves, the unloading response is weakened: the
+  elastic stiffness of the material appears to be damaged (or degraded). The
+  degradation of the elastic stiffness is characterized by two damage variables,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>,
+  which are assumed to be functions of the plastic strains, temperature, and
+  field variables: 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">;</mo><mn class = "- topic/foreign ">   0</mn><mo class = "- topic/foreign ">≤</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">,</mo><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">;</mo><mn class = "- topic/foreign ">   0</mn><mo class = "- topic/foreign ">≤</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1.</mn></mrow></mtd></mtr></mtable></math></div>
+
+<p>The damage variables can take values from zero, representing the undamaged
+  material, to one, which represents total loss of strength. 
+</p> 
+<p>If <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></math></span>
+  is the initial (undamaged) elastic stiffness of the material, the stress-strain
+  relations under uniaxial tension and compression loading are, respectively: 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>We define the “effective” tensile and compressive cohesion stresses as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">t</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mfrac><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">c</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mfrac><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">.</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>The effective cohesion stresses determine the size of the yield (or failure)
+  surface. 
+</p></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title4" id = "simamat-c-concretedamaged-t-UniaxialCyclicBehavior-sma-topic2"> 
+<h3 class = "title topictitle3 title">Uniaxial Cyclic Behavior</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>Under uniaxial cyclic loading conditions the degradation mechanisms are
+  quite complex, involving the opening and closing of previously formed
+  micro-cracks, as well as their interaction. Experimentally, it is observed that
+  there is some recovery of the elastic stiffness as the load changes sign during
+  a uniaxial cyclic test. The stiffness recovery effect, also known as the
+  “unilateral effect,” is an important aspect of the concrete behavior under
+  cyclic loading. The effect is usually more pronounced as the load changes from
+  tension to compression, causing tensile cracks to close, which results in the
+  recovery of the compressive stiffness. 
+</p> 
+<p>The concrete damaged plasticity model assumes that the reduction of the
+  elastic modulus is given in terms of a scalar degradation variable
+  <span class = "ph ph mathterm">d</span> as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">d</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></math></span>
+  is the initial (undamaged) modulus of the material. 
+</p> 
+<p>This expression holds both in the tensile (<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&gt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>)
+  and the compressive (<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&lt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>)
+  sides of the cycle. The stiffness degradation variable, <span class = "ph ph mathterm">d</span>,
+  is a function of the stress state and the uniaxial damage variables,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>.
+  For the uniaxial cyclic conditions 
+  <span class = "ph ph">Abaqus</span>
+  assumes that 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">d</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>
+  are functions of the stress state that are introduced to model stiffness
+  recovery effects associated with stress reversals. They are defined according
+  to 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">t</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">;</mo><mn class = "- topic/foreign ">   0</mn><mo class = "- topic/foreign ">≤</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">c</mi></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">;</mo><mn class = "- topic/foreign ">    0</mn><mo class = "- topic/foreign ">≤</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>where 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">=</mo><mi class = "- topic/foreign ">H</mi><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">{</mo><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "center" class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn></mtd><mtd columnalign = "center" class = "- topic/foreign "><mi class = "- topic/foreign ">if</mi></mtd><mtd columnalign = "center" class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&gt;</mo><mn class = "- topic/foreign ">0</mn></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "center" class = "- topic/foreign "><mn class = "- topic/foreign ">0</mn></mtd><mtd columnalign = "center" class = "- topic/foreign "><mi class = "- topic/foreign ">if</mi></mtd><mtd columnalign = "center" class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&lt;</mo><mn class = "- topic/foreign ">0</mn></mrow></mtd></mtr></mtable></mrow></mrow></math></div>
+
+<p>The weight factors <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>,
+  which are assumed to be material properties, control the recovery of the
+  tensile and compressive stiffness upon load reversal. To illustrate this,
+  consider the example in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-UniaxialCyclicBehavior-sma-topic2__simamat-c-concrete-wc">Figure 2</a>,
+  where the load changes from tension to compression. 
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-UniaxialCyclicBehavior-sma-topic2__simamat-c-concrete-wc"><span class = "figcap">Figure 2. Illustration of the effect of the compression stiffness recovery
+	 parameter <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>.</span> 
+  
+  
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-wc-nls.png"/><br/> 
+   
+</figure> 
+<p>Assume that there was no previous compressive damage (crushing) in the
+  material; that is, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>.
+  Then 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">d</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">s</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<ul class = "ul ul"> 
+  <li class = "li li"> 
+	 <p>In tension (<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&gt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>),
+		<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow></math></span>;
+		therefore, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></math></span>
+		as expected. 
+	 </p> 
+  </li> 
+  <li class = "li li"> 
+	 <p>In compression (<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">&lt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>),
+		<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>,
+		and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></mrow></math></span>.
+		If <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow></math></span>,
+		then <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>;
+		therefore, the material fully recovers the compressive stiffness (which in this
+		case is the initial undamaged stiffness, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mrow></math></span>).
+		If, on the other hand, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>,
+		then <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow></math></span>
+		and there is no stiffness recovery. Intermediate values of
+		<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>
+		result in partial recovery of the stiffness. 
+	 </p> 
+  </li> 
+</ul></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title5" id = "simamat-c-concretedamaged-t-MultiaxialBehavior-sma-topic3"> 
+<h3 class = "title topictitle3 title">Multiaxial Behavior</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The stress-strain relations for the general three-dimensional multiaxial
+  condition are given by the scalar damage elasticity equation: 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">d</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msubsup class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">D</mi><mn class = "- topic/foreign ">0</mn><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow></mrow><mo class = "- topic/foreign ">:</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">-</mo><msup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">D</mi><mn class = "- topic/foreign ">0</mn><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  is the initial (undamaged) elasticity matrix. 
+</p> 
+<p>The previous expression for the scalar stiffness degradation variable,
+  <span class = "ph ph mathterm">d</span>, is generalized to the multiaxial stress case by
+  replacing the unit step function <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">*</mo></msup><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mn class = "- topic/foreign ">11</mn></msub><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span>
+  with a multiaxial stress weight factor, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">^</mo></mover><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span>,
+  defined as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mover accent = "true" class = "- topic/foreign "><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">^</mo></mrow></mover><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">=</mo><mfrac class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mo movablelimits = "false" class = "- topic/foreign ">∑</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">3</mn></mrow></msubsup></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">⟨</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">^</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi></mrow></msub><mo class = "- topic/foreign ">⟩</mo></mrow></mrow><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">∑</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">3</mn></mrow></msubsup><mrow class = "- topic/foreign "><mo fence = "true" class = "- topic/foreign ">|</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">^</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi></mrow></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow></mrow></mfrac></mrow><mo class = "- topic/foreign ">;</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">   0</mn><mo class = "- topic/foreign ">≤</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">r</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mover accent = "true" class = "- topic/foreign "><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">^</mo></mrow></mover><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1</mn></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">^</mo></mover><mi class = "- topic/foreign ">i</mi></msub><mo mathvariant = "italic" separator = "true" class = "- topic/foreign ">    </mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">,</mo><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">,</mo><mn class = "- topic/foreign ">3</mn><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span>
+  are the principal stress components. The Macauley bracket
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">⟨</mo><mo class = "- topic/foreign ">⋅</mo><mo class = "- topic/foreign ">⟩</mo></mrow></math></span>
+  is defined by <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">⟨</mo><mi class = "- topic/foreign ">x</mi><mo class = "- topic/foreign ">⟩</mo></mrow><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mn class = "- topic/foreign ">2</mn></mfrac><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo fence = "true" class = "- topic/foreign ">|</mo><mi class = "- topic/foreign ">x</mi><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mo class = "- topic/foreign ">+</mo><mi class = "- topic/foreign ">x</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow></math></span>.
+  
+</p> 
+<p>See 
+  <a class = "xref xref" href = "../SIMACAETHERefMap/simathe-c-concretedamaged.htm" title = "This section describes the concrete damaged plasticity model provided in Abaqus for the analysis of concrete and other quasi-brittle materials.">Damaged plasticity model for concrete and other quasi-brittle materials</a>
+  for further details of the constitutive model. 
+</p></div>
+</article></article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title6" id = "simamat-c-concretedamaged-t-Reinforcement-sma-topic5"> 
+<h2 class = "title topictitle2 title">Reinforcement</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>In 
+  <span class = "ph ph">Abaqus</span>
+  reinforcement in concrete structures is typically provided by means of rebars,
+  which are one-dimensional rods that can be defined singly or embedded in
+  oriented surfaces. Rebars are typically used with metal plasticity models to
+  describe the behavior of the rebar material and are superposed on a mesh of
+  standard element types used to model the concrete. 
+</p> 
+<p>With this modeling approach, the concrete behavior is considered
+  independently of the rebar. Effects associated with the rebar/concrete
+  interface, such as bond slip and dowel action, are modeled approximately by
+  introducing some “tension stiffening” into the concrete modeling to simulate
+  load transfer across cracks through the rebar. Details regarding tension
+  stiffening are provided below. 
+</p> 
+<p>Defining the rebar can be tedious in complex problems, but it is important
+  that this be done accurately since it may cause an analysis to fail due to lack
+  of reinforcement in key regions of a model. See 
+  <a class = "xref xref" href = "../SIMACAEMODRefMap/simamod-c-rebar.htm" title = "You can define rebar in shell, membrane, continuum, and beam elements as an element property.">Defining Rebar as an Element Property</a>
+  for more information regarding rebars. 
+</p></div>
+</article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title7" id = "simamat-c-concretedamaged-tensionstiffening"> 
+<h2 class = "title topictitle2 title">Defining Tension Stiffening</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The postfailure behavior for direct straining is modeled with tension
+  stiffening, which allows you to define the strain-softening behavior for
+  cracked concrete. This behavior also allows for the effects of the
+  reinforcement interaction with concrete to be simulated in a simple manner.
+  Tension stiffening is required in the concrete damaged plasticity model. You
+  can specify tension stiffening by means of a postfailure stress-strain relation
+  or by applying a fracture energy cracking criterion. 
+</p></div>
+ 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title8" id = "simamat-c-concretedamaged-t-PostfailureStressstrainRelation-sma-topic6"> 
+<h3 class = "title topictitle3 title">Postfailure Stress-Strain Relation</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>In reinforced concrete the specification of postfailure behavior generally
+  means giving the postfailure stress as a function of cracking strain,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></math></span>.
+  The cracking strain is defined as the total strain minus the elastic strain
+  corresponding to the undamaged material; that is, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">0</mn><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow></mrow></math></span>,
+  where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">0</mn><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mrow></mrow></math></span>,
+  as illustrated in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-PostfailureStressstrainRelation-sma-topic6__simamat-c-concrete-crackstrain">Figure 3</a>.
+  To avoid potential numerical problems, 
+  <span class = "ph ph">Abaqus</span>
+  enforces a lower limit on the postfailure stress equal to one-hundreth of the
+  initial failure stress: <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">≥</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">/</mo><mn class = "- topic/foreign ">100</mn></mrow></mrow></math></span>.
+  
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-PostfailureStressstrainRelation-sma-topic6__simamat-c-concrete-crackstrain"><span class = "figcap">Figure 3. Illustration of the definition of the cracking strain
+	 <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></math></span>
+	 used for the definition of tension stiffening data.</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-crackstrain.png"/><br/> 
+   
+</figure> 
+<p>Tension stiffening data are given in terms of the cracking strain,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></math></span>.
+  When unloading data are available, the data are provided to 
+  <span class = "ph ph">Abaqus</span>
+  in terms of tensile damage curves, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></mrow></math></span>,
+  as discussed below. 
+  <span class = "ph ph">Abaqus</span>
+  automatically converts the cracking strain values to plastic strain values
+  using the relationship 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mfrac><mo class = "- topic/foreign ">⁢</mo><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mfrac></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<p><span class = "ph ph">Abaqus</span>
+  will issue an error message if the calculated plastic strain values are
+  negative and/or decreasing with increasing cracking strain, which typically
+  indicates that the tensile damage curves are incorrect. In the absence of
+  tensile damage <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></mrow></math></span>.
+  
+</p> 
+<p>In cases with little or no reinforcement, the specification of a postfailure
+  stress-strain relation introduces mesh sensitivity in the results, in the sense
+  that the finite element predictions do not converge to a unique solution as the
+  mesh is refined because mesh refinement leads to narrower crack bands. This
+  problem typically occurs if cracking failure occurs only at localized regions
+  in the structure and mesh refinement does not result in the formation of
+  additional cracks. If cracking failure is distributed evenly (either due to the
+  effect of rebar or due to the presence of stabilizing elastic material, as in
+  the case of plate bending), mesh sensitivity is less of a concern. 
+</p> 
+<p>In practical calculations for reinforced concrete, the mesh is usually such
+  that each element contains rebars. The interaction between the rebars and the
+  concrete tends to reduce the mesh sensitivity, provided that a reasonable
+  amount of tension stiffening is introduced in the concrete model to simulate
+  this interaction. This requires an estimate of the tension stiffening effect,
+  which depends on such factors as the density of reinforcement, the quality of
+  the bond between the rebar and the concrete, the relative size of the concrete
+  aggregate compared to the rebar diameter, and the mesh. A reasonable starting
+  point for relatively heavily reinforced concrete modeled with a fairly detailed
+  mesh is to assume that the strain softening after failure reduces the stress
+  linearly to zero at a total strain of about 10 times the strain at failure. The
+  strain at failure in standard concretes is typically 10<sup class = "ph sup ph sup">−4</sup>, which
+  suggests that tension stiffening that reduces the stress to zero at a total
+  strain of about 10<sup class = "ph sup ph sup">−3</sup> is reasonable. This parameter should be
+  calibrated to a particular case. 
+</p> 
+<p>The choice of tension stiffening parameters is important since, generally,
+  more tension stiffening makes it easier to obtain numerical solutions. Too
+  little tension stiffening will cause the local cracking failure in the concrete
+  to introduce temporarily unstable behavior in the overall response of the
+  model. Few practical designs exhibit such behavior, so that the presence of
+  this type of response in the analysis model usually indicates that the tension
+  stiffening is unreasonably low. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening" title = "Define postcracking properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION STIFFENING</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span> (default)</pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Tensile Behavior</span>: <span class = "ph ph guilabel">Type: Strain</span></pre></figure></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title9" id = "simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7"> 
+<h3 class = "title topictitle3 title">Fracture Energy Cracking Criterion</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>When there is no reinforcement in significant regions of the model, the
+  tension stiffening approach described above will introduce unreasonable mesh
+  sensitivity into the results. However, it is generally accepted that
+  Hillerborg's (1976) fracture energy proposal is adequate to allay the concern
+  for many practical purposes. Hillerborg defines the energy required to open a
+  unit area of crack, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi><mi class = "- topic/foreign ">f</mi></msub></math></span>,
+  as a material parameter, using brittle fracture concepts. With this approach
+  the concrete's brittle behavior is characterized by a stress-displacement
+  response rather than a stress-strain response. Under tension a concrete
+  specimen will crack across some section. After it has been pulled apart
+  sufficiently for most of the stress to be removed (so that the undamaged
+  elastic strain is small), its length will be determined primarily by the
+  opening at the crack. The opening does not depend on the specimen's length. 
+</p> 
+<p>This fracture energy cracking model can be invoked by specifying the
+  postfailure stress as a tabular function of cracking displacement, as shown in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7__simamat-c-concretetensstiff-disp">Figure 4</a>.
+  
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7__simamat-c-concretetensstiff-disp"><span class = "figcap">Figure 4. Postfailure stress-displacement curve.</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-dep.png"/><br/> 
+   
+</figure> 
+<p>Alternatively, the fracture energy, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi><mi class = "- topic/foreign ">f</mi></msub></math></span>,
+  can be specified directly as a material property; in this case, define the
+  failure stress, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></math></span>,
+  as a tabular function of the associated fracture energy. This model assumes a
+  linear loss of strength after cracking, as shown in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7__simamat-c-concretetensstiff-gfi">Figure 5</a>.
+  
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7__simamat-c-concretetensstiff-gfi"><span class = "figcap">Figure 5. Postfailure stress-fracture energy curve.</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-gfi.png"/><br/> 
+   
+</figure> 
+<p>The cracking displacement at which complete loss of strength takes place is,
+  therefore, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi><mi class = "- topic/foreign ">f</mi></msub></mrow><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></mrow></mrow></math></span>.
+  Typical values of <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi><mi class = "- topic/foreign ">f</mi></msub></math></span>
+  range from 40 N/m (0.22 lb/in) for a typical construction concrete (with a
+  compressive strength of approximately 20 MPa, 2850 lb/in<sup class = "ph sup ph sup">2</sup>) to 120
+  N/m (0.67 lb/in) for a high-strength concrete (with a compressive strength of
+  approximately 40 MPa, 5700 lb/in<sup class = "ph sup ph sup">2</sup>). 
+</p> 
+<p>If tensile damage, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>,
+  is specified, 
+  <span class = "ph ph">Abaqus</span>
+  automatically converts the cracking displacement values to “plastic”
+  displacement values using the relationship 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mfrac><mo class = "- topic/foreign ">⁢</mo><mfrac class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">l</mi><mn class = "- topic/foreign ">0</mn></msub></mrow><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mfrac></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+        <p>where <span class = "ph inlineequation ph inlineequation">
+            <math class = "- topic/foreign ">
+              <msub class = "- topic/foreign ">
+                <mi class = "- topic/foreign ">l</mi>
+                <mn class = "- topic/foreign ">0</mn>
+              </msub>
+            </math>
+          </span> is the specimen length. By default, <span class = "ph ph">Abaqus</span> assumes <span class = "ph inlineequation ph inlineequation">
+            <math class = "- topic/foreign ">
+              <msub class = "- topic/foreign ">
+                <mi class = "- topic/foreign ">l</mi>
+                <mn class = "- topic/foreign ">0</mn>
+              </msub>
+            </math>
+          </span> to be one unit length (<span class = "ph inlineequation ph inlineequation">
+            <math class = "- topic/foreign ">
+              <mrow class = "- topic/foreign ">
+                <msub class = "- topic/foreign ">
+                  <mi class = "- topic/foreign ">l</mi>
+                  <mn class = "- topic/foreign ">0</mn>
+                </msub>
+                <mo class = "- topic/foreign ">=</mo>
+                <mn class = "- topic/foreign ">1</mn>
+              </mrow>
+            </math>
+          </span>). However, it is recommended that you specify this value directly in the
+          material definition to properly account for the length units.</p>
+        <figure class = "fig fignone fig usage"><p>Input File Usage</p>
+          <pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity" title = "Define flow potential, yield surface, and viscosity parameters for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE DAMAGED PLASTICITY</span></a>, <span class = "ph ph abqparameter">REF LENGTH</span>=<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign ">
+                <mrow class = "- topic/foreign ">
+                  <msub class = "- topic/foreign ">
+                    <mrow class = "- topic/foreign ">
+                      <mi class = "- topic/foreign ">l</mi>
+                    </mrow>
+                    <mrow class = "- topic/foreign ">
+                      <mn class = "- topic/foreign ">0</mn>
+                    </mrow>
+                  </msub>
+                </mrow>
+              </math></span></pre>
+        </figure>
+        <figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p>
+          <p>Specifying the specimen length is not supported in <span class = "ph ph">Abaqus/CAE</span>.</p>
+        </figure> 
+<div class = "section section" id = "simamat-c-concretedamaged-t-FractureEnergyCrackingCriterion-sma-topic7__simamat-c-concretedamaged-s-Implementation-section1"><h4 class = "title sectiontitle title">Implementation</h4> 
+   
+  <p>The implementation of this stress-displacement concept in a finite element
+	 model requires the definition of a characteristic length associated with an
+	 integration point. The characteristic crack length is based on the element
+	 geometry and formulation: it is a typical length of a line across an element
+	 for a first-order element; it is half of the same typical length for a
+	 second-order element. For beams and trusses it is a characteristic length along
+	 the element axis. For membranes and shells it is a characteristic length in the
+	 reference surface. For axisymmetric elements it is a characteristic length in
+	 the <span class = "ph ph mathterm">r</span>–<span class = "ph ph mathterm">z</span> plane only. For cohesive
+	 elements it is equal to the constitutive thickness. This definition of the
+	 characteristic crack length is used because the direction in which cracking
+	 occurs is not known in advance. Therefore, elements with large aspect ratios
+	 will have rather different behavior depending on the direction in which they
+	 crack: some mesh sensitivity remains because of this effect, and elements that
+	 have aspect ratios close to one are recommended. Alternatively, this mesh
+	 dependency could be reduced by directly specifying the characteristic length as
+	 a function of the element topology and material orientation in user subroutine 
+	 <a class = "xref xref" href = "../SIMACAESUBRefMap/simasub-c-vucharlength.htm#simasub-c-vucharlength" title = "User subroutine to define characteristic element length at a material point."><span class = "keyword keyword abqusersub">VUCHARLENGTH</span></a> (see 
+	 <a class = "xref xref" href = "simamat-c-materialdata.htm#simamat-c-materialdata-charlength">Defining the Characteristic Element Length at a Material Point in Abaqus/Explicit</a>).
+	 
+  </p><figure class = "fig fignone fig usage"><p>Input File Usage</p><p>Use the following option to specify the postfailure stress
+  as a tabular function of displacement:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening" title = "Define postcracking properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION STIFFENING</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span></pre><p>Use the following option to specify the postfailure stress as
+  a tabular function of the fracture energy:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening" title = "Define postcracking properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION STIFFENING</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">GFI</span></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Tensile Behavior</span>: <span class = "ph ph guilabel">Type: Displacement</span> or <span class = "ph ph guilabel">GFI</span></pre></figure> 
+</div>
+</div>
+</article></article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title10" id = "simamat-c-concretedamaged-compressivehardening"> 
+<h2 class = "title topictitle2 title">Defining Compressive Behavior</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>You can define the stress-strain behavior of plain concrete in uniaxial
+  compression outside the elastic range. Compressive stress data are provided as
+  a tabular function of inelastic (or crushing) strain, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></math></span>,
+  and, if desired, strain rate, temperature, and field variables. Positive
+  (absolute) values should be given for the compressive stress and strain. The
+  stress-strain curve can be defined beyond the ultimate stress, into the
+  strain-softening regime. 
+</p> 
+<p>Hardening data are given in terms of an inelastic strain,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></math></span>,
+  instead of plastic strain, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>.
+  The compressive inelastic strain is defined as the total strain minus the
+  elastic strain corresponding to the undamaged material,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">0</mn><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow></mrow></math></span>,
+  where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">0</mn><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mrow></mrow></math></span>,
+  as illustrated in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-compressivehardening__simamat-c-concrete-inelstrain">Figure 6</a>.
+  
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-compressivehardening__simamat-c-concrete-inelstrain"><span class = "figcap">Figure 6. Definition of the compressive inelastic (or crushing) strain
+	 <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></math></span>
+	 used for the definition of compression hardening data.</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-inelstrain.png"/><br/> 
+   
+</figure> 
+<p>Unloading data are provided to 
+  <span class = "ph ph">Abaqus</span>
+  in terms of compressive damage curves, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></mrow></math></span>,
+  as discussed below. 
+  <span class = "ph ph">Abaqus</span>
+  automatically converts the inelastic strain values to plastic strain values
+  using the relationship 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mfrac><mo class = "- topic/foreign ">⁢</mo><mfrac class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">c</mi></msub><msub class = "- topic/foreign "><mi class = "- topic/foreign ">E</mi><mn class = "- topic/foreign ">0</mn></msub></mfrac></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<p><span class = "ph ph">Abaqus</span>
+  will issue an error message if the calculated plastic strain values are
+  negative and/or decreasing with increasing inelastic strain, which typically
+  indicates that the compressive damage curves are incorrect. In the absence of
+  compressive damage <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></mrow></math></span>.
+  
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening" title = "Define hardening in compression for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION HARDENING</span></a></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Compressive Behavior</span></pre></figure></div>
+</article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title11" id = "simamat-c-concretedamaged-damage"> 
+<h2 class = "title topictitle2 title">Defining Damage and Stiffness Recovery</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>Damage, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and/or <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>,
+  can be specified in tabular form. (If damage is not specified, the model
+  behaves as a plasticity model; consequently, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">k</mi></mrow></msubsup></mrow></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">n</mi></mrow></msubsup></mrow></math></span>.)
+  
+</p> 
+<p>In 
+  <span class = "ph ph">Abaqus</span>
+  the damage variables are treated as non-decreasing material point quantities.
+  At any increment during the analysis, the new value of each damage variable is
+  obtained as the maximum between the value at the end of the previous increment
+  and the value corresponding to the current state (interpolated from the
+  user-specified tabular data); that is, 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo movablelimits = "false" class = "- topic/foreign ">max</mo><mo class = "- topic/foreign ">⁡</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">{</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">,</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">}</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo movablelimits = "false" class = "- topic/foreign ">max</mo><mo class = "- topic/foreign ">⁡</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">{</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">,</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi mathvariant = "normal" class = "- topic/foreign ">Δ</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">t</mi></mrow></mrow></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">}</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>The choice of the damage properties is important since, generally, excessive
+  damage may have a critical effect on the rate of convergence. It is recommended
+  to avoid using values of the damage variables above 0.99, which corresponds to
+  a 99% reduction of the stiffness. 
+</p> 
+<p>It is strongly recommended that you specify the tabular definition of
+  tensile and compressive damage variables for the same values of cracking and
+  inelastic strains/displacements as those used in the tabular definitions of
+  tension stiffening and compressive behavior, respectively. When the tensile
+  stiffening response is defined directly in terms of failure stress and fracture
+  energy (<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>),
+  the definition of the tension damage variable should be such that it increases
+  linearly as a function of the cracking displacement. 
+</p></div>
+ 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title12" id = "simamat-c-concretedamaged-t-TensileDamage-sma-topic10"> 
+<h3 class = "title topictitle3 title">Tensile Damage</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>You can define the uniaxial tension damage variable,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>,
+  as a tabular function of either cracking strain or cracking displacement. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><p>Use the following option to specify tensile damage as a
+function of cracking strain:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span> (default)</pre><p>Use the following option to specify tensile damage as a
+function of cracking displacement:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Tensile Behavior</span>: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Suboptions</span><span class = "ph ph guimenuitem">Tension Damage</span></span>: 
+<span class = "ph ph guilabel">Type: Strain</span> or <span class = "ph ph guilabel">Displacement</span></pre></figure></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title13" id = "simamat-c-concretedamaged-t-CompressiveDamage-sma-topic11"> 
+<h3 class = "title topictitle3 title">Compressive Damage</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>You can define the uniaxial compression damage variable,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>,
+  as a tabular function of inelastic (crushing) strain. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage" title = "Define compression damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION DAMAGE</span></a></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Compressive Behavior</span>: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Suboptions</span><span class = "ph ph guimenuitem">Compression Damage</span></span></pre></figure></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title14" id = "simamat-c-concretedamaged-t-StiffnessRecovery-sma-topic12"> 
+<h3 class = "title topictitle3 title">Stiffness Recovery</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>As discussed above, stiffness recovery is an important aspect of the
+  mechanical response of concrete under cyclic loading. 
+  <span class = "ph ph">Abaqus</span>
+  allows direct user specification of the stiffness recovery factors
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>.
+  
+</p> 
+<p>The experimental observation in most quasi-brittle materials, including
+  concrete, is that the compressive stiffness is recovered upon crack closure as
+  the load changes from tension to compression. On the other hand, the tensile
+  stiffness is not recovered as the load changes from compression to tension once
+  crushing micro-cracks have developed. This behavior, which corresponds to
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow></math></span>,
+  is the default used by 
+  <span class = "ph ph">Abaqus</span>.
+  
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-StiffnessRecovery-sma-topic12__simamat-c-concrete-cycle">Figure 7</a>
+  illustrates a uniaxial load cycle assuming the default behavior. 
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-StiffnessRecovery-sma-topic12__simamat-c-concrete-cycle"><span class = "figcap">Figure 7. Uniaxial load cycle (tension-compression-tension) assuming default
+	 values for the stiffness recovery factors: <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>
+	 and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">1</mn></mrow></math></span>.</span> 
+  
+  
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-cycle.png"/><br/> 
+   
+</figure><figure class = "fig fignone fig usage"><p>Input File Usage</p><p>Use the following option to specify the compression
+stiffness recovery factor, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>:</p>
+<pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensiondamage.htm#simakey-r-concretetensiondamage" title = "Define postcracking damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION DAMAGE</span></a>, <span class = "ph ph abqparameter">COMPRESSION RECOVERY</span>=<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span></pre><p>Use the following option to specify the tension stiffness
+recovery factor, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>:</p>
+<pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretecompressiondamage.htm#simakey-r-concretecompressiondamage" title = "Define compression damage properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION DAMAGE</span></a>, <span class = "ph ph abqparameter">TENSION RECOVERY</span>=<span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub></math></span></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>:
+<span class = "ph ph guilabel">Tensile Behavior</span>: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Suboptions</span><span class = "ph ph guimenuitem">Tension Damage</span></span>: <span class = "ph ph guilabel">Compression</span>
+<span class = "ph ph guilabel">recovery:</span> <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>
+<span class = "ph ph guilabel">Compressive Behavior</span>: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Suboptions</span><span class = "ph ph guimenuitem">Compression Damage</span></span>: 
+<span class = "ph ph guilabel">Tension recovery:</span> <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">w</mi><mi class = "- topic/foreign ">t</mi></msub></math></span></pre></figure></div>
+</article></article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title15" id = "simamat-c-concretedamaged-t-conretefailure"> 
+<h2 class = "title topictitle2 title">Defining Material Failure Criteria in    <span class = "ph ph">Abaqus/Explicit</span></h2>
+
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>In 
+  <span class = "ph ph">Abaqus/Explicit</span>
+  you can define material failure for the concrete damaged plasticity model based
+  on the following criteria: 
+</p> 
+<ul class = "ul ul"> 
+  <li class = "li li">Tensile cracking strain criterion, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">≥</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>,
+	 or tensile cracking displacement criterion, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">≥</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">u</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mi class = "- topic/foreign ">k</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>;
+	 
+  </li> 
+  <li class = "li li">Compressive inelastic strain criterion, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">≥</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mrow class = "- topic/foreign "><mover class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi></mrow><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">˜</mo></mrow></mover></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">i</mi><mi class = "- topic/foreign ">n</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>;
+	 
+  </li> 
+  <li class = "li li">Tensile damage variable criterion, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow></msub><mo class = "- topic/foreign ">≥</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi></mrow></msub><mo class = "- topic/foreign ">)</mo></mrow></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>,
+	 if a tensile damage behavior is defined; and 
+  </li> 
+  <li class = "li li">Compressive damage variable criterion, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow></msub><mo class = "- topic/foreign ">≥</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi></mrow></msub><mo class = "- topic/foreign ">)</mo></mrow><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi></mrow></msub></mrow></math></span>,
+	 if a compressive damage behavior is defined. 
+  </li> 
+</ul> 
+<p>If you specify a positive value at failure for the quantity of a criterion,
+  the criterion is considered during the analysis. When any criterion at a
+  material point is met, the material point fails and all stress components are
+  set to zero. By default, an element is deleted from a mesh upon material
+  failure. Details for element deletion driven by material failure are described
+  in 
+  <a class = "xref xref" href = "simamat-c-materialdata.htm#simamat-c-materialdata-matfailelemdel">Material Failure and Element Deletion</a>.
+  The status of a material point and an element can be determined by requesting
+  output variables <span class = "ph ph abqoutputvar">STATUSMP</span> and <span class = "ph ph abqoutputvar">STATUS</span>, respectively. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><p>Use the following option to specify material failure criteria
+and define tensile failure based on a tensile cracking strain criterion:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretefailure.htm#simakey-r-concretefailure" title = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model."><span class = "keyword keyword abqkeyword">CONCRETE FAILURE</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">STRAIN</span> (default)
+</pre><p>Use the following option to specify material failure criteria
+and define tensile failure based on a tensile cracking displacement
+criterion:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretefailure.htm#simakey-r-concretefailure" title = "Specify material failure criteria and allow element deletion for the concrete damaged plasticity material model."><span class = "keyword keyword abqkeyword">CONCRETE FAILURE</span></a>, <span class = "ph ph abqparameter">TYPE</span>=<span class = "ph ph abqparamvalue">DISPLACEMENT</span>
+</pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p> 
+<p>Specifying material failure criteria is not supported in 
+<span class = "ph ph">Abaqus/CAE</span>.</p></figure></div>
+</article>
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title16" id = "simamat-c-concretedamaged-t-RateDependence-sma-topic14"> 
+<h2 class = "title topictitle2 title">Rate Dependence</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The rate-sensitive behavior of quasi-brittle materials is mainly connected
+  to the retardation effects that high strain rates have on the growth of
+  micro-cracks. The effect is usually more pronounced under tensile loading. As
+  the strain rate increases, the stress-strain curves exhibit decreasing
+  nonlinearity as well as an increase in the peak strength. You can specify
+  tension stiffening as a tabular function of cracking strain (or displacement)
+  rate, and you can specify compression hardening data as a tabular function of
+  inelastic strain rate. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><p>Use the following options:</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretetensionstiffening.htm#simakey-r-concretetensionstiffening" title = "Define postcracking properties for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE TENSION STIFFENING</span></a>
+<a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretecompressionhardening.htm#simakey-r-concretecompressionhardening" title = "Define hardening in compression for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE COMPRESSION HARDENING</span></a></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: 
+<span class = "ph ph guilabel">Tensile Behavior</span>: <span class = "ph ph guilabel">Use strain-rate-dependent data</span>
+<span class = "ph ph guilabel">Compressive Behavior</span>: <span class = "ph ph guilabel">Use strain-rate-dependent data</span></pre></figure></div>
+</article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title17" id = "simamat-c-concretedamaged-t-ConcretePlasticity-sma-topic15"> 
+<h2 class = "title topictitle2 title">Concrete Plasticity</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>You can define flow potential, yield surface, and in 
+  <span class = "ph ph">Abaqus/Standard</span>
+  viscosity parameters for the concrete damaged plasticity material model. 
+</p><figure class = "fig fignone fig usage"><p>Input File Usage</p><pre class = "codeblock"><a class = "xref xref" href = "../SIMACAEKEYRefMap/simakey-r-concretedamagedplasticity.htm#simakey-r-concretedamagedplasticity" title = "Define flow potential, yield surface, and viscosity parameters for the concrete damaged plasticity model."><span class = "keyword keyword abqkeyword">CONCRETE DAMAGED PLASTICITY</span></a></pre></figure><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Property module: material editor: <span class = "ph ph menuchoice"><span class = "ph ph guimenu">Mechanical</span><span class = "ph ph guisubmenu">Plasticity</span><span class = "ph ph guimenuitem">Concrete Damaged Plasticity</span></span>: <span class = "ph ph guilabel">Plasticity</span></pre></figure></div>
+ 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title18" id = "simamat-c-concretedamaged-t-EffectiveStressInvariants-sma-topic15"> 
+<h3 class = "title topictitle3 title">Effective Stress Invariants</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The effective stress is defined as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">=</mo><msubsup class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">D</mi><mn class = "- topic/foreign ">0</mn><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow><mo class = "- topic/foreign ">:</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">-</mo><msup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<p>The plastic flow potential function and the yield surface make use of two
+  stress invariants of the effective stress tensor, namely the hydrostatic
+  pressure stress, 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mn class = "- topic/foreign ">3</mn></mfrac><mo class = "- topic/foreign ">⁢</mo><mpadded width = "+1.666667pt" class = "- topic/foreign "><mi class = "- topic/foreign ">trace</mi></mpadded><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>and the Mises equivalent effective stress, 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">q</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">=</mo><msqrt class = "- topic/foreign "><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">3</mn><mn class = "- topic/foreign ">2</mn></mfrac><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">S</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">:</mo><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">S</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">)</mo></mrow></mrow></msqrt></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">S</mi><mo class = "- topic/foreign ">¯</mo></mover></math></span>
+  is the effective stress deviator, defined as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">S</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">⁢</mo><mi mathvariant = "bold" class = "- topic/foreign ">I</mi></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div></div>
+</article>
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title19" id = "simamat-c-concretedamaged-t-PlasticFlow-sma-topic16"> 
+<h3 class = "title topictitle3 title">Plastic Flow</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The concrete damaged plasticity model assumes nonassociated potential
+  plastic flow. The flow potential <span class = "ph ph sma-emphasis">G</span> used for this
+  model is the Drucker-Prager hyperbolic function: 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">G</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><msqrt class = "- topic/foreign "><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ϵ</mi><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">tan</mi><mo class = "- topic/foreign ">⁡</mo><mi class = "- topic/foreign ">ψ</mi></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow><mn class = "- topic/foreign ">2</mn></msup><mo class = "- topic/foreign ">+</mo><msup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">q</mi><mo class = "- topic/foreign ">¯</mo></mover><mn class = "- topic/foreign ">2</mn></msup></mrow></msqrt><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">tan</mi><mo class = "- topic/foreign ">⁡</mo><mi class = "- topic/foreign ">ψ</mi></mrow></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where 
+</p><dl class = "dl dl variablelist"><dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ψ</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the dilation angle measured in the
+  <span class = "ph ph mathterm">p</span>–<span class = "ph ph mathterm">q</span> plane at high confining pressure;
+  
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">=</mo><msub class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mi class = "- topic/foreign ">t</mi></msub><mo fence = "true" class = "- topic/foreign ">|</mo></mrow><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow><mo class = "- topic/foreign ">,</mo><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow></mrow></msub></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the uniaxial tensile stress at failure, taken from the user-specified
+  tension stiffening data; and 
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ϵ</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">θ</mi><mo class = "- topic/foreign ">,</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">f</mi><mi class = "- topic/foreign ">i</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is a parameter, referred to as the eccentricity, that defines the rate at
+  which the function approaches the asymptote (the flow potential tends to a
+  straight line as the eccentricity tends to zero). 
+</p></dd></dl> 
+<p>This flow potential, which is continuous and smooth, ensures that the flow
+  direction is always uniquely defined. The function approaches the linear
+  Drucker-Prager flow potential asymptotically at high confining pressure stress
+  and intersects the hydrostatic pressure axis at 90°. See 
+  <a class = "xref xref" href = "../SIMACAETHERefMap/simathe-c-granularpoly.htm" title = "The behavior of granular and polymeric materials is complex. However, under essentially monotonic loading conditions rather simple constitutive models provide useful design information.">Models for granular or polymer behavior</a>
+  for further discussion of this potential. 
+</p> 
+<p>The default flow potential eccentricity is <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">ϵ</mi><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0.1</mn></mrow></math></span>,
+  which implies that the material has almost the same dilation angle over a wide
+  range of confining pressure stress values. Increasing the value of
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mi class = "- topic/foreign ">ϵ</mi></math></span>
+  provides more curvature to the flow potential, implying that the dilation angle
+  increases more rapidly as the confining pressure decreases. Values of
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mi class = "- topic/foreign ">ϵ</mi></math></span>
+  that are significantly less than the default value may lead to convergence
+  problems if the material is subjected to low confining pressures because of the
+  very tight curvature of the flow potential locally where it intersects the
+  <span class = "ph ph mathterm">p</span>-axis. 
+</p></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title20" id = "simamat-c-concretedamaged-t-YieldFunction-sma-topic17"> 
+<h3 class = "title topictitle3 title">Yield Function</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The model makes use of the yield function of Lubliner et. al. (1989), with
+  the modifications proposed by Lee and Fenves (1998) to account for different
+  evolution of strength under tension and compression. The evolution of the yield
+  surface is controlled by the hardening variables, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>.
+  In terms of effective stresses, the yield function takes the form 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">F</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">α</mi></mrow></mfrac><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">q</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">3</mn><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">α</mi><mo class = "- topic/foreign ">⁢</mo><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">¯</mo></mover></mrow><mo class = "- topic/foreign ">+</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">β</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msup><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">⟨</mo><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">^</mo></mover><mi class = "- topic/foreign ">max</mi></msub><mo class = "- topic/foreign ">⟩</mo></mrow></mrow><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">γ</mi><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">⟨</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">^</mo></mover><mi class = "- topic/foreign ">max</mi></msub></mrow><mo class = "- topic/foreign ">⟩</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">=</mo><mn class = "- topic/foreign ">0</mn></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>with 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mtable rowspacing = "1.5ex" columnspacing = "0.4em" displaystyle = "true" class = "- topic/foreign "><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><mi class = "- topic/foreign ">α</mi></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">=</mo><mfrac class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">b</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">-</mo><mn class = "- topic/foreign ">1</mn></mrow><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">b</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">-</mo><mn class = "- topic/foreign ">1</mn></mrow></mfrac><mo class = "- topic/foreign ">;</mo><mn class = "- topic/foreign "> 0</mn><mo class = "- topic/foreign ">≤</mo><mi class = "- topic/foreign ">α</mi><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">0.5</mn><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><mi class = "- topic/foreign ">β</mi></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow></mfrac><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><mi class = "- topic/foreign ">α</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">-</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">+</mo><mi class = "- topic/foreign ">α</mi></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></mtd></mtr><mtr class = "- topic/foreign "><mtd columnalign = "right" class = "- topic/foreign "><mi class = "- topic/foreign ">γ</mi></mtd><mtd columnalign = "left" class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">​</mi><mo class = "- topic/foreign ">=</mo><mfrac class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">3</mn><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">K</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">⁢</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">K</mi><mi class = "- topic/foreign ">c</mi></msub></mrow><mo class = "- topic/foreign ">-</mo><mn class = "- topic/foreign ">1</mn></mrow></mfrac></mrow><mo class = "- topic/foreign ">.</mo></mrow></mtd></mtr></mtable></math></div>
+
+<p>Here, 
+</p><dl class = "dl dl variablelist"><dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mo class = "- topic/foreign ">^</mo></mover><mi class = "- topic/foreign ">max</mi></msub></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the maximum principal effective stress; 
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">b</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub><mo class = "- topic/foreign ">/</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">c</mi><mo class = "- topic/foreign ">⁢</mo><mn class = "- topic/foreign ">0</mn></mrow></msub></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the ratio of initial equibiaxial compressive yield stress to initial
+  uniaxial compressive yield stress (the default value is
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mn class = "- topic/foreign ">1.16</mn></math></span>);
+  
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">K</mi><mi class = "- topic/foreign ">c</mi></msub></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p> is the ratio of the second stress invariant on the tensile meridian,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">q</mi><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mi class = "- topic/foreign ">TM</mi><mo class = "- topic/foreign ">)</mo></mrow></msub></math></span>,
+  to that on the compressive meridian, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">q</mi><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mi class = "- topic/foreign ">CM</mi><mo class = "- topic/foreign ">)</mo></mrow></msub></math></span>,
+  at initial yield for any given value of the pressure invariant
+  <span class = "ph ph mathterm">p</span> such that the maximum principal stress is negative,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">^</mo></mover><mi class = "- topic/foreign ">max</mi></msub><mo class = "- topic/foreign ">&lt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>
+  (see 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-YieldFunction-sma-topic17__simamat-c-concrete-yield-deviatoric">Figure 8</a>);
+  it must satisfy the condition <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">0.5</mn><mo class = "- topic/foreign ">&lt;</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">K</mi><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">≤</mo><mn class = "- topic/foreign ">1.0</mn></mrow></math></span>
+  (the default value is <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">2</mn><mo class = "- topic/foreign ">/</mo><mn class = "- topic/foreign ">3</mn></mrow></math></span>);
+  
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">t</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the effective tensile cohesion stress; and 
+</p></dd> 
+<dt class = "dt dlterm dt varlistterm"><span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">¯</mo></mover><mi class = "- topic/foreign ">c</mi></msub><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">)</mo></mrow></mrow></math></span></dt>
+<dd class = "dd dd varlistitem"> 
+<p>is the effective compressive cohesion stress. 
+</p></dd></dl> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-YieldFunction-sma-topic17__simamat-c-concrete-yield-deviatoric"><span class = "figcap">Figure 8. Yield surfaces in the deviatoric plane, corresponding to different
+	 values of <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">K</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>.</span> 
+  
+  
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-deviatoric.png"/><br/> 
+   
+</figure> 
+<p>Typical yield surfaces are shown in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-YieldFunction-sma-topic17__simamat-c-concrete-yield-deviatoric">Figure 8</a>
+  on the deviatoric plane and in 
+  <a class = "xref xref" href = "simamat-c-concretedamaged.htm#simamat-c-concretedamaged-t-YieldFunction-sma-topic17__simamat-c-concrete-yield-ps">Figure 9</a>
+  for plane stress conditions. 
+</p> 
+<figure class = "fig fignone fig" id = "simamat-c-concretedamaged-t-YieldFunction-sma-topic17__simamat-c-concrete-yield-ps"><span class = "figcap">Figure 9. Yield surface in plane stress.</span> 
+   
+  <br/><img border = "1" class = "image break image" src = "../SIMA3DXRefImages/cconcretedamaged-yield-nls.png"/><br/> 
+   
+</figure></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title21" id = "simamat-c-concretedamaged-t-NonassociatedFlow-sma-topic18"> 
+<h3 class = "title topictitle3 title">Nonassociated Flow</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>Because plastic flow is nonassociated, the use of concrete damaged
+  plasticity results in a nonsymmetric material stiffness matrix. Therefore, to
+  obtain an acceptable rate of convergence in 
+  <span class = "ph ph">Abaqus/Standard</span>,
+  the unsymmetric matrix storage and solution scheme should be used. 
+  <span class = "ph ph">Abaqus/Standard</span>
+  will automatically activate the unsymmetric solution scheme if concrete damaged
+  plasticity is used in the analysis. If desired, you can turn off the
+  unsymmetric solution scheme for a particular step (see 
+  <a class = "xref xref" href = "../SIMACAEANLRefMap/simaanl-c-over.htm" title = "An analysis is defined in Abaqus by:">Defining an Analysis</a>).
+  
+</p></div>
+</article> 
+<article class = "topic concept nested2 topic concept sma-topic" aria-labelledby = "ariaid-title22" id = "simamat-c-concretedamaged-t-ViscoplasticRegularization-sma-topic19"> 
+<h3 class = "title topictitle3 title">Viscoplastic Regularization</h3>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>Material models exhibiting softening behavior and stiffness degradation
+  often lead to severe convergence difficulties in implicit analysis programs,
+  such as 
+  <span class = "ph ph">Abaqus/Standard</span>.
+  A common technique to overcome some of these convergence difficulties is the
+  use of a viscoplastic regularization of the constitutive equations, which
+  causes the consistent tangent stiffness of the softening material to become
+  positive for sufficiently small time increments. 
+</p> 
+<p>The concrete damaged plasticity model can be regularized in 
+  <span class = "ph ph">Abaqus/Standard</span>
+  using viscoplasticity by permitting stresses to be outside of the yield
+  surface. We use a generalization of the Duvaut-Lions regularization, according
+  to which the viscoplastic strain rate tensor, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">v</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>,
+  is defined as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">v</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mi class = "- topic/foreign ">μ</mi></mfrac><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><msup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msup><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">v</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<p>Here <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mi class = "- topic/foreign ">μ</mi></math></span>
+  is the viscosity parameter representing the relaxation time of the viscoplastic
+  system, and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msup></math></span>
+  is the plastic strain evaluated in the inviscid backbone model. 
+</p> 
+<p>Similarly, a viscous stiffness degradation variable,
+  <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">v</mi></msub></math></span>,
+  for the viscoplastic system is defined as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><msub class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">˙</mo></mover><mi class = "- topic/foreign ">v</mi></msub><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mfrac class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mi class = "- topic/foreign ">μ</mi></mfrac><mo class = "- topic/foreign ">⁢</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">v</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow></mrow><mo class = "- topic/foreign ">,</mo></mrow></math></div>
+
+<p>where <span class = "ph ph mathterm">d</span> is the degradation variable evaluated in the
+  inviscid backbone model. The stress-strain relation of the viscoplastic model
+  is given as 
+</p><div class = "equation"><math class = "- topic/foreign " display = "block"><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">σ</mi><mo class = "- topic/foreign ">=</mo><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mn class = "- topic/foreign ">1</mn><mo class = "- topic/foreign ">-</mo><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">v</mi></msub></mrow><mo class = "- topic/foreign ">)</mo></mrow><mo class = "- topic/foreign ">⁢</mo><msubsup class = "- topic/foreign "><mi mathvariant = "bold" class = "- topic/foreign ">D</mi><mn class = "- topic/foreign ">0</mn><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">e</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow></mrow><mo class = "- topic/foreign ">:</mo><mrow class = "- topic/foreign "><mo class = "- topic/foreign ">(</mo><mrow class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">-</mo><msubsup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">v</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></mrow><mo class = "- topic/foreign ">)</mo></mrow></mrow><mo class = "- topic/foreign ">.</mo></mrow></math></div>
+
+<p>Using the viscoplastic regularization with a small value for the viscosity
+  parameter (small compared to the characteristic time increment) usually helps
+  improve the rate of convergence of the model in the softening regime, without
+  compromising results. The basic idea is that the solution of the viscoplastic
+  system relaxes to that of the inviscid case as <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">t</mi><mo class = "- topic/foreign ">/</mo><mi class = "- topic/foreign ">μ</mi></mrow><mo class = "- topic/foreign ">→</mo><mi mathvariant = "normal" class = "- topic/foreign ">∞</mi></mrow></math></span>, where
+  <span class = "ph ph mathterm">t</span> represents time. You can specify the value of the
+  viscosity parameter as part of the concrete damaged plasticity material
+  behavior definition. If the viscosity parameter is different from zero, output
+  results of the plastic strain and stiffness degradation refer to the
+  viscoplastic values, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mi mathvariant = "bold-italic" class = "- topic/foreign ">ε</mi><mi class = "- topic/foreign ">v</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>
+  and <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">v</mi></msub></math></span>.
+  In 
+  <span class = "ph ph">Abaqus/Standard</span>
+  the default value of the viscosity parameter is zero, so that no viscoplastic
+  regularization is performed. 
+</p></div>
+</article></article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title23" id = "simamat-c-concretedamaged-t-MaterialDamping-sma-topic21"> 
+<h2 class = "title topictitle2 title">Material Damping</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>The concrete damaged plasticity model can be used in combination with
+  material damping (see 
+  <a class = "xref xref" href = "simamat-c-dampingopt.htm">Material Damping</a>).
+  If stiffness proportional damping is specified, 
+  <span class = "ph ph">Abaqus</span>
+  calculates the damping stress based on the undamaged elastic stiffness. This
+  may introduce large artificial damping forces on elements undergoing severe
+  damage at high strain rates. 
+</p></div>
+</article> 
+<article class = "topic concept nested1 topic concept sma-topic" aria-labelledby = "ariaid-title24" id = "simamat-c-concretedamaged-t-VisualizationOfldquocrackDirectionsrdquo-sma-topic22"> 
+<h2 class = "title topictitle2 title">Visualization of “Crack Directions”</h2>
+<div class = "body conbody body conbody sma-topic-body"> 
+<p>Unlike concrete models based on the smeared crack approach, the concrete
+  damaged plasticity model does not have the notion of cracks developing at the
+  material integration point. However, it is possible to introduce the concept of
+  an effective crack direction with the purpose of obtaining a graphical
+  visualization of the cracking patterns in the concrete structure. Different
+  criteria can be adopted within the framework of scalar-damage plasticity for
+  the definition of the direction of cracking. Following Lubliner et. al. (1989),
+  we can assume that cracking initiates at points where the tensile equivalent
+  plastic strain is greater than zero, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><mrow class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup><mo class = "- topic/foreign ">&gt;</mo><mn class = "- topic/foreign ">0</mn></mrow></math></span>,
+  and the maximum principal plastic strain is positive. The direction of the
+  vector normal to the crack plane is assumed to be parallel to the direction of
+  the maximum principal plastic strain. This direction can be viewed in 
+  <span class = "ph ph">the Visualization module</span>
+  of 
+  <span class = "ph ph">Abaqus/CAE</span>.
+  
+</p><figure class = "fig fignone usage abqinterface(interactive)"><p>Abaqus/CAE Usage</p><pre class = "codeblock">Visualization module: 
+<span class = "ph ph menuchoice"><span class = "ph ph guimenu">Result</span><span class = "ph ph guimenuitem">Field Output</span></span>: <span class = "ph ph guilabel">PE</span>, <span class = "ph ph guilabel">Max. Principal</span>
+<span class = "ph ph menuchoice"><span class = "ph ph guimenu">Plot</span><span class = "ph ph guimenuitem">Symbols</span></span></pre></figure></div>
+</article> 
+<article class = "topic concept nested1 topic concept elemsect" aria-labelledby = "ariaid-title25" id = "simamat-c-concretedamaged-t-elemsect1"><h2 class = "title topictitle2 title gen-from-elemsect">Elements</h2>
+ <div class = "body conbody body conbody elemsect-body"> 
+<p><span class = "ph ph">Abaqus</span> offers a variety of elements for use with the concrete damaged plasticity model: truss,
+        beam, shell, plane stress, plane strain, generalized plane strain, axisymmetric, and
+        three-dimensional elements. Thin-walled, open-section beam elements and
+        <span class = "ph ph abqelement">PIPE</span> elements can also be used with the
+        concrete damaged plasticity model in <span class = "ph ph">Abaqus/Standard</span>. </p> 
+<p>For general shell analysis more than the default number of five integration
+  points through the thickness of the shell should be used; nine thickness
+  integration points are commonly used to model progressive failure of the
+  concrete through the thickness with acceptable accuracy. 
+</p></div>
+</article> 
+<article class = "topic concept nested1 topic concept outputsect" aria-labelledby = "ariaid-title26" id = "simamat-c-concretedamaged-t-outputsect1"><h2 class = "title topictitle2 title gen-from-outputsect">Output</h2>
+<div class = "body conbody body conbody outputsect-body"> 
+<p>In addition to the standard output identifiers available in 
+  <span class = "ph ph">Abaqus</span>
+  (<a class = "xref xref" href = "../SIMACAEOUTRefMap/simaout-c-stdoutputvar.htm" title = "The tables in the following sections list all of the output variables that are available in Abaqus/Standard.">Abaqus/Standard Output Variable Identifiers</a>
+  and 
+  <a class = "xref xref" href = "../SIMACAEOUTRefMap/simaout-c-expoutputvar.htm" title = "Except for the information in the status file, results can be obtained from Abaqus/Explicit only by postprocessing.">Abaqus/Explicit Output Variable Identifiers</a>),
+  the following variables relate specifically to material points in the concrete
+  damaged plasticity model: 
+</p><dl class = "dl dl outvarlist"><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">DAMAGEC</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Compressive damage variable, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">c</mi></msub></math></span>.
+  
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">DAMAGET</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Tensile damage variable, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msub class = "- topic/foreign "><mi class = "- topic/foreign ">d</mi><mi class = "- topic/foreign ">t</mi></msub></math></span>.
+  
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">PEEQ</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Compressive equivalent plastic strain, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">c</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>.
+  
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">PEEQT</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Tensile equivalent plastic strain, <span class = "ph inlineequation ph inlineequation"><math class = "- topic/foreign "><msubsup class = "- topic/foreign "><mover accent = "true" class = "- topic/foreign "><mi class = "- topic/foreign ">ε</mi><mo class = "- topic/foreign ">~</mo></mover><mi class = "- topic/foreign ">t</mi><mrow class = "- topic/foreign "><mi class = "- topic/foreign ">p</mi><mo class = "- topic/foreign ">⁢</mo><mi class = "- topic/foreign ">l</mi></mrow></msubsup></math></span>.
+  
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">SDEG</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Stiffness degradation variable, <span class = "ph ph mathterm">d</span>. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">DMENER</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Energy dissipated per unit volume by damage. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">ELDMD</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Total energy dissipated in the element by damage. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">ALLDMD</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Energy dissipated in the whole (or partial) model by damage. The
+  contribution from <span class = "ph ph abqoutputvar">ALLDMD</span> is included in the total strain energy <span class = "ph ph abqoutputvar">ALLIE</span>. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">EDMDDEN</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>Energy dissipated per unit volume in the element by damage. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">SENER</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>The recoverable part of the energy per unit volume. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">ELSE</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>The recoverable part of the energy in the element. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">ALLSE</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>The recoverable part of the energy in the whole (partial) model. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">ESEDEN</span></dt><dd class = "dd dd abqoutputvardef"> 
+<p>The recoverable part of the energy per unit volume in the element. 
+</p></dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">STATUS</span></dt><dd class = "dd dd abqoutputvardef">Status of element (available
+only for 
+<span class = "ph ph">Abaqus/Explicit</span>).
+The status of an element is 1.0 if the element is active and 0.0 if it is
+not.</dd><dt class = "dt dlterm dt abqoutputvarterm"><span class = "ph ph abqoutputvar">STATUSMP</span></dt><dd class = "dd dd abqoutputvardef">Status of each material
+point in the element (available only for 
+<span class = "ph ph">Abaqus/Explicit</span>).
+The status of a material point is 1.0 if the material point is active and 0.0
+if it is not.
+</dd></dl></div>
+</article>
+<article class = "topic concept nested1 topic concept bibliography-c" aria-labelledby = "ariaid-title27" id = "simamat-c-concretedamaged-t-bibliography-c1"><h2 class = "title topictitle2 title gen-from-concept">References</h2>
+ 
+<div class = "body conbody body conbody bibliography-c-body"><ol class = "ol ol bibliolist"> 
+<li class = "li li articlebiblioentry"><span class = "ph ph biblioauthorgrp"><span class = "ph ph biblioprimaryauthor"><span class = "ph ph bibliolastname">Hillerborg<span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph biblioinitial"><span class = "ph ph gen-from-ph"> </span>A<span class = "ph ph gen-from-ph">.</span></span><span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph biblioinitial">M<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Modeer</span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph gen-from-ph">, and </span><span class = "ph ph biblioinitial">P<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph biblioinitial">E<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Petersson</span><span class = "ph ph gen-from-ph">, </span></span></span><span class = "ph ph bibliocitetitle"><span class = "ph ph gen-from-ph">“</span>Analysis
+of Crack Formation and Crack Growth in Concrete by Means of Fracture Mechanics
+and Finite Elements<span class = "ph ph gen-from-ph">,” </span></span><span class = "ph ph bibliopublication">Cement and Concrete
+Research</span><span class = "ph ph bibliovolume"><span class = "ph ph gen-from-ph">, vol. </span>6</span><span class = "ph ph bibliostartpage"><span class = "ph ph gen-from-ph">, pp. </span>773<span class = "ph ph gen-from-ph">–</span></span><span class = "ph ph biblioendpage">782</span><span class = "ph ph biblioyear"><span class = "ph ph gen-from-ph">, </span>1976<span class = "ph ph gen-from-ph">.</span></span></li>
+<li class = "li li articlebiblioentry"><span class = "ph ph biblioauthorgrp"><span class = "ph ph biblioprimaryauthor"><span class = "ph ph bibliolastname">Lee<span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph biblioinitial"><span class = "ph ph gen-from-ph"> </span>J<span class = "ph ph gen-from-ph">.</span></span><span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph gen-from-ph"> and </span><span class = "ph ph biblioinitial">G<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph biblioinitial">L<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Fenves</span><span class = "ph ph gen-from-ph">, </span></span></span><span class = "ph ph bibliocitetitle"><span class = "ph ph gen-from-ph">“</span>Plastic-Damage
+Model for Cyclic Loading of Concrete
+Structures<span class = "ph ph gen-from-ph">,” </span></span><span class = "ph ph bibliopublication">Journal of Engineering
+Mechanics</span><span class = "ph ph bibliovolume"><span class = "ph ph gen-from-ph">, vol. </span>124</span><span class = "ph ph biblionumber"><span class = "ph ph gen-from-ph">, no. </span>8</span><span class = "ph ph bibliostartpage"><span class = "ph ph gen-from-ph">, pp. </span>892<span class = "ph ph gen-from-ph">–</span></span><span class = "ph ph biblioendpage">900</span><span class = "ph ph biblioyear"><span class = "ph ph gen-from-ph">, </span>1998<span class = "ph ph gen-from-ph">.</span></span></li>
+<li class = "li li articlebiblioentry"><span class = "ph ph biblioauthorgrp"><span class = "ph ph biblioprimaryauthor"><span class = "ph ph bibliolastname">Lubliner<span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph biblioinitial"><span class = "ph ph gen-from-ph"> </span>J<span class = "ph ph gen-from-ph">.</span></span><span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph biblioinitial">J<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Oliver</span><span class = "ph ph gen-from-ph">, </span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph biblioinitial">S<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Oller</span></span><span class = "ph ph bibliosecondaryauthor"><span class = "ph ph gen-from-ph">, and </span><span class = "ph ph biblioinitial">E<span class = "ph ph gen-from-ph">. </span></span><span class = "ph ph bibliolastname">Oñate</span><span class = "ph ph gen-from-ph">, </span></span></span><span class = "ph ph bibliocitetitle"><span class = "ph ph gen-from-ph">“</span>A
+Plastic-Damage Model for
+Concrete<span class = "ph ph gen-from-ph">,” </span></span><span class = "ph ph bibliopublication">International Journal of Solids
+and
+Structures</span><span class = "ph ph bibliovolume"><span class = "ph ph gen-from-ph">, vol. </span>25</span><span class = "ph ph bibliostartpage"><span class = "ph ph gen-from-ph">, pp. </span>299<span class = "ph ph gen-from-ph">–</span></span><span class = "ph ph biblioendpage">329</span><span class = "ph ph biblioyear"><span class = "ph ph gen-from-ph">, </span>1989<span class = "ph ph gen-from-ph">.</span></span></li></ol></div>
+</article></td></tr></table><script type = "text/javascript" src = "../DSDocUI_Bottom34.js">/* */</script></body>
+</html>
