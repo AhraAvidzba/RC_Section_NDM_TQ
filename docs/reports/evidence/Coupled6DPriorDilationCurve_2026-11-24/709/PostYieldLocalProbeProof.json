@@ -1,0 +1,103 @@
+{
+  "accepted18_history_and_parameters_exact": true,
+  "entire_goal_completed": false,
+  "global_postyield_step_not_solved": true,
+  "modes": {
+    "-1": {
+      "roots": [],
+      "samples": 62,
+      "unavailable": 0
+    },
+    "0": {
+      "roots": [],
+      "samples": 62,
+      "unavailable": 0
+    },
+    "1": {
+      "roots": [],
+      "samples": 62,
+      "unavailable": 0
+    },
+    "2": {
+      "roots": [],
+      "samples": 62,
+      "unavailable": 0
+    },
+    "4": {
+      "roots": [
+        {
+          "lateral": 0.000135227635207535,
+          "lateral_error": 4.9026540178921316e-11,
+          "sigma_zz_error_MPa": 2.395832626506068e-05,
+          "stress_MPa": [
+            -6.72251391371337e-09,
+            -6.72251390967477e-09,
+            0.00168321143670856,
+            -1.43179988002103e-17,
+            0.0,
+            0.0
+          ],
+          "substeps": 4
+        }
+      ],
+      "samples": 62,
+      "unavailable": 19
+    },
+    "8": {
+      "roots": [
+        {
+          "lateral": 0.00013522758637941,
+          "lateral_error": 9.78546651803254e-11,
+          "sigma_zz_error_MPa": 3.053935257136078e-05,
+          "stress_MPa": [
+            -8.60296885930979e-09,
+            -8.60296885523085e-09,
+            0.00168979246301486,
+            -1.51451934078058e-17,
+            0.0,
+            0.0
+          ],
+          "substeps": 8
+        }
+      ],
+      "samples": 62,
+      "unavailable": 0
+    },
+    "16": {
+      "roots": [
+        {
+          "lateral": 0.00013522758637941,
+          "lateral_error": 9.78546651803254e-11,
+          "sigma_zz_error_MPa": 2.5835866459970706e-05,
+          "stress_MPa": [
+            -7.25786853896479e-09,
+            -7.25786853467724e-09,
+            0.00168508897690347,
+            -1.5462644750495e-17,
+            0.0,
+            0.0
+          ],
+          "substeps": 16
+        }
+      ],
+      "samples": 62,
+      "unavailable": 0
+    }
+  },
+  "native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 166,
+    "timeout600": false
+  },
+  "operational_full_step_root_found": false,
+  "physical_capacity_certified": false,
+  "reference": {
+    "expected_lateral": 0.00013522768423407519,
+    "expected_sigma_zz_MPa": 0.0016592531104434993,
+    "prior": 0.002,
+    "target": 0.0025
+  },
+  "scalar_full_step_root_found": false
+}

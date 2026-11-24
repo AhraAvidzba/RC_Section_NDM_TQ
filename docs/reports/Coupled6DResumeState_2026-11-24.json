@@ -1,7 +1,13 @@
 {
-  "active_exec_session": null,
-  "active_jobs": [],
-  "all_started_stages_terminal": true,
+  "active_exec_session": 45282,
+  "active_jobs": [
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold712PriorDilationCapacity_20261124",
+      "session": 45282,
+      "stage": "directed native material diagnosis"
+    }
+  ],
+  "all_started_stages_terminal": false,
   "branch": "codex/coupled-6d",
   "entire_goal_completed": false,
   "full_acceptance_not_run": true,
@@ -39,8 +45,8 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Diagnose post-yield prescribed step .002→.0025 on exact accepted18 material history; distinguish predictor/step size from local constitutive discontinuity. No tolerance loosening or physical failure inference. Then automatic peak trace and real coldall6/HardShear; original full scope remains open.",
-  "no_new_experiments_added_after_pause_request": true,
+  "next_action": "Finish existing712 compiler, verify actual sources, run automatic capacity from two elastic initial states with exact697 adaptive controller and711 material, default assembled tangent. Preserve96 probes/30 iterations/.001 accuracy; do not infer failure from NumFail. Then real coldall6/HardShear and full original scope.",
+  "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
   "pause_request_revoked": true,
@@ -73,7 +79,7 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: local full-step root and18 independently assembled section states through known uniaxial peak; next prescribed step still NumFail",
+  "previous_goal_turn_classification": "progress: full original21 realCDP+steel prescribed curve194/0 and all spatial fields independently verified; automatic capacity712 being compiled",
   "prior_pause_revoked_by_explicit_resume": true,
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
@@ -191,16 +197,31 @@
     "next_strain_numfail": 0.0025,
     "proof": "docs/reports/evidence/Coupled6DExactCohesionCurve_2026-11-24/708/ExactCohesionCurveProof.json"
   },
+  "section711": {
+    "accepted_states": 21,
+    "automatic_capacity_confirmed": false,
+    "full_original_curve_passed": true,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 194,
+      "timeout600": false
+    },
+    "proof": "docs/reports/evidence/Coupled6DPriorDilationCurve_2026-11-24/711/PriorDilationCurveProof.json"
+  },
   "stopped_own_file_enumeration_session": {
     "exit_code": 1,
     "reason": "Unneeded broad rg listing interrupted; no Office process affected",
     "session": 47261
   },
+  "subsequent_experiments_authorized_by_pause_revocation": true,
   "terminal_sessions_this_stage": [
     11153,
     16147,
     16181,
     21859,
+    24444,
     25261,
     28797,
     33931,
@@ -209,13 +230,19 @@
     38699,
     40717,
     45411,
+    48427,
+    50535,
     52416,
     55018,
     55381,
+    56016,
     57786,
     60225,
+    70831,
+    72043,
     73975,
     76344,
+    80666,
     84774,
     86272,
     87359,
@@ -224,7 +251,7 @@
     99831,
     99841
   ],
-  "updated_local": "2026-11-24T20:17:55.223116+03:00",
+  "updated_local": "2026-11-24T20:34:06.296818+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
