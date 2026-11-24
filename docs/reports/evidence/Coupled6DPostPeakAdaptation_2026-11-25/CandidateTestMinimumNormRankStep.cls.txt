@@ -1,0 +1,51 @@
+' Находит решение наименьшей нормы вырожденной задачи без нормальных уравнений.
+' После исходного QR выполняется тонкий QR транспонированного блока R; ранг и окончательная нелинейная приёмка не меняются.
+Private Function TryUndampedRankStep(ByRef direction() As Double) As Boolean
+    Erase direction
+    If Not mPivoted Then Exit Function
+    Dim triangle() As Double, ordered() As Double
+    ReDim triangle(1 To mCount, 1 To mCount): ReDim ordered(1 To mCount)
+    Dim row As Long, column As Long, position As Long, rank As Long, largest As Double, total As Double
+    For row = 1 To mCount
+        For column = row To mCount
+            position = position + 1: triangle(column, row) = mR(position)
+            largest = GeomMax(largest, Abs(mR(position)))
+        Next column
+    Next row
+    rank = mCount
+    For row = 1 To mCount
+        If Abs(triangle(row, row)) <= MACHINE_EPSILON * mCount * largest Then rank = row - 1: Exit For
+    Next row
+    Dim diagonal() As Double, work() As Double, magnitude As Double, multiplier As Double, k As Long
+    ReDim diagonal(1 To rank + 1): ReDim work(1 To mCount)
+    ' triangle теперь хранит B^T, где B — первые rank строк R. Отражения сохраняются ниже диагонали, верхний треугольник относится к тонкому QR.
+    For column = 1 To rank
+        For row = column To mCount: work(row) = triangle(row, column): Next row
+        magnitude = VectorNorm(work, column, mCount)
+        If magnitude = 0# Then Exit Function
+        If triangle(column, column) < 0# Then magnitude = -magnitude
+        For row = column To mCount: triangle(row, column) = triangle(row, column) / magnitude: Next row
+        triangle(column, column) = triangle(column, column) + 1#
+        For k = column + 1 To rank
+            total = 0#
+            For row = column To mCount: total = total + triangle(row, column) * triangle(row, k): Next row
+            multiplier = total / triangle(column, column)
+            For row = column To mCount: triangle(row, k) = triangle(row, k) - multiplier * triangle(row, column): Next row
+        Next k
+        diagonal(column) = -magnitude
+    Next column
+    For row = 1 To rank
+        total = -mQtf(row)
+        For column = 1 To row - 1: total = total - triangle(column, row) * ordered(column): Next column
+        ordered(row) = total / diagonal(row) ' T^T*y=-Q1^T*f; остальные компоненты y равны нулю для минимальной нормы.
+    Next row
+    For column = rank To 1 Step -1
+        total = 0#
+        For row = column To mCount: total = total + triangle(row, column) * ordered(row): Next row
+        multiplier = total / triangle(column, column)
+        For row = column To mCount: ordered(row) = ordered(row) - multiplier * triangle(row, column): Next row
+    Next column
+    ReDim direction(1 To mCount)
+    For column = 1 To mCount: direction(mColumnOrder(column)) = ordered(column): Next column
+    TryUndampedRankStep = True
+End Function

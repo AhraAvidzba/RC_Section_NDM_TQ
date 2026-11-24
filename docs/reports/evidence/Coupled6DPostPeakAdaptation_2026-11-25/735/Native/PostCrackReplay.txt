@@ -1,0 +1,17 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold735FrozenGrowthReplay_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 96A97631696F400410786E5BD7650650E3A9F0B5C99B63812438304F65662386
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold735FrozenGrowthReplay_20261125\Temp\RC_NDM_ModeSuite_71cd7bfd6e424eef81b1dd61f07e5ce1\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=27336; startTicks=639311515714127239
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-25T00:12:58
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=27336; workingSet=145915904; privateBytes=108216320; cpu=14.9375
+REPLAY_ONLY: exact accepted fields; no continuation or capacity search
+TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=70; mode=0; numerical_outcome_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold735FrozenGrowthReplay_20261125\Temp\RC_NDM_ModeSuite_71cd7bfd6e424eef81b1dd61f07e5ce1\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-25T00:13:07
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

@@ -1,0 +1,575 @@
+{
+  "cases": [
+    {
+      "size": 2,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 2.753408667670345e-17,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 8.359574166923866e-17,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 2,
+      "rank": 2,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 3.730107750486537e-16,
+      "relative_residual": 9.046840147171225e-17
+    },
+    {
+      "size": 2,
+      "rank": 2,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.201037590457743e-14,
+      "relative_residual": 3.1207559795099144e-15
+    },
+    {
+      "size": 2,
+      "rank": 2,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 4.016390298583462e-12,
+      "relative_residual": 5.4830581988861554e-11
+    },
+    {
+      "size": 3,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 3,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 3,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 3,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 3.411376716805347e-16,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 3,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.73676957912375e-16,
+      "relative_residual": 5.7879759954958e-17
+    },
+    {
+      "size": 3,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 3.906255455797837e-17,
+      "relative_residual": 7.812510911595675e-17
+    },
+    {
+      "size": 3,
+      "rank": 2,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 3.6692752822329646e-17,
+      "relative_residual": 8.204748959232634e-17
+    },
+    {
+      "size": 3,
+      "rank": 2,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 5.475768434979941e-14,
+      "relative_residual": 2.5566379467196084e-14
+    },
+    {
+      "size": 3,
+      "rank": 2,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 6.815525464284494e-16,
+      "relative_residual": 2.2043498435782117e-11
+    },
+    {
+      "size": 3,
+      "rank": 3,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 3.1472233616298986e-16,
+      "relative_residual": 6.867804420763043e-17
+    },
+    {
+      "size": 3,
+      "rank": 3,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.1066893640576155e-14,
+      "relative_residual": 7.619566613118241e-14
+    },
+    {
+      "size": 3,
+      "rank": 3,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 6.248147093066448e-11,
+      "relative_residual": 4.110210163634272e-12
+    },
+    {
+      "size": 6,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 6,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 6,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 6,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 7.3855195641212e-17,
+      "relative_residual": 2.532178136270125e-16
+    },
+    {
+      "size": 6,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 6.757193251729326e-17,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 6,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 6.030247849485545e-17,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 6,
+      "rank": 3,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 2.064618168853065e-16,
+      "relative_residual": 1.6434974892736378e-16
+    },
+    {
+      "size": 6,
+      "rank": 3,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.3076475038696658e-14,
+      "relative_residual": 3.8567309753750344e-15
+    },
+    {
+      "size": 6,
+      "rank": 3,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 2.5239171220667997e-11,
+      "relative_residual": 7.714985914227646e-12
+    },
+    {
+      "size": 6,
+      "rank": 5,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 2.0206919494898106e-16,
+      "relative_residual": 2.1959952692116852e-16
+    },
+    {
+      "size": 6,
+      "rank": 5,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 6.261334086718227e-14,
+      "relative_residual": 1.48602753152858e-14
+    },
+    {
+      "size": 6,
+      "rank": 5,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 7.400744522487436e-11,
+      "relative_residual": 3.0216575028493497e-12
+    },
+    {
+      "size": 6,
+      "rank": 6,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 5.546702290859961e-16,
+      "relative_residual": 2.0780914585470952e-16
+    },
+    {
+      "size": 6,
+      "rank": 6,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.900141421955096e-14,
+      "relative_residual": 1.2875593399600588e-14
+    },
+    {
+      "size": 6,
+      "rank": 6,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 2.3205777670186613e-11,
+      "relative_residual": 8.078405801309173e-11
+    },
+    {
+      "size": 12,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 12,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 12,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 12,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 1.3668938841702078e-17,
+      "relative_residual": 2.4262921784584957e-17
+    },
+    {
+      "size": 12,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.9574961990446455e-16,
+      "relative_residual": 6.510851147652923e-17
+    },
+    {
+      "size": 12,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.9148982451661342e-17,
+      "relative_residual": 6.638590530277599e-18
+    },
+    {
+      "size": 12,
+      "rank": 6,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 3.698023119433791e-16,
+      "relative_residual": 2.0491607181648859e-16
+    },
+    {
+      "size": 12,
+      "rank": 6,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.6115719928513014e-14,
+      "relative_residual": 1.8875785691935707e-14
+    },
+    {
+      "size": 12,
+      "rank": 6,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 7.565085614322546e-12,
+      "relative_residual": 1.8151283663915179e-12
+    },
+    {
+      "size": 12,
+      "rank": 11,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 5.702097027561095e-16,
+      "relative_residual": 2.7676325903696175e-16
+    },
+    {
+      "size": 12,
+      "rank": 11,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 8.262923922651212e-14,
+      "relative_residual": 6.997341378985929e-15
+    },
+    {
+      "size": 12,
+      "rank": 11,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 9.111271380849784e-12,
+      "relative_residual": 4.3650557960874285e-13
+    },
+    {
+      "size": 12,
+      "rank": 12,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 5.941456478544381e-16,
+      "relative_residual": 2.626069563289746e-16
+    },
+    {
+      "size": 12,
+      "rank": 12,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.781078099780175e-14,
+      "relative_residual": 3.228428784660567e-14
+    },
+    {
+      "size": 12,
+      "rank": 12,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 6.376042639860247e-12,
+      "relative_residual": 1.2872439771516559e-11
+    },
+    {
+      "size": 31,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 31,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 31,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 31,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 2.6055110775337916e-17,
+      "relative_residual": 1.2918418000046795e-17
+    },
+    {
+      "size": 31,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.1415758558285163e-16,
+      "relative_residual": 8.679954694818397e-17
+    },
+    {
+      "size": 31,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.7581303373028746e-16,
+      "relative_residual": 7.295734999144954e-17
+    },
+    {
+      "size": 31,
+      "rank": 15,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 6.388962163481057e-16,
+      "relative_residual": 1.9712010654641443e-16
+    },
+    {
+      "size": 31,
+      "rank": 15,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 4.183279107938311e-14,
+      "relative_residual": 4.394560055940597e-15
+    },
+    {
+      "size": 31,
+      "rank": 15,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.3472481182948755e-11,
+      "relative_residual": 9.988360168722913e-12
+    },
+    {
+      "size": 31,
+      "rank": 30,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 8.415602953425812e-16,
+      "relative_residual": 4.522127388423328e-16
+    },
+    {
+      "size": 31,
+      "rank": 30,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.0957641150890656e-14,
+      "relative_residual": 1.5938576178071917e-14
+    },
+    {
+      "size": 31,
+      "rank": 30,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.0121756950120574e-11,
+      "relative_residual": 6.291339939657579e-12
+    },
+    {
+      "size": 31,
+      "rank": 31,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 1.1331928348316528e-15,
+      "relative_residual": 4.727053501289939e-16
+    },
+    {
+      "size": 31,
+      "rank": 31,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 3.452574404883391e-14,
+      "relative_residual": 1.6592977327175755e-14
+    },
+    {
+      "size": 31,
+      "rank": 31,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 5.08649433561391e-12,
+      "relative_residual": 1.2508835622845243e-11
+    },
+    {
+      "size": 61,
+      "rank": 0,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 61,
+      "rank": 0,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 61,
+      "rank": 0,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 0.0,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 61,
+      "rank": 1,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 1.2976913033837383e-17,
+      "relative_residual": 3.3845122691893545e-18
+    },
+    {
+      "size": 61,
+      "rank": 1,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 1.8662679513575924e-16,
+      "relative_residual": 9.278460602352768e-17
+    },
+    {
+      "size": 61,
+      "rank": 1,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 2.298427284734173e-17,
+      "relative_residual": 0.0
+    },
+    {
+      "size": 61,
+      "rank": 30,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 7.257619964635964e-16,
+      "relative_residual": 3.627347203268862e-16
+    },
+    {
+      "size": 61,
+      "rank": 30,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 4.067601514615453e-14,
+      "relative_residual": 2.1604854600308628e-14
+    },
+    {
+      "size": 61,
+      "rank": 30,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 3.1676429382861517e-11,
+      "relative_residual": 5.307710389849652e-12
+    },
+    {
+      "size": 61,
+      "rank": 60,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 1.1503513563814591e-15,
+      "relative_residual": 5.623853181104206e-16
+    },
+    {
+      "size": 61,
+      "rank": 60,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 2.5047204650763483e-14,
+      "relative_residual": 2.8770085611233433e-14
+    },
+    {
+      "size": 61,
+      "rank": 60,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.493898750805632e-11,
+      "relative_residual": 4.582630525709924e-12
+    },
+    {
+      "size": 61,
+      "rank": 61,
+      "condition": 1.0,
+      "relative_to_independent_SVD": 1.132082484174073e-15,
+      "relative_residual": 5.632758147266832e-16
+    },
+    {
+      "size": 61,
+      "rank": 61,
+      "condition": 1000.0,
+      "relative_to_independent_SVD": 3.2292514523106196e-14,
+      "relative_residual": 1.4913887429156438e-14
+    },
+    {
+      "size": 61,
+      "rank": 61,
+      "condition": 1000000.0,
+      "relative_to_independent_SVD": 1.6745041081512575e-11,
+      "relative_residual": 9.97676427844591e-12
+    }
+  ],
+  "seed": 20261125,
+  "actual_VBA_not_executed": true,
+  "nonlinear_solver_not_tested": true,
+  "physical_capacity_certified": false
+}

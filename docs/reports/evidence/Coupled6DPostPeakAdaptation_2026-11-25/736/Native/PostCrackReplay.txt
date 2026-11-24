@@ -1,0 +1,18 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold736FrozenTailMatrix_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: FCB32F37F615CF480B95F843941FBDF7F92D97B7A570F0BA154F8CDB01DCD6EC
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold736FrozenTailMatrix_20261125\Temp\RC_NDM_ModeSuite_1b885e459e9d44148ccb0abafecdd0cc\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=24408; startTicks=639311520257021632
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-25T00:20:44
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=16756; workingSet=183271424; privateBytes=133558272; cpu=191.796875
+EXCEL_AFTER_SUITE: pid=24408; workingSet=145125376; privateBytes=99495936; cpu=20.953125
+RUNTIME ERROR: VBAProject Path not found
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold736FrozenTailMatrix_20261125\Temp\RC_NDM_ModeSuite_1b885e459e9d44148ccb0abafecdd0cc\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-25T00:21:07
+FAIL_FAST: remaining suites were not run after a completed failed suite
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=1; source unchanged=True

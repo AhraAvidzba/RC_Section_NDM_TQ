@@ -1,0 +1,28 @@
+﻿{
+    "Stage":  "TIMEOUT",
+    "Passed":  false,
+    "Identity":  {
+                     "Valid":  true,
+                     "PID":  21392,
+                     "Ticks":  639311508312295989,
+                     "Reason":  "Primary TEST_EXCEL_PROCESS"
+                 },
+    "Before":  {
+                   "State":  "Live",
+                   "PID":  21392,
+                   "StartTicksUTC":  "639311508312295989",
+                   "Reason":  "Exact own Excel is still alive",
+                   "ObservedUTC":  "2026-11-24T21:10:30.0708850+00:00"
+               },
+    "After":  {
+                  "State":  "Absent",
+                  "PID":  21392,
+                  "StartTicksUTC":  "639311508312295989",
+                  "Reason":  "Explicit NoProcessFoundForGivenId",
+                  "ObservedUTC":  "2026-11-24T21:10:30.5364227+00:00"
+              },
+    "ChildStopError":  null,
+    "ExcelStopRequested":  true,
+    "ExcelStopError":  null,
+    "ExactOwnExcelStopRequestedOnlyByExplicitTimeout":  true
+}
