@@ -1,0 +1,40 @@
+{
+  "accepted_states": 32,
+  "cold743": {
+    "native": {
+      "failed": 0,
+      "macros": 0,
+      "own_process_closed": true,
+      "passed": 0,
+      "timeout600": true
+    },
+    "results_reopen_unverified": true,
+    "returned_workflow_result_missing": true
+  },
+  "compiled_source_workbook_unchanged": true,
+  "exact_source_prefix_states": 11,
+  "independent_tensor_reintegration_pending": true,
+  "initial_before_recovery_all12_source_states_exact": true,
+  "last_accepted_lambda": 1.108845010558338,
+  "material_Newton_and_test_module_exact741": true,
+  "max_reported_unverified_declines": 2,
+  "maximum_accepted_lambda": 1.108845010558338,
+  "no_physical_capacity_claimed": true,
+  "no_working_promotion": true,
+  "raw_frames": 71,
+  "raw_history": {
+    "bytes": 556084,
+    "complete_bytes": 556084,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "C689236793B626FC44C97C59C9552C67FE4BB5D85B8ED5F486FC7C356B61F415"
+  },
+  "regression": {
+    "failed": 0,
+    "macros": 3,
+    "own_process_closed": true,
+    "passed": 105,
+    "timeout600": false
+  },
+  "whole_goal_completed": false
+}

@@ -1,0 +1,95 @@
+﻿{
+    "Stage":  "AFTER_CHILD_EXIT",
+    "Passed":  true,
+    "ChildHasExited":  true,
+    "ChildExitCode":  0,
+    "Closure":  {
+                    "Passed":  true,
+                    "Identity":  {
+                                     "Valid":  true,
+                                     "PID":  17576,
+                                     "Ticks":  639311577996783408,
+                                     "Reason":  "Primary TEST_EXCEL_PROCESS"
+                                 },
+                    "FinalState":  {
+                                       "State":  "Absent",
+                                       "PID":  17576,
+                                       "StartTicksUTC":  "639311577996783408",
+                                       "Reason":  "Explicit NoProcessFoundForGivenId",
+                                       "ObservedUTC":  "2026-11-24T22:58:26.0547910+00:00"
+                                   },
+                    "Observations":  [
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:24.7310458+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:24.9721337+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:25.1883459+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:25.4035193+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:25.6193136+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-24T22:58:25.8379884+00:00"
+                                         },
+                                         {
+                                             "State":  "Absent",
+                                             "PID":  17576,
+                                             "StartTicksUTC":  "639311577996783408",
+                                             "Reason":  "Explicit NoProcessFoundForGivenId",
+                                             "ObservedUTC":  "2026-11-24T22:58:26.0547910+00:00"
+                                         }
+                                     ],
+                    "GraceMilliseconds":  3000,
+                    "OrdinaryPathKilledAnything":  false
+                },
+    "RunnerCleanupValid":  true,
+    "RunnerCleanup":  {
+                          "Stage":  "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+                          "OwnerVerified":  true,
+                          "PID":  17576,
+                          "StartTicksUTC":  "639311577996783408",
+                          "CloseRequested":  false,
+                          "CloseSucceeded":  false,
+                          "QuitRequested":  true,
+                          "QuitSucceeded":  true,
+                          "Errors":  [
+
+                                     ],
+                          "Failed":  false,
+                          "FinalExitNotAsserted":  true,
+                          "FinalClosureAuthority":  "Run-Audit03Watchdog after actual child exit",
+                          "ObservedUTC":  "2026-11-24T22:58:23.9692339+00:00"
+                      },
+    "RunnerCleanupReadError":  null,
+    "OrdinaryPathKilledAnything":  false
+}
