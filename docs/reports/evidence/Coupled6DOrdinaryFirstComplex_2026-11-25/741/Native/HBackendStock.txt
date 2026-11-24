@@ -1,0 +1,50 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: D9443744B6FB5E938EBC79A60199EC073B42A571FEEE06C2E0CF579226B95D51
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_72c6e3f680a4429585614c36fe68aa1d\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=17652; startTicks=639311570931978214
+===== modTestCoupledElasticState.RunTestStockHTrace =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T01:45:00
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7500; workingSet=217223168; privateBytes=161001472; cpu=2032.9375
+EXCEL_AFTER_SUITE: pid=17652; workingSet=171462656; privateBytes=118140928; cpu=143.109375
+TIMING_SECONDS: 131.5439453125 | Both | Excel
+TIMING_MESSAGE: Расчет завершен. |  | Геометрия для расчёта загружена с листа Results текущей книги. |  | Обработано сочетаний: 1. |  | Результаты и пояснения всех проверок — на листе Results. |  | Сочетаний с неподтверждённым численным результатом: 1. |  | Первая численная неудача: | Сочетание HardShear: Суммарный спад найден, но его максимум не подтверждён повтором плеч. Причина: Итерации: 4; пробы: 37; невязка, МПа: 4.7156209303597E-03; мин. ведущий элемент: 8.02571503058236E-03; пространственная касательная уточнена; уравнение 54 (продольный градиент Mx); действие касательной, МПа: -4.51155846136483E-03; фактическое изменение на единицу доли поправки, МПа: 2.19001614117482E-02; невязка перед демпфированием, МПа: 4.51155846136486E-03; лучшая невязка проб, МПа: 4.7156209303597E-03; уравнение 54 (продольный градиент Mx); действие касательной, МПа: -4.51155846136486E-03; фактическое изменение на единицу доли поправки, МПа: 0.021900147637064 Допустимое равновесие подтверждено до lambda = 1.105707. Эта проверка не получила подтверждённого численного результата; сам статус NumFail не доказывает физическое невыполнение. |  | Проверьте исходные данные и диагностику расчёта. |  | Исходная строка сочетания: | Config!H71:Q71. |  | Пошаговый отчет сохранен: | D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_72c6e3f680a4429585614c36fe68aa1d\RC_Section_NDM_execution_report.txt |  | Время расчёта: 131.54 с. |  | Данные сохранены на листе Results текущей книги.
+TIMING_STATES: direct=OK; capacity=NumFail; confirmed lower=1.10570660161397; limit=; code=NUMERICAL_FAILURE
+TIMING_LIMIT_REASON: Суммарный спад найден, но его максимум не подтверждён повтором плеч. Причина: Итерации: 4; пробы: 37; невязка, МПа: 4.7156209303597E-03; мин. ведущий элемент: 8.02571503058236E-03; пространственная касательная уточнена; уравнение 54 (продольный градиент Mx); действие касательной, МПа: -4.51155846136483E-03; фактическое изменение на единицу доли поправки, МПа: 2.19001614117482E-02; невязка перед демпфированием, МПа: 4.51155846136486E-03; лучшая невязка проб, МПа: 4.7156209303597E-03; уравнение 54 (продольный градиент Mx); действие касательной, МПа: -4.51155846136486E-03; фактическое изменение на единицу доли поправки, МПа: 0.021900147637064 Допустимое равновесие подтверждено до lambda = 1.105707.
+OK: workbook balances the requested hard-shear case
+OK: direct N actual=2.85520539633855 expected=2.8552053963382
+OK: direct Mx actual=5.20055268618584E-02 expected=5.20055268618743E-02
+OK: direct My actual=1.83548918336074E-02 expected=1.83548918336027E-02
+OK: direct T actual=0.152957431946676 expected=0.152957431946689
+OK: direct Qx actual=1.73351756206216 expected=1.73351756206248
+OK: direct Qy actual=-0.723998511214267 expected=-0.723998511214329
+OK: automatic chart draws the closed hoop from the new snapshot
+OK: TauXZ colours use the actual displayed sign
+OK: TauXZ draws a signed legend
+OK: Tau colours use the actual displayed sign
+OK: shear magnitude draws a scale from zero to the maximum
+OK: Warping colours use the actual displayed sign
+OK: Warping draws a signed legend
+OK: longitudinal stress keeps its material-state legend
+OK: unresolved capacity gives a confirmed lower bound and a reason
+OK: no unconfirmed limit component N
+OK: no unconfirmed limit component Mx
+OK: no unconfirmed limit component My
+OK: no unconfirmed limit component T
+OK: no unconfirmed limit component Qx
+OK: no unconfirmed limit component Qy
+OK: native load trace for HardShear
+OK: native target marker belongs to the direct branch
+OK: native direct series matches accepted trace
+OK: native capacity branch is shown independently
+OK: native capacity series matches accepted trace
+OK: native marker does not claim a limit for NumFail
+TOTAL_COUPLED_WORKBOOK_TIMING: passed=28; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_72c6e3f680a4429585614c36fe68aa1d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T01:47:18
+RESULTS_SAVE_REOPEN: before=FBE468AFF45438333E1E939322011833E4726DF6F1437E86D0E716022C86E553; after=FBE468AFF45438333E1E939322011833E4726DF6F1437E86D0E716022C86E553; equal=True; file=D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_72c6e3f680a4429585614c36fe68aa1d\RC_Section_NDM_saved.xlsm
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

@@ -1,0 +1,40 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: D9443744B6FB5E938EBC79A60199EC073B42A571FEEE06C2E0CF579226B95D51
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_4681dd23934b4e8f99a300e7c7744cc8\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=15364; startTicks=639311566005250932
+===== modTestCoupledElasticState.RunTestCoupledWorkbookTiming =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledWorkbookTiming; 2026-11-25T01:36:49
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7500; workingSet=220258304; privateBytes=171720704; cpu=1354.953125
+EXCEL_AFTER_SUITE: pid=15364; workingSet=169844736; privateBytes=124592128; cpu=19.1875
+TIMING_SECONDS: 7.9560546875 | Direct | Excel
+TIMING_MESSAGE: Расчет завершен. |  | Геометрия для расчёта загружена с листа Results текущей книги. |  | Обработано сочетаний: 1. |  | Результаты и пояснения всех проверок — на листе Results. |  | Пошаговый отчет сохранен: | D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_4681dd23934b4e8f99a300e7c7744cc8\RC_Section_NDM_execution_report.txt |  | Время расчёта: 7.96 с. |  | Данные сохранены на листе Results текущей книги.
+TIMING_STATES: direct=OK; capacity=N/A; confirmed lower=; limit=; code=
+TIMING_LIMIT_REASON: 
+OK: workbook balances the requested hard-shear case
+OK: direct N actual=2.85520539633855 expected=2.8552053963382
+OK: direct Mx actual=5.20055268618584E-02 expected=5.20055268618743E-02
+OK: direct My actual=1.83548918336074E-02 expected=1.83548918336027E-02
+OK: direct T actual=0.152957431946676 expected=0.152957431946689
+OK: direct Qx actual=1.73351756206216 expected=1.73351756206248
+OK: direct Qy actual=-0.723998511214267 expected=-0.723998511214329
+OK: automatic chart draws the closed hoop from the new snapshot
+OK: TauXZ colours use the actual displayed sign
+OK: TauXZ draws a signed legend
+OK: Tau colours use the actual displayed sign
+OK: shear magnitude draws a scale from zero to the maximum
+OK: Warping colours use the actual displayed sign
+OK: Warping draws a signed legend
+OK: longitudinal stress keeps its material-state legend
+OK: native load trace for HardShear
+OK: native target marker belongs to the direct branch
+OK: native direct series matches accepted trace
+OK: direct-only chart has no capacity branch
+TOTAL_COUPLED_WORKBOOK_TIMING: passed=19; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold741OrdinaryFirstComplex_20261125\Temp\RC_NDM_ModeSuite_4681dd23934b4e8f99a300e7c7744cc8\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledWorkbookTiming; 2026-11-25T01:37:03
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

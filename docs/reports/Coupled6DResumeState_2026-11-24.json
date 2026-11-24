@@ -1,12 +1,243 @@
 {
-  "active_exec_session": 75856,
+  "active_exec_session": 92960,
   "active_jobs": [
     {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold741OrdinaryFirstComplex_20261125",
-      "session": 75856,
-      "stage": "cold actual HardShear Both/Excel with ordinary-first concrete return"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold743UnverifiedCumulativeRecovery_20261125",
+      "session": 92960,
+      "stage": "targeted known-peak and retained/discarded shoulder regressions"
     }
   ],
+  "actual_cold_frozen_replay742": {
+    "all_exported_fields_match_original_Double_to15digit_CSV_precision": true,
+    "independent_force_and_weak_equilibrium": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "AcceptedPostCrackTestPath",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.10570660161397,
+      "meta": [
+        "4",
+        "0",
+        "Принятая контрольная последовательность. Это не предел."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.01
+      ],
+      "orientation": [
+        {
+          "current_length": 2.86914195080508e-05,
+          "field": 3,
+          "previous_length": 2.732475555800678e-05,
+          "signed_advance": 2.865327614203694e-05
+        },
+        {
+          "current_length": 5.340948340816411e-05,
+          "field": 4,
+          "previous_length": 2.86914195080508e-05,
+          "signed_advance": 4.6254947902736794e-05
+        },
+        {
+          "current_length": 2.8717255719122757e-05,
+          "field": 5,
+          "previous_length": 5.340948340816411e-05,
+          "signed_advance": 2.7584527126087607e-05
+        },
+        {
+          "current_length": 3.439596494126668e-05,
+          "field": 6,
+          "previous_length": 2.8717255719122757e-05,
+          "signed_advance": 3.2668975718744766e-05
+        },
+        {
+          "current_length": 2.7213567763519628e-05,
+          "field": 7,
+          "previous_length": 3.439596494126668e-05,
+          "signed_advance": 2.5664482274796152e-05
+        },
+        {
+          "current_length": 1.0746162324266747e-05,
+          "field": 8,
+          "previous_length": 2.7213567763519628e-05,
+          "signed_advance": 9.706100403838879e-06
+        },
+        {
+          "current_length": 8.71564638781543e-06,
+          "field": 9,
+          "previous_length": 1.0746162324266747e-05,
+          "signed_advance": 7.546943254810308e-06
+        },
+        {
+          "current_length": 2.1775878488528606e-06,
+          "field": 10,
+          "previous_length": 8.71564638781543e-06,
+          "signed_advance": 1.9661073625786327e-06
+        },
+        {
+          "current_length": 1.05752014690189e-06,
+          "field": 11,
+          "previous_length": 2.1775878488528606e-06,
+          "signed_advance": 1.0403162824630054e-06
+        },
+        {
+          "current_length": 1.3175851162394182e-06,
+          "field": 12,
+          "previous_length": 1.05752014690189e-06,
+          "signed_advance": 1.3110639360079306e-06
+        }
+      ],
+      "phase": "EnvelopeEnergy.Accepted",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 6.62037037037037e-07,
+          "force_residual_MPa": 2.097972770013772e-16,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 0.25,
+          "residual_MPa": 3.4861002973229915e-14,
+          "steel_utilization": 0.000609287423213503
+        },
+        {
+          "bound_MPa": 8.240740740740741e-07,
+          "force_residual_MPa": 5.052748343182936e-16,
+          "fraction": 1.0,
+          "index": 2,
+          "lambda": 0.5,
+          "residual_MPa": 8.870681966755001e-14,
+          "steel_utilization": 0.001218574846427
+        },
+        {
+          "bound_MPa": 9.861111111111112e-07,
+          "force_residual_MPa": 3.746727425432592e-10,
+          "fraction": 1.0,
+          "index": 3,
+          "lambda": 0.75,
+          "residual_MPa": 1.7501555760190968e-10,
+          "steel_utilization": 0.00182761658878147
+        },
+        {
+          "bound_MPa": 1.1481481481481482e-06,
+          "force_residual_MPa": 1.6168794698185394e-13,
+          "fraction": 1.0,
+          "index": 4,
+          "lambda": 1.0,
+          "residual_MPa": 7.214668112606216e-13,
+          "steel_utilization": 0.00241050214757619
+        },
+        {
+          "bound_MPa": 1.1796144616464326e-06,
+          "force_residual_MPa": 3.664735467518094e-09,
+          "fraction": 1.0,
+          "index": 5,
+          "lambda": 1.04854802654021,
+          "residual_MPa": 1.634141591434681e-08,
+          "steel_utilization": 0.00259163142850542
+        },
+        {
+          "bound_MPa": 1.2009695179499965e-06,
+          "force_residual_MPa": 5.281300993239577e-12,
+          "fraction": 1.0,
+          "index": 6,
+          "lambda": 1.08149582769428,
+          "residual_MPa": 1.1350829672886198e-11,
+          "steel_utilization": 0.00351517148613627
+        },
+        {
+          "bound_MPa": 1.209688414185411e-06,
+          "force_residual_MPa": 5.729073025038277e-09,
+          "fraction": 1.0,
+          "index": 7,
+          "lambda": 1.09494783902892,
+          "residual_MPa": 1.3420115775033756e-07,
+          "steel_utilization": 0.00436943099104239
+        },
+        {
+          "bound_MPa": 1.2130635389054204e-06,
+          "force_residual_MPa": 8.080388835407105e-11,
+          "fraction": 1.0,
+          "index": 8,
+          "lambda": 1.10015517431122,
+          "residual_MPa": 7.19753876356026e-09,
+          "steel_utilization": 0.0047584885247251
+        },
+        {
+          "bound_MPa": 1.2149973758780158e-06,
+          "force_residual_MPa": 1.5341425880725707e-15,
+          "fraction": 1.0,
+          "index": 9,
+          "lambda": 1.10313880849751,
+          "residual_MPa": 2.5184421063341456e-12,
+          "steel_utilization": 0.00488372429040949
+        },
+        {
+          "bound_MPa": 1.2159498496328759e-06,
+          "force_residual_MPa": 1.3642420526593926e-14,
+          "fraction": 1.0,
+          "index": 10,
+          "lambda": 1.10460833943358,
+          "residual_MPa": 1.9202602290387116e-12,
+          "steel_utilization": 0.00485805981904888
+        },
+        {
+          "bound_MPa": 1.2163081125617797e-06,
+          "force_residual_MPa": 2.8411796237911507e-12,
+          "fraction": 1.0,
+          "index": 11,
+          "lambda": 1.10516108795246,
+          "residual_MPa": 3.5707160421808923e-09,
+          "steel_utilization": 0.00484263142249532
+        },
+        {
+          "bound_MPa": 1.216661686231277e-06,
+          "force_residual_MPa": 1.336906684122773e-11,
+          "fraction": 1.0,
+          "index": 12,
+          "lambda": 1.10570660161397,
+          "residual_MPa": 2.723155256845189e-09,
+          "steel_utilization": 0.00482344142372146
+        }
+      ]
+    },
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_independent_constitutive_model_claimed": true,
+    "no_new_capacity_search": true,
+    "numerical_core_exact741": true,
+    "physical_capacity_certified": false,
+    "raw_history": {
+      "bytes": 103700,
+      "complete_bytes": 103700,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "C53453645358C66FF640CC7CAE86640A78D822DD0E80E4711070158026C7971C"
+    },
+    "source_fields_and_lambdas_binary_exact": true,
+    "states": 12,
+    "whole_goal_completed": false
+  },
   "all_started_stages_terminal": false,
   "automatic712": {
     "accepted_states": 57,
@@ -1296,8 +1527,69 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Observe75856 with original600 timeout, no restart on observation timeout. Paired Direct both19/0,7417.956s vs73912.065s single-run only. Record exact material/source/closure proof and archive739740 report; investigate actual cold capacity branch, all6physicalgoal remainsopen.",
+  "next_action": "743 actual255source auditPASS and compilationclosed. Regressions92960 live; if105/0 run actualcoldBoth original600s.741742 archive93pins verified and reportready; no physicalcapacity. Controller reuses existing decline recheck after cumulative shoulderfailure, no threshold/budget changes.",
   "no_new_experiments_added_after_pause_request": false,
+  "ordinary_first_complex741": {
+    "accepted_states": 12,
+    "cold741": {
+      "all_saved_sources_exact": 255,
+      "capacity": "NumFail",
+      "code": "NUMERICAL_FAILURE",
+      "direct": "OK",
+      "limit": "",
+      "lower": 1.10570660161397,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 28,
+        "timeout600": false
+      },
+      "results_checksum": "FBE468AFF45438333E1E939322011833E4726DF6F1437E86D0E716022C86E553",
+      "saved_book_sha256": "D4A33A1FC16E03C7AF8B5A822A02654A629F9DC3C456C494B3B2FECE6E930542",
+      "seconds": 131.5439453125
+    },
+    "direct739": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 19,
+      "timeout600": false
+    },
+    "direct739_seconds": 12.06494140625,
+    "direct741": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 19,
+      "timeout600": false
+    },
+    "direct741_seconds": 7.9560546875,
+    "direct_all_six_printed_resultants_exact_between_pair": true,
+    "finite_concrete_criterion_not_resolved": true,
+    "independent_tensor_reintegration_pending": true,
+    "material_regressions": {
+      "failed": 0,
+      "macros": 3,
+      "own_process_closed": true,
+      "passed": 87,
+      "timeout600": false
+    },
+    "newton_controller_test_module_exact739": true,
+    "no_physical_limit": true,
+    "no_working_promotion": true,
+    "ordinary_material_exact711": true,
+    "raw_frames": 23,
+    "raw_history": {
+      "bytes": 103700,
+      "complete_bytes": 103700,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "C53453645358C66FF640CC7CAE86640A78D822DD0E80E4711070158026C7971C"
+    },
+    "single_sequential_timing_pair_not_statistical_benchmark": true,
+    "whole_goal_completed": false
+  },
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
   "pause_request_revoked": true,
@@ -1429,7 +1721,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:738 fullFDconfirmsrank17,checkpointeda4b7e.739bounded12nativePTCtrials/metric/backwarderrorschecked butonly3.52%normgainandnobetterload-balancedresidual; ordinaryverificationtimeout600,no NDSoutcome.740realcoldall6Bothwithhoops/grades,600timeoutat8states/nativeL1.10015517,no returnedlimit/reopen. Badprototype notpromoted;741onlymaterialclass exact711 ordinaryfirst+closurefallback staged/compiled/audited fordirectedmaterial/realcasepair. Entiregoalpreserved.",
+  "previous_goal_turn_classification": "progress: completed741coldBoth131.54s DirectOK CapacityNumFail lower1.1057066 and actualsavedreopen255.742independentall12weak/gauge/all6equilibrium verified.743candidate numericalretry after cumulativepeak shoulderfailure prepared; no physicalcapacity and fullgoal unchanged.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -2633,6 +2925,7 @@
   },
   "terminal_sessions_this_stage": [
     1109,
+    2277,
     2312,
     2450,
     4763,
@@ -2687,6 +2980,7 @@
     42094,
     45282,
     45411,
+    47141,
     48073,
     48427,
     49056,
@@ -2717,8 +3011,10 @@
     73975,
     74004,
     75081,
+    75856,
     76344,
     76431,
+    76774,
     77140,
     77326,
     78149,
@@ -2727,6 +3023,7 @@
     79300,
     80580,
     80666,
+    81919,
     83283,
     84038,
     84774,
@@ -2736,6 +3033,7 @@
     87359,
     87682,
     88605,
+    89569,
     90746,
     91568,
     92127,
@@ -2747,7 +3045,7 @@
     99841,
     99863
   ],
-  "updated_local": "2026-11-25T01:45:11.440178+03:00",
+  "updated_local": "2026-11-25T01:57:01.707022+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
