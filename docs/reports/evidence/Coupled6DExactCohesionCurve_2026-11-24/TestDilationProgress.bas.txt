@@ -1,0 +1,42 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет завершённую строку до длительной пробы; счётчики включают три самостоятельные материальные станции.
+Private Sub TestWriteDilationProgress(ByVal folder As String, ByVal stage As String, ByVal strain As Double, _
+        ByVal started As Double, ByRef concrete() As CCoupledConcreteResponse, ByVal resultCode As Long)
+    Dim totals(0 To 4) As Double, values As Variant, side As Long, index As Long
+    For side = LBound(concrete) To UBound(concrete)
+        values = concrete(side).ReadDilationWorkTest
+        For index = 0 To 4: totals(index) = totals(index) + CDbl(values(index)): Next index
+    Next side
+    Dim elapsed As Double: elapsed = Timer - started: If elapsed < 0# Then elapsed = elapsed + 86400#
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\DilationProgress.csv" For Append As #handle
+    Print #handle, stage & ";" & TestOnsetNumber(strain) & ";" & TestOnsetNumber(elapsed) & TestHardPreparedVector(totals) & ";" & resultCode
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает два способа обновления на одной истории и одной деформации; записывает фактическую работу, не подменяя её числом конечных подшагов.
+Private Sub TestCompareExactCohesionUpdate(ByVal concrete As CCoupledConcreteResponse, ByVal operators As CCoupledElasticState, _
+        ByRef prediction As Variant, ByVal target As Double, ByVal folder As String, _
+        ByRef report As String, ByRef passed As Long, ByRef failed As Long)
+    Dim seed() As Double: seed = prediction
+    Dim strain(1 To 6) As Double, before(1 To 6) As Double, after(1 To 6) As Double
+    operators.PointStrain 1, seed, strain: strain(1) = 0.5 * (strain(1) + strain(2)): strain(2) = strain(1): strain(3) = target
+    Dim start As Variant, finish As Variant, originalReady As Boolean, exactReady As Boolean, substeps As Long, component As Long
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\ExactCohesionComparison.csv" For Output As #handle
+    concrete.SetExactCohesionUpdateTest False: start = concrete.ReadDilationWorkTest
+    originalReady = concrete.ReadPostCrackUpdateTest(strain, before, 0, substeps): finish = concrete.ReadDilationWorkTest
+    Print #handle, "ORIGINAL;" & Abs(CLng(originalReady)) & TestHardPreparedVector(before)
+    For component = 0 To 4: Print #handle, "WORK_ORIGINAL;" & component & ";" & TestOnsetNumber(CDbl(finish(component)) - CDbl(start(component))): Next component
+    concrete.SetExactCohesionUpdateTest True: start = concrete.ReadDilationWorkTest
+    exactReady = concrete.ReadPostCrackUpdateTest(strain, after, 0, substeps): finish = concrete.ReadDilationWorkTest
+    Print #handle, "EXACT;" & Abs(CLng(exactReady)) & TestHardPreparedVector(after)
+    For component = 0 To 4: Print #handle, "WORK_EXACT;" & component & ";" & TestOnsetNumber(CDbl(finish(component)) - CDbl(start(component))): Next component
+    Close #handle
+    TestRecord originalReady And exactReady, "оба локальных полного шага допустимы на одной исходной истории", passed, failed, report
+    Dim difference As Double
+    For component = 1 To 6: difference = GeomMax(difference, Abs(before(component) - after(component))): Next component
+    TestRecord difference <= 0.00000001, "точное обновление сцеплений сохраняет локальный отклик; отличие МПа=" & CStr(difference), passed, failed, report
+End Sub

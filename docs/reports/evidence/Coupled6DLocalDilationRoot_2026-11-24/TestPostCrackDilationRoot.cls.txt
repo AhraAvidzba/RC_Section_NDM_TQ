@@ -1,0 +1,94 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Прогноз из дробления выбирает окрестность скалярного корня; принимается только исходный полный шаг со всеми условиями материала.
+Private Function TestTryPostCrackLocalGuide(ByRef strain() As Double, ByRef stress() As Double, ByRef substeps As Long) As Boolean
+    Dim guide As TConcreteHistory, prior As TConcreteHistory, result As TConcreteHistory
+    Dim guideStress(1 To 6) As Double, intermediate(1 To 6) As Double, virgin As Boolean
+    Dim divisions As Long, stepIndex As Long, component As Long, fraction As Double, available As Boolean
+    divisions = 2
+    Do
+        prior = mHistory(1, mCommitted): available = False
+        For stepIndex = 1 To divisions
+            fraction = CDbl(stepIndex) / divisions
+            For component = 1 To 6
+                intermediate(component) = mHistory(1, mCommitted).Strain(component) + fraction * (strain(component) - mHistory(1, mCommitted).Strain(component))
+                If stepIndex = divisions Then intermediate(component) = strain(component)
+            Next component
+            available = UpdatePoint(intermediate, prior, guide, guideStress, virgin)
+            If Not available Then Exit For
+            prior = guide
+        Next stepIndex
+        If available Then Exit Do
+        divisions = divisions * 2
+    Loop While divisions <= MAX_LOCAL_DIVISIONS
+    If Not available Then Exit Function
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, r As Double, damageFactor As Double
+    CoupledStressInvariants guideStress, trace, q, high, middle, low
+    r = PositiveStressFraction(high, middle, low)
+    damageFactor = (1# - r * guide.TensionDamage) * (1# - guide.CompressionDamage)
+    If damageFactor <= 0# Then Exit Function
+    Dim center As Double: center = CurrentDilation(guide.TensionEnergy, guide.CompressionEnergy, r, trace / damageFactor, q / damageFactor)
+    Dim limit As Double: limit = Tan(mDilationMax)
+    Dim centerResidual As Double, centerAvailable As Boolean, ready As Boolean
+    centerAvailable = TestReadDilationResidual(strain, guide, center, result, stress, centerResidual, ready)
+    If ready Then TestTryPostCrackLocalGuide = True: substeps = 1: Exit Function
+    Dim radius As Double: radius = 0.000001 * (1# + limit)
+    Dim left As Double, right As Double, leftResidual As Double, rightResidual As Double
+    Dim leftAvailable As Boolean, rightAvailable As Boolean, attempt As Long
+    For attempt = 1 To 21
+        left = GeomMax(0#, center - radius): right = GeomMin(limit, center + radius)
+        leftAvailable = TestReadDilationResidual(strain, guide, left, result, stress, leftResidual, ready)
+        If ready Then TestTryPostCrackLocalGuide = True: substeps = 1: Exit Function
+        rightAvailable = TestReadDilationResidual(strain, guide, right, result, stress, rightResidual, ready)
+        If ready Then TestTryPostCrackLocalGuide = True: substeps = 1: Exit Function
+        If centerAvailable Then
+            If leftAvailable Then
+                If Sgn(leftResidual) <> Sgn(centerResidual) Then
+                    TestTryPostCrackLocalGuide = TestBisectDilationResidual(strain, guide, left, center, leftResidual, stress)
+                    If TestTryPostCrackLocalGuide Then substeps = 1
+                    Exit Function
+                End If
+            End If
+            If rightAvailable Then
+                If Sgn(centerResidual) <> Sgn(rightResidual) Then
+                    TestTryPostCrackLocalGuide = TestBisectDilationResidual(strain, guide, center, right, centerResidual, stress)
+                    If TestTryPostCrackLocalGuide Then substeps = 1
+                    Exit Function
+                End If
+            End If
+        End If
+        If leftAvailable And rightAvailable Then
+            If Sgn(leftResidual) <> Sgn(rightResidual) Then
+                TestTryPostCrackLocalGuide = TestBisectDilationResidual(strain, guide, left, right, leftResidual, stress)
+                If TestTryPostCrackLocalGuide Then substeps = 1
+                Exit Function
+            End If
+        End If
+        If left = 0# And right = limit Then Exit For
+        radius = 2# * radius
+    Next attempt
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' При фиксированной дилатансии замыкает координаты истории; проба остаётся промежуточной, пока не выполнено исходное условие потока.
+Private Function TestReadDilationResidual(ByRef strain() As Double, ByRef guide As TConcreteHistory, ByVal dilation As Double, _
+        ByRef result As TConcreteHistory, ByRef stress() As Double, ByRef residual As Double, ByRef ready As Boolean) As Boolean
+    Dim virgin As Boolean
+    ready = False
+    TestReadDilationResidual = UpdatePoint(strain, mHistory(1, mCommitted), result, stress, virgin, _
+        True, guide.Tension, guide.Compression, dilation, True, residual, ready)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Скалярная скобка задаёт только направление поиска; успех требует всех исходных критериев полного материального шага.
+Private Function TestBisectDilationResidual(ByRef strain() As Double, ByRef guide As TConcreteHistory, _
+        ByVal left As Double, ByVal right As Double, ByVal leftResidual As Double, ByRef stress() As Double) As Boolean
+    Dim result As TConcreteHistory, middle As Double, residual As Double, ready As Boolean, iteration As Long
+    For iteration = 1 To 64
+        middle = left + 0.5 * (right - left)
+        If middle <= left Or middle >= right Then Exit Function
+        If Not TestReadDilationResidual(strain, guide, middle, result, stress, residual, ready) Then Exit Function
+        If ready Then TestBisectDilationResidual = True: Exit Function
+        If Sgn(residual) = Sgn(leftResidual) Then left = middle: leftResidual = residual Else right = middle
+    Next iteration
+End Function

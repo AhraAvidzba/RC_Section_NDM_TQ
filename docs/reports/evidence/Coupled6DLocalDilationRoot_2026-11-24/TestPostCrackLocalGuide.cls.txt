@@ -1,0 +1,34 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Дробление даёт только начальное приближение координат истории; результат повторно решается на исходном полном шаге.
+Private Function TestTryPostCrackLocalGuide(ByRef strain() As Double, ByRef stress() As Double, ByRef substeps As Long) As Boolean
+    Dim guide As TConcreteHistory, prior As TConcreteHistory, result As TConcreteHistory
+    Dim guideStress(1 To 6) As Double, intermediate(1 To 6) As Double, virgin As Boolean
+    Dim divisions As Long, stepIndex As Long, component As Long, fraction As Double, ready As Boolean
+    divisions = 2
+    Do
+        prior = mHistory(1, mCommitted): ready = False
+        For stepIndex = 1 To divisions
+            fraction = CDbl(stepIndex) / divisions
+            For component = 1 To 6
+                intermediate(component) = mHistory(1, mCommitted).Strain(component) + fraction * (strain(component) - mHistory(1, mCommitted).Strain(component))
+                If stepIndex = divisions Then intermediate(component) = strain(component)
+            Next component
+            ready = UpdatePoint(intermediate, prior, guide, guideStress, virgin)
+            If Not ready Then Exit For
+            prior = guide
+        Next stepIndex
+        If ready Then Exit Do
+        divisions = divisions * 2
+    Loop While divisions <= MAX_LOCAL_DIVISIONS
+    If Not ready Then Exit Function
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, r As Double, damageFactor As Double, dilation As Double
+    CoupledStressInvariants guideStress, trace, q, high, middle, low
+    r = PositiveStressFraction(high, middle, low)
+    damageFactor = (1# - r * guide.TensionDamage) * (1# - guide.CompressionDamage)
+    If damageFactor <= 0# Then Exit Function
+    dilation = CurrentDilation(guide.TensionEnergy, guide.CompressionEnergy, r, trace / damageFactor, q / damageFactor)
+    TestTryPostCrackLocalGuide = UpdatePoint(strain, mHistory(1, mCommitted), result, stress, virgin, _
+        True, guide.Tension, guide.Compression, dilation)
+    If TestTryPostCrackLocalGuide Then substeps = 1 ' Принят только результат полного исходного шага, не история дроблений.
+End Function

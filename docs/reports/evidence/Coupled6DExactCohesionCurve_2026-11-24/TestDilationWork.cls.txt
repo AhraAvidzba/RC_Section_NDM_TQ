@@ -1,0 +1,12 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Управляет только точным обновлением координат при неизменных эффективных сцеплениях; критерии полного шага не меняются.
+Friend Sub SetExactCohesionUpdateTest(ByVal enabled As Boolean)
+    mExactCohesionUpdateTest = enabled
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает реальные локальные вызовы, итерации, запросы резерва, принятые возвраты и скалярные пробы.
+Friend Function ReadDilationWorkTest() As Variant
+    ReadDilationWorkTest = Array(mStateCallsTest, mStateIterationsTest, mClosureRequestsTest, mClosureSuccessesTest, mDilationReadsTest)
+End Function

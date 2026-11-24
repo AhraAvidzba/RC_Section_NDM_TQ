@@ -1,0 +1,39 @@
+{
+  "accepted11_native_fields_and_parameters_exact": true,
+  "entire_goal_completed": false,
+  "full_section_curve_still_negative": true,
+  "independent_uniaxial_reference": {
+    "dilation": 0.4920476502448084,
+    "expected_lateral_strain": 2.5274738984633976e-05,
+    "expected_sigma_zz_MPa": 0.3365906715610312,
+    "lateral_plastic_increment_ratio": 0.06467820323643235
+  },
+  "intermediate_substeps_are_only_predictor": true,
+  "local_original_full_step_root_found": true,
+  "native": {
+    "failed": 1,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 101,
+    "timeout600": false
+  },
+  "original_coarse_samples_and2to64_reference_records_exact": true,
+  "original_full_step_acceptance_preserved": true,
+  "original_full_step_default_body_exact": true,
+  "physical_capacity_certified": false,
+  "raw_csv_sha256": "155EAF926D677A608003FE4C17CC0741803D16E2B45BCEC63D3FF6527410FF81",
+  "roots": [
+    {
+      "epsilon_lateral": 2.52747393012602e-05,
+      "full_original_steps": 1,
+      "stress_MPa": [
+        5.94315474265643e-09,
+        5.94315472318121e-09,
+        0.336590672081489,
+        4.4301908649572e-17,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+
+' Выявляет потерю девиатора на новом растянутом пластическом шаге после существенно негидростатической принятой истории.
+' Численная полоса совпадает с полосой сопряжения потенциала; исходный допустимый возврат сохраняется при отказе резерва.
+Private Function NeedsDilationClosure(ByRef committed As TConcreteHistory, ByRef updated As TConcreteHistory, _
+        ByRef stress() As Double, ByVal virginElastic As Boolean) As Boolean
+    If Not mASDFlow Is Nothing Or virginElastic Then Exit Function
+    If updated.Tension = committed.Tension And updated.Compression = committed.Compression Then Exit Function
+    Dim trace As Double, q As Double, high As Double, middle As Double, low As Double, damageFactor As Double
+    CoupledStressInvariants stress, trace, q, high, middle, low
+    If low <= 0# Then Exit Function
+    damageFactor = (1# - updated.TensionDamage) * (1# - updated.CompressionDamage)
+    If damageFactor <= 0# Then Exit Function
+    If q > TENSILE_AXIS_BAND_RATIO * mFc * damageFactor + PLASTIC_ROUNDOFF * high Then Exit Function
+    CoupledStressInvariants committed.Stress, trace, q, high, middle, low
+    damageFactor = (1# - PositiveStressFraction(high, middle, low) * committed.TensionDamage) * (1# - committed.CompressionDamage)
+    If q <= TENSILE_AXIS_BAND_RATIO * mFc * damageFactor + PLASTIC_ROUNDOFF * GeomMax(Abs(high), Abs(low)) Then Exit Function
+    NeedsDilationClosure = True
+End Function
+
+' Замыкает обычный полный материальный шаг; промежуточное состояние при фиксированной дилатансии доступно только внутреннему скалярному решателю.
+Private Function UpdatePoint(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
+        ByRef updated As TConcreteHistory, ByRef apparent() As Double, ByRef virginElastic As Boolean) As Boolean
+    UpdatePoint = EvaluatePointState(strain, committed, updated, apparent, virginElastic)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Контрольная обёртка использует тот же резерв полного шага без принятия пробного материала.
+Private Function TestTryPostCrackLocalGuide(ByRef strain() As Double, ByRef stress() As Double, ByRef substeps As Long) As Boolean
+    Dim result As TConcreteHistory
+    TestTryPostCrackLocalGuide = TryDilationClosure(strain, mHistory(1, mCommitted), result, stress)
+    If TestTryPostCrackLocalGuide Then substeps = 1
+End Function

@@ -9,6 +9,18 @@
   "goal_status": "active",
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
+  "local_dilation706": {
+    "full_section_curve_not_yet_passed": true,
+    "independent_uniaxial_reference": {
+      "dilation": 0.4920476502448084,
+      "expected_lateral_strain": 2.5274738984633976e-05,
+      "expected_sigma_zz_MPa": 0.3365906715610312,
+      "lateral_plastic_increment_ratio": 0.06467820323643235
+    },
+    "original_acceptance_preserved": true,
+    "original_full_step_root_found": true,
+    "proof": "docs/reports/evidence/Coupled6DLocalDilationRoot_2026-11-24/Proof.json"
+  },
   "main_unchanged": "3e7da82d3391a90aab8678054584f259eda30fe7",
   "material_integration702": {
     "automatic_substeps_both_sides_of_jump": 1,
@@ -27,11 +39,13 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Investigate local UpdatePoint branch selection/cohesion/dilation at failed epsilon_zz0.0008. One-step map jumps while2..64substeps recover same uniaxial root. Test a consistent local continuation/predictor or error-controlled integration; do not blindly force2substeps or relax global tolerances. Then full curve and actual cold capacity/all6 original scope.",
+  "next_action": "Diagnose post-yield prescribed step .002→.0025 on exact accepted18 material history; distinguish predictor/step size from local constitutive discontinuity. No tolerance loosening or physical failure inference. Then automatic peak trace and real coldall6/HardShear; original full scope remains open.",
   "no_new_experiments_added_after_pause_request": true,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
+  "pause_request_revoked": true,
   "pause_requested_explicitly": false,
+  "pause_revoked_user_message": "На паузу не ставь пока я сам об этом не попрошу снова",
   "physical_capacity_certified": false,
   "postcrack700_summary": {
     "Matrix": {
@@ -59,7 +73,7 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: exact working kernel213/0+48SVD; material jump1.044934788MPa reproduced at same accepted11; local roots exist for2..64substeps",
+  "previous_goal_turn_classification": "progress: local full-step root and18 independently assembled section states through known uniaxial peak; next prescribed step still NumFail",
   "prior_pause_revoked_by_explicit_resume": true,
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
@@ -163,29 +177,54 @@
     "Git evidence/source checkpoints retained; no merge into main before required checks and user agreement."
   ],
   "schema": "Coupled6DRankKernelActive4",
+  "section708": {
+    "accepted_states": 18,
+    "automatic_capacity_confirmed": false,
+    "known_peak_lambda": 1.4413963572798234,
+    "native": {
+      "failed": 1,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "next_strain_numfail": 0.0025,
+    "proof": "docs/reports/evidence/Coupled6DExactCohesionCurve_2026-11-24/708/ExactCohesionCurveProof.json"
+  },
   "stopped_own_file_enumeration_session": {
     "exit_code": 1,
     "reason": "Unneeded broad rg listing interrupted; no Office process affected",
     "session": 47261
   },
   "terminal_sessions_this_stage": [
+    11153,
     16147,
     16181,
     21859,
+    25261,
     28797,
     33931,
     37183,
     38101,
+    38699,
+    40717,
     45411,
     52416,
+    55018,
+    55381,
+    57786,
+    60225,
     73975,
+    76344,
+    84774,
     86272,
     87359,
     94068,
     97029,
-    99831
+    99831,
+    99841
   ],
-  "updated_local": "2026-11-24T19:25:59.379216+03:00",
+  "updated_local": "2026-11-24T20:17:55.223116+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
