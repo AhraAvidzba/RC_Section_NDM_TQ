@@ -1,0 +1,111 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет ограниченные псевдовременные направления на одной истории; матрица принятой точки служит численным оператором, закон материала не меняется.
+Private Sub TestProbePseudoTimeDirections(ByVal equations As ICoupledEquationSystem, ByRef zero() As Double, _
+        ByRef residual() As Double, ByRef matrix() As Double, ByRef accepted() As Double, ByRef seed() As Double)
+    Dim size As Long: size = UBound(zero)
+    Dim scales As Variant: scales = mReverseSolverTest.ReadNewtonLineScalesTest
+    Dim acceptedCoordinates() As Double: ReDim acceptedCoordinates(1 To size)
+    Dim degree As Long, factor As Double, fraction As Double, seedFactor As Double, mapped() As Double
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, fraction, factor
+    mReverseSolverTest.ReadNewtonLineFieldTest zero, mapped, seedFactor
+    For degree = 1 To size - 1: acceptedCoordinates(degree) = (accepted(degree) - seed(degree)) / CDbl(scales(degree)): Next degree
+    acceptedCoordinates(size) = (factor - seedFactor) / CDbl(scales(size))
+    Dim referenceResidual() As Double, reference() As Double, revision As Long
+    revision = mReverseSolverTest.AcceptedRevision
+    If Not equations.TryEvaluate(acceptedCoordinates, True, referenceResidual, reference) Then Err.Raise 5, , "Нет касательной принятой точки для численного резерва."
+    mPtcRootTest = mHardPreparedPathTest
+    mPtcInitialNormTest = TestPseudoResidualNorm(residual): mPtcBestNormTest = mPtcInitialNormTest
+    mPtcTargetTest = seed(1): mPtcBestReadyTest = False
+    Dim radius As Double: radius = mReverseSolverTest.SpatialFieldDistance(accepted, seed)
+    If radius <= 0# Then Err.Raise 5, , "Нет положительного масштаба пространственной поправки."
+    Dim report As Integer: report = FreeFile
+    Open mPtcRootTest & ".PseudoTrials.csv" For Output As #report
+    Print #report, "MODE;BoundedPseudoTimeDirections;FrozenHistory;NotCapacity"
+    Print #report, "BASE;" & TestOnsetNumber(mPtcInitialNormTest) & ";" & TestOnsetNumber(radius) & ";" & CStr(revision)
+    Dim handle As Integer: handle = FreeFile
+    Open mPtcRootTest & ".PseudoReference.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPTCREF0000001"
+    Put #handle, , magic: Put #handle, , size
+    TestWriteReverseBinaryVector handle, acceptedCoordinates
+    TestWriteReverseBinaryVector handle, referenceResidual
+    Dim row As Long, column As Long, value As Double
+    For row = 1 To size
+        For column = 1 To size: value = reference(column, row): Put #handle, , value: Next column
+    Next row
+    Close #handle
+    Dim algebra As New CCoupledLinearSystem, regularized() As Double, movement() As Double, coordinates() As Double
+    Dim trialResidual() As Double, unused() As Double, trialField() As Double, trialFactor As Double
+    Dim muIndex As Long, cut As Long, mu As Double, gain As Double, cap As Double, distance As Double, norm As Double, ready As Boolean
+    For muIndex = 0 To 3
+        mu = 0.1 * 10# ^ muIndex
+        ReDim regularized(1 To size, 1 To size): ReDim movement(1 To size)
+        For row = 1 To size
+            movement(row) = -residual(row)
+            For column = 1 To size: regularized(column, row) = matrix(column, row) + mu * reference(column, row): Next column
+        Next row
+        ready = algebra.Solve(regularized, movement, size)
+        Print #report, "LINEAR;" & TestOnsetNumber(mu) & ";" & CStr(ready) & ";" & TestOnsetNumber(algebra.MinimumPivot)
+        If ready Then
+            movement(1) = 0# ' Линейное управление имеет нулевую поправку выбранной деформации; устраняем только округление её решения.
+            mReverseSolverTest.ReadNewtonLineFieldTest movement, trialField, trialFactor
+            distance = mReverseSolverTest.SpatialFieldDistance(seed, trialField)
+            cap = 1#: If distance > radius Then cap = radius / distance
+            For cut = 0 To 2
+                gain = cap / 2# ^ cut: coordinates = movement
+                For degree = 1 To size: coordinates(degree) = gain * movement(degree): Next degree
+                ready = equations.TryEvaluate(coordinates, False, trialResidual, unused)
+                norm = 1E+300
+                If ready Then
+                    norm = TestPseudoResidualNorm(trialResidual)
+                    mReverseSolverTest.ReadNewtonLineFieldTest coordinates, trialField, trialFactor
+                    If norm < mPtcBestNormTest Then
+                        mPtcBestNormTest = norm: mPtcBestFieldTest = trialField: mPtcBestFactorTest = trialFactor: mPtcBestReadyTest = True
+                    End If
+                End If
+                Print #report, "TRIAL;" & TestOnsetNumber(mu) & ";" & CStr(cut) & ";" & TestOnsetNumber(gain) & ";" & CStr(ready) & ";" & TestOnsetNumber(norm) & TestHardPreparedVector(coordinates)
+                If ready Then Print #report, "RESIDUAL;" & TestOnsetNumber(mu) & ";" & CStr(cut) & TestHardPreparedVector(trialResidual)
+                If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Численный резерв изменил принятую историю."
+            Next cut
+        End If
+    Next muIndex
+    Close #report
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает максимальную компоненту тех же нормированных уравнений, без добавочного псевдовременного слагаемого.
+Private Function TestPseudoResidualNorm(ByRef values() As Double) As Double
+    Dim index As Long
+    For index = LBound(values) To UBound(values): TestPseudoResidualNorm = GeomMax(TestPseudoResidualNorm, Abs(values(index))): Next index
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Перепроверяет улучшенный прогноз обычным решателем с исходными допусками и 30 итерациями; успешное поле выгружается через точный повтор всей истории.
+Private Sub TestVerifyPseudoTimeCandidate()
+    Dim handle As Integer: handle = FreeFile
+    Open mPtcRootTest & ".PseudoOutcome.txt" For Output As #handle
+    Print #handle, "PTC_CANDIDATE: improved=" & CStr(mPtcBestReadyTest) & "; initialNorm=" & TestOnsetNumber(mPtcInitialNormTest) & "; bestNorm=" & TestOnsetNumber(mPtcBestNormTest)
+    Close #handle
+    If Not mPtcBestReadyTest Then Exit Sub
+    Dim projection() As Double: ReDim projection(1 To mReverseOperatorsTest.DegreeCount): projection(1) = 1#
+    Dim predicted As Variant: predicted = mPtcBestFieldTest
+    Dim factor As Double, solved As Boolean, started As Double, seconds As Double
+    started = Timer
+    solved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, mPtcTargetTest, mPtcBestFactorTest, factor, _
+        mReverseOptionsTest(3), mReverseOptionsTest(4), 30, initialField:=predicted, allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+    seconds = Timer - started: If seconds < 0# Then seconds = seconds + 86400#
+    Open mPtcRootTest & ".PseudoOutcome.txt" For Append As #handle
+    Print #handle, "PTC_RESULT: solved=" & CStr(solved) & "; factor=" & TestOnsetNumber(factor) & "; iterations=" & CStr(mReverseSolverTest.IterationCount) & "; seconds=" & TestOnsetNumber(seconds)
+    Print #handle, "COMMENT: " & mReverseSolverTest.ResultMeta.ResultComment
+    Print #handle, "DETAILS: " & mReverseSolverTest.ResultMeta.DiagnosticDetails
+    Close #handle
+    If Not solved Then Exit Sub
+    Dim field() As Double, resultants() As Double
+    mReverseSolverTest.CopyTrial field, resultants
+    mReverseSolverTest.AcceptStep
+    mReverseFieldsTest.Add field: mReverseTraceTest.Add 1#, factor
+    mPtcSuppressTest = True
+    Dim originalPath As String: originalPath = mHardPreparedPathTest
+    mHardPreparedPathTest = mPtcRootTest & ".PseudoWitness"
+    TestExportFastFrozenReplay
+    mHardPreparedPathTest = originalPath: mPtcSuppressTest = False
+End Sub

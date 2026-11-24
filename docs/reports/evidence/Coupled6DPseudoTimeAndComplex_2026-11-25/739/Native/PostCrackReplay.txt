@@ -1,0 +1,8 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold739PseudoTimeProbe_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: D9238AF382A7E84F3864EADDD3299A2AEA19523461A4BC9AF5143EC9038072D5
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold739PseudoTimeProbe_20261125\Temp\RC_NDM_ModeSuite_f62fc9cf93f64d91be16f0f6c0df08c9\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=23920; startTicks=639311546485902535
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-25T01:04:25
+WATCHDOG_FAILURE: timeout=600 sec; macro=modTestCoupledElasticState.RunTestPostCrackRawReplay; ownExcelState=Absent; exactCleanupRequested=True

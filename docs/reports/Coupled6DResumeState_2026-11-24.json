@@ -1,10 +1,10 @@
 {
-  "active_exec_session": 12388,
+  "active_exec_session": 75856,
   "active_jobs": [
     {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold739PseudoTimeProbe_20261125",
-      "session": 12388,
-      "stage": "native739 bounded pseudo-time forecasts and ordinary NDS verification"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold741OrdinaryFirstComplex_20261125",
+      "session": 75856,
+      "stage": "cold actual HardShear Both/Excel with ordinary-first concrete return"
     }
   ],
   "all_started_stages_terminal": false,
@@ -102,6 +102,47 @@
     "prototype731_requires_fallback_for_rejected_early_candidate": true,
     "same_original52_binary_prefix_and_target": true,
     "working_code_promoted": false
+  },
+  "current_complex740": {
+    "accepted_states": 8,
+    "all_six_components_nonzero": true,
+    "capacity_limit_not_confirmed": true,
+    "compiled_source_exact739": true,
+    "independent_tensor_reintegration_not_yet_done": true,
+    "last_accepted_lambda": 1.100155173994633,
+    "native": {
+      "failed": 0,
+      "macros": 0,
+      "own_process_closed": true,
+      "passed": 0,
+      "timeout600": true
+    },
+    "native_maximum_accepted_lambda": 1.100155173994633,
+    "no_axial_history_or_external_seed_used": true,
+    "no_new_compilation_or_material_state_reuse": true,
+    "not_a_clean_performance_benchmark_due_to_checkpoint_observer": true,
+    "original_macro": "RunTestStockHTrace -> RunTestCoupledWorkbookTiming(Both,Excel)",
+    "physical_capacity_certified": false,
+    "raw_frames": 8,
+    "results_reopen_not_verified": true,
+    "returned_workflow_result_missing": true,
+    "source_internal_loads_N_Nmm": [
+      28000.0,
+      510000.0,
+      180000.0,
+      1500000.0,
+      17000.0,
+      -7100.0
+    ],
+    "source_raw_history": {
+      "bytes": 25080,
+      "complete_bytes": 25080,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "BF204144F54A18730A93E4E29B2EA68F8B0574357AFF67A06B7BDD30E63605B0"
+    },
+    "source_workbook_unchanged": true,
+    "whole_goal_completed": false
   },
   "entire_goal_completed": false,
   "frozen733_replay": {
@@ -1255,7 +1296,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "739 native12388 confirmedlive afteractual255audit; bounded12readonlytrials same70history, max30ordinaryNDSifbestforecastimproved,71stateexactwitnessonlyifsolved. Pollsamehandle, observeoutputnotrestart.738 fullFD ranks17matchesassembled;42pins+primaryPDFcomplete. Full6goal active no confirmedcapacity.",
+  "next_action": "Observe75856 with original600 timeout, no restart on observation timeout. Paired Direct both19/0,7417.956s vs73912.065s single-run only. Record exact material/source/closure proof and archive739740 report; investigate actual cold capacity branch, all6physicalgoal remainsopen.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -1388,7 +1429,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:738 all247 complete residual samples available,assembled andpurevalues identical anddeterministic; finite-difference ranks17 atbothh andrelativeerrors1.50e-7/2.56e-9. Verified ranklossisnotassembledJacobianbug here. SavedprimaryKelleyKeyes1996 PDF19pages/visualformulas andPETSc SERsource/manualdiscrepancy.739 bounded nativepseudo-time trial staged/compiling,notpromoted,no physicalcapacity; fullgoalpreserved.",
+  "previous_goal_turn_classification": "progress:738 fullFDconfirmsrank17,checkpointeda4b7e.739bounded12nativePTCtrials/metric/backwarderrorschecked butonly3.52%normgainandnobetterload-balancedresidual; ordinaryverificationtimeout600,no NDSoutcome.740realcoldall6Bothwithhoops/grades,600timeoutat8states/nativeL1.10015517,no returnedlimit/reopen. Badprototype notpromoted;741onlymaterialclass exact711 ordinaryfirst+closurefallback staged/compiled/audited fordirectedmaterial/realcasepair. Entiregoalpreserved.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -1512,6 +1553,169 @@
     },
     "same_six_other_sources_and_tests_exact": true,
     "working_code_contains_new_LM_candidate": false
+  },
+  "pseudo_time739": {
+    "accepted_field_roundtrip_exact": true,
+    "actual_trial_vectors_recorded_as_native15digit_CSV_not_full_binary": true,
+    "all12_available": true,
+    "all12_spatial_caps_and_linear_backward_errors_verified": true,
+    "all70_tensor_fields_exact_verified_parent": true,
+    "best_norm": 4.37216088569059e-05,
+    "best_trial_load_balanced_norm": 9.21461941671355e-06,
+    "final_NDS_result_missing": true,
+    "fresh_native_reference_matrix_exact737_accepted_matrix": true,
+    "initial_load_balanced_norm": 9.213948658594774e-06,
+    "initial_norm": 4.5317111135645405e-05,
+    "native": {
+      "failed": 0,
+      "macros": 0,
+      "own_process_closed": true,
+      "passed": 0,
+      "timeout600": true
+    },
+    "no_working_promotion": true,
+    "numerical_core_exact738": true,
+    "numerical_stop_not_a_returned_NumFail": true,
+    "ordinary_root_verification_completed": false,
+    "physical_capacity_certified": false,
+    "readonly_trials": [
+      {
+        "cut": 0,
+        "gain": 0.464252129717742,
+        "independent_linear_backward_error": 2.449246646620634e-17,
+        "load_balanced_norm": 1.32171666003548,
+        "mu": 0.1,
+        "native_linear_minimum_pivot": 7.15223702598933e-07,
+        "native_norm": 1.63424052132044,
+        "spatial_distance": 0.0002492478549359928,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 1,
+        "gain": 0.232126064858871,
+        "independent_linear_backward_error": 6.154468765648321e-18,
+        "load_balanced_norm": 0.668088460072468,
+        "mu": 0.1,
+        "native_linear_minimum_pivot": 7.15223702598933e-07,
+        "native_norm": 1.77938137144829,
+        "spatial_distance": 0.00012462392746799637,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 2,
+        "gain": 0.116063032429436,
+        "independent_linear_backward_error": 3.852421619394319e-18,
+        "load_balanced_norm": 0.318542163067219,
+        "mu": 0.1,
+        "native_linear_minimum_pivot": 7.15223702598933e-07,
+        "native_norm": 1.63392617599562,
+        "spatial_distance": 6.231196373399817e-05,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 0,
+        "gain": 1.0,
+        "independent_linear_backward_error": 1.6869822956984339e-18,
+        "load_balanced_norm": 0.265374036991006,
+        "mu": 1.0,
+        "native_linear_minimum_pivot": 3.93373036424247e-06,
+        "native_norm": 1.58525986511171,
+        "spatial_distance": 5.4532129852461336e-05,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 1,
+        "gain": 0.5,
+        "independent_linear_backward_error": 4.78017734422848e-18,
+        "load_balanced_norm": 0.191313560280491,
+        "mu": 1.0,
+        "native_linear_minimum_pivot": 3.93373036424247e-06,
+        "native_norm": 0.327780643991039,
+        "spatial_distance": 2.7266064926230678e-05,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 2,
+        "gain": 0.25,
+        "independent_linear_backward_error": 6.656241728155442e-18,
+        "load_balanced_norm": 0.182835714630031,
+        "mu": 1.0,
+        "native_linear_minimum_pivot": 3.93373036424247e-06,
+        "native_norm": 0.361544932651281,
+        "spatial_distance": 1.363303246311533e-05,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 0,
+        "gain": 1.0,
+        "independent_linear_backward_error": 1.0492396187540396e-18,
+        "load_balanced_norm": 0.0100631303541794,
+        "mu": 10.0,
+        "native_linear_minimum_pivot": 7.15223702588599e-06,
+        "native_norm": 0.0144017363071214,
+        "spatial_distance": 5.400481159500783e-06,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 1,
+        "gain": 0.5,
+        "independent_linear_backward_error": 1.743669761742081e-18,
+        "load_balanced_norm": 9.22777478741158e-06,
+        "mu": 10.0,
+        "native_linear_minimum_pivot": 7.15223702588599e-06,
+        "native_norm": 4.37216088569059e-05,
+        "spatial_distance": 2.7002405797503983e-06,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 2,
+        "gain": 0.25,
+        "independent_linear_backward_error": 1.145993542714225e-18,
+        "load_balanced_norm": 9.22085868896572e-06,
+        "mu": 10.0,
+        "native_linear_minimum_pivot": 7.15223702588599e-06,
+        "native_norm": 4.45193534908128e-05,
+        "spatial_distance": 1.3501202898751932e-06,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 0,
+        "gain": 1.0,
+        "independent_linear_backward_error": 4.042934867928882e-19,
+        "load_balanced_norm": 9.2166320342182e-06,
+        "mu": 100.0,
+        "native_linear_minimum_pivot": 7.78956507769659e-06,
+        "native_norm": 4.49695059714372e-05,
+        "spatial_distance": 5.397590646315077e-07,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 1,
+        "gain": 0.5,
+        "independent_linear_backward_error": 1.016127678847676e-18,
+        "load_balanced_norm": 9.21529023206477e-06,
+        "mu": 100.0,
+        "native_linear_minimum_pivot": 7.78956507769659e-06,
+        "native_norm": 4.5143308303075e-05,
+        "spatial_distance": 2.698795323157531e-07,
+        "spatial_radius": 0.0002492478549359927
+      },
+      {
+        "cut": 2,
+        "gain": 0.25,
+        "independent_linear_backward_error": 2.5223292175504054e-19,
+        "load_balanced_norm": 9.21461941671355e-06,
+        "mu": 100.0,
+        "native_linear_minimum_pivot": 7.78956507769659e-06,
+        "native_norm": 4.523020965852e-05,
+        "spatial_distance": 1.3493976615788119e-07,
+        "spatial_radius": 0.0002492478549359927
+      }
+    ],
+    "reference_rank": 61,
+    "relative_norm_reduction": 0.035207501951388,
+    "source_rank": 17,
+    "whole_goal_completed": false
   },
   "released_files_current_sha256": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
@@ -2433,10 +2637,12 @@
     2450,
     4763,
     7997,
+    9759,
     10205,
     10530,
     11153,
     11192,
+    12388,
     12646,
     13811,
     14384,
@@ -2459,6 +2665,7 @@
     28422,
     28797,
     29563,
+    30205,
     30844,
     31421,
     31556,
@@ -2467,6 +2674,7 @@
     32493,
     33931,
     34937,
+    36034,
     36412,
     37183,
     37524,
@@ -2507,6 +2715,8 @@
     70831,
     72043,
     73975,
+    74004,
+    75081,
     76344,
     76431,
     77140,
@@ -2527,6 +2737,7 @@
     87682,
     88605,
     90746,
+    91568,
     92127,
     92701,
     94068,
@@ -2536,7 +2747,7 @@
     99841,
     99863
   ],
-  "updated_local": "2026-11-25T01:04:37.090882+03:00",
+  "updated_local": "2026-11-25T01:45:11.440178+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

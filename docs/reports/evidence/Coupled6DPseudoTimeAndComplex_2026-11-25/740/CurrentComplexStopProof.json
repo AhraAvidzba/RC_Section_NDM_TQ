@@ -1,0 +1,41 @@
+{
+  "accepted_states": 8,
+  "all_six_components_nonzero": true,
+  "capacity_limit_not_confirmed": true,
+  "compiled_source_exact739": true,
+  "independent_tensor_reintegration_not_yet_done": true,
+  "last_accepted_lambda": 1.100155173994633,
+  "native": {
+    "failed": 0,
+    "macros": 0,
+    "own_process_closed": true,
+    "passed": 0,
+    "timeout600": true
+  },
+  "native_maximum_accepted_lambda": 1.100155173994633,
+  "no_axial_history_or_external_seed_used": true,
+  "no_new_compilation_or_material_state_reuse": true,
+  "not_a_clean_performance_benchmark_due_to_checkpoint_observer": true,
+  "original_macro": "RunTestStockHTrace -> RunTestCoupledWorkbookTiming(Both,Excel)",
+  "physical_capacity_certified": false,
+  "raw_frames": 8,
+  "results_reopen_not_verified": true,
+  "returned_workflow_result_missing": true,
+  "source_internal_loads_N_Nmm": [
+    28000.0,
+    510000.0,
+    180000.0,
+    1500000.0,
+    17000.0,
+    -7100.0
+  ],
+  "source_raw_history": {
+    "bytes": 25080,
+    "complete_bytes": 25080,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "BF204144F54A18730A93E4E29B2EA68F8B0574357AFF67A06B7BDD30E63605B0"
+  },
+  "source_workbook_unchanged": true,
+  "whole_goal_completed": false
+}
