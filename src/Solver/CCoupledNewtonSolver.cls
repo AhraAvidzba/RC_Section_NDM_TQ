@@ -256,6 +256,7 @@ End Property
 ' Оба резерва не применяются к псевдодуге и не меняют допуск принятия.
 ' conditionHybridRecovery включает норму столбцов и свежую полную касательную только явно выбранного резерва.
 ' allowRefinedRestart разрешает повтор исходного прогноза для подтверждённой исходящей материальной меры.
+' allowGuideRecovery проверяет вычисляемый прогноз до полного разностного резерва; владелец учитывает guideProbes в общем бюджете.
 Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction() As Double, _
         ByRef controlProjection() As Double, ByVal targetControl As Double, ByVal initialLambda As Double, _
         ByRef trialLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
@@ -264,7 +265,10 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         Optional ByRef initialField As Variant, Optional ByVal loadProjection As Double = 0#, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
         Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#, _
-        Optional ByVal allowRefinedRestart As Boolean = False) As Boolean
+        Optional ByVal allowRefinedRestart As Boolean = False, Optional ByVal allowGuideRecovery As Boolean = False, _
+        Optional ByVal guideReferenceLambda As Double = 0#, Optional ByRef guideProbes As Long = 0, _
+        Optional ByRef guideReturnSucceeded As Boolean = False) As Boolean
+    guideProbes = 0: guideReturnSucceeded = False
     If LBound(baseLoad) <> 1 Or UBound(baseLoad) <> COMPONENT_COUNT Or _
             LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Or _
             LBound(controlProjection) <> 1 Or UBound(controlProjection) <> mDegreeCount Then _
@@ -290,7 +294,8 @@ Friend Function TryDeformationStep(ByRef baseLoad() As Double, ByRef direction()
         recoverYieldControl, initialField:=initialField, recoverSameControl:=recoverSameControl, _
         allowSmallCorrection:=(allowSmallCorrection And mUseSpatialHistory And Not HasPrincipalBoundaries And loadProjection = 0#), _
         allowHybridRecovery:=allowHybridRecovery, conditionHybridRecovery:=conditionHybridRecovery, referenceLambda:=referenceLambda, _
-        allowRefinedRestart:=allowRefinedRestart)
+        allowRefinedRestart:=allowRefinedRestart, allowGuideRecovery:=allowGuideRecovery, guideReferenceLambda:=guideReferenceLambda, _
+        guideProbes:=guideProbes, guideReturnSucceeded:=guideReturnSucceeded)
     If TryDeformationStep Then trialLambda = mTrialLambda
 End Function
 
@@ -301,6 +306,119 @@ Private Sub ConfigureControlledLoad(ByRef baseLoad() As Double, ByRef direction(
     mSection.LoadEquations direction(1), direction(2), direction(3), direction(4), direction(5), direction(6), mDirectionEquations
     ReDim mExternal(1 To mDegreeCount)
 End Sub
+
+' Вычисляет направляющее равновесие большим шагом и возвращается к исходной линейной цели после численного отказа CDP.
+' Исходная проба, направляющая и возврат делят maxIterations; обе дополнительные пробы сообщаются владельцу общего бюджета.
+' Принятие материала не выполняется. Знаковые границы ASD, псевдодуга и замена исходной меры этим резервом не обрабатываются.
+Friend Function TryRecoverDeformationByGuide(ByRef prediction As Variant, ByVal predictionLambda As Double, _
+        ByVal acceptedLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maxIterations As Long, ByRef trialLambda As Double, ByRef extraProbes As Long) As Boolean
+    extraProbes = 0
+    If mCandidateReady Or mHybridActive Or Not mControlActive Or mArcLoadProjection <> 0# Then Exit Function
+    If Not mUseSpatialHistory Or Not SupportsHybridRecovery Or mEnvelopeControl Then Exit Function
+    If mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+    If mMeta.ResultCode <> rcNumericalFailure And mMeta.ResultCode <> rcSingularTangent Then Exit Function
+    If maxIterations - mIterations < 2 Or Not IsArray(prediction) Then Exit Function
+    If LBound(prediction) <> 1 Or UBound(prediction) <> mDegreeCount Then Exit Function
+
+    Dim originalProjection() As Double, originalTarget As Double, origin As Double, i As Long
+    originalProjection = mControlProjection: originalTarget = mTargetControl
+    For i = 1 To mGaugeStart - 1: origin = origin + originalProjection(i) * mAccepted(i): Next i
+    If originalTarget = origin Then Exit Function
+    Dim revision As Long: revision = mAcceptedRevision
+    Dim initialEffort As TSolveEffort, guideEffort As TSolveEffort
+    ReadSolveEffort initialEffort
+    Dim originalMeta As CResultMeta: Set originalMeta = mMeta.Clone
+    Dim base() As Double, direction() As Double, external() As Double, residual() As Double, resultants() As Double, matrix() As Double
+    base = mBaseLoad: direction = mLoadDirection
+    external = mExternal: residual = mResidual: resultants = mTrialResultants: matrix = mMatrix
+    Dim originalFactor As Double, norm As Double, pivot As Double, failureCode As ESolverFailureCode
+    originalFactor = mCurrentControlLambda: norm = mLastNorm: pivot = mMinimumPivot: failureCode = mFailureCode
+    Dim materialPoint As Long, lastPoint As Long, lastSide As Long
+    materialPoint = mMaterialPoint: lastPoint = mLastFailedPoint: lastSide = mLastFailedSide
+    Dim wasConsistent As Boolean, wasRefined As Boolean, refinedReason As String, wasWrong As Boolean
+    wasConsistent = mConsistentControl: wasRefined = mRefinedControlTangent: refinedReason = mRefinedControlReason
+    wasWrong = mWrongControlDirection
+    Dim hadRejected As Boolean, rejected() As Double, triedYield As Boolean, triedSame As Boolean
+    hadRejected = mHasRejectedDirection: If hadRejected Then rejected = mRejectedDirection
+    triedYield = mYieldRecoveryTried: triedSame = mSameControlRecoveryTried
+
+    Dim seed As Variant, field() As Double, actual() As Double, guideTarget As Double, guideFactor As Double, factor As Double, returnedFactor As Double
+    Dim solved As Boolean, label As String, phaseDetails As String, guideIterations As Long, returnIterations As Long, guideBudget As Long
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    On Error GoTo InterruptedGuide
+    seed = mAccepted
+    For i = 1 To mGaugeStart - 1: seed(i) = mAccepted(i) + 2# * (prediction(i) - mAccepted(i)): Next i
+    guideTarget = origin + 2# * (originalTarget - origin) ' Удвоение задаёт численную направляющую точку, а не новый физический предел.
+    factor = acceptedLambda + 2# * (predictionLambda - acceptedLambda)
+    guideBudget = (maxIterations - initialEffort.Iterations) \ 2 ' Не более половины остатка отводится непринятой направляющей точке; оставшиеся поправки сохраняются для возврата.
+    label = "направляющее равновесие": extraProbes = 1
+    solved = TryDeformationStep(base, direction, originalProjection, guideTarget, factor, guideFactor, _
+        absoluteTolerance, relativeTolerance, guideBudget, consistentControl:=True, initialField:=seed, _
+        allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True, referenceLambda:=acceptedLambda, allowRefinedRestart:=True)
+    If Not solved Then GoTo RejectGuide
+    If mRecoveredControlReady Or guideFactor <= 0# Then label = "неподходящее направляющее равновесие": GoTo RejectGuide
+    If mAcceptedRevision <> revision Then Err.Raise 5, "CCoupledNewtonSolver", "Направляющая проба изменила принятую историю."
+    If maxIterations - initialEffort.Iterations - mIterations < 1 Then label = "недостаточно итераций для возврата": GoTo RejectGuide
+    CopyTrial field, actual
+    ReadSolveEffort guideEffort: guideIterations = guideEffort.Iterations
+    DiscardStep
+    seed = mAccepted
+    For i = 1 To mGaugeStart - 1: seed(i) = mAccepted(i) + 0.5 * (field(i) - mAccepted(i)): Next i
+    factor = acceptedLambda + 0.5 * (guideFactor - acceptedLambda) ' Интерполяция вычисленного корня сохраняет исходную цель линейной меры и множители связей.
+    label = "возврат к исходной цели": extraProbes = 2
+    solved = TryDeformationStep(base, direction, originalProjection, originalTarget, factor, returnedFactor, _
+        absoluteTolerance, relativeTolerance, maxIterations - initialEffort.Iterations - guideEffort.Iterations, _
+        consistentControl:=True, initialField:=seed, allowSmallCorrection:=True, allowHybridRecovery:=True, _
+        conditionHybridRecovery:=True, referenceLambda:=acceptedLambda, allowRefinedRestart:=True)
+    If Not solved Then GoTo RejectGuide
+    If mRecoveredControlReady Or returnedFactor <= 0# Then label = "возврат не подтвердил исходную положительную траекторию": GoTo RejectGuide
+    If mAcceptedRevision <> revision Then Err.Raise 5, "CCoupledNewtonSolver", "Возврат к исходной цели изменил принятую историю."
+    phaseDetails = mMeta.DiagnosticDetails
+    trialLambda = returnedFactor
+    TryRecoverDeformationByGuide = True
+    GoTo CountGuide
+
+RejectGuide:
+    phaseDetails = mMeta.DiagnosticDetails
+    DiscardStep
+    mControlProjection = originalProjection: mTargetControl = originalTarget: mArcLoadProjection = 0#
+    mCurrentControlLambda = originalFactor
+    mExternal = external: mResidual = residual: mTrialResultants = resultants: mMatrix = matrix
+    mConsistentControl = wasConsistent: mRefinedControlTangent = wasRefined: mRefinedControlReason = refinedReason
+    mWrongControlDirection = wasWrong: mHasRejectedDirection = hadRejected
+    If hadRejected Then mRejectedDirection = rejected Else Erase mRejectedDirection
+    mYieldRecoveryTried = triedYield: mSameControlRecoveryTried = triedSame
+    mRecoveredControlReady = False: mRecoveredControlUncertainty = 0#: Erase mRecoveredProjection
+    If solved Or mMeta.InternalStatus = rsNumericalFailure Then
+        Set mMeta = originalMeta
+        mLastNorm = norm: mMinimumPivot = pivot: mFailureCode = failureCode
+        mMaterialPoint = materialPoint: mLastFailedPoint = lastPoint: mLastFailedSide = lastSide
+    End If
+CountGuide:
+    If extraProbes = 1 Then
+        guideIterations = mIterations
+    ElseIf extraProbes = 2 Then
+        returnIterations = mIterations
+        AddSolveEffort guideEffort
+    End If
+    If extraProbes > 0 Then AddSolveEffort initialEffort
+    mYieldRecoveryTried = triedYield Or mYieldRecoveryTried
+    mSameControlRecoveryTried = triedSame Or mSameControlRecoveryTried
+    mMeta.DiagnosticDetails = DiagnosticSummary() & "; направляющих проб и возвратов: " & CStr(extraProbes) & _
+        "; итерации исходной / направляющей / возврата: " & CStr(initialEffort.Iterations) & " / " & _
+        CStr(guideIterations) & " / " & CStr(returnIterations) & "; общий лимит: " & CStr(maxIterations) & _
+        "; последняя проба: " & label & " | Исходный отказ: " & originalMeta.DiagnosticDetails
+    If Len(phaseDetails) > 0 Then mMeta.DiagnosticDetails = mMeta.DiagnosticDetails & " | Проверка: " & phaseDetails
+    If errorNumber <> 0 Then
+        On Error GoTo 0
+        Err.Raise errorNumber, errorSource, errorText
+    End If
+    Exit Function
+InterruptedGuide:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    Resume RejectGuide
+End Function
 
 ' Проверяет короткую псевдодугу после измеренного расхождения касательной.
 ' Обе пробы используют принятую историю. Публикуется только проба при исходной мере.
@@ -925,7 +1043,10 @@ Private Function SolveStep(ByRef load() As Double, ByVal initialLambda As Double
         Optional ByVal retainDirectProof As Boolean = False, Optional ByVal recoverSameControl As Boolean = False, _
         Optional ByVal allowSmallCorrection As Boolean = False, Optional ByVal allowHybridRecovery As Boolean = False, _
         Optional ByVal conditionHybridRecovery As Boolean = False, Optional ByVal referenceLambda As Double = 0#, _
-        Optional ByVal allowRefinedRestart As Boolean = False) As Boolean
+        Optional ByVal allowRefinedRestart As Boolean = False, Optional ByVal allowGuideRecovery As Boolean = False, _
+        Optional ByVal guideReferenceLambda As Double = 0#, Optional ByRef guideProbes As Long = 0, _
+        Optional ByRef guideReturnSucceeded As Boolean = False) As Boolean
+    guideProbes = 0: guideReturnSucceeded = False
     ResetSolveState
     If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or maxIterations < 1 Then
         RecordFailure sfcInvalidConfiguration, "Для связанного равновесия задайте положительные допуски и лимит итераций."
@@ -1152,6 +1273,11 @@ RecomputeTangent:
                         RecordFailure sfcNumericalFailure, "Уменьшение поправки не снизило невязку связанного сечения."
                     End If
                 End If
+            End If
+            If Not SolveStep And allowGuideRecovery And IsArray(controlPrediction) Then
+                SolveStep = TryRecoverDeformationByGuide(controlPrediction, initialLambda, guideReferenceLambda, _
+                    absoluteTolerance, relativeTolerance, maxIterations, candidateLambda, guideProbes)
+                guideReturnSucceeded = SolveStep
             End If
             If Not SolveStep And allowHybridRecovery Then SolveStep = TryHybridControlledField(current, currentLambda, load, _
                 absoluteTolerance, relativeTolerance, maxIterations, conditionHybridRecovery, controlPrediction, initialLambda, referenceLambda)

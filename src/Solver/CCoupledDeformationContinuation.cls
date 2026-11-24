@@ -108,6 +108,7 @@ Private mUsesEnvelopeControl As Boolean
 Private mEnvelopeResolution As Double
 Private mEnvelopeDepartures As Long, mEnvelopeDepartureRevision As Long
 Private mDepartureRecoveryRevision As Long, mDepartureRecoveryProbes As Long, mDepartureRecoveredPoints As Long ' Отдельный резерв не повторяется на той же принятой истории и расходует общий бюджет.
+Private mGuideRecoveryProbes As Long, mGuideRecoverySolutions As Long ' Численные направляющие пробы и успешные возвраты; материал принимает общий путь контроллера.
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -158,6 +159,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mPostPeakWidePoints = 0
     mLocalPeak = 0#: mLocalPeakAccuracy = 0#
     mFollowingLocalPeak = False: mRecoveredPeaks = 0
+    mGuideRecoveryProbes = 0: mGuideRecoverySolutions = 0
     mReusedRightPoints = 0
     mShoulderProbes = 0
     Set mLimitFields = Nothing: Erase mLimitResultants
@@ -947,13 +949,19 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         Exit Function
     End If
     Dim solved As Boolean, recoverSameControl As Boolean, recoveryReference As Double
+    Dim guideProbes As Long, guideReturned As Boolean, allowGuide As Boolean
+    allowGuide = mFollowingLocalPeak And Not robustDeparture And (mFieldControlChanges > 0 Or mBranchTangentControl) And _
+        IsArray(initialField) And mProbeCount + 2 <= PROBE_LIMIT ' Возврат после локального максимума не расходует бюджет ещё не прослеженной восходящей ветви.
     If robustDeparture Then recoveryReference = acceptedLambda
     recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
         point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, (mBranchTangentControl Or robustDeparture), recoverSameControl, _
         initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery, _
         conditionHybridRecovery:=robustDeparture, referenceLambda:=recoveryReference, _
-        allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture))
+        allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture), allowGuideRecovery:=allowGuide, _
+        guideReferenceLambda:=acceptedLambda, guideProbes:=guideProbes, guideReturnSucceeded:=guideReturned)
+    mProbeCount = mProbeCount + guideProbes: mGuideRecoveryProbes = mGuideRecoveryProbes + guideProbes
+    If guideReturned Then mGuideRecoverySolutions = mGuideRecoverySolutions + 1
     If Not robustDeparture Then ' Резерв после H имеет отдельные счётчики при неизменном общем бюджете проб.
         If mSolver.SameControlRecoveryTried Then
             mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
@@ -1828,6 +1836,8 @@ Private Function Details() As String
     If mEnvelopeDepartures > 0 Then Details = Details & "; возвратов к пространственной мере после остановки H: " & CStr(mEnvelopeDepartures)
     If mDepartureRecoveryProbes > 0 Then Details = Details & "; материальных резервов после остановки H: " & _
         CStr(mDepartureRecoveryProbes) & "; принято после них: " & CStr(mDepartureRecoveredPoints)
+    If mGuideRecoveryProbes > 0 Then Details = Details & "; направляющих проб и возвратов: " & CStr(mGuideRecoveryProbes) & _
+        "; подтверждённых возвратов к исходной цели: " & CStr(mGuideRecoverySolutions)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
