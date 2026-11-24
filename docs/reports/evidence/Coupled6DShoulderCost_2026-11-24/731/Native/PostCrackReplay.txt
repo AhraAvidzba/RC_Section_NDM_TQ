@@ -1,0 +1,19 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold731OuterToleranceShoulder_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 42E556D39CC4FC67DC30C9E449421B85DB23113E6ADEA8C8DCFA2F03AD3456B6
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold731OuterToleranceShoulder_20261124\Temp\RC_NDM_ModeSuite_4e314a9e046b4c99b34f72b61ff388a5\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=25588; startTicks=639311474149352767
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T23:03:42
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=25588; workingSet=145121280; privateBytes=100327424; cpu=55.09375
+QUALITY_DETAILS: initialUncertainty=2.7307372913526E-03; finalUncertainty=3.59366822984399E-05; additionalProbes=1; details=
+CRITICAL_QUALITY_PROBE: directSolved=True; qualityConfirmed=True; target=1.9925546603658E-03; guide=False; physical_capacity_certified=False
+Итерации: 9; пробы: 23; невязка, МПа: 1.35192973554031E-08; мин. ведущий элемент: 3.8852751300732E-04; гибридных поправок: 6; глобальных касательных: 2; разностных и прочих гибридных проб: 9; равновесие подтверждено после гибридного резерва | Исходная численная проба: Итерации: 2; пробы: 13; невязка, МПа: 2.15551453131013E-07; мин. ведущий элемент: 3.8852751300732E-04; невязка перед демпфированием, МПа: 1.28002929145055E-07; лучшая невязка проб, МПа: 2.15551453131013E-07; уравнение 1 (равновесие по N); действие касательной, МПа: 1.28002929145065E-07; фактическое изменение на единицу доли поправки, МПа: -1.12062110702027E-05 | Гибридный резерв: код остановки 1; принятых поправок 2; лучшая невязка 1.35192973554031E-08
+TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=52; mode=1; numerical_outcome_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold731OuterToleranceShoulder_20261124\Temp\RC_NDM_ModeSuite_4e314a9e046b4c99b34f72b61ff388a5\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T23:04:31
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

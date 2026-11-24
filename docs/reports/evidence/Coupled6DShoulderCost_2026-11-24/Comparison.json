@@ -1,0 +1,39 @@
+{
+  "cases": {
+    "728": {
+      "analytical_error_N": 0.6618197594943922,
+      "analytical_within_original_halfNewton": false,
+      "elapsed_before_export_seconds": 146.140625,
+      "final_uncertainty": 3.27908787907813e-05,
+      "quality_confirmed": true
+    },
+    "729": {
+      "analytical_error_N": 0.31740962323965505,
+      "analytical_within_original_halfNewton": true,
+      "elapsed_before_export_seconds": 168.53125,
+      "final_uncertainty": 2.63902027904458e-05,
+      "quality_confirmed": true
+    },
+    "730": {
+      "analytical_error_N": 1.077764000336174,
+      "analytical_within_original_halfNewton": false,
+      "elapsed_before_export_seconds": 87.5625,
+      "final_uncertainty": 3.59560951239196e-05,
+      "quality_confirmed": true
+    },
+    "731": {
+      "analytical_error_N": 1.0784656254400034,
+      "analytical_within_original_halfNewton": false,
+      "elapsed_before_export_seconds": 37.8828125,
+      "final_uncertainty": 3.59366822984399e-05,
+      "quality_confirmed": true
+    }
+  },
+  "entire_goal_completed": false,
+  "no_full_capacity_result_in_these_cases": true,
+  "original_quality_target": 6.25e-05,
+  "physical_capacity_certified": false,
+  "prototype731_requires_fallback_for_rejected_early_candidate": true,
+  "same_original52_binary_prefix_and_target": true,
+  "working_code_promoted": false
+}

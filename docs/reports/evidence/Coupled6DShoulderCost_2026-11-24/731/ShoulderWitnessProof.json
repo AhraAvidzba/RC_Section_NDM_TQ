@@ -1,0 +1,108 @@
+{
+  "additional_probes": 1,
+  "analytical": {
+    "epsilon": 0.00199255466036615,
+    "error_N": 1.0784656254400034,
+    "expected_N": 172328.22978928723,
+    "force_N": 172329.30825491267,
+    "index": 1
+  },
+  "analytical_within_original_halfNewton": false,
+  "direct_solved": true,
+  "elapsed_before_export_seconds": 37.8828125,
+  "entire_goal_completed": false,
+  "final_uncertainty": 3.59366822984399e-05,
+  "independent_final_field": {
+    "concrete_points": 25,
+    "dofs": 60,
+    "independent_equilibrium": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "DiagnosticReSolve",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.43607756911731,
+      "meta": [
+        "4",
+        "0",
+        "Контрольное повторное равновесие. Контроллер его не принимал",
+        " это не предел."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.001
+      ],
+      "orientation": [],
+      "phase": "PostCrackRawReplay.Sequence",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 4.489104358659195e-06,
+          "force_residual_MPa": 1.3519297355692566e-08,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 1.43607756911731,
+          "residual_MPa": 1.3519297355674186e-08,
+          "steel_utilization": 0.0996277330183076
+        }
+      ]
+    },
+    "independent_material_integration": false,
+    "phase": "PostCrackRawReplay.Sequence",
+    "physical_capacity_certified": false,
+    "physical_dofs": 56,
+    "point_fields": [
+      {
+        "control_epsilon": 0.00199255466036615,
+        "index": 1,
+        "lambda_value": 1.43607756911731,
+        "max_epsilon_zz_difference": 2.1562648801036477e-08,
+        "max_shear_strain": 1.2653699966904807e-11,
+        "max_transverse_stress_MPa": 5.2974533466768e-08,
+        "maximum_sigma_zz_MPa": 0.00815552389654347,
+        "minimum_sigma_zz_MPa": 0.00815041075781478
+      }
+    ],
+    "points": 26,
+    "record_sha256": "C7C8C793C507D648963DF7F0573934D71DFC541EA0D418B9F1F77AF3040112C4",
+    "states": 1
+  },
+  "independent_material_integration": false,
+  "independent_residual_below_requested_strict_tolerance": true,
+  "initial_uncertainty": 0.0027307372913526,
+  "native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "original_quality_target": 6.25e-05,
+  "physical_capacity_certified": false,
+  "quality_confirmed": true,
+  "quality_retries": [
+    {
+      "accuracy_scale": 0.0114437958198905,
+      "attempt": 1,
+      "elapsed": 12.171875,
+      "uncertainty_before": 0.0027307372913526
+    }
+  ],
+  "requested_strict_residual_tolerance_MPa": 5.137239369467632e-08
+}

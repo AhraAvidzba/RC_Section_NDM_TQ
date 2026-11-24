@@ -1,0 +1,19 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold730ProvidedJacobianShoulder_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 6835D5E506E6BF8CB74946C7B20668E2B372966E29BD30CF2AD4D2D4FF3A1864
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold730ProvidedJacobianShoulder_20261124\Temp\RC_NDM_ModeSuite_0464e222542548ceadb9436661fa6e26\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=20820; startTicks=639311467711010199
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:52:58
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=20820; workingSet=144326656; privateBytes=99225600; cpu=105.375
+QUALITY_DETAILS: initialUncertainty=2.7307372913526E-03; finalUncertainty=3.59560951239196E-05; additionalProbes=1; details=
+CRITICAL_QUALITY_PROBE: directSolved=True; qualityConfirmed=True; target=1.9925546603658E-03; guide=False; physical_capacity_certified=False
+Итерации: 30; пробы: 54; невязка, МПа: 1.02240129611561E-08; мин. ведущий элемент: 3.8852751300732E-04; гибридных поправок: 27; глобальных касательных: 12; разностных и прочих гибридных проб: 40; равновесие подтверждено после гибридного резерва | Исходная численная проба: Итерации: 2; пробы: 13; невязка, МПа: 2.15551453131013E-07; мин. ведущий элемент: 3.8852751300732E-04; невязка перед демпфированием, МПа: 1.28002929145055E-07; лучшая невязка проб, МПа: 2.15551453131013E-07; уравнение 1 (равновесие по N); действие касательной, МПа: 1.28002929145065E-07; фактическое изменение на единицу доли поправки, МПа: -1.12062110702027E-05 | Гибридный резерв: код остановки 2; принятых поправок 12; лучшая невязка 1.02240129611561E-08
+TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=52; mode=1; numerical_outcome_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold730ProvidedJacobianShoulder_20261124\Temp\RC_NDM_ModeSuite_0464e222542548ceadb9436661fa6e26\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:54:37
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

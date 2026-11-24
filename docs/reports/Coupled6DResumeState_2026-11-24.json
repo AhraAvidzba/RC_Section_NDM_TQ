@@ -1,13 +1,7 @@
 {
-  "active_exec_session": 10205,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold728FastShoulderWitness_20261124",
-      "session": 10205,
-      "stage": "same original critical shoulder quality; immediate outcome and final-field witness"
-    }
-  ],
-  "all_started_stages_terminal": false,
+  "active_exec_session": null,
+  "active_jobs": [],
+  "all_started_stages_terminal": true,
   "automatic712": {
     "accepted_states": 57,
     "lower_lambda": 1.44119480550414,
@@ -22,8 +16,103 @@
     "probes": 96,
     "proof": "docs/reports/evidence/Coupled6DPriorDilationCapacity_2026-11-24/PriorDilationCapacityProof.json"
   },
+  "automatic732_stop": {
+    "absolute_known_maximum_difference": 4.1096433833764934e-07,
+    "accepted_states": 71,
+    "analytical_force_misses": 36,
+    "entire_goal_completed": false,
+    "final_raw_frame": 97,
+    "full_native_tensor_export_incomplete": true,
+    "has_certified_capacity": false,
+    "independent_all71_fields_pending": false,
+    "independent_all71_fields_verified_via733": true,
+    "known_uniaxial_maximum": 1.441396356622893,
+    "last_control_strain": 0.0035852239348247677,
+    "maximum_analytical_force_error_N": 132.81984026636928,
+    "native": {
+      "failed": 0,
+      "macros": 0,
+      "own_process_closed": true,
+      "passed": 0,
+      "timeout600": true
+    },
+    "native_local_peak": 1.4413959456585546,
+    "native_local_peak_accuracy": 0.000964931327853268,
+    "numerical_search_returned_before_export": true,
+    "numerical_stop": "96 probe budget exhausted before steel limit",
+    "original_capacity_checks": {
+      "failed": 1,
+      "passed": 18
+    },
+    "original_full_export_still_incomplete": true,
+    "physical_capacity_certified": false,
+    "required_capacity_accuracy": 0.001,
+    "source_raw_history": {
+      "bytes": 1938292,
+      "complete_bytes": 1938292,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "E1BB37707A40FEF6E78F1C865FA901FF2CF7DFD2930AE6B02DE17C7CF837722F"
+    },
+    "steel_event_localized": false
+  },
   "branch": "codex/coupled-6d",
+  "critical_shoulder_cost": {
+    "cases": {
+      "728": {
+        "analytical_error_N": 0.6618197594943922,
+        "analytical_within_original_halfNewton": false,
+        "elapsed_before_export_seconds": 146.140625,
+        "final_uncertainty": 3.27908787907813e-05,
+        "quality_confirmed": true
+      },
+      "729": {
+        "analytical_error_N": 0.31740962323965505,
+        "analytical_within_original_halfNewton": true,
+        "elapsed_before_export_seconds": 168.53125,
+        "final_uncertainty": 2.63902027904458e-05,
+        "quality_confirmed": true
+      },
+      "730": {
+        "analytical_error_N": 1.077764000336174,
+        "analytical_within_original_halfNewton": false,
+        "elapsed_before_export_seconds": 87.5625,
+        "final_uncertainty": 3.59560951239196e-05,
+        "quality_confirmed": true
+      },
+      "731": {
+        "analytical_error_N": 1.0784656254400034,
+        "analytical_within_original_halfNewton": false,
+        "elapsed_before_export_seconds": 37.8828125,
+        "final_uncertainty": 3.59366822984399e-05,
+        "quality_confirmed": true
+      }
+    },
+    "entire_goal_completed": false,
+    "evidence": "docs/reports/evidence/Coupled6DShoulderCost_2026-11-24",
+    "no_full_capacity_result_in_these_cases": true,
+    "original_quality_target": 6.25e-05,
+    "physical_capacity_certified": false,
+    "prototype731_requires_fallback_for_rejected_early_candidate": true,
+    "same_original52_binary_prefix_and_target": true,
+    "working_code_promoted": false
+  },
   "entire_goal_completed": false,
+  "frozen733_replay": {
+    "all71_independent_weak_gauge_and_six_force_checks": true,
+    "all71_input_and_export_fields_match": true,
+    "analytical_misses": 36,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "physical_capacity_certified": false,
+    "tail66_69_field_prediction_passes_but_load_prediction_fails": true,
+    "tail70_71_both_growth_checks_pass": true
+  },
   "full_acceptance_not_run": true,
   "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
   "goal_status": "active",
@@ -59,7 +148,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Poll10205 same native handle.727 numericalquality phase ended140.55s but180s timeout during full diagnostic export, no final totals; original logs retained.728 same numerical core saves outcome immediately and exports only final field after exact verified prefix. Then run Check-TestShoulderWitness.py.729 prepared script (not staged or run) can tighten local CDP tolerances100x only after frozen prefix; do not launch until728 witness checked. Original full6 goal active.",
+  "next_action": "No native jobs live; whole6 goal active.732 correctlocalpeak1.441395945659, knownerror4.11e-7, accuracy.000964931<=.001 but96probe budget beforesteel;733 all71 exactfields andindependent mechanics verified,36analytical misses retained. Tail66-69 fieldprediction errors<2%, loadpredictioncurvature gate(~9.76e-6lambda) fails;70-71 bothpass onlywhenbudgetends. Need prototype postpeak step adaptation tied to requested capacity accuracy and iteration cost/actualsteel limit, plus safeguarded strain-event localization; keep96budget andall final/halfstep checks. OfficialOpenSees adaptive docs alreadysaved. First checkpoint727-733 evidence andupdatedacceptance toGit. Do not promote test-only innerstop without full-guard fallback. Realcold6HardShear andONQ012/fullscope stillopen.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
@@ -164,7 +253,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress: prescribed curve reaches existing steel limit .02 with230/0 and25 independent mechanics checks; cold723 still timesout600 and has32 analytical misses; exact53prefix and next ordinary step independently verified in726; actual six-force HardShear DirectOK19/0 takes17.25s vs10.43s prior material. Critical shoulder accuracy now isolated rather than repeating cold search.",
+  "previous_goal_turn_classification": "progress: cold732 now returns numerical96probe budget stop before export, correct refinedlocalpeak1.441395945659 accuracy.00096493 andknownerror4.11e-7 butno steel event; export later timedout600.733 validates all71 exactfields and independent mechanics in single8s nativeStressOnly replay;36analytical misses retained. Taildiagnosis shows load prediction curvature gate, not field prediction, delaysgrowth at66-69; bothpass70-71 onlyasbudgetends. Full6 goal preserved.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -368,27 +457,36 @@
     1109,
     2450,
     4763,
+    10205,
     10530,
     11153,
     11192,
+    12646,
+    13811,
     16147,
     16181,
     16553,
     18956,
     21859,
+    22798,
     23111,
+    23322,
     24444,
     24703,
     25261,
     26138,
     28317,
+    28422,
     28797,
     29563,
     31421,
+    31923,
     32063,
+    32493,
     33931,
     34937,
     37183,
+    37524,
     38101,
     38699,
     39957,
@@ -397,6 +495,7 @@
     42094,
     45282,
     45411,
+    48073,
     48427,
     49056,
     50535,
@@ -410,8 +509,10 @@
     60225,
     60275,
     61911,
+    62866,
     64786,
     66134,
+    68652,
     68966,
     70831,
     72043,
@@ -424,19 +525,24 @@
     78535,
     80580,
     80666,
+    83283,
+    84038,
     84774,
     86004,
     86272,
     86451,
     87359,
+    88605,
+    92127,
     92701,
     94068,
+    95899,
     97029,
     99831,
     99841,
     99863
   ],
-  "updated_local": "2026-11-24T22:41:47.993464+03:00",
+  "updated_local": "2026-11-24T23:53:00.062657+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

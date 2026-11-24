@@ -1,0 +1,19 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold728FastShoulderWitness_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 8519D67C9EE0B68D9D47DAC2B5EFFD9160BD45C791135BF612E55386E1EB8CCA
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold728FastShoulderWitness_20261124\Temp\RC_NDM_ModeSuite_45ab056cb7e54625be60c5e808a3f4fd\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=9720; startTicks=639311460831448387
+===== modTestCoupledElasticState.RunTestPostCrackRawReplay =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:41:30
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=9720; workingSet=145850368; privateBytes=99987456; cpu=164.578125
+QUALITY_DETAILS: initialUncertainty=2.7307372913526E-03; finalUncertainty=3.27908787907813E-05; additionalProbes=1; details=
+CRITICAL_QUALITY_PROBE: directSolved=True; qualityConfirmed=True; target=1.9925546603658E-03; guide=False; physical_capacity_certified=False
+Итерации: 11; пробы: 389; невязка, МПа: 5.14612175095408E-09; мин. ведущий элемент: 3.8852751300732E-04; гибридных поправок: 8; глобальных касательных: 3; разностных и прочих гибридных проб: 375; равновесие подтверждено после гибридного резерва | Исходная численная проба: Итерации: 2; пробы: 13; невязка, МПа: 2.15551453131013E-07; мин. ведущий элемент: 3.8852751300732E-04; невязка перед демпфированием, МПа: 1.28002929145055E-07; лучшая невязка проб, МПа: 2.15551453131013E-07; уравнение 1 (равновесие по N); действие касательной, МПа: 1.28002929145065E-07; фактическое изменение на единицу доли поправки, МПа: -1.12062110702027E-05 | Гибридный резерв: код остановки 1; принятых поправок 3; лучшая невязка 5.14612175095408E-09
+TOTAL_POSTCRACK_RAW_REPLAY_TEST: passed=1; failed=0; sourceStates=52; mode=1; numerical_outcome_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold728FastShoulderWitness_20261124\Temp\RC_NDM_ModeSuite_45ab056cb7e54625be60c5e808a3f4fd\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestPostCrackRawReplay; 2026-11-24T22:44:08
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

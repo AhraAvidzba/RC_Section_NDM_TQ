@@ -1,0 +1,40 @@
+{
+  "absolute_known_maximum_difference": 4.1096433833764934e-07,
+  "accepted_states": 71,
+  "analytical_force_misses": 36,
+  "entire_goal_completed": false,
+  "final_raw_frame": 97,
+  "full_native_tensor_export_incomplete": true,
+  "has_certified_capacity": false,
+  "independent_all71_fields_pending": false,
+  "independent_all71_fields_verified_via733": true,
+  "known_uniaxial_maximum": 1.441396356622893,
+  "last_control_strain": 0.0035852239348247677,
+  "maximum_analytical_force_error_N": 132.81984026636928,
+  "native": {
+    "failed": 0,
+    "macros": 0,
+    "own_process_closed": true,
+    "passed": 0,
+    "timeout600": true
+  },
+  "native_local_peak": 1.4413959456585546,
+  "native_local_peak_accuracy": 0.000964931327853268,
+  "numerical_search_returned_before_export": true,
+  "numerical_stop": "96 probe budget exhausted before steel limit",
+  "original_capacity_checks": {
+    "failed": 1,
+    "passed": 18
+  },
+  "original_full_export_still_incomplete": true,
+  "physical_capacity_certified": false,
+  "required_capacity_accuracy": 0.001,
+  "source_raw_history": {
+    "bytes": 1938292,
+    "complete_bytes": 1938292,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "E1BB37707A40FEF6E78F1C865FA901FF2CF7DFD2930AE6B02DE17C7CF837722F"
+  },
+  "steel_event_localized": false
+}

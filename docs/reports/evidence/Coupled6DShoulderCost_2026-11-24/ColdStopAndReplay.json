@@ -1,0 +1,223 @@
+{
+  "all71_states_independently_verified": true,
+  "automatic732": {
+    "absolute_known_maximum_difference": 4.1096433833764934e-07,
+    "accepted_states": 71,
+    "analytical_force_misses": 36,
+    "entire_goal_completed": false,
+    "final_raw_frame": 97,
+    "full_native_tensor_export_incomplete": true,
+    "has_certified_capacity": false,
+    "independent_all71_fields_pending": false,
+    "independent_all71_fields_verified_via733": true,
+    "known_uniaxial_maximum": 1.441396356622893,
+    "last_control_strain": 0.0035852239348247677,
+    "maximum_analytical_force_error_N": 132.81984026636928,
+    "native": {
+      "failed": 0,
+      "macros": 0,
+      "own_process_closed": true,
+      "passed": 0,
+      "timeout600": true
+    },
+    "native_local_peak": 1.4413959456585546,
+    "native_local_peak_accuracy": 0.000964931327853268,
+    "numerical_search_returned_before_export": true,
+    "numerical_stop": "96 probe budget exhausted before steel limit",
+    "original_capacity_checks": {
+      "failed": 1,
+      "passed": 18
+    },
+    "original_full_export_still_incomplete": true,
+    "physical_capacity_certified": false,
+    "required_capacity_accuracy": 0.001,
+    "source_raw_history": {
+      "bytes": 1938292,
+      "complete_bytes": 1938292,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "E1BB37707A40FEF6E78F1C865FA901FF2CF7DFD2930AE6B02DE17C7CF837722F"
+    },
+    "steel_event_localized": false
+  },
+  "growth_diagnosis_scope": "reconstruction from consecutive final fields, same native spatial metric and load-resolution formula",
+  "growth_diagnosis_tail": [
+    {
+      "epsilon": 0.0020047519348065468,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 3.1035115896221245e-15,
+      "increment": 2.032879073399479e-06,
+      "index": 58,
+      "load_prediction_error": 1.8854953405880726e-18,
+      "load_prediction_pass": true,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.765548439161026e-06,
+      "reconstructed_consecutive_history_ratio": 1.0000000000002134
+    },
+    {
+      "epsilon": 0.00204638529822999,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 1.4121922091873144e-16,
+      "increment": 4.163336342344337e-05,
+      "index": 59,
+      "load_prediction_error": 1.2951656522461102e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.765513095687837e-06,
+      "reconstructed_consecutive_history_ratio": 20.480000000109225
+    },
+    {
+      "epsilon": 0.0020984270025092944,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 1.2094112896089717e-16,
+      "increment": 5.204170427930421e-05,
+      "index": 60,
+      "load_prediction_error": 2.847067172212503e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.764841067982973e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.0021634791328584246,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 0.005961395274003134,
+      "increment": 6.505213034913027e-05,
+      "index": 61,
+      "load_prediction_error": 3.751027375725746e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.764114916038787e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.0022447942957948375,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 0.009950071523102762,
+      "increment": 8.131516293641283e-05,
+      "index": 62,
+      "load_prediction_error": 0.0002420426499111228,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.763357267203581e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.0023464382494653535,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 0.0062870209562784565,
+      "increment": 0.00010164395367051604,
+      "index": 63,
+      "load_prediction_error": 0.00016059275930563333,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.763378376759217e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.0024734931915534985,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 5.834001462564323e-17,
+      "increment": 0.00012705494208814505,
+      "index": 64,
+      "load_prediction_error": 9.269625953828298e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.762762392666541e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.00263231186916368,
+      "field_prediction_pass": false,
+      "field_prediction_relative_error": 0.036736379120137885,
+      "increment": 0.00015881867761018131,
+      "index": 65,
+      "load_prediction_error": 0.00015330402922908437,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.762363197588848e-06,
+      "reconstructed_consecutive_history_ratio": 1.25
+    },
+    {
+      "epsilon": 0.002791130546773861,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 4.8908791075544987e-17,
+      "increment": 0.00015881867761018131,
+      "index": 66,
+      "load_prediction_error": 8.343473956218261e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.761250987624815e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    },
+    {
+      "epsilon": 0.0029499492243840425,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 1.451774985889946e-17,
+      "increment": 0.00015881867761018131,
+      "index": 67,
+      "load_prediction_error": 0.00014841802583420716,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.760472516619033e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    },
+    {
+      "epsilon": 0.003108767901994224,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 1.180510891313785e-17,
+      "increment": 0.00015881867761018131,
+      "index": 68,
+      "load_prediction_error": 1.80788792132347e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.760287717716586e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    },
+    {
+      "epsilon": 0.003267586579604405,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 2.882467593245461e-41,
+      "increment": 0.00015881867761018131,
+      "index": 69,
+      "load_prediction_error": 1.1005571417976867e-05,
+      "load_prediction_pass": false,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.760175234330994e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    },
+    {
+      "epsilon": 0.0034264052572145864,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 0.0,
+      "increment": 0.00015881867761018131,
+      "index": 70,
+      "load_prediction_error": 6.7031514152660066e-06,
+      "load_prediction_pass": true,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.760106773231071e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    },
+    {
+      "epsilon": 0.0035852239348247677,
+      "field_prediction_pass": true,
+      "field_prediction_relative_error": 0.0,
+      "increment": 0.00015881867761018131,
+      "index": 71,
+      "load_prediction_error": 4.093084873035835e-06,
+      "load_prediction_pass": true,
+      "original_field_prediction_bound": 0.02,
+      "original_load_prediction_bound": 9.760065124736812e-06,
+      "reconstructed_consecutive_history_ratio": 1.0
+    }
+  ],
+  "physical_capacity_certified": false,
+  "replay733_native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "whole_goal_completed": false
+}
