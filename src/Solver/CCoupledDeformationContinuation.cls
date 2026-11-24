@@ -107,6 +107,7 @@ Private mEnvelopeProbes As Long, mEnvelopeRecoveries As Long
 Private mUsesEnvelopeControl As Boolean
 Private mEnvelopeResolution As Double
 Private mEnvelopeDepartures As Long, mEnvelopeDepartureRevision As Long
+Private mDepartureRecoveryRevision As Long, mDepartureRecoveryProbes As Long, mDepartureRecoveredPoints As Long ' Отдельный резерв не повторяется на той же принятой истории и расходует общий бюджет.
 
 ' Начинает деформационный участок после двух принятых силовых точек.
 ' Выбор меры производится по их фактической разности. История первых
@@ -138,6 +139,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mEnvelopeAttemptRevision = -1: mEnvelopeAttemptsAtRevision = 0: mEnvelopeProbes = 0: mEnvelopeRecoveries = 0
     mUsesEnvelopeControl = False: mEnvelopeResolution = 0#
     mEnvelopeDepartures = 0: mEnvelopeDepartureRevision = -1
+    mDepartureRecoveryRevision = -1: mDepartureRecoveryProbes = 0: mDepartureRecoveredPoints = 0
     mCornerAttemptRevision = -1: mCornerAttemptsAtRevision = 0
     mMaterialRecoveryRevision = -1: mMaterialRecoveryAtRevision = 0
     mArcRecoveryTried = False: mArcRecoveryProbes = 0
@@ -212,14 +214,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, lastLoadUnresolved As Boolean
-    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean, envelopeRecovered As Boolean
+    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean, envelopeRecovered As Boolean, departureRecovered As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
     Dim arcFields As Collection
     If Not reinforcement Is Nothing Then reinforced = reinforcement.HasSteel
     For attempt = 1 To PROBE_LIMIT
-        hybridRecovery = False: envelopeRecovered = False
+        hybridRecovery = False: envelopeRecovered = False: departureRecovered = False
         If mProbeCount >= PROBE_LIMIT Then Exit For
         If mUsesEnvelopeControl And mProbeCount + 2 > PROBE_LIMIT Then
             StopSearch "Остатка общего бюджета недостаточно для следующего материального шага с обязательной проверкой поворота."
@@ -258,14 +260,17 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                             Exit Sub
                         Else
                             envelopeRecovered = TryEnvelopeRecovery(history, left, current, trial, nominal, increment, minimum)
-                            If Not envelopeRecovered Then Exit For
+                            If Not envelopeRecovered Then
+                                If reinforced Then departureRecovered = TryRecoverEnvelopeDeparture(history, current, trial)
+                                If Not departureRecovered Then Exit For
+                            End If
                         End If
                     End If
                 End If
             End If
         End If
         Dim seed As Variant, seedLambda As Double
-        If envelopeRecovered Then
+        If envelopeRecovered Or departureRecovered Then
             targetCoordinate = trial.Coordinate: probed = True
         Else
             targetCoordinate = current.Coordinate + increment
@@ -365,7 +370,8 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             If hybridRecovery Then mHybridRecoveredPoints = mHybridRecoveredPoints + 1
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
             unresolvedSteel = False
-            If changedControl Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
+            If changedControl And Not departureRecovered Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
+            If departureRecovered Then mDepartureRecoveredPoints = mDepartureRecoveredPoints + 1
             If Len(mPostPeakControlName) > 0 Then
                 If mPostPeakControlPoints = 0 Then mControlName = mPostPeakControlName
                 mPostPeakControlPoints = mPostPeakControlPoints + 1
@@ -517,6 +523,74 @@ Private Function TryLeaveEnvelopeControl(ByVal history As Collection, ByRef left
     mEnvelopeDepartures = mEnvelopeDepartures + 1: mEnvelopeDepartureRevision = mSolver.AcceptedRevision
     mFieldControlChanges = mFieldControlChanges + 1: mLastFieldControlRevision = mSolver.AcceptedRevision
     TryLeaveEnvelopeControl = True
+End Function
+
+' Проверяет один материальный резерв после выхода из H либо исчерпания его проб на той же принятой ревизии.
+' Использует только прошлую нагрузочно различимую секущую; новую меру и поле принимает общий путь CopyRecoveredControl, а не эта проба.
+Private Function TryRecoverEnvelopeDeparture(ByVal history As Collection, ByRef current As TBranchPoint, _
+        ByRef trial As TBranchPoint) As Boolean
+    If mUsesEnvelopeControl Then Exit Function
+    If mEnvelopeDepartureRevision <> mSolver.AcceptedRevision Then
+        If mEnvelopeAttemptRevision <> mSolver.AcceptedRevision Or mEnvelopeAttemptsAtRevision < YIELD_RECOVERY_LIMIT Then Exit Function ' Неудачные H-пробы также завершают этот способ продолжения, не меняя принятую историю.
+    End If
+    If mDepartureRecoveryRevision = mSolver.AcceptedRevision Or mProbeCount >= PROBE_LIMIT Then Exit Function
+    If history Is Nothing Or mTrace Is Nothing Then Exit Function
+    If current.HistoryIndex < 2 Or current.HistoryIndex <> history.Count Or mTrace.Count <> history.Count Then Exit Function
+    Dim previous() As Double, accepted() As Double, movement() As Double, projection() As Double
+    previous = history(current.HistoryIndex - 1): accepted = history(current.HistoryIndex)
+    ReDim movement(1 To UBound(accepted))
+    Dim i As Long, index As Long, referenceIndex As Long, fraction As Double, factor As Double
+    For i = 1 To mSolver.PhysicalDegreeCount: movement(i) = accepted(i) - previous(i): Next i
+    Dim coordinate As Double, spacing As Double, reference() As Double, referenceCoordinate As Double
+    If Not mSolver.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then Exit Function
+    For index = current.HistoryIndex - 1 To 1 Step -1
+        mTrace.ReadPoint index, fraction, factor
+        If fraction <> 1# Then Exit For
+        If Abs(current.Lambda - factor) > 8# * LoadResolution(current.Lambda) Then
+            reference = history(index): spacing = GeomMax(spacing, mSolver.SpatialFieldDistance(reference, accepted)) ' Масштаб совпадает с выходом из H и не задаёт физический предел.
+            Exit For
+        End If
+    Next index
+    referenceIndex = current.HistoryIndex - 1
+    For index = current.HistoryIndex - 1 To 1 Step -1
+        mTrace.ReadPoint index, fraction, factor
+        If fraction = 1# And current.Lambda - factor > 8# * LoadResolution(current.Lambda) Then
+            reference = history(index): referenceCoordinate = 0#
+            For i = 1 To mSolver.PhysicalDegreeCount: referenceCoordinate = referenceCoordinate + projection(i) * reference(i): Next i
+            If coordinate > referenceCoordinate Then referenceIndex = index: Exit For
+        End If
+    Next index
+    reference = history(referenceIndex): referenceCoordinate = 0#
+    mTrace.ReadPoint referenceIndex, fraction, factor
+    If fraction <> 1# Then Exit Function
+    For i = 1 To mSolver.PhysicalDegreeCount: referenceCoordinate = referenceCoordinate + projection(i) * reference(i): Next i
+    trial.Coordinate = coordinate + spacing
+    If coordinate <= referenceCoordinate Or trial.Coordinate <= coordinate Then Exit Function
+    Dim ratio As Double, seed() As Double, prediction As Variant, initialLambda As Double
+    ratio = (trial.Coordinate - coordinate) / (coordinate - referenceCoordinate): seed = accepted
+    For i = 1 To mSolver.PhysicalDegreeCount: seed(i) = accepted(i) + ratio * (accepted(i) - reference(i)): Next i
+    initialLambda = current.Lambda + ratio * (current.Lambda - factor): prediction = seed ' Служебные множители связей сохраняются из принятого поля.
+    Dim originalProjection() As Double, recoveredProjection() As Double, solved As Boolean
+    originalProjection = mProjection
+    mDepartureRecoveryRevision = mSolver.AcceptedRevision: mDepartureRecoveryProbes = mDepartureRecoveryProbes + 1
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    On Error GoTo RestoreAfterError
+    mProjection = projection
+    solved = Probe(trial, initialLambda, initialField:=prediction, allowHybridRecovery:=True, _
+        acceptedLambda:=current.Lambda, robustDeparture:=True)
+    mProjection = originalProjection
+    If Not solved Then Exit Function
+    If Not mSolver.CopyRecoveredControl(recoveredProjection) Then
+        mSolver.DiscardStep
+        mProbeDetails = "Материальный резерв после остановки H не предоставил новую подтверждённую меру управления."
+        Exit Function
+    End If
+    TryRecoverEnvelopeDeparture = True ' Сталь, направление, диапазон lambda и принятие новой меры проверяет общий путь контроллера.
+    Exit Function
+RestoreAfterError:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    mProjection = originalProjection
+    Err.Raise errorNumber, errorSource, errorText
 End Function
 
 ' Выбирает ближайшую принятую секущую с различимой нагрузкой, сохраняя все промежуточные состояния материала.
@@ -857,7 +931,8 @@ End Function
 Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Double, _
         Optional ByVal recoverYieldControl As Boolean = False, Optional ByVal keepYieldControl As Boolean = False, _
         Optional ByVal arcFields As Collection = Nothing, Optional ByRef initialField As Variant, _
-        Optional ByVal allowHybridRecovery As Boolean = False, Optional ByVal acceptedLambda As Double = 0#) As Boolean
+        Optional ByVal allowHybridRecovery As Boolean = False, Optional ByVal acceptedLambda As Double = 0#, _
+        Optional ByVal robustDeparture As Boolean = False) As Boolean
     If mProbeCount >= PROBE_LIMIT Then Exit Function
     If mUsesEnvelopeControl And mProbeCount + 2 > PROBE_LIMIT Then
         mProbeDetails = "Оставшегося бюджета недостаточно для полного материального шага и обязательной половинной проверки при повороте."
@@ -870,21 +945,25 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         Probe = ProbeEnvelope(point, acceptedLambda, initialLambda, initialField)
         Exit Function
     End If
-    Dim solved As Boolean, recoverSameControl As Boolean
+    Dim solved As Boolean, recoverSameControl As Boolean, recoveryReference As Double
+    If robustDeparture Then recoveryReference = acceptedLambda
     recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
-        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, mBranchTangentControl, recoverSameControl, _
+        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, (mBranchTangentControl Or robustDeparture), recoverSameControl, _
         initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery, _
-        allowRefinedRestart:=IsMaterialGrowthControl())
-    If mSolver.SameControlRecoveryTried Then
-        mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
-    ElseIf mSolver.YieldRecoveryTried Then
-        mYieldRecoveryProbes = mYieldRecoveryProbes + 1
-        If mSolver.HasPrincipalBoundaries Then
-            If mMaterialRecoveryRevision <> mSolver.AcceptedRevision Then
-                mMaterialRecoveryRevision = mSolver.AcceptedRevision: mMaterialRecoveryAtRevision = 0
+        conditionHybridRecovery:=robustDeparture, referenceLambda:=recoveryReference, _
+        allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture))
+    If Not robustDeparture Then ' Резерв после H имеет отдельные счётчики при неизменном общем бюджете проб.
+        If mSolver.SameControlRecoveryTried Then
+            mFixedYieldRecoveryProbes = mFixedYieldRecoveryProbes + 1
+        ElseIf mSolver.YieldRecoveryTried Then
+            mYieldRecoveryProbes = mYieldRecoveryProbes + 1
+            If mSolver.HasPrincipalBoundaries Then
+                If mMaterialRecoveryRevision <> mSolver.AcceptedRevision Then
+                    mMaterialRecoveryRevision = mSolver.AcceptedRevision: mMaterialRecoveryAtRevision = 0
+                End If
+                mMaterialRecoveryAtRevision = mMaterialRecoveryAtRevision + 1
             End If
-            mMaterialRecoveryAtRevision = mMaterialRecoveryAtRevision + 1
         End If
     End If
     If Not solved And Not arcFields Is Nothing And mProbeCount + 2 <= PROBE_LIMIT Then
@@ -1746,6 +1825,8 @@ Private Function Details() As String
         "; восстановлений по ней: " & CStr(mEnvelopeRecoveries)
     If mUsesEnvelopeControl Then Details = Details & "; последующие шаги и плечи проверяются по H"
     If mEnvelopeDepartures > 0 Then Details = Details & "; возвратов к пространственной мере после остановки H: " & CStr(mEnvelopeDepartures)
+    If mDepartureRecoveryProbes > 0 Then Details = Details & "; материальных резервов после остановки H: " & _
+        CStr(mDepartureRecoveryProbes) & "; принято после них: " & CStr(mDepartureRecoveredPoints)
     If Len(mPostPeakControlName) > 0 Then Details = Details & "; пробная мера после максимума: " & mPostPeakControlName & _
         "; принято полей после максимума в новой мере: " & CStr(mPostPeakControlPoints)
     If mFixedYieldRecoveryProbes > 0 Then Details = Details & _
