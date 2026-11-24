@@ -1,696 +1,141 @@
 {
-  "AGENTS_sha256": "D4372F89DF95880D55DC2EF75CC84D36819C1AD772A20533D0CF73DE2467E271",
-  "active_compiler_process": null,
   "active_exec_session": null,
   "active_jobs": [],
-  "actual_Trace_native_identity": {
-    "PID": 26928,
-    "utcStartTicks": 639310802808713184
-  },
-  "actual_Trace_terminal": {
-    "actual_stop_comment": "Подтверждён локальный максимум при lambda = 1.121026. Предельное состояние железобетонного сечения не установлено. Остатка общего бюджета недостаточно для следующего материального шага с обязательной проверкой поворота. Допустимое равновесие подтверждено до lambda = 1.121026.",
-    "best_lambda": 1.12102609132239,
-    "exit_code": 0,
-    "physical_capacity_certified": false,
-    "session": 3920,
-    "solver_seconds": 441.9208984375,
-    "states": 146
-  },
-  "actual_current_Newton_controller_regression": {
-    "exit_code": 0,
-    "failed": 0,
-    "own_process_closed": true,
-    "passed": 26,
-    "session": 78203
-  },
-  "all_calculation_jobs_terminal": true,
-  "candidate_source": "src/Solver/CCoupledDeformationContinuation.cls",
-  "candidate_source_sha256": "844E58BC700B90B30A2594EA5FBCBD35C56867C84B2B438A1B747A8AE839B382",
-  "cold676_negative": {
-    "no_final_saved_book": true,
-    "nonregression_gate_passed": false,
-    "own_native_closed": true,
-    "partial_max_lambda": 1.0949478390289227,
-    "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold676WorkingGuideCold96_20261124\\BroadGuideColdTimeoutProof.json",
-    "sha256": "711F10B42A3A44A8095E99BFE98E911A58CDDB6EDD0DB7D2BE4B4ECD5FA6065D",
-    "source_variant": "broad_before_control_context_guard",
-    "states": 7,
-    "timeout600": true
-  },
-  "compile_identity": {
-    "PID": 11956,
-    "terminal": true,
-    "utcStartTicks": 639310838494273944
-  },
-  "compile_retry_reason": "First21776 terminal exit1: COM RPC_E_SYS_CALL_FAILED at book.Close after Save; exact own156/ticks639310774529823010 closed. Original case preserved. Fresh retry same numerical sources, no live restart.",
-  "current671": {
-    "additional43_from15digit_CSV": true,
-    "certified_continuation_steps": 0,
-    "compile_own_closed": true,
-    "first103_exact_Double": true,
-    "forward_positive_resolved_candidates": 1,
-    "mathematical_equilibria": 2,
-    "native_identity": {
-      "PID": 26276,
-      "utcStartTicks": 639310844542267572
-    },
-    "native_launched": true,
-    "native_own_closed": true,
-    "native_terminal_exit0": true,
-    "native_time_budget_seconds": 600,
-    "options": 4,
-    "physical_capacity_certified": false,
-    "source_composition_not_yet_verified": false,
-    "source_validation_session54421_exit0": true
-  },
-  "current673": {
-    "cases": [
-      {
-        "mode": 0,
-        "positive_forward_original_control_candidate": false,
-        "solved": true
-      },
-      {
-        "mode": 3,
-        "positive_forward_original_control_candidate": true,
-        "solved": true
-      }
-    ],
-    "compiler_PID30100_closed": true,
-    "compiler_session55564_exit0": true,
-    "future_root_used_only_for_diagnostic_seed": true,
-    "native_identity": {
-      "PID": 32724,
-      "utcStartTicks": 639310947625344175
-    },
-    "native_launched": true,
-    "online_algorithm_certified": false,
-    "terminal": true
-  },
-  "current674": {
-    "compiler_session97233_exit0": true,
-    "full_combination10seconds_not_verified": true,
-    "guide_and_return_fields_exact_controls": true,
-    "guide_not_committed": true,
-    "known_future_input_not_read": true,
-    "native_identity": {
-      "PID": 18552,
-      "utcStartTicks": 639310954163051782
-    },
-    "native_launched": true,
-    "native_session2378_exit0": true,
-    "only_test_module_imported": true,
-    "original_control_return_verified": true,
-    "other254_exact_parent_except_VBE_identifier_case": true,
-    "own_native_closed": true,
-    "primary_budget": 30,
-    "primary_iterations": 7,
-    "source_audit_session80035_exit0": true,
-    "source_book_sha256": "F1E2EED87088057CE7139C61E953BB696B1FD00B00E85D0F95382BF343E843F5",
-    "source_components_checked": 255,
-    "terminal": true,
-    "total_local_solver_seconds": 3.720703125,
-    "total_primary_iterations": 7
-  },
-  "current_cold676": {
-    "cold_independent_equilibrium_pending": true,
-    "compiled_workbook_sha256": "F880D92703CA50E40F55CDA2B08B47FB09B624ED6846D1F8F05A839EE8FCA01A",
-    "completed": false,
-    "current_Working_Newton_methods": 141,
-    "full_cold_from_zero": true,
-    "global_probe_limit": 96,
-    "input146_not_read_by_macro": true,
-    "native_identity": {
-      "PID": 31596,
-      "utcStartTicks": 639310986438889204
-    },
-    "observer_readonly": true,
-    "physical_capacity_certified": false,
-    "primary_budget": 30,
-    "terminal": true,
-    "timeout600": true
-  },
-  "current_cold678": {
-    "cold_independent_equilibrium_pending": true,
-    "compiled_workbook_sha256": "3507996A3C62915BF75527F90DCFF7269FB9E198AF9F36499E7ACC07B11972E4",
-    "current_Working_Newton_methods": 141,
-    "current_compilation_modules_verified": true,
-    "current_lower": 1.10917514556655,
-    "full_cold_from_zero": true,
-    "global_probe_limit": 96,
-    "input146_not_read_by_macro": true,
-    "native_identity": {
-      "PID": 29476,
-      "utcStartTicks": 639310998830000057
-    },
-    "nonregression_gate_passed": false,
-    "observer_readonly": true,
-    "physical_capacity_certified": false,
-    "primary_budget": 30,
-    "stock": {
-      "all_saved_sources_exact": 255,
-      "capacity": "NumFail",
-      "code": "NUMERICAL_FAILURE",
-      "direct": "OK",
-      "limit": "",
-      "lower": 1.10917514556655,
-      "native": {
-        "failed": 0,
-        "macros": 1,
-        "own_process_closed": true,
-        "passed": 28,
-        "timeout600": false
-      },
-      "results_checksum": "340D93B32DDC37AF74264CE3BFBD2670D9D2BE96D0429F7B105723AF6F8D56E4",
-      "saved_book_sha256": "BC3C2D88B95A053EA8639880094C4C550E5C842738C68D118F12D2B078D6597D",
-      "seconds": 473.6875
-    },
-    "terminal": true
-  },
-  "current_cold682": {
-    "cold_independent_equilibrium_pending": false,
-    "compiled_workbook_sha256": "4BF8D56B3D2DBFFB7A61518FC1A56DE1B769D33C3C92FC982DD5B9FCD3FE324F",
-    "current_Working_Newton_methods": 141,
-    "current_compilation_modules_verified": true,
-    "current_lower": 1.109225820167928,
-    "full_cold_from_zero": true,
-    "global_probe_limit": 96,
-    "input146_not_read_by_macro": true,
-    "native_identity": {
-      "PID": 27436,
-      "utcStartTicks": 639311014583000730
-    },
-    "nonregression_gate_passed": true,
-    "observer_readonly": true,
-    "physical_capacity_certified": false,
-    "primary_budget": 30,
-    "stock": {
-      "all_saved_sources_exact": 255,
-      "capacity": "NumFail",
-      "code": "NUMERICAL_FAILURE",
-      "direct": "OK",
-      "limit": "",
-      "lower": 1.10922582016793,
-      "native": {
-        "failed": 0,
-        "macros": 1,
-        "own_process_closed": true,
-        "passed": 28,
-        "timeout600": false
-      },
-      "results_checksum": "D1DB04C5CE760F0A1CFF1DA7E2DBDD012DA76EB3B4F2CDB44A356938215FFFDF",
-      "saved_book_sha256": "65652845239CB3578A88D424AAB847DB3F506B7DBA7BB3DDCA3DEE527563936F",
-      "seconds": 413.28125
-    },
-    "terminal": true
-  },
-  "current_goal_turn_classification": "progress: False-domain83/0 and arithmetic88/0 verified; working CResultMeta diagnostics exact native692; realCDP all11+58 fields verified; shoulder and lambda-only candidates failed18/1; all jobs terminal, full goal active",
-  "current_hybrid_domain": {
-    "arithmetic_baseline_failed": 2,
-    "arithmetic_baseline_passed": 86,
-    "baseline": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold686HybridDomainBaseline_20261124",
-    "baseline_failed": 2,
-    "baseline_passed": 81,
-    "candidate": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124",
-    "current_failed": 0,
-    "current_passed": 88,
-    "proof": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold687HybridDomainRetry_20261124\\HybridDomainProof.json",
-    "proof_sha256": "3F7D7545146B894B91F8886AFC6EA3D84766EEF3FB8538770E1D1302497F8B06",
-    "real_CDP_maximum": 1.44120209252818,
-    "real_CDP_retest_passed": false,
-    "real_CDP_retest_pending": false,
-    "working_changes_uncommitted": true
-  },
-  "current_phase": "Hybrid88AndFieldDiagnosticsVerified_AllRunsTerminal_NextRegularizedTrust",
-  "current_step_refinement": {
-    "input_states": 146,
-    "native_identity": {
-      "PID": 5868,
-      "utcStartTicks": 639310849699499844
-    },
-    "native_launched": true,
-    "positive_forward_original_control_candidate": false,
-    "second_half_not_launched": true,
-    "solved": false,
-    "source_precision": "103exactDouble+43CSV15digits",
-    "terminal": true,
-    "watchdog_seconds": 600,
-    "working_materials_and_tolerances_unchanged": true
-  },
-  "current_working_guide": {
-    "global_probe_limit": 96,
-    "main_Trace_not_executed": true,
-    "native_identity": {
-      "PID": 12612,
-      "utcStartTicks": 639310994974423883
-    },
-    "primary_budget": 30,
-    "primary_iterations": 13.0,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold677ScopedGuideUnit146_20261124",
-    "src/Solver/CCoupledDeformationContinuation.cls": "C6F2C84D4456576F988C816CEDFC25DE2927FF2C0BDAC763A7CB0923DF99DC28",
-    "src/Solver/CCoupledNewtonSolver.cls": "07FA06D7A6616CBC425A67FFE832DE4C03EC25EBBC21092C2ACBE57121F925D2",
-    "terminal": true
-  },
-  "directed_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold682PostPeakGuideCold96_20261124",
-  "eligibility_first_compile_failure": {
-    "error": "RPC_E_SYS_CALL_FAILED at Close after Save; exact own closure Absent; no numerical test launched",
-    "exit_code": 1,
-    "own_PID": 15208,
-    "own_utcStartTicks": 639310781523462367,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility10320261124",
-    "session": 11277
-  },
+  "all_started_stages_terminal": true,
+  "branch": "codex/coupled-6d",
   "entire_goal_completed": false,
-  "established_facts": [
-    "384 research run timed out1800; exact own Excel closed;169 complete snapshots/103 states, max lambda1.1093511588217642; no final saved/reopened book.",
-    "Independent replay verifies all103 accepted fields, weak equations/gauges and6resultants; material integration is still VBA.",
-    "Three large steel-coordinate roots solved, but all spatial reverse and two negative lambda; none is admitted continuation.",
-    "CDP energy ratios in all three roots unchanged at exported precision across all129 station-point pairs; this is not exact internal Double-state equality.",
-    "Archive666 source layer43cases/255components and45CFBs verified; scientific clean replay/registry closure still open.",
-    "New six-case experiment changes only Testmodule: equal fine target with constant seed versus accepted load-distinct secant; materials/limits/30iterations unchanged.",
-    "First stage Cold667SteelStrainSeed10320261124 failed before compilation: optional AllCoupledSources.json absent; retained separately, not a numerical result.",
-    "First compile91454 terminated exit1: RPC_E_SYS_CALL_FAILED at Save/Close line189. Read-only own stack proved GC finalizer wait in cleanup; exact own Excel28624 stopped only after Quit and saved witnesses; closure Absent. No numerical trials launched.",
-    "Fresh retry from verified parent uses identical numerical VBA/Testmodule, with private compile Save/Close stage logs and cleanup that does not wait for COM finalizers before exact own-PID termination. Save/Close failures remain failures.",
-    "Retry compiler3088 terminal exit0; all255sources and254other parent components verified by source finalizer55374. Source17916A6EDE4714D4F02A71AD91086CF7FC33B04AB560F119ACC75592B0307DBB.",
-    "Two native launch attempts under PowerShell7 stopped before any Excel: watchdog expects PSHOME/powershell.exe. Direct WindowsPowerShell5.1 executable invocation actually launched native session36645, owned Excel20352/ticks639310701061736018.",
-    "Native36645 terminal exit0; all6roots independently verified, one positive-forward resolved candidate at fraction.001/secant: lambda1.1092711488183795, H growth1.4844100700202052e-8. Not a certified continuation step or capacity.",
-    "Midpoint case reused exact compiled book17916A6E..., no imports and no reused mutable history. Fractions.00025,.0005,.00075, constant/secant each. Historical inherited proof was renamed explicitly before any current-result claim.",
-    "Midpoint native77292 terminal exit0; all6roots verified. All3secant roots positive-forward with H growth, lambda1.1093142483518108/1.109299655405757/1.109285432787821; all3constant roots reverse/H frozen. Each root starts from103, not sequential history. Two-half comparison still required; capacity open.",
-    "Fixed-projection second-half case adds actual midpoint field as104th accepted input, preserving all103 original Double fields. Projection/point/limit come from original validated selector, not new auto-selection. Only Testmodule changed;31-info/8-vector format0003 includes native lambda sensitivity and both before/after effort counters.",
-    "Fixed-half compile91464 and source finalize63944 terminal exit0; all255sources and254other parent components checked. A prior PowerShell5 parser failure happened before Excel creation due missing UTF8 BOM; BOM-only repair pinned separately. No failed scientific result was discarded.",
-    "Fixed-half native45087 terminal exit0; all6root105-fields verified. All6forward geometrically, only3secant roots grow H. Full vs2halves lambda difference-8.985134192229793e-9; tensor RMS difference1.586628139299529e-11, relative to full increment0.0002279589704967415. Native endpoint linearized lambda uncertainty3.531905920494709e-5; coarse uncertainty not measured. No capacity certification."
-  ],
-  "first670_compile_failure": {
-    "closure": "Absent",
-    "error": "RPC_E_SYS_CALL_FAILED on Close after Save; no numerical run",
-    "exit_code": 1,
-    "own_PID": 32640,
-    "own_utcStartTicks": 639310799573097680,
-    "session": 56516
-  },
-  "first_working_guide_unit_failure": {
-    "exit_code": 1,
-    "expectations_not_weakened": true,
-    "expected_return_not_observed": true,
-    "own_native_closed": true,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold675WorkingGuideUnit146_20261124",
-    "session": 48916
-  },
-  "full_acceptance_completed": false,
-  "git_checkpoint": {
-    "branch": "codex/coupled-6d",
-    "commit": "6b6c49f2ae93df2092f7a1b933c01b26d786be24",
-    "main_unchanged": true,
-    "pushed": true,
-    "release_workbook_unchanged": true
-  },
-  "goal_status_at_snapshot": "active",
-  "goal_status_required": "active",
-  "latest_working_unit_verified": {
-    "all147equations_verified": true,
-    "global_probe_limit96_verified": true,
-    "original6_guide4_return3": true,
-    "pre_peak_guard_verified": true,
-    "primary_iterations": 13,
-    "regressions_failed": 0,
-    "regressions_passed": 105,
-    "regressions_pending": false,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold681PostPeakGuideUnit146_20261124"
-  },
-  "literature_numerical_reference": {
-    "CPP_functions_not_copied": true,
-    "file": "literature/Coupled6D/NumericalContinuation/Ceres_2.2.0_trust_region_minimizer.cc",
-    "sha256": "461E15859319822B4F968CE889DD4A2D657B0F1B518A2DEA7CE2FD7310D9E33D",
-    "source_notice_retained": true
-  },
-  "main_changed": false,
-  "native_unit_terminal": {
-    "exit_code": 0,
-    "session": 65086
-  },
-  "ndm_observer_changed": false,
-  "new_pause_checkpoint_commit_pending": false,
-  "next_action": {
-    "concrete_criterion_ONQ008_open": true,
-    "entire_original_scope_preserved": true,
-    "full_acceptance_not_authorized_by_directed_tests": true,
-    "full_cold_from_zero_still_required": true,
-    "postcracking_control": "Real CDP and perfectly plastic steel,netAc21168/As432,Eb30000/Es200000,ft3/fy400,Gt0.12/l125:analytical first peak72144N and later peak172967.56279474715N;native RC test still required;first cracking must not terminate the section.",
-    "priority": "Implement tested computed-guide recovery in working continuation with original control,immutable accepted history,shared30iterations and correctly charged global probes;verify affected paths,then cold-from-zero."
-  },
-  "next_concrete_action": {
-    "candidate_root_suggestion": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold696PostPeakLeastSquaresTrust_20261124",
-    "method_API": "(equations,initial,maxEvaluations,maxSteps,residualTolerance,solution,relativeDifferenceStep,initialRadius)",
-    "not_staged_or_run": true,
-    "notes": "LM already exists and uses pivoted QR/More1977,code has no use in working modTestCoupledHybrid tests. Its candidate currently calls ReadResidual; reuse ReadTrialResidual and unavailable flag so wrong dimensions stay fatal. Do not widen SMALL_STRAIN_MAX_NORM=2 or force tolerance.",
-    "policy": "Private candidate: post-local-peak CDP Probe uses consistent tangent+conditioned recovery,referenceLambda remains0 to allow decline; in TryHybridControlledField use least-squares trust when conditionRecovery=True and referenceLambda=0; preserve dogleg/difference-bracket reference>0 paths",
-    "task": "Use existing complete regularized trust solve for postpeak CDP failure; retain same physical equations and30/96 budgets",
-    "tests": "First independent LM analytic unit:known roots,rank deficient,missing/overflow/division candidate,initial arithmetic error,cancellation,dimensions,budgets. Then same capacity-only from2 native elastic states; full prescribed curve remains open",
-    "working_method": "CCoupledHybridSolver.TrySolveLeastSquaresTrust"
-  },
-  "pause_condition": {
-    "remaining_percent": 3,
-    "reset_credits": 0,
-    "used_percent": 97
-  },
-  "pause_condition_reached": true,
-  "pause_request_revoked_by_explicit_resume": true,
+  "full_acceptance_not_run": true,
+  "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
+  "goal_status": "safe_checkpoint_for_explicit_user_pause; goal API follows successful Git checkpoint and push",
+  "last_verified_working_cold_lower": 1.109225820167928,
+  "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
+  "main_unchanged": "3e7da82d3391a90aab8678054584f259eda30fe7",
+  "ndm_unchanged": true,
+  "next_action": "Wait for explicit user resume. Then inspect this checkpoint and exact saved candidates before any new native process.",
+  "no_new_experiments_added_after_pause_request": true,
+  "original_goal_scope_preserved": true,
+  "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
+  "pause_requested_explicitly": true,
   "physical_capacity_certified": false,
-  "postcrack_research": {
-    "all6_result_not_certified": true,
-    "case683_maximum": 1.31006089091038,
-    "case684_maximum": 1.44120209252818,
-    "case684_passed": false,
-    "case685_maximum": 1.44120209252818,
-    "case685_status": "terminal failure99/2; QR invoked at singular tangent but first invalid residual stops trust-region",
-    "case688_status": "99/2 unchanged; domain False fix not sufficient",
-    "case689_status": "99/2; all11 prescribed and58 automatic fields independently verified",
-    "case692_status": "99/2; arithmetic trial recovery15steps,9accepted,bestnorm0.0775859295169052,not equilibrium",
-    "case693_694_695_accepted_data_byte_equal": true,
-    "case693_status": "capacity-only18/1;shoulder predictor no confirmed limit",
-    "case694_status": "18/1;lambda-only candidate not accepted",
-    "case695_status": "18/1;full weak residual0.00121975617445246,row48;control0,gauges7.80072676668133e-17,tolerance4.50282777378599e-6",
-    "first_lambda": 0.6012,
-    "first_two_cold_fields_native_bits_equal": true,
-    "reference_lambda": 1.441396356622893
+  "previous_goal_turn_classification": "progress: verified native 20/0 after reproducible 19/1; actual private sources and terminal physical outcome preserved",
+  "private_regularized_trust": {
+    "actual_VBA_components_per_book": 255,
+    "analytic_baseline": {
+      "failed": 1,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 19,
+      "timeout600": false
+    },
+    "analytic_rank_repair": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 20,
+      "timeout600": false
+    },
+    "candidate_sources_sha256": {
+      "src/Solver/CCoupledDeformationContinuation.cls": "4A7F748FC00D812868890B65EA1D2DFB390C534FC5143042ABAB60316A15056C",
+      "src/Solver/CCoupledHybridFactorization.cls": "1E7E87A0EDE510732AF4A349601ABC3100CD0E2ED7FE5D7B3C47E7477AD3BCD5",
+      "src/Solver/CCoupledHybridSolver.cls": "27E95669C39EB438079C39A383459A7C10A91E131E0E5901ED5C84296AD71AD2",
+      "src/Solver/CCoupledNewtonSolver.cls": "6AE6F2ACDE5604FED1FAB2867FA3B844002989C60908B38BA95CC8EC940A0124",
+      "tests/CHybridEquationsTest.cls": "2C746CA6F2F77E6ACCFB3EE906E8539C6EFFFE645B4D43C2A537B44E8D614617",
+      "tests/modTestCoupledElasticState.bas": "4053CD315C465A91726F5B601179FBDFD55FF80503E73CE34AFE12B61CC16E53",
+      "tests/modTestCoupledHybrid.bas": "433DDAFAE22980919D5E6FF779D1DAE7D8417369F78D58F0B4A61F8270537DFD"
+    },
+    "candidate_workbook_sha256": "7A3EF84249043DDA22E21935D710C4066A66FD3FE82FC09BBCE1D9EF3311E32D",
+    "entire_goal_completed": false,
+    "evidence_files_sha256": {
+      "696_CompilePointClosure.json": "68DFAC9C32FDE075CA24E899E36DDE2BC070DF5F9CC6642A8F01DD60345AA906",
+      "696_LeastSquaresTrust.txt": "4AEE7A4ACE9D0462187B8B505088C8FAC23E2B8FFAFF95E410CEF54C489D99DC",
+      "696_LeastSquaresTrust.txt.ProcessClosure.json": "CAC8ACF8A1F97ACF75265131CDBFEF68BC54DD2EDBAFB1347F8E740BA8046FF2",
+      "696_PointTraceSourceComposition.json": "62D371333D24230886D3329C2294DD1272B56782A23AC96CB8357544743E2505",
+      "697_CompilePointClosure.json": "9D5C8D505970EEE5E4FCC21FB50F98CF7D6D1692D5D9C7091C2014FA371EB99A",
+      "697_LeastSquaresTrust.txt": "6B57E20BCFED1F2A7ECBA25B397EAEB0BE74D2A746412D44AE03D788816D58DF",
+      "697_LeastSquaresTrust.txt.ProcessClosure.json": "115914C263620705510C1E4AA3A0E2DCE7C9B5BE5146C9A8D0845ACC6D232BBE",
+      "697_PointTraceSourceComposition.json": "8EFFB874A926AF0ABCDEEA7B07AD313638693B594AFAB971710F6EC4E6984F6C",
+      "697_PostCrackCapacityProof.json": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1",
+      "697_PostCrackFieldsProof.json": "67662B90007080595CD020C9E0A0A3C55804A75E3583B638A3D161DDF526E2A0",
+      "697_PostCrackTension.txt": "1285B554C28FB58C5A8C72681DDB33D67BF260077E95D6459D95D81C3C0740E8",
+      "697_PostCrackTension.txt.ProcessClosure.json": "4F65ECB7EA0E58E60461B00BE41867A6AE4C8D613CD66BEFC6B17A5CC66CB579",
+      "CandidateUndampedRank.cls.txt": "3354420CC1414C78A96E8EE2C2808ECAEF620D6E7D05AFBAC49DB62717D11852",
+      "Check-TestPostCrackTrust.py": "5F8913B0EDD025F31B3E621D3827A8739A4E78ABEDA5B24979C440C4C59ECC7C",
+      "Stage-TestPostCrackTrust.py": "742CC6D7E3CE9DF4C949539D0C62CFBE56ACD814F9520A657EF15C22216CEC44",
+      "Stage-TestRankTrust.py": "06F918D6A37196FA4F7FADA336A59A530408EAE6DA0C05CA6E0FE35E6CCF007A",
+      "TestLeastSquaresTrust.bas.txt": "DB09AB20118C0C77F66AFCA949D8C8F1B808598A012EC807B0E9EDEAD629E9F5"
+    },
+    "next_checks": [
+      "40 original linear SVD cases and new interior rank-deficient cases",
+      "full prescribed real CDP and steel curve",
+      "cold HardShear and all LoadPath",
+      "finite concrete physical-limit contract ONQ-008",
+      "full original workbook acceptance and performance"
+    ],
+    "only_rank_factorization_changed_between_analytic_runs": true,
+    "physical_capacity": {
+      "arbitrary_section_all6_capacity_certified": false,
+      "entire_goal_completed": false,
+      "full_prescribed_curve_not_checked_in_this_run": true,
+      "independently_checked_mechanical_states": {
+        "PostCrackContinuation.Accepted": 58,
+        "PostCrackPrescribed.Accepted": 2
+      },
+      "known_maximum_lambda": 1.441396356622893,
+      "native": {
+        "failed": 1,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 18,
+        "timeout600": false
+      },
+      "original_reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124",
+      "particular_uniaxial_capacity_passed": false,
+      "reported_accuracy": null,
+      "returned_peak": null,
+      "same_original_two_cold_fields_and_load_bits": true,
+      "snapshot_sha256": "423A6F5B8939E5B2ED2988279E77316D9C0617A193B98D47A984115077312D0C"
+    },
+    "private_parent_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124",
+    "private_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold697PostCrackRankTrust_20261124",
+    "released_files_sha256": {
+      "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+      "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+    },
+    "same_six_other_sources_and_tests_exact": true,
+    "working_code_contains_new_LM_candidate": false
   },
-  "previous_Trace_terminal": {
-    "best_lambda": 1.12041519510758,
-    "exit_code": 0,
-    "physical_capacity_certified": false,
-    "reserve_accepted": 1,
-    "reserve_attempts": 1,
-    "session": 87156,
-    "solver_seconds": 231.8037109375,
-    "states": 118
-  },
-  "previous_checkpoint_regression": {
-    "exit_code": 0,
-    "failed": 0,
-    "own_process_closed": true,
-    "passed": 26,
-    "session": 78203
-  },
-  "previous_goal_turn_classification": "progress:118equilibria verified, actual140Newton regression26/0, checkpointa83f0b8 pushed; Git maintenance65559 now terminal0",
-  "proofs_current": {
-    "Cold672SteelFirstHalf146_20261124": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold672SteelFirstHalf146_20261124\\SteelRefinementProof.json",
-      "sha256": "70B4D96111F01C56637A11D742E15CC1A9030180AB7921C90998011E680AE989"
-    },
-    "Cold691HybridArithmeticRetry_20261124/HybridArithmeticProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124\\HybridArithmeticProof.json",
-      "sha256": "6D4A1020E4D404DF753649A9B64F65B787E6406DD5F04B7ED3D27729E4298AD2"
-    },
-    "Cold692PostCrackArithmeticRetry_20261124/PostCrackFieldsProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124\\PostCrackFieldsProof.json",
-      "sha256": "CD48D86289F45371971571DFF5A483BD95B8B47957DB9A0438A957D99332250E"
-    },
-    "Cold692PostCrackArithmeticRetry_20261124/WorkingDiagnosticReuseProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124\\WorkingDiagnosticReuseProof.json",
-      "sha256": "1ECBAF637F7FF7FDDF2B973EF4B6A07161A35B56630EE973966C1D3C6286DCD0"
-    },
-    "Cold693PostCrackShoulderPredictor_20261124/PostCrackCapacityProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold693PostCrackShoulderPredictor_20261124\\PostCrackCapacityProof.json",
-      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
-    },
-    "Cold694PostCrackLoadBalance_20261124/PostCrackCapacityProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold694PostCrackLoadBalance_20261124\\PostCrackCapacityProof.json",
-      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
-    },
-    "Cold695PostCrackBalanceDiagnostics_20261124/PostCrackCapacityProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold695PostCrackBalanceDiagnostics_20261124\\PostCrackCapacityProof.json",
-      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
-    },
-    "CurrentColdHistoryProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold682PostPeakGuideCold96_20261124\\CurrentColdHistoryProof.json",
-      "sha256": "3EF922121893058CD584B04A51334057973EC3321C6AFE4C5E9A98547D0E3D63"
-    },
-    "WorkingGuideColdProof.json": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold682PostPeakGuideCold96_20261124\\WorkingGuideColdProof.json",
-      "sha256": "C4231EA40A71F6D1FB4DDDABE9BC47175D65864F91BD72E61F27730653D498A7"
-    },
-    "actual_Trace_current140_method_scope": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\WorkingNewtonMethodScope.json",
-      "sha256": "55FCB65C73454E2ED41117A92DFA0B459ADD9C7B42E7079E85355B1D0C575D04"
-    },
-    "actual_Trace_unreached_reserve": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669WorkingDepartureTrace103Retry20261124\\WorkingDepartureTraceProof.json",
-      "sha256": "9E8BE7FAAA51B6285D3BFF7847DA125583C3E4725C065C4064691EB130C92832"
-    },
-    "actual_current_Newton_controller_regression": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\Native\\PersistentHUnit.txt",
-      "sha256": "45016A53A3EFF974B351DC2ED3791D7532E9403E0E1C263FF4FDFC81699D0E0E"
-    },
-    "all19_prior_snapshots_exact": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\EligibilityPrefixProof.json",
-      "sha256": "21A68B8F23E813558813625E674D6EA15D7297F508FB21565AA4A4C0415453AF"
-    },
-    "archived_sources43": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\H99DiagnosticsEvidence20261123\\ArchivedSourcesProof.json",
-      "sha256": "B19086F7A91921A4A11A2300B510D46D5BAA82537340C7CC5F68B2F240ABB6D4"
-    },
-    "captured_recovery_API": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668SpatialRecoveryCapture10320261124\\SpatialSeedProof.json",
-      "sha256": "88839BD2EB3981B070AE498A92382A8ADD7E6150A4F6DE9C032F560EF686231C"
-    },
-    "cold96": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPostFailureCold9620261123\\PostFailureCold96Proof.json",
-      "sha256": "246FD46483597411EDBBB79A0A4EE6E95683195A5AB698FFF0C6741AAE72D8A0"
-    },
-    "continued_material_actual_sources": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\PointTraceSourceComposition.json",
-      "sha256": "A9D40BD47A14AA9CA64D0D9855067DAC83D23311EF74DB6D109EBDB3BB683340"
-    },
-    "continued_material_peak_analysis": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\ContinuedMaterialPeakAnalysis.json",
-      "sha256": "2A83B21D6E79BCDDE246E70D3798A99BB0F08A4E80B423889D7B371C680357AB"
-    },
-    "continued_material_regression": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\Native\\PersistentHUnit.txt",
-      "sha256": "A53F6BFBEE84CC3597BAB24B657487FEFE0E9253D37356FF2DCBB838626D1F99"
-    },
-    "continued_material_result": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold670MaterialContinuation96Retry_20261124\\ContinuedMaterialBudgetProof.json",
-      "sha256": "24EF19EF2719F8B1758AA510A39FCDD7FFE0E101E88EFF1ABC512B914B3153F3"
-    },
-    "corrected_eligibility_Trace_result": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669DepartureEligibility103Retry20261124\\DepartureEligibilityTraceProof.json",
-      "sha256": "1B8E4C50A109E38ED0CD3022ADBEE839AC0A521CD411514E752ABA5DB0FDC698"
-    },
-    "diagnostic_sources": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold673SteelMidSeed146_20261124\\PointTraceSourceComposition.json",
-      "sha256": "786B7BEE2ECF88C91B88C2F7B242B7BCBE3FE0A2FD69DCFA5105D0F222616E84"
-    },
-    "failed_actual_Trace_compile": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669WorkingDepartureTrace10320261124\\CompilePointFailure.json",
-      "sha256": "5C0DC89D0C854AE2F64A7EF8A297CD86DFAFEED23901696CA8D695D71B9F1FEB"
-    },
-    "half": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold672SteelFirstHalf146_20261124\\SteelRefinementProof.json",
-      "sha256": "70B4D96111F01C56637A11D742E15CC1A9030180AB7921C90998011E680AE989"
-    },
-    "midpoint_seed_diagnostic": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold673SteelMidSeed146_20261124\\SteelMidSeedDiagnosticProof.json",
-      "sha256": "651A6ADD64B85D8BC4FA838F250C9247BBFAE5328FEC7E6792112D689A673297"
-    },
-    "newton_existing_method_scope": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668SpatialRecoveryCapture10320261124\\NewtonMethodScope.json",
-      "sha256": "976937382644F0DBAC68B801049AE64EC56201194300C2F093AE0B76D86F804F"
-    },
-    "online_steel_guide": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold674OnlineSteelGuide146_20261124\\OnlineSteelGuideProof.json",
-      "sha256": "C0CD59002444A9ED25A1DFA57FFFD405126B3DB65C97604C037E8D5C48C7FCF7"
-    },
-    "postpeak": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold671PostPeakSteel146_20261124\\PostPeakSteelProof.json",
-      "sha256": "2BDFB51E6D5E93B926967D48C19CAE1B778FD7F6A04C220AE1ECC18B36244788"
-    },
-    "postpeak_steel_probes": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold671PostPeakSteel146_20261124\\PostPeakSteelProof.json",
-      "sha256": "2BDFB51E6D5E93B926967D48C19CAE1B778FD7F6A04C220AE1ECC18B36244788"
-    },
-    "prefix103": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearPartial103Replay20261124\\CurrentColdHistoryProof.json",
-      "sha256": "B712DE388F0050391023B9D06A568DDEF440BEF0580F2A07B0B50E57C8D13ED1"
-    },
-    "spatial_next_halves": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668SpatialStepHalves10320261124\\SpatialSeedProof.json",
-      "sha256": "D91CF3385B2D5AE8C6CAB5DA7D4DF895EC8F6DE6E56252BC6B76EED3315A3CE1"
-    },
-    "steel_constant_seed3": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainLocal10320261124\\SteelStrainLocalProof.json",
-      "sha256": "8C6607BE6C85096E0FDD79DC34CB3D4B4ED934E4AAB614F182D9C11007AFC12B"
-    },
-    "steel_fixed_half": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelFixedHalf10420261124\\SteelFixedHalfProof.json",
-      "sha256": "305249A6CA740465C3EF80000A78C1A577670C5A4930209780E62020ED85CEBF"
-    },
-    "steel_initial_paired_seeds6": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainSeed103Retry20261124\\SteelStrainSeedProof.json",
-      "sha256": "4D70EF30813265E9D4DB5DB4DC8F81DA96636618D25DDE693A99AB5156BC5589"
-    },
-    "steel_midpoints_completed": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelSeedMidpoints10320261124\\SteelStrainSeedProof.json",
-      "sha256": "0C1777D21E39C3ACF0CE4712BBF45D1D1CA7F7A8A770EFD2C36506D9ED9FF3E7"
-    },
-    "stock_spatial_four_working_methods": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668StockSpatialSeed10320261124\\WorkingSpatialMethods.json",
-      "sha256": "DD7838EAADBE63AE7D1E6CE041CBFF1B85FB3E798C9BF9FFB30AC17E0C6F8134"
-    },
-    "stock_spatial_source_audit": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668StockSpatialSeed10320261124\\PointTraceSourceComposition.json",
-      "sha256": "82E96DD34227304E77FD46563C35EFD7945A80149BF29A22B111A914E8527276"
-    },
-    "stock_spatial_target_failure": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold668StockSpatialSeed10320261124\\SpatialSeedStudyFailure.json",
-      "sha256": "4CE5EE238B09A0A50C3BF76FAD8BE48EDB0221346DDFF609468FFF0019BE32CC"
-    },
-    "timeout384": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold666RetainedNearResearch38420261123\\RetainedNear384TimeoutProof.json",
-      "sha256": "BD91AD8F4963A305DEA108ACED37CFD217DBA6434B54149C272DE27CE6D34EA9"
-    },
-    "working_cold678": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold678ScopedGuideCold96_20261124\\WorkingGuideColdProof.json",
-      "sha256": "57C4B458B28388F1637330C95EE687C2B49FFEF4E7FF15680CE3C9B9EEE9DDC2"
-    },
-    "working_cold682": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold682PostPeakGuideCold96_20261124\\WorkingGuideColdProof.json",
-      "sha256": "C4231EA40A71F6D1FB4DDDABE9BC47175D65864F91BD72E61F27730653D498A7"
-    },
-    "working_controller_regression": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669WorkingDepartureUnit10320261124\\Native\\PersistentHUnit.txt",
-      "sha256": "3B31C58F11090F73ACC76447A9ED9262D9FE6A17F66E18AA5BF7E3B4955CA49A"
-    },
-    "working_departure_unit": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold669WorkingDepartureUnit10320261124\\DepartureRecoveryProof.json",
-      "sha256": "25FCB7F7C7716A70E358EAD70B8ACED2C2B5EAAA30C08EC7E3AF377E8BA681FF"
-    },
-    "working_guide_unit": {
-      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold677ScopedGuideUnit146_20261124\\WorkingGuideUnitProof.json",
-      "sha256": "AB39FF71599396F5185575C053F7480A9A8F2E229B12E9568D4714B4F4AA330F"
-    }
-  },
-  "quota_last_observed_remaining_percent": 3,
   "released_files_current_sha256": {
     "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
     "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
   },
   "released_workbook_modified": false,
   "remaining_work": [
-    "No live stages when active_exec_session is null. First compiler56516 terminal1/own32640 closed; retry50899 terminal0/own24216/ticks639310801804228389 closed, sourcefinalizer52983 terminal0. Trace3920 terminal0 and unit78203 terminal0/26pass. If a future handle is present poll it only; never restart on observation timeout. Current Git checkpoint/push state is git_checkpoint.",
-    "Actual source check completed:onecontrollerimport/255actualcomponents/254parentothers,140workingNewton methods unchanged. Private compiler skips duplicate enumeration only for empty retirement, releases VBE refs, adds unsaved OWN blank close anchor; Save/Close errors still fail. Witnesses pinned, numerical VBA unchanged by private driver.",
-    "Verified670:146states from103prefix,28more than669; all118parentfields exact published precision,36old snapshots byte-identical, all equations/gauges/6forces independently verified, no new spatial reversals. Actual localmaximum1.12102609132239/nativeaccuracy0.000400174722778108,25postpeak states to1.09533730272841.95probes of96; nextHrequires2. Solver441.9208984375s, status6/code10, CopyPeak/SteelLimitFalse. Book0F747693FC27436EC479B2049D0AF6032E23BE554BB7165F6125D54C5AC198C7.",
-    "NEXT PHYSICS: do NOT blindly increase budgets. Inspect finite physical termination and full material contract: WithinPhysicalRange currently steel-only; 3Dconcrete cutoff incomplete. Research primary sources/save used literature/prefer Russian, derive criterion for chosen material with explicit assumptions and normative provenance, not arbitrary damage threshold or first crack. Independently verify peak shoulders/history/intermediate transition states and demonstrate determining/global event before calling capacity.",
-    "Actual selected-state analysis: peak121 concrete principal strain[-0.0002845657469750855,0.00044391757185445555], steel strain-limit ratio0.0039691620093904; end146 [-0.0003188948574932719,0.0004687691691337081], steelratio0.00485148966317889. These ratios are NOT load reserve; no concrete failure inferred. H rises0.00018051926932517848 to0.00022763715047543554MPa after peak.",
-    "Then actual cold-from-zero, full LoadPaths/materials/steel event/external controls and real workbook/CAD/10s complete combination target. Full original scope and docs/reports/Coupled6DAcceptance.md authoritative.146fieldreplay starts from103priorhistory, NOT full cold run; material integration remains nativeVBA. No completion from local test.",
-    "Archive666 scientific clean replay/registry closure open;667-670 evidence not silently registered. Full long acceptance still needs scoped consent, no subagents authorized.",
-    "Pause only at actual account remaining<=3percent after started jobs terminal/checkpoint; latest observed remaining is quota_last_observed_remaining_percent. No reset credits available."
+    "After explicit resume: verify rank correction on original40 native linear cases with independent SVD plus new interior rank-deficient cases; source fixture LeastSquaresTrustStepB20261121 and Oracle Cold86TRFStepOracleWithSeeds20261121 on D.",
+    "Finish complete prescribed CDP+steel postcracking curve and automatic known ultimate; do not equate first crack or NumFail to destruction.",
+    "Resolve concrete finite physical-limit contract ONQ-008; preserve material/history/equilibrium and do not invent damage cutoff.",
+    "Own stable NDS and confirmed ultimate for arbitrary geometry and N,Mx,My,T,Qx,Qy; cold HardShear, all LoadPath/Auto/All6, independent/external matched materials and tests.",
+    "Preserve distinct longitudinal/transverse grades, compact hoop input and reserve/failure/output/status, actual diagrams, existing NM/crack/stability behavior, CAD export and deformation visualization.",
+    "Actual rebuilt release and complete scoped acceptance incl Excel validation/reopen, CAD and FocusedValidationPlan; separate consent for longest full suites according to AGENTS.md.",
+    "End-to-end10s performance still unmet; do not trade physical/equilibrium criteria for speed or PASS.",
+    "Git evidence/source checkpoints retained; no merge into main before required checks and user agreement."
   ],
-  "requested_pause_to_be_applied_after_checkpoint": false,
-  "schema": "HybridTrialRecoveryResume2",
-  "terminal_prior_sessions": [
-    1406,
-    1628,
-    2720,
-    3088,
-    3920,
-    4126,
-    7029,
-    7636,
-    11277,
-    13899,
-    14341,
-    17057,
-    17796,
-    18597,
-    21776,
-    21997,
-    22057,
-    22615,
-    24572,
-    26365,
-    30305,
-    31004,
-    33188,
-    36645,
-    37771,
-    38875,
-    39888,
-    39903,
-    40906,
-    40981,
-    41187,
-    42422,
-    45087,
-    46881,
-    46912,
-    48427,
-    48916,
-    49076,
-    50204,
-    50571,
-    50899,
-    52983,
-    53665,
-    53933,
-    54421,
-    55374,
-    55564,
-    56516,
-    56720,
-    58621,
-    59762,
-    60977,
-    62557,
-    63925,
-    63944,
-    65086,
-    65559,
-    66363,
-    68333,
-    70307,
-    71765,
-    72287,
-    77292,
-    78203,
-    80035,
-    81962,
-    83468,
-    83764,
-    85066,
-    85437,
-    87156,
-    91454,
-    91464,
-    91875,
-    92479,
-    94403,
-    95989,
-    97233,
-    98029
+  "schema": "Coupled6DRequestedPauseCheckpoint3",
+  "stopped_own_file_enumeration_session": {
+    "exit_code": 1,
+    "reason": "Unneeded broad rg listing interrupted; no Office process affected",
+    "session": 47261
+  },
+  "terminal_sessions_this_stage": [
+    16147,
+    28797,
+    33931,
+    86272
   ],
-  "uncommitted_source_hashes": {
-    "src/Solver/CCoupledHybridSolver.cls": "331CD3ECAA099A3AF7A902A3D09575FE5AEE6A48CCBBF592C3DD8D41E7F4FBB5",
-    "src/Solver/CCoupledNewtonSolver.cls": "6B06DE888E9FE78DED0D3C44E94CAC109DAA67CE23D241AD2680F2E1D8209835",
-    "tests/CHybridEquationsTest.cls": "1BB91284CB07A5F391236FC3DC3DCBA60E2F6C10BB8459E331D7E6240F4CB456",
-    "tests/modTestCoupledHybrid.bas": "2DDC66B222E481193D969C9A52C4DE1B3355C6694000A6D8C68E0EE849696455"
-  },
-  "updated_local": "2026-11-24T11:42:26.151897+03:00",
-  "user_pause_condition": {
-    "action": "Only at actual account remaining<=3%: finish already running stages, save evidence, call update_goal(paused).",
-    "pause_now_requested": false,
-    "remaining_percent_at_or_below": 3
-  },
-  "working_commit": "13d5d9a293f317eadd48b94fd638cfabfb57938b",
-  "working_numerical_sources_modified": true,
-  "working_unit675_verified": {
-    "all147equations_verified": true,
-    "global_probe_limit96_verified": true,
-    "native_session60977_exit0": true,
-    "original6_guide4_return3": true,
-    "primary_iterations": 13,
-    "regressions_failed": 0,
-    "regressions_passed": 105,
-    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold675EarlyGuideUnit146_20261124"
+  "updated_local": "2026-11-24T12:04:20.619771+03:00",
+  "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
+  "working_hybrid_native_assertions": {
+    "checkpoint": "02622b5",
+    "failed": 0,
+    "passed": 88
   }
 }

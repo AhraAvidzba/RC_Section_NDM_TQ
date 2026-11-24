@@ -1,0 +1,38 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold696PostCrackFullTrust_20261124\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 60BF9A40ED9B54859B78AC8D5120E19CC8B57E32A6594A65443199C294F8B638
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold696PostCrackFullTrust_20261124\Temp\RC_NDM_ModeSuite_3330a53c487144c0871158e12010f887\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=17376; startTicks=639311070630128789
+===== modTestCoupledHybrid.RunTestCoupledLeastSquaresTrust =====
+SUITE_STARTED: modTestCoupledHybrid.RunTestCoupledLeastSquaresTrust; 2026-11-24T11:51:11
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=17376; workingSet=148873216; privateBytes=106995712; cpu=7.171875
+EXCEL_AFTER_SUITE: pid=31472; workingSet=103407616; privateBytes=61919232; cpu=5.109375
+PASS: LM nonsymmetric known root
+PASS: LM input unchanged
+PASS: LM analytic callbacks counted
+FAIL: LM rank deficient existing roots
+PASS: LM no real root remains failure
+PASS: LM existing root after LMUnavailable
+PASS: LM unavailable callbacks counted LMUnavailable
+PASS: LM existing root after LMOverflow
+PASS: LM unavailable callbacks counted LMOverflow
+PASS: LM existing root after LMDivision
+PASS: LM unavailable callbacks counted LMDivision
+PASS: LM difference Jacobian domain recovery
+PASS: LM difference callbacks counted
+PASS: LM invalid trial shares step budget
+PASS: LM invalid trial shares function budget
+PASS: LM wrong trial dimensions fatal
+PASS: LM trial cancellation propagates
+PASS: LM initial arithmetic fatal
+PASS: LM initial unavailable fatal
+PASS: LM initial dimensions rejected
+TOTAL_COUPLED_LM_TEST: passed=19; failed=1
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold696PostCrackFullTrust_20261124\Temp\RC_NDM_ModeSuite_3330a53c487144c0871158e12010f887\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledHybrid.RunTestCoupledLeastSquaresTrust; 2026-11-24T11:51:12
+FAIL_FAST: remaining suites were not run after a completed failed suite
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=1; source unchanged=True

@@ -1,0 +1,59 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет полную регуляризованную поправку, существующие корни, область определения и общие бюджеты.
+Public Function RunTestCoupledLeastSquaresTrust() As String
+    On Error GoTo Failed
+    Dim report As String, passed As Long, failedCount As Long
+    Dim adapter As New CHybridEquationsTest, equations As ICoupledEquationSystem, solver As New CCoupledHybridSolver
+    Set equations = adapter
+    Dim initial() As Double, solution() As Double, solved As Boolean, mode As Variant, cancelNumber As Long
+    ReDim initial(1 To 2): adapter.InitializeTest "Linear"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 200, 100, 0.0000000001, solution, 0#)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001 And Abs(solution(2) + 2#) < 0.00000001, "LM nonsymmetric known root", report, passed, failedCount
+    TestCheck initial(1) = 0# And initial(2) = 0#, "LM input unchanged", report, passed, failedCount
+    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest, "LM analytic callbacks counted", report, passed, failedCount
+    adapter.InitializeTest "Degenerate"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 300, 100, 0.0000000001, solution, 0#)
+    TestCheck solved And Abs(solution(1) + solution(2) - 3#) < 0.00000001, "LM rank deficient existing roots", report, passed, failedCount
+    ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 200, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.BestResidual >= 1# And solver.Steps <= 100 And solver.FunctionCalls <= 200, "LM no real root remains failure", report, passed, failedCount
+    For Each mode In Array("LMUnavailable", "LMOverflow", "LMDivision")
+        adapter.InitializeTest CStr(mode): initial(1) = 9#
+        solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+        TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "LM existing root after " & CStr(mode), report, passed, failedCount
+        TestCheck adapter.UnavailableCallsTest > 0 And solver.FunctionCalls = adapter.EvaluationCallsTest And initial(1) = 9#, "LM unavailable callbacks counted " & CStr(mode), report, passed, failedCount
+    Next mode
+    adapter.InitializeTest "LMUnavailable": initial(1) = 9#
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001 And adapter.UnavailableCallsTest > 0, "LM difference Jacobian domain recovery", report, passed, failedCount
+    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest, "LM difference callbacks counted", report, passed, failedCount
+    adapter.InitializeTest "LMOverflow"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 1, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.Steps = 1 And solver.FunctionCalls = 3 And adapter.UnavailableCallsTest = 1, "LM invalid trial shares step budget", report, passed, failedCount
+    adapter.InitializeTest "LMUnavailable"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 3, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.FunctionCalls = 3 And solver.Steps = 1 And solver.StopCode = 2, "LM invalid trial shares function budget", report, passed, failedCount
+    adapter.InitializeTest "LMWrongDimensions"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.StopCode = -1 And solver.Steps = 1 And solver.FunctionCalls = 3, "LM wrong trial dimensions fatal", report, passed, failedCount
+    adapter.InitializeTest "LMCancel"
+    On Error Resume Next
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+    cancelNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18 And adapter.UnavailableCallsTest = 1, "LM trial cancellation propagates", report, passed, failedCount
+    adapter.InitializeTest "LMOverflow": initial(1) = 0#
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.StopCode = -2 And Not solver.HasBestPoint And solver.FunctionCalls = 1, "LM initial arithmetic fatal", report, passed, failedCount
+    adapter.InitializeTest "NoResponse": initial(1) = 9#
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.StopCode = -1 And Not solver.HasBestPoint, "LM initial unavailable fatal", report, passed, failedCount
+    adapter.InitializeTest "BadDimensions"
+    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
+    TestCheck Not solved And solver.StopCode = -1 And solver.FunctionCalls = 1, "LM initial dimensions rejected", report, passed, failedCount
+    RunTestCoupledLeastSquaresTrust = report & "TOTAL_COUPLED_LM_TEST: passed=" & CStr(passed) & "; failed=" & CStr(failedCount)
+    Exit Function
+Failed:
+    RunTestCoupledLeastSquaresTrust = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

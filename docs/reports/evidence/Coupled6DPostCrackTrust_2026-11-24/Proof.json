@@ -1,0 +1,86 @@
+{
+  "actual_VBA_components_per_book": 255,
+  "analytic_baseline": {
+    "failed": 1,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 19,
+    "timeout600": false
+  },
+  "analytic_rank_repair": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 20,
+    "timeout600": false
+  },
+  "candidate_sources_sha256": {
+    "src/Solver/CCoupledDeformationContinuation.cls": "4A7F748FC00D812868890B65EA1D2DFB390C534FC5143042ABAB60316A15056C",
+    "src/Solver/CCoupledHybridFactorization.cls": "1E7E87A0EDE510732AF4A349601ABC3100CD0E2ED7FE5D7B3C47E7477AD3BCD5",
+    "src/Solver/CCoupledHybridSolver.cls": "27E95669C39EB438079C39A383459A7C10A91E131E0E5901ED5C84296AD71AD2",
+    "src/Solver/CCoupledNewtonSolver.cls": "6AE6F2ACDE5604FED1FAB2867FA3B844002989C60908B38BA95CC8EC940A0124",
+    "tests/CHybridEquationsTest.cls": "2C746CA6F2F77E6ACCFB3EE906E8539C6EFFFE645B4D43C2A537B44E8D614617",
+    "tests/modTestCoupledElasticState.bas": "4053CD315C465A91726F5B601179FBDFD55FF80503E73CE34AFE12B61CC16E53",
+    "tests/modTestCoupledHybrid.bas": "433DDAFAE22980919D5E6FF779D1DAE7D8417369F78D58F0B4A61F8270537DFD"
+  },
+  "candidate_workbook_sha256": "7A3EF84249043DDA22E21935D710C4066A66FD3FE82FC09BBCE1D9EF3311E32D",
+  "entire_goal_completed": false,
+  "evidence_files_sha256": {
+    "696_CompilePointClosure.json": "68DFAC9C32FDE075CA24E899E36DDE2BC070DF5F9CC6642A8F01DD60345AA906",
+    "696_LeastSquaresTrust.txt": "4AEE7A4ACE9D0462187B8B505088C8FAC23E2B8FFAFF95E410CEF54C489D99DC",
+    "696_LeastSquaresTrust.txt.ProcessClosure.json": "CAC8ACF8A1F97ACF75265131CDBFEF68BC54DD2EDBAFB1347F8E740BA8046FF2",
+    "696_PointTraceSourceComposition.json": "62D371333D24230886D3329C2294DD1272B56782A23AC96CB8357544743E2505",
+    "697_CompilePointClosure.json": "9D5C8D505970EEE5E4FCC21FB50F98CF7D6D1692D5D9C7091C2014FA371EB99A",
+    "697_LeastSquaresTrust.txt": "6B57E20BCFED1F2A7ECBA25B397EAEB0BE74D2A746412D44AE03D788816D58DF",
+    "697_LeastSquaresTrust.txt.ProcessClosure.json": "115914C263620705510C1E4AA3A0E2DCE7C9B5BE5146C9A8D0845ACC6D232BBE",
+    "697_PointTraceSourceComposition.json": "8EFFB874A926AF0ABCDEEA7B07AD313638693B594AFAB971710F6EC4E6984F6C",
+    "697_PostCrackCapacityProof.json": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1",
+    "697_PostCrackFieldsProof.json": "67662B90007080595CD020C9E0A0A3C55804A75E3583B638A3D161DDF526E2A0",
+    "697_PostCrackTension.txt": "1285B554C28FB58C5A8C72681DDB33D67BF260077E95D6459D95D81C3C0740E8",
+    "697_PostCrackTension.txt.ProcessClosure.json": "4F65ECB7EA0E58E60461B00BE41867A6AE4C8D613CD66BEFC6B17A5CC66CB579",
+    "CandidateUndampedRank.cls.txt": "3354420CC1414C78A96E8EE2C2808ECAEF620D6E7D05AFBAC49DB62717D11852",
+    "Check-TestPostCrackTrust.py": "5F8913B0EDD025F31B3E621D3827A8739A4E78ABEDA5B24979C440C4C59ECC7C",
+    "Stage-TestPostCrackTrust.py": "742CC6D7E3CE9DF4C949539D0C62CFBE56ACD814F9520A657EF15C22216CEC44",
+    "Stage-TestRankTrust.py": "06F918D6A37196FA4F7FADA336A59A530408EAE6DA0C05CA6E0FE35E6CCF007A",
+    "TestLeastSquaresTrust.bas.txt": "DB09AB20118C0C77F66AFCA949D8C8F1B808598A012EC807B0E9EDEAD629E9F5"
+  },
+  "next_checks": [
+    "40 original linear SVD cases and new interior rank-deficient cases",
+    "full prescribed real CDP and steel curve",
+    "cold HardShear and all LoadPath",
+    "finite concrete physical-limit contract ONQ-008",
+    "full original workbook acceptance and performance"
+  ],
+  "only_rank_factorization_changed_between_analytic_runs": true,
+  "physical_capacity": {
+    "arbitrary_section_all6_capacity_certified": false,
+    "entire_goal_completed": false,
+    "full_prescribed_curve_not_checked_in_this_run": true,
+    "independently_checked_mechanical_states": {
+      "PostCrackContinuation.Accepted": 58,
+      "PostCrackPrescribed.Accepted": 2
+    },
+    "known_maximum_lambda": 1.441396356622893,
+    "native": {
+      "failed": 1,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 18,
+      "timeout600": false
+    },
+    "original_reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124",
+    "particular_uniaxial_capacity_passed": false,
+    "reported_accuracy": null,
+    "returned_peak": null,
+    "same_original_two_cold_fields_and_load_bits": true,
+    "snapshot_sha256": "423A6F5B8939E5B2ED2988279E77316D9C0617A193B98D47A984115077312D0C"
+  },
+  "private_parent_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124",
+  "private_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold697PostCrackRankTrust_20261124",
+  "released_files_sha256": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "same_six_other_sources_and_tests_exact": true,
+  "working_code_contains_new_LM_candidate": false
+}

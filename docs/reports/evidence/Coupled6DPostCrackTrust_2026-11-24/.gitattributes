@@ -1,0 +1,4 @@
+# Сохраняет исходные байты журналов и доказательств для проверки SHA-256.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Файл патча содержит буквальные строки исходного diff, включая его пробельный контекст.
+*.patch -whitespace

@@ -1,0 +1,471 @@
+--- a/src/Solver/CCoupledDeformationContinuation.cls
++++ b/src/Solver/CCoupledDeformationContinuation.cls
+@@ -322,8 +322,8 @@
+                     smoothTrial = (mSolver.IterationCount <= GeomMax(1, mMaxIterations \ 2)) ' Как в адаптивном управлении OpenSees, затраты предыдущего решения ограничивают рост следующего шага.
+                 ElseIf IsMaterialGrowthControl() Then
+                     smoothTrial = FitsMaterialGrowthSecant(history, left, current, trial)
+-                ElseIf mFollowingLocalPeak And Len(mPostPeakControlName) > 0 Then
+-                    smoothTrial = FitsPostPeakSecant(history, left, current, trial)
++                ElseIf mLocalPeak > 0# Then
++                    smoothTrial = FitsMaterialGrowthSecant(history, left, current, trial)
+                 End If
+             End If
+         End If
+@@ -342,7 +342,7 @@
+             Else
+                 increment = increment * 0.5
+             End If
+-        ElseIf Not mUsesEnvelopeControl And (IsMaterialGrowthControl() Or (mFollowingLocalPeak And Len(mPostPeakControlName) > 0)) And _
++        ElseIf Not mUsesEnvelopeControl And (IsMaterialGrowthControl() Or mLocalPeak > 0#) And _
+                 increment > nominal And Not smoothTrial Then
+             If BeyondSteelLimit() Then unresolvedSteel = True ' Уточнение требует меньшей пробы на прослеженной ветви.
+             mSolver.DiscardStep ' На прежнем размере можно пройти изменение наклона без экстраполяции ветви.
+@@ -385,9 +385,9 @@
+             If mUnverifiedDecline And current.Lambda > mUnverifiedReference + LoadResolution(mUnverifiedReference) Then
+                 mUnverifiedDecline = False: mRecoveredDips = mRecoveredDips + 1
+             End If
+-            If smoothTrial And (mFollowingLocalPeak Or IsMaterialGrowthControl()) Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
++            If smoothTrial And (mLocalPeak > 0# Or IsMaterialGrowthControl()) Then smoothSteps = smoothSteps + 1 Else smoothSteps = 0
+             stepCeiling = nominal
+-            If IsMaterialGrowthControl() Then
++            If IsMaterialGrowthControl() Or mLocalPeak > 0# Then
+                 increment = acceptedIncrement ' Доверенный масштаб и следующая цель относятся к фактически принятому полю, а не к прогнозу.
+                 mMaterialMaximumStep = GeomMax(mMaterialMaximumStep, increment)
+                 If smoothSteps >= 2 Then
+@@ -406,7 +406,7 @@
+                 minimum = 2# * mEnvelopeResolution ' Растущий номинальный шаг не запрещает последующее уточнение до действительного разрешения H.
+             End If
+             If increment > stepCeiling Then increment = stepCeiling
+-            If IsMaterialGrowthControl() And smoothSteps >= 2 Then
++            If (IsMaterialGrowthControl() Or mLocalPeak > 0#) And smoothSteps >= 2 Then
+                 increment = GeomMin(stepCeiling, increment * MATERIAL_STEP_GROWTH)
+             ElseIf increment < stepCeiling / STEP_GROWTH Then
+                 increment = increment * STEP_GROWTH
+@@ -616,7 +616,7 @@
+ ' Готовит начальное приближение из собственных полей либо касательной принятого материального перехода без изменения истории.
+ ' Секущая использует механические координаты; касательная полной системы прогнозирует также вспомогательные множители связей.
+ Private Function PrepareSecantSeed(ByVal history As Collection, ByRef left As TBranchPoint, ByRef current As TBranchPoint, _
+-        ByVal target As Double, ByRef seed As Variant, ByRef factor As Double) As Boolean
++        ByVal target As Double, ByRef seed As Variant, ByRef factor As Double, Optional ByVal predictorTrace As CCoupledLoadTrace = Nothing) As Boolean
+     If Not mUsesEnvelopeControl And mEnvelopeDepartureRevision = mSolver.AcceptedRevision Then Exit Function
+     If left.HistoryIndex < 1 Or left.HistoryIndex >= current.HistoryIndex Or current.HistoryIndex <> history.Count Then Exit Function
+     Dim previous() As Double, accepted() As Double, field() As Double, oldControl As Double, control As Double, ratio As Double, i As Long
+@@ -637,11 +637,13 @@
+         PrepareSecantSeed = True
+         Exit Function
+     End If
++    Dim selectedTrace As CCoupledLoadTrace: Set selectedTrace = predictorTrace
++    If selectedTrace Is Nothing Then Set selectedTrace = mTrace
+     Dim previousLambda As Double: previousLambda = left.Lambda
+-    If Not mTrace Is Nothing Then
++    If Not selectedTrace Is Nothing Then
+         Dim fraction As Double
+         previous = history(current.HistoryIndex - 1)
+-        mTrace.ReadPoint current.HistoryIndex - 1, fraction, previousLambda
++        selectedTrace.ReadPoint current.HistoryIndex - 1, fraction, previousLambda
+         If fraction <> 1# Then Exit Function
+     End If
+     If mUsesEnvelopeControl Then
+@@ -949,16 +951,17 @@
+         Exit Function
+     End If
+     Dim solved As Boolean, recoverSameControl As Boolean, recoveryReference As Double
++    Dim postPeakRecovery As Boolean: postPeakRecovery = (mLocalPeak > 0# And Not mSolver.HasPrincipalBoundaries)
+     Dim guideProbes As Long, guideReturned As Boolean, allowGuide As Boolean
+     allowGuide = mFollowingLocalPeak And Not robustDeparture And (mFieldControlChanges > 0 Or mBranchTangentControl) And _
+         IsArray(initialField) And mProbeCount + 2 <= PROBE_LIMIT ' Возврат после локального максимума не расходует бюджет ещё не прослеженной восходящей ветви.
+     If robustDeparture Then recoveryReference = acceptedLambda
+     recoverSameControl = keepYieldControl And mBranchTangentControl And mFixedYieldRecoveryProbes < FIXED_YIELD_RECOVERY_LIMIT
+     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
+-        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, (mBranchTangentControl Or robustDeparture), recoverSameControl, _
+-        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery, _
+-        conditionHybridRecovery:=robustDeparture, referenceLambda:=recoveryReference, _
+-        allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture), allowGuideRecovery:=allowGuide, _
++        point.Lambda, mAbsTol, mRelTol, mMaxIterations, recoverYieldControl, (mBranchTangentControl Or robustDeparture Or postPeakRecovery), recoverSameControl, _
++        initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=(allowHybridRecovery Or postPeakRecovery), _
++        conditionHybridRecovery:=(robustDeparture Or postPeakRecovery), referenceLambda:=recoveryReference, _
++        allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture Or postPeakRecovery), allowGuideRecovery:=allowGuide, _
+         guideReferenceLambda:=acceptedLambda, guideProbes:=guideProbes, guideReturnSucceeded:=guideReturned)
+     mProbeCount = mProbeCount + guideProbes: mGuideRecoveryProbes = mGuideRecoveryProbes + guideProbes
+     If guideReturned Then mGuideRecoverySolutions = mGuideRecoverySolutions + 1
+@@ -1462,6 +1465,12 @@
+         Set refined = New Collection: Set integrated = New Collection
+     End If
+     Dim field() As Double, resultants() As Double
++    Dim seedFields As New Collection, seedTrace As CCoupledLoadTrace, seedSource As CCoupledLoadTrace
++    Dim seedLeft As TBranchPoint, seedCurrent As TBranchPoint, prediction As Variant, predictedLambda As Double
++    Dim seedIndex As Long, seedFraction As Double, probed As Boolean
++    For seedIndex = 1 To left.HistoryIndex: field = history.Item(seedIndex): seedFields.Add field: Next seedIndex
++    Set seedSource = sourceTrace: If seedSource Is Nothing Then Set seedSource = mTrace
++    If Not seedSource Is Nothing Then Set seedTrace = seedSource.CopyPrefix(left.HistoryIndex)
+     ReDim samples(0 To 2 * divisions)
+     samples(0) = left: previousLambda = left.Lambda
+     For shoulder = 1 To 2
+@@ -1477,7 +1486,20 @@
+                 Exit Function
+             End If
+             If mProbeCount < PROBE_LIMIT Then mShoulderProbes = mShoulderProbes + 1
+-            If Not Probe(point, previousLambda, keepYieldControl:=keepRight, acceptedLambda:=previousLambda) Then Exit Function
++            seedCurrent = samples(index): seedLeft.HistoryIndex = 0
++            If index > 0 Then
++                seedLeft = samples(index - 1)
++            ElseIf left.HistoryIndex > 1 And Not seedTrace Is Nothing Then
++                seedLeft.HistoryIndex = left.HistoryIndex - 1
++                seedTrace.ReadPoint seedLeft.HistoryIndex, seedFraction, seedLeft.Lambda
++                If seedFraction <> 1# Then seedLeft.HistoryIndex = 0
++            End If
++            If PrepareSecantSeed(seedFields, seedLeft, seedCurrent, point.Coordinate, prediction, predictedLambda, seedTrace) Then
++                probed = Probe(point, predictedLambda, keepYieldControl:=keepRight, initialField:=prediction, acceptedLambda:=previousLambda)
++            Else
++                probed = Probe(point, previousLambda, keepYieldControl:=keepRight, acceptedLambda:=previousLambda)
++            End If
++            If Not probed Then Exit Function
+             If Not UpdateTrialCoordinate(point, samples(index).Coordinate) Then Exit Function
+             If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
+                 mSolver.DiscardStep
+@@ -1492,11 +1514,13 @@
+                 mSolver.DiscardStep
+                 Exit Function
+             End If
++            mSolver.CopyTrial field, resultants
+             If saveFields Then
+-                mSolver.CopyTrial field, resultants
+                 refined.Add field: integrated.Add resultants
+             End If
+             mSolver.AcceptStep
++            seedFields.Add field
++            If Not seedTrace Is Nothing Then seedTrace.Add 1#, point.Lambda
+             index = index + 1
+             point.HistoryIndex = left.HistoryIndex + index
+             samples(index) = point
+--- a/src/Solver/CCoupledHybridSolver.cls
++++ b/src/Solver/CCoupledHybridSolver.cls
+@@ -464,6 +464,7 @@
+         Optional ByVal initialRadius As Double = 1#) As Boolean
+     On Error GoTo ArithmeticFailure
+     mFunctionCalls = 0: mJacobianCalls = 0: mSteps = 0: mAccepted = 0: mRestarts = 0: mStopCode = 0
++    mArithmeticDiagnostic = vbNullString
+     mBestNorm = 1E+300: mHasBest = False: Erase mBest: Erase mBestResidual: Erase solution
+     If equations Is Nothing Then Exit Function
+     Dim count As Long: count = UBound(initial)
+@@ -480,7 +481,7 @@
+     Dim scalingReady As Boolean, radiusReady As Boolean, i As Long, j As Long, valid As Boolean, accepted As Boolean
+     Dim norm As Double, nextNorm As Double, stepNorm As Double, cost As Double, nextCost As Double
+     Dim actualReduction As Double, predictedReduction As Double, ratio As Double, total As Double
+-    Dim originalResidual() As Double
++    Dim originalResidual() As Double, trialUnavailable As Boolean
+     Do
+         If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
+         If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
+@@ -528,14 +529,14 @@
+             trial = x
+             For i = 1 To count: trial(i) = x(i) + movement(i) / diagonal(i): Next i
+             mSteps = mSteps + 1
+-            valid = ReadResidual(equations, trial, nextResidual, unused, count)
++            valid = ReadTrialResidual(equations, trial, nextResidual, unused, count, trialUnavailable)
+             actualReduction = 0#: ratio = 0#: nextNorm = 0#: nextCost = 0#
+             If valid Then
+                 nextNorm = algebra.VectorNorm(nextResidual, 1, count): nextCost = 0.5 * nextNorm * nextNorm
+                 actualReduction = cost - nextCost
+                 If predictedReduction > 0# Then ratio = actualReduction / predictedReduction
+                 If predictedReduction = 0# And actualReduction = 0# Then ratio = 1#
+-            ElseIf mStopCode = -1 Then
++            ElseIf trialUnavailable Then
+                 mStopCode = 0 ' Отсутствие отклика одной пробы разрешает меньшую область от той же принятой истории.
+             Else
+                 Exit Do
+--- a/src/Solver/CCoupledNewtonSolver.cls
++++ b/src/Solver/CCoupledNewtonSolver.cls
+@@ -1022,6 +1022,8 @@
+                 GoTo RecomputeTangent
+             End If
+             RecordFailure mSystem.FailureCode, "Касательная связанного сечения вырождена или не решается с заданной точностью."
++            If allowHybridRecovery Then SolveStep = TryHybridControlledField(current, currentLambda, load, _
++                absoluteTolerance, relativeTolerance, maxIterations, conditionHybridRecovery, controlPrediction, initialLambda, referenceLambda)
+             Exit Function
+         End If
+         mMinimumPivot = mSystem.MinimumPivot
+@@ -1249,14 +1251,22 @@
+     Dim converged As Boolean
+     Dim observer As ICoupledDifferenceObserver
+     If reserved > 0 Then Set observer = Me
++    If conditionRecovery And referenceLambda = 0# Then
++        converged = hybrid.TrySolveLeastSquaresTrust(equations, coordinates, ordinaryCalls, ordinarySteps, _
++            absoluteTolerance, solution, HYBRID_DIFFERENCE_STEP)
++    Else
+     converged = hybrid.TrySolve(equations, coordinates, ordinaryCalls, ordinarySteps, absoluteTolerance, _
+         0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
+         automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery, captureDifferenceBracket:=(reserved > 0), _
+         differenceObserver:=observer, completeNewtonLineSearch:=(reserved > 0))
++    End If
+     mHybridActive = False
+     mIterations = mIterations + hybrid.Steps
+     mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls
+     mHybridEvaluations = mHybridEvaluations + hybrid.FunctionCalls
++    original.DiagnosticDetails = original.DiagnosticDetails & " | Гибридный резерв: код остановки " & CStr(hybrid.StopCode) & _
++        "; принятых поправок " & CStr(hybrid.AcceptedSteps) & "; лучшая невязка " & CStr(hybrid.BestResidual)
++    If Len(hybrid.ArithmeticDiagnostic) > 0 Then original.DiagnosticDetails = original.DiagnosticDetails & " | " & hybrid.ArithmeticDiagnostic
+     If mFailureCode <> sfcNone And mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
+         RecordFailure mFailureCode, "Материальная проба глобальной касательной не может быть исправлена уменьшением поправки."
+         Exit Function
+--- a/tests/CHybridEquationsTest.cls
++++ b/tests/CHybridEquationsTest.cls
+@@ -47,6 +47,20 @@
+     If withJacobian Then ReDim jacobian(1 To count, 1 To count)
+     Dim i As Long
+     Select Case mMode
++        Case "LMUnavailable", "LMOverflow", "LMDivision", "LMCancel", "LMWrongDimensions"
++            If coordinates(1) < 0.5 Then
++                mUnavailableCallsTest = mUnavailableCallsTest + 1
++                If mMode = "LMOverflow" Then Err.Raise 6, "CHybridEquationsTest", "Тестовое переполнение LM-пробы."
++                If mMode = "LMDivision" Then Err.Raise 11, "CHybridEquationsTest", "Тестовое деление на ноль LM-пробы."
++                If mMode = "LMCancel" Then Err.Raise 18, "CHybridEquationsTest", "Тестовая отмена LM-пробы."
++                If mMode = "LMWrongDimensions" Then
++                    ReDim residual(1 To count + 1)
++                    ICoupledEquationSystem_TryEvaluate = True
++                End If
++                Exit Function
++            End If
++            residual(1) = Sqr(coordinates(1)) - 1#
++            If withJacobian Then jacobian(1, 1) = 0.5 / Sqr(coordinates(1))
+         Case "DomainSqrt", "TrialDimensions", "OverflowTrial", "DivisionTrial", "CancelTrial"
+             If coordinates(1) <= 0# Then
+                 mUnavailableCallsTest = mUnavailableCallsTest + 1
+--- a/tests/modTestCoupledHybrid.bas
++++ b/tests/modTestCoupledHybrid.bas
+@@ -301,3 +301,63 @@
+     If condition Then passed = passed + 1 Else failed = failed + 1
+     report = report & IIf(condition, "PASS: ", "FAIL: ") & name & vbCrLf
+ End Sub
++
++
++' -------------------- ДЛЯ ТЕСТОВ --------------------
++' Проверяет полную регуляризованную поправку, существующие корни, область определения и общие бюджеты.
++Public Function RunTestCoupledLeastSquaresTrust() As String
++    On Error GoTo Failed
++    Dim report As String, passed As Long, failedCount As Long
++    Dim adapter As New CHybridEquationsTest, equations As ICoupledEquationSystem, solver As New CCoupledHybridSolver
++    Set equations = adapter
++    Dim initial() As Double, solution() As Double, solved As Boolean, mode As Variant, cancelNumber As Long
++    ReDim initial(1 To 2): adapter.InitializeTest "Linear"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 200, 100, 0.0000000001, solution, 0#)
++    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001 And Abs(solution(2) + 2#) < 0.00000001, "LM nonsymmetric known root", report, passed, failedCount
++    TestCheck initial(1) = 0# And initial(2) = 0#, "LM input unchanged", report, passed, failedCount
++    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest, "LM analytic callbacks counted", report, passed, failedCount
++    adapter.InitializeTest "Degenerate"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 300, 100, 0.0000000001, solution, 0#)
++    TestCheck solved And Abs(solution(1) + solution(2) - 3#) < 0.00000001, "LM rank deficient existing roots", report, passed, failedCount
++    ReDim initial(1 To 1): initial(1) = 0.5: adapter.InitializeTest "NoRoot"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 200, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.BestResidual >= 1# And solver.Steps <= 100 And solver.FunctionCalls <= 200, "LM no real root remains failure", report, passed, failedCount
++    For Each mode In Array("LMUnavailable", "LMOverflow", "LMDivision")
++        adapter.InitializeTest CStr(mode): initial(1) = 9#
++        solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++        TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "LM existing root after " & CStr(mode), report, passed, failedCount
++        TestCheck adapter.UnavailableCallsTest > 0 And solver.FunctionCalls = adapter.EvaluationCallsTest And initial(1) = 9#, "LM unavailable callbacks counted " & CStr(mode), report, passed, failedCount
++    Next mode
++    adapter.InitializeTest "LMUnavailable": initial(1) = 9#
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution)
++    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001 And adapter.UnavailableCallsTest > 0, "LM difference Jacobian domain recovery", report, passed, failedCount
++    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest, "LM difference callbacks counted", report, passed, failedCount
++    adapter.InitializeTest "LMOverflow"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 1, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.Steps = 1 And solver.FunctionCalls = 3 And adapter.UnavailableCallsTest = 1, "LM invalid trial shares step budget", report, passed, failedCount
++    adapter.InitializeTest "LMUnavailable"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 3, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.FunctionCalls = 3 And solver.Steps = 1 And solver.StopCode = 2, "LM invalid trial shares function budget", report, passed, failedCount
++    adapter.InitializeTest "LMWrongDimensions"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.StopCode = -1 And solver.Steps = 1 And solver.FunctionCalls = 3, "LM wrong trial dimensions fatal", report, passed, failedCount
++    adapter.InitializeTest "LMCancel"
++    On Error Resume Next
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++    cancelNumber = Err.Number: Err.Clear
++    On Error GoTo Failed
++    TestCheck cancelNumber = 18 And adapter.UnavailableCallsTest = 1, "LM trial cancellation propagates", report, passed, failedCount
++    adapter.InitializeTest "LMOverflow": initial(1) = 0#
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.StopCode = -2 And Not solver.HasBestPoint And solver.FunctionCalls = 1, "LM initial arithmetic fatal", report, passed, failedCount
++    adapter.InitializeTest "NoResponse": initial(1) = 9#
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.StopCode = -1 And Not solver.HasBestPoint, "LM initial unavailable fatal", report, passed, failedCount
++    adapter.InitializeTest "BadDimensions"
++    solved = solver.TrySolveLeastSquaresTrust(equations, initial, 400, 100, 0.0000000001, solution, 0#)
++    TestCheck Not solved And solver.StopCode = -1 And solver.FunctionCalls = 1, "LM initial dimensions rejected", report, passed, failedCount
++    RunTestCoupledLeastSquaresTrust = report & "TOTAL_COUPLED_LM_TEST: passed=" & CStr(passed) & "; failed=" & CStr(failedCount)
++    Exit Function
++Failed:
++    RunTestCoupledLeastSquaresTrust = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
++End Function
+--- a/tests/modTestCoupledElasticState.bas
++++ b/tests/modTestCoupledElasticState.bas
+@@ -5363,7 +5363,7 @@
+     Dim handle As Integer: handle = FreeFile
+     Open path & ".csv" For Output As #handle
+     If caseIndex = 0 Then
+-        Print #handle, "MODE;AcceptedAutomaticPath;NotACapacityResult"
++        Print #handle, "MODE;AcceptedPostCrackTestPath;NotACapacityResult"
+     Else
+         Print #handle, "MODE;DiagnosticReSolve;NotAcceptedContinuation;NotACapacityResult"
+     End If
+@@ -5375,12 +5375,12 @@
+     Print #handle, "OFFSET" & TestHardPreparedVector(mReverseBaseTest)
+     Print #handle, "DIRECTION" & TestHardPreparedVector(mReverseDirectionTest)
+     If caseIndex = 0 Then
+-        Print #handle, "META;4;0;Принятая штатным контроллером история. Это не предел."
++        Print #handle, "META;4;0;Принятая контрольная последовательность. Это не предел."
+     Else
+         Print #handle, "META;4;0;Контрольное повторное равновесие. Контроллер его не принимал; это не предел."
+     End If
+     If caseIndex = 0 Then
+-        Print #handle, "DETAILS;AcceptedAutomaticPath;capacity_certified=False"
++        Print #handle, "DETAILS;AcceptedPostCrackTestPath;capacity_certified=False"
+     Else
+         Print #handle, "DETAILS;DiagnosticReSolve;capacity_certified=False"
+     End If
+@@ -6606,3 +6606,145 @@
+     Dim i As Long
+     For i = 1 To UBound(projection): TestSteelSeedCoordinate = TestSteelSeedCoordinate + projection(i) * field(i): Next i
+ End Function
++
++' -------------------- ДЛЯ ТЕСТОВ --------------------
++' Проверяет реальный CDP и арматуру на однородном растяжении, включая более высокий максимум после первой трещины.
++Public Function RunTestCoupledPostCrackTension(Optional ByVal evidenceRoot As String = "", Optional ByVal capacityOnly As Boolean = False) As String
++    Dim passed As Long, failed As Long, report As String
++    On Error GoTo Failed
++    Const EC As Double = 30000#, ES As Double = 200000#, FT As Double = 3#, FY As Double = 400#
++    Const GROSS_AREA As Double = 21600#, STEEL_AREA As Double = 432#, LENGTH As Double = 125#, GT As Double = 0.12
++    Const DESIGN_FORCE As Double = 120000#, ABS_TOL As Double = 0.0000005, REL_TOL As Double = 0.0000005
++    Dim section As CSectionModel: Set section = TestBuildSection(TestFixtureBox(180#, 120#))
++    section.AddRebarElement 0#, 0#, Sqr(4# * STEEL_AREA / GEOM_PI), STEEL_AREA, "TestPostCrackSteel"
++    Dim steel As New CCoupledSteelModel, models As Object
++    steel.Initialize ES, FY, FY, 0#, 0#, 0.02, 0.02
++    Set models = CreateObject("Scripting.Dictionary"): models.Add "TestPostCrackSteel", steel
++    Dim operators As New CCoupledElasticState
++    operators.PrepareModel section, EC, 0.2, 1, 1, 5, steelModels:=models
++    Dim concrete(1 To 3) As CCoupledConcreteResponse, response(1 To 3) As CCoupledReinforcedResponse, side As Long
++    For side = 1 To 3
++        Set concrete(side) = New CCoupledConcreteResponse
++        concrete(side).Initialize operators.PointCount, EC, 0.2, 16#, 30#, FT, 0.002, GT, 80#, LENGTH
++        Set response(side) = New CCoupledReinforcedResponse: response(side).Initialize operators, concrete(side), models
++    Next side
++    Dim solver As New CCoupledNewtonSolver: solver.Initialize operators, response(2), EC, response(3), response(1)
++    Dim offset(1 To 6) As Double, direction(1 To 6) As Double, projection() As Double
++    direction(1) = DESIGN_FORCE: ReDim projection(1 To operators.DegreeCount): projection(1) = 1#
++    Dim history As New Collection, trace As New CCoupledLoadTrace, initialActual() As Double
++    Dim curveFields As New Collection, curveTrace As New CCoupledLoadTrace
++    Dim previousFactor As Double, initialFactor As Double, factor As Double, trialFactor As Double, previousStrain As Double
++    Dim olderField() As Double, olderStrain As Double, olderFactor As Double, predictionFactor As Double, ratio As Double
++    Dim strain As Variant, seed As Variant, accepted() As Double, field() As Double, actual() As Double, stress(1 To 6) As Double
++    Dim expected As Double, concreteStress As Double, firstForce As Double, laterForce As Double, i As Long, solved As Boolean
++    Dim handle As Integer, hasFile As Boolean
++    If Len(evidenceRoot) > 0 Then
++        handle = FreeFile: Open evidenceRoot & "\Native\PostCrackTension.Curve.csv" For Output As #handle: hasFile = True
++        Print #handle, "epsilon;N_native_N;N_analytical_N;sigma_c_analytical_MPa;steel_utilization"
++    End If
++    Dim strainTargets As Variant
++    If capacityOnly Then
++        strainTargets = Array(0.00005, 0.00008) ' Контроллер запускается от двух одинаковых дотрещинных точек, без отдельной проверки крупных предписанных шагов.
++    Else
++        strainTargets = Array(0.00005, 0.00008, 0.0001, 0.0002, 0.00025, 0.0003, 0.00035, 0.000366095841094101, _
++            0.0004, 0.0005, 0.0006, 0.0008, 0.001, 0.0012, 0.0014, 0.0016, 0.0018, 0.002, 0.0025, 0.003, 0.004)
++    End If
++    For Each strain In strainTargets
++        solver.CopyAccepted accepted: seed = accepted
++        predictionFactor = factor
++        If olderStrain > 0# And previousStrain > olderStrain Then
++            ratio = (CDbl(strain) - previousStrain) / (previousStrain - olderStrain)
++            For i = 1 To solver.PhysicalDegreeCount: seed(i) = accepted(i) + ratio * (accepted(i) - olderField(i)): Next i
++            predictionFactor = factor + ratio * (factor - olderFactor) ' Начальное приближение использует только две уже принятые точки.
++        ElseIf previousStrain > 0# Then
++            For i = 1 To solver.PhysicalDegreeCount: seed(i) = accepted(i) * CDbl(strain) / previousStrain: Next i
++        End If
++        seed(1) = CDbl(strain)
++        solved = solver.TryDeformationStep(offset, direction, projection, CDbl(strain), predictionFactor, trialFactor, ABS_TOL, REL_TOL, 30, _
++            consistentControl:=True, initialField:=seed, allowSmallCorrection:=True, allowHybridRecovery:=True, _
++            conditionHybridRecovery:=True, allowRefinedRestart:=True)
++        TestRecord solved, "реальное CDP-равновесие при epsilon=" & CStr(strain) & "; " & solver.ResultMeta.DiagnosticDetails, passed, failed, report
++        If Not solved Then GoTo CheckContinuation
++        solver.CopyTrial field, actual
++        If CDbl(strain) <= FT / EC Then
++            concreteStress = EC * CDbl(strain)
++        Else
++            concreteStress = FT * Exp(-FT * LENGTH * (CDbl(strain) - FT / EC) / GT) ' Полная одноосная деформация равна пластической части плюс FT/EC для принятой растягивающей огибающей.
++        End If
++        expected = (GROSS_AREA - STEEL_AREA) * concreteStress + STEEL_AREA * GeomMin(ES * CDbl(strain), FY)
++        TestPostCrackExpectNear actual(1), expected, 0.5, "независимое равновесие чистой площади бетона и стали", passed, failed, report
++        TestPostCrackExpectNear field(1), CDbl(strain), 0.0000000001, "исходная продольная деформация", passed, failed, report
++        For i = 2 To 4: TestPostCrackExpectNear actual(i), 0#, 10#, "нулевая моментная компонента " & CStr(i), passed, failed, report: Next i
++        For i = 5 To 6: TestPostCrackExpectNear actual(i), 0#, 0.1, "нулевая поперечная сила " & CStr(i), passed, failed, report: Next i
++        TestRecord response(2).TrialSteelUtilization <= 1#, "исходная сталь в физическом диапазоне", passed, failed, report
++        If hasFile Then Print #handle, TestOnsetNumber(CDbl(strain)) & ";" & TestOnsetNumber(actual(1)) & ";" & _
++            TestOnsetNumber(expected) & ";" & TestOnsetNumber(concreteStress) & ";" & TestOnsetNumber(response(2).TrialSteelUtilization)
++        solver.AcceptStep
++        curveFields.Add field: curveTrace.Add 1#, trialFactor
++        If trace.Count < 2 Then
++            history.Add field: trace.Add 1#, trialFactor
++            previousFactor = initialFactor: initialFactor = trialFactor: initialActual = actual
++        End If
++        If CDbl(strain) = 0.0001 Then firstForce = actual(1)
++        If CDbl(strain) = 0.002 Then laterForce = actual(1)
++        If CDbl(strain) = 0.004 Then
++            concrete(2).CopyAcceptedStress 1, stress
++            TestRecord Abs(stress(3)) < 0.0001, "посттрещинное растяжение бетона мало; это проверка вклада, не новый порог разрушения", passed, failed, report
++            TestPostCrackExpectNear actual(1), STEEL_AREA * FY, 3#, "основную растягивающую силу воспринимает арматура", passed, failed, report
++        End If
++        olderField = accepted: olderStrain = previousStrain: olderFactor = factor
++        factor = trialFactor: previousStrain = CDbl(strain)
++    Next strain
++    If Not capacityOnly Then TestRecord laterForce > 2# * firstForce, "после первой вершины достигнута более чем вдвое большая нагрузка", passed, failed, report
++CheckContinuation:
++    If hasFile Then Close #handle: hasFile = False
++    If history.Count <> 2 Then Err.Raise 5, , "Для проверки контроллера нужны две подтверждённые дотрещинные точки."
++    Dim proofSides As New Collection
++    proofSides.Add concrete(1): proofSides.Add response(1): proofSides.Add concrete(3): proofSides.Add response(3)
++    If Len(evidenceRoot) > 0 Then
++        Set mReverseSnapshotsTest = New Collection: mHardPreparedPathTest = evidenceRoot & "\Native\PostCrackPrescribed"
++        TestExportSpatialReverses solver, operators, concrete(2), response(2), proofSides, _
++            Array(EC, 0.2, 30#, FT, 16#, 0.002, GT, 80#, LENGTH), Array(4#, 64#, 30#, ABS_TOL, REL_TOL, 0.001, 3#), _
++            offset, direction, curveFields, curveTrace
++        TestWriteSpatialSequenceSnapshot curveFields, curveTrace, projection, previousStrain, actual, 0
++    End If
++    If Not solver.ReplayAcceptedFields(history, history.Count) Then Err.Raise 5, , "Не восстановлено начало до первой трещины."
++    Dim branch As New CCoupledDeformationContinuation, peak As Double, accuracy As Double, design As Boolean
++    branch.Trace solver, response(2), offset, direction, history, previousFactor, initialFactor, initialActual, 3#, 0.001, 30, ABS_TOL, REL_TOL, trace
++    report = report & "POSTCRACK_BRANCH: " & branch.ResultMeta.DiagnosticDetails & vbCrLf
++    If Len(evidenceRoot) > 0 Then
++        Set mReverseSnapshotsTest = New Collection: mHardPreparedPathTest = evidenceRoot & "\Native\PostCrackContinuation"
++        TestExportSpatialReverses solver, operators, concrete(2), response(2), proofSides, _
++            Array(EC, 0.2, 30#, FT, 16#, 0.002, GT, 80#, LENGTH), Array(4#, 64#, 30#, ABS_TOL, REL_TOL, 0.001, 3#), _
++            offset, direction, branch.AcceptedFields, branch.SavedTrace
++    End If
++    solved = branch.CopyPeak(peak, accuracy, design)
++    TestRecord solved, "определяющий посттрещинный предел, а не первая бетонная вершина: " & branch.ResultMeta.ResultComment, passed, failed, report
++    If solved Then
++        expected = ((GROSS_AREA - STEEL_AREA) * FT * Exp(-FT * LENGTH * (FY / ES - FT / EC) / GT) + STEEL_AREA * FY) / DESIGN_FORCE
++        TestPostCrackExpectNear peak, expected, 0.002, "предел согласуется с независимым максимумом одноосной ветви", passed, failed, report
++        TestRecord accuracy <= 0.001 And design, "точность предела и точное сочетание на посттрещинной восходящей ветви подтверждены", passed, failed, report
++        TestRecord branch.SteelEventPoint > 0, "допустимая ветвь завершена локализованным арматурным событием", passed, failed, report
++    End If
++Done:
++    If hasFile Then Close #handle
++    RunTestCoupledPostCrackTension = report & IIf(capacityOnly, "TOTAL_COUPLED_POSTCRACK_CAPACITY", "TOTAL_COUPLED_POSTCRACK_TENSION") & ": passed=" & passed & "; failed=" & failed
++    Exit Function
++Failed:
++    If hasFile Then Close #handle
++    RunTestCoupledPostCrackTension = report & "RUNTIME ERROR: " & Err.Source & " " & Err.Description
++End Function
++
++' -------------------- ДЛЯ ТЕСТОВ --------------------
++' Проверяет только настоящий поиск известного посттрещинного предела; полная предписанная диаграмма проверяется отдельным запуском.
++Public Function RunTestCoupledPostCrackCapacity(ByVal evidenceRoot As String) As String
++    RunTestCoupledPostCrackCapacity = RunTestCoupledPostCrackTension(evidenceRoot, True)
++End Function
++
++' -------------------- ДЛЯ ТЕСТОВ --------------------
++' Сравнивает силу, момент или деформацию с абсолютным допуском в собственных единицах, включая нулевой эталон.
++Private Sub TestPostCrackExpectNear(ByVal actual As Double, ByVal expected As Double, ByVal tolerance As Double, _
++        ByVal label As String, ByRef passed As Long, ByRef failed As Long, ByRef report As String)
++    TestRecord Abs(actual - expected) <= tolerance, label & " actual=" & CStr(actual) & " expected=" & CStr(expected) & _
++        " absTolerance=" & CStr(tolerance), passed, failed, report
++End Sub
