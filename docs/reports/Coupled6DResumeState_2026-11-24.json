@@ -1,10 +1,10 @@
 {
-  "active_exec_session": 28317,
+  "active_exec_session": 58105,
   "active_jobs": [
     {
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold713SmallLoadContinuation_20261124",
-      "session": 28317,
-      "stage": "native automatic small-load continuation"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold717ShoulderAccuracy_20261124",
+      "session": 58105,
+      "stage": "native critical equilibrium accuracy"
     }
   ],
   "all_started_stages_terminal": false,
@@ -59,13 +59,23 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Poll existing session28317 only.713 accepts converged forward spatial steps with small lambda change and detects cumulative decline from accepted maximum; coarse local peak before verified design remains subject to original final precision. Preserve observer/checkpoints and all negative outcomes. Independently verify all fields and final event/peak if found, then focused regressions before production promotion; original full scope remains open.",
+  "next_action": "Poll58105 only.717 tightens critical shoulder NDS tolerances while preserving original uniform adjoint bound,96total probes,30iterations and .001capacity accuracy; all extra solves counted. Verify all fields/precision and ultimate event if found; otherwise diagnose actual failure.713/715/716 archived fullrank adjoint/residual evidence; nonlinear DWR estimator not adopted. Full original scope active.",
   "no_new_experiments_added_after_pause_request": false,
   "original_goal_scope_preserved": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
   "pause_request_revoked": true,
   "pause_requested_explicitly": false,
   "pause_revoked_user_message": "На паузу не ставь пока я сам об этом не попрошу снова",
+  "peak_accuracy716": {
+    "adjoints_full_rank": 8,
+    "corresponding_actual_componentwise_linear_estimate": 3.090377029485483e-06,
+    "maximum_uniform_uncertainty": 0.32099988994524725,
+    "nonlinear_estimator_not_adopted": true,
+    "original_formula_preserved": true,
+    "physical_capacity_certified": false,
+    "proof": "docs/reports/evidence/Coupled6DPeakAccuracy_2026-11-24/716/ActualAdjointResidualProof.json",
+    "raw_history715_exact": true
+  },
   "physical_capacity_certified": false,
   "postcrack700_summary": {
     "Matrix": {
@@ -93,7 +103,7 @@
       "prescribed_points": 11
     }
   },
-  "previous_goal_turn_classification": "progress: full original21 realCDP+steel prescribed curve194/0 and all spatial fields independently verified; automatic capacity712 being compiled",
+  "previous_goal_turn_classification": "progress: full-rank adjoints and exact residuals falsify rank-failure hypothesis; excessive uniform uncertainty blocks peak identification; targeted tighter solves717 staged with original bound retained",
   "prior_pause_revoked_by_explicit_resume": true,
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
@@ -235,8 +245,10 @@
     16147,
     16181,
     21859,
+    23111,
     24444,
     25261,
+    28317,
     28797,
     33931,
     37183,
@@ -247,17 +259,21 @@
     45411,
     48427,
     50535,
+    51591,
     52416,
     55018,
     55381,
     56016,
     57786,
     60225,
+    68966,
     70831,
     72043,
     73975,
     76344,
     77140,
+    78149,
+    80580,
     80666,
     84774,
     86272,
@@ -267,7 +283,7 @@
     99831,
     99841
   ],
-  "updated_local": "2026-11-24T20:44:56.583981+03:00",
+  "updated_local": "2026-11-24T21:07:05.101441+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

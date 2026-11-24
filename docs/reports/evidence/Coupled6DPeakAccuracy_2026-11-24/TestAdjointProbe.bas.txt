@@ -1,0 +1,28 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет исходную сопряжённую систему в точных Double до факторизации; не меняет массивы и материальную историю.
+Public Function TestRecordAdjointInput(ByRef matrix() As Double, ByRef rightHandSide() As Double, ByVal size As Long, _
+        ByVal factor As Double, ByVal tolerance As Double) As Long
+    If Len(mStockProbeRootTest) = 0 Then Exit Function
+    mAdjointProbeCountTest = mAdjointProbeCountTest + 1
+    Dim handle As Integer: handle = FreeFile
+    Dim signature As String * 16: signature = "NDMADJOINT0000001"
+    Dim row As Long, column As Long
+    Open mStockProbeRootTest & "\Native\Adjoint." & CStr(mAdjointProbeCountTest) & ".bin" For Binary Access Write As #handle
+    Put #handle, , signature: Put #handle, , size: Put #handle, , factor: Put #handle, , tolerance
+    For row = 1 To size
+        For column = 1 To size: Put #handle, , matrix(column, row): Next column
+    Next row
+    For row = 1 To size: Put #handle, , rightHandSide(row): Next row
+    Close #handle
+    TestRecordAdjointInput = mAdjointProbeCountTest
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Связывает точный вход с исходом штатной LU-факторизации; ложный успех и подавление численного отказа не допускаются.
+Public Sub TestRecordAdjointOutcome(ByVal index As Long, ByVal solved As Boolean, ByVal pivot As Double, ByVal failureCode As Long)
+    If index = 0 Then Exit Sub
+    Dim handle As Integer: handle = FreeFile
+    Open mStockProbeRootTest & "\Native\Adjoint.Outcomes.csv" For Append As #handle
+    Print #handle, CStr(index) & ";" & Abs(CLng(solved)) & ";" & TestOnsetNumber(pivot) & ";" & CStr(failureCode)
+    Close #handle
+End Sub

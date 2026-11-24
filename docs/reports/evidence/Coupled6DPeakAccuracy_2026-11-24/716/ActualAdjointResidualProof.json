@@ -1,0 +1,121 @@
+{
+  "adjoint_inputs715_exact": true,
+  "all_raw_history_and_saved_fields715_exact": true,
+  "entire_goal_completed": false,
+  "estimator_not_adopted_in_production": true,
+  "native": {
+    "failed": 1,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 18,
+    "timeout600": false
+  },
+  "nonlinear_remainder_not_certified": true,
+  "physical_capacity_certified": false,
+  "results": [
+    {
+      "actual_residual_inf": 1.140338596853096e-07,
+      "adjoint_backward_error": 1.1438509425286209e-17,
+      "allowed_tolerance": 2.1587891186874385e-06,
+      "componentwise_linearized_estimate": 1.3527677222978616e-08,
+      "dominant_actual_contribution_row": 1,
+      "index": 1,
+      "lambda_value": 0.5971640827274779,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 1.893368384226268e-09,
+      "uniform_uncertainty": 6.390080345093525e-07,
+      "weights_l1": 0.29600151059206153
+    },
+    {
+      "actual_residual_inf": 1.7610007140174916e-08,
+      "adjoint_backward_error": 1.017622819942756e-17,
+      "allowed_tolerance": 2.13567375583316e-06,
+      "componentwise_linearized_estimate": 1.2111492876474291e-09,
+      "dominant_actual_contribution_row": 1,
+      "index": 2,
+      "lambda_value": 0.5888425520999377,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 7.615476121632587e-10,
+      "uniform_uncertainty": 4.917527051729566e-07,
+      "weights_l1": 0.23025498447257603
+    },
+    {
+      "actual_residual_inf": 7.405173835794976e-07,
+      "adjoint_backward_error": 2.1495594375293875e-18,
+      "allowed_tolerance": 2.1084756045895432e-06,
+      "componentwise_linearized_estimate": 1.340759930310543e-07,
+      "dominant_actual_contribution_row": 1,
+      "index": 3,
+      "lambda_value": 0.5790512176522357,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 1.3407599303105428e-07,
+      "uniform_uncertainty": 5.317965830955257e-07,
+      "weights_l1": 0.25221701585521283
+    },
+    {
+      "actual_residual_inf": 5.4377007674411004e-08,
+      "adjoint_backward_error": 5.841390723589475e-18,
+      "allowed_tolerance": 2.083097528759507e-06,
+      "componentwise_linearized_estimate": 9.791010726165048e-09,
+      "dominant_actual_contribution_row": 1,
+      "index": 4,
+      "lambda_value": 0.5699151103534226,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 9.791010726165048e-09,
+      "uniform_uncertainty": 6.382839908721106e-07,
+      "weights_l1": 0.3064094898245061
+    },
+    {
+      "actual_residual_inf": 1.1567324600882285e-09,
+      "adjoint_backward_error": 2.358697472034737e-19,
+      "allowed_tolerance": 4.471046169300303e-06,
+      "componentwise_linearized_estimate": 1.4344797190799255e-09,
+      "dominant_actual_contribution_row": 6,
+      "index": 5,
+      "lambda_value": 1.4295766209481093,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 5.44717464668333e-10,
+      "uniform_uncertainty": 0.0022730338656956704,
+      "weights_l1": 508.3897089777169
+    },
+    {
+      "actual_residual_inf": 5.5020526801285996e-08,
+      "adjoint_backward_error": 2.2283659809395866e-19,
+      "allowed_tolerance": 4.503316745425824e-06,
+      "componentwise_linearized_estimate": 3.090377029485483e-06,
+      "dominant_actual_contribution_row": 15,
+      "index": 6,
+      "lambda_value": 1.4411940283532967,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 2.656917418475023e-06,
+      "uniform_uncertainty": 0.32099988994524725,
+      "weights_l1": 71280.77105977849
+    },
+    {
+      "actual_residual_inf": 2.357844424594191e-06,
+      "adjoint_backward_error": 2.450168637181487e-19,
+      "allowed_tolerance": 4.502558205895318e-06,
+      "componentwise_linearized_estimate": 1.5600950756063455e-06,
+      "dominant_actual_contribution_row": 1,
+      "index": 7,
+      "lambda_value": 1.4409209541223147,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 6.21855919245409e-07,
+      "uniform_uncertainty": 0.04737301912805442,
+      "weights_l1": 10521.356294993773
+    },
+    {
+      "actual_residual_inf": 1.7666331508792155e-07,
+      "adjoint_backward_error": 1.9560913675665953e-19,
+      "allowed_tolerance": 4.501971509645967e-06,
+      "componentwise_linearized_estimate": 2.291595257154878e-06,
+      "dominant_actual_contribution_row": 15,
+      "index": 8,
+      "lambda_value": 1.4407097434725484,
+      "nonlinear_remainder_not_bounded": true,
+      "signed_linearized_estimate": 2.045537346449593e-06,
+      "uniform_uncertainty": 0.06447551496733583,
+      "weights_l1": 14321.617723326006
+    }
+  ]
+}

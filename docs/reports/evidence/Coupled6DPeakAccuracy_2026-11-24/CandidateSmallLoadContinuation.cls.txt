@@ -1,0 +1,38 @@
+' При малом изменении нагрузки принимает только уже сошедшееся движение по прежней пространственной ветви.
+' Разрешение максимума по lambda не является минимальным допустимым приращением нагрузки.
+Private Function AdvancesWithSmallLoadChange(ByVal history As Collection, ByRef current As TBranchPoint, ByRef trial As TBranchPoint) As Boolean
+    If Not mSolver.UsesSpatialHistory Or mUsesEnvelopeControl Or Not mSolver.SupportsHybridRecovery Then Exit Function
+    If trial.Lambda <= 0# Or Abs(trial.Lambda - current.Lambda) > LoadResolution(current.Lambda) Then Exit Function
+    AdvancesWithSmallLoadChange = SpatialTrialAdvances(history, current)
+End Function
+
+' Выделяет различимый суммарный спад от наибольшего принятого узла, даже если отдельные приращения меньше разрешения lambda.
+' Левое плечо и кандидат берутся только из фактически принятого следа; будущий ответ не интерполируется.
+Private Function SelectCumulativePeak(ByVal history As Collection, ByRef trial As TBranchPoint, _
+        ByRef left As TBranchPoint, ByRef middle As TBranchPoint) As Boolean
+    If Not mSolver.UsesSpatialHistory Or mUsesEnvelopeControl Or mFollowingLocalPeak Then Exit Function
+    If mTrace Is Nothing Then Exit Function
+    If mTrace.Count <> history.Count Or history.Count < 3 Then Exit Function
+    Dim index As Long, bestIndex As Long, fraction As Double, factor As Double, best As Double
+    For index = 1 To history.Count
+        mTrace.ReadPoint index, fraction, factor
+        If fraction <> 1# Then Exit Function
+        If factor > best Then best = factor: bestIndex = index
+    Next index
+    If bestIndex < 2 Or best - trial.Lambda <= LoadResolution(best) Then Exit Function
+    Dim field() As Double, selectedLeft As TBranchPoint, selectedMiddle As TBranchPoint
+    field = history(bestIndex)
+    selectedMiddle.HistoryIndex = bestIndex: selectedMiddle.Lambda = best: selectedMiddle.Coordinate = CoordinateOf(field): selectedMiddle.Uncertainty = 0#
+    If trial.Coordinate <= selectedMiddle.Coordinate Then Exit Function
+    For index = bestIndex - 1 To 1 Step -1
+        mTrace.ReadPoint index, fraction, factor
+        If best > factor + LoadResolution(best) Then
+            field = history(index)
+            selectedLeft.HistoryIndex = index: selectedLeft.Lambda = factor: selectedLeft.Coordinate = CoordinateOf(field): selectedLeft.Uncertainty = 0#
+            If selectedLeft.Coordinate < selectedMiddle.Coordinate Then
+                left = selectedLeft: middle = selectedMiddle: SelectCumulativePeak = True
+            End If
+            Exit Function
+        End If
+    Next index
+End Function
