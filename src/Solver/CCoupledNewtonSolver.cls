@@ -1371,6 +1371,9 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     mIterations = mIterations + hybrid.Steps
     mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls
     mHybridEvaluations = mHybridEvaluations + hybrid.FunctionCalls
+    original.DiagnosticDetails = original.DiagnosticDetails & " | Гибридный резерв: код остановки " & CStr(hybrid.StopCode) & _
+        "; принятых поправок " & CStr(hybrid.AcceptedSteps) & "; лучшая невязка " & CStr(hybrid.BestResidual)
+    If Len(hybrid.ArithmeticDiagnostic) > 0 Then original.DiagnosticDetails = original.DiagnosticDetails & " | " & hybrid.ArithmeticDiagnostic
     If mFailureCode <> sfcNone And mFailureCode <> sfcNumericalFailure And mFailureCode <> sfcSingularTangent Then
         RecordFailure mFailureCode, "Материальная проба глобальной касательной не может быть исправлена уменьшением поправки."
         Exit Function

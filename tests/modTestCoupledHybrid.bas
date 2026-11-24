@@ -247,6 +247,43 @@ Public Function RunTestCoupledHybrid() As String
     cancelNumber = Err.Number: Err.Clear
     On Error GoTo Failed
     TestCheck cancelNumber = 18, "difference linearization propagates cancellation", report, passed, failedCount
+    ReDim initial(1 To 1): initial(1) = 9#: adapter.InitializeTest "DomainSqrt"
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "existing root after unavailable dogleg trial", report, passed, failedCount
+    TestCheck adapter.UnavailableCallsTest > 0 And initial(1) = 9#, "unavailable trial exercised without changing input", report, passed, failedCount
+    TestCheck solver.FunctionCalls + solver.JacobianCalls = adapter.EvaluationCallsTest, "unavailable trials counted", report, passed, failedCount
+    adapter.InitializeTest "DomainSqrt"
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution, relativeDifferenceStep:=0.000001)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "difference Jacobian recovers unavailable dogleg trial", report, passed, failedCount
+    TestCheck solver.FunctionCalls = adapter.EvaluationCallsTest And adapter.UnavailableCallsTest > 0, "difference and unavailable callbacks counted", report, passed, failedCount
+    adapter.InitializeTest "DomainSqrt"
+    solved = solver.TrySolve(equations, initial, 200, 1, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck Not solved And solver.Steps = 1 And solver.FunctionCalls = 2, "unavailable trial cannot bypass correction budget", report, passed, failedCount
+    adapter.InitializeTest "DomainSqrt"
+    solved = solver.TrySolve(equations, initial, 2, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck Not solved And solver.FunctionCalls = 2 And solver.Steps = 1, "unavailable trial cannot bypass evaluation budget", report, passed, failedCount
+    adapter.InitializeTest "TrialDimensions"
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck Not solved And solver.StopCode = -1 And solver.Steps = 1 And solver.FunctionCalls = 2, _
+        "wrong trial dimensions remain a contract error", report, passed, failedCount
+    adapter.InitializeTest "OverflowTrial": initial(1) = 9#
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "trial overflow contracts trust region", report, passed, failedCount
+    adapter.InitializeTest "DivisionTrial"
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck solved And Abs(solution(1) - 1#) < 0.00000001, "trial division by zero contracts trust region", report, passed, failedCount
+    adapter.InitializeTest "CancelTrial"
+    On Error Resume Next
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    cancelNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    TestCheck cancelNumber = 18, "trial cancellation propagates", report, passed, failedCount
+    adapter.InitializeTest "OverflowTrial": initial(1) = -1#
+    solved = solver.TrySolve(equations, initial, 200, 200, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck Not solved And solver.StopCode = -2 And Not solver.HasBestPoint, "initial arithmetic failure remains fatal", report, passed, failedCount
+    adapter.InitializeTest "OverflowTrial": initial(1) = 9#
+    solved = solver.TrySolve(equations, initial, 200, 1, 0.0000000001, 0.00000000001, 20#, solution)
+    TestCheck Not solved And solver.Steps = 1 And solver.FunctionCalls = 2, "arithmetic rejection shares correction budget", report, passed, failedCount
     Dim algebra As New CCoupledHybridFactorization, values(1 To 2) As Double
     values(1) = 1E+200: values(2) = 1E+200
     TestCheck Abs(algebra.VectorNorm(values, 1, 2) / 1E+200 - Sqr(2#)) < 0.000000000001, "large finite norm", report, passed, failedCount

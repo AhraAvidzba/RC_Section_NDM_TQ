@@ -16,17 +16,24 @@ Option Explicit
 Implements ICoupledEquationSystem
 Private mMode As String
 Private mEvaluationCallsTest As Long
+Private mUnavailableCallsTest As Long
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Выбирает систему с известным корнем, отсутствием корня либо отсутствием отклика.
 Friend Sub InitializeTest(ByVal mode As String)
-    mMode = mode: mEvaluationCallsTest = 0
+    mMode = mode: mEvaluationCallsTest = 0: mUnavailableCallsTest = 0
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Возвращает число реально полученных интерфейсом запросов независимо от счётчиков решателя.
 Friend Property Get EvaluationCallsTest() As Long
     EvaluationCallsTest = mEvaluationCallsTest
+End Property
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает число проб за областью определения отдельно от всех чтений функции.
+Friend Property Get UnavailableCallsTest() As Long
+    UnavailableCallsTest = mUnavailableCallsTest
 End Property
 
 ' Реализация тестового интерфейса: точные производные, без обновления исходных координат.
@@ -40,6 +47,20 @@ Private Function ICoupledEquationSystem_TryEvaluate(ByRef coordinates() As Doubl
     If withJacobian Then ReDim jacobian(1 To count, 1 To count)
     Dim i As Long
     Select Case mMode
+        Case "DomainSqrt", "TrialDimensions", "OverflowTrial", "DivisionTrial", "CancelTrial"
+            If coordinates(1) <= 0# Then
+                mUnavailableCallsTest = mUnavailableCallsTest + 1
+                If mMode = "OverflowTrial" Then Err.Raise 6, "CHybridEquationsTest", "Тестовое переполнение в пробной точке."
+                If mMode = "DivisionTrial" Then Err.Raise 11, "CHybridEquationsTest", "Тестовое деление на ноль в пробной точке."
+                If mMode = "CancelTrial" Then Err.Raise 18, "CHybridEquationsTest", "Тестовая отмена в пробной точке."
+                If mMode = "TrialDimensions" Then
+                    ReDim residual(1 To count + 1)
+                    ICoupledEquationSystem_TryEvaluate = True ' Ошибочный размер не является обычным отсутствием отклика.
+                End If
+                Exit Function
+            End If
+            residual(1) = Sqr(coordinates(1)) - 1#
+            If withJacobian Then jacobian(1, 1) = 0.5 / Sqr(coordinates(1))
         Case "Linear"
             residual(1) = 3# * coordinates(1) + 2# * coordinates(2) + 1#
             residual(2) = coordinates(1) + 4# * coordinates(2) + 7#

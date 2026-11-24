@@ -25,6 +25,7 @@ Option Explicit
 
 Private Const MACHINE_EPSILON As Double = 2# ^ (-52)
 Private mFunctionCalls As Long, mJacobianCalls As Long, mSteps As Long, mAccepted As Long, mStopCode As Long
+Private mArithmeticDiagnostic As String
 Private mBestNorm As Double, mBest() As Double, mBestResidual() As Double
 Private mHasBest As Boolean
 Private mRestarts As Long
@@ -65,6 +66,7 @@ Friend Function TrySolve(ByVal equations As ICoupledEquationSystem, ByRef initia
         Optional ByVal captureDifferenceBracket As Boolean = False, Optional ByVal differenceObserver As ICoupledDifferenceObserver = Nothing, _
         Optional ByVal completeNewtonLineSearch As Boolean = False) As Boolean
     mRestarts = 0
+    mArithmeticDiagnostic = vbNullString
     mHasDifferenceBracket = False: mDifferenceScore = 0#: mDifferenceColumn = 0
     Erase mDifferenceBefore: Erase mDifferenceAfter
     If maxRestarts < 0 Then Err.Raise 5, "CCoupledHybridSolver", "Число повторных стартов не может быть отрицательным."
@@ -126,7 +128,7 @@ Private Function SolveNewtonFrom(ByVal equations As ICoupledEquationSystem, ByRe
             If mFunctionCalls >= maxEvaluations Then mStopCode = 2: Exit For
             trial = x
             For i = 1 To count: trial(i) = x(i) + alpha * correction(i): Next i
-            If ReadResidual(equations, trial, nextResidual, matrix, count) Then
+            If ReadTrialResidual(equations, trial, nextResidual, matrix, count) Then
                 norm = algebra.VectorNorm(nextResidual, 1, count)
                 If norm <= (1# - 0.0001 * alpha) * baseNorm Then
                     x = trial: residual = nextResidual: mAccepted = mAccepted + 1: accepted = True
@@ -150,11 +152,13 @@ ArithmeticFailure:
     Dim errorNumber As Long, errorSource As String, errorDescription As String
     errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
     If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
+    mArithmeticDiagnostic = "Арифметический отказ полного Newton: " & CStr(errorNumber) & "; " & errorSource & "; " & errorDescription
     mStopCode = -2
     Resume Finished
 End Function
 
 ' Выполняет один HYBRJ без принятия истории материалов. Повторный старт разрешает только внешний ограниченный цикл.
+' Недоступная пробная невязка уменьшает радиус; отсутствие исходного отклика и нарушение размеров завершают поиск.
 Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef initial() As Double, _
         ByVal maxEvaluations As Long, ByVal maxSteps As Long, ByVal residualTolerance As Double, _
         ByVal stepTolerance As Double, ByVal initialRadius As Double, ByVal relativeDifferenceStep As Double, _
@@ -169,6 +173,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             residualTolerance < 0# Or stepTolerance < 0# Or initialRadius <= 0# Then Exit Function
     Dim x() As Double, residual() As Double, matrix() As Double, movement() As Double, trial() As Double
     Dim nextResidual() As Double, model() As Double
+    Dim phase As String: phase = "исходный отклик"
     x = initial
     If Not ReadResidual(equations, x, residual, matrix, count) Then GoTo Finished
     Dim algebra As New CCoupledHybridFactorization
@@ -176,7 +181,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
     norm = algebra.VectorNorm(residual, 1, count)
     Dim goodRadius As Long, badRadius As Long, slowSteps As Long, slowMatrices As Long
     Dim actualReduction As Double, predictedReduction As Double, ratio As Double, estimate As Double
-    Dim fresh As Boolean, first As Boolean, accepted As Boolean, i As Long
+    Dim fresh As Boolean, first As Boolean, accepted As Boolean, i As Long, trialUnavailable As Boolean
     Dim diagonal() As Double, workMetric() As Double, diagonalReady As Boolean
     ReDim diagonal(1 To count): ReDim workMetric(1 To count)
     For i = 1 To count: diagonal(i) = 1#: Next i
@@ -185,13 +190,16 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
         If mBestNorm <= residualTolerance Then mStopCode = 1: Exit Do
         If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
         mJacobianCalls = mJacobianCalls + 1
+        phase = "полная касательная"
         If relativeDifferenceStep > 0# Then
             If Not BuildDifferenceJacobian(equations, x, residual, relativeDifferenceStep, maxEvaluations, matrix, count, captureDifferenceBracket, differenceObserver) Then Exit Do
         Else
             If Not equations.TryEvaluate(x, True, residual, matrix) Then mStopCode = -1: Exit Do
         End If
         If Not ValidDimensions(residual, matrix, count) Then mStopCode = -1: Exit Do
+        phase = "масштабирование столбцов"
         If automaticScaling Then ScaleJacobianColumns matrix, diagonal, workMetric, count, diagonalReady, algebra
+        phase = "QR-разложение"
         algebra.Factor matrix, residual, count
         fresh = True
         If first Then
@@ -199,17 +207,28 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             If radius = 0# Then radius = initialRadius
         End If
         Do
+RetryDoglegTrial:
             If mFunctionCalls >= maxEvaluations Or mSteps >= maxSteps Then mStopCode = 2: Exit Do
+            phase = "dogleg-поправка"
             algebra.Dogleg radius, movement
             ReDim trial(1 To count)
+            phase = "координаты пробной точки"
             For i = 1 To count: movement(i) = -movement(i): trial(i) = x(i) + movement(i) / diagonal(i): Next i
             movementNorm = algebra.VectorNorm(movement, 1, count)
             If first Then radius = GeomMin(radius, movementNorm)
             mSteps = mSteps + 1
-            If Not ReadResidual(equations, trial, nextResidual, matrix, count) Then Exit Do
+            phase = "пробный отклик"
+            If Not ReadTrialResidual(equations, trial, nextResidual, matrix, count, trialUnavailable) Then
+                If Not trialUnavailable Then Exit Do ' Ошибочный размер отклика не исправляется уменьшением радиуса.
+                mStopCode = 0: goodRadius = 0
+                radius = 0.5 * radius ' Неизвестная невязка отклоняет только пробу, сохраняя исходную точку и её QR.
+                If radius = 0# Or radius <= stepTolerance * xnorm Then mStopCode = 3: Exit Do
+                GoTo RetryDoglegTrial ' Неудачная проба уже учтена в mSteps и mFunctionCalls.
+            End If
             nextNorm = algebra.VectorNorm(nextResidual, 1, count)
             actualReduction = -1#
             If nextNorm < norm Then actualReduction = 1# - (nextNorm / norm) ^ 2
+            phase = "невязка линейной модели"
             algebra.ModelResidual movement, model
             estimate = algebra.VectorNorm(model, 1, count): predictedReduction = 0#
             If estimate < norm Then predictedReduction = 1# - (estimate / norm) ^ 2
@@ -241,6 +260,7 @@ Private Function SolveFrom(ByVal equations As ICoupledEquationSystem, ByRef init
             If badRadius = 2 Then Exit Do
             If movementNorm = 0# Then mStopCode = 3: Exit Do
             If freshJacobian And accepted Then Exit Do ' Следующая линеаризация учитывает фактические активные ветви материала.
+            phase = "секущий поворот QR"
             algebra.Update movement, nextResidual, model, movementNorm, accepted
             fresh = False
         Loop
@@ -256,6 +276,7 @@ ArithmeticFailure:
     Dim errorNumber As Long, errorSource As String, errorDescription As String
     errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
     If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
+    mArithmeticDiagnostic = "Арифметический отказ HYBRJ; этап " & phase & "; ошибка " & CStr(errorNumber) & "; " & errorSource & "; " & errorDescription
     mStopCode = -2
     Resume Finished
 End Function
@@ -352,16 +373,38 @@ Friend Function CopyDifferenceBracket(ByRef before() As Double, ByRef after() As
 End Function
 
 ' Вычисляет одну невязку и сохраняет точную лучшую точку без округления ключей или координат.
+' unavailable отличает отсутствие отклика интерфейса от нарушения размеров; исключения не перехватываются.
 Private Function ReadResidual(ByVal equations As ICoupledEquationSystem, ByRef x() As Double, _
-        ByRef residual() As Double, ByRef matrix() As Double, ByVal count As Long) As Boolean
+        ByRef residual() As Double, ByRef matrix() As Double, ByVal count As Long, Optional ByRef unavailable As Boolean = False) As Boolean
+    unavailable = False
     mFunctionCalls = mFunctionCalls + 1
-    If Not equations.TryEvaluate(x, False, residual, matrix) Then mStopCode = -1: Exit Function
+    If Not equations.TryEvaluate(x, False, residual, matrix) Then unavailable = True: mStopCode = -1: Exit Function
     If LBound(residual) <> 1 Or UBound(residual) <> count Then mStopCode = -1: Exit Function
     Dim i As Long, norm As Double
     For i = 1 To count: norm = GeomMax(norm, Abs(residual(i))): Next i
     If Not mHasBest Or norm < mBestNorm Then mBestNorm = norm: mBest = x: mBestResidual = residual: mHasBest = True
     ReadResidual = True
 End Function
+
+' Читает только пробную точку; переполнение или деление на ноль отклоняет её, не меняя исходное поле поиска.
+' Вызов ReadResidual уже учитывает чтение. Отмена и остальные исключения передаются вызывающему коду.
+Private Function ReadTrialResidual(ByVal equations As ICoupledEquationSystem, ByRef x() As Double, _
+        ByRef residual() As Double, ByRef matrix() As Double, ByVal count As Long, Optional ByRef unavailable As Boolean = False) As Boolean
+    On Error GoTo TrialArithmetic
+    ReadTrialResidual = ReadResidual(equations, x, residual, matrix, count, unavailable)
+    Exit Function
+TrialArithmetic:
+    Dim errorNumber As Long, errorSource As String, errorDescription As String
+    errorNumber = Err.Number: errorSource = Err.Source: errorDescription = Err.Description
+    If errorNumber <> 6 And errorNumber <> 11 Then Err.Raise errorNumber, errorSource, errorDescription
+    mArithmeticDiagnostic = "Арифметический отказ пробного отклика: " & CStr(errorNumber) & "; " & errorSource & "; " & errorDescription
+    unavailable = True: mStopCode = -1
+End Function
+
+' Возвращает последний арифметический отказ текущего поиска; успешный последующий шаг не превращается из-за него в отказ.
+Friend Property Get ArithmeticDiagnostic() As String
+    ArithmeticDiagnostic = mArithmeticDiagnostic
+End Property
 
 ' Проверяет контракт размеров полной касательной, не исправляя ошибочный отклик молча.
 Private Function ValidDimensions(ByRef residual() As Double, ByRef matrix() As Double, ByVal count As Long) As Boolean

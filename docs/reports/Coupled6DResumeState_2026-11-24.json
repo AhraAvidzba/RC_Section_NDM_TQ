@@ -204,8 +204,24 @@
     },
     "terminal": true
   },
-  "current_goal_turn_classification": "progress: workingguide budgets/regressions/cold nonregression and independent60 verified; realpostcrack branch and negative QR replay expose premature stop on invalid dogleg residual; full goal active",
-  "current_phase": "VerifiedWorkingGuideCold682_PostCrack685Negative_NextTrustRegionInvalidTrialAudit",
+  "current_goal_turn_classification": "progress: False-domain83/0 and arithmetic88/0 verified; working CResultMeta diagnostics exact native692; realCDP all11+58 fields verified; shoulder and lambda-only candidates failed18/1; all jobs terminal, full goal active",
+  "current_hybrid_domain": {
+    "arithmetic_baseline_failed": 2,
+    "arithmetic_baseline_passed": 86,
+    "baseline": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold686HybridDomainBaseline_20261124",
+    "baseline_failed": 2,
+    "baseline_passed": 81,
+    "candidate": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124",
+    "current_failed": 0,
+    "current_passed": 88,
+    "proof": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold687HybridDomainRetry_20261124\\HybridDomainProof.json",
+    "proof_sha256": "3F7D7545146B894B91F8886AFC6EA3D84766EEF3FB8538770E1D1302497F8B06",
+    "real_CDP_maximum": 1.44120209252818,
+    "real_CDP_retest_passed": false,
+    "real_CDP_retest_pending": false,
+    "working_changes_uncommitted": true
+  },
+  "current_phase": "Hybrid88AndFieldDiagnosticsVerified_AllRunsTerminal_NextRegularizedTrust",
   "current_step_refinement": {
     "input_states": 146,
     "native_identity": {
@@ -301,6 +317,12 @@
     "regressions_pending": false,
     "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold681PostPeakGuideUnit146_20261124"
   },
+  "literature_numerical_reference": {
+    "CPP_functions_not_copied": true,
+    "file": "literature/Coupled6D/NumericalContinuation/Ceres_2.2.0_trust_region_minimizer.cc",
+    "sha256": "461E15859319822B4F968CE889DD4A2D657B0F1B518A2DEA7CE2FD7310D9E33D",
+    "source_notice_retained": true
+  },
   "main_changed": false,
   "native_unit_terminal": {
     "exit_code": 0,
@@ -315,6 +337,16 @@
     "full_cold_from_zero_still_required": true,
     "postcracking_control": "Real CDP and perfectly plastic steel,netAc21168/As432,Eb30000/Es200000,ft3/fy400,Gt0.12/l125:analytical first peak72144N and later peak172967.56279474715N;native RC test still required;first cracking must not terminate the section.",
     "priority": "Implement tested computed-guide recovery in working continuation with original control,immutable accepted history,shared30iterations and correctly charged global probes;verify affected paths,then cold-from-zero."
+  },
+  "next_concrete_action": {
+    "candidate_root_suggestion": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold696PostPeakLeastSquaresTrust_20261124",
+    "method_API": "(equations,initial,maxEvaluations,maxSteps,residualTolerance,solution,relativeDifferenceStep,initialRadius)",
+    "not_staged_or_run": true,
+    "notes": "LM already exists and uses pivoted QR/More1977,code has no use in working modTestCoupledHybrid tests. Its candidate currently calls ReadResidual; reuse ReadTrialResidual and unavailable flag so wrong dimensions stay fatal. Do not widen SMALL_STRAIN_MAX_NORM=2 or force tolerance.",
+    "policy": "Private candidate: post-local-peak CDP Probe uses consistent tangent+conditioned recovery,referenceLambda remains0 to allow decline; in TryHybridControlledField use least-squares trust when conditionRecovery=True and referenceLambda=0; preserve dogleg/difference-bracket reference>0 paths",
+    "task": "Use existing complete regularized trust solve for postpeak CDP failure; retain same physical equations and30/96 budgets",
+    "tests": "First independent LM analytic unit:known roots,rank deficient,missing/overflow/division candidate,initial arithmetic error,cancellation,dimensions,budgets. Then same capacity-only from2 native elastic states; full prescribed curve remains open",
+    "working_method": "CCoupledHybridSolver.TrySolveLeastSquaresTrust"
   },
   "pause_condition": {
     "remaining_percent": 3,
@@ -331,7 +363,15 @@
     "case684_passed": false,
     "case685_maximum": 1.44120209252818,
     "case685_status": "terminal failure99/2; QR invoked at singular tangent but first invalid residual stops trust-region",
+    "case688_status": "99/2 unchanged; domain False fix not sufficient",
+    "case689_status": "99/2; all11 prescribed and58 automatic fields independently verified",
+    "case692_status": "99/2; arithmetic trial recovery15steps,9accepted,bestnorm0.0775859295169052,not equilibrium",
+    "case693_694_695_accepted_data_byte_equal": true,
+    "case693_status": "capacity-only18/1;shoulder predictor no confirmed limit",
+    "case694_status": "18/1;lambda-only candidate not accepted",
+    "case695_status": "18/1;full weak residual0.00121975617445246,row48;control0,gauges7.80072676668133e-17,tolerance4.50282777378599e-6",
     "first_lambda": 0.6012,
+    "first_two_cold_fields_native_bits_equal": true,
     "reference_lambda": 1.441396356622893
   },
   "previous_Trace_terminal": {
@@ -356,6 +396,30 @@
     "Cold672SteelFirstHalf146_20261124": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold672SteelFirstHalf146_20261124\\SteelRefinementProof.json",
       "sha256": "70B4D96111F01C56637A11D742E15CC1A9030180AB7921C90998011E680AE989"
+    },
+    "Cold691HybridArithmeticRetry_20261124/HybridArithmeticProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold691HybridArithmeticRetry_20261124\\HybridArithmeticProof.json",
+      "sha256": "6D4A1020E4D404DF753649A9B64F65B787E6406DD5F04B7ED3D27729E4298AD2"
+    },
+    "Cold692PostCrackArithmeticRetry_20261124/PostCrackFieldsProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124\\PostCrackFieldsProof.json",
+      "sha256": "CD48D86289F45371971571DFF5A483BD95B8B47957DB9A0438A957D99332250E"
+    },
+    "Cold692PostCrackArithmeticRetry_20261124/WorkingDiagnosticReuseProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold692PostCrackArithmeticRetry_20261124\\WorkingDiagnosticReuseProof.json",
+      "sha256": "1ECBAF637F7FF7FDDF2B973EF4B6A07161A35B56630EE973966C1D3C6286DCD0"
+    },
+    "Cold693PostCrackShoulderPredictor_20261124/PostCrackCapacityProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold693PostCrackShoulderPredictor_20261124\\PostCrackCapacityProof.json",
+      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
+    },
+    "Cold694PostCrackLoadBalance_20261124/PostCrackCapacityProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold694PostCrackLoadBalance_20261124\\PostCrackCapacityProof.json",
+      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
+    },
+    "Cold695PostCrackBalanceDiagnostics_20261124/PostCrackCapacityProof.json": {
+      "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold695PostCrackBalanceDiagnostics_20261124\\PostCrackCapacityProof.json",
+      "sha256": "C02D3058D87909D4B051AB27D77702422B8A5CE3F6255169F1FC9018AA3E8FA1"
     },
     "CurrentColdHistoryProof.json": {
       "path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold682PostPeakGuideCold96_20261124\\CurrentColdHistoryProof.json",
@@ -523,7 +587,7 @@
     "Pause only at actual account remaining<=3percent after started jobs terminal/checkpoint; latest observed remaining is quota_last_observed_remaining_percent. No reset credits available."
   ],
   "requested_pause_to_be_applied_after_checkpoint": false,
-  "schema": "WorkingGuideColdResume1",
+  "schema": "HybridTrialRecoveryResume2",
   "terminal_prior_sessions": [
     1406,
     1628,
@@ -544,6 +608,8 @@
     22057,
     22615,
     24572,
+    26365,
+    30305,
     31004,
     33188,
     36645,
@@ -552,9 +618,13 @@
     39888,
     39903,
     40906,
+    40981,
+    41187,
     42422,
     45087,
     46881,
+    46912,
+    48427,
     48916,
     49076,
     50204,
@@ -569,12 +639,15 @@
     56516,
     56720,
     58621,
+    59762,
     60977,
     62557,
     63925,
     63944,
     65086,
     65559,
+    66363,
+    68333,
     70307,
     71765,
     72287,
@@ -583,6 +656,7 @@
     80035,
     81962,
     83468,
+    83764,
     85066,
     85437,
     87156,
@@ -595,13 +669,19 @@
     97233,
     98029
   ],
-  "updated_local": "2026-11-24T10:31:54.970209+03:00",
+  "uncommitted_source_hashes": {
+    "src/Solver/CCoupledHybridSolver.cls": "331CD3ECAA099A3AF7A902A3D09575FE5AEE6A48CCBBF592C3DD8D41E7F4FBB5",
+    "src/Solver/CCoupledNewtonSolver.cls": "6B06DE888E9FE78DED0D3C44E94CAC109DAA67CE23D241AD2680F2E1D8209835",
+    "tests/CHybridEquationsTest.cls": "1BB91284CB07A5F391236FC3DC3DCBA60E2F6C10BB8459E331D7E6240F4CB456",
+    "tests/modTestCoupledHybrid.bas": "2DDC66B222E481193D969C9A52C4DE1B3355C6694000A6D8C68E0EE849696455"
+  },
+  "updated_local": "2026-11-24T11:42:26.151897+03:00",
   "user_pause_condition": {
     "action": "Only at actual account remaining<=3%: finish already running stages, save evidence, call update_goal(paused).",
     "pause_now_requested": false,
     "remaining_percent_at_or_below": 3
   },
-  "working_commit": "6b6c49f2ae93df2092f7a1b933c01b26d786be24",
+  "working_commit": "13d5d9a293f317eadd48b94fd638cfabfb57938b",
   "working_numerical_sources_modified": true,
   "working_unit675_verified": {
     "all147equations_verified": true,
