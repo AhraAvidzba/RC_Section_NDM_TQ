@@ -1,0 +1,41 @@
+' Подтверждает нужную точность множителя тем же сопряжённым оператором после более точного решения только критической точки.
+' Формула погрешности, материал и конечный допуск максимума не меняются; повтор расходует обычную пробу из общего бюджета.
+Private Function ConfirmShoulderAccuracy(ByRef point As TBranchPoint, ByVal previousLambda As Double, _
+        ByVal previousCoordinate As Double, ByVal keepRight As Boolean) As Boolean
+    If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, point.Uncertainty) Then
+        mProbeDetails = "Не удалось оценить чувствительность множителя к невязке."
+        Exit Function
+    End If
+    If mUsesEnvelopeControl Or Not mSolver.SupportsHybridRecovery Then ConfirmShoulderAccuracy = True: Exit Function
+    Dim target As Double: target = mLambdaTolerance
+    If Abs(point.Lambda - 1#) <= 0.05 Then target = GeomMin(target, NEAR_ONE_TOLERANCE)
+    target = target / 16# ' Отдельные погрешности плеч занимают ограниченную часть допуска максимума; ошибка дискретизации оценивается независимо.
+    Dim attempt As Long, accuracyScale As Double: accuracyScale = 1#
+    Dim field() As Double, resultants() As Double, prediction As Variant, initialLambda As Double
+    For attempt = 1 To 3
+        If point.Uncertainty <= target Then ConfirmShoulderAccuracy = True: Exit Function
+        If mProbeCount >= PROBE_LIMIT Then Exit Function
+        accuracyScale = accuracyScale * (0.5 * (target / point.Uncertainty))
+        If accuracyScale <= 0# Then
+            mProbeDetails = "Требуемая точность критического равновесия вышла за численный диапазон."
+            Exit Function
+        End If
+        mSolver.CopyTrial field, resultants: prediction = field: initialLambda = point.Lambda
+        mSolver.DiscardStep
+        mShoulderProbes = mShoulderProbes + 1
+        If Not Probe(point, initialLambda, keepYieldControl:=keepRight, initialField:=prediction, _
+                acceptedLambda:=previousLambda, accuracyScale:=accuracyScale) Then Exit Function
+        If Not UpdateTrialCoordinate(point, previousCoordinate) Then Exit Function
+        If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Or (keepRight And point.Lambda <= 0#) Then
+            mSolver.DiscardStep
+            mProbeDetails = "Уточнённая точка плеча вышла из допустимой области материалов или нагрузки."
+            Exit Function
+        End If
+        If Not mSolver.TrialLambdaUncertainty(mAbsTol * accuracyScale, mRelTol * accuracyScale, point.Uncertainty) Then
+            mProbeDetails = "Не подтверждена чувствительность множителя после уточнения критического равновесия."
+            Exit Function
+        End If
+    Next attempt
+    ConfirmShoulderAccuracy = (point.Uncertainty <= target)
+    If Not ConfirmShoulderAccuracy Then mProbeDetails = "Точность критического равновесия уточнялась, но погрешность множителя осталась выше выделенной части допуска."
+End Function
