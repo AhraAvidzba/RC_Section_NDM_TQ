@@ -1,12 +1,6 @@
 {
-  "active_exec_session": 28703,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold749DepartureCandidateAudit_20261125",
-      "session": 28703,
-      "stage": "repeat full255 content audit after declared import order correction"
-    }
-  ],
+  "active_exec_session": null,
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1983,7 +1977,7 @@
       }
     ]
   },
-  "all_started_stages_terminal": false,
+  "all_started_stages_terminal": true,
   "automatic712": {
     "accepted_states": 57,
     "lower_lambda": 1.44119480550414,
@@ -2159,6 +2153,116 @@
     },
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
+  },
+  "departure_candidate749": {
+    "accepted_revision_unchanged": 48,
+    "all46_original_states_equilibrium_verified_again": true,
+    "candidate_lambda": 1.040461057467035,
+    "candidate_original_control": 0.00011522294008912698,
+    "candidate_raw_sha256": "A4DFC5D6A6BD858915C124E25BDF06604DB9FB91092DCD0540A6F97B2081859D",
+    "diagnostic_candidate_not_accepted_by_controller": true,
+    "diagnostic_sequence_states": 47,
+    "independent_candidate_equilibrium": {
+      "bound_MPa": 1.1743729076175194e-06,
+      "force_residual_MPa": 1.903201875932239e-13,
+      "fraction": 1.0,
+      "index": 47,
+      "lambda": 1.04046105746703,
+      "residual_MPa": 4.368727601899991e-13,
+      "steel_utilization": 0.00258405324804779
+    },
+    "independent_forward_direction_check_would_also_reject": true,
+    "independent_spatial_signed_advance": -1.5472035882454876e-06,
+    "lambda_change": -0.011746503569023847,
+    "lambda_resolution": 8.208830244144234e-06,
+    "lambda_uncertainty": 2.2785727858599116e-05,
+    "lambda_uncertainty_available": true,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "native_full_residual_MPa": 1.9672033549458892e-13,
+    "native_full_tolerance_MPa": 1.1743729076175226e-06,
+    "new_material_projection_increment": 1.4622113976685014e-06,
+    "no_new_cold_capacity_search": true,
+    "old_projection_increment": -1.5472035882454897e-06,
+    "original_requested_control": 0.0001168469282731093,
+    "physical_capacity_certified": false,
+    "previous_spatial_increment": 9.789169401938735e-10,
+    "reference_lambda": 1.0522075610360588,
+    "removing_lambda_guard_alone_not_supported_by_this_evidence": true,
+    "repeated_working_procedure_from_fresh_exact_history_not_claimed_original_call_bitidentity": true,
+    "source_states": 46,
+    "spatial_candidate_distance": 2.573739135183346e-06,
+    "unchanged_existing_lambda_guard_would_reject": true,
+    "whole_goal_completed": false
+  },
+  "departure_original_target_return750": {
+    "accepted_revision_unchanged": 143,
+    "actual_control": 0.00011684692827310927,
+    "auxiliary_effort": [
+      14.0,
+      1069.0,
+      10.0,
+      8.0,
+      1040.0,
+      1.0,
+      48.0,
+      1.9672033549458892e-13
+    ],
+    "auxiliary_guide_excluded_from47_state_return_sequence": true,
+    "auxiliary_lambda": 1.040461057467035,
+    "auxiliary_state_not_admitted_as_history": true,
+    "control_bound_MPa": 1.18564674733225e-06,
+    "control_residual_MPa": 8.131516293641283e-16,
+    "independent_NDS_and_original_control_verified": true,
+    "independent_return_equilibrium": {
+      "bound_MPa": 1.185646747332251e-06,
+      "force_residual_MPa": 4.330835239401226e-10,
+      "fraction": 1.0,
+      "index": 47,
+      "lambda": 1.05785498159833,
+      "residual_MPa": 6.656313567606625e-09,
+      "steel_utilization": 0.00264929537720724
+    },
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_cold_capacity_search": true,
+    "numerical_kernel_exact749": true,
+    "original_target": 0.0001168469282731093,
+    "physical_capacity_certified": false,
+    "primary_limit": 30,
+    "primary_steps_spent_on_auxiliary": 14,
+    "primary_steps_used_on_return": 3,
+    "remaining_primary_steps": 16,
+    "repeated_guide_candidate_bitidentical_to749": true,
+    "return_effort": [
+      3.0,
+      6.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      143.0,
+      6.656798685954028e-09
+    ],
+    "return_seconds": 0.54296875,
+    "returned_lambda": 1.0578549815983267,
+    "signed_advance_in_original_projection": 7.678459573682522e-08,
+    "solved_original_target": true,
+    "source_result_sha256": "6D9DA98C451F7F891BBFE4ECAAD35BE706BE55E0E7DB56D4D0A774CC2A286C36",
+    "source_states": 46,
+    "total_primary_steps": 17,
+    "whole_goal_completed": false,
+    "working_lambda_guard_not_changed": true
   },
   "early_envelope745": {
     "accepted_states": 46,
@@ -4110,7 +4214,18 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "749audit28703live, same3modules, requestedorder corrected to actualsource traversal with proof; numeric contents unchanged. IfPASS runisolatedone departureprocedure fromexact46 and capturefullmaterialcandidate before unchangedlambda guard.745748119pins verifiedreportready; fullgoalactive no physicalcapacity.",
+  "next_action": "750 returned originaltarget lambda1.0578549815983267 in14+3=17 sharedsteps,0.543s returnphase only. Independent47state weak/gauge/all6 and originalcontrol PASS, auxiliary backwardroot excludedfromreturnhistory. Nextintegratecomputationalreturn into lateH743 privateNewton withsharedbudgets andcounters, preservealloriginalguards; targeted105andtruecoldBoth needed. No physicalcapacity, fullgoalactive.",
+  "next_solver_integration": {
+    "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
+    "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
+    "do_not_adopt_745_early_H": true,
+    "evidence": "Cold750DepartureGuideReturn_20261125: 14 auxiliary steps +3 return steps, returned lambda1.0578549815983267, independent full NDS and original control, auxiliary absent from return history.",
+    "keep_late_H_initial_policy": true,
+    "location": "CCoupledNewtonSolver.TryDifferenceMaterialField before rejection of equilibrated auxiliary root",
+    "parent_numerical_case": "Cold743UnverifiedCumulativeRecovery_20261125",
+    "publication": "Only original-target NDS after verification. Restore original control and expose recovered projection/uncertainty for outer unchanged direction/steel/peak checks.",
+    "required_checks": "Actual255 source audit, focused regressions105, independent directed guide case, then true cold HardShear Both/Excel with same96probe30iteration budgets and saved reopen; no physical limit claim without mechanism."
+  },
   "no_new_experiments_added_after_pause_request": false,
   "ordinary_first_complex741": {
     "accepted_states": 12,
@@ -4304,7 +4419,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:745earlyH realcold returned379.858sNumFail lower1.05220776, regression105/0 and actualsavedreopen255.747all46independentweak/gauge/all6.746queryflagfailure preserved/fixed in748; actualall6HfullFD247samples rank61,smallsteprelativeerror1.285e-5,larger0.02252. No physicalcapacity and fullscope unchanged.",
+  "previous_goal_turn_classification": "progress:745earlyH rejected with realcold379.86sNumFail,747all46independent;748realall6HFD247rank61locallyconsistent.749candidatefullNDSbutbackward verified.750unacceptedreverseguide returnedoriginaltarget lambda1.05785498 in14+3=17sharedsteps; independent47state force/gauge/control checks. Notcoldautomaticcapacity; entiregoalactive.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -6052,6 +6167,7 @@
     11153,
     11192,
     12133,
+    12165,
     12388,
     12646,
     13811,
@@ -6076,6 +6192,7 @@
     28317,
     28422,
     28604,
+    28703,
     28797,
     29563,
     30205,
@@ -6163,6 +6280,7 @@
     89569,
     90257,
     90746,
+    91249,
     91568,
     92127,
     92701,
@@ -6170,13 +6288,15 @@
     93011,
     93670,
     94068,
+    95552,
     95899,
+    96407,
     97029,
     99831,
     99841,
     99863
   ],
-  "updated_local": "2026-11-25T02:41:51.180035+03:00",
+  "updated_local": "2026-11-25T03:01:14.133811+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

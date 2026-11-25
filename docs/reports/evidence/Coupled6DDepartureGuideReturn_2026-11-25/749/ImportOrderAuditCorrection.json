@@ -1,0 +1,16 @@
+{
+  "actual_source_traversal_order": [
+    "CCoupledDeformationContinuation",
+    "CCoupledNewtonSolver",
+    "modTestCoupledElasticState"
+  ],
+  "exact_three_names_preserved": true,
+  "full255_component_audit_still_required": true,
+  "initial_source_audit_failed_on_order_only": true,
+  "no_code_or_book_edit": true,
+  "requested_order": [
+    "CCoupledNewtonSolver",
+    "CCoupledDeformationContinuation",
+    "modTestCoupledElasticState"
+  ]
+}
