@@ -1,0 +1,32 @@
+{
+  "accepted_revision_unchanged": true,
+  "all_approach_candidates_and_probes_independently_verified": true,
+  "allowance": 3,
+  "approaches": [],
+  "event_lambda": 0.0,
+  "event_primary": 0,
+  "independent_last_state_weak_check_at_inner_tolerance": true,
+  "independent_weak_rounding_allowance_MPa": 1e-12,
+  "insufficient_budget_did_not_admit_candidate": true,
+  "mismatched_history_rejected_before_any_solve_with_clear_reason": true,
+  "native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "no_controller_history_acceptance_claimed": true,
+  "nonlinear_calls": 2,
+  "pair_primary": 8,
+  "pair_roots_bitidentical791": true,
+  "physical_capacity_certified": false,
+  "returned_all_equations": null,
+  "returned_force": null,
+  "returned_lambda": 0.0,
+  "returned_verified_candidate": false,
+  "selected_kind": 0,
+  "source10_exact": true,
+  "total_primary": 8,
+  "whole_goal_completed": false
+}

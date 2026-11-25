@@ -1,0 +1,49 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold797ArcGrowthControl_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: CD791F18B8103F1EEA25FFCA5C3919EE6D2FF39FEACCFCB7BBC916CB5CEB1A67
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold797ArcGrowthControl_20261125\Temp\RC_NDM_ModeSuite_8bf4f906e5a04518b4e83c17126befe0\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=23428; startTicks=639311811045259591
+===== modTestCoupledElasticState.RunTestStockHTrace =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T08:25:12
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=23428; workingSet=171741184; privateBytes=118927360; cpu=290.765625
+TIMING_SECONDS: 279.71484375 | Both | Excel
+TIMING_MESSAGE: Расчет завершен. |  | Геометрия для расчёта загружена с листа Results текущей книги. |  | Обработано сочетаний: 1. |  | Результаты и пояснения всех проверок — на листе Results. |  | Сочетаний с неподтверждённым численным результатом: 1. |  | Первая численная неудача: | Сочетание HardShear: Исчерпан общий лимит проб деформационного продолжения и проверки максимума. Допустимое равновесие подтверждено до lambda = 1.105887. Эта проверка не получила подтверждённого численного результата; сам статус NumFail не доказывает физическое невыполнение. |  | Проверьте исходные данные и диагностику расчёта. |  | Исходная строка сочетания: | Config!H71:Q71. |  | Пошаговый отчет сохранен: | D:\CodexScratch\RC_Section_NDM_TQ\Cold797ArcGrowthControl_20261125\Temp\RC_NDM_ModeSuite_8bf4f906e5a04518b4e83c17126befe0\RC_Section_NDM_execution_report.txt |  | Время расчёта: 279.71 с. |  | Данные сохранены на листе Results текущей книги.
+TIMING_STATES: direct=OK; capacity=NumFail; confirmed lower=1.10588741429175; limit=; code=NUMERICAL_FAILURE
+TIMING_LIMIT_REASON: Исчерпан общий лимит проб деформационного продолжения и проверки максимума. Допустимое равновесие подтверждено до lambda = 1.105887.
+OK: workbook balances the requested hard-shear case
+OK: direct N actual=2.85520539633855 expected=2.8552053963382
+OK: direct Mx actual=5.20055268618584E-02 expected=5.20055268618743E-02
+OK: direct My actual=1.83548918336074E-02 expected=1.83548918336027E-02
+OK: direct T actual=0.152957431946676 expected=0.152957431946689
+OK: direct Qx actual=1.73351756206216 expected=1.73351756206248
+OK: direct Qy actual=-0.723998511214267 expected=-0.723998511214329
+OK: automatic chart draws the closed hoop from the new snapshot
+OK: TauXZ colours use the actual displayed sign
+OK: TauXZ draws a signed legend
+OK: Tau colours use the actual displayed sign
+OK: shear magnitude draws a scale from zero to the maximum
+OK: Warping colours use the actual displayed sign
+OK: Warping draws a signed legend
+OK: longitudinal stress keeps its material-state legend
+OK: unresolved capacity gives a confirmed lower bound and a reason
+OK: no unconfirmed limit component N
+OK: no unconfirmed limit component Mx
+OK: no unconfirmed limit component My
+OK: no unconfirmed limit component T
+OK: no unconfirmed limit component Qx
+OK: no unconfirmed limit component Qy
+OK: native load trace for HardShear
+OK: native target marker belongs to the direct branch
+OK: native direct series matches accepted trace
+OK: native capacity branch is shown independently
+OK: native capacity series matches accepted trace
+OK: native marker does not claim a limit for NumFail
+TOTAL_COUPLED_WORKBOOK_TIMING: passed=28; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold797ArcGrowthControl_20261125\Temp\RC_NDM_ModeSuite_8bf4f906e5a04518b4e83c17126befe0\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T08:29:57
+RESULTS_SAVE_REOPEN: before=2B12BA128339CCBC5F8582A14DD13A62474D44E6C572F364222B6CA09B09F128; after=2B12BA128339CCBC5F8582A14DD13A62474D44E6C572F364222B6CA09B09F128; equal=True; file=D:\CodexScratch\RC_Section_NDM_TQ\Cold797ArcGrowthControl_20261125\Temp\RC_NDM_ModeSuite_8bf4f906e5a04518b4e83c17126befe0\RC_Section_NDM_saved.xlsm
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

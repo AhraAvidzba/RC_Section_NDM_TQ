@@ -1,0 +1,39 @@
+{
+  "accepted_states": 45,
+  "actual_cold_workflow_not_resumed_from_Input_Reverse": true,
+  "arc_calls": 16,
+  "arc_recovered_directions": 1,
+  "cold": {
+    "all_saved_sources_exact": 256,
+    "capacity": "NumFail",
+    "code": "NUMERICAL_FAILURE",
+    "direct": "OK",
+    "limit": "",
+    "lower": 1.10588698106597,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 28,
+      "timeout600": false
+    },
+    "results_checksum": "FCFE3B0CDEA330111B40FECD221A9585F06A20499E8BABA8420E06898E892B0C",
+    "saved_book_sha256": "F926CCC97BBDCEAE06AF98C5DA9A3F209D37606CC8CA5A86CA24CA908994F5FE",
+    "seconds": 262.30859375
+  },
+  "exact_prefix_with_warm_input": 10,
+  "independent_cold_stress_replay_pending": true,
+  "last_accepted_lambda": 1.1058869810436738,
+  "latest_details": "; вызовов проверенной знаковой дуги 16; принятых направлений 1; Мера деформации: пространственная мера по отвергнутой поправке; наибольший допустимый lambda: 1.10588698106597; равновесие при lambda = 1 подтверждено: True; проб: 96; смен пространственной меры после отказа: 3; проб полного разностного резерва после деления шага: 2; принято после него: 0; последняя цель резерва: 1.27840010996226E-04; проб смены меры: 4; принято после смены меры: 1; расширений шага CDP: 5; наибольший принятый шаг после CDP: 2.11046544979854E-07; геометрических проб с внутренней точностью дуги: 66 | Последняя неудачная проба: Итерации: 4; пробы: 26; невязка, МПа: 1.96086654399385E-09; мин. ведущий элемент: 1.42727489969353E-02; невязка перед демпфированием, МПа: 1.94178459813135E-09; лучшая невязка проб, МПа: 1.96086654399385E-09",
+  "maximum_accepted_lambda": 1.1058869810659748,
+  "physical_capacity_certified": false,
+  "raw_frames": 81,
+  "raw_history": {
+    "bytes": 1149664,
+    "complete_bytes": 1149664,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "974034596256AC4EC2F79E10ADF3B3540192F18F3275C18CA75C842AD48AB9AE"
+  },
+  "whole_goal_completed": false
+}

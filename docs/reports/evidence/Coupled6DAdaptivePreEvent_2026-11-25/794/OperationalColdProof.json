@@ -1,0 +1,39 @@
+{
+  "accepted_states": 67,
+  "actual_cold_workflow_not_resumed_from_Input_Reverse": true,
+  "arc_calls": 12,
+  "arc_recovered_directions": 1,
+  "cold": {
+    "all_saved_sources_exact": 256,
+    "capacity": "NumFail",
+    "code": "NUMERICAL_FAILURE",
+    "direct": "OK",
+    "limit": "",
+    "lower": 1.10588828229993,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 28,
+      "timeout600": false
+    },
+    "results_checksum": "CCDE5436B8384A630C925070AD60ACDFE8B2BD628F95A7AA6FABF1B6C3C725EF",
+    "saved_book_sha256": "2DAB2B5C31DE416EE6950C8F357D3E539FF0CBC6B68CCE0FED0854119D7B230A",
+    "seconds": 230.04296875
+  },
+  "exact_prefix_with_warm_input": 10,
+  "independent_cold_stress_replay_pending": true,
+  "last_accepted_lambda": 1.105888282299933,
+  "latest_details": "; вызовов проверенной знаковой дуги 12; принятых направлений 1; Мера деформации: пространственная мера по отвергнутой поправке; наибольший допустимый lambda: 1.10588828229993; равновесие при lambda = 1 подтверждено: True; проб: 96; смен пространственной меры после отказа: 2; проб полного разностного резерва после деления шага: 1; принято после него: 0; последняя цель резерва: 1.54133996519866E-04; проб смены меры: 4; принято после смены меры: 1 | Последняя неудачная проба: Итерации: 4; пробы: 28; невязка, МПа: 4.68338392093553E-06; мин. ведущий элемент: 7.31814584954097E-03; невязка перед демпфированием, МПа: 4.66849972960663E-06; лучшая невязка проб, МПа: 4.68338392093553E-06",
+  "maximum_accepted_lambda": 1.105888282299933,
+  "physical_capacity_certified": false,
+  "raw_frames": 85,
+  "raw_history": {
+    "bytes": 1595196,
+    "complete_bytes": 1595196,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "1E40B047748CEBC18DF13BE0E7BAA7B3B9B0FC550BE85A88A1561CEB0341B77A"
+  },
+  "whole_goal_completed": false
+}

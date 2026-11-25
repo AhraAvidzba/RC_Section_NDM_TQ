@@ -1,0 +1,270 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: F41E261B7FDBD31CF0BFB1E758D62767250517C6458CAFB835F9B08D00318197
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=26456; startTicks=639311818240220400
+===== modTestCoupledEnvelopeControl.RunTestCoupledEnvelopeControl =====
+SUITE_STARTED: modTestCoupledEnvelopeControl.RunTestCoupledEnvelopeControl; 2026-11-25T08:37:11
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=26028; workingSet=157773824; privateBytes=110034944; cpu=154.359375
+EXCEL_AFTER_SUITE: pid=26456; workingSet=146116608; privateBytes=100241408; cpu=87.453125
+OK: reset has no accepted H pair
+OK: prescribed compression equilibrium 0.0008
+OK: prescribed compression equilibrium 0.0016
+OK: accepted H pair available
+OK: first H path entry available
+OK: second H path entry available
+OK: path agrees exactly with growing accepted pair
+OK: zero H path index rejected
+OK: foreign H path count rejected
+OK: accepted pair can be read repeatedly
+OK: returned field copy does not mutate accepted pair
+OK: previous prefix can be replayed
+OK: previous prefix H available
+OK: previous H equals independent native replay
+OK: complete prefix can be replayed
+OK: complete prefix H available
+OK: complete H equals independent native replay
+OK: growing H trial with retained control
+OK: H adjoint uncertainty available
+OK: H uncertainty is finite and distinguishes the load scale
+OK: H solution and adjoint preserve accepted revision
+OK: accepted H available after discarded trial
+OK: discarded H trial leaves accepted coordinate exact
+BRANCH_DETAILS: Мера деформации: материальная координата H огибающих; наибольший допустимый lambda: 0.899897823829519; равновесие при lambda = 1 подтверждено: False; проб: 37; расширений шага CDP: 0; наибольший принятый шаг после CDP: 3.31399748884992E-04; проб материальной координаты: 37; восстановлений по ней: 0; последующие шаги и плечи проверяются по H | Последняя неудачная проба: При повторе плеч не найден максимум, отделённый от соседних уровней с учётом погрешности lambda. Крайние множители: 0.894999408515461 и 0.899409322447668; проверено промежуточных уровней: 3. | Оценка погрешности lambda: 2.05330422395558E-04 | Координаты плеч: 1.65700401646876E-02, 1.70704546705947E-02
+OK: three-station concrete peak certified: Подтверждён первый максимум прослеженной ветви.
+OK: peak agrees with independent uniaxial fc*A
+OK: peak meets requested absolute lambda accuracy
+TOTAL_COUPLED_ENVELOPE_CONTROL: passed=26; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledEnvelopeControl.RunTestCoupledEnvelopeControl; 2026-11-25T08:38:32
+===== modTestCoupledElasticState.RunTestCoupledRetainedShoulders =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledRetainedShoulders; 2026-11-25T08:38:33
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=26028; workingSet=157773824; privateBytes=110034944; cpu=157.578125
+EXCEL_AFTER_SUITE: pid=26456; workingSet=151109632; privateBytes=104697856; cpu=90.796875
+OK: первое исходное поле actual=0.75 expected=0.75
+OK: второе исходное поле actual=0.8 expected=0.8
+OK: все уточнённые поля согласованы с нагрузочным следом
+OK: каждое сохранённое поле удовлетворяет независимому полиному 1
+OK: каждое принятое поле продвигается при полной постоянной части 1
+TEST_TWIN_PEAK_FIELD;1;0.0004;0.75
+OK: каждое сохранённое поле удовлетворяет независимому полиному 2
+OK: каждое принятое поле продвигается при полной постоянной части 2
+TEST_TWIN_PEAK_FIELD;2;0.0005;0.82
+OK: каждое сохранённое поле удовлетворяет независимому полиному 3
+OK: каждое принятое поле продвигается при полной постоянной части 3
+TEST_TWIN_PEAK_FIELD;3;0.0006;0.8
+OK: каждое сохранённое поле удовлетворяет независимому полиному 4
+OK: каждое принятое поле продвигается при полной постоянной части 4
+TEST_TWIN_PEAK_FIELD;4;0.000625;0.973710937499999
+OK: каждое сохранённое поле удовлетворяет независимому полиному 5
+OK: каждое принятое поле продвигается при полной постоянной части 5
+TEST_TWIN_PEAK_FIELD;5;0.0006375;1.04942626953125
+OK: каждое сохранённое поле удовлетворяет независимому полиному 6
+OK: каждое принятое поле продвигается при полной постоянной части 6
+TEST_TWIN_PEAK_FIELD;6;0.00065;1.1
+OK: каждое сохранённое поле удовлетворяет независимому полиному 7
+OK: каждое принятое поле продвигается при полной постоянной части 7
+TEST_TWIN_PEAK_FIELD;7;0.000653125;1.10689301490784
+OK: каждое сохранённое поле удовлетворяет независимому полиному 8
+OK: каждое принятое поле продвигается при полной постоянной части 8
+TEST_TWIN_PEAK_FIELD;8;0.00065625;1.11095840454102
+OK: каждое сохранённое поле удовлетворяет независимому полиному 9
+OK: каждое принятое поле продвигается при полной постоянной части 9
+TEST_TWIN_PEAK_FIELD;9;0.0006578125;1.11184410154819
+OK: каждое сохранённое поле удовлетворяет независимому полиному 10
+OK: каждое принятое поле продвигается при полной постоянной части 10
+TEST_TWIN_PEAK_FIELD;10;0.000658203125;1.11194006525213
+OK: каждое сохранённое поле удовлетворяет независимому полиному 11
+OK: каждое принятое поле продвигается при полной постоянной части 11
+TEST_TWIN_PEAK_FIELD;11;0.00065859375;1.11198472622782
+OK: каждое сохранённое поле удовлетворяет независимому полиному 12
+OK: каждое принятое поле продвигается при полной постоянной части 12
+TEST_TWIN_PEAK_FIELD;12;0.000658984375;1.11197752166772
+OK: каждое сохранённое поле удовлетворяет независимому полиному 13
+OK: каждое принятое поле продвигается при полной постоянной части 13
+TEST_TWIN_PEAK_FIELD;13;0.000659375;1.11191788673401
+OK: каждое сохранённое поле удовлетворяет независимому полиному 14
+OK: каждое принятое поле продвигается при полной постоянной части 14
+TEST_TWIN_PEAK_FIELD;14;0.000709375;0.445554971694949
+OK: уточнённый максимум совпадает с независимым корнем производной до 0.0001
+OK: граница подтверждения равна максимуму всех сохранённых равновесий
+OK: последнее сохранённое поле точно совпадает с принятым решателем
+OK: в диагностике указан больший подтверждённый максимум
+OK: точное сочетание проверено из уточнённого восходящего участка
+OK: локальный пик железобетона не опубликован как предел
+OK: локальный пик не публикует предельное поле
+OK: отклонённая проба не изменила принятую материальную историю actual=0.000709375 expected=0.000709375
+OK: индексы истории и следа совпадают
+TOTAL_COUPLED_RETAINED_SHOULDERS: passed=40; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledRetainedShoulders; 2026-11-25T08:38:36
+===== modTestCoupledElasticState.RunTestCoupledDiscardedShoulder =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledDiscardedShoulder; 2026-11-25T08:38:37
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=26028; workingSet=157773824; privateBytes=110034944; cpu=160.5625
+EXCEL_AFTER_SUITE: pid=26456; workingSet=150142976; privateBytes=103710720; cpu=93.9375
+OK: грубое левое поле actual=0.75 expected=0.75
+OK: грубый максимум до уточнения actual=1.2 expected=1.2
+OK: все уточнённые поля согласованы с нагрузочным следом
+OK: каждое сохранённое поле удовлетворяет независимому полиному 1
+OK: каждое принятое поле продвигается при полной постоянной части 1
+TEST_TWIN_PEAK_FIELD;1;0.0004;0.75
+OK: каждое сохранённое поле удовлетворяет независимому полиному 2
+OK: каждое принятое поле продвигается при полной постоянной части 2
+TEST_TWIN_PEAK_FIELD;2;0.0005;0.82
+OK: каждое сохранённое поле удовлетворяет независимому полиному 3
+OK: каждое принятое поле продвигается при полной постоянной части 3
+TEST_TWIN_PEAK_FIELD;3;0.0006;0.8
+OK: каждое сохранённое поле удовлетворяет независимому полиному 4
+OK: каждое принятое поле продвигается при полной постоянной части 4
+TEST_TWIN_PEAK_FIELD;4;0.000625;0.973710937499999
+OK: каждое сохранённое поле удовлетворяет независимому полиному 5
+OK: каждое принятое поле продвигается при полной постоянной части 5
+TEST_TWIN_PEAK_FIELD;5;0.0006375;1.04942626953125
+OK: каждое сохранённое поле удовлетворяет независимому полиному 6
+OK: каждое принятое поле продвигается при полной постоянной части 6
+TEST_TWIN_PEAK_FIELD;6;0.00065;1.1
+OK: каждое сохранённое поле удовлетворяет независимому полиному 7
+OK: каждое принятое поле продвигается при полной постоянной части 7
+TEST_TWIN_PEAK_FIELD;7;0.000653125;1.10689301490784
+OK: каждое сохранённое поле удовлетворяет независимому полиному 8
+OK: каждое принятое поле продвигается при полной постоянной части 8
+TEST_TWIN_PEAK_FIELD;8;0.00065625;1.11095840454102
+OK: каждое сохранённое поле удовлетворяет независимому полиному 9
+OK: каждое принятое поле продвигается при полной постоянной части 9
+TEST_TWIN_PEAK_FIELD;9;0.0006578125;1.11184410154819
+OK: каждое сохранённое поле удовлетворяет независимому полиному 10
+OK: каждое принятое поле продвигается при полной постоянной части 10
+TEST_TWIN_PEAK_FIELD;10;0.000658203125;1.11194006525213
+OK: каждое сохранённое поле удовлетворяет независимому полиному 11
+OK: каждое принятое поле продвигается при полной постоянной части 11
+TEST_TWIN_PEAK_FIELD;11;0.00065859375;1.11198472622782
+OK: каждое сохранённое поле удовлетворяет независимому полиному 12
+OK: каждое принятое поле продвигается при полной постоянной части 12
+TEST_TWIN_PEAK_FIELD;12;0.000658984375;1.11197752166772
+OK: каждое сохранённое поле удовлетворяет независимому полиному 13
+OK: каждое принятое поле продвигается при полной постоянной части 13
+TEST_TWIN_PEAK_FIELD;13;0.000659375;1.11191788673401
+OK: каждое сохранённое поле удовлетворяет независимому полиному 14
+OK: каждое принятое поле продвигается при полной постоянной части 14
+TEST_TWIN_PEAK_FIELD;14;0.000709375;0.445554971694949
+OK: уточнённый максимум совпадает с независимым корнем производной до 0.0001
+OK: граница подтверждения равна максимуму всех сохранённых равновесий
+OK: последнее сохранённое поле точно совпадает с принятым решателем
+OK: отменённый грубый множитель 1.2 не является сохранённой границей
+OK: сохраняется численный исход без физического предела
+OK: публикуемая нижняя граница взята из принятой ветви actual=1.11198472622782 expected=1.11198472622782
+OK: материальная история совпадает с полем actual=0.000709375 expected=0.000709375
+OK: история и след имеют одинаковое число шагов
+TOTAL_COUPLED_DISCARDED_SHOULDER: passed=39; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledDiscardedShoulder; 2026-11-25T08:38:39
+===== modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing; 2026-11-25T08:38:40
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=26028; workingSet=157773824; privateBytes=110034944; cpu=165.3125
+EXCEL_AFTER_SUITE: pid=26456; workingSet=153796608; privateBytes=107122688; cpu=98.84375
+OK: analytical seed at strain 0.0004 actual=0.615219512195122 expected=0.615219512195122
+OK: analytical seed at strain 0.0006 actual=0.855024390243902 expected=0.855024390243902
+OK: central bar controls the localized event
+OK: physical closure certifies the refined preceding peak Мера деформации: продольная деформация; наибольший допустимый lambda: 1.07317042794258; равновесие при lambda = 1 подтверждено: True; проб: 47; локальный максимум lambda: 1.07317042794258; погрешность локального максимума: 6.69315511883251E-05; максимумов превзойдено после спада: 0; повторно использовано точек правого плеча: 3; проб при проверке плеч: 20 | Арматурное событие: lambda до = 0.966670840990117, lambda после = 0.966586438804581. Координата деформации: [1.24998092651367E-03, 1.25007629394531E-03]. Точка арматуры: 26; отношения деформаций к пределам: 0.999984741210937 и 1.00006103515625; оценка интервала lambda: [0.966586281477666, 0.966670998323785] | Определяющий максимум lambda: 1.07317042794258; оценка погрешности: 6.69315511883251E-05
+OK: peak resolution covers the independent maximum at the requested tolerance
+OK: no later admissible equilibrium exceeds the certified maximum
+OK: late steel limit returns the earlier governing maximum state
+OK: comment identifies physical closure and its separate maximum
+OK: diagnostics resolve the late steel event in deformation coordinates
+OK: capacity classifies the known maximum as OK
+OK: a safe design load is verified before the governing maximum
+OK: a load above the known maximum is not falsely verified
+OK: saved maximum strain precedes the closing steel rupture
+OK: the same peak state balances the fixed and scaled torque
+OK: governing peak prefix replays
+OK: replayed governing history excludes the descending closing tail
+OK: trace ends at the governing limit actual=1.07317042794258 expected=1.07317073170732
+OK: trace retains the admissible side of the crossing
+OK: no inadmissible material state committed
+OK: accepted fields align with the complete load trace
+OK: last saved field exactly matches the committed solver state
+OK: last retained field independently equilibrates its saved load actual=439999.87545646 expected=439999.87545646
+OK: analytical seed at strain 0.0004 actual=0.560533333333333 expected=0.560533333333333
+OK: analytical seed at strain 0.0006 actual=0.779022222222222 expected=0.779022222222222
+OK: central bar controls the localized event
+OK: steel limit before the peak gives a physical failure
+OK: rising steel limit has a bracket
+OK: rising steel bracket contains the independent analytical load
+OK: central bar controls the rising steel limit
+OK: saved rising-limit equilibrium actual=415914.330747131 expected=415914.330747131
+OK: saved field is within the admissible side of the strain interval
+OK: trace ends at the governing limit actual=0.924254068326957 expected=0.924266666666667
+OK: trace retains the admissible side of the crossing
+OK: no inadmissible material state committed
+OK: accepted fields align with the complete load trace
+OK: last saved field exactly matches the committed solver state
+OK: last retained field independently equilibrates its saved load actual=415914.330747131 expected=415914.330747131
+OK: analytical seed at strain 0.0004 actual=0.606462781304097 expected=0.606462781304097
+OK: analytical seed at strain 0.0006 actual=0.842854395075976 expected=0.842854395075976
+OK: central bar controls the localized event
+OK: event interval containing exact design load stays unresolved
+OK: uncertainty at design load supplies no governing capacity state
+OK: comment identifies the event near the design load: Достигнута предельная деформация арматуры. Интервал её достижения охватывает расчётную нагрузку (lambda = 1). Допустимое равновесие подтверждено до lambda = 0.999986.
+OK: trace ends at the governing limit actual=0.999986369367019 expected=1
+OK: trace retains the admissible side of the crossing
+OK: no inadmissible material state committed
+OK: accepted fields align with the complete load trace
+OK: last saved field exactly matches the committed solver state
+OK: last retained field independently equilibrates its saved load actual=415914.330747131 expected=415914.330747131
+TOTAL_COUPLED_DEFORMATION_STEEL_CROSSING: passed=49; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledDeformationSteelCrossing; 2026-11-25T08:38:43
+===== modTestCoupledElasticState.RunTestCoupledSteelAtDesign =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledSteelAtDesign; 2026-11-25T08:38:44
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=26028; workingSet=157962240; privateBytes=110465024; cpu=173.421875
+EXCEL_AFTER_SUITE: pid=26456; workingSet=159916032; privateBytes=113254400; cpu=107.109375
+STEEL_NEAR: exact=0.98; initial=1; directU-1=1.51335230881942E-02; event=True; lo=0.97998046875; hi=0.98004150390625; accepted=0.75; code=6
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.75; принято: 3; отклонено: 0; проб: 16 | Интервал: [0.97998046875, 0.98004150390625], отношения деформаций к пределам: 0.999985126791159 и 1.00003166094012.
+OK: определённый арматурный предел ниже расчётной нагрузки
+STEEL_NEAR: exact=0.98; initial=0.5; directU-1=1.51335230881942E-02; event=True; lo=0.97998046875; hi=0.98004150390625; accepted=0.875; code=6
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.875; принято: 3; отклонено: 0; проб: 15 | Интервал: [0.97998046875, 0.98004150390625], отношения деформаций к пределам: 0.99998510979081 и 1.00003164390534.
+OK: определённый арматурный предел ниже расчётной нагрузки
+STEEL_NEAR: exact=0.999999; initial=1; directU-1=7.47719718807716E-07; event=True; lo=0.99993896484375; hi=1; accepted=0.75; code=10
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.75; принято: 3; отклонено: 0; проб: 16 | Интервал: [0.99993896484375, 1], отношения деформаций к пределам: 0.999955148753037 и 1.00000075361305.
+OK: при близком физическом пределе найденный интервал содержит аналитическое значение
+STEEL_NEAR: exact=0.999999; initial=0.5; directU-1=7.47719718807716E-07; event=True; lo=0.99993896484375; hi=1; accepted=0.875; code=10
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.875; принято: 3; отклонено: 0; проб: 15 | Интервал: [0.99993896484375, 1], отношения деформаций к пределам: 0.999955143828551 и 1.00000074869222.
+OK: при близком физическом пределе найденный интервал содержит аналитическое значение
+STEEL_NEAR: exact=1; initial=1; directU-1=5.46378720045482E-10; event=True; lo=0.99993896484375; hi=1; accepted=0.75; code=10
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.75; принято: 3; отклонено: 0; проб: 16 | Интервал: [0.99993896484375, 1], отношения деформаций к пределам: 0.999954401591338 и 1.00000000643976.
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+STEEL_NEAR: exact=1; initial=0.5; directU-1=5.46378720045482E-10; event=True; lo=0.99993896484375; hi=1; accepted=0.875; code=10
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 0.875; принято: 3; отклонено: 0; проб: 15 | Интервал: [0.99993896484375, 1], отношения деформаций к пределам: 0.999954395223406 и 1.00000000007411.
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+STEEL_NEAR: exact=1.00000002; initial=1; directU-1=-1.4397078529349E-08; event=False; lo=0; hi=0; accepted=1; code=9
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+STEEL_NEAR: exact=1.00000002; initial=0.5; directU-1=-1.4397078529349E-08; event=False; lo=0; hi=0; accepted=1; code=9
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+STEEL_NEAR: exact=1.02; initial=1; directU-1=-1.47586458354373E-02; event=False; lo=0; hi=0; accepted=1; code=9
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+STEEL_NEAR: exact=1.02; initial=0.5; directU-1=-1.47586458354373E-02; event=False; lo=0; hi=0; accepted=1; code=9
+STEEL_NEAR_DETAIL: Доля постоянной части: 1; lambda: 1; принято: 4; отклонено: 0; проб: 4
+OK: допустимая ветвь не имеет подтверждённого предела ниже расчётной нагрузки
+TOTAL_COUPLED_STEEL_AT_DESIGN: passed=10; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold800PostArcAccuracy_20261125\Temp\RC_NDM_ModeSuite_3c7d221403a946038a28ec131cb8a22d\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledSteelAtDesign; 2026-11-25T08:38:52
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

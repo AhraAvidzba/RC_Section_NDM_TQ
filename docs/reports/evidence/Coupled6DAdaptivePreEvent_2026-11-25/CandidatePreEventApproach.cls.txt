@@ -1,0 +1,72 @@
+' Проверяет уменьшаемый кандидат перед событием от неизменной принятой истории; каждая новая половинная проба расходует остаток той же фазы.
+' Уже найденное поле переиспользуется только как непринятый кандидат; выбор следующей величины не является принятием материала.
+Private Function TryPreEventApproach(ByRef accepted() As Double, ByRef initial() As Double, ByRef initialActual() As Double, _
+        ByVal initialLambda As Double, ByVal reference As Double, ByRef projection() As Double, ByVal faceCoordinate As Double, _
+        ByVal faceSpacing As Double, ByRef arcProjection() As Double, ByVal q As Double, ByVal callAllowance As Long, _
+        ByRef eventInfo As Variant, ByRef phaseSteps As Long, ByRef selected() As Double, ByRef selectedLambda As Double) As Boolean
+    Dim candidate() As Double, actualCandidate() As Double, factor As Double, fraction As Double
+    candidate = initial: actualCandidate = initialActual: factor = initialLambda: fraction = 0.5
+    Dim level As Long, revision As Long: revision = mSolver.AcceptedRevision
+    For level = 1 To 4
+        If mCalls + 2 > callAllowance Or mMaximumIterations - phaseSteps < 2 Then Exit For ' Один вызов и одна допустимая поправка остаются для точного восстановления кандидата.
+        Dim seed() As Double, prediction As Variant, i As Long, probe() As Double, actualProbe() As Double
+        seed = accepted
+        For i = 1 To mSolver.PhysicalDegreeCount: seed(i) = 0.5 * (accepted(i) + candidate(i)): Next i
+        prediction = seed
+        Dim solved As Boolean, probeLambda As Double, steps As Long
+        mCalls = mCalls + 1
+        solved = mSolver.TryDeformationStep(mBase, mDirection, projection, faceCoordinate - (1# - 0.5 * fraction) * faceSpacing, _
+            0.5 * (reference + factor), probeLambda, mAbsolute, mRelative, mMaximumIterations - phaseSteps - 1, _
+            consistentControl:=True, initialField:=prediction, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        steps = mSolver.IterationCount: phaseSteps = phaseSteps + steps: mPrimary = mPrimary + steps
+        If solved Then mSolver.CopyTrial probe, actualProbe Else ReDim probe(1 To 1): ReDim actualProbe(1 To 1)
+        mSolver.DiscardStep
+        Dim error As Double, lambdaError As Double, lambdaBound As Double, length As Double, resolved As Boolean, verified As Boolean
+        error = -1#: lambdaError = -1#: lambdaBound = 0#: length = mSolver.SpatialFieldDistance(accepted, candidate)
+        If solved And length > 0# Then
+            Dim doubled() As Double: doubled = probe
+            For i = 1 To mSolver.PhysicalDegreeCount: doubled(i) = 2# * probe(i) - accepted(i): Next i
+            error = mSolver.SpatialFieldDistance(candidate, doubled) / length
+            lambdaError = Abs(2# * probeLambda - reference - factor)
+            lambdaBound = GeomMax(FIELD_ERROR_LIMIT * Abs(factor - reference), 8# * mRelative * (1# + Abs(reference)))
+            resolved = 0.5 * length * mModulus > 8# * GeomMax(Bound(factor), Bound(probeLambda))
+            verified = error <= FIELD_ERROR_LIMIT And lambdaError <= lambdaBound And resolved And factor > 0# And probeLambda > 0#
+            verified = verified And PositiveArcProgress(accepted, candidate, factor, reference, arcProjection, q)
+            verified = verified And PositiveArcProgress(accepted, probe, probeLambda, reference, arcProjection, q)
+            verified = verified And length <= 1.5 * fraction * faceSpacing
+            verified = verified And mSolver.SpatialFieldDistance(accepted, probe) <= 0.75 * fraction * faceSpacing
+            Dim candidateYield As Double, probeYield As Double
+            If Not mSolver.TryReadLoadingSurface(CLng(eventInfo(1)), CLng(eventInfo(2)), candidate, candidateYield) Then verified = False
+            If Not mSolver.TryReadLoadingSurface(CLng(eventInfo(1)), CLng(eventInfo(2)), probe, probeYield) Then verified = False
+            verified = verified And candidateYield < 0# And probeYield < 0#
+        End If
+        mApproaches.Add Array(Array(level, fraction, factor, probeLambda, reference, length, error, lambdaError, lambdaBound, _
+            Abs(CLng(resolved)), Abs(CLng(verified)), revision, mSolver.AcceptedRevision, phaseSteps, steps, mCalls), _
+            candidate, probe, projection, actualCandidate, actualProbe)
+        If mSolver.AcceptedRevision <> revision Or phaseSteps > mMaximumIterations Or mCalls >= callAllowance Then _
+            Err.Raise 5, "CCoupledArcContinuation", "Уточнение подхода нарушило историю или остаток общего бюджета."
+        If verified Then
+            selected = candidate: selectedLambda = factor: mError = error
+            TryPreEventApproach = True: Exit Function
+        End If
+        If Not solved Or Not resolved Then Exit For
+        candidate = probe: actualCandidate = actualProbe: factor = probeLambda: fraction = 0.5 * fraction
+    Next level
+End Function
+
+' Проверяет ориентированное продвижение по исходной знаковой дуге без требования роста множителя нагрузки.
+Private Function PositiveArcProgress(ByRef accepted() As Double, ByRef field() As Double, ByVal factor As Double, _
+        ByVal reference As Double, ByRef projection() As Double, ByVal q As Double) As Boolean
+    Dim progress As Double, i As Long: progress = q * (factor - reference)
+    For i = 1 To UBound(projection): progress = progress + projection(i) * (field(i) - accepted(i)): Next i
+    PositiveArcProgress = progress > 0#
+End Function
+
+' Возвращает отдельный набор свидетельств уточнения; изменение коллекции у потребителя не меняет рабочий объект.
+Friend Property Get ApproachVerification() As Collection
+    Dim result As New Collection, record As Variant
+    If Not mApproaches Is Nothing Then
+        For Each record In mApproaches: result.Add record: Next record
+    End If
+    Set ApproachVerification = result
+End Property
