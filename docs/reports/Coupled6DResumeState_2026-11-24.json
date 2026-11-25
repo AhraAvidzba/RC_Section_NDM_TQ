@@ -4297,7 +4297,7 @@
   },
   "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
   "goal_pause_tool_pending": false,
-  "goal_status": "paused",
+  "goal_status": "active",
   "guide_half_confirmation756": {
     "accepted_coordinate": 0.00011677014367737244,
     "accepted_revision_unchanged": 48,
@@ -6527,7 +6527,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Resume only on explicit user request. Preserve full original goal. First finalize835 compiled-only source audit and run pending pure stress replay of832 actual49-state cold trajectory, verify source exact; no replay PASS claimed yet. Then implement generic CDP elastic principal-zero transition using existing projected material-event solver in private candidate based on833 math and831 gated/proactive controller. Require negative yield surface at both endpoints and event, preserve ASD flag/semantics, all full/half field/lambda/force/gauge/steel/30iteration/96probe contracts. Reproduce source86 frozen failure, test event correction and continue branch, then actual cold. Do not hardcode point3/station. CDP AcceptedPointDamage exposes energy coordinates, not damage factors. Retained-arc ungated828 slower negative variant preserved; local lambda uncertainty829 excludes nonlinear remainder and is not ultimate proof. No production/main/release promotion or full acceptance. Pending physical admissibility ONQ012, mesh/step/external and full original LoadPaths/hoop/UI/CAD/performance/workbook checks remain.",
+  "next_action": "Goal ACTIVE; user explicitly revoked pause before any goal pause tool call.835 actual49-state cold stress replay/source audit VERIFIED, all native jobs terminal. Next implement generic CDP elastic principal-zero event in private candidate:833 math/834 exact86 input,831 gated proactive controller when integrating cold. Require phi<0 at both endpoints and solved face; generic earliest point/station/principal selection, no hardcoded3, preserve ASD behavior,30/96 and full/half/force/gauge/steel criteria. Verify source86 failure fix, continue branch, then actual cold and physical ONQ012,step/mesh/external and original complete goal.829 local linear sensitivity not physical ultimate; no release/main promotion; full acceptance pending. Checkpoint92948eb records historical pause preparation, subsequently revoked. GitHub push of92948eb failedHTTP408; retry latest checkpoint and verify actual remote ref before claiming sent.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6637,12 +6637,14 @@
     "source_lambda": 1.1058869810286156
   },
   "outgoing_loading_pause_evidence": "docs/reports/evidence/Coupled6DOutgoingLoadingPause_2026-11-25",
-  "pause_after_current_stage": true,
-  "pause_checkpoint_ready": true,
+  "pause_after_current_stage": false,
+  "pause_checkpoint_ready": false,
+  "pause_goal_tool_was_not_called": true,
   "pause_request": "До технологического завершения текущего этапа поставим задачу на паузу.",
-  "pause_request_revoked": false,
-  "pause_requested_explicitly": true,
-  "pause_revoked_user_message": "На паузу не ставь пока я сам об этом не попрошу снова",
+  "pause_request_revoked": true,
+  "pause_requested_explicitly": false,
+  "pause_revoked_replay_evidence": "docs/reports/evidence/Coupled6DPauseRevokedReplay_2026-11-25",
+  "pause_revoked_user_message": "Паузу не включай пока я сам об этом чётко не попрошу",
   "peak_accuracy716": {
     "adjoints_full_rank": 8,
     "corresponding_actual_componentwise_linear_estimate": 3.090377029485483e-06,
@@ -7760,7 +7762,7 @@
     }
   },
   "spectral_pause_evidence": "docs/reports/evidence/Coupled6DSpectralPause_2026-11-25",
-  "stage835": "Compilation complete, own Excel26792 absent; native replay NOT started before pause",
+  "stage835": "Completed after explicit pause revocation:49 actual832 states independently rebuilt;4 early states above arc inner bound;256 actual compiled components audited,255 parent components preserved",
   "stopped_own_file_enumeration_session": {
     "exit_code": 1,
     "reason": "Unneeded broad rg listing interrupted; no Office process affected",
@@ -8697,6 +8699,7 @@
     30135,
     30205,
     30281,
+    30403,
     30485,
     30844,
     31266,
@@ -8780,6 +8783,7 @@
     55381,
     55638,
     56016,
+    56270,
     57628,
     57659,
     57786,
@@ -8923,12 +8927,13 @@
     98786,
     99254,
     99292,
+    99354,
     99831,
     99841,
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T19:32:15.333845+03:00",
+  "updated_local": "2026-11-25T19:36:49.766242+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
