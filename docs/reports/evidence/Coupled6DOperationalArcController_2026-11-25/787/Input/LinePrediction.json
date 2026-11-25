@@ -1,0 +1,144 @@
+{
+  "hinge_slope_largest_row": 53,
+  "hinge_slope_maximum_MPa": 0.0010436595552458627,
+  "lines": [
+    {
+      "alpha": 1.0,
+      "critical_row": 53,
+      "max_F_MPa": 0.0010426175863043686,
+      "max_nonlinear_defect_MPa": 0.0010426175863043911
+    },
+    {
+      "alpha": 0.5,
+      "critical_row": 53,
+      "max_F_MPa": 0.0005224970157922493,
+      "max_nonlinear_defect_MPa": 0.0005207761471565492
+    },
+    {
+      "alpha": 0.25,
+      "critical_row": 53,
+      "max_F_MPa": 0.0002624396920817379,
+      "max_nonlinear_defect_MPa": 0.00025985838912817664
+    },
+    {
+      "alpha": 0.125,
+      "critical_row": 53,
+      "max_F_MPa": 0.00013241176807942003,
+      "max_nonlinear_defect_MPa": 0.00012940024796692813
+    },
+    {
+      "alpha": 0.0625,
+      "critical_row": 53,
+      "max_F_MPa": 6.73979905999557e-05,
+      "max_nonlinear_defect_MPa": 6.417136190799849e-05
+    },
+    {
+      "alpha": 0.03125,
+      "critical_row": 53,
+      "max_F_MPa": 3.489114784478367e-05,
+      "max_nonlinear_defect_MPa": 3.1556964863093794e-05
+    },
+    {
+      "alpha": 0.015625,
+      "critical_row": 53,
+      "max_F_MPa": 1.863773804752745e-05,
+      "max_nonlinear_defect_MPa": 1.524977792097124e-05
+    },
+    {
+      "alpha": 0.0078125,
+      "critical_row": 53,
+      "max_F_MPa": 1.051103613025075e-05,
+      "max_nonlinear_defect_MPa": 7.096187431261376e-06
+    },
+    {
+      "alpha": 0.00390625,
+      "critical_row": 53,
+      "max_F_MPa": 7.293395867462948e-06,
+      "max_nonlinear_defect_MPa": 3.019392889722322e-06
+    },
+    {
+      "alpha": 0.001953125,
+      "critical_row": 53,
+      "max_F_MPa": 7.3076961618696965e-06,
+      "max_nonlinear_defect_MPa": 9.809957812528184e-07
+    },
+    {
+      "alpha": 0.0009765625,
+      "critical_row": 53,
+      "max_F_MPa": 7.314846320366541e-06,
+      "max_nonlinear_defect_MPa": 4.4160816225612826e-13
+    }
+  ],
+  "maximum_normalized_Newton_correction": 0.0018162619778663482,
+  "newton_linear_system_error_MPa": 2.2605615296322767e-17,
+  "physical_failure": false,
+  "single_hinge_approximation_location": 0.0010131681419027283,
+  "single_hinge_error_norm_MPa": 2.1057252345154688e-12,
+  "strongest_point_subspaces": [
+    {
+      "point": 21,
+      "relative_subspace_error": 2.039690521604918e-07,
+      "station_type": "end_pair",
+      "stress_slope_components_MPa": [
+        0.0,
+        0.0,
+        5.218298044994519e-05,
+        0.0,
+        -1.1154586613921543e-05,
+        -3.635874992946301e-06
+      ]
+    },
+    {
+      "point": 16,
+      "relative_subspace_error": 0.2981051825182777,
+      "station_type": "end_pair",
+      "stress_slope_components_MPa": [
+        0.0,
+        0.0,
+        5.4050474874111245e-05,
+        0.0,
+        -1.234129135457144e-05,
+        -6.0185545990337445e-06
+      ]
+    },
+    {
+      "point": 22,
+      "relative_subspace_error": 0.3419725074162732,
+      "station_type": "end_pair",
+      "stress_slope_components_MPa": [
+        0.0,
+        0.0,
+        5.6597430938005746e-05,
+        0.0,
+        -1.2464051954935864e-05,
+        -4.4312562782065035e-06
+      ]
+    },
+    {
+      "point": 17,
+      "relative_subspace_error": 0.4205899186651732,
+      "station_type": "end_pair",
+      "stress_slope_components_MPa": [
+        0.0,
+        0.0,
+        5.969899063720027e-05,
+        0.0,
+        -1.4840623122592774e-05,
+        -8.110607860534968e-06
+      ]
+    },
+    {
+      "point": 11,
+      "relative_subspace_error": 0.5072049682465656,
+      "station_type": "end_pair",
+      "stress_slope_components_MPa": [
+        0.0,
+        0.0,
+        4.997364119569418e-05,
+        0.0,
+        -6.871222057030515e-06,
+        -8.657183866888673e-06
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+' При остановке выбранной меры проверяет одну знаковую дугу от текущей истории; все вызовы учитываются общим владельцем бюджета.
+' Новое поле остаётся пробным: предел стали, область нагрузки, принятие материала и конечный статус проверяет основной цикл.
+Private Function TryArcContinuationProbe(ByVal history As Collection, ByRef current As TBranchPoint, ByRef trial As TBranchPoint, _
+        ByRef nominal As Double, ByRef increment As Double, ByRef minimum As Double) As Boolean
+    If Not mSolver.UsesSpatialHistory Or mSolver.HasPrincipalBoundaries Or mDesignHistoryIndex = 0 Then Exit Function
+    If history.Count < 4 Or mTrace Is Nothing Or mProbeCount + 3 > PROBE_LIMIT Then Exit Function
+    If mSignedArcRevision <> mSolver.AcceptedRevision Then
+        mSignedArcRevision = mSolver.AcceptedRevision: mSignedArcAttempts = 0: mSignedArcRatio = 1#
+    End If
+    If mSignedArcAttempts >= 4 Then Exit Function
+    mSignedArcAttempts = mSignedArcAttempts + 1
+    mSolver.DiscardStep
+    Dim arc As New CCoupledArcContinuation, projection() As Double, solved As Boolean
+    arc.Initialize mSolver, mOffset, mDirection, mAbsTol, mRelTol, mMaxIterations
+    solved = arc.TryStep(history, mTrace, mSignedArcRatio, PROBE_LIMIT - mProbeCount, trial.Lambda, projection)
+    mProbeCount = mProbeCount + arc.Calls: mSignedArcProbes = mSignedArcProbes + arc.Calls
+    mProbeDetails = arc.Details
+    If Not solved Then mSignedArcRatio = 0.5 * mSignedArcRatio: Exit Function
+    Dim accepted() As Double, field() As Double, actual() As Double
+    accepted = history(current.HistoryIndex): mSolver.CopyTrial field, actual
+    If Not mSolver.SpatialIncrementAdvances(history(current.HistoryIndex - 1), accepted, field, nominal, increment) Then
+        mSolver.DiscardStep: Exit Function
+    End If
+    mProjection = projection: current.Coordinate = CoordinateOf(accepted): trial.Coordinate = CoordinateOf(field)
+    nominal = trial.Coordinate - current.Coordinate
+    If nominal <= 0# Then mSolver.DiscardStep: Exit Function
+    increment = 0.5 * nominal: minimum = increment * MIN_STEP_RATIO
+    mUsesEnvelopeControl = False: mUsesYieldControl = False: mUsesFieldControl = True: mUsesTransverseControl = False
+    mBranchTangentControl = True: mMaterialGrowthActive = False: Erase mMaterialGrowthProjection
+    mFieldControlChanges = mFieldControlChanges + 1: mLastFieldControlRevision = mSolver.AcceptedRevision
+    mControlName = "пространственная мера проверенной знаковой дуги"
+    If trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then
+        If Not mUnverifiedDecline Then mUnverifiedDips = mUnverifiedDips + 1
+        mUnverifiedDecline = True: mUnverifiedReference = GeomMax(mUnverifiedReference, mBestLambda)
+    End If
+    mSignedArcRecovered = mSignedArcRecovered + 1
+    TryArcContinuationProbe = True
+End Function

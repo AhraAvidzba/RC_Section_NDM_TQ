@@ -1,0 +1,34 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' На фактически отклонённом полном шаге выбирает первое новое начало пластичности CDP и решает существующие уравнения события.
+Friend Function TestLocateArcYieldBoundary(ByRef baseLoad() As Double, ByRef direction() As Double, ByRef ends() As Double, _
+        ByVal fromLambda As Double, ByVal toLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maxIterations As Long, ByRef result() As Double, ByRef resultLambda As Double, ByRef eventInfo As Variant) As Boolean
+    If mCandidateReady Or mHybridActive Then Err.Raise 5, , "Перед событием завершите пробный контекст."
+    ConfigureControlledLoad baseLoad, direction: ResetSolveState
+    mControlActive = False: mArcLoadProjection = 0#: mConsistentControl = False
+    ReDim mControlProjection(1 To mDegreeCount): mTargetControl = 0# ' Материальный проектор заменяет управляющую строку; читающий интерфейс всё равно требует подготовленного массива.
+    Dim station As TYieldStation, candidate As TYieldStation, nearest As Double, fraction As Double, selected As Boolean
+    Dim point As Long, side As Long: nearest = 1#
+    For point = 1 To mPointCount
+        For side = -1 To 1
+            If ReadYieldCrossing(point, side, mAccepted, ends, candidate) Then
+                If candidate.FromValue < -16# * YIELD_ROOT_TOLERANCE And candidate.ToValue > 0# Then
+                    If LocateYieldCoordinate(candidate, mAccepted, ends, 0#, fraction) Then
+                        If Not selected Or fraction < nearest Then station = candidate: nearest = fraction: selected = True
+                    End If
+                End If
+            End If
+        Next side
+    Next point
+    eventInfo = Array(Abs(CLng(selected)), station.Point, station.Side, station.FromValue, station.ToValue, nearest, mAcceptedRevision)
+    If Not selected Then Exit Function
+    Dim seed() As Double: seed = mAccepted
+    Dim i As Long, projection() As Double, load(1 To COMPONENT_COUNT) As Double, tolerance As Double, radius As Double
+    For i = 1 To mDegreeCount: seed(i) = mAccepted(i) + nearest * (ends(i) - mAccepted(i)): Next i
+    SetControlledLoad fromLambda + nearest * (toLambda - fromLambda), load
+    tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    radius = SpatialFieldDistance(mAccepted, ends)
+    If radius <= 0# Then Exit Function
+    TestLocateArcYieldBoundary = FollowYieldEventCoordinate(station, seed, mCurrentControlLambda, 0#, tolerance, maxIterations, mAccepted, radius, result, resultLambda, projection)
+End Function
