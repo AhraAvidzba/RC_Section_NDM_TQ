@@ -1,0 +1,85 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Решает обнаруженное начало пластичности, проверяет подход половинным шагом и продолжает дугу от принятого события.
+Private Sub TestRunArcYieldSplit()
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ArcRoots.bin" For Binary Access Read As #inputHandle
+    Dim fullData As Variant, halfData As Variant, projectionData As Variant, context As Variant
+    fullData = TestReadPolishVector(inputHandle): halfData = TestReadPolishVector(inputHandle)
+    projectionData = TestReadPolishVector(inputHandle): context = TestReadPolishVector(inputHandle): Close #inputHandle
+    Dim ends() As Double, face() As Double, accepted() As Double, previous() As Double, i As Long, eventInfo As Variant, factor As Double
+    accepted = mReverseFieldsTest(mReverseFieldsTest.Count): previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+    ReDim ends(1 To UBound(accepted))
+    For i = 1 To UBound(ends): ends(i) = fullData(i): Next i
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim solved As Boolean, halfSolved As Boolean, verified As Boolean, effort As Variant, halfEffort As Variant, restored As Variant
+    Dim absTol As Double, relTol As Double, maxIterations As Long
+    absTol = mReverseOptionsTest(3) * 0.0001: relTol = mReverseOptionsTest(4) * 0.0001: maxIterations = CLng(mReverseOptionsTest(2))
+    solved = mReverseSolverTest.TestLocateArcYieldBoundary(mReverseBaseTest, mReverseDirectionTest, ends, context(6), context(1), _
+        absTol, relTol, maxIterations \ 2, face, factor, eventInfo)
+    effort = mReverseSolverTest.ReadPolishEffortTest
+    Dim projection() As Double, coordinate As Double, spacing As Double, movement() As Double, halfTarget As Double
+    Dim half() As Double, halfActual() As Double, halfLambda As Double, prediction As Variant, doubled() As Double, fieldError As Double, lambdaError As Double, lambdaBound As Double
+    Dim faceTarget As Double, restoredLambda As Double, fullActual() As Double, restoredField() As Double
+    fieldError = -1#: lambdaError = -1#: lambdaBound = 0#
+    If solved Then
+        movement = face
+        For i = 1 To UBound(movement): movement(i) = face(i) - accepted(i): Next i
+        If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, face, movement, projection, coordinate, spacing) Then Err.Raise 5, , "Нет меры подхода к событию."
+        For i = 1 To UBound(projection): faceTarget = faceTarget + projection(i) * face(i): Next i
+        halfTarget = faceTarget - 0.5 * spacing: prediction = accepted
+        Dim seed() As Double: seed = accepted
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = 0.5 * (face(i) + accepted(i)): Next i
+        prediction = seed
+        halfSolved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, halfTarget, _
+            0.5 * (context(6) + factor), halfLambda, absTol, relTol, maxIterations - CLng(effort(0)), _
+            consistentControl:=True, initialField:=prediction, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        halfEffort = mReverseSolverTest.ReadPolishEffortTest
+        If halfSolved Then
+            mReverseSolverTest.CopyTrial half, halfActual: doubled = half
+            For i = 1 To mReverseSolverTest.PhysicalDegreeCount: doubled(i) = 2# * half(i) - accepted(i): Next i
+            fieldError = mReverseSolverTest.SpatialFieldDistance(face, doubled) / spacing
+            lambdaError = Abs(2# * halfLambda - context(6) - factor)
+            lambdaBound = GeomMax(0.005 * Abs(factor - context(6)), 8# * relTol * (1# + Abs(context(6))))
+            verified = fieldError <= 0.005 And lambdaError <= lambdaBound And factor > 0# And halfLambda > 0#
+        Else
+            ReDim half(1 To 1): ReDim halfActual(1 To 1)
+        End If
+        mReverseSolverTest.DiscardStep
+        If verified Then
+            prediction = face
+            verified = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, faceTarget, factor, _
+                restoredLambda, absTol, relTol, maxIterations - CLng(effort(0) + halfEffort(0)), consistentControl:=True, initialField:=prediction)
+            restored = mReverseSolverTest.ReadPolishEffortTest
+            If Not verified Or restored(0) <> 0 Or restoredLambda <> factor Then Err.Raise 5, , "Событие не восстановлено без поправок."
+            mReverseSolverTest.CopyTrial restoredField, fullActual
+            For i = 1 To UBound(face): If restoredField(i) <> face(i) Then Err.Raise 5, , "При восстановлении изменилось поле события."
+            Next i
+        Else
+            restored = Array(0#, 0#, 0#, 0#, 0#, 0#, revision, 0#): ReDim fullActual(1 To 1)
+        End If
+    Else
+        ReDim face(1 To 1): ReDim half(1 To 1): ReDim halfActual(1 To 1): ReDim fullActual(1 To 1): ReDim projection(1 To 1)
+        halfEffort = Array(0#, 0#, 0#, 0#, 0#, 0#, revision, 0#): restored = halfEffort
+    End If
+    If mReverseSolverTest.AcceptedRevision <> revision Or effort(0) + halfEffort(0) + restored(0) > maxIterations Then Err.Raise 5, , "Нарушена история или общий бюджет события."
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ArcYieldSplit.Result.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMARCYIELDSPLIT1"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(Abs(CLng(solved)), Abs(CLng(halfSolved)), Abs(CLng(verified)), factor, halfLambda, revision, fieldError, lambdaError, lambdaBound, spacing, faceTarget, halfTarget)
+    TestWriteReverseBinaryVector handle, eventInfo: TestWriteReverseBinaryVector handle, effort
+    TestWriteReverseBinaryVector handle, halfEffort: TestWriteReverseBinaryVector handle, restored
+    TestWriteReverseBinaryVector handle, face: TestWriteReverseBinaryVector handle, half: TestWriteReverseBinaryVector handle, projection
+    TestWriteReverseBinaryVector handle, fullActual: TestWriteReverseBinaryVector handle, halfActual
+    Close #handle
+    handle = FreeFile
+    Open mPolishRootTest & "\Native\ArcYieldSplit.Outcome.txt" For Output As #handle
+    Print #handle, "EVENT;" & CStr(solved) & ";HALF;" & CStr(halfSolved) & ";VERIFIED;" & CStr(verified) & ";ERROR;" & CStr(fieldError)
+    Print #handle, mReverseSolverTest.ResultMeta.DiagnosticDetails
+    Close #handle
+    If verified Then
+        mReverseSolverTest.AcceptStep: mReverseFieldsTest.Add face: mReverseTraceTest.Add 1#, factor
+        TestRunConfirmedArcWalk
+    End If
+End Sub

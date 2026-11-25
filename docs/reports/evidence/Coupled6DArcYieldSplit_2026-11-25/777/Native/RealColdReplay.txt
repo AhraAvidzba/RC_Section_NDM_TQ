@@ -1,0 +1,38 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold777ArcYieldSplit_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: F726F0C4228184909970B67FCCCE6C684D84379712DB463DD89C82551F32A508
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold777ArcYieldSplit_20261125\Temp\RC_NDM_ModeSuite_89fc1db522c140a8949f0158fd8aabb2\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=9664; startTicks=639311728336936819
+===== modTestCoupledElasticState.RunTestReversePolish =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T06:07:20
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=9664; workingSet=170000384; privateBytes=120328192; cpu=13.0625
+RUNTIME ERROR: VBAProject Не выполнен контроль восстановленной истории. Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 1.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Внутренних ошибок: 1.
+
+Первая внутренняя ошибка:
+Сочетание HardShear: Расчет сочетания остановлен из-за ошибки выполнения: Subscript out of range
+
+Исходная строка сочетания:
+Config!H71:Q71.
+
+Пошаговый отчет сохранен:
+D:\CodexScratch\RC_Section_NDM_TQ\Cold777ArcYieldSplit_20261125\Temp\RC_NDM_ModeSuite_89fc1db522c140a8949f0158fd8aabb2\RC_Section_NDM_execution_report.txt
+
+Время расчёта: 12.97 с.
+
+Данные сохранены на листе Results текущей книги.
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold777ArcYieldSplit_20261125\Temp\RC_NDM_ModeSuite_89fc1db522c140a8949f0158fd8aabb2\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T06:07:35
+FAIL_FAST: remaining suites were not run after a completed failed suite
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=1; source unchanged=True

@@ -1,0 +1,40 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает штатный ответ заданной точки и отдельно обычный локальный возврат от той же истории, не записывая пробу.
+Friend Function ReadOperationalPointRouteTest(ByVal point As Long, ByRef strain() As Double) As Collection
+    If point < 1 Or point > mPointCount Or Not mASDFlow Is Nothing Then Err.Raise 5, , "Недоступна CDP-точка читающего теста."
+    Dim result As New Collection, operational As TConcreteHistory, ordinary As TConcreteHistory
+    Dim stress(1 To 6) As Double, ordinaryStress(1 To 6) As Double, operationalElastic As Boolean, ordinaryElastic As Boolean
+    Dim ready As Boolean, ordinaryReady As Boolean, needsClosure As Boolean, substeps As Long, i As Long
+    Dim before As Variant, after As Variant, work(1 To 5) As Double, ordinaryWork(1 To 5) As Double
+    before = ReadDilationWorkTest
+    ready = UpdateWithSubsteps(strain, mHistory(point, mCommitted), operational, stress, operationalElastic, substeps)
+    after = ReadDilationWorkTest
+    For i = 1 To 5: work(i) = after(i - 1) - before(i - 1): Next i
+    before = ReadDilationWorkTest
+    ordinaryReady = UpdatePoint(strain, mHistory(point, mCommitted), ordinary, ordinaryStress, ordinaryElastic)
+    after = ReadDilationWorkTest
+    For i = 1 To 5: ordinaryWork(i) = after(i - 1) - before(i - 1): Next i
+    If ordinaryReady Then needsClosure = NeedsDilationClosure(mHistory(point, mCommitted), ordinary, ordinaryStress, ordinaryElastic)
+    result.Add Array(Abs(CLng(ready)), substeps, Abs(CLng(operationalElastic)), Abs(CLng(ordinaryReady)), Abs(CLng(ordinaryElastic)), Abs(CLng(needsClosure)))
+    result.Add work: result.Add ordinaryWork
+    result.Add TestPointHistoryVector(mHistory(point, mCommitted))
+    result.Add TestPointHistoryVector(operational): result.Add TestPointHistoryVector(ordinary)
+    result.Add stress: result.Add ordinaryStress
+    result.Add Array(mElastic(3, 3), mElastic(1, 2), mElastic(4, 4), mAlpha, mGamma, mFc, mFt, TENSILE_AXIS_BAND_RATIO, PLASTIC_ROUNDOFF)
+    Set ReadOperationalPointRouteTest = result
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает явную копию полных деформаций, напряжений, пластических деформаций и восьми координат истории.
+Private Function TestPointHistoryVector(ByRef history As TConcreteHistory) As Variant
+    Dim values(1 To 26) As Double, i As Long
+    For i = 1 To 6
+        values(i) = history.Strain(i): values(6 + i) = history.Stress(i): values(12 + i) = history.Plastic(i)
+    Next i
+    values(19) = history.Tension: values(20) = history.Compression
+    values(21) = history.TensionCohesion: values(22) = history.CompressionCohesion
+    values(23) = history.TensionDamage: values(24) = history.CompressionDamage
+    values(25) = history.TensionEnergy: values(26) = history.CompressionEnergy
+    TestPointHistoryVector = values
+End Function
