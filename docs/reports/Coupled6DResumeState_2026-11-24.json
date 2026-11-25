@@ -1,6 +1,12 @@
 {
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_exec_session": 80140,
+  "active_jobs": [
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold858BalancedInitialStressReplay_20261125",
+      "session": 80140,
+      "stage": "CompileFrozenStressReplay7;857coldtimeout600closed;164regressionPASS;CDPcomparisondeferred"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1978,7 +1984,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -2282,6 +2288,12 @@
     },
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
+  },
+  "deferred_CDP_versus_SP_pure_bending_check": {
+    "after": "primary coupled convergence and confirmed ultimate problems",
+    "plan": "docs/ValidationPlan.md",
+    "requested": "2026-11-25",
+    "status": "not run"
   },
   "departure_candidate749": {
     "accepted_revision_unchanged": 48,
@@ -3196,6 +3208,7 @@
     "total_states": 113
   },
   "entire_goal_completed": false,
+  "extended192_did_not_improve_load_maximum": true,
   "failed_H_read746": {
     "cause": "AtTarget was called with its allowJacobian=False default while requesting a Jacobian",
     "native_runtime_failure": true,
@@ -6576,6 +6589,7 @@
     "total_states": 92
   },
   "latest_candidate_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold845SteelActivityArcPolicy_20261125",
+  "latest_cold_budget_and_controls_evidence": "docs/reports/evidence/Coupled6DColdBudgetAndControls_2026-11-25",
   "latest_continuation_physical_progress_audit": {
     "additional_warm_states": 6,
     "cold_budget": {
@@ -6688,6 +6702,57 @@
     ],
     "whole_goal_completed": false
   },
+  "latest_spatial_decline_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold857SpatialDeclineRecovery_20261125",
+  "latest_spatial_decline_cold_summary": {
+    "accepted_states": 19,
+    "balanced_initial_control": true,
+    "cold": {
+      "own_process_closed": true,
+      "timeout_seconds": 600,
+      "workflow_result_missing": true
+    },
+    "default_working_budget_not_changed": true,
+    "full_cold_from_zero": true,
+    "independent_new_stress_replay_pending": true,
+    "last_accepted_lambda": 1.1042833676987807,
+    "maximum_accepted_lambda": 1.1042833676987807,
+    "negative96_exact_prefix_states": 4,
+    "old96_control_retained": true,
+    "original_materials_and_tolerances_unchanged": true,
+    "physical_capacity_certified": false,
+    "physical_progress": [
+      {
+        "concrete_principal_max": 0.00022106324989033845,
+        "concrete_principal_min": -0.00016500188736872078,
+        "lambda_value": 1.0,
+        "max_abs_hoop_strain": 2.3133498717014012e-05,
+        "max_abs_long_steel_strain": 6.0290858556387436e-05,
+        "maximum_lambda_so_far": 1.0,
+        "maximum_three_station_steel_utilization": 0.002411634342255497,
+        "state": 4
+      },
+      {
+        "concrete_principal_max": 0.0004411866943447973,
+        "concrete_principal_min": -0.0002468834365834714,
+        "lambda_value": 1.1042833676987807,
+        "max_abs_hoop_strain": 9.631914238449196e-05,
+        "max_abs_long_steel_strain": 8.356720270471763e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004815957119224598,
+        "state": 19
+      }
+    ],
+    "raw_history": {
+      "bytes": 179812,
+      "complete_bytes": 179812,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "C32D154F871ACD08D775460986FE86CE29DE15F4050C85503FAF183CCCA605F0"
+    },
+    "single_controller_constant96_to192_only": false,
+    "spatial_generalized_decline_recovery": true,
+    "whole_goal_completed": false
+  },
   "latest_steel_guard_and_automatic_Hwalk_evidence": "docs/reports/evidence/Coupled6DSteelActivityHGuideWalk_2026-11-25",
   "latest_verified_active_loading_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold842HReentryWalk_20261125",
   "latest_verified_auto_H_guide_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold844AutomaticHGuideArc_20261125",
@@ -6748,7 +6813,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Continue full original goal;DO NOT PAUSE absent newexplicitrequest. All nativejobs852/853terminal,ownclosed. Candidate851 verifiedlocalfix,852warm92onlysmallphysicalprogress,853coldEXACT83249/NumFail. Read latest_continuation_physical_progress_audit and reports beforeclaimingprogress. Immediateprioritycoldfromzero: inspectcontrollerProbe/globalallocation,notmorewarmmicrostates. Lastcold96stopisbudget AFTERsuccessfularc (31arccalls8accepts5retained);priorcheckpoint42states73probes,final49/96. SourceconstantPROBE_LIMIT96inCCoupledDeformationContinuation,notaphysicalcriterionoruserTZlimit. Need choosejustifiedearlyarc/recoveryafterexactfailedmeasure toavoidrepeatedwrongcoordinate (cachedfailedrevision/projectionalreadyexists),preserve831retained/proactivecontextguards andnewCArcH/steel/verifiedguidechecks. Alternatively a clearly separated extended-budget cold diagnostic (e.g.192,predeclaredtimeout/resourceguard) can revealwhetherpostcrackphysicsprogresses;DONOTpromotehigherbudgetasstable/fasterorcapacityproof. Preserveoriginal96negativecontrol. Measureprogressinprincipalstrains/steel/degradation/globalphysicalcriterion,notstatecountoroneλmaximum. Do not blindly relaxradii orforce/half thresholds. 848diagnosisradiusratio3.1768;850refinedbranch at1/64predictsactualoutgoinggain19.06butlargeincomingprobeisunstable;851usesverifiedsecantguideandretargetingwithORIGINAL1.5/3radii. WorkingCArc851+Newton848opt-inreadonlytrace+Deform845(pinned831withnextstepcap1) arecurrentcandidate. 852failsnextfaceatstate92,4attemptsratios1,.5,.25,.125using16,16,15,15primary;secondaryfuturediagnosiscanreusecompiled851TestDiagnoseNewLoadingCoordinate withnewInput92 toavoidcompile (verifyactualprefix86matchbeforeTestClone). FulloriginalphysicalONQ010/012/mesh/step/external/allLoadPaths/hoop/UI/CAD/cracks/stability/performance/release/fullscopedacceptanceremainopen. NeedGitcheckpointandpushnow;lastverifiedremote28a2f4f43c91dd050797ac521ca49a0938caac0d. Newlocalreports/evidence848–853ready;no main/releasechange. Userlatestconcernconfirmedbyexplicitphysicalaudit:6newwarmstates changeconcreteepsmaxfrom.0004406420to.0004406353andlongsteelfrom.0000834616to.0000834708;doNOTpresentcountgrowthasnearultimate. Nextdesignmustshowmeaningfulphysicalstateprogressorcertainfailurecriterion;reviewONQ010/012andexternalexistenceevidence ifcontinuationsremainmicro. Differencecurrentlambda1.10007493vsretainedmax1.10588698explainsunchangedmaximum;neitherconfirmsphysicalcapacity.",
+  "next_action": "Continue original goal;DO NOT PAUSE. Inspect archived854–857 outcomes before changing budget/control again.192budget64states SAMEmax1.1058869810286156,no meaningful physical progress;all64forces+56/4equations+3stationsteelindepverified856.855initialbalancedselector7readonlycasesPASS butcoldstoppedat7 on unverifiedcumulativedecline;857 only3TraceroutinggatesallowexistingReplayUnverifiedDeclineforspatialgeneralizedtwist,allothermathunchanged and164targetedregressionspassed.857coldTIMEOUT600,19acceptedstates,max1.1042833676987807,NO finalResults/savedbook and NO returnedNumFail;exactown10332closedbywatchdog. Latestdefaultauthoritativecold853remains49/max1.1058869810286156/NumFail. Do NOT promote857orblindlyincreaseitsruntimebudget;inspectcoldcheckpointcost (12shoulderprobes/localpeakverification,slowfailedNewtonsteps).858frozen7stresscompilationmaystillberunning;checkactivejobs thenfinishactual256audit/native/exportverifier.855/857distinctstressesnotyetindependentlyverified. NO physicalcapacity certificate,fullacceptance or working/releasepromotion. PurebendingCDP-vs-SP explicitlyDEFERREDuntilprimaryproblemsresolved. Preserve main/release/userdata.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -8858,6 +8923,7 @@
     8166,
     8852,
     8978,
+    9618,
     9644,
     9759,
     10205,
@@ -8875,6 +8941,7 @@
     12388,
     12646,
     13811,
+    13850,
     13853,
     14384,
     14589,
@@ -8901,6 +8968,7 @@
     18956,
     19123,
     19677,
+    20401,
     20496,
     20542,
     21051,
@@ -8919,6 +8987,7 @@
     24703,
     24815,
     25261,
+    25835,
     26138,
     26175,
     26274,
@@ -8937,6 +9006,7 @@
     30281,
     30403,
     30485,
+    30710,
     30844,
     31266,
     31411,
@@ -8966,6 +9036,7 @@
     37102,
     37183,
     37351,
+    37430,
     37439,
     37524,
     37896,
@@ -8982,6 +9053,7 @@
     40742,
     40853,
     41572,
+    41724,
     42094,
     42262,
     42347,
@@ -9045,6 +9117,7 @@
     59864,
     59912,
     60094,
+    60191,
     60225,
     60275,
     60472,
@@ -9084,6 +9157,7 @@
     69420,
     69525,
     69535,
+    70002,
     70193,
     70629,
     70645,
@@ -9128,13 +9202,16 @@
     81541,
     81545,
     81619,
+    81866,
     81919,
     82906,
     83218,
     83264,
     83283,
     83355,
+    83472,
     83496,
+    83543,
     83669,
     83984,
     84038,
@@ -9151,6 +9228,7 @@
     86463,
     86488,
     87181,
+    87203,
     87280,
     87296,
     87359,
@@ -9194,6 +9272,7 @@
     96365,
     96407,
     96656,
+    97005,
     97029,
     97145,
     97396,
@@ -9208,7 +9287,8 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T22:25:46.201758+03:00",
+  "updated_local": "2026-11-25T23:08:20.299641+03:00",
+  "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "28a2f4f43c91dd050797ac521ca49a0938caac0d",
     "remote_branch": "codex/coupled-6d",
