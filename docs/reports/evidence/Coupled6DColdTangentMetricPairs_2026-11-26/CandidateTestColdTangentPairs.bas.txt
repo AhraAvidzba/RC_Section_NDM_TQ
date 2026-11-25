@@ -1,0 +1,130 @@
+Public Function TestRunColdTangentPairs() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Проверяет полную/половинную знаковые дуги с касательным прогнозом от настоящей истории; новые поля не принимаются как ветвь.
+    Dim accepted() As Double, previous() As Double, reference As Double, fraction As Double, revision As Long
+    mReverseSolverTest.CopyAccepted accepted: previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, fraction, reference
+    revision = mReverseSolverTest.AcceptedRevision
+    Dim slopes(1 To 3) As Double, factors(1 To 4) As Double, a() As Double, b() As Double, i As Long
+    For i = 1 To 4: mReverseTraceTest.ReadPoint mReverseTraceTest.Count - 4 + i, fraction, factors(i): Next i
+    For i = 1 To 3
+        a = mReverseFieldsTest(mReverseFieldsTest.Count - 4 + i): b = mReverseFieldsTest(mReverseFieldsTest.Count - 3 + i)
+        slopes(i) = mReverseSolverTest.SpatialFieldDistance(a, b) / Abs(factors(i + 1) - factors(i))
+    Next i
+    Dim alpha As Double: alpha = GeomMax(GeomMin(slopes(1), slopes(2)), GeomMin(GeomMax(slopes(1), slopes(2)), slopes(3)))
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ColdTangentPredictors.bin" For Binary Access Read As #inputHandle
+    Dim header As Variant: header = TestReadPolishVector(inputHandle)
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ColdTangentPairs.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMCOLDPAIR00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(header(1), reference, revision, alpha)
+    Dim caseIndex As Long, metadata As Variant, raw As Variant, movement() As Double, prediction() As Double
+    Dim projection() As Double, coordinate As Double, spacing As Double, arcLength As Double, radius As Double, q As Double, target As Double
+    Dim level As Double, ratio As Double, dl As Double, halfSeed() As Double, fullSeed() As Double, fullGuess As Double
+    Dim half() As Double, full() As Double, actualHalf() As Double, actualFull() As Double, halfLambda As Double, fullLambda As Double
+    Dim sh As Boolean, sf As Boolean, halfSteps As Long, fullSteps As Long, halfEffort As Variant, fullEffort As Variant
+    Dim halfSteel As Double, fullSteel As Double, sideSteel As CCoupledReinforcedResponse
+    Dim restored As Boolean, restoreSteps As Long, restoreLambda As Double, restoredField() As Double, restoredActual() As Double
+    Dim restoreProjection() As Double, restoredCoordinate As Double, restoredLength As Double, delta() As Double
+    Dim records As New Collection, record As Collection, seed As Variant, item As Variant
+    Dim absTol As Double: absTol = mReverseOptionsTest(3) * 0.0001
+    Dim relTol As Double: relTol = mReverseOptionsTest(4) * 0.0001
+    Dim maxIterations As Long: maxIterations = CLng(mReverseOptionsTest(2))
+    For caseIndex = 1 To CLng(header(1))
+        metadata = TestReadPolishVector(inputHandle): raw = TestReadPolishVector(inputHandle)
+        level = metadata(1): ratio = metadata(2): dl = metadata(3)
+        ReDim movement(1 To 60): prediction = accepted
+        For i = 1 To 60: movement(i) = raw(i): Next i
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: prediction(i) = accepted(i) + movement(i): Next i
+        If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, prediction, movement, projection, coordinate, spacing) Then Err.Raise 5, , "Нет пространственной меры касательного прогноза."
+        arcLength = Sqr(spacing * spacing + alpha * alpha * dl * dl): radius = ratio * arcLength
+        q = alpha * alpha * dl / arcLength: target = q * reference
+        For i = 1 To 60
+            projection(i) = projection(i) * spacing / arcLength: target = target + projection(i) * accepted(i)
+        Next i
+        halfSeed = accepted: fullSeed = accepted
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount
+            halfSeed(i) = accepted(i) + 0.5 * ratio * movement(i): fullSeed(i) = accepted(i) + ratio * movement(i)
+        Next i
+        ReDim half(1 To 1): ReDim full(1 To 1): ReDim actualHalf(1 To 1): ReDim actualFull(1 To 1)
+        ReDim restoredField(1 To 1): ReDim restoredActual(1 To 1)
+        halfSteel = 0#: fullSteel = 0#: restored = False: restoreSteps = -1: restoreLambda = 0#
+        mReverseSolverTest.DiscardStep: seed = halfSeed
+        sh = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target + 0.5 * radius, _
+            reference + 0.5 * ratio * dl, halfLambda, absTol, relTol, maxIterations \ 2, consistentControl:=True, initialField:=seed, _
+            loadProjection:=q, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        halfSteps = mReverseSolverTest.IterationCount: halfEffort = mReverseSolverTest.ReadPolishEffortTest
+        If sh Then
+            mReverseSolverTest.CopyTrial half, actualHalf: halfSteel = mReverseReinforcedTest.TrialSteelUtilization
+            Set sideSteel = mReverseSidesTest(2): halfSteel = GeomMax(halfSteel, sideSteel.TrialSteelUtilization)
+            Set sideSteel = mReverseSidesTest(4): halfSteel = GeomMax(halfSteel, sideSteel.TrialSteelUtilization)
+        End If
+        mReverseSolverTest.DiscardStep
+        fullGuess = reference + ratio * dl
+        If sh Then
+            For i = 1 To mReverseSolverTest.PhysicalDegreeCount: fullSeed(i) = 2# * half(i) - accepted(i): Next i
+            fullGuess = 2# * halfLambda - reference
+        End If
+        seed = fullSeed
+        sf = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target + radius, _
+            fullGuess, fullLambda, absTol, relTol, maxIterations - halfSteps, consistentControl:=True, initialField:=seed, _
+            loadProjection:=q, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        fullSteps = mReverseSolverTest.IterationCount: fullEffort = mReverseSolverTest.ReadPolishEffortTest
+        If sf Then
+            mReverseSolverTest.CopyTrial full, actualFull: fullSteel = mReverseReinforcedTest.TrialSteelUtilization
+            Set sideSteel = mReverseSidesTest(2): fullSteel = GeomMax(fullSteel, sideSteel.TrialSteelUtilization)
+            Set sideSteel = mReverseSidesTest(4): fullSteel = GeomMax(fullSteel, sideSteel.TrialSteelUtilization)
+        End If
+        mReverseSolverTest.DiscardStep
+        If sf And maxIterations - halfSteps - fullSteps >= 1 Then
+            delta = full
+            For i = 1 To 60: delta(i) = full(i) - accepted(i): Next i
+            If mReverseSolverTest.SelectSpatialDirectionControl(accepted, full, delta, restoreProjection, restoredCoordinate, restoredLength) Then
+                seed = full
+                restored = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, restoreProjection, restoredCoordinate, _
+                    fullLambda, restoreLambda, absTol, relTol, maxIterations - halfSteps - fullSteps, consistentControl:=True, initialField:=seed)
+                restoreSteps = mReverseSolverTest.IterationCount
+                If restored Then
+                    mReverseSolverTest.CopyTrial restoredField, restoredActual
+                    restored = restoreSteps = 0 And restoreLambda = fullLambda
+                    If restored Then
+                        For i = 1 To 60
+                            If restoredField(i) <> full(i) Then restored = False: Exit For
+                        Next i
+                    End If
+                End If
+            End If
+        End If
+        mReverseSolverTest.DiscardStep
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Касательная проба приняла материальную историю."
+        TestWriteReverseBinaryVector handle, Array(caseIndex, level, ratio, reference, dl, alpha, spacing, arcLength, radius, q, _
+            Abs(CLng(sh)), Abs(CLng(sf)), halfLambda, fullLambda, halfSteps, fullSteps, Abs(CLng(restored)), restoreSteps, restoreLambda, _
+            revision, mReverseSolverTest.AcceptedRevision, halfSteel, fullSteel)
+        TestWriteReverseBinaryVector handle, projection: TestWriteReverseBinaryVector handle, accepted
+        TestWriteReverseBinaryVector handle, halfSeed: TestWriteReverseBinaryVector handle, fullSeed
+        TestWriteReverseBinaryVector handle, half: TestWriteReverseBinaryVector handle, full
+        TestWriteReverseBinaryVector handle, actualHalf: TestWriteReverseBinaryVector handle, actualFull
+        TestWriteReverseBinaryVector handle, halfEffort: TestWriteReverseBinaryVector handle, fullEffort
+        TestWriteReverseBinaryVector handle, restoredField: TestWriteReverseBinaryVector handle, restoredActual
+        If sh Then
+            Set record = New Collection: record.Add "ColdTangent.Half" & Format$(caseIndex, "000"): record.Add half: record.Add halfLambda: records.Add record
+        End If
+        If sf Then
+            Set record = New Collection: record.Add "ColdTangent.Full" & Format$(caseIndex, "000"): record.Add full: record.Add fullLambda: records.Add record
+        End If
+    Next caseIndex
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Лишние данные касательных прогнозов."
+    Close #inputHandle: Close #handle
+    Dim checked() As Double: mReverseSolverTest.CopyAccepted checked
+    For i = 1 To 60
+        If accepted(i) <> checked(i) Then Err.Raise 5, , "Касательная проба изменила принятое поле."
+    Next i
+    For Each item In records
+        Set record = item: a = record(2): TestExportSignedArcTrial CStr(record(1)), a, CDbl(record(3))
+    Next item
+    mHardPreparedPathTest = mPolishRootTest & "\Native\ColdTangent.Restored"
+    mPtcSuppressTest = True: TestExportFastFrozenReplay: mPtcSuppressTest = False
+    TestRunColdTangentPairs = "TOTAL_COLD_TANGENT_PAIRS_TEST: passed=1; failed=0; numerical outcomes recorded not asserted; capacity_certified=False"
+End Function
