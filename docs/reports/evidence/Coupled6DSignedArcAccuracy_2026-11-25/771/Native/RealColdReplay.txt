@@ -1,0 +1,39 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold771ArcMaterialAccuracy_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 8B8A9C7BC972E7E35622C2A93EE8F6E3C20EB70D5C01916942B7635E658A8144
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold771ArcMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_630c4e6174c543ddba5a3853f35ea112\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=24912; startTicks=639311704677752434
+===== modTestCoupledElasticState.RunTestReversePolish =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T05:27:55
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=24912; workingSet=165310464; privateBytes=114937856; cpu=12.625
+EXCEL_AFTER_SUITE: pid=26460; workingSet=88797184; privateBytes=64888832; cpu=1.296875
+RUNTIME ERROR: VBAProject Не выполнен контроль восстановленной истории. Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 1.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Внутренних ошибок: 1.
+
+Первая внутренняя ошибка:
+Сочетание HardShear: Расчет сочетания остановлен из-за ошибки выполнения: Замороженная точка не прошла исходную приёмку.
+
+Исходная строка сочетания:
+Config!H71:Q71.
+
+Пошаговый отчет сохранен:
+D:\CodexScratch\RC_Section_NDM_TQ\Cold771ArcMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_630c4e6174c543ddba5a3853f35ea112\RC_Section_NDM_execution_report.txt
+
+Время расчёта: 5.46 с.
+
+Данные сохранены на листе Results текущей книги.
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold771ArcMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_630c4e6174c543ddba5a3853f35ea112\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T05:28:03
+FAIL_FAST: remaining suites were not run after a completed failed suite
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=1; source unchanged=True

@@ -1,0 +1,90 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет автоматическую последовательность знаковых дуг от известного равновесия; будущие поля и предел не задаются.
+Private Sub TestRunConfirmedArcWalk()
+    Dim handle As Integer, record As Integer, attempt As Long, acceptedCount As Long, reason As String
+    Dim initialCount As Long: initialCount = mReverseFieldsTest.Count
+    Dim previousLambda As Double, fraction As Double, fullLambda As Double, halfLambda As Double
+    Dim accepted() As Double, full() As Double, half() As Double, doubled() As Double, projection() As Double
+    Dim field() As Double, actual() As Double, prediction As Variant, factor As Double, solve As Boolean
+    Dim distance As Double, halfDistance As Double, fieldError As Double, lambdaError As Double, lambdaBound As Double
+    Dim radius As Double, alpha As Double, q As Double, target As Double, tolerance As Double, i As Long, ready As Boolean
+    Dim revision As Long, restoration As Variant, calls As Long, primary As Long
+    handle = FreeFile
+    Open mPolishRootTest & "\Native\ArcWalk.Attempts.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMARCWALK000001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(initialCount, 32#, 96#, 30#, 0.005, 0.0001)
+    mSignedArcWalkingTest = True: mSignedArcRatioTest = 0.0078125
+    reason = "Исчерпан бюджет32 дуговых пар."
+    For attempt = 1 To 32
+        mReverseTraceTest.ReadPoint mReverseTraceTest.Count, fraction, previousLambda
+        accepted = mReverseFieldsTest(mReverseFieldsTest.Count): revision = mReverseSolverTest.AcceptedRevision
+        TestRunSignedArcPair
+        calls = calls + 2: primary = primary + CLng(mSignedArcPairTest(11))
+        Dim saved As String: saved = mPolishRootTest & "\Native\ArcWalk." & Format$(attempt, "000")
+        Name mPolishRootTest & "\Native\SignedArc.Result.bin" As saved & ".bin"
+        Name mPolishRootTest & "\Native\SignedArc.Outcome.txt" As saved & ".txt"
+        ready = False: fieldError = -1#: lambdaError = -1#: lambdaBound = 0#
+        fullLambda = mSignedArcPairTest(2): halfLambda = mSignedArcPairTest(3)
+        radius = mSignedArcPairTest(9): alpha = mSignedArcPairTest(10)
+        target = mSignedArcPairTest(7): q = mSignedArcPairTest(8)
+        tolerance = mReverseOptionsTest(3) + mReverseOptionsTest(4) * TestArcWalkLoadNorm(previousLambda)
+        If 0.5 * radius * mReverseModulusTest <= 8# * tolerance Then
+            reason = "Дуговое приращение меньше разрешения исходного равновесия."
+            TestWriteReverseBinaryVector handle, Array(attempt, mReverseFieldsTest.Count, 0#, mSignedArcRatioTest, fieldError, lambdaError, lambdaBound, revision, revision, calls, primary)
+            Exit For
+        End If
+        If mSignedArcPairTest(0) And mSignedArcPairTest(1) Then
+            full = mSignedArcPairTest(4): half = mSignedArcPairTest(5): projection = mSignedArcPairTest(6)
+            doubled = half
+            For i = 1 To mReverseSolverTest.PhysicalDegreeCount: doubled(i) = 2# * half(i) - accepted(i): Next i
+            distance = mReverseSolverTest.SpatialFieldDistance(accepted, full)
+            If distance > 0# Then fieldError = mReverseSolverTest.SpatialFieldDistance(full, doubled) / distance
+            lambdaError = Abs(2# * halfLambda - previousLambda - fullLambda)
+            lambdaBound = GeomMax(0.005 * Abs(fullLambda - previousLambda), 8# * mReverseOptionsTest(4) * 0.0001 * (1# + Abs(previousLambda)))
+            distance = Sqr(distance ^ 2 + alpha ^ 2 * (fullLambda - previousLambda) ^ 2)
+            halfDistance = Sqr(mReverseSolverTest.SpatialFieldDistance(accepted, half) ^ 2 + alpha ^ 2 * (halfLambda - previousLambda) ^ 2)
+            ready = fieldError >= 0# And fieldError <= 0.005 And lambdaError <= lambdaBound And fullLambda > 0# And halfLambda > 0#
+            ready = ready And distance <= 3# * radius And halfDistance <= 1.5 * radius
+        End If
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Пробная дуговая пара изменила историю."
+        If ready Then
+            prediction = full
+            solve = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target, fullLambda, factor, _
+                mReverseOptionsTest(3) * 0.0001, mReverseOptionsTest(4) * 0.0001, CLng(mReverseOptionsTest(2) - mSignedArcPairTest(11)), _
+                consistentControl:=True, initialField:=prediction, loadProjection:=q)
+            restoration = mReverseSolverTest.ReadPolishEffortTest: calls = calls + 1: primary = primary + CLng(restoration(0))
+            If Not solve Or restoration(0) <> 0 Or factor <> fullLambda Then Err.Raise 5, , "Подтверждённая полная дуга не восстановлена без новых поправок."
+            mReverseSolverTest.CopyTrial field, actual
+            For i = 1 To UBound(full): If field(i) <> full(i) Then Err.Raise 5, , "Изменено подтверждённое дуговое поле."
+            Next i
+            mReverseSolverTest.AcceptStep: mReverseFieldsTest.Add full: mReverseTraceTest.Add 1#, fullLambda
+            acceptedCount = acceptedCount + 1
+        End If
+        TestWriteReverseBinaryVector handle, Array(attempt, mReverseFieldsTest.Count, Abs(CLng(ready)), mSignedArcRatioTest, fieldError, lambdaError, lambdaBound, revision, mReverseSolverTest.AcceptedRevision, calls, primary)
+        If ready Then
+            mSignedArcRatioTest = GeomMin(2#, 0.8 * Sqr(0.005 / GeomMax(fieldError, 0.00000001))) ' Рост следующего шага ограничен; локальная проверка обязательна заново.
+        Else
+            mSignedArcRatioTest = 0.5 * mSignedArcRatioTest
+        End If
+    Next attempt
+    Close #handle: mSignedArcWalkingTest = False
+    record = FreeFile
+    Open mPolishRootTest & "\Native\ArcWalk.Outcome.txt" For Output As #record
+    Print #record, "INITIAL;" & CStr(initialCount) & ";ACCEPTED;" & CStr(acceptedCount) & ";CALLS;" & CStr(calls) & ";PRIMARY;" & CStr(primary)
+    Print #record, "STOP;" & reason & ";PHYSICAL_CAPACITY_CERTIFIED;False"
+    Close #record
+    If calls > 96 Then Err.Raise 5, , "Превышен бюджет96 нелинейных вызовов."
+    mHardPreparedPathTest = mPolishRootTest & "\Native\ArcWalk.Accepted"
+    mPtcSuppressTest = True: TestExportFastFrozenReplay 999: mPtcSuppressTest = False
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вычисляет масштаб физических слабых нагрузок для исходного пользовательского допуска, включая все шесть усилий.
+Private Function TestArcWalkLoadNorm(ByVal factor As Double) As Double
+    Dim force(1 To 6) As Double, external() As Double, i As Long
+    For i = 1 To 6: force(i) = mReverseBaseTest(i) + factor * mReverseDirectionTest(i): Next i
+    mReverseOperatorsTest.LoadEquations force(1), force(2), force(3), force(4), force(5), force(6), external
+    For i = 1 To mReverseSolverTest.PhysicalDegreeCount: TestArcWalkLoadNorm = GeomMax(TestArcWalkLoadNorm, Abs(external(i))): Next i
+End Function

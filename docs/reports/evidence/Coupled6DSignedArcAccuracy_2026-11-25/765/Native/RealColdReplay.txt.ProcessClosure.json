@@ -1,0 +1,74 @@
+﻿{
+    "Stage":  "AFTER_CHILD_EXIT",
+    "Passed":  true,
+    "ChildHasExited":  true,
+    "ChildExitCode":  0,
+    "Closure":  {
+                    "Passed":  true,
+                    "Identity":  {
+                                     "Valid":  true,
+                                     "PID":  20736,
+                                     "Ticks":  639311689807150525,
+                                     "Reason":  "Primary TEST_EXCEL_PROCESS"
+                                 },
+                    "FinalState":  {
+                                       "State":  "Absent",
+                                       "PID":  20736,
+                                       "StartTicksUTC":  "639311689807150525",
+                                       "Reason":  "Explicit NoProcessFoundForGivenId",
+                                       "ObservedUTC":  "2026-11-25T02:03:18.5916236+00:00"
+                                   },
+                    "Observations":  [
+                                         {
+                                             "State":  "Live",
+                                             "PID":  20736,
+                                             "StartTicksUTC":  "639311689807150525",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-25T02:03:17.9264719+00:00"
+                                         },
+                                         {
+                                             "State":  "Live",
+                                             "PID":  20736,
+                                             "StartTicksUTC":  "639311689807150525",
+                                             "Reason":  "Exact own Excel is still alive",
+                                             "ObservedUTC":  "2026-11-25T02:03:18.1582528+00:00"
+                                         },
+                                         {
+                                             "State":  "Unknown",
+                                             "PID":  20736,
+                                             "StartTicksUTC":  "639311689807150525",
+                                             "Reason":  "PID identity mismatch; absence not asserted",
+                                             "ObservedUTC":  "2026-11-25T02:03:18.3747625+00:00"
+                                         },
+                                         {
+                                             "State":  "Absent",
+                                             "PID":  20736,
+                                             "StartTicksUTC":  "639311689807150525",
+                                             "Reason":  "Explicit NoProcessFoundForGivenId",
+                                             "ObservedUTC":  "2026-11-25T02:03:18.5916236+00:00"
+                                         }
+                                     ],
+                    "GraceMilliseconds":  3000,
+                    "OrdinaryPathKilledAnything":  false
+                },
+    "RunnerCleanupValid":  true,
+    "RunnerCleanup":  {
+                          "Stage":  "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+                          "OwnerVerified":  true,
+                          "PID":  20736,
+                          "StartTicksUTC":  "639311689807150525",
+                          "CloseRequested":  false,
+                          "CloseSucceeded":  false,
+                          "QuitRequested":  true,
+                          "QuitSucceeded":  true,
+                          "Errors":  [
+
+                                     ],
+                          "Failed":  false,
+                          "FinalExitNotAsserted":  true,
+                          "FinalClosureAuthority":  "Run-Audit03Watchdog after actual child exit",
+                          "ObservedUTC":  "2026-11-25T02:03:17.4104318+00:00"
+                      },
+    "RunnerCleanupReadError":  null,
+    "OrdinaryPathKilledAnything":  false
+}

@@ -1,0 +1,17 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold768SignedArcPrefix32Small_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: A699F711D303D30750A0F7DAB07C68874BA86374689F575269375DEC9E94ABE1
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold768SignedArcPrefix32Small_20261125\Temp\RC_NDM_ModeSuite_399d9b1089a0470b840ce24cca2eb2b7\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=27900; startTicks=639311697246277349
+===== modTestCoupledElasticState.RunTestReversePolish =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T05:15:32
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=7912; workingSet=185409536; privateBytes=139231232; cpu=180.875
+EXCEL_AFTER_SUITE: pid=27900; workingSet=171085824; privateBytes=131231744; cpu=15.5625
+TOTAL_REVERSE_POLISH_STUDY_TEST: passed=1; failed=0; numerical_outcomes_recorded_not_asserted; capacity_certified=False
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold768SignedArcPrefix32Small_20261125\Temp\RC_NDM_ModeSuite_399d9b1089a0470b840ce24cca2eb2b7\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T05:15:42
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

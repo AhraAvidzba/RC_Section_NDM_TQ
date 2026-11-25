@@ -6409,7 +6409,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Use corrected private759 halfguard (working757 plus six-component array allocation; testwrapper from758), reject unverified guide752/754 promotion. Seek connected continuation with a different parameter near turning states; verify full/half before adoption, not just positive projection and equilibrium. Positive guard restores fullstate, but cold search after correction and automatic physical limit remain unproved. Preserve full task and main/release.",
+  "next_action": "773 half-first predictor still accepts only2 states. Diagnose remaining field correction and tangent conditioning at roots of770/773; force residual alone may not resolve displacement accuracy near turning. Distinguish this from material branch transition using actual full/half root derivatives, rather than more blind step shrinking. Keep numerical stop distinct from physical failure; preserve full original six-force workbook scope, unchanged production kernel, main and release.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6649,7 +6649,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:754 automatic return adds27 equilibrium states but756 halfstep disproves local-step consistency (tensorerror0.98711);757 adds shared-budget halfguard, rejection20/30/history preserved;758 positive test reveals unallocated full-restoration load array, fixed759 and positive plus105 final regressions verified. Physicalcapacity and fullgoal remain open.",
+  "previous_goal_turn_classification": "progress: strict signed-arc pair769 independently confirmed; automatic770 continuation verified2 new states;771 isolated outer precision broke frozen5;772 consistent nested precision restored replay and87 regressions but no further advancement;773 half-first predictor evaluated. No physical capacity certified.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -7539,6 +7539,70 @@
     "states": 64,
     "steel_event_not_reached": true
   },
+  "signed_arc_accuracy_evidence": "docs/reports/evidence/Coupled6DSignedArcAccuracy_2026-11-25",
+  "signed_arc_accuracy_summary": {
+    "760": {
+      "locally_confirmed_by_half_step": false
+    },
+    "761": {
+      "locally_confirmed_by_half_step": false
+    },
+    "762": {
+      "locally_confirmed_by_half_step": false
+    },
+    "763": {
+      "locally_confirmed_by_half_step": false,
+      "tensor_relative_half_error": 0.726439427974874
+    },
+    "764": {
+      "locally_confirmed_by_half_step": false
+    },
+    "765": {},
+    "766": {
+      "locally_confirmed_by_half_step": false,
+      "tensor_relative_half_error": 0.24156650969318258
+    },
+    "767": {
+      "locally_confirmed_by_half_step": false,
+      "tensor_relative_half_error": 0.019607037651860438
+    },
+    "768": {
+      "locally_confirmed_by_half_step": false,
+      "tensor_relative_half_error": 0.3375717752410298
+    },
+    "769": {
+      "locally_confirmed_by_half_step": true,
+      "tensor_relative_half_error": 6.638739569703436e-05
+    },
+    "770": {
+      "last_lambda": 1.1088492220149055,
+      "maximum_lambda": 1.1088492220149055,
+      "new_accepted_states": 2,
+      "nonlinear_calls": 18,
+      "stop": "INITIAL;32;ACCEPTED;2;CALLS;18;PRIMARY;30\nSTOP;Дуговое приращение меньше разрешения исходного равновесия.;PHYSICAL_CAPACITY_CERTIFIED;False\n",
+      "total_primary_steps": 30
+    },
+    "771": {
+      "actual_residual_MPa": 0.0161095642612828,
+      "first_failed_frozen_state": 5
+    },
+    "772": {
+      "last_lambda": 1.1088492220214365,
+      "maximum_lambda": 1.1088492220214365,
+      "new_accepted_states": 2,
+      "nonlinear_calls": 18,
+      "stop": "INITIAL;32;ACCEPTED;2;CALLS;18;PRIMARY;30\nSTOP;Дуговое приращение меньше разрешения исходного равновесия.;PHYSICAL_CAPACITY_CERTIFIED;False\n",
+      "total_primary_steps": 30
+    },
+    "773": {
+      "last_lambda": 1.1088492220149417,
+      "maximum_lambda": 1.1088492220149417,
+      "new_accepted_states": 2,
+      "nonlinear_calls": 18,
+      "stop": "INITIAL;32;ACCEPTED;2;CALLS;18;PRIMARY;27\nSTOP;Дуговое приращение меньше разрешения исходного равновесия.;PHYSICAL_CAPACITY_CERTIFIED;False\n",
+      "total_primary_steps": 27
+    }
+  },
   "stopped_own_file_enumeration_session": {
     "exit_code": 1,
     "reason": "Unneeded broad rg listing interrupted; no Office process affected",
@@ -8386,10 +8450,13 @@
   },
   "terminal_sessions_this_stage": [
     1109,
+    2002,
     2277,
     2312,
     2450,
+    4426,
     4763,
+    4781,
     5291,
     6585,
     7846,
@@ -8414,12 +8481,18 @@
     16382,
     16553,
     16755,
+    17157,
     17689,
+    17992,
+    18643,
     18956,
     19123,
+    19677,
+    20542,
     21364,
     21859,
     22798,
+    22845,
     23111,
     23260,
     23322,
@@ -8438,19 +8511,23 @@
     30205,
     30844,
     31266,
+    31411,
     31421,
     31556,
     31923,
     32063,
     32493,
+    33763,
     33931,
     34055,
     34937,
+    35394,
     36027,
     36034,
     36412,
     36441,
     37183,
+    37439,
     37524,
     38101,
     38126,
@@ -8458,7 +8535,9 @@
     39957,
     40717,
     40742,
+    40853,
     42094,
+    42262,
     42347,
     42421,
     44935,
@@ -8474,6 +8553,7 @@
     50872,
     51591,
     52416,
+    53557,
     54096,
     55018,
     55381,
@@ -8482,25 +8562,30 @@
     57628,
     57786,
     58105,
+    59690,
     59912,
     60094,
     60225,
     60275,
     61803,
     61911,
+    62845,
     62866,
     64786,
     65737,
     66134,
     67411,
+    67949,
     68103,
     68652,
+    68748,
     68966,
     70831,
     71706,
     72043,
     73975,
     74004,
+    74939,
     75081,
     75856,
     76344,
@@ -8510,20 +8595,27 @@
     77326,
     78149,
     78535,
+    79040,
     79250,
     79300,
     80580,
     80666,
+    81179,
     81294,
     81541,
     81919,
     83283,
     83669,
     84038,
+    84068,
+    84727,
     84774,
+    85277,
     86004,
     86272,
+    86279,
     86451,
+    87181,
     87280,
     87359,
     87682,
@@ -8532,6 +8624,7 @@
     88306,
     88605,
     89569,
+    89949,
     90257,
     90746,
     91249,
@@ -8554,9 +8647,10 @@
     97145,
     99831,
     99841,
-    99863
+    99863,
+    99944
   ],
-  "updated_local": "2026-11-25T04:17:51.543980+03:00",
+  "updated_local": "2026-11-25T05:38:25.194318+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
