@@ -1,6 +1,14 @@
 {
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_cold_exec_session": 9088,
+  "active_cold_source_root": "Cold880CriticalHCold96_20261126",
+  "active_exec_session": 9088,
+  "active_jobs": [
+    {
+      "root": "Cold880CriticalHCold96_20261126",
+      "session": 9088,
+      "stage": "actual cold from zero on verified878;96/30same;wallwatchdog1200;results-save-reopen requested"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1978,7 +1986,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -4330,6 +4338,11 @@
     "whole_goal_completed": false
   },
   "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
+  "generic_runtime_three_station_steel_limit_audit_open": [
+    "CCoupledNewtonSolver.PrincipalSteelWithinLimits",
+    "CCoupledNewtonSolver.TryEnvelopeStep half steel guard",
+    "CCoupledDeformationContinuation.BeyondSteelLimit"
+  ],
   "goal_pause_tool_pending": false,
   "goal_status": "active",
   "guide_half_confirmation756": {
@@ -7681,6 +7694,126 @@
     ],
     "whole_goal_completed": false
   },
+  "latest_critical_H_recovery_evidence": "docs/reports/evidence/Coupled6DCriticalHRecovery_2026-11-26",
+  "latest_critical_H_recovery_proof": {
+    "H_pair_required_at_recovery_and_turn": true,
+    "absent_failed_roots_not_counted": true,
+    "actual_components": 256,
+    "all14_native_analytical_outcomes_verified": true,
+    "cases": [
+      {
+        "actual_turn": false,
+        "case": 1,
+        "field_error": 0.0037249984675212632,
+        "full_output_exact_after_half": true,
+        "full_steps": 3,
+        "half_steps": 2,
+        "joint_error": 0.003922040369235028,
+        "lambda_bound": 6.973886251215874e-06,
+        "lambda_error": 2.575847482644278e-06,
+        "primary_iterations": 5,
+        "probes": 2,
+        "ratio": 1.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015298186713050515,
+            "H_increment": 1.5847684004492843e-07,
+            "H_target": 0.0001529818671305051,
+            "direction_cosine": 0.9962909012040169,
+            "lambda_value": 1.1042004576769582,
+            "length_over_incoming": 0.9755458448314153,
+            "maximum_three_station_steel_utilization": 0.0048115988752002615,
+            "raw_force_residual_MPa": 3.36849889545529e-16,
+            "weak": {
+              "bound_MPa": 1.2156854818276594e-06,
+              "force_residual_MPa": 1.1789746134093516e-15,
+              "fraction": 1.0,
+              "index": 21,
+              "lambda": 1.10420045767696,
+              "residual_MPa": 6.860456213536592e-13,
+              "steel_utilization": 0.00481159887520026
+            }
+          },
+          "Half": {
+            "H_MPa": 0.00015290262871048255,
+            "H_increment": 7.923842002232869e-08,
+            "H_target": 0.00015290262871048266,
+            "direction_cosine": 0.9964897682071311,
+            "lambda_value": 1.1042331803485372,
+            "length_over_incoming": 0.48729144600510726,
+            "maximum_three_station_steel_utilization": 0.004812290340759701,
+            "raw_force_residual_MPa": 3.36849889545529e-16,
+            "weak": {
+              "bound_MPa": 1.2157066909666463e-06,
+              "force_residual_MPa": 3.873773729773584e-15,
+              "fraction": 1.0,
+              "index": 21,
+              "lambda": 1.10423318034854,
+              "residual_MPa": 1.932129044431019e-13,
+              "steel_utilization": 0.0048122903407597
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "case": 2,
+        "primary_iterations": 30,
+        "probes": 1,
+        "ratio": 0.25,
+        "solved": false
+      },
+      {
+        "case": 3,
+        "primary_iterations": 30,
+        "probes": 1,
+        "ratio": 0.0625,
+        "solved": false
+      }
+    ],
+    "exactly_one_argument_changed_in_each_controller_arc_and_test_call": true,
+    "existing_force_tolerances_and_all_three_station_steel_checked": true,
+    "generic_runtime_principal_and_deformation_helpers_central_steel_only_audit_open": true,
+    "independently_rebuilt_root_count": 2,
+    "native": {
+      "failed": 0,
+      "macros": 3,
+      "own_process_closed": true,
+      "passed": 3,
+      "timeout600": false
+    },
+    "no_history_or_physical_capacity_acceptance": true,
+    "only_current_benchmark_three_station_limits_proven_not_generic_steel_limit_contract": true,
+    "ordinary_H_steps_preserve_original_scope": true,
+    "physical_capacity_certified": false,
+    "true_source20_history_unchanged": true,
+    "verified_case1_full_half_stresses_and_operators_bit_identical876": true,
+    "verified_working_H_pairs": 1,
+    "whole_goal_completed": false
+  },
+  "latest_critical_H_regressions": {
+    "875": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "877": {
+      "failed": 1,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 23,
+      "timeout600": false
+    },
+    "879": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    }
+  },
   "latest_fixed_metric_cold_proof": {
     "accepted_states": 20,
     "cold": {
@@ -9783,6 +9916,231 @@
     "whole_goal_completed": false,
     "working_kernel_changed_and_verified": true
   },
+  "latest_shared_curve_control_proof": {
+    "absent_or_unattempted_half_roots_not_counted": true,
+    "actual_components": 256,
+    "all14_native_analytical_outcomes_verified": true,
+    "all_existing_roots_independently_rebuilt_count": 1,
+    "analytic": [
+      {
+        "case": 1,
+        "joint_error": 0.0007499999062500175,
+        "lambda_bound": 7500.000937499942,
+        "lambda_error": 1125.0,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 2,
+        "joint_error": 0.0007499999062500176,
+        "lambda_bound": 750.0000937499941,
+        "lambda_error": 112.5,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 3,
+        "joint_error": 0.0007499999062500177,
+        "lambda_bound": 75.00000937499941,
+        "lambda_error": 11.25,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 4,
+        "joint_error": 0.0007499999062500175,
+        "lambda_bound": 75.00000937499941,
+        "lambda_error": 11.25,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 5,
+        "joint_error": 0.0007499999062500177,
+        "lambda_bound": 7.500000937499941,
+        "lambda_error": 1.125,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 6,
+        "joint_error": 0.0007499999062500162,
+        "lambda_bound": 0.7500000937499943,
+        "lambda_error": 0.11249999999999982,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 7,
+        "joint_error": 0.0007499999062500164,
+        "lambda_bound": 0.7500000937499941,
+        "lambda_error": 0.11249999999999982,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 8,
+        "joint_error": 0.0007499999062500162,
+        "lambda_bound": 0.07500000937499943,
+        "lambda_error": 0.011249999999999982,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 9,
+        "joint_error": 0.000749999906250046,
+        "lambda_bound": 0.007500000937499941,
+        "lambda_error": 0.0011250000000000426,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 10,
+        "joint_error": 0.0007499999062216243,
+        "lambda_bound": 7.500000937499941e-05,
+        "lambda_error": 1.12499999995741e-05,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 11,
+        "joint_error": 0.0007499999064288658,
+        "lambda_bound": 7.500000937499942e-06,
+        "lambda_error": 1.1250000002682725e-06,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 12,
+        "joint_error": 0.0007499999031722116,
+        "lambda_bound": 7.500000937499947e-07,
+        "lambda_error": 1.1249999953832912e-07,
+        "new_metric_admits": true,
+        "old_metric_admits": false
+      },
+      {
+        "case": 13,
+        "joint_error": 0.0,
+        "lambda_bound": 50.0,
+        "lambda_error": 0.0,
+        "new_metric_admits": true,
+        "old_metric_admits": true
+      },
+      {
+        "case": 14,
+        "joint_error": 0.006,
+        "lambda_bound": 2.4000000000000002e-14,
+        "lambda_error": 0.0,
+        "new_metric_admits": false,
+        "old_metric_admits": false
+      }
+    ],
+    "full_H_roots": 1,
+    "half_H_roots": 0,
+    "native": {
+      "failed": 0,
+      "macros": 3,
+      "own_process_closed": true,
+      "passed": 3,
+      "timeout600": false
+    },
+    "no_history_or_capacity_acceptance": true,
+    "original_full30_budget_preserved": true,
+    "pairs": [
+      {
+        "case": 1,
+        "full_solved": true,
+        "half_solved": false
+      },
+      {
+        "case": 2,
+        "full_solved": false,
+        "half_solved": false
+      },
+      {
+        "case": 3,
+        "full_solved": false,
+        "half_solved": false
+      }
+    ],
+    "physical_capacity_certified": false,
+    "roots": [
+      {
+        "H_MPa": 0.00015298186713050515,
+        "H_increment": 1.5847684004492843e-07,
+        "H_target": 0.0001529818671305051,
+        "attempted": true,
+        "case": 1,
+        "direction_cosine": 0.9962909012040169,
+        "iterations": 3,
+        "lambda_value": 1.1042004576769582,
+        "probes": 1,
+        "raw_force_residual_MPa": 3.36849889545529e-16,
+        "role": "Full",
+        "solved": true,
+        "steel_utilization": 0.0048115988752002615,
+        "total_pair_iterations": 3,
+        "weak": {
+          "bound_MPa": 1.2156854818276594e-06,
+          "force_residual_MPa": 1.1789746134093516e-15,
+          "fraction": 1.0,
+          "index": 21,
+          "lambda": 1.10420045767696,
+          "residual_MPa": 6.860456213536592e-13,
+          "steel_utilization": 0.00481159887520026
+        }
+      },
+      {
+        "attempted": true,
+        "case": 1,
+        "iterations": 27,
+        "probes": 1,
+        "role": "Half",
+        "solved": false,
+        "total_pair_iterations": 30
+      },
+      {
+        "attempted": true,
+        "case": 2,
+        "iterations": 30,
+        "probes": 1,
+        "role": "Full",
+        "solved": false,
+        "total_pair_iterations": 30
+      },
+      {
+        "attempted": false,
+        "case": 2,
+        "iterations": 0,
+        "probes": 0,
+        "role": "Half",
+        "solved": false,
+        "total_pair_iterations": 30
+      },
+      {
+        "attempted": true,
+        "case": 3,
+        "iterations": 30,
+        "probes": 1,
+        "role": "Full",
+        "solved": false,
+        "total_pair_iterations": 30
+      },
+      {
+        "attempted": false,
+        "case": 3,
+        "iterations": 0,
+        "probes": 0,
+        "role": "Half",
+        "solved": false,
+        "total_pair_iterations": 30
+      }
+    ],
+    "shared_curve_metric_delegation_and_two_Newton_consumers_verified": true,
+    "total_actual_solved_roots": 1,
+    "true20_history_unchanged": true,
+    "whole_goal_completed": false
+  },
   "latest_spatial_decline_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold857SpatialDeclineRecovery_20261125",
   "latest_spatial_decline_cold_summary": {
     "accepted_states": 19,
@@ -9984,6 +10342,98 @@
     "whole_goal_completed": false,
     "working_kernel_changed_and_verified": true
   },
+  "latest_verified_H_pair_proof": {
+    "absent_failed_roots_not_counted": true,
+    "actual_components": 256,
+    "all14_native_analytical_outcomes_verified": true,
+    "cases": [
+      {
+        "actual_turn": false,
+        "case": 1,
+        "field_error": 0.0037249984675212632,
+        "full_output_exact_after_half": true,
+        "full_steps": 3,
+        "half_steps": 2,
+        "joint_error": 0.003922040369235028,
+        "lambda_bound": 6.973886251215874e-06,
+        "lambda_error": 2.575847482644278e-06,
+        "primary_iterations": 5,
+        "probes": 2,
+        "ratio": 1.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015298186713050515,
+            "H_increment": 1.5847684004492843e-07,
+            "H_target": 0.0001529818671305051,
+            "direction_cosine": 0.9962909012040169,
+            "lambda_value": 1.1042004576769582,
+            "length_over_incoming": 0.9755458448314153,
+            "maximum_three_station_steel_utilization": 0.0048115988752002615,
+            "raw_force_residual_MPa": 3.36849889545529e-16,
+            "weak": {
+              "bound_MPa": 1.2156854818276594e-06,
+              "force_residual_MPa": 1.1789746134093516e-15,
+              "fraction": 1.0,
+              "index": 21,
+              "lambda": 1.10420045767696,
+              "residual_MPa": 6.860456213536592e-13,
+              "steel_utilization": 0.00481159887520026
+            }
+          },
+          "Half": {
+            "H_MPa": 0.00015290262871048255,
+            "H_increment": 7.923842002232869e-08,
+            "H_target": 0.00015290262871048266,
+            "direction_cosine": 0.9964897682071311,
+            "lambda_value": 1.1042331803485372,
+            "length_over_incoming": 0.48729144600510726,
+            "maximum_three_station_steel_utilization": 0.004812290340759701,
+            "raw_force_residual_MPa": 3.36849889545529e-16,
+            "weak": {
+              "bound_MPa": 1.2157066909666463e-06,
+              "force_residual_MPa": 3.873773729773584e-15,
+              "fraction": 1.0,
+              "index": 21,
+              "lambda": 1.10423318034854,
+              "residual_MPa": 1.932129044431019e-13,
+              "steel_utilization": 0.0048122903407597
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "case": 2,
+        "primary_iterations": 30,
+        "probes": 1,
+        "ratio": 0.25,
+        "solved": false
+      },
+      {
+        "case": 3,
+        "primary_iterations": 30,
+        "probes": 1,
+        "ratio": 0.0625,
+        "solved": false
+      }
+    ],
+    "existing_force_tolerances_and_all_three_station_steel_checked": true,
+    "generic_runtime_principal_and_deformation_helpers_central_steel_only_audit_open": true,
+    "independently_rebuilt_root_count": 2,
+    "native": {
+      "failed": 0,
+      "macros": 3,
+      "own_process_closed": true,
+      "passed": 3,
+      "timeout600": false
+    },
+    "no_history_or_physical_capacity_acceptance": true,
+    "only_current_benchmark_three_station_limits_proven_not_generic_steel_limit_contract": true,
+    "physical_capacity_certified": false,
+    "true_source20_history_unchanged": true,
+    "verified_working_H_pairs": 1,
+    "whole_goal_completed": false
+  },
   "latest_verified_active_loading_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold842HReentryWalk_20261125",
   "latest_verified_auto_H_guide_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold844AutomaticHGuideArc_20261125",
   "latest_verified_automatic_Hwalk_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold852AutomaticLoadingSecantWalk_20261125",
@@ -10043,7 +10493,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "NEXT ACTUAL NUMERICAL WORK:centralize constant-reference full/half curve metric for Newton ConfirmOriginalReturnHalf and TryEnvelopeStep; separate repeat-solution PrincipalTransition gate needs different audit,not mechanical replacement. Then test H-directed admissible corner continuation from true20, diagnosepoint6/+1 loading/unloading complementarity.870refined-only and871control both0roots24calls;873branchsignatureiteration max4also0roots42calls;all native/source audits preserved;872local/globaltangent proof andtwobranch approximation localizemismatch. No material/force weakening,no physical failure claim,no release promotion. Archive388usedfiles verified;wholegoalactive.",
+  "next_action": "POLL THIS SAME ACTUAL COLD SESSION;do not restart. 878criticalHpaired5iterations strictfull/half and all14analyticalPASS;879all164PASS including known0.9peak;876mandatoryeveryHnegative877fixedbycriticalscope,notbudget/targetweakening. Preserve coldterminal/full workflow evidence and independently replay whole actualtrajectory. Genericruntimecentral-onlysteelhelpers+ONQ010/012 stillopen;physicalultimate notcertified;goalactive.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -10324,7 +10774,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:870one-call refined primary corrector and871immutablecontrol bothactualtrue20 zero roots24calls,unhelpfulchangeNOTadopted.872readonlynativeall129points2locations bothderivatives plusdirectstressdifferences;probe refinedmatrix independentlyannihilatesdirection2.93e-17 butincomingprobe loads6/+1 whilecomputedforwarddirection unloads;twobranch independentapprox confirmsopposite signs.873actualgeneralNewton/Arc branchsignatureiteration4budgetedbuilds compiled2imports254others verified;actualnativeoutcomearchived,notphysicalfailure. Furtherduplicate relativeDeltaLambda half-gates identified in Newton H/event consumers;next reconcilecurvecontrols and investigate admissible H-directed continuation,noforcerelaxation.",
+  "previous_goal_turn_classification": "progress:sharedCurveLambdaBound in generalNewton/Arc twohalf-gates,14nativeanalyticPASS;874strictfullHroot3itersfoundattrue20butincominghalf27fails.876workingHhalfseedmidpointfull gives strictverifiedfull+half3+2iters,field.003724998joint.003922040,oldlambdaerrorboundwouldreject;all6/56+4/H/all3stationsteel verified. MandatoryeveryH876causedknown0.9peakregression87723PASS1FAIL budget, fixedscope878criticalrecovery/turnonly, preservingordinaryHbehavior/knownpeak/96/30;8782rootsandstressesbitidentical876;879all164PASS. Actualcold880launchedsession9088onexact878,wall1200only,noresultyet. Generic3stationruntime steelhelpergap found/currenttoyall3independentlyverified;physicalultimate/wholegoalopen.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -12127,6 +12577,7 @@
     "working_code_promoted": false
   },
   "terminal_sessions_this_stage": [
+    1055,
     1109,
     1801,
     1809,
@@ -12139,6 +12590,7 @@
     3065,
     3074,
     3333,
+    3987,
     4388,
     4426,
     4559,
@@ -12212,6 +12664,7 @@
     19123,
     19402,
     19677,
+    19716,
     20068,
     20401,
     20496,
@@ -12244,6 +12697,7 @@
     27422,
     28317,
     28422,
+    28499,
     28604,
     28703,
     28797,
@@ -12258,6 +12712,7 @@
     30710,
     30844,
     30876,
+    31050,
     31266,
     31411,
     31421,
@@ -12275,6 +12730,7 @@
     35024,
     35133,
     35394,
+    35593,
     35629,
     35698,
     35896,
@@ -12314,10 +12770,12 @@
     42421,
     42590,
     43419,
+    43669,
     43814,
     43829,
     43884,
     44434,
+    44891,
     44935,
     45060,
     45120,
@@ -12336,6 +12794,7 @@
     49125,
     49126,
     49446,
+    49844,
     50037,
     50163,
     50306,
@@ -12391,6 +12850,7 @@
     62959,
     63225,
     63350,
+    63362,
     64297,
     64786,
     65220,
@@ -12427,8 +12887,10 @@
     71731,
     71847,
     72043,
+    72129,
     72543,
     72955,
+    73257,
     73476,
     73914,
     73975,
@@ -12507,6 +12969,7 @@
     88284,
     88306,
     88605,
+    89231,
     89569,
     89834,
     89949,
@@ -12561,7 +13024,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T01:28:54.549835+03:00",
+  "updated_local": "2026-11-26T02:03:56.841320+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
