@@ -1,0 +1,53 @@
+{
+  "accepted_revision_after": 48,
+  "accepted_revision_before": 48,
+  "accepted_revision_unchanged": true,
+  "actual_single_working_recovery_call": true,
+  "all46_original_states_verified": true,
+  "auxiliary_reverse_root_excluded_from_return_sequence": true,
+  "cold_capacity_not_tested": true,
+  "control_bound_MPa": 1.18564674733225e-06,
+  "diagnostic_sequence_not_controller_branch_admission": true,
+  "effort": [
+    17.0,
+    1076.0,
+    10.0,
+    8.0,
+    1040.0,
+    1.0,
+    48.0,
+    6.656798685954028e-09
+  ],
+  "independent_NDS_and_original_control_verified": true,
+  "independent_return_equilibrium": {
+    "bound_MPa": 1.185646747332251e-06,
+    "force_residual_MPa": 4.330835239401226e-10,
+    "fraction": 1.0,
+    "index": 47,
+    "lambda": 1.05785498159833,
+    "residual_MPa": 6.656313567606625e-09,
+    "steel_utilization": 0.00264929537720724
+  },
+  "lambda_uncertainty": 1.53076283591264e-05,
+  "native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "original_control_actual": 0.00011684692827310927,
+  "original_control_residual_MPa": 8.131516293641283e-16,
+  "original_control_target": 0.0001168469282731093,
+  "original_lambda_guard_verified": true,
+  "physical_capacity_certified": false,
+  "primary_limit": 30,
+  "reference_lambda": 1.0522075610360588,
+  "returned_lambda": 1.0578549815983267,
+  "signed_advance_in_original_projection": 7.678459573682522e-08,
+  "solved": true,
+  "source_result_sha256": "967E65CAE54E11F820AA60DA3F5B3B59145D160F766829BD5B9734A439C11307",
+  "source_states": 46,
+  "total_primary_steps": 17,
+  "whole_goal_completed": false
+}

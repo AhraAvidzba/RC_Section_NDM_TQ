@@ -1,0 +1,17 @@
+{
+  "after_sha256": "1A66ADF12EFCA3DC711949356B9365685043A1D90CFDA33DDE01D965D1D311D0",
+  "before_sha256": "7A5D0B9F908E57C186D795AE5290B617309EDDC01F0CAE9B44430873A0CB8D3E",
+  "first_closure": {
+    "PID": 13920,
+    "StartTicksUTC": "639311633796497429",
+    "State": "Absent"
+  },
+  "first_failure": {
+    "Message": "You cannot call a method on a null-valued expression.",
+    "Position": "At D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold753IntegratedColdFrozenReplay_20261125\\Compile-TestExternalPoint.ps1:15 char:9\r\n+         & './tools/build_workbook/Update-IsolatedOptimizerCode.ps1' - ...\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "ScriptStackTrace": "at <ScriptBlock>, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold753IntegratedColdFrozenReplay_20261125\\tools\\build_workbook\\Update-IsolatedOptimizerCode.ps1: line 190\r\nat <ScriptBlock>, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold753IntegratedColdFrozenReplay_20261125\\Compile-TestExternalPoint.ps1: line 15"
+  },
+  "numerical_sources_changed": false,
+  "original_book_unchanged": true,
+  "original_compilation_not_accepted": true
+}

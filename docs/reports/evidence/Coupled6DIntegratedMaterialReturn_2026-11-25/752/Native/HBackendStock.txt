@@ -1,0 +1,8 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold752IntegratedGuideDirected_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 02EFA33A3A481D1ACC12DD07862778DB529AA52CD00231B401DD63A6FC85DA5F
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold752IntegratedGuideDirected_20261125\Temp\RC_NDM_ModeSuite_c0819810ad344eff9a7b1ba1c4a8a8b2\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=21240; startTicks=639311627277877607
+===== modTestCoupledElasticState.RunTestStockHTrace =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T03:18:55
+WATCHDOG_FAILURE: timeout=600 sec; macro=modTestCoupledElasticState.RunTestStockHTrace; ownExcelState=Absent; exactCleanupRequested=True
