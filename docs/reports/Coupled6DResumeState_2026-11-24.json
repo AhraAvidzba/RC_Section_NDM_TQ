@@ -4270,7 +4270,8 @@
     "whole_goal_completed": false
   },
   "full_original_scope": "Original NDM_Coupled6D_Codex_Spec.md and current docs/reports/Coupled6DAcceptance.md; own arbitrary-section six-force solver, all LoadPaths, hoop/grades/statuses, legacy NM/cracks/stability, diagrams/CAD, external and real-book acceptance, performance, literature and reproducible evidence.",
-  "goal_status": "active",
+  "goal_pause_tool_pending": true,
+  "goal_status": "pause_requested",
   "guide_half_confirmation756": {
     "accepted_coordinate": 0.00011677014367737244,
     "accepted_revision_unchanged": 48,
@@ -6498,7 +6499,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Use812 as isolated current candidate (same802 material state tolerance, only verified CArc fix), not unsuccessful804 state tightening. Cold808 still NumFail43/max1.1058869810286156 at95probes, no ultimate or performance improvement. Reproduce actual remaining cold808 endpoint and verify outgoing material branch/control after a resolved event; determine whether incoming linear arc hyperplane can track the outgoing direction before further cold runs. Finite local alpha alone does not exclude a nonsmooth corner, but a corner/local crack is not confirmed full RC failure; require actual post-transition equilibria and physical criteria. Keep30/96, force/gauges/field0.005/lambda checks. Need confirmed capacity, cold reproducibility, step/mesh/external comparisons, all LoadPaths, original workbook/UI/CAD deliverables and scoped full acceptance. Goal active.",
+  "next_action": "AFTER COMMIT AND SUCCESSFUL PUSH: call update_goal paused, report returned status and STOP. Resume only after explicit user request. On resume, retain full original objective.813-815 evidence establishes outgoing equilibria on cold808 exact endpoint: source1.1058869810286156, half1.1058869198622188, full1.105886858697143; surface25/+1 positive targets. Old incoming arc has joint cosine-0.6999, mechanical forward+0.4017. Need automatic outgoing-coordinate continuation with recent resolved station selected from solver/controller state, never hardcode25; use neighborhood from original predictor before solving, strict full/half field0.005 and lambda errors, force/gauges,30/96 and exact restoration; verify actual material limits, steel/hoops, LoadPaths.815 is TEST ENTRY ONLY, no physical peak/capacity claim; lambda uncertainty, wider postbranch, cold repeat, mesh/step/external controls, production integration/workbook, performance and full scoped acceptance remain incomplete. Prefer original state tolerance as812 unless new evidence justifies804 tightening. Do not restart cold808 or mark failure merely from NumFail.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6580,9 +6581,39 @@
     "whole_goal_completed": false
   },
   "original_goal_scope_preserved": true,
+  "outgoing815_summary": {
+    "full_lambda": 1.105886858697143,
+    "half_lambda": 1.1058869198622188,
+    "material_history_not_accepted": true,
+    "pair": {
+      "both_lambdas_below_source": true,
+      "distances": {
+        "Full": 4.0243655014897314e-11,
+        "Half": 2.0122060883911038e-11
+      },
+      "field_half_error": 3.9154180283756055e-05,
+      "incoming_joint_direction_cosine": -0.6998855133028187,
+      "incoming_load_metric": 0.013842279728889942,
+      "lambda_half_bound": 8.423547924114463e-10,
+      "lambda_half_error": 1.3211653993039363e-12,
+      "local": true,
+      "mechanical_direction_cosine": 0.40168223632160893,
+      "outgoing_field_per_lambda": 0.000328972211239129,
+      "reference_limits": {
+        "Full": 4.794259426695617e-11,
+        "Half": 2.3971297133478085e-11
+      },
+      "verified": true
+    },
+    "shared_primary": 15,
+    "source_lambda": 1.1058869810286156
+  },
+  "outgoing_loading_pause_evidence": "docs/reports/evidence/Coupled6DOutgoingLoadingPause_2026-11-25",
+  "pause_after_current_stage": true,
+  "pause_checkpoint_ready": true,
   "pause_request": "поставь на паузу задачу как дойдешь до логического завершения текущего этапа",
-  "pause_request_revoked": true,
-  "pause_requested_explicitly": false,
+  "pause_request_revoked": false,
+  "pause_requested_explicitly": true,
   "pause_revoked_user_message": "На паузу не ставь пока я сам об этом не попрошу снова",
   "peak_accuracy716": {
     "adjoints_full_rank": 8,
@@ -6746,7 +6777,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress: paired nested precision80287materials164regressions,45cold equilibria803; state precision80487materials still fails endpoint.805 exact Newton witness linear residual3.47e-23 but actual row53 reverses,25/+1 dominates.806 independent yield/branch shows actual loading transition25/+1 crossed by failed correction, original predictors bracket it but both root failures prevent any event search.807 permits event solve from predictor bracket only; restores verified event after5calls, no history acceptance/criteria change.8094call negative and8105call bitexact positive pass.807reg164 pass.808 actualcold still NumFail43/max1.1058869810286156/464.796875s;811 independent43equilibria verified.812 isolates same CArc fix with original802 state tolerance: also verified5calls. No higher lambda/physical capacity/speedup; production unchanged.",
+  "previous_goal_turn_classification": "progress:813 reproduces actual remaining43-state cold808 endpoint with both arc roots failing and no new resolved event.814 mapped outgoing coordinate candidates rejected by seed-relative locality before force recheck; no equilibria claimed.815 uses original full-predictor neighborhood fixed before solves, half1.5/full3, and existing CDP coordinate25/+1 with unchanged strict force/gauges/30; independently verifies both roots, field half error3.915e-5, lambda half error1.321e-12<8.424e-10, mechanical cosine+0.4017 versus incoming joint-0.6999, total15primary. Exact source history retained. No automatic continuation/physical capacity implemented. User explicitly requested pause at logical stage completion; no new research/solver changes after request, only finishing815 and archiving.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8662,6 +8693,7 @@
     42262,
     42347,
     42421,
+    42590,
     43419,
     43829,
     44935,
@@ -8669,6 +8701,7 @@
     45282,
     45411,
     46166,
+    46709,
     47141,
     48073,
     48427,
@@ -8786,6 +8819,7 @@
     87359,
     87569,
     87682,
+    87769,
     87972,
     88125,
     88284,
@@ -8816,13 +8850,15 @@
     96407,
     97029,
     97145,
+    98786,
+    99254,
     99292,
     99831,
     99841,
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T09:38:20.921617+03:00",
+  "updated_local": "2026-11-25T09:56:26.265707+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
