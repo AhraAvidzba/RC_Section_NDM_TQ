@@ -1,0 +1,72 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает невязку и тензоры всех точек вдоль линии к половинному корню; промежуточные поля не выдаются за равновесия.
+Private Sub TestRunArcRootPath()
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ArcRoots.bin" For Binary Access Read As #inputHandle
+    Dim fullData As Variant, halfData As Variant, projectionData As Variant, context As Variant, etas As Variant
+    fullData = TestReadPolishVector(inputHandle): halfData = TestReadPolishVector(inputHandle)
+    projectionData = TestReadPolishVector(inputHandle): context = TestReadPolishVector(inputHandle): Close #inputHandle
+    inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ArcPathOptions.bin" For Binary Access Read As #inputHandle
+    etas = TestReadPolishVector(inputHandle): Close #inputHandle
+    Dim accepted() As Double, field() As Double, projection() As Double, degree As Long
+    accepted = mReverseFieldsTest(mReverseFieldsTest.Count): ReDim projection(1 To UBound(accepted))
+    For degree = 1 To UBound(projection): projection(degree) = projectionData(degree): Next degree
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ArcRootPath.Raw.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMARCROOTPATH01"
+    Put #handle, , magic
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    TestWriteReverseBinaryVector handle, Array(revision, mReverseModulusTest, UBound(accepted), mReverseSolverTest.PhysicalDegreeCount, mReverseOperatorsTest.PointCount, context(6), context(5), context(2))
+    Dim index As Long, eta As Double, factor As Double, target As Double, kind As Long
+    For index = LBound(etas) To UBound(etas) + 1
+        field = accepted: kind = 0
+        If index <= UBound(etas) Then
+            eta = etas(index): factor = context(6) + eta * (context(2) - context(6))
+            For degree = 1 To mReverseSolverTest.PhysicalDegreeCount: field(degree) = accepted(degree) + eta * (halfData(degree) - accepted(degree)): Next degree
+            For degree = mReverseSolverTest.PhysicalDegreeCount + 1 To UBound(accepted): field(degree) = accepted(degree) + eta * (halfData(degree) - accepted(degree)): Next degree
+        Else
+            eta = 0#: kind = 1: factor = context(1)
+            For degree = 1 To UBound(accepted): field(degree) = fullData(degree): Next degree
+        End If
+        target = context(5) * factor
+        For degree = 1 To UBound(field): target = target + projection(degree) * field(degree): Next degree
+        If Not mReverseSolverTest.BeginArcRootTest(mReverseBaseTest, mReverseDirectionTest, projection, target, field, factor, context(5)) Then Err.Raise 5, , "Не открыта читающая точка дуговой линии."
+        Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+        Dim zero() As Double, residual() As Double, matrix() As Double
+        ReDim zero(1 To UBound(field) + 1)
+        If Not equations.TryEvaluate(zero, False, residual, matrix) Then Err.Raise 5, , "Не получена невязка точки дуговой линии."
+        TestWriteReverseBinaryVector handle, Array(index, kind, eta, factor, target)
+        TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, residual
+        TestWriteArcRootNetTensors handle, field
+        mReverseSolverTest.EndNewtonLineTest
+    Next index
+    TestWriteReverseBinaryVector handle, Array(mReverseSolverTest.AcceptedRevision)
+    Close #handle
+    If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Читающая линия изменила принятую историю."
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вычисляет чистые тензоры бетона с замещающей арматурой тем же рабочим интерфейсом без записи пробной истории.
+Private Sub TestWriteArcRootNetTensors(ByVal handle As Integer, ByRef field() As Double)
+    Dim side As Long, point As Long, component As Long, response As ICoupledPointResponse
+    Dim strain(1 To 6) As Double, gradient(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    Dim values() As Double, position As Long
+    ReDim values(1 To 18 * mReverseOperatorsTest.PointCount)
+    For side = -1 To 1
+        Select Case side
+            Case -1: Set response = mReverseSidesTest(2)
+            Case 0: Set response = mReverseReinforcedTest
+            Case 1: Set response = mReverseSidesTest(4)
+        End Select
+        For point = 1 To mReverseOperatorsTest.PointCount
+            mReverseOperatorsTest.PointStrain point, field, strain
+            mReverseOperatorsTest.AxialGradientAtPoint point, field, gradient
+            For component = 1 To 6: strain(component) = strain(component) + side * HARD_PREPARED_HALF_TEST * gradient(component): Next component
+            If response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly, False) <> sfcNone Then Err.Raise 5, , "Недоступен материальный тензор читающей линии."
+            For component = 1 To 6: position = position + 1: values(position) = stress(component): Next component
+        Next point
+    Next side
+    TestWriteReverseBinaryVector handle, values
+End Sub

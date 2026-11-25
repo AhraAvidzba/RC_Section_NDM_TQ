@@ -1978,6 +1978,7 @@
     ]
   },
   "all_started_stages_terminal": true,
+  "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "automatic712": {
     "accepted_states": 57,
     "lower_lambda": 1.44119480550414,
@@ -6409,7 +6410,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "773 half-first predictor still accepts only2 states. Diagnose remaining field correction and tangent conditioning at roots of770/773; force residual alone may not resolve displacement accuracy near turning. Distinguish this from material branch transition using actual full/half root derivatives, rather than more blind step shrinking. Keep numerical stop distinct from physical failure; preserve full original six-force workbook scope, unchanged production kernel, main and release.",
+  "next_action": "Trace actual operational CDP update at concrete point15 on each z-station along775 eta path, including substep counts, ordinary-return/apex/conditional-dilatancy-closure route and yield/dilatancy residuals, without accepting material or changing physical laws. Distinguish a genuine smooth/kinked material path from a numerical root-switch discontinuity before any production fix. Preserve full six-force workbook scope; do not substitute this witness for automatic capacity validation.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6649,7 +6650,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress: strict signed-arc pair769 independently confirmed; automatic770 continuation verified2 new states;771 isolated outer precision broke frozen5;772 consistent nested precision restored replay and87 regressions but no further advancement;773 half-first predictor evaluated. No physical capacity certified.",
+  "previous_goal_turn_classification": "progress:774 full61-dimensional derivatives/492 readonly samples independently verified. Remaining root corrections are1e-8 of increment, refuting insufficient Newton convergence for these roots.775 all43x3 net tensors and residual curve independently verified; point15 at(72,0) dominates nonlinear row53 near half-step transition. No physical failure or capacity certified.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8450,6 +8451,7 @@
   },
   "terminal_sessions_this_stage": [
     1109,
+    1809,
     2002,
     2277,
     2312,
@@ -8489,6 +8491,7 @@
     19123,
     19677,
     20542,
+    21051,
     21364,
     21859,
     22798,
@@ -8582,7 +8585,9 @@
     68966,
     70831,
     71706,
+    71847,
     72043,
+    72543,
     73975,
     74004,
     74939,
@@ -8650,7 +8655,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T05:38:25.194318+03:00",
+  "updated_local": "2026-11-25T05:53:41.806303+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

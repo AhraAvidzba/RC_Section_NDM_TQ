@@ -1,0 +1,81 @@
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает три фактические линеаризации и центральные разности двух дуговых корней, не меняя принятую историю.
+Private Sub TestRunArcRootDerivative()
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ArcRoots.bin" For Binary Access Read As #inputHandle
+    Dim fullData As Variant, halfData As Variant, projectionData As Variant, context As Variant
+    fullData = TestReadPolishVector(inputHandle): halfData = TestReadPolishVector(inputHandle)
+    projectionData = TestReadPolishVector(inputHandle): context = TestReadPolishVector(inputHandle): Close #inputHandle
+    Dim projection() As Double, field() As Double, accepted() As Double, i As Long, count As Long
+    accepted = mReverseFieldsTest(mReverseFieldsTest.Count): count = UBound(accepted)
+    ReDim projection(1 To count)
+    For i = 1 To count: projection(i) = projectionData(i): Next i
+    Dim matricesHandle As Integer: matricesHandle = FreeFile
+    Open mPolishRootTest & "\Native\ArcRoots.Matrix.bin" For Binary Access Write As #matricesHandle
+    Dim matrixMagic As String * 16: matrixMagic = "NDMARCROOTS00001"
+    Put #matricesHandle, , matrixMagic
+    Dim samplesHandle As Integer: samplesHandle = FreeFile
+    Open mPolishRootTest & "\Native\ArcRoots.Samples.bin" For Binary Access Write As #samplesHandle
+    Dim sampleMagic As String * 16: sampleMagic = "NDMARCROOTDIFF01"
+    Put #samplesHandle, , sampleMagic
+    Dim sourceRevision As Long: sourceRevision = mReverseSolverTest.AcceptedRevision
+    Dim caseIndex As Long, factor As Double, target As Double, equations As ICoupledEquationSystem
+    Dim zero() As Double, residual() As Double, matrix() As Double, flat() As Double, scales As Variant, row As Long, column As Long
+    For caseIndex = 0 To 2
+        field = accepted
+        If caseIndex = 0 Then
+            factor = context(6): target = context(5) * factor
+            For i = 1 To count: target = target + projection(i) * field(i): Next i
+        Else
+            For i = 1 To count
+                If caseIndex = 1 Then field(i) = fullData(i) Else field(i) = halfData(i)
+            Next i
+            If caseIndex = 1 Then factor = context(1): target = context(3) Else factor = context(2): target = context(4)
+        End If
+        If Not mReverseSolverTest.BeginArcRootTest(mReverseBaseTest, mReverseDirectionTest, projection, target, field, factor, context(5)) Then Err.Raise 5, , "Не открыт читающий контекст дугового корня."
+        Set equations = mReverseSolverTest: ReDim zero(1 To count + 1)
+        If Not equations.TryEvaluate(zero, True, residual, matrix) Then Err.Raise 5, , "Нет фактической касательной дугового корня."
+        scales = mReverseSolverTest.ReadNewtonLineScalesTest
+        ReDim flat(1 To (count + 1) ^ 2)
+        For row = 1 To count + 1
+            For column = 1 To count + 1: flat((row - 1) * (count + 1) + column) = matrix(column, row): Next column
+        Next row
+        TestWriteReverseBinaryVector matricesHandle, Array(caseIndex, factor, target, context(5), sourceRevision, context(6))
+        TestWriteReverseBinaryVector matricesHandle, field: TestWriteReverseBinaryVector matricesHandle, projection
+        TestWriteReverseBinaryVector matricesHandle, scales: TestWriteReverseBinaryVector matricesHandle, residual
+        TestWriteReverseBinaryVector matricesHandle, flat
+        If caseIndex > 0 Then TestWriteArcRootSamples equations, zero, samplesHandle, caseIndex
+        mReverseSolverTest.EndNewtonLineTest
+    Next caseIndex
+    Close #matricesHandle: Close #samplesHandle
+    If mReverseSolverTest.AcceptedRevision <> sourceRevision Then Err.Raise 5, , "Чтение производных изменило принятую историю."
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет каждую фактическую пробу разностей, включая повтор исходного нуля, для независимого построения матриц.
+Private Sub TestWriteArcRootSamples(ByVal equations As ICoupledEquationSystem, ByRef zero() As Double, ByVal handle As Integer, ByVal caseIndex As Long)
+    Dim stepIndex As Long, column As Long, sign As Long, stepSize As Double, coordinates() As Double
+    TestAppendArcRootSample equations, zero, handle, caseIndex, 0#, 0, 0
+    For stepIndex = 1 To 2
+        If stepIndex = 1 Then stepSize = 0.000001 Else stepSize = 0.00000001
+        For column = 1 To UBound(zero)
+            For sign = -1 To 1 Step 2
+                coordinates = zero: coordinates(column) = sign * stepSize
+                TestAppendArcRootSample equations, coordinates, handle, caseIndex, stepSize, column, sign
+            Next sign
+        Next column
+    Next stepIndex
+    TestAppendArcRootSample equations, zero, handle, caseIndex, 0#, 0, 0
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает ответ интерфейса невязки без дополнительного допуска или замены неудачной пробы нулём.
+Private Sub TestAppendArcRootSample(ByVal equations As ICoupledEquationSystem, ByRef coordinates() As Double, ByVal handle As Integer, _
+        ByVal caseIndex As Long, ByVal stepSize As Double, ByVal column As Long, ByVal sign As Long)
+    Dim residual() As Double, matrix() As Double, ready As Boolean
+    ready = equations.TryEvaluate(coordinates, False, residual, matrix)
+    If Not ready Then ReDim residual(1 To 1)
+    TestWriteReverseBinaryVector handle, Array(caseIndex, stepSize, column, sign, Abs(CLng(ready)))
+    TestWriteReverseBinaryVector handle, coordinates: TestWriteReverseBinaryVector handle, residual
+End Sub
