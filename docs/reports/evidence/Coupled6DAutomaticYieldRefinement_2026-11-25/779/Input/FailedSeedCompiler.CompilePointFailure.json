@@ -1,0 +1,5 @@
+{
+  "Message": "Ошибка при системном вызове. (0x80010100 (RPC_E_SYS_CALL_FAILED))",
+  "ScriptStackTrace": "at <ScriptBlock>, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainSeed103Ready20261124\\tools\\build_workbook\\Update-IsolatedOptimizerCode.ps1: line 189\r\nat <ScriptBlock>, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainSeed103Ready20261124\\Compile-TestExternalPoint.ps1: line 15\r\nat <ScriptBlock>, <No file>: line 2",
+  "Position": "At D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainSeed103Ready20261124\\Compile-TestExternalPoint.ps1:15 char:9\r\n+         & './tools/build_workbook/Update-IsolatedOptimizerCode.ps1' - …\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+}

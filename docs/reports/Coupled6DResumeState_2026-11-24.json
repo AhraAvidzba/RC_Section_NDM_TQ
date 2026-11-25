@@ -2095,6 +2095,16 @@
     },
     "steel_event_localized": false
   },
+  "automatic_yield_refinement784_summary": {
+    "accepted_states": 53,
+    "last_lambda": 1.1089684283417398,
+    "maximum_lambda": 1.1089684283417398,
+    "new_accepted_states": 19,
+    "nonlinear_calls": 94,
+    "stop": "INITIAL;34;ACCEPTED;14;CALLS;94;PRIMARY;232\nSTOP;Остатка общего бюджета недостаточно для пары и восстановления.;PHYSICAL_CAPACITY_CERTIFIED;False\n",
+    "total_primary_steps": 232
+  },
+  "automatic_yield_refinement_evidence": "docs/reports/evidence/Coupled6DAutomaticYieldRefinement_2026-11-25",
   "branch": "codex/coupled-6d",
   "critical_shoulder_cost": {
     "cases": {
@@ -6472,7 +6482,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Integrate repeated automatic loading-yield event splits into bounded private arc walk after full/half consistency rejection. Use778 verified generic event finder and actual failed full/half bracket, not point15 hardcode or future fields. Preserve96 global probe budget and shared30 iterations per declared step; record separate event attempts and their exact source histories/parameters so every event and post-event state can be independently checked. Test from current33 source first, then cold from zero and affected regressions before any production promotion. Do not confuse old maximum~1.109 with a certified capacity; full original six-force scope remains active.",
+  "next_action": "Inspect784 stop and unresolved events. Integrate only verified automatic continuation into working controller and test cold from zero using exact current six-force input, with shared budgets and half-step/raw-equilibrium checks. Preserve detection of physical failure distinct from NumFail; do not promote warm-history advance as cold capacity, do not chase lambda increments alone. Then step/mesh/external controls and remaining full scope, actual workbook and performance acceptance. Full long suites need scoped consent.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6712,7 +6722,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:776 excludes cache/apex/substeps/closure atpoint15; side+1 ordinary update changes from elastic0 iterations to plastic7-12.777 test context failed due unallocated projection, fixed778. Existing projected solver automatically selects15/+1, event and half verified in3 shared primary iterations; then9 locally confirmed arc states, all43 accepted equilibria independently verified. Physicalcapacity not certified.",
+  "previous_goal_turn_classification": "progress: independently verified782 full/half event, all44 weak/all6 equilibria,105 directed regressions;783 actual492 finite differences show field correction below0.0036% of increment. Integrated third-difference refinement in bounded automatic784 with resolution tied to actual inner solve; archived779-784 including negative780/781. No physical capacity certified.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8532,6 +8542,7 @@
     10530,
     11153,
     11192,
+    11425,
     12133,
     12165,
     12388,
@@ -8539,6 +8550,7 @@
     13811,
     14384,
     14589,
+    15150,
     15533,
     16147,
     16181,
@@ -8549,6 +8561,8 @@
     17689,
     17992,
     18643,
+    18664,
+    18716,
     18956,
     19123,
     19677,
@@ -8556,6 +8570,7 @@
     21051,
     21364,
     21859,
+    22694,
     22798,
     22845,
     23111,
@@ -8615,10 +8630,12 @@
     48427,
     48848,
     49056,
+    50163,
     50535,
     50561,
     50872,
     51591,
+    52358,
     52416,
     53557,
     54096,
@@ -8637,8 +8654,11 @@
     60275,
     61803,
     61911,
+    62471,
     62845,
     62866,
+    63225,
+    64297,
     64786,
     65737,
     66134,
@@ -8660,6 +8680,7 @@
     75856,
     76344,
     76431,
+    76687,
     76774,
     77140,
     77326,
@@ -8723,7 +8744,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T06:16:27.544191+03:00",
+  "updated_local": "2026-11-25T07:06:36.775061+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

@@ -1,0 +1,32 @@
+{
+  "RecordedUTC": "2026-11-23T22:30:09.0396406Z",
+  "CompilerPID": 21912,
+  "CompilerStartTicks": 639310689674602798,
+  "ExcelPID": 28624,
+  "ExcelStartTicks": 639310689702314611,
+  "Stack": [
+    "{\"Id\":1,\"Name\":\"Runspace1\",\"Availability\":\"Available\",\"State\":\"Opened\"}",
+    "{\"Function\":\"<ScriptBlock>\",\"Script\":\"D:\\\\CodexScratch\\\\RC_Section_NDM_TQ\\\\Cold667SteelStrainSeed103Ready20261124\\\\tools\\\\build_workbook\\\\Update-IsolatedOptimizerCode.ps1\",\"Line\":198,\"Position\":\"[GC]::WaitForPendingFinalizers()\"}",
+    "{\"Function\":\"<ScriptBlock>\",\"Script\":\"D:\\\\CodexScratch\\\\RC_Section_NDM_TQ\\\\Cold667SteelStrainSeed103Ready20261124\\\\Compile-TestExternalPoint.ps1\",\"Line\":15,\"Position\":\"& './tools/build_workbook/Update-IsolatedOptimizerCode.ps1' -WorkbookPath $book -ModuleNames 'modTestCoupledElasticState' |\\n            Tee-Object -FilePath 'CompilePoint.log'\"}",
+    "{\"Function\":\"<ScriptBlock>\",\"Script\":null,\"Line\":2,\"Position\":\"& 'D:/CodexScratch/RC_Section_NDM_TQ/Cold667SteelStrainSeed103Ready20261124/Compile-TestExternalPoint.ps1'\"}",
+    "{\"Id\":4,\"Name\":\"RemoteHost\",\"Availability\":\"Available\",\"State\":\"Opened\"}"
+  ],
+  "CleanupSourceSHA256": "749EF9C2E3105A1DF3EBDBFD22431982E251929B8C2292BBD1A01D2C8CC6651D",
+  "DiagnosticWorkbookSHA256": "E7D762988A0FF78FA031518907DF1A56ED85A6DE4DEE5E8FDC2006BAEEA77B15",
+  "CodeUpdateBefore": {
+    "Workbook": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold667SteelStrainLocal10320261124\\docs\\regression\\Diagnostic.xlsm",
+    "WorkbookSHA256": "D0719A48CF37BB19AACF3DE7BF515E36F5B4B0D2CB3706046D2FCCA0C6E2D4EF",
+    "ProductionSHA256": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "Compiled": true,
+    "Modules": [
+      "CCoupledReinforcedResponse",
+      "CCoupledNewtonSolver",
+      "modTestCoupledElasticState"
+    ],
+    "RetiredModules": [],
+    "EntryPointNames": [],
+    "TraceGeometry": false,
+    "ProductionChanged": false
+  },
+  "Reason": "Finally after book.Close and Excel.Quit; GC finalizer wait prevents own-PID cleanup. Not a numerical timeout or material failure."
+}
