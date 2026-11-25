@@ -2096,6 +2096,21 @@
     },
     "steel_event_localized": false
   },
+  "automatic_H_guide_evidence": "docs/reports/evidence/Coupled6DAutomaticHGuideArc_2026-11-25",
+  "automatic_H_guide_summary": {
+    "allowance5_not_admitted": true,
+    "allowance6_and96_bit_identical": true,
+    "calls": 6,
+    "event_lambda": 1.099575618453593,
+    "event_point": 25,
+    "event_side": -1,
+    "no_precomputed_future_field": true,
+    "pair_primary": 18,
+    "physical_capacity_certified": false,
+    "recovery_primary": 8,
+    "regression_passed": 164,
+    "total_primary": 26
+  },
   "automatic_loading_candidate": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold823AutomaticLoadingWalk_20261125",
   "automatic_loading_cold_branch_evidence": "docs/reports/evidence/Coupled6DLoadingColdBranch_2026-11-25",
   "automatic_loading_cold_summary": {
@@ -6525,6 +6540,7 @@
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
   "latest_verified_active_loading_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold842HReentryWalk_20261125",
+  "latest_verified_auto_H_guide_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold844AutomaticHGuideArc_20261125",
   "latest_verified_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold832GatedLoadingCold_20261125",
   "latest_verified_extended_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold838ElasticPrincipalArc_20261125",
   "latest_verified_loading_boundary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold841HGuideMaterialEvent_20261125",
@@ -6559,7 +6575,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Continue full original active goal. Authoritative LOADING path is842: original70 + independently verified841 H-guided face +8 automatic outgoing states,total79,lastlambda1.09958083069725. Reconstruct exact79 prefix from842 raw packets and continue while monitoring H. Original838 states71..113 are valid declining-load equilibria with all129 energy coords frozen after70; DO NOT extend their unloading towardzero as capacity evidence.840 strict H roots exist but full/half errors.1156/.2367/.4762 fail; do not admit them directly.841 working TryLoadingYieldBoundary with strict840 H guide selects25/-1 face,verifiedpairHgrowth andzero-iterationrestore.842 recent boundary guards pass;first3 outgoing attempts fail at ratios1,.5,.25,4th.125succeeds(kind4),next7kind1growingH. Next implement automatic H-guide material-event recovery/gating in common CArc/controller: current IsEnvelopeUnloading explicitly excludes arcRecovered; include arc candidate H-progress checks and route through verified material boundary,retain original30iteration phase/96calls/field/lambda/force/gauge/steel criteria and exactrestore. Count H guide solve,event,half,restore within shared budget;do not merely bypass criteria or accept isolated H roots. Test reference source70 case and actual cold gated831/832 controller. Cold832 stillNumFail49/max1.1058869810286156;physical ONQ010/012,step/mesh/external/full original production/LoadPaths/hoop/UI/CAD/cracks/stability/performance/workbook and full scoped acceptance remain.839 compiled-only continuation deliberatelynotrun;test-only standalone entry renamed TestLocateElasticPrincipalBoundary;allnewworkingmath/materialsunmodified. Main/release unchanged. Latest successful delivery55074b2 used HTTPS HTTP/2 +postBuffer536870912 +empty Expect;retry latest checkpoint and verify actualremote ref.",
+  "next_action": "Continue full original active goal. Working candidate844 now computes H guide itself in CArc.TryStep (noInput/HMaterialGuide.bin), triggers on convergedSF evenifSHfailed, returns verified25/-1 eventatlambda1.099575618453593;code +native5/6/96 budget controls +164regressionsverified. Before general promotion, add a READONLY steel-plastic-activity guard: frozen concrete H plus declininglambda must not automatically divert a valid steel-plastic/softening branch. Reuse reinforced.ReadSteelBranch and all3stations;materialsunchanged. Test elastic vsplastic longitudinal/transverse andnoSteel cases. Also owner next-ratio policy after newloadingphi face:842 required ratios1,.5,.25,.125 before successful kind4; normal warm driver after kind2 suggests2 and wouldexhaust4attempts before.125. Expose/reset nextstep bound1 afternewloadingphi eventonly (not spectra) in both retained831controller and warm driver, preserving force/fullhalf/budgets. Then run automatic sequence from original70 with newguide, throughfaceandoutgoing withoutprescribed intermediatefield, monitorH and continue exact842active79 prefix tofindphysicalend. Integrate current844kernel with actual831/832gatedcoldcontroller andrun nativecold,targetedregressions;cold832still49/max1.1058869810286156/NumFail96. NewH guide,event,half,restore share30phase andcountallcalls;guideunadmitted,eventlocal≤3originalradii. Standalone843failurepartialrawpreserved;noPARSEpassclaim. Need loading/steel distinction,ONQ010/012physicalcriterion,step/mesh/external andfull originalLoadPaths/hoop/UI/CAD/cracks/stability/performance/actualreleasebook/full scopedacceptance. Main/releaseunchanged. Prior successfulGitHubcheckpoint51dca39;pushlatestwithHTTPSHTTP/2,postBuffer536870912,emptyExpectandverifyactualremote.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6839,7 +6855,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress:839 exact113 prefix/source rename audited;840 independently identifies frozen energy coordinates in all129 point/stations after70 and verifies8 H roots but rejects all3 strict full/half pairs as admission evidence.841 existing material-event solver reaches new point25/-1 loading boundary atlambda1.099575618453593,field half error4.7443569134402475e-05,strict forces/gauges/steel and exact restore0 independently verified,H grows.842 automatically departs via existing recent-loading control,then7 ordinary arcs;8 new equilibria27 calls andallhalfroots/forces/three-station steel verified,allnewHstrictlygrows. Wrong late unloading not confused with physical capacity;working equations unchanged.",
+  "previous_goal_turn_classification": "progress:working CArc now detects a converged unloading full/half candidate and computes its own H guide,then verifies material-event and half pair within shared30 recovery phase.843 failed diagnostic/pair-eligibility case preserved and fixed.844 original70 test runs with futureHfieldinputabsent;allowance5 uses2calls and doesnotadmitunloadingroot;allowances6/96 use6calls,18initialpair+8sharedrecovery=26primary,andreturnbitidenticalloadingeventlambda1.099575618453593.Allforces/gauges/three-stationsteel/H/phasebudgets/radius/exactrestore independently verified;164directedregressionspassed.Cold/generalsteel/capacityproofnotcomplete.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8693,6 +8709,7 @@
     16553,
     16755,
     17157,
+    17224,
     17269,
     17689,
     17992,
@@ -8714,6 +8731,7 @@
     22845,
     23111,
     23260,
+    23313,
     23322,
     24444,
     24511,
@@ -8761,6 +8779,7 @@
     36034,
     36412,
     36441,
+    36477,
     36943,
     37102,
     37183,
@@ -8805,6 +8824,7 @@
     49446,
     50037,
     50163,
+    50306,
     50535,
     50561,
     50587,
@@ -8872,7 +8892,9 @@
     68652,
     68748,
     68966,
+    69420,
     69525,
+    69535,
     70193,
     70629,
     70645,
@@ -8976,6 +8998,7 @@
     97029,
     97145,
     98786,
+    99214,
     99254,
     99292,
     99354,
@@ -8984,7 +9007,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T20:35:29.160638+03:00",
+  "updated_local": "2026-11-25T21:02:48.363040+03:00",
   "verified_git_delivery": {
     "commit": "a24900ba59b9a8eb1287805d0febfdc02ae10c36",
     "previous_HTTP408_and_SSH_auth_failures_resolved_for_delivery": true,
