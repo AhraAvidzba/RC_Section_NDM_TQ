@@ -1,0 +1,63 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет половинный подход к событию через четвертную пробу от той же истории; новых физических критериев не вводит.
+Private Sub TestPreEventQuarter(ByVal certificate As Variant)
+    Dim status As Variant: status = certificate(0)
+    If Not CBool(status(26)) Then Exit Sub
+    Dim accepted() As Double, face() As Double, half() As Double, movement() As Double, projection() As Double
+    accepted = certificate(2): face = certificate(10): half = certificate(11)
+    If UBound(half) <= 1 Then Exit Sub
+    movement = face
+    Dim i As Long, coordinate As Double, spacing As Double
+    For i = 1 To UBound(movement): movement(i) = face(i) - accepted(i): Next i
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, face, movement, projection, coordinate, spacing) Then Err.Raise 5, , "Нет меры подхода к событию."
+    Dim remaining As Long: remaining = CLng(mReverseOptionsTest(2) - status(17) - 1)
+    If remaining < 1 Then Exit Sub
+    Dim seed() As Double, prediction As Variant: seed = accepted
+    For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = 0.5 * (accepted(i) + half(i)): Next i
+    prediction = seed
+    Dim quarterLambda As Double, solved As Boolean, quarter() As Double, actualQuarter() As Double, quarterSteps As Long
+    solved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate - 0.75 * spacing, _
+        0.5 * (status(6) + status(24)), quarterLambda, mReverseOptionsTest(3) * 0.0001, mReverseOptionsTest(4) * 0.0001, _
+        remaining, consistentControl:=True, initialField:=prediction, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+    quarterSteps = mReverseSolverTest.IterationCount
+    If solved Then mReverseSolverTest.CopyTrial quarter, actualQuarter Else ReDim quarter(1 To 1): ReDim actualQuarter(1 To 1)
+    mReverseSolverTest.DiscardStep
+    Dim error As Double, lambdaError As Double, lambdaBound As Double, doubled() As Double, length As Double, verified As Boolean
+    error = -1#: lambdaError = -1#
+    If solved Then
+        doubled = quarter
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: doubled(i) = 2# * quarter(i) - accepted(i): Next i
+        length = mReverseSolverTest.SpatialFieldDistance(accepted, half)
+        error = mReverseSolverTest.SpatialFieldDistance(half, doubled) / length
+        lambdaError = Abs(2# * quarterLambda - status(6) - status(24))
+        lambdaBound = GeomMax(0.005 * Abs(status(24) - status(6)), 8# * mReverseOptionsTest(4) * 0.0001 * (1# + Abs(status(6))))
+        verified = error <= 0.005 And lambdaError <= lambdaBound And quarterLambda > 0# And status(24) > 0#
+    End If
+    Dim restored As Boolean, result As Double, restoredField() As Double, actualHalf() As Double, restoreSteps As Long
+    If verified Then
+        prediction = half
+        restored = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate - 0.5 * spacing, _
+            status(24), result, mReverseOptionsTest(3) * 0.0001, mReverseOptionsTest(4) * 0.0001, _
+            CLng(mReverseOptionsTest(2) - status(17) - quarterSteps), consistentControl:=True, initialField:=prediction)
+        restoreSteps = mReverseSolverTest.IterationCount
+        If Not restored Or restoreSteps <> 0 Or result <> status(24) Then Err.Raise 5, , "Половинное поле не восстановлено точно."
+        mReverseSolverTest.CopyTrial restoredField, actualHalf
+        For i = 1 To UBound(half): If half(i) <> restoredField(i) Then Err.Raise 5, , "Изменилось проверенное половинное поле."
+        Next i
+    Else
+        ReDim restoredField(1 To 1): ReDim actualHalf(1 To 1)
+    End If
+    If mReverseSolverTest.AcceptedRevision <> status(14) Or status(17) + quarterSteps + restoreSteps > mReverseOptionsTest(2) Then Err.Raise 5, , "Нарушен общий бюджет или история подхода."
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\PreEventQuarter.Result.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPREEVENT00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(Abs(CLng(solved)), Abs(CLng(verified)), quarterLambda, status(24), status(6), spacing, error, lambdaError, lambdaBound, status(14), mReverseSolverTest.AcceptedRevision, status(17), quarterSteps, restoreSteps, status(18) + 1 + Abs(CLng(verified)))
+    TestWriteReverseBinaryVector handle, face: TestWriteReverseBinaryVector handle, half: TestWriteReverseBinaryVector handle, quarter
+    TestWriteReverseBinaryVector handle, projection: TestWriteReverseBinaryVector handle, actualQuarter
+    TestWriteReverseBinaryVector handle, actualHalf: TestWriteReverseBinaryVector handle, restoredField
+    Close #handle
+    mReverseSolverTest.DiscardStep
+    If verified Then TestExportSignedArcTrial "PreEventHalf", half, status(24)
+    If solved Then TestExportSignedArcTrial "PreEventQuarter", quarter, quarterLambda
+End Sub

@@ -1,12 +1,6 @@
 {
-  "active_exec_session": 65581,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold787ArcContextOrder_20261125",
-      "session": 65581,
-      "stage": "original cold787 handle"
-    }
-  ],
+  "active_exec_session": null,
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1983,7 +1977,7 @@
       }
     ]
   },
-  "all_started_stages_terminal": false,
+  "all_started_stages_terminal": true,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -2112,6 +2106,14 @@
   },
   "automatic_yield_refinement_evidence": "docs/reports/evidence/Coupled6DAutomaticYieldRefinement_2026-11-25",
   "branch": "codex/coupled-6d",
+  "cold787_final_summary": {
+    "accepted_states": 56,
+    "arc_calls": 8,
+    "arc_recovered_directions": 0,
+    "last_accepted_lambda": 1.095007819890606,
+    "maximum_accepted_lambda": 1.109037161811455
+  },
+  "cold_arc_rejection_evidence": "docs/reports/evidence/Coupled6DColdArcRejection_2026-11-25",
   "critical_shoulder_cost": {
     "cases": {
       "728": {
@@ -6488,7 +6490,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Revalidate and poll existing cold787 handle65581 (not restart). On terminal outcome verify saved workbook and independently replay accepted cold history. Arc was not admitted in cold785 (4calls/0directions), so do not claim cold arc success. To resolve remaining issue capture/reproduce actual rejected arc from exact cold prefix10 (ratios1 and0.5), inspect event-half error and accepted-root residual/correction before adding retries or reducing steps.41/60 cold785 states satisfy original but not10000x tighter inner tolerance; causal role unproved. Check bounded adaptive retry at same accepted history and preserve original failure context/budgets, then physical criteria, mesh/step/external controls and full original scope. Production promotion remains unapproved/unverified.",
+  "next_action": "Develop bounded repeated pre-event halving from same accepted history: reuse actual solved half field, solve fresh midpoint, check BOTH field0.005 and lambda errors plus force/gauges/source-yield/locality, keep common event30 primary and overall96 calls; reserve exact restoration.792 HALF NOT VERIFIED, do not integrate it as accepted. Expected need smaller candidate than half-event; test quarter/eighth/sixteenth with recorded probes and no threshold weakening. Integrate only verified fallback in CCoupledArcContinuation and cold controller, then new cold workflow, independent replay, step/mesh/external controls, all LoadPaths and full original deliverables.791 event filter is private; production sources/release unchanged. Full long acceptance remains NOT RUN.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6735,7 +6737,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress: implemented operational arc class and stalled-controller integration; actual256 components audited; warm operation5calls/7primary and34 equilibria independently verified. Cold785 completed60 states, saved/reopened256 sources, NumFail retained;788 independently verified all60. Found original failure dispatch lost after auxiliary successful probe; fixed exact revision/projection routing786/787, native match/foreign-context tests passed;164 affected regression checks passed for785 and787. Physical capacity not certified.",
+  "previous_goal_turn_classification": "progress: operational class/controller implemented and audited256; cold78560 and cold78756 equilibria independently verified, saved/reopened256 sources and164 regressions.789 exact cold10 rejection reproduced: event29/-1 nearly zero, half1.076e-11MPa below required9.728e-10; source already tighter than inner bound, so coarse source is not cause here.791 filters unresolved interpolation event before nearest choice, finds real15/+1, same physics and budgets;164 regressions pass.792 quarter solve gives field error0.0029745 but lambda error2.7788e-6 exceeds7.4525e-7, so no candidate admitted. All stages terminal, physical capacity unconfirmed.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8542,8 +8544,10 @@
     2312,
     2450,
     4426,
+    4559,
     4763,
     4781,
+    4784,
     5291,
     6585,
     7846,
@@ -8608,12 +8612,14 @@
     31411,
     31421,
     31556,
+    31722,
     31923,
     32063,
     32493,
     33763,
     33931,
     34055,
+    34645,
     34937,
     35394,
     35629,
@@ -8632,6 +8638,7 @@
     40717,
     40742,
     40853,
+    41572,
     42094,
     42262,
     42347,
@@ -8652,6 +8659,7 @@
     50561,
     50872,
     51591,
+    51910,
     52358,
     52416,
     52768,
@@ -8662,6 +8670,7 @@
     55638,
     56016,
     57628,
+    57659,
     57786,
     58105,
     59158,
@@ -8679,6 +8688,7 @@
     64297,
     64786,
     65352,
+    65581,
     65737,
     66134,
     66517,
@@ -8688,6 +8698,7 @@
     68652,
     68748,
     68966,
+    69525,
     70831,
     71706,
     71731,
@@ -8767,7 +8778,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T07:39:14.777605+03:00",
+  "updated_local": "2026-11-25T08:00:47.605942+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {

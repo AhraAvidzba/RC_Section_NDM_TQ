@@ -1,0 +1,56 @@
+{
+  "calculation_finished_normally": false,
+  "closure": {
+    "After": {
+      "ObservedUTC": "2026-11-23T21:14:29.5540555+00:00",
+      "PID": 29332,
+      "Reason": "Explicit NoProcessFoundForGivenId",
+      "StartTicksUTC": "639310634702512451",
+      "State": "Absent"
+    },
+    "Before": {
+      "ObservedUTC": "2026-11-23T21:14:28.9997335+00:00",
+      "PID": 29332,
+      "Reason": "Exact own Excel is still alive",
+      "StartTicksUTC": "639310634702512451",
+      "State": "Live"
+    },
+    "ChildStopError": null,
+    "ExactOwnExcelStopRequestedOnlyByExplicitTimeout": true,
+    "ExcelStopError": null,
+    "ExcelStopRequested": true,
+    "Identity": {
+      "PID": 29332,
+      "Reason": "Primary TEST_EXCEL_PROCESS",
+      "Ticks": 639310634702512451,
+      "Valid": true
+    },
+    "Passed": false,
+    "Stage": "TIMEOUT"
+  },
+  "current_saved_reopened_book_available": false,
+  "entire_goal_completed": false,
+  "exact_owned_PID_and_start_verified": true,
+  "full_cold_origin": true,
+  "independent_current_prefix_equilibrium_not_yet_verified": true,
+  "input_compiled_book_unchanged": true,
+  "last_complete_accepted_prefix_only": true,
+  "maximum_lambda": 1.1093511588217642,
+  "ordinary_first95_exact": true,
+  "outcome": "Timeout;NotPhysicalFailure",
+  "own_excel_absent": true,
+  "physical_capacity_certified": false,
+  "previous384_common_snapshots": 157,
+  "previous384_maximum_lambda": 1.109343941825654,
+  "previous384_states": 98,
+  "raw_history": {
+    "bytes": 4339868,
+    "complete_bytes": 4339868,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "DB8ECBEDE797C39B898885FDEE7854D9E3885D2B1937F8B74BEDB3DAEF31CDD4"
+  },
+  "snapshots": 169,
+  "states": 103,
+  "watchdog_seconds": 1800
+}
