@@ -1,0 +1,39 @@
+{
+  "accepted_states": 51,
+  "actual_cold_workflow_not_resumed_from_Input_Reverse": true,
+  "arc_calls": 16,
+  "arc_recovered_directions": 3,
+  "cold": {
+    "all_saved_sources_exact": 256,
+    "capacity": "NumFail",
+    "code": "NUMERICAL_FAILURE",
+    "direct": "OK",
+    "limit": "",
+    "lower": 1.10588698102862,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 28,
+      "timeout600": false
+    },
+    "results_checksum": "C93A5D7235BE65A8E181C30B4431EFE7B540B617F6FFFD2E3FD84FF14C58A5AC",
+    "saved_book_sha256": "2BB4AB94810E5C68138A382514EB14A43C7F7C49EE45A4CC8CC1EEE07AB865EF",
+    "seconds": 301.1875
+  },
+  "exact_prefix_with_warm_input": 43,
+  "independent_cold_stress_replay_pending": true,
+  "last_accepted_lambda": 1.1058853590245683,
+  "latest_details": "; вызовов проверенной знаковой дуги 16; принятых направлений 3; Мера деформации: пространственная мера проверенной знаковой дуги; наибольший допустимый lambda: 1.10588698102862; равновесие при lambda = 1 подтверждено: True; проб: 96; смен пространственной меры после отказа: 3; проб смены меры: 4; принято после смены меры: 3; расширений шага CDP: 11; наибольший принятый шаг после CDP: 2.11046498421258E-07; геометрических проб с внутренней точностью дуги: 66 | Последняя неудачная проба: Знаковая дуга: парных итераций 0; всех основных итераций 15; вызовов 3; ошибка поля 3.91541802837561E-05; событие True; восстановление True",
+  "maximum_accepted_lambda": 1.1058869810286156,
+  "physical_capacity_certified": false,
+  "raw_frames": 81,
+  "raw_history": {
+    "bytes": 1165164,
+    "complete_bytes": 1165164,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "A8222EC066FD4147BB59F451918F21413EBB641C7B0B6D75856C582CA34E0F6D"
+  },
+  "whole_goal_completed": false
+}
