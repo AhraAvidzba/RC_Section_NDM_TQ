@@ -1,0 +1,121 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold802NestedMaterialAccuracy_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: F483EC8561129795DDAF6032B6FC58DB0329FEE2AAF727D140E74DBA142D4DB6
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold802NestedMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_9d65357133ad443280f4bd979dabf6e0\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=28320; startTicks=639311832499950173
+===== modTestCoupledElasticState.RunTestCoupledConcreteTensor =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-25T09:00:57
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=28320; workingSet=145362944; privateBytes=100212736; cpu=6.484375
+OK: isotropic normal stiffness actual=33333.3333333333 expected=33333.3333333333
+OK: isotropic Poisson stiffness actual=8333.33333333333 expected=8333.33333333333
+OK: engineering shear stiffness actual=12500 expected=12500
+OK: hydrostatic values exact
+OK: physical shear contribution to invariant actual=15.5884572681199 expected=15.5884572681199
+OK: pure shear has opposite principal stresses
+OK: rotated principal directions preserve spectrum
+OK: uniaxial compression at specified cohesion
+OK: uniaxial tension at specified cohesion
+OK: potential derivative 1
+OK: potential derivative 2
+OK: potential derivative 3
+OK: potential derivative 4
+OK: potential derivative 5
+OK: potential derivative 6
+TOTAL_COUPLED_CONCRETE_TENSOR: passed=15; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold802NestedMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_9d65357133ad443280f4bd979dabf6e0\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteTensor; 2026-11-25T09:00:57
+===== modTestCoupledElasticState.RunTestCoupledConcreteReturn =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-25T09:00:59
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=28320; workingSet=150224896; privateBytes=104972288; cpu=8.53125
+OK: elastic trial stays unchanged
+OK: return 1
+OK: yield consistency 1
+OK: backward Euler equations 1
+OK: return 2
+OK: yield consistency 2
+OK: backward Euler equations 2
+OK: return 3
+OK: yield consistency 3
+OK: backward Euler equations 3
+OK: pure shear analytical return actual=2.80491473534864 expected=2.80491473534864
+OK: return 4
+OK: yield consistency 4
+OK: backward Euler equations 4
+OK: hydrostatic analytical return actual=3.28358208955224 expected=3.28358208955224
+OK: return 5
+OK: yield consistency 5
+OK: backward Euler equations 5
+OK: return 6
+OK: yield consistency 6
+OK: backward Euler equations 6
+OK: closed-form return crosses to compressive principal branch actual=25.4604197840169 expected=25.4604197840169
+OK: hydrostatic tension without volumetric flow reports inability to return
+OK: near-apex return for dilation 0.000001
+OK: near-apex analytical pressure actual=3.28358208955228 expected=3.28358208955224
+OK: near-apex volumetric flow actual=2.43283582089543E-05 expected=2.43283582089552E-05
+OK: near-apex engineering shear balance actual=0.025 expected=0.025
+OK: near-apex return for dilation 1E-170
+OK: near-apex analytical pressure actual=3.28358208955224 expected=3.28358208955224
+OK: near-apex volumetric flow actual=2.43283582089552E-05 expected=2.43283582089552E-05
+OK: near-apex engineering shear balance actual=0.025 expected=0.025
+OK: near-apex deviator does not enable volumetric flow at zero dilation
+OK: subnormal dilation remains positive
+OK: scaled deviator apex starts in the intended branch
+OK: scaled deviator apex uses a scaled multiplier
+OK: scaled deviator apex analytical volumetric flow actual=2.43283582089552E-05 expected=2.43283582089552E-05
+OK: scaled deviator apex analytical pressure and normal increments
+OK: scaled deviator apex constitutive engineering shears
+OK: scaled deviator apex yield and hydrostatic invariants
+OK: hydrostatic apex starts in the intended branch
+OK: hydrostatic apex uses a scaled multiplier
+OK: hydrostatic apex analytical volumetric flow actual=2.43283582089552E-05 expected=2.43283582089552E-05
+OK: hydrostatic apex analytical pressure and normal increments
+OK: hydrostatic apex constitutive engineering shears
+OK: hydrostatic apex yield and hydrostatic invariants
+TOTAL_COUPLED_CONCRETE_RETURN: passed=45; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold802NestedMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_9d65357133ad443280f4bd979dabf6e0\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteReturn; 2026-11-25T09:00:59
+===== modTestCoupledElasticState.RunTestCoupledConcreteResponse =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-25T09:01:00
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=28320; workingSet=147767296; privateBytes=102490112; cpu=10.453125
+OK: virgin elastic concrete response
+OK: virgin shear actual=0.5 expected=0.5
+OK: virgin shear tangent actual=12500 expected=12500
+OK: mixed plastic-damage response
+OK: shear affected by multi-axial damage
+OK: gradient probe computes the same required tangent columns and stress
+OK: stress-only probe has identical stress with no tangent calculation
+OK: nearby rejected probe uses its own concrete strain
+OK: axial columns evaluate again after a different trial
+OK: partial-to-full trial reuse preserves all stresses and tangent entries exactly
+OK: shear perturbation plus
+OK: independent tangent increment 3242.71817954213 vs 3242.71818188393
+OK: trial and tangent leave committed energy untouched
+OK: repeat trial gives identical stress
+OK: other concrete location remains elastic
+OK: directional probe returns the tensile-shear perturbation
+OK: accepted concrete stress is unchanged by the directional probe
+OK: both histories advance in shear 0.108251908656677 3.44085151947624E-03
+OK: virgin integration point remains independent
+OK: unloading from cracked concrete
+OK: unloading preserves both damage histories
+OK: independent combination clears concrete history
+OK: hydrostatic tension reaches a constitutively consistent return
+OK: hydrostatic return preserves symmetry and reduces elastic pressure
+OK: hydrostatic damaged stress matches the scalar reference actual=3.27558644910606 expected=3.27558644910606
+OK: hydrostatic trial keeps accepted history unchanged
+OK: hydrostatic tension advances only tension history
+TOTAL_COUPLED_CONCRETE_RESPONSE: passed=27; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold802NestedMaterialAccuracy_20261125\Temp\RC_NDM_ModeSuite_9d65357133ad443280f4bd979dabf6e0\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestCoupledConcreteResponse; 2026-11-25T09:01:01
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

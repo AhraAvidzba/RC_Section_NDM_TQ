@@ -1,0 +1,39 @@
+{
+  "accepted_states": 45,
+  "actual_cold_workflow_not_resumed_from_Input_Reverse": true,
+  "arc_calls": 18,
+  "arc_recovered_directions": 2,
+  "cold": {
+    "all_saved_sources_exact": 256,
+    "capacity": "NumFail",
+    "code": "NUMERICAL_FAILURE",
+    "direct": "OK",
+    "limit": "",
+    "lower": 1.10588698104066,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 28,
+      "timeout600": false
+    },
+    "results_checksum": "A3DE1FD9D0869154C0110FB16DE39878563BE3B216150D81D533D4A3D62224C2",
+    "saved_book_sha256": "8565B0EE7A152DD820345C006A8E407125BFE68D111D82C99C8D75A8409F1887",
+    "seconds": 224.05859375
+  },
+  "exact_prefix_with_warm_input": 3,
+  "independent_cold_stress_replay_pending": true,
+  "last_accepted_lambda": 1.1058869810406582,
+  "latest_details": "; вызовов проверенной знаковой дуги 18; принятых направлений 2; Мера деформации: пространственная мера проверенной знаковой дуги; наибольший допустимый lambda: 1.10588698104066; равновесие при lambda = 1 подтверждено: True; проб: 96; смен пространственной меры после отказа: 3; проб полного разностного резерва после деления шага: 2; принято после него: 0; последняя цель резерва: 1.27840038534715E-04; проб смены меры: 4; принято после смены меры: 2; расширений шага CDP: 5; наибольший принятый шаг после CDP: 2.11046506962847E-07; геометрических проб с внутренней точностью дуги: 64 | Последняя неудачная проба: Итерации: 9; пробы: 62; невязка, МПа: 1.3326736928625E-09; мин. ведущий элемент: 7.91893426635349E-03; невязка перед демпфированием, МПа: 1.29619875596787E-09; лучшая невязка проб, МПа: 1.3326736928625E-09; уравнение 53 (продольный градиент N); действие касательной, МПа: 1.29619875596787E-09; фактическое изменение на единицу доли поправки, МПа: -4.66879192251302E-09",
+  "maximum_accepted_lambda": 1.1058869810406582,
+  "physical_capacity_certified": false,
+  "raw_frames": 79,
+  "raw_history": {
+    "bytes": 1106148,
+    "complete_bytes": 1106148,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "59A50FB7547F4D861F2F052D250AAE459D8491D37A3D89106F82ABD78A8F105D"
+  },
+  "whole_goal_completed": false
+}
