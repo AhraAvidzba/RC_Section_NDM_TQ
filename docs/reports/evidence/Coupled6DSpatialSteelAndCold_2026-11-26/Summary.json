@@ -1,0 +1,1596 @@
+{
+  "actual_spatial_steel_component_audit": {
+    "capacity_certified": false,
+    "checked_coupled_sources": [],
+    "compiled_project_storage": "workbook",
+    "compiled_workbook_sha256": "3DBF5A122141F2451F6EA7BA32C71F340AD03C8E3A11C06B8988DEF67BA602F7",
+    "components": 256,
+    "documented_compiler_conversions": {
+      "CConstraintEquationsTest": [],
+      "CCoupledASDFlow": [],
+      "CCoupledASDTangent": [],
+      "CCoupledArcContinuation": [],
+      "CCoupledConcreteBackbone": [],
+      "CCoupledConcreteResponse": [
+        {
+          "count": 1,
+          "from": "1e-12",
+          "kind": "equivalent_literal",
+          "to": "0.000000000001"
+        },
+        {
+          "from": "' \u0432\u0435\u0441 (1-s)^3(1+3s+6s\u00b2) \u0438\u043c\u0435\u0435\u0442 \u043d\u0443\u043b\u0435\u0432\u044b\u0435 \u043f\u0435\u0440\u0432\u0443\u044e \u0438 \u0432\u0442\u043e\u0440\u0443\u044e \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u043d\u044b\u0435 \u043d\u0430 \u043a\u043e\u043d\u0446\u0430\u0445.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0432\u0435\u0441 (1-s)^3(1+3s+6s?) \u0438\u043c\u0435\u0435\u0442 \u043d\u0443\u043b\u0435\u0432\u044b\u0435 \u043f\u0435\u0440\u0432\u0443\u044e \u0438 \u0432\u0442\u043e\u0440\u0443\u044e \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u043d\u044b\u0435 \u043d\u0430 \u043a\u043e\u043d\u0446\u0430\u0445."
+        },
+        {
+          "kind": "compiler_comma_spacing_only",
+          "strings_and_comments_preserved": true
+        }
+      ],
+      "CCoupledConcreteReturn": [],
+      "CCoupledConstraintEquations": [],
+      "CCoupledDeformationContinuation": [],
+      "CCoupledDiscretization": [],
+      "CCoupledElasticState": [
+        {
+          "count": 1,
+          "from": "1e-10",
+          "kind": "equivalent_literal",
+          "to": "0.0000000001"
+        },
+        {
+          "count": 1,
+          "from": "1e-13",
+          "kind": "equivalent_literal",
+          "to": "0.0000000000001"
+        },
+        {
+          "count": 1,
+          "from": "1e-8",
+          "kind": "equivalent_literal",
+          "to": "0.00000001"
+        },
+        {
+          "count": 1,
+          "from": "1e-7",
+          "kind": "equivalent_literal",
+          "to": "0.0000001"
+        },
+        {
+          "from": "' \u0440\u0435\u0430\u043b\u0438\u0437\u0443\u0435\u0442 \u0441\u043b\u0430\u0431\u043e\u0435 \u0440\u0430\u0432\u043d\u043e\u0432\u0435\u0441\u0438\u0435 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u043e\u0439 \u043c\u043e\u0434\u0435\u043b\u0438 bair\u00e1n \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0440\u043e\u0434\u043d\u043e\u0439",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0440\u0435\u0430\u043b\u0438\u0437\u0443\u0435\u0442 \u0441\u043b\u0430\u0431\u043e\u0435 \u0440\u0430\u0432\u043d\u043e\u0432\u0435\u0441\u0438\u0435 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u043e\u0439 \u043c\u043e\u0434\u0435\u043b\u0438 bairan \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0440\u043e\u0434\u043d\u043e\u0439"
+        },
+        {
+          "from": "' \u0432\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0442\u044b \u0442\u043e\u0447\u043a\u0438 \u0432 \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0445 \u043e\u0441\u044f\u0445 \u0438 \u0435\u0451 \u0432\u0435\u0441, \u043c\u043c\u00b2.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0432\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0442\u044b \u0442\u043e\u0447\u043a\u0438 \u0432 \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0445 \u043e\u0441\u044f\u0445 \u0438 \u0435\u0451 \u0432\u0435\u0441, \u043c\u043c?."
+        },
+        {
+          "from": "' \u043e\u0440\u0442\u043e\u0433\u043e\u043d\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438. \u0447\u043b\u0435\u043d\u044b \u03c3'zx, \u03c3'zy, \u03c3'zz \u0431\u0435\u0440\u0443\u0442\u0441\u044f \u0438\u0437 d bp d, \u0433\u0434\u0435 d = l dq/dz.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u043e\u0440\u0442\u043e\u0433\u043e\u043d\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438. \u0447\u043b\u0435\u043d\u044b ?'zx, ?'zy, ?'zz \u0431\u0435\u0440\u0443\u0442\u0441\u044f \u0438\u0437 d bp d, \u0433\u0434\u0435 d = l dq/dz."
+        },
+        {
+          "from": "' \u043f\u043e\u0440\u044f\u0434\u043e\u043a \u03b5xx, \u03b5yy, \u03b5zz, \u03b3xy, \u03b3xz, \u03b3yz. \u0432\u044b\u0437\u044b\u0432\u0430\u044e\u0449\u0438\u0439 \u043f\u0435\u0440\u0435\u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 \u043c\u0430\u0441\u0441\u0438\u0432.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u043f\u043e\u0440\u044f\u0434\u043e\u043a ?xx, ?yy, ?zz, ?xy, ?xz, ?yz. \u0432\u044b\u0437\u044b\u0432\u0430\u044e\u0449\u0438\u0439 \u043f\u0435\u0440\u0435\u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 \u043c\u0430\u0441\u0441\u0438\u0432."
+        },
+        {
+          "from": "' \u0434\u043b\u044f \u0442\u043e\u0447\u043a\u0438 \u0438\u0434\u0443\u0442 \u03b5xx, \u03b5yy, \u03b3xy, \u0437\u0430\u0442\u0435\u043c \u043f\u0430\u0440\u044b \u2212/+ \u0434\u043b\u044f \u03b5zz, \u03b3xz \u0438 \u03b3yz.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0434\u043b\u044f \u0442\u043e\u0447\u043a\u0438 \u0438\u0434\u0443\u0442 ?xx, ?yy, ?xy, \u0437\u0430\u0442\u0435\u043c \u043f\u0430\u0440\u044b ?/+ \u0434\u043b\u044f ?zz, ?xz \u0438 ?yz."
+        },
+        {
+          "from": "' \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 \u0431\u043b\u043e\u043a b\u1d40 d b \u0434\u043b\u044f \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0439 \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u044c\u043d\u043e\u0439 \u0442\u043e\u0447\u043a\u0438. \u043f\u0440\u0438 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u043e\u043c",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 \u0431\u043b\u043e\u043a b? d b \u0434\u043b\u044f \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0439 \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u044c\u043d\u043e\u0439 \u0442\u043e\u0447\u043a\u0438. \u043f\u0440\u0438 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u043e\u043c"
+        },
+        {
+          "from": "' \u0432\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043f\u043b\u043e\u0449\u0430\u0434\u044c \u043a\u0432\u0430\u0434\u0440\u0430\u0442\u0443\u0440\u044b \u0431\u0435\u0442\u043e\u043d\u0430, \u043c\u043c\u00b2, \u0438 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u043d\u043e\u0435 \u043f\u043b\u0435\u0447\u043e, \u043c\u043c,",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0432\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043f\u043b\u043e\u0449\u0430\u0434\u044c \u043a\u0432\u0430\u0434\u0440\u0430\u0442\u0443\u0440\u044b \u0431\u0435\u0442\u043e\u043d\u0430, \u043c\u043c?, \u0438 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u043d\u043e\u0435 \u043f\u043b\u0435\u0447\u043e, \u043c\u043c,"
+        },
+        {
+          "from": "' \u0433\u0440\u0430\u0434\u0438\u0435\u043d\u0442 my \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 \u0437\u0430\u0434\u0430\u043d\u043d\u043e\u0435 qx \u0438 \u043a\u043e\u043c\u043f\u0435\u043d\u0441\u0438\u0440\u0443\u0435\u0442 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u043d\u0443\u044e \u03c3zz.",
+          "kind": "legacy_comment_encoding_loss",
+          "to": "' \u0433\u0440\u0430\u0434\u0438\u0435\u043d\u0442 my \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 \u0437\u0430\u0434\u0430\u043d\u043d\u043e\u0435 qx \u0438 \u043a\u043e\u043c\u043f\u0435\u043d\u0441\u0438\u0440\u0443\u0435\u0442 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u043d\u0443\u044e ?zz."
+        }
+      ],
+      "CCoupledEnvelopeEquations": [],
+      "CCoupledFieldSubspace": [],
+      "CCoupledHybridFactorization": [],
+      "CCoupledHybridSolver": [],
+      "CCoupledMaterialConstraint": [],
+      "CCoupledMaterialFailure": [],
+      "CCoupledMaterialSnapshot": [],
+      "CCoupledNewtonSolver": [
+        {
+          "kind": "compiler_intertoken_spacing_only",
+          "line_boundaries_strings_comments_typed_numbers_and_operators_preserved": true
+        }
+      ],
+      "CCoupledPrincipalTransition": [],
+      "CCoupledProgressObserverTest": [],
+      "CCoupledReinforcedResponse": [],
+      "CCoupledSectionAnalysis": [
+        {
+          "kind": "known_inline_comment_encoding",
+          "only_comment": true
+        }
+      ],
+      "CCoupledSectionQuadrature": [
+        {
+          "count": 2,
+          "from": "1e-7",
+          "kind": "equivalent_literal",
+          "to": "0.0000001"
+        },
+        {
+          "count": 1,
+          "from": "1e-8",
+          "kind": "equivalent_literal",
+          "to": "0.00000001"
+        }
+      ],
+      "CCubicSplineBasis": [],
+      "CEnvelopeEnergyEquationsTest": [],
+      "CHybridDifferenceObserverTest": [],
+      "CHybridEquationsTest": [],
+      "CNDMResultsWriter": [],
+      "CProjectedEquationsTest": [],
+      "ICoupledContinuationProgress": [],
+      "ICoupledDifferenceObserver": [],
+      "ICoupledEquationSystem": [],
+      "ICoupledScalarConstraint": [],
+      "modCoupledConcreteTensor": [],
+      "modTestCoupledASDMaterial": [],
+      "modTestCoupledASDTangent": [],
+      "modTestCoupledConstraint": [],
+      "modTestCoupledElasticState": [
+        {
+          "kind": "compiler_intertoken_spacing_only",
+          "line_boundaries_strings_comments_typed_numbers_and_operators_preserved": true
+        }
+      ],
+      "modTestCoupledEnvelopeControl": [],
+      "modTestCoupledHybrid": [],
+      "modTestCoupledQuadrature": [],
+      "modTestMVT2ProductionASDTest": [
+        {
+          "count": 1,
+          "from": "72812.5#",
+          "kind": "equivalent_literal",
+          "to": "72812.5"
+        },
+        {
+          "count": 1,
+          "from": "75312.5#",
+          "kind": "equivalent_literal",
+          "to": "75312.5"
+        }
+      ]
+    },
+    "full_acceptance_completed": false,
+    "imported_this_pass": [
+      "CCoupledReinforcedResponse",
+      "CCoupledDeformationContinuation",
+      "CCoupledElasticState",
+      "CCoupledNewtonSolver",
+      "CCoupledSectionAnalysis",
+      "modTestCoupledElasticState"
+    ],
+    "installed_workbook_changed": false,
+    "other_actual_components_exact_parent_except_identifier_case": [
+      "\u042d\u0442\u0430\u041a\u043d\u0438\u0433\u0430",
+      "\u041b\u0438\u0441\u04421",
+      "\u041b\u0438\u0441\u04422",
+      "\u041b\u0438\u0441\u04423",
+      "\u041b\u0438\u0441\u04424",
+      "\u041b\u0438\u0441\u04425",
+      "CLoadPathDescriptor",
+      "CLoadPathMath",
+      "CLoadPathVector",
+      "CMomentZeroFilter",
+      "CResultMeta",
+      "CResultStatusPolicy",
+      "CSectionLoadState",
+      "modCalculationPurpose",
+      "modGeometryPrimitives",
+      "modGeometryTypes",
+      "modResultStatus",
+      "modSectionRecipeApiGuide",
+      "modSectionRecipeTypes",
+      "modSolverWorkStats",
+      "ICoupledPointResponse",
+      "ILimitSearchProblem",
+      "CFiberMeshBuilder",
+      "CGeometryDiagnostic",
+      "CGeometryPath",
+      "CGeometryRegion",
+      "CGeometryVariableOffset",
+      "CPolygonSpec",
+      "CSectionRecipeCircle",
+      "CSectionRecipeHollowRectangle",
+      "CSectionRecipePointedSection",
+      "CSectionRecipeRectangles",
+      "CConcreteElement",
+      "CConcreteRegion",
+      "CRebarContactBuilder",
+      "CRebarGroupAnnotationBuilder",
+      "CRebarLayout",
+      "CRebarOffsetContours",
+      "CRebarRuleExecutor",
+      "CRebarRuleOptions",
+      "CSectionAnnotationBuilder",
+      "CSectionAnnotations",
+      "CSectionBuilder",
+      "CSectionContours",
+      "CSectionDefinition",
+      "CSectionDefinitionBuilder",
+      "CSectionGeometryQuery",
+      "CSectionInputReader",
+      "CSectionInputTable",
+      "CSectionModel",
+      "CSectionModelBuilder",
+      "CSectionPropertiesCalculator",
+      "CSectionRecipeContext",
+      "CTransverseRebarLayout",
+      "ISectionRecipe",
+      "CConcreteMaterialParameters",
+      "CCoupledConcreteEnvelope",
+      "CCoupledConcreteResponse",
+      "CCoupledConcreteReturn",
+      "CCoupledMaterialSnapshot",
+      "CCoupledSteelModel",
+      "CMaterialDiagram",
+      "CMaterialModelProvider",
+      "CMaterialModelSpec",
+      "CSteelMaterialParameters",
+      "CTestLinearConcreteMaterial",
+      "CTestLinearSteelMaterial",
+      "modCoupledConcreteTensor",
+      "CCapacityCalculator",
+      "CCapacityLimitSearchProblem",
+      "CCapacityResult",
+      "CCapacitySolver",
+      "CCoupledFieldSnapshot",
+      "CCoupledLinearSystem",
+      "CCoupledLoadContinuation",
+      "CCoupledLoadTrace",
+      "CCoupledSectionQuadrature",
+      "CCrackLimitSearchProblem",
+      "CCubicSplineBasis",
+      "CDiscreteForceIntegrator",
+      "CLimitSearchCoordinator",
+      "CLimitSearchRequest",
+      "CLimitSearchResult",
+      "CLinearSystem3x3",
+      "CLoadMultiplierSearch",
+      "CSectionNumericalFrame",
+      "CSectionSolver",
+      "CSectionStrainLimits",
+      "CStateGuessBuilder",
+      "CStateSolutionRunner",
+      "CTransverseRebarQuadrature",
+      "CUltimateStrainSearch",
+      "modLimitSearchRequestFactory",
+      "modNonlinearStepControl",
+      "CCrackFormationCalculator",
+      "CCrackFormationResult",
+      "CCrackResult",
+      "CCrackWidthCalculator",
+      "CCrackWidthResult",
+      "CLongitudinalCrackCalculator",
+      "CLongitudinalCrackResult",
+      "CSP35CrackData",
+      "CStabilityCalculator",
+      "CStabilityResult",
+      "CBatchSectionCalculator",
+      "CCalculationProfile",
+      "CCalculationProfileCatalog",
+      "CCombinationResult",
+      "CDirectStateResult",
+      "CSectionStateResult",
+      "CStateProvider",
+      "CStateRepository",
+      "CStateRequest",
+      "CStrengthResult",
+      "CAutoCADContourReader",
+      "CAutoCADSectionModelImporter",
+      "CBatchResultWriter",
+      "CBinarySnapshotFile",
+      "CCalculationSnapshot",
+      "CCalculationSnapshotStore",
+      "CCrackSummaryWriter",
+      "CExcelAppStateGuard",
+      "CExecutionReport",
+      "CFileChecksum",
+      "CIndexedSnapshotFile",
+      "CLoadCombinationReader",
+      "CNDMResultsWriter",
+      "CPlotAnnotationLayout",
+      "CResultBlockIndex",
+      "CResultReadSource",
+      "CSectionInputSnapshotReader",
+      "CSectionPlotDataReader",
+      "CSectionPlotter",
+      "CSectionTypeRegistry",
+      "CStabilitySummaryWriter",
+      "CStrengthSummaryWriter",
+      "CSystemSettingsReader",
+      "CUnitSystem",
+      "modAutoCADStressExport",
+      "modCalculationSnapshot",
+      "modCoupledFieldResults",
+      "modCoupledLoadChart",
+      "modCoupledWorkbookInput",
+      "modIndexedExcelResults",
+      "modMeshConfiguration",
+      "modResultFreshness",
+      "modResultsFormatting",
+      "modSectionIllustrations",
+      "modSectionOptionalData",
+      "modSectionRecipeSetup",
+      "modSectionSnapshot",
+      "modSnapshotTables",
+      "modStatusFormatting",
+      "modTransverseResultPaths",
+      "modWorkbookCalculation",
+      "modWorkbookMessages",
+      "CTestCoupledPointResponse",
+      "CTestExcelApplicationState",
+      "CTestFakeAcadContour",
+      "CTestFakeAcadContourExport",
+      "CTestFakeAcadDocument",
+      "CTestFakeAcadLine",
+      "CTestFakeAcadRegion",
+      "CTestLimitSearchProblem",
+      "CTestWorkflowWorkbook",
+      "modTestAudit02Api",
+      "modTestAudit02Snapshots",
+      "modTestAutoCADConfig",
+      "modTestAutoCADContours",
+      "modTestBatchCalculation",
+      "modTestCalculationSnapshot",
+      "modTestCapacitySolver",
+      "modTestConfiguration",
+      "modTestContourMesh",
+      "modTestCoupledAnalyticTorsion",
+      "modTestCoupledCancellation",
+      "modTestCoupledExperiment",
+      "modTestCoupledMixedMaterial",
+      "modTestCoupledRecipeWorkbook",
+      "modTestCoupledReinforcedPrism",
+      "modTestCoupledSplineBasis",
+      "modTestCoupledSteelModel",
+      "modTestCoupledTransverseRebar",
+      "modTestCrackWidth",
+      "modTestDeclarativeExamples",
+      "modTestDeclarativeGeometry",
+      "modTestDiscreteForces",
+      "modTestElementGeometry",
+      "modTestElementGeometryViews",
+      "modTestGeneralGeometryConfig",
+      "modTestGeometry",
+      "modTestGeometryConfig",
+      "modTestGeometryFixtures",
+      "modTestGeometryPublication",
+      "modTestGeometryQuery",
+      "modTestGeometryReview",
+      "modTestGeometrySolidSnapshots",
+      "modTestIndividualContours",
+      "modTestLoadTableConfig",
+      "modTestMaterialDiagrams",
+      "modTestPerformance",
+      "modTestPlotConfig",
+      "modTestPolygonSpec",
+      "modTestProfileConfig",
+      "modTestRecipeAnnotations",
+      "modTestRecipeApiCatalogue",
+      "modTestRecipeOperations",
+      "modTestRecipeSetbacks",
+      "modTestRegressionBaseline",
+      "modTestSectionInputReader",
+      "modTestSectionRecipes",
+      "modTestSectionSolver",
+      "modTestSectionWorkflow",
+      "modTestShapeArchitecture",
+      "modTestSP35CrackWidth",
+      "modTestTravushSquare2022",
+      "modTestWorkbookInterface",
+      "modTestZeroContourParity",
+      "CCoupledStepOptimizer",
+      "CCoupledSteelCorrection",
+      "ICoupledContinuationProgress",
+      "ICoupledDifferenceObserver",
+      "ICoupledEquationSystem",
+      "ICoupledScalarConstraint",
+      "CCoupledASDFlow",
+      "CCoupledASDTangent",
+      "CCoupledConcreteBackbone",
+      "CCoupledMaterialFailure",
+      "CCoupledConstraintEquations",
+      "CCoupledDiscretization",
+      "CCoupledFieldSubspace",
+      "CCoupledHybridFactorization",
+      "CCoupledHybridSolver",
+      "CCoupledMaterialConstraint",
+      "CCoupledPrincipalTransition",
+      "CConstraintEquationsTest",
+      "CCoupledProgressObserverTest",
+      "CEnvelopeEnergyEquationsTest",
+      "CHybridDifferenceObserverTest",
+      "CHybridEquationsTest",
+      "CProjectedEquationsTest",
+      "modTestCoupledASDMaterial",
+      "modTestCoupledASDTangent",
+      "modTestCoupledConstraint",
+      "modTestCoupledHybrid",
+      "modTestCoupledQuadrature",
+      "modTestMVT2ProductionASDTest",
+      "CCoupledEnvelopeEquations",
+      "modTestCoupledEnvelopeControl",
+      "CCoupledArcContinuation"
+    ],
+    "parent_compiled_project_sha256": "3D4ADE177210A900DD62F66F498E4566E99C6FB5F33ECAEEADC11DB82AE91BA7",
+    "raw_source_byte_identical_other_components": 195,
+    "raw_source_case_changed_by_VBE": [
+      "CSectionPropertiesCalculator",
+      "CCoupledConcreteEnvelope",
+      "CCoupledConcreteResponse",
+      "CCoupledConcreteReturn",
+      "CCoupledMaterialSnapshot",
+      "CMaterialModelProvider",
+      "CSteelMaterialParameters",
+      "modCoupledConcreteTensor",
+      "CCapacitySolver",
+      "CCoupledLinearSystem",
+      "CCoupledLoadContinuation",
+      "CLinearSystem3x3",
+      "CSectionNumericalFrame",
+      "CSectionSolver",
+      "CStateGuessBuilder",
+      "CStateSolutionRunner",
+      "CUltimateStrainSearch",
+      "CCrackFormationCalculator",
+      "CStabilityCalculator",
+      "CStateProvider",
+      "CStabilitySummaryWriter",
+      "modAutoCADStressExport",
+      "modCoupledWorkbookInput",
+      "CTestCoupledPointResponse",
+      "modTestAutoCADContours",
+      "modTestBatchCalculation",
+      "modTestCapacitySolver",
+      "modTestContourMesh",
+      "modTestCoupledAnalyticTorsion",
+      "modTestCoupledExperiment",
+      "modTestCoupledReinforcedPrism",
+      "modTestCrackWidth",
+      "modTestDeclarativeExamples",
+      "modTestDiscreteForces",
+      "modTestGeometry",
+      "modTestGeometrySolidSnapshots",
+      "modTestMaterialDiagrams",
+      "modTestPerformance",
+      "modTestRegressionBaseline",
+      "modTestSectionRecipes",
+      "modTestSectionSolver",
+      "modTestShapeArchitecture",
+      "modTestTravushSquare2022",
+      "CCoupledStepOptimizer",
+      "CCoupledSteelCorrection",
+      "CCoupledASDFlow",
+      "CCoupledASDTangent",
+      "CCoupledFieldSubspace",
+      "CCoupledHybridSolver",
+      "CCoupledMaterialConstraint",
+      "modTestCoupledASDMaterial",
+      "modTestCoupledASDTangent",
+      "modTestMVT2ProductionASDTest",
+      "CCoupledEnvelopeEquations",
+      "modTestCoupledEnvelopeControl"
+    ],
+    "source_components_checked": 43,
+    "unchanged": 213
+  },
+  "cold880": {
+    "accepted_states": 56,
+    "cold": {
+      "all_saved_sources_exact": 256,
+      "capacity": "NumFail",
+      "code": "NUMERICAL_FAILURE",
+      "direct": "OK",
+      "limit": "",
+      "lower": 1.10428336769878,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 28,
+        "timeout600": false
+      },
+      "results_checksum": "2B1D577BC262322E2C8BA9A59CB4EEDE1982C79056BAD9108B6D269E5B701245",
+      "saved_book_sha256": "B1FF94AE652304FF6195984C6BC57E761230DE151453BAEE05BA8C12DF5092D7",
+      "seconds": 748.125
+    },
+    "entire_new_cold_trajectory_stress_replay_still_required": true,
+    "full_cold_from_zero": true,
+    "global_probe_limit96": true,
+    "last_accepted_lambda": 1.1024449601176982,
+    "maximum_accepted_lambda": 1.1042833676987807,
+    "negative853_exact_prefix_states": 4,
+    "no_release_promotion": true,
+    "no_warm_fields_passed_to_stock_macro": true,
+    "original_materials_and_force_tolerances": true,
+    "physical_capacity_certified": false,
+    "physical_progress": [
+      {
+        "concrete_principal_max": 0.00022106324989033845,
+        "concrete_principal_min": -0.00016500188736872078,
+        "lambda_value": 1.0,
+        "max_abs_hoop_strain": 2.3133498717014012e-05,
+        "max_abs_long_steel_strain": 6.0290858556387436e-05,
+        "maximum_lambda_so_far": 1.0,
+        "maximum_three_station_steel_utilization": 0.002411634342255497,
+        "state": 4
+      },
+      {
+        "concrete_principal_max": 0.00037503886562140253,
+        "concrete_principal_min": -0.00021410014760745198,
+        "lambda_value": 1.0984462345363621,
+        "max_abs_hoop_strain": 7.940440430689897e-05,
+        "max_abs_long_steel_strain": 7.459705736509992e-05,
+        "maximum_lambda_so_far": 1.0984462345363621,
+        "maximum_three_station_steel_utilization": 0.0039702202153449485,
+        "state": 7
+      },
+      {
+        "concrete_principal_max": 0.0004411866943447973,
+        "concrete_principal_min": -0.0002468834365834714,
+        "lambda_value": 1.1042833676987807,
+        "max_abs_hoop_strain": 9.631914238449196e-05,
+        "max_abs_long_steel_strain": 8.356720270471763e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004815957119224598,
+        "state": 19
+      },
+      {
+        "concrete_principal_max": 0.0004416777690804396,
+        "concrete_principal_min": -0.00024822470606515747,
+        "lambda_value": 1.1024447615704829,
+        "max_abs_hoop_strain": 9.564279550601442e-05,
+        "max_abs_long_steel_strain": 8.378072841152607e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004782139775300721,
+        "state": 49
+      },
+      {
+        "concrete_principal_max": 0.0004417125440922663,
+        "concrete_principal_min": -0.0002482581711934878,
+        "lambda_value": 1.1024449601176982,
+        "max_abs_hoop_strain": 9.564060167914524e-05,
+        "max_abs_long_steel_strain": 8.378794541611962e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004782030083957262,
+        "state": 56
+      }
+    ],
+    "raw_history": {
+      "bytes": 903124,
+      "complete_bytes": 903124,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "AEF949CE632DBAA05BE3A6A6E3979C356CD08F27386BE20815A99E02BFE0D202"
+    },
+    "regressions": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "same_actual_compiled_kernel878": true,
+    "whole_goal_completed": false
+  },
+  "full_acceptance_not_run": true,
+  "goal_active": true,
+  "no_release_or_main_promotion": true,
+  "physical_HardShear_limit_certified": false,
+  "raw_archive": "RawEvidence.tar.xz",
+  "raw_bytes": 199660550,
+  "raw_files": 418,
+  "regressions883": {
+    "failed": 0,
+    "macros": 5,
+    "own_process_closed": true,
+    "passed": 164,
+    "timeout600": false
+  },
+  "remaining": [
+    "HardShear confirmed ultimate;larger local state count did not improve maximum lambda or time",
+    "independent raw-field/stress replay of new synthetic side-limit test;its current comment incorrectly says linear",
+    "side metadata in load-controlled steel-limit diagnostics and detailed output;native end-to-end reports for side event",
+    "step integration and two sequential accepted half-steps;mesh and step sensitivity;ONQ010/012",
+    "external material-matched controls;full SOW and scoped acceptance;target10seconds;main/release promotion"
+  ],
+  "side_boundary884": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 12,
+    "timeout600": false
+  },
+  "side_steel_boundary_brackets": [
+    [
+      -1.0,
+      1.63922119140625,
+      1.63931274414063
+    ],
+    [
+      1.0,
+      1.63922119140625,
+      1.63931274414063
+    ]
+  ],
+  "spatial_steel881": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 31,
+    "timeout600": false
+  },
+  "stress882": {
+    "H_MPa": [
+      0.0,
+      0.0,
+      3.923243523785656e-06,
+      3.5164098362815754e-05,
+      6.647721431274299e-05,
+      0.00011238569684518864,
+      0.0001156832480179072,
+      0.00011933527357074076,
+      0.00012303388081079728,
+      0.0001267757577013535,
+      0.00013491999115148464,
+      0.00013928400077811826,
+      0.0001407731348895929,
+      0.00014275085754876567,
+      0.00014523186574834336,
+      0.0001466584193207501,
+      0.0001481593217438756,
+      0.00015018398543491953,
+      0.00015266491345041535,
+      0.00015336446669456737,
+      0.00015336544779610372,
+      0.00015336554180203323,
+      0.00015336572981203492,
+      0.00015336578426063344,
+      0.00015336584014376004,
+      0.00015336589422625227,
+      0.0001533659483089789,
+      0.00015336600239130406,
+      0.00015336603619265737,
+      0.0001533660720635901,
+      0.00015336612547326507,
+      0.00015336618410976538,
+      0.00015336623941968104,
+      0.0001533663045993305,
+      0.000153366369777275,
+      0.00015336643495499568,
+      0.0001533665164268354,
+      0.00015336661826613511,
+      0.00015336674556449414,
+      0.00015336690468623328,
+      0.0001533671035865166,
+      0.0001533673522089346,
+      0.00015336766298235362,
+      0.00015336805144193803,
+      0.00015336853700518394,
+      0.00015336914394169254,
+      0.000153369902584899,
+      0.00015337085084605006,
+      0.00015337203610552236,
+      0.0001533735175752111,
+      0.00015337536924879381,
+      0.00015337768358521695,
+      0.00015338057610637452,
+      0.00015338419113366492,
+      0.00015338870894226453,
+      0.00015339435467824777
+    ],
+    "H_is_continuation_coordinate_not_failure_criterion": true,
+    "actual_components": 256,
+    "all_raw_fields_fractions_and_lambdas_exact": true,
+    "all_six_forces_and_all_56_physical_and4_gauge_equations": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "AcceptedPostCrackTestPath",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.10428336769878,
+      "meta": [
+        "4",
+        "0",
+        "\u041f\u0440\u0438\u043d\u044f\u0442\u0430\u044f \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c\u043d\u0430\u044f \u043f\u043e\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c. \u042d\u0442\u043e \u043d\u0435 \u043f\u0440\u0435\u0434\u0435\u043b."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.01
+      ],
+      "orientation": [
+        {
+          "current_length": 2.8691419507951455e-05,
+          "field": 3,
+          "previous_length": 2.732475555800678e-05,
+          "signed_advance": 2.8653276141942285e-05
+        },
+        {
+          "current_length": 5.3409483407228394e-05,
+          "field": 4,
+          "previous_length": 2.8691419507951455e-05,
+          "signed_advance": 4.6254947901656596e-05
+        },
+        {
+          "current_length": 3.2689940336340645e-05,
+          "field": 5,
+          "previous_length": 5.3409483407228394e-05,
+          "signed_advance": 3.134750362800135e-05
+        },
+        {
+          "current_length": 4.267402409347975e-05,
+          "field": 6,
+          "previous_length": 3.2689940336340645e-05,
+          "signed_advance": 4.038270384485889e-05
+        },
+        {
+          "current_length": 3.217498149484515e-06,
+          "field": 7,
+          "previous_length": 4.267402409347975e-05,
+          "signed_advance": 2.906725801351069e-06
+        },
+        {
+          "current_length": 3.1269185807350574e-06,
+          "field": 8,
+          "previous_length": 3.217498149484515e-06,
+          "signed_advance": 2.765256162312595e-06
+        },
+        {
+          "current_length": 6.743789996717289e-06,
+          "field": 9,
+          "previous_length": 3.1269185807350574e-06,
+          "signed_advance": 1.538159686099474e-06
+        },
+        {
+          "current_length": 3.950483862327787e-06,
+          "field": 10,
+          "previous_length": 6.743789996717289e-06,
+          "signed_advance": 1.2023478252433907e-06
+        },
+        {
+          "current_length": 7.72055062677927e-06,
+          "field": 11,
+          "previous_length": 3.950483862327787e-06,
+          "signed_advance": 7.36165771821546e-06
+        },
+        {
+          "current_length": 5.130216874609992e-06,
+          "field": 12,
+          "previous_length": 7.72055062677927e-06,
+          "signed_advance": 4.782812514948704e-06
+        },
+        {
+          "current_length": 1.6861850577768636e-06,
+          "field": 13,
+          "previous_length": 5.130216874609992e-06,
+          "signed_advance": 1.5249124183928007e-06
+        },
+        {
+          "current_length": 2.16047880541392e-06,
+          "field": 14,
+          "previous_length": 1.6861850577768636e-06,
+          "signed_advance": 2.1344065711553146e-06
+        },
+        {
+          "current_length": 2.712649072653542e-06,
+          "field": 15,
+          "previous_length": 2.16047880541392e-06,
+          "signed_advance": 2.7118848201581836e-06
+        },
+        {
+          "current_length": 1.6313596623508114e-06,
+          "field": 16,
+          "previous_length": 2.712649072653542e-06,
+          "signed_advance": 1.5914535050252572e-06
+        },
+        {
+          "current_length": 2.1518818184717736e-06,
+          "field": 17,
+          "previous_length": 1.6313596623508114e-06,
+          "signed_advance": 1.976428190102783e-06
+        },
+        {
+          "current_length": 2.562125110176509e-06,
+          "field": 18,
+          "previous_length": 2.1518818184717736e-06,
+          "signed_advance": 2.4664183376551014e-06
+        },
+        {
+          "current_length": 3.409952089069204e-06,
+          "field": 19,
+          "previous_length": 2.562125110176509e-06,
+          "signed_advance": 3.3727403953508936e-06
+        },
+        {
+          "current_length": 1.7137081783576366e-06,
+          "field": 20,
+          "previous_length": 3.409952089069204e-06,
+          "signed_advance": 1.0811987685591452e-06
+        },
+        {
+          "current_length": 3.007747832677635e-09,
+          "field": 21,
+          "previous_length": 1.7137081783576366e-06,
+          "signed_advance": 1.6084888296515537e-09
+        },
+        {
+          "current_length": 1.8013464900307915e-10,
+          "field": 22,
+          "previous_length": 3.007747832677635e-09,
+          "signed_advance": 1.4739002650620108e-10
+        },
+        {
+          "current_length": 3.602692884572097e-10,
+          "field": 23,
+          "previous_length": 1.8013464900307915e-10,
+          "signed_advance": 3.6026928842267455e-10
+        },
+        {
+          "current_length": 1.0433648721192045e-10,
+          "field": 24,
+          "previous_length": 3.602692884572097e-10,
+          "signed_advance": 1.0433648720516724e-10
+        },
+        {
+          "current_length": 1.0446571988725077e-10,
+          "field": 25,
+          "previous_length": 1.0433648721192045e-10,
+          "signed_advance": 1.0433648728918442e-10
+        },
+        {
+          "current_length": 1.04345843326022e-10,
+          "field": 26,
+          "previous_length": 1.0446571988725077e-10,
+          "signed_advance": 1.0420856816706839e-10
+        },
+        {
+          "current_length": 1.0434584236740112e-10,
+          "field": 27,
+          "previous_length": 1.04345843326022e-10,
+          "signed_advance": 1.0434584235121892e-10
+        },
+        {
+          "current_length": 1.0434584959109879e-10,
+          "field": 28,
+          "previous_length": 1.0434584236740112e-10,
+          "signed_advance": 1.0434584958627236e-10
+        },
+        {
+          "current_length": 6.521615828344352e-11,
+          "field": 29,
+          "previous_length": 1.0434584959109879e-10,
+          "signed_advance": 6.521615828286279e-11
+        },
+        {
+          "current_length": 8.408115930538871e-11,
+          "field": 30,
+          "previous_length": 6.521615828344352e-11,
+          "signed_advance": 8.158170039138512e-11
+        },
+        {
+          "current_length": 1.0273703576323085e-10,
+          "field": 31,
+          "previous_length": 8.408115930538871e-11,
+          "signed_advance": 1.0163141445599581e-10
+        },
+        {
+          "current_length": 1.0216397714220053e-10,
+          "field": 32,
+          "previous_length": 1.0273703576323085e-10,
+          "signed_advance": 1.0133423869522905e-10
+        },
+        {
+          "current_length": 1.042217862290052e-10,
+          "field": 33,
+          "previous_length": 1.0216397714220053e-10,
+          "signed_advance": 1.0127184206409473e-10
+        },
+        {
+          "current_length": 1.0302075218040426e-10,
+          "field": 34,
+          "previous_length": 1.042217862290052e-10,
+          "signed_advance": 9.93009900401613e-11
+        },
+        {
+          "current_length": 1.0302041058088613e-10,
+          "field": 35,
+          "previous_length": 1.0302075218040426e-10,
+          "signed_advance": 1.0302041050393846e-10
+        },
+        {
+          "current_length": 1.0302036620791774e-10,
+          "field": 36,
+          "previous_length": 1.0302041058088613e-10,
+          "signed_advance": 1.0302036620668745e-10
+        },
+        {
+          "current_length": 1.2877539638122642e-10,
+          "field": 37,
+          "previous_length": 1.0302036620791774e-10,
+          "signed_advance": 1.2877539637925947e-10
+        },
+        {
+          "current_length": 1.6096914707894097e-10,
+          "field": 38,
+          "previous_length": 1.2877539638122642e-10,
+          "signed_advance": 1.6096914707505622e-10
+        },
+        {
+          "current_length": 2.01211282477129e-10,
+          "field": 39,
+          "previous_length": 1.6096914707894097e-10,
+          "signed_advance": 2.0121128246961502e-10
+        },
+        {
+          "current_length": 2.5151386527847035e-10,
+          "field": 40,
+          "previous_length": 2.01211282477129e-10,
+          "signed_advance": 2.515138652636944e-10
+        },
+        {
+          "current_length": 3.1439195904646463e-10,
+          "field": 41,
+          "previous_length": 2.5151386527847035e-10,
+          "signed_advance": 3.1439195901763527e-10
+        },
+        {
+          "current_length": 3.929893703715946e-10,
+          "field": 42,
+          "previous_length": 3.1439195904646463e-10,
+          "signed_advance": 3.9298937031543e-10
+        },
+        {
+          "current_length": 4.912358062917729e-10,
+          "field": 43,
+          "previous_length": 3.929893703715946e-10,
+          "signed_advance": 4.912358061818233e-10
+        },
+        {
+          "current_length": 6.14043342481505e-10,
+          "field": 44,
+          "previous_length": 4.912358062917729e-10,
+          "signed_advance": 6.140433422669593e-10
+        },
+        {
+          "current_length": 7.675519666754514e-10,
+          "field": 45,
+          "previous_length": 6.14043342481505e-10,
+          "signed_advance": 7.675519662562458e-10
+        },
+        {
+          "current_length": 9.594365056103387e-10,
+          "field": 46,
+          "previous_length": 7.675519666754514e-10,
+          "signed_advance": 9.594365047916164e-10
+        },
+        {
+          "current_length": 1.1992902386409422e-09,
+          "field": 47,
+          "previous_length": 9.594365056103387e-10,
+          "signed_advance": 1.199290237041398e-09
+        },
+        {
+          "current_length": 1.4991043760308547e-09,
+          "field": 48,
+          "previous_length": 1.1992902386409422e-09,
+          "signed_advance": 1.4991043729063162e-09
+        },
+        {
+          "current_length": 1.8738673208020533e-09,
+          "field": 49,
+          "previous_length": 1.4991043760308547e-09,
+          "signed_advance": 1.8738673146978607e-09
+        },
+        {
+          "current_length": 2.342313622653893e-09,
+          "field": 50,
+          "previous_length": 1.8738673208020533e-09,
+          "signed_advance": 2.3423136107278065e-09
+        },
+        {
+          "current_length": 2.9278599915649658e-09,
+          "field": 51,
+          "previous_length": 2.342313622653893e-09,
+          "signed_advance": 2.9278599682635824e-09
+        },
+        {
+          "current_length": 3.6597750013241474e-09,
+          "field": 52,
+          "previous_length": 2.9278599915649658e-09,
+          "signed_advance": 3.659774955790761e-09
+        },
+        {
+          "current_length": 4.5746407886601405e-09,
+          "field": 53,
+          "previous_length": 3.6597750013241474e-09,
+          "signed_advance": 4.574640699675016e-09
+        },
+        {
+          "current_length": 5.718179442594215e-09,
+          "field": 54,
+          "previous_length": 4.5746407886601405e-09,
+          "signed_advance": 5.7181792686640115e-09
+        },
+        {
+          "current_length": 7.147534930094791e-09,
+          "field": 55,
+          "previous_length": 5.718179442594215e-09,
+          "signed_advance": 7.147534590068854e-09
+        },
+        {
+          "current_length": 8.93412381963408e-09,
+          "field": 56,
+          "previous_length": 7.147534930094791e-09,
+          "signed_advance": 8.934123154739951e-09
+        }
+      ],
+      "phase": "EnvelopeEnergy.Accepted",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 6.62037037037037e-07,
+          "force_residual_MPa": 2.097972770013772e-16,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 0.25,
+          "residual_MPa": 3.4861002973229915e-14,
+          "steel_utilization": 0.000609287423213503
+        },
+        {
+          "bound_MPa": 8.240740740740741e-07,
+          "force_residual_MPa": 5.052748343182936e-16,
+          "fraction": 1.0,
+          "index": 2,
+          "lambda": 0.5,
+          "residual_MPa": 8.870681966755001e-14,
+          "steel_utilization": 0.001218574846427
+        },
+        {
+          "bound_MPa": 9.861111111111112e-07,
+          "force_residual_MPa": 3.746727425432592e-10,
+          "fraction": 1.0,
+          "index": 3,
+          "lambda": 0.75,
+          "residual_MPa": 1.7501566862421214e-10,
+          "steel_utilization": 0.00182761658878148
+        },
+        {
+          "bound_MPa": 1.1481481481481482e-06,
+          "force_residual_MPa": 1.6017212247889905e-13,
+          "fraction": 1.0,
+          "index": 4,
+          "lambda": 1.0,
+          "residual_MPa": 9.241792444172892e-13,
+          "steel_utilization": 0.00241050214757632
+        },
+        {
+          "bound_MPa": 1.1824553764640373e-06,
+          "force_residual_MPa": 4.5202711960343926e-10,
+          "fraction": 1.0,
+          "index": 5,
+          "lambda": 1.0529311522588,
+          "residual_MPa": 3.598856512278259e-09,
+          "steel_utilization": 0.00261502515693364
+        },
+        {
+          "bound_MPa": 1.2090585959465166e-06,
+          "force_residual_MPa": 8.090349301373527e-08,
+          "fraction": 1.0,
+          "index": 6,
+          "lambda": 1.09397611946034,
+          "residual_MPa": 7.939878532425837e-08,
+          "steel_utilization": 0.00393024841662227
+        },
+        {
+          "bound_MPa": 1.2119558927550482e-06,
+          "force_residual_MPa": 2.1526205239718336e-09,
+          "fraction": 1.0,
+          "index": 7,
+          "lambda": 1.09844623453636,
+          "residual_MPa": 2.1787509517210866e-09,
+          "steel_utilization": 0.00397022021534495
+        },
+        {
+          "bound_MPa": 1.213560674030115e-06,
+          "force_residual_MPa": 1.3768343436553283e-09,
+          "fraction": 1.0,
+          "index": 8,
+          "lambda": 1.10092218278932,
+          "residual_MPa": 1.4347209442624326e-09,
+          "steel_utilization": 0.0040910644344458
+        },
+        {
+          "bound_MPa": 1.2066270962233258e-06,
+          "force_residual_MPa": 8.198522091670722e-11,
+          "fraction": 1.0,
+          "index": 9,
+          "lambda": 1.09022466274456,
+          "residual_MPa": 1.315934910952471e-10,
+          "steel_utilization": 0.00410622483339314
+        },
+        {
+          "bound_MPa": 1.2093683622509556e-06,
+          "force_residual_MPa": 1.1372051007869975e-07,
+          "fraction": 1.0,
+          "index": 10,
+          "lambda": 1.09445404461576,
+          "residual_MPa": 7.76227725567645e-07,
+          "steel_utilization": 0.00423497670103606
+        },
+        {
+          "bound_MPa": 1.2119754034958055e-06,
+          "force_residual_MPa": 5.183294517876305e-11,
+          "fraction": 1.0,
+          "index": 11,
+          "lambda": 1.0984763368221,
+          "residual_MPa": 1.885199599888348e-09,
+          "steel_utilization": 0.00454567174607796
+        },
+        {
+          "bound_MPa": 1.2130281291062026e-06,
+          "force_residual_MPa": 6.182007281394262e-10,
+          "fraction": 1.0,
+          "index": 12,
+          "lambda": 1.10010054204957,
+          "residual_MPa": 1.2806653071351093e-07,
+          "steel_utilization": 0.00471414526644702
+        },
+        {
+          "bound_MPa": 1.213034090837088e-06,
+          "force_residual_MPa": 2.120638479633878e-12,
+          "fraction": 1.0,
+          "index": 13,
+          "lambda": 1.10010974014865,
+          "residual_MPa": 2.8924950786326023e-10,
+          "steel_utilization": 0.00476728841029795
+        },
+        {
+          "bound_MPa": 1.213092693210048e-06,
+          "force_residual_MPa": 4.454118490886888e-07,
+          "fraction": 1.0,
+          "index": 14,
+          "lambda": 1.10020015523836,
+          "residual_MPa": 8.612071411562283e-07,
+          "steel_utilization": 0.0048322500546053
+        },
+        {
+          "bound_MPa": 1.2130985088030482e-06,
+          "force_residual_MPa": 7.322834209602587e-07,
+          "fraction": 1.0,
+          "index": 15,
+          "lambda": 1.10020912786756,
+          "residual_MPa": 7.322834207901252e-07,
+          "steel_utilization": 0.00491278500330251
+        },
+        {
+          "bound_MPa": 1.213442745483948e-06,
+          "force_residual_MPa": 5.490653199592124e-13,
+          "fraction": 1.0,
+          "index": 16,
+          "lambda": 1.10074023588952,
+          "residual_MPa": 7.267086932216671e-11,
+          "steel_utilization": 0.00492999996902067
+        },
+        {
+          "bound_MPa": 1.214520905209741e-06,
+          "force_residual_MPa": 2.085947452342649e-11,
+          "fraction": 1.0,
+          "index": 17,
+          "lambda": 1.1024036823236,
+          "residual_MPa": 2.3156433437421242e-09,
+          "steel_utilization": 0.00487775296741098
+        },
+        {
+          "bound_MPa": 1.2154069938327472e-06,
+          "force_residual_MPa": 1.6842494477276451e-15,
+          "fraction": 1.0,
+          "index": 18,
+          "lambda": 1.10377079048481,
+          "residual_MPa": 7.01236323782245e-13,
+          "steel_utilization": 0.00484834605163616
+        },
+        {
+          "bound_MPa": 1.2157392198047649e-06,
+          "force_residual_MPa": 2.7554320964824273e-13,
+          "fraction": 1.0,
+          "index": 19,
+          "lambda": 1.10428336769878,
+          "residual_MPa": 5.5144777633131525e-11,
+          "steel_utilization": 0.0048159571192246
+        },
+        {
+          "bound_MPa": 1.2145490496252953e-06,
+          "force_residual_MPa": 4.0894502928023476e-11,
+          "fraction": 1.0,
+          "index": 20,
+          "lambda": 1.10244710513617,
+          "residual_MPa": 1.0500372460420238e-08,
+          "steel_utilization": 0.00478226466395898
+        },
+        {
+          "bound_MPa": 1.2145474933681326e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 21,
+          "lambda": 1.10244470405369,
+          "residual_MPa": 2.8236087513261454e-12,
+          "steel_utilization": 0.00478218258590575
+        },
+        {
+          "bound_MPa": 1.2145474880341779e-06,
+          "force_residual_MPa": 6.231722956592287e-15,
+          "fraction": 1.0,
+          "index": 22,
+          "lambda": 1.10244469582416,
+          "residual_MPa": 2.2278698796809188e-11,
+          "steel_utilization": 0.00478218110372853
+        },
+        {
+          "bound_MPa": 1.2145474773486713e-06,
+          "force_residual_MPa": 1.6783782160110175e-15,
+          "fraction": 1.0,
+          "index": 23,
+          "lambda": 1.10244467933795,
+          "residual_MPa": 6.963268395047961e-13,
+          "steel_utilization": 0.00478217813941098
+        },
+        {
+          "bound_MPa": 1.214547474249499e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 24,
+          "lambda": 1.10244467455637,
+          "residual_MPa": 1.6235608398060958e-11,
+          "steel_utilization": 0.00478217728094557
+        },
+        {
+          "bound_MPa": 1.2145474670186677e-06,
+          "force_residual_MPa": 5.170645804523871e-14,
+          "fraction": 1.0,
+          "index": 25,
+          "lambda": 1.10244466340023,
+          "residual_MPa": 9.35729651315581e-12,
+          "steel_utilization": 0.00478217674655407
+        },
+        {
+          "bound_MPa": 1.2145474628324991e-06,
+          "force_residual_MPa": 5.423283221683017e-14,
+          "fraction": 1.0,
+          "index": 26,
+          "lambda": 1.10244465694157,
+          "residual_MPa": 1.2648831689086176e-11,
+          "steel_utilization": 0.00478217585726072
+        },
+        {
+          "bound_MPa": 1.2145474586452546e-06,
+          "force_residual_MPa": 4.715898453637406e-15,
+          "fraction": 1.0,
+          "index": 27,
+          "lambda": 1.10244465048125,
+          "residual_MPa": 6.781247113320232e-13,
+          "steel_utilization": 0.00478217496807303
+        },
+        {
+          "bound_MPa": 1.214547454455489e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 28,
+          "lambda": 1.10244464401704,
+          "residual_MPa": 5.39748746999219e-13,
+          "steel_utilization": 0.00478217407884611
+        },
+        {
+          "bound_MPa": 1.2145474518358558e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 29,
+          "lambda": 1.10244463997532,
+          "residual_MPa": 2.2458516166570797e-13,
+          "steel_utilization": 0.00478217352308298
+        },
+        {
+          "bound_MPa": 1.2145474591177027e-06,
+          "force_residual_MPa": 1.2800295802730103e-14,
+          "fraction": 1.0,
+          "index": 30,
+          "lambda": 1.10244465121017,
+          "residual_MPa": 6.5232151819950845e-12,
+          "steel_utilization": 0.00478217153197752
+        },
+        {
+          "bound_MPa": 1.2145474666628213e-06,
+          "force_residual_MPa": 1.908254624275422e-13,
+          "fraction": 1.0,
+          "index": 31,
+          "lambda": 1.10244466285121,
+          "residual_MPa": 9.20889479038775e-11,
+          "steel_utilization": 0.00478216997738086
+        },
+        {
+          "bound_MPa": 1.214547468991099e-06,
+          "force_residual_MPa": 1.65224870822082e-13,
+          "fraction": 1.0,
+          "index": 32,
+          "lambda": 1.10244466644341,
+          "residual_MPa": 4.426401346152575e-11,
+          "steel_utilization": 0.00478216926145912
+        },
+        {
+          "bound_MPa": 1.21454746414345e-06,
+          "force_residual_MPa": 1.1318156288729776e-13,
+          "fraction": 1.0,
+          "index": 33,
+          "lambda": 1.10244465896418,
+          "residual_MPa": 1.2081780915345133e-10,
+          "steel_utilization": 0.00478216828942554
+        },
+        {
+          "bound_MPa": 1.2145474649701435e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 34,
+          "lambda": 1.10244466023965,
+          "residual_MPa": 3.886021821171426e-13,
+          "steel_utilization": 0.00478216796897844
+        },
+        {
+          "bound_MPa": 1.2145474657917815e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 35,
+          "lambda": 1.10244466150732,
+          "residual_MPa": 5.752615723185472e-13,
+          "steel_utilization": 0.00478216764830777
+        },
+        {
+          "bound_MPa": 1.2145474666116889e-06,
+          "force_residual_MPa": 2.694799116364232e-15,
+          "fraction": 1.0,
+          "index": 36,
+          "lambda": 1.10244466277232,
+          "residual_MPa": 6.644554156019777e-13,
+          "steel_utilization": 0.00478216732763942
+        },
+        {
+          "bound_MPa": 1.214547467634149e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 37,
+          "lambda": 1.10244466434983,
+          "residual_MPa": 1.2367884494324244e-13,
+          "steel_utilization": 0.00478216692680816
+        },
+        {
+          "bound_MPa": 1.2145474689084407e-06,
+          "force_residual_MPa": 3.536923840228055e-15,
+          "fraction": 1.0,
+          "index": 38,
+          "lambda": 1.10244466631588,
+          "residual_MPa": 2.2792878695554464e-13,
+          "steel_utilization": 0.00478216642577354
+        },
+        {
+          "bound_MPa": 1.214547470495399e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 39,
+          "lambda": 1.10244466876433,
+          "residual_MPa": 1.7570737616615095e-13,
+          "steel_utilization": 0.00478216579948897
+        },
+        {
+          "bound_MPa": 1.2145474724698528e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 40,
+          "lambda": 1.10244467181063,
+          "residual_MPa": 3.0245711534274133e-13,
+          "steel_utilization": 0.00478216501664587
+        },
+        {
+          "bound_MPa": 1.2145474749235084e-06,
+          "force_residual_MPa": 1.048986385006886e-15,
+          "fraction": 1.0,
+          "index": 41,
+          "lambda": 1.10244467559627,
+          "residual_MPa": 2.7685568681351524e-13,
+          "steel_utilization": 0.00478216403811112
+        },
+        {
+          "bound_MPa": 1.2145474779680157e-06,
+          "force_residual_MPa": 2.8632240611369967e-15,
+          "fraction": 1.0,
+          "index": 42,
+          "lambda": 1.10244468029351,
+          "residual_MPa": 2.0432733196379393e-13,
+          "steel_utilization": 0.00478216281497485
+        },
+        {
+          "bound_MPa": 1.21454748173841e-06,
+          "force_residual_MPa": 2.0210993372731743e-15,
+          "fraction": 1.0,
+          "index": 43,
+          "lambda": 1.10244468611069,
+          "residual_MPa": 3.8242363919679945e-13,
+          "steel_utilization": 0.00478216128610324
+        },
+        {
+          "bound_MPa": 1.2145474863963463e-06,
+          "force_residual_MPa": 1.8526743925004096e-15,
+          "fraction": 1.0,
+          "index": 44,
+          "lambda": 1.10244469329722,
+          "residual_MPa": 4.5197179332490123e-13,
+          "steel_utilization": 0.00478215937508973
+        },
+        {
+          "bound_MPa": 1.2145474921327427e-06,
+          "force_residual_MPa": 5.558023177501229e-15,
+          "fraction": 1.0,
+          "index": 45,
+          "lambda": 1.10244470214766,
+          "residual_MPa": 2.2265674547161662e-13,
+          "steel_utilization": 0.00478215698644175
+        },
+        {
+          "bound_MPa": 1.2145474991687925e-06,
+          "force_residual_MPa": 3.0316490059097614e-15,
+          "fraction": 1.0,
+          "index": 46,
+          "lambda": 1.10244471300328,
+          "residual_MPa": 5.247990627135768e-13,
+          "steel_utilization": 0.00478215400081827
+        },
+        {
+          "bound_MPa": 1.2145475077538e-06,
+          "force_residual_MPa": 1.1789746134093516e-15,
+          "fraction": 1.0,
+          "index": 47,
+          "lambda": 1.10244472624872,
+          "residual_MPa": 4.382050278195493e-13,
+          "steel_utilization": 0.00478215026907991
+        },
+        {
+          "bound_MPa": 1.2145475181567917e-06,
+          "force_residual_MPa": 7.915972404319932e-15,
+          "fraction": 1.0,
+          "index": 48,
+          "lambda": 1.10244474229905,
+          "residual_MPa": 4.571343303894082e-13,
+          "steel_utilization": 0.00478214560486173
+        },
+        {
+          "bound_MPa": 1.2145475306475332e-06,
+          "force_residual_MPa": 1.8357261737620503e-15,
+          "fraction": 1.0,
+          "index": 49,
+          "lambda": 1.10244476157048,
+          "residual_MPa": 7.829596888365986e-13,
+          "steel_utilization": 0.00478213977530072
+        },
+        {
+          "bound_MPa": 1.2145475454593e-06,
+          "force_residual_MPa": 2.661802951954973e-15,
+          "fraction": 1.0,
+          "index": 50,
+          "lambda": 1.10244478442292,
+          "residual_MPa": 1.0579315201653117e-12,
+          "steel_utilization": 0.00478213248946102
+        },
+        {
+          "bound_MPa": 1.214547562721177e-06,
+          "force_residual_MPa": 1.2463445913184574e-14,
+          "fraction": 1.0,
+          "index": 51,
+          "lambda": 1.10244481105553,
+          "residual_MPa": 1.5806245201588354e-12,
+          "steel_utilization": 0.00478212338390118
+        },
+        {
+          "bound_MPa": 1.2145475823404268e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 52,
+          "lambda": 1.10244484132523,
+          "residual_MPa": 2.486566508252963e-12,
+          "steel_utilization": 0.00478211200467077
+        },
+        {
+          "bound_MPa": 1.2145476038040797e-06,
+          "force_residual_MPa": 8.562351367618706e-15,
+          "fraction": 1.0,
+          "index": 53,
+          "lambda": 1.10244487444058,
+          "residual_MPa": 4.35895763928329e-12,
+          "steel_utilization": 0.00478209778488975
+        },
+        {
+          "bound_MPa": 1.2145476258498665e-06,
+          "force_residual_MPa": 2.509531677114191e-14,
+          "fraction": 1.0,
+          "index": 54,
+          "lambda": 1.10244490845408,
+          "residual_MPa": 6.757816528590865e-12,
+          "steel_utilization": 0.00478208001682534
+        },
+        {
+          "bound_MPa": 1.2145476459288029e-06,
+          "force_residual_MPa": 2.4590041936823618e-14,
+          "fraction": 1.0,
+          "index": 55,
+          "lambda": 1.10244493943301,
+          "residual_MPa": 1.028599427854715e-11,
+          "steel_utilization": 0.00478205781717635
+        },
+        {
+          "bound_MPa": 1.2145476593355463e-06,
+          "force_residual_MPa": 5.035905848705659e-14,
+          "fraction": 1.0,
+          "index": 56,
+          "lambda": 1.1024449601177,
+          "residual_MPa": 1.6915358003188885e-11,
+          "steel_utilization": 0.00478203008395726
+        }
+      ]
+    },
+    "all_three_station_steel_limits_checked": true,
+    "all_working_sources_exact_source": false,
+    "immutable_compiled_book_reused": true,
+    "material_and_kinematic_files_and_replay_methods_exact_source": true,
+    "maximum_three_station_steel_utilization": 0.0049299999690206675,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_new_NDS_or_capacity_search": true,
+    "only_test_module_imported": false,
+    "physical_capacity_certified": false,
+    "source_root": "Cold880CriticalHCold96_20261126",
+    "source_states": 56,
+    "source_workflow_incomplete": false,
+    "whole_goal_completed": false
+  },
+  "synthetic_point_law": "diagonal30000,shear15000,axial30000*epsilon+1e10*epsilon^3;not_a_concrete_calibration",
+  "synthetic_side_limit_confirmed_not_concrete_capacity": true
+}
