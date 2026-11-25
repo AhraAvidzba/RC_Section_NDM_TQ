@@ -3168,6 +3168,18 @@
     "unchanged_compiled_book_exact744": true,
     "whole_goal_completed": false
   },
+  "elastic_principal_arc_evidence": "docs/reports/evidence/Coupled6DElasticPrincipalArc_2026-11-25",
+  "elastic_principal_arc_summary": {
+    "calls": 95,
+    "initial_states": 86,
+    "last_lambda": 0.208818271363159,
+    "maximum_three_station_steel_utilization": 0.005123590472371458,
+    "new_equilibria": 27,
+    "physical_capacity_certified": false,
+    "regression_passed": 164,
+    "spectral_events": 7,
+    "total_states": 113
+  },
   "entire_goal_completed": false,
   "failed_H_read746": {
     "cause": "AtTarget was called with its allowJacobian=False default while requesting a Jacobian",
@@ -6496,7 +6508,8 @@
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
   "latest_verified_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold832GatedLoadingCold_20261125",
-  "latest_verified_extended_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold833ContinuedOutgoingWalk_20261125",
+  "latest_verified_extended_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold838ElasticPrincipalArc_20261125",
+  "latest_verified_spectral_event_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold837ElasticPrincipalEvent_20261125",
   "local_dilation706": {
     "full_section_curve_not_yet_passed": true,
     "independent_uniaxial_reference": {
@@ -6527,7 +6540,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Goal ACTIVE; user explicitly revoked pause before any goal pause tool call.835 actual49-state cold stress replay/source audit VERIFIED, all native jobs terminal. Next implement generic CDP elastic principal-zero event in private candidate:833 math/834 exact86 input,831 gated proactive controller when integrating cold. Require phi<0 at both endpoints and solved face; generic earliest point/station/principal selection, no hardcoded3, preserve ASD behavior,30/96 and full/half/force/gauge/steel criteria. Verify source86 failure fix, continue branch, then actual cold and physical ONQ012,step/mesh/external and original complete goal.829 local linear sensitivity not physical ultimate; no release/main promotion; full acceptance pending. Checkpoint92948eb records historical pause preparation, subsequently revoked. GitHub push of92948eb failedHTTP408; retry latest checkpoint and verify actual remote ref before claiming sent.",
+  "next_action": "Continue full original active goal; pause explicitly revoked.838 generic elastic spectral transitions verified at points3/8/31,principals1/3,both sign directions. Current branch113 ends atlambda0.208818271363159 from96-call budget(95 used),not physical failure. Reconstruct exact113 prefix from838 packets and continue unchanged integrated kernel to understand admissible postcrack path/possible later steel carrying branch and physical limit ONQ012. Also integrate spectral kernel with831/832 gated/proactive cold controller and address cold96-budget distribution honestly; authoritative cold832 still49 states,max1.1058869810286156,NumFail;835 independent replay passed. Need cold/peak/step/mesh/external validation and complete original LoadPaths/hoop/UI/CAD/cracks/stability/performance/workbook/full scoped acceptance. Production/main/release unchanged.836 compile syntax failure preserved;837 saved compilation had separateRPC Close failure,own process closed,recovered print areas/passport,actual256 sources verified;838 normal compile/save/closure verified. GitHub92948eb/9b252c9 not yet sent:HTTPS HTTP408 twice,SSH official host verified but no publickey authentication; retry latest checkpoint using working authorized HTTPS,do not claim remote updated without verification.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -6807,7 +6820,7 @@
     },
     "working_material_unchanged": true
   },
-  "previous_goal_turn_classification": "progress: gated/proactive controller cold49, maximum unchanged1.1058869810286156; continuation69->86 to0.5832175966249188 with independent equilibrium and three-station steel checks; source86 spectral elastic principal sign event independently localized, no new yield crossing; physical ultimate unconfirmed",
+  "previous_goal_turn_classification": "progress:835 actual49-state cold stress replay completed after explicit pause revocation. Current836-838 fixes missing generic CDP elastic principal sign event:837 solves6 frozen segments,2322 analytic gradients independent;838 passes original86 stopping point and adds27 verified equilibria to113 total,95 calls,lambda0.208818271363159;all accepted/half roots/six forces/three-station steel and7 actual stress zero events verified,164 directed regressions PASS. No material law/acceptance math changed; no physical ultimate or full acceptance.",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
     "capacity718_timed_out": true,
@@ -8626,6 +8639,7 @@
     5291,
     6079,
     6585,
+    7564,
     7846,
     7867,
     7997,
@@ -8696,6 +8710,7 @@
     28797,
     29563,
     29628,
+    29834,
     30135,
     30205,
     30281,
@@ -8716,6 +8731,7 @@
     34645,
     34783,
     34937,
+    35024,
     35133,
     35394,
     35629,
@@ -8766,6 +8782,7 @@
     50163,
     50535,
     50561,
+    50587,
     50872,
     51125,
     51591,
@@ -8806,6 +8823,7 @@
     62785,
     62845,
     62866,
+    62959,
     63225,
     63350,
     64297,
@@ -8823,6 +8841,7 @@
     67933,
     67949,
     68103,
+    68396,
     68652,
     68748,
     68966,
@@ -8884,6 +8903,7 @@
     86272,
     86279,
     86451,
+    86488,
     87181,
     87280,
     87296,
@@ -8900,6 +8920,7 @@
     89949,
     90257,
     90746,
+    90800,
     90822,
     91249,
     91568,
@@ -8933,7 +8954,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-25T19:36:49.766242+03:00",
+  "updated_local": "2026-11-25T20:02:05.447871+03:00",
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
