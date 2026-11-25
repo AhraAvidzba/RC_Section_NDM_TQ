@@ -1,0 +1,50 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold754IntegratedEarlyEnvelope_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: E59A5E525F196F5D2156B4AB020AF11842DDE19C364EBB8528D3C32D2DF4F268
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold754IntegratedEarlyEnvelope_20261125\Temp\RC_NDM_ModeSuite_a5a10292a7af47688d4895ee5c6d2ca8\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=25560; startTicks=639311641574270241
+===== modTestCoupledElasticState.RunTestStockHTrace =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T03:42:45
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=10384; workingSet=213737472; privateBytes=165908480; cpu=1846.390625
+EXCEL_AFTER_SUITE: pid=25560; workingSet=171405312; privateBytes=117788672; cpu=389.40625
+TIMING_SECONDS: 377.1689453125 | Both | Excel
+TIMING_MESSAGE: Расчет завершен. |  | Геометрия для расчёта загружена с листа Results текущей книги. |  | Обработано сочетаний: 1. |  | Результаты и пояснения всех проверок — на листе Results. |  | Сочетаний с неподтверждённым численным результатом: 1. |  | Первая численная неудача: | Сочетание HardShear: Исчерпан общий лимит проб деформационного продолжения и проверки максимума. Допустимое равновесие подтверждено до lambda = 1.059490. Эта проверка не получила подтверждённого численного результата; сам статус NumFail не доказывает физическое невыполнение. |  | Проверьте исходные данные и диагностику расчёта. |  | Исходная строка сочетания: | Config!H71:Q71. |  | Пошаговый отчет сохранен: | D:\CodexScratch\RC_Section_NDM_TQ\Cold754IntegratedEarlyEnvelope_20261125\Temp\RC_NDM_ModeSuite_a5a10292a7af47688d4895ee5c6d2ca8\RC_Section_NDM_execution_report.txt |  | Время расчёта: 377.17 с. |  | Данные сохранены на листе Results текущей книги.
+TIMING_STATES: direct=OK; capacity=NumFail; confirmed lower=1.05949019266373; limit=; code=NUMERICAL_FAILURE
+TIMING_LIMIT_REASON: Исчерпан общий лимит проб деформационного продолжения и проверки максимума. Допустимое равновесие подтверждено до lambda = 1.059490.
+OK: workbook balances the requested hard-shear case
+OK: direct N actual=2.85520539633855 expected=2.8552053963382
+OK: direct Mx actual=5.20055268618584E-02 expected=5.20055268618743E-02
+OK: direct My actual=1.83548918336074E-02 expected=1.83548918336027E-02
+OK: direct T actual=0.152957431946676 expected=0.152957431946689
+OK: direct Qx actual=1.73351756206216 expected=1.73351756206248
+OK: direct Qy actual=-0.723998511214267 expected=-0.723998511214329
+OK: automatic chart draws the closed hoop from the new snapshot
+OK: TauXZ colours use the actual displayed sign
+OK: TauXZ draws a signed legend
+OK: Tau colours use the actual displayed sign
+OK: shear magnitude draws a scale from zero to the maximum
+OK: Warping colours use the actual displayed sign
+OK: Warping draws a signed legend
+OK: longitudinal stress keeps its material-state legend
+OK: unresolved capacity gives a confirmed lower bound and a reason
+OK: no unconfirmed limit component N
+OK: no unconfirmed limit component Mx
+OK: no unconfirmed limit component My
+OK: no unconfirmed limit component T
+OK: no unconfirmed limit component Qx
+OK: no unconfirmed limit component Qy
+OK: native load trace for HardShear
+OK: native target marker belongs to the direct branch
+OK: native direct series matches accepted trace
+OK: native capacity branch is shown independently
+OK: native capacity series matches accepted trace
+OK: native marker does not claim a limit for NumFail
+TOTAL_COUPLED_WORKBOOK_TIMING: passed=28; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold754IntegratedEarlyEnvelope_20261125\Temp\RC_NDM_ModeSuite_a5a10292a7af47688d4895ee5c6d2ca8\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestStockHTrace; 2026-11-25T03:49:09
+RESULTS_SAVE_REOPEN: before=51821EB02BC4BA00432D2564EFF81A32DF4830B26B0A6F7D59A81798D020D312; after=51821EB02BC4BA00432D2564EFF81A32DF4830B26B0A6F7D59A81798D020D312; equal=True; file=D:\CodexScratch\RC_Section_NDM_TQ\Cold754IntegratedEarlyEnvelope_20261125\Temp\RC_NDM_ModeSuite_a5a10292a7af47688d4895ee5c6d2ca8\RC_Section_NDM_saved.xlsm
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

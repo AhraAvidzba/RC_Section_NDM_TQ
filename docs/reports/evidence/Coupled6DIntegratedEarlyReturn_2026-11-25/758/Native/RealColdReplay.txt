@@ -1,0 +1,39 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold758PositiveHalfGuard_20261125\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 779A83B8DF8F16950F6C0C3F6FB46459E33FAE9C2AE376A2747209ECEAD9FEA8
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold758PositiveHalfGuard_20261125\Temp\RC_NDM_ModeSuite_ccfb80aa89194463aaaa10f3af5a3e64\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=24912; startTicks=639311657482374757
+===== modTestCoupledElasticState.RunTestReversePolish =====
+SUITE_STARTED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T04:09:16
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=10384; workingSet=227176448; privateBytes=173072384; cpu=3143.890625
+EXCEL_AFTER_SUITE: pid=24912; workingSet=167915520; privateBytes=126926848; cpu=14.8125
+RUNTIME ERROR: VBAProject Не выполнен контроль восстановленной истории. Расчет завершен.
+
+Геометрия для расчёта загружена с листа Results текущей книги.
+
+Обработано сочетаний: 1.
+
+Результаты и пояснения всех проверок — на листе Results.
+
+Внутренних ошибок: 1.
+
+Первая внутренняя ошибка:
+Сочетание HardShear: Расчет сочетания остановлен из-за ошибки выполнения: Subscript out of range
+
+Исходная строка сочетания:
+Config!H71:Q71.
+
+Пошаговый отчет сохранен:
+D:\CodexScratch\RC_Section_NDM_TQ\Cold758PositiveHalfGuard_20261125\Temp\RC_NDM_ModeSuite_ccfb80aa89194463aaaa10f3af5a3e64\RC_Section_NDM_execution_report.txt
+
+Время расчёта: 6.93 с.
+
+Данные сохранены на листе Results текущей книги.
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold758PositiveHalfGuard_20261125\Temp\RC_NDM_ModeSuite_ccfb80aa89194463aaaa10f3af5a3e64\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledElasticState.RunTestReversePolish; 2026-11-25T04:09:25
+FAIL_FAST: remaining suites were not run after a completed failed suite
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=1; source unchanged=True

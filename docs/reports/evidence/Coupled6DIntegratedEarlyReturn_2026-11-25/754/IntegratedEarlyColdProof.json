@@ -1,0 +1,161 @@
+{
+  "accepted_return_matches": [
+    {
+      "history_index": 47,
+      "snapshot": 68
+    },
+    {
+      "history_index": 47,
+      "snapshot": 69
+    },
+    {
+      "history_index": 47,
+      "snapshot": 70
+    },
+    {
+      "history_index": 47,
+      "snapshot": 71
+    },
+    {
+      "history_index": 47,
+      "snapshot": 72
+    },
+    {
+      "history_index": 47,
+      "snapshot": 73
+    },
+    {
+      "history_index": 47,
+      "snapshot": 74
+    },
+    {
+      "history_index": 47,
+      "snapshot": 75
+    },
+    {
+      "history_index": 47,
+      "snapshot": 76
+    },
+    {
+      "history_index": 47,
+      "snapshot": 77
+    },
+    {
+      "history_index": 47,
+      "snapshot": 78
+    },
+    {
+      "history_index": 47,
+      "snapshot": 79
+    },
+    {
+      "history_index": 47,
+      "snapshot": 80
+    },
+    {
+      "history_index": 47,
+      "snapshot": 81
+    },
+    {
+      "history_index": 47,
+      "snapshot": 82
+    },
+    {
+      "history_index": 47,
+      "snapshot": 83
+    },
+    {
+      "history_index": 47,
+      "snapshot": 84
+    },
+    {
+      "history_index": 47,
+      "snapshot": 85
+    },
+    {
+      "history_index": 47,
+      "snapshot": 86
+    },
+    {
+      "history_index": 47,
+      "snapshot": 87
+    },
+    {
+      "history_index": 47,
+      "snapshot": 88
+    },
+    {
+      "history_index": 47,
+      "snapshot": 89
+    },
+    {
+      "history_index": 47,
+      "snapshot": 90
+    },
+    {
+      "history_index": 47,
+      "snapshot": 91
+    },
+    {
+      "history_index": 47,
+      "snapshot": 92
+    },
+    {
+      "history_index": 47,
+      "snapshot": 93
+    },
+    {
+      "history_index": 47,
+      "snapshot": 94
+    }
+  ],
+  "accepted_states": 73,
+  "actual_cold_all6_not_restarted_from_saved_fields": true,
+  "all_four_initial_force_states_exact745": true,
+  "cold": {
+    "all_saved_sources_exact": 255,
+    "capacity": "NumFail",
+    "code": "NUMERICAL_FAILURE",
+    "direct": "OK",
+    "limit": "",
+    "lower": 1.05949019266373,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 28,
+      "timeout600": false
+    },
+    "results_checksum": "51821EB02BC4BA00432D2564EFF81A32DF4830B26B0A6F7D59A81798D020D312",
+    "saved_book_sha256": "C469A88D4661B350BA1F43FFE41511C67FF9E2654A7E9CB52F261EF015CD55E3",
+    "seconds": 377.1689453125
+  },
+  "exact_directed752_return_present_in_accepted_history": true,
+  "final_control_details": "Мера деформации: мера деформации у перехода бетона; наибольший допустимый lambda: 1.05949019266373; равновесие при lambda = 1 подтверждено: True; проб: 96; смен пространственной меры после отказа: 1; проб полного разностного резерва после деления шага: 1; принято после него: 0; последняя цель резерва: 1.16770743557027E-04; проб смены меры: 4; принято после смены меры: 0; проб материального перехода: 1; подтверждённых переходов: 0; прогнозов из проверочного равновесия: 0; проб материальной координаты: 60; восстановлений по ней: 0; возвратов к пространственной мере после остановки H: 1; материальных резервов после остановки H: 1; принято после них: 1 | Последняя неудачная проба: Не подтверждено входящее равновесие материального события; Итерации: 5; пробы: 684; невязка, МПа: 1.06157781048772E-06; мин. ведущий элемент: 0; гибридных поправок: 5; глобальных касательных: 5; разностных и прочих гибридных проб: 683 | ; CDP точка 3, станция -1, цель 0 МПа, шаг производных 0.000001, остановка 5, невязка 1.06783913612668E-06 МПа; CDP точка 3, станция -1, цель 0 МПа, шаг производных 0.0000001, остановка 5, невязка 1.06157781048772E-06 МПа | Исходная проба: Итерации: 30; пробы: 924; невязка, МПа: 1.06120324123594E-05; мин. ведущий элемент: 0.183247334810973; пространственная касательная уточнена; уравнение 56 (продольный градиент T); действие касательной, МПа: -1.09634693613919E-05; фактическое изменение на единицу доли поправки, МПа: 7.38133886907244E-06; гибридных поправок: 24; глобальных касательных: 7; разностных и прочих гибридных проб: 879; гибридный резерв не подтвердил равновесие | Исходная численная проба: Итерации: 5; пробы: 44; невязка, МПа: 1.06120324123594E-05; мин. ведущий элемент: 0.183247334810973; пространственная касательная уточнена; уравнение 56 (продольный градиент T); действие касательной, МПа: -1.09634693613919E-05; фактическое изменение на единицу доли поправки, МПа: 7.38133886907244E-06; невязка перед демпфированием, МПа: 1.00440793288107E-05; лучшая невязка проб, МПа: 1.06120324123594E-05; уравнение 56 (продольный градиент T); действие касательной, МПа: -1.00440793288107E-05; фактическое изменение на единицу доли поправки, МПа: 7.26979946942376E-05 | Гибридный резерв: код остановки 2; принятых поправок 9; лучшая невязка 5.81605499651941E-06",
+  "independent_tensor_reintegration_pending_at_cold_recording": true,
+  "initial_H_control_selected_before_first_controlled_probe": true,
+  "last_accepted_lambda": 1.0594901926637308,
+  "material_Newton_test_module_exact752": true,
+  "maximum_accepted_lambda": 1.0594901926637308,
+  "maximum_exact_prefix_with745": 46,
+  "missing_diagnostic_marker_alone_does_not_prove_return_not_called": true,
+  "no_physical_capacity_claimed": true,
+  "no_working_promotion": true,
+  "raw_frames": 94,
+  "raw_history": {
+    "bytes": 1883268,
+    "complete_bytes": 1883268,
+    "incomplete_tail_bytes": 0,
+    "original_binary_Double": true,
+    "sha256": "545E9B578ED70A0BD55F4B23C00103AA5E8BA18DF40542C5B1AFC86EFBE46D96"
+  },
+  "regression": {
+    "failed": 0,
+    "macros": 3,
+    "own_process_closed": true,
+    "passed": 105,
+    "timeout600": false
+  },
+  "reported_original_control_return_checkpoints": 0,
+  "whole_goal_completed": false
+}

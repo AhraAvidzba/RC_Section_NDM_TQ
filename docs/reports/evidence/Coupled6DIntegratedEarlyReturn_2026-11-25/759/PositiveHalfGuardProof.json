@@ -1,0 +1,35 @@
+{
+  "accepted_revision_unchanged": 50,
+  "actual_elastic_all6_prefix": true,
+  "exact_original_target_restored": true,
+  "full_candidate_bitexact_restored": true,
+  "full_lambda": 0.5,
+  "guarded_half_check_returned_true": true,
+  "independent_full_control_residual_MPa": 4.0657581468206416e-16,
+  "independent_full_equilibrium": {
+    "bound_MPa": 8.240740740740741e-07,
+    "force_residual_MPa": 5.052748343182936e-16,
+    "fraction": 1.0,
+    "index": 2,
+    "lambda": 0.5,
+    "residual_MPa": 8.870681966755001e-14,
+    "steel_utilization": 0.001218574846427
+  },
+  "native": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 1,
+    "timeout600": false
+  },
+  "no_new_capacity_search": true,
+  "only_working_difference_is_fixed_six_component_load_array": true,
+  "physical_capacity_certified": false,
+  "positive_half_state_not_separately_exported": true,
+  "primary_limit": 30,
+  "primary_steps_after": 0,
+  "primary_steps_before": 0,
+  "reference_lambda": 0.25,
+  "whole_goal_completed": false,
+  "working_methods_exact757_with_test_wrapper_appended_only": false
+}
