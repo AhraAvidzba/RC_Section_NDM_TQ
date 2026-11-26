@@ -1,0 +1,38 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Удерживает объекты фактического штатного запуска; материалы и записанные Results до завершения расчёта не трогает.
+Public Sub TestHoldActualReverse(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByVal calibration As Variant, ByVal options As Variant)
+    If Not mActualReverseRequestedTest Then Exit Sub
+    If Not mActualSolverTest Is Nothing Then Err.Raise 5, , "Повторный штатный контекст не должен подменять первый."
+    Set mActualSolverTest = solver: Set mActualOperatorsTest = operators
+    Set mActualConcreteTest = concrete: Set mActualReinforcedTest = reinforced: Set mActualSidesTest = sides
+    Set mActualFieldsTest = New Collection
+    Dim i As Long, field() As Double
+    For i = 1 To fields.Count: field = fields(i): mActualFieldsTest.Add field: Next i
+    Set mActualTraceTest = trace.CopyPrefix(trace.Count)
+    mActualCalibrationTest = calibration: mActualOptionsTest = options
+    path.Components mActualOffsetTest, mActualDirectionTest
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Выполняет штатный Both/Excel, а после записи Results воспроизводит удержанные поля только для контрольных файлов.
+Public Function RunTestActualReverseCapture(ByVal outputRoot As String) As String
+    On Error GoTo Failed
+    Set mReverseSnapshotsTest = New Collection
+    Set mActualSolverTest = Nothing: mActualReverseRequestedTest = True
+    mHardPreparedPathTest = outputRoot & "\Native\ActualReverse"
+    Dim outcome As String: outcome = RunTestCoupledWorkbookTiming("Both", "Excel")
+    mActualReverseRequestedTest = False
+    If InStr(outcome, "TOTAL_COUPLED_WORKBOOK_TIMING: passed=28; failed=0") = 0 Then Err.Raise 5, , outcome
+    If mActualSolverTest Is Nothing Or mReverseSnapshotsTest.Count = 0 Then Err.Raise 5, , "Не удержан штатный путь и отклонённое равновесие."
+    If mActualFieldsTest.Count <> mActualTraceTest.Count Then Err.Raise 5, , "Число штатных полей и нагрузок различается."
+    TestExportSpatialReverses mActualSolverTest, mActualOperatorsTest, mActualConcreteTest, mActualReinforcedTest, mActualSidesTest, _
+        mActualCalibrationTest, mActualOptionsTest, mActualOffsetTest, mActualDirectionTest, mActualFieldsTest, mActualTraceTest
+    RunTestActualReverseCapture = outcome & vbCrLf & "TOTAL_ACTUAL_REVERSE_CAPTURE_TEST: passed=1; failed=0; capacity_certified=False"
+    Exit Function
+Failed:
+    mActualReverseRequestedTest = False
+    RunTestActualReverseCapture = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function

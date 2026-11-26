@@ -1,0 +1,120 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает локальные меры из одного принятого НДС; неудачная проба не означает разрушение.
+Private Function RunControlProbesTest(ByRef report As String, ByVal tracePath As String) As Boolean
+    Const EC As Double = 30000#, NU As Double = 0.2, TORQUE As Double = 10510000#, FORCE_SCALE As Double = 75000#
+    Const FT As Double = 2.10667357864589, PEAK As Double = 0.0022
+    Const ATOL As Double = 0.0000005, RTOL As Double = 0.0000005
+    Dim section As CSectionModel, transverse As CTransverseRebarLayout, steel As Object
+    Set section = BuildWangMVT2SectionTest(transverse, steel)
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse
+    Dim response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, EC, NU, 2, 2, 5, transverse, steelModels:=steel, useFullSpanGauss5:=True
+    Dim fc As Double: fc = 588000# / (0.3 * 240# * 240#)
+    Dim plusConcrete As CCoupledConcreteResponse, minusConcrete As CCoupledConcreteResponse
+    Dim plusSide As CCoupledReinforcedResponse, minusSide As CCoupledReinforcedResponse
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, fc, FT, PEAK, 0#, 0#, True, _
+        plusConcrete, minusConcrete, plusSide, minusSide
+    Dim history As Collection, q() As Double, torqueHistory() As Double
+    ReadControlHistoryTest Environ$("NDM_MVT_FLOW_FOLDER") & "\AcceptedHistory.csv", history, q, torqueHistory
+    If history.Count <> 74 Then Err.Raise 5, , "Для сравнительных проб нужны 74 принятых состояния."
+    RecordGaussPointsTest section, operators, report, tracePath
+    WriteMVT2OperatorsTest operators, tracePath
+    Dim handle As Integer: handle = FreeFile
+    Open tracePath & ".Tensor.csv" For Output As #handle: Close #handle
+    Dim stations As New Collection
+    stations.Add minusConcrete: stations.Add minusSide: stations.Add concrete: stations.Add response
+    stations.Add plusConcrete: stations.Add plusSide
+    Dim previous() As Double, current() As Double, projection() As Double, seed() As Double, actual() As Double
+    Dim base(1 To 6) As Double, direction(1 To 6) As Double, trial() As Double
+    Dim control As Double, spacing As Double, oldControl As Double, name As String, target As Double, signValue As Double
+    Dim index As Long, i As Long, factor As Double, solved As Boolean, consistent As Boolean, initial As Variant, lambda As Double
+    Dim mode As String, phase As String, row As String
+    previous = history(history.Count - 1): current = history(history.Count)
+    base(4) = TORQUE: direction(2) = -396# * FORCE_SCALE: direction(6) = FORCE_SCALE
+    For index = 1 To 6
+        If Not solver.ReplayAcceptedFields(history, history.Count) Then Err.Raise 5, , "Не восстановлена исходная история пробы."
+        Erase projection: control = 0#: oldControl = 0#: consistent = False
+        Select Case index
+            Case 1, 2
+                mode = "FirstBar": consistent = True
+                operators.CopySteelStrainProjection operators.ConcretePointCount + 1, projection
+                ReDim Preserve projection(1 To operators.DegreeCount)
+            Case 3, 4
+                mode = "Automatic"
+                If Not solver.SelectDeformationControl(previous, current, projection, control, spacing, name) Then _
+                    Err.Raise 5, , "Не выбрана меняющаяся мера."
+            Case 5
+                mode = "Twist": ReDim projection(1 To operators.DegreeCount): projection(4) = 1#
+            Case 6
+                Dim unused() As Double: mode = "ShearY": operators.MeanShearProjections unused, projection
+        End Select
+        control = 0#
+        For i = 1 To solver.PhysicalDegreeCount
+            control = control + projection(i) * current(i)
+            oldControl = oldControl + projection(i) * previous(i)
+        Next i
+        signValue = Sgn(control - oldControl)
+        If signValue = 0# Then Err.Raise 5, , "Мера не меняется на исходной секущей."
+        If signValue < 0# Then
+            For i = 1 To solver.PhysicalDegreeCount: projection(i) = -projection(i): Next i
+            control = -control: oldControl = -oldControl
+        End If
+        factor = 32#: If index = 1 Or index = 3 Then factor = 4#
+        target = control + factor * (control - oldControl)
+        seed = current
+        For i = 1 To solver.PhysicalDegreeCount: seed(i) = current(i) + factor * (current(i) - previous(i)): Next i
+        initial = seed: phase = mode & CStr(factor)
+        row = "CONTROL_PROJECTION;" & phase
+        For i = 1 To operators.DegreeCount: row = row & ";" & ExperimentNumberTest(projection(i)): Next i
+        AddExperimentTraceTest report, tracePath, row
+        solved = solver.TryDeformationStep(base, direction, projection, target, _
+            (q(history.Count) + factor * (q(history.Count) - q(history.Count - 1))) / FORCE_SCALE, lambda, _
+            ATOL, RTOL, 32, consistentControl:=consistent, initialField:=initial)
+        row = "CONTROL_PROBE;" & phase & ";" & CStr(solved) & ";" & ExperimentNumberTest(target) & ";" & _
+            ExperimentNumberTest(lambda) & ";" & solver.ResultMeta.DiagnosticDetails
+        AddExperimentTraceTest report, tracePath, row
+        WriteMaterialFailureTest concrete.LastFailure, phase, 0, report, tracePath
+        WriteMaterialFailureTest plusConcrete.LastFailure, phase, 1, report, tracePath
+        WriteMaterialFailureTest minusConcrete.LastFailure, phase, -1, report, tracePath
+        If solved Then
+            solver.CopyTrial trial, actual: solver.AcceptStep
+            AddExperimentTraceTest report, tracePath, "CONTROL_PROBE_ACCEPTED;" & phase & ";" & ExperimentNumberTest(lambda * FORCE_SCALE)
+            WriteMVT2FullFrameTest operators, trial, phase, TORQUE, lambda * FORCE_SCALE, tracePath, stations
+        Else
+            solver.DiscardStep
+        End If
+    Next index
+    RunControlProbesTest = True
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает точную последовательность полей и нагрузок из закреплённого нативного набора.
+Private Sub ReadControlHistoryTest(ByVal path As String, ByRef history As Collection, ByRef q() As Double, ByRef torque() As Double)
+    Dim handle As Integer, line As String, row As Variant, field() As Double, i As Long, count As Long
+    Set history = New Collection: handle = FreeFile: Open path For Input As #handle
+    Do While Not EOF(handle)
+        Line Input #handle, line: row = Split(line, ";"): count = count + 1
+        ReDim Preserve q(1 To count): ReDim Preserve torque(1 To count)
+        torque(count) = Val(row(1)): q(count) = Val(row(2))
+        ReDim field(1 To UBound(row) - 2)
+        For i = 1 To UBound(field): field(i) = Val(row(i + 2)): Next i
+        history.Add field
+    Loop
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет реальный этап отказа и полный локальный вход для независимого повторения ASD.
+Private Sub WriteMaterialFailureTest(ByVal snapshot As CCoupledMaterialFailure, ByVal phase As String, ByVal side As Long, _
+        ByRef report As String, ByVal tracePath As String)
+    If snapshot Is Nothing Then Exit Sub
+    Dim strain() As Double, prior() As Double, effective() As Double, t As Double, c As Double, row As String, i As Long
+    snapshot.CopyState strain, prior, effective, t, c
+    row = "MATERIAL_CONTEXT;" & phase & ";" & CStr(side) & ";" & CStr(snapshot.Point) & ";" & snapshot.Stage & ";" & _
+        CStr(snapshot.TangentMode) & ";" & CStr(snapshot.Component) & ";" & CStr(snapshot.Epoch) & ";" & _
+        ExperimentNumberTest(t) & ";" & ExperimentNumberTest(c)
+    For i = 1 To 6: row = row & ";" & ExperimentNumberTest(strain(i)): Next i
+    For i = 1 To 6: row = row & ";" & ExperimentNumberTest(prior(i)): Next i
+    For i = 1 To 6: row = row & ";" & ExperimentNumberTest(effective(i)): Next i
+    AddExperimentTraceTest report, tracePath, row
+End Sub
