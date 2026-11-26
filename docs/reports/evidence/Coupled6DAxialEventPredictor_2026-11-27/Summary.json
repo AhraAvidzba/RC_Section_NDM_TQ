@@ -1,0 +1,373 @@
+{
+  "all_four_actual_saved_books_included": true,
+  "all_raw_files_read_back_and_hashed": true,
+  "archive_bytes": 47351108,
+  "axial_seed_event_proof": {
+    "actual_saved_book_sha256": "F7BA06CF13A35D5D37FE0058FFF25078C79FD1D23D4BFB35A7E4E851153CCFCA",
+    "cold_repeat_history_bitexact": true,
+    "events": {
+      "1048": {
+        "N_interval_N": [
+          98279.90835048389,
+          98287.4052492178
+        ],
+        "accepted_states": 43,
+        "admissible_field_independently_replayed": true,
+        "admissible_utilization": 0.999794703161832,
+        "base_N_N": 10000.0,
+        "exceeded_utilization": 1.00067853167513,
+        "exceeding_field_not_exported": true,
+        "history_sha256": "98F156285E4F08CACFF520741FA2E5858DD026CB32046DD5576FEFFD1A254879",
+        "lambda_interval": [
+          9.82799083504839,
+          9.82874052492178
+        ],
+        "seconds": 5.35498046875,
+        "status": "NumFail"
+      },
+      "1049": {
+        "N_interval_N": [
+          98279.7246607064,
+          98285.5000619443
+        ],
+        "accepted_states": 77,
+        "admissible_field_independently_replayed": true,
+        "admissible_utilization": 0.999773028896526,
+        "base_N_N": 100000.0,
+        "exceeded_utilization": 1.00045390566365,
+        "exceeding_field_not_exported": true,
+        "history_sha256": "866F62E25B8D2A939E3EEC1FB40E291550179295B8393C599FB44826E3B9D143",
+        "lambda_interval": [
+          0.982797246607064,
+          0.982855000619443
+        ],
+        "seconds": 11.18994140625,
+        "status": "FAIL"
+      },
+      "1050": {
+        "N_interval_N": [
+          98279.90835048389,
+          98287.4052492178
+        ],
+        "accepted_states": 43,
+        "admissible_field_independently_replayed": true,
+        "admissible_utilization": 0.999794703161832,
+        "base_N_N": 10000.0,
+        "exceeded_utilization": 1.00067853167513,
+        "exceeding_field_not_exported": true,
+        "history_sha256": "98F156285E4F08CACFF520741FA2E5858DD026CB32046DD5576FEFFD1A254879",
+        "lambda_interval": [
+          9.82799083504839,
+          9.82874052492178
+        ],
+        "seconds": 4.7529296875,
+        "status": "NumFail"
+      }
+    },
+    "full_acceptance_passed": false,
+    "global_concrete_capacity_unresolved": true,
+    "independent_reference_N_N": 98281.64986089355,
+    "independent_reference_inside_all_native_brackets": true,
+    "initial_state_for_10kN_verified": true,
+    "production_controller_not_promoted": true,
+    "same_compiled_book_for_both_scales": true,
+    "scale_event_localization_passed": true,
+    "steel_failure_before_100kN_design_load_verified": true,
+    "two_scale_event_intervals_overlap": true,
+    "whole_goal_completed": false
+  },
+  "books": {
+    "1047": {
+      "exact_saved_book_included": true,
+      "member": "1047/docs/regression/Diagnostic.xlsm",
+      "sha256": "F4E64058F5B12A46CEA2EABC31F6A7858391447DAEAE99622815D2D3401CC0F2"
+    },
+    "1048": {
+      "exact_saved_book_included": true,
+      "member": "1048/docs/regression/Diagnostic.xlsm",
+      "sha256": "F7BA06CF13A35D5D37FE0058FFF25078C79FD1D23D4BFB35A7E4E851153CCFCA"
+    },
+    "1049": {
+      "exact_saved_book_included": true,
+      "member": "1049/docs/regression/Diagnostic.xlsm",
+      "sha256": "F7BA06CF13A35D5D37FE0058FFF25078C79FD1D23D4BFB35A7E4E851153CCFCA"
+    },
+    "1050": {
+      "exact_saved_book_included": true,
+      "member": "1050/docs/regression/Diagnostic.xlsm",
+      "sha256": "F7BA06CF13A35D5D37FE0058FFF25078C79FD1D23D4BFB35A7E4E851153CCFCA"
+    }
+  },
+  "created_local": "2026-11-27T00:55:04.544664+03:00",
+  "full_acceptance_not_run": true,
+  "logical_files": 2665,
+  "native_equilibrium_replay": {
+    "1047": {
+      "accepted_states": 64,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        10000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.15358300000661984,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "3AE017D01D8A4FBA99D202970FF4F7B38FA816A8B7D3540F4B3713B76651E577",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 1.7400452634319663e-14,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.03886909182620002,
+      "maximum_lambda": 9.828143912072218,
+      "maximum_moment_error_Nmm": 1.1618703865678981e-07,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    },
+    "1048": {
+      "accepted_states": 43,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        10000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.1064089999999851,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "98F156285E4F08CACFF520741FA2E5858DD026CB32046DD5576FEFFD1A254879",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 1.7400452634319663e-14,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.03886909182620002,
+      "maximum_lambda": 9.827990835048391,
+      "maximum_moment_error_Nmm": 1.1618703865678981e-07,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    },
+    "1049": {
+      "accepted_states": 77,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        100000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.2525889999815263,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "866F62E25B8D2A939E3EEC1FB40E291550179295B8393C599FB44826E3B9D143",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 3.910390660166741e-12,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.05635413162235636,
+      "maximum_lambda": 0.9827972466070642,
+      "maximum_moment_error_Nmm": 3.91039066016674e-06,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    },
+    "1050": {
+      "accepted_states": 43,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        10000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.11977960000513121,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "98F156285E4F08CACFF520741FA2E5858DD026CB32046DD5576FEFFD1A254879",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 1.7400452634319663e-14,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.03886909182620002,
+      "maximum_lambda": 9.827990835048391,
+      "maximum_moment_error_Nmm": 1.1618703865678981e-07,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    }
+  },
+  "native_execution": {
+    "1047": {
+      "confirmed_lower_lambda": 9.828143912072218,
+      "elapsed_seconds": 34.72119140625,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 9.828143912072218,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1048": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 5.35498046875,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 1.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 9.827990835048391,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 9.827990835048391,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1049": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 11.18994140625,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 1.0,
+      "has_ultimate_point": 1.0,
+      "lambda_capacity": 0.9827972466070642,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 0.9827972466070642,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.9827972466070642,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1050": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 4.7529296875,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 1.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 9.827990835048391,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 9.827990835048391,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    }
+  },
+  "next_stage": "Pure N compression peak remains unresolved; then M/T/NMT/Q/NMTQ in user order",
+  "physical_capacity_certified": false,
+  "unique_payloads": 718,
+  "whole_goal_completed": false,
+  "working_solver_not_changed": true
+}

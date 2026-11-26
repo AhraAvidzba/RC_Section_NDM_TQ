@@ -1,8 +1,14 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_exec_session": 77042,
+  "active_jobs": [
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1052ASDPureNPeakObservation_20261127",
+      "session": 77042,
+      "stage": "Compile read-only peak-refinement observer,2 observation components, numeric expressions unchanged"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1980,7 +1986,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -37248,7 +37254,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "N only.1047 conditionedfreshJac QR didnotadvance: same64states as1045/46,34.721s,bestres2.94545e-6 slightlyabovebound2.775e-6; preservefailure,nopromotion. Next target RefineSteelCrossing predictor: retain actual solved low/high fullfields,interpolate only initialguess+lambda for midpoint,and use savedhigh field asseed when repeating high after acceptedlow; re-evaluate/solve all56+4+6 atcurrenthistory,never accept interpolated field as equilibrium. This reuses known valid shoulder solutions rather than increasingbudgets. Need closedcheckpointreports/rawarchivesfirst1039to1046 andpush. Allstartedjobsclosed. UserorderN/M/T/NMT/Q/NMTQ; compressionpeakaccuracy stillunresolved.",
+  "next_action": "CurrentNstage.1051 samecompressionlocalpeaklambda7.3590488604,accuracy0.01708595>0.001,55statesallverified,late steel afterdecline,no certifiedpeak. Await1052 compiler13700/start639313273103490042 then sourceaudit(Defo+Testmodule observer-only254others)+native+CheckMain+Replay;assertMainHistorybyteidentical1051;inspectNative/PeakRefinement.Values.csv estimate/replay_failed/completion toseparate sampling,adjointuncertainty,failedreplay andexactfieldverification. Needfixactualcausewithoutlooseningexpectations. Seed1048/49/50 strictcomparisonpassed andarchive49046complete2665raw47.351MB;newreportwritten,commit+pushcheckpointpending. CompressionindependentTRFmaybeneeded. NoM/NMT/Qtests;publicbooknotchanged.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -37879,6 +37885,33 @@
       "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1040ASDPureNCompression_20261127",
       "seconds": 5.996002197265625
     }
+  },
+  "pure_N_seed_checkpoint": {
+    "cold_repeat_history_bitexact": true,
+    "complete_concrete_capacity_unresolved": true,
+    "compression_peak_certified": false,
+    "evidence": "docs/reports/evidence/Coupled6DAxialEventPredictor_2026-11-27",
+    "full_user_run_10seconds_not_verified": true,
+    "independent_reference_inside_native_brackets": true,
+    "initial_10kN_equilibrium_found": true,
+    "native_100kN_event_N_interval": [
+      98279.7246607064,
+      98285.5000619443
+    ],
+    "native_100kN_strength_status": "FAIL",
+    "native_10kN_event_N_interval": [
+      98279.90835048389,
+      98287.4052492178
+    ],
+    "report": "docs/reports/Coupled6DAxialEventPredictor_2026-11-27.md",
+    "source_controller_not_promoted": true,
+    "times_seconds": {
+      "1048": 5.35498046875,
+      "1049": 11.18994140625,
+      "1050": 4.7529296875
+    },
+    "two_base_load_steel_event_localization_verified": true,
+    "whole_goal_completed": false
   },
   "recovered_cold_frozen_replay744": {
     "all_exported_fields_match_original_Double_to15digit_CSV_precision": true,
@@ -39526,6 +39559,7 @@
     8222,
     8369,
     8464,
+    8761,
     8852,
     8869,
     8889,
@@ -39580,6 +39614,7 @@
     14300,
     14384,
     14589,
+    14635,
     14711,
     14716,
     14848,
@@ -39761,6 +39796,7 @@
     38699,
     38865,
     39041,
+    39222,
     39304,
     39349,
     39642,
@@ -39836,6 +39872,7 @@
     48848,
     48897,
     48946,
+    49046,
     49056,
     49065,
     49125,
@@ -39922,6 +39959,7 @@
     60191,
     60225,
     60275,
+    60305,
     60472,
     60761,
     60838,
@@ -39964,6 +40002,7 @@
     65581,
     65737,
     65749,
+    65801,
     65812,
     65958,
     66108,
@@ -40135,6 +40174,7 @@
     86463,
     86488,
     86703,
+    86767,
     86874,
     86887,
     86985,
@@ -40249,7 +40289,8 @@
   ],
   "unarchived_N1047": {
     "accepted_states": 64,
-    "archive_pending": true,
+    "archive": "docs/reports/evidence/Coupled6DAxialEventPredictor_2026-11-27",
+    "archive_pending": false,
     "elapsed_seconds": 34.72119140625,
     "maximum_lambda": 9.828143912072218,
     "original_tolerances_satisfied_for_all_saved_states": true,
@@ -40257,7 +40298,7 @@
     "same_history_as1045_and1046": true,
     "steel_event_localization_passed": false
   },
-  "updated_local": "2026-11-27T00:43:05.837035+03:00",
+  "updated_local": "2026-11-27T01:04:54.226608+03:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
