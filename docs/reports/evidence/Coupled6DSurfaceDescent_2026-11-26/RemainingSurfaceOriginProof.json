@@ -1,0 +1,113 @@
+{
+  "accepted25_history_field_exact": true,
+  "current_lambda": 1.1024974179997635,
+  "governing_row": 55,
+  "initial_norm_MPa": 0.06242030274306588,
+  "last_valid_norm_MPa": 0.062490966493304274,
+  "minimum_fraction": 1.52587890625e-05,
+  "near_trial_surfaces": [
+    {
+      "current_trial_yield_MPa": -1.888111109948909e-05,
+      "point": 11,
+      "side": -1,
+      "station_z_over_L": -0.001,
+      "trial_yield_MPa": 3.671877711042271e-05
+    },
+    {
+      "current_trial_yield_MPa": 0.00034115375042631513,
+      "point": 5,
+      "side": 1,
+      "station_z_over_L": 0.001,
+      "trial_yield_MPa": 0.0003420943565508594
+    },
+    {
+      "current_trial_yield_MPa": 0.0009562014366863991,
+      "point": 5,
+      "side": 0,
+      "station_z_over_L": 0.0,
+      "trial_yield_MPa": 0.000956992305408022
+    },
+    {
+      "current_trial_yield_MPa": -0.00809072570254088,
+      "point": 11,
+      "side": 0,
+      "station_z_over_L": 0.0,
+      "trial_yield_MPa": -0.008035158991670954
+    },
+    {
+      "current_trial_yield_MPa": -0.009269062003609108,
+      "point": 36,
+      "side": 1,
+      "station_z_over_L": 0.001,
+      "trial_yield_MPa": -0.009264503790538114
+    },
+    {
+      "current_trial_yield_MPa": -0.00948875419303441,
+      "point": 36,
+      "side": 0,
+      "station_z_over_L": 0.0,
+      "trial_yield_MPa": -0.00948423954403843
+    },
+    {
+      "current_trial_yield_MPa": -0.009708862056285739,
+      "point": 36,
+      "side": -1,
+      "station_z_over_L": -0.001,
+      "trial_yield_MPa": -0.009704390977267607
+    },
+    {
+      "current_trial_yield_MPa": -0.015330908480745364,
+      "point": 18,
+      "side": -1,
+      "station_z_over_L": -0.001,
+      "trial_yield_MPa": -0.015308694386332533
+    },
+    {
+      "current_trial_yield_MPa": -0.01714458862719148,
+      "point": 17,
+      "side": 1,
+      "station_z_over_L": 0.001,
+      "trial_yield_MPa": -0.017112292542035945
+    },
+    {
+      "current_trial_yield_MPa": -0.018097894522012936,
+      "point": 17,
+      "side": 0,
+      "station_z_over_L": 0.0,
+      "trial_yield_MPa": -0.018065571417634985
+    },
+    {
+      "current_trial_yield_MPa": -0.018599843510594738,
+      "point": 25,
+      "side": 1,
+      "station_z_over_L": 0.001,
+      "trial_yield_MPa": -0.018594603192333636
+    },
+    {
+      "current_trial_yield_MPa": -0.018810261325587163,
+      "point": 25,
+      "side": 0,
+      "station_z_over_L": 0.0,
+      "trial_yield_MPa": -0.018805071793019934
+    }
+  ],
+  "no_crossing_not_proof_of_material_smoothness": true,
+  "no_new_material_evaluation_or_NDS": true,
+  "physical_capacity_certified": false,
+  "source_hashes": {
+    "Cold930FineLinePlusSurface_20261126/Input/Reverse1.bin": "67DA25C7D304CBEAED4C60FEF18BAFCBB89445074DEAC359A9166DB33E33AD59",
+    "Cold930FineLinePlusSurface_20261126/Native/ArcScan.States.bin": "DC8BA8520327F789C7818D2EA7F50F936540C0C1CB34CAAF6E8878A7DCDC5CC2",
+    "Cold930FineLinePlusSurface_20261126/Native/EnvelopeEnergy.Accepted.Operators.csv": "13A27E4211BD9362DB034C589BD41B04614644088E8959402508446647C46018",
+    "Cold934ConsistentSpatialLine_20261126/Native/NewtonRejected.00003.bin": "4E1472FBF9E01B64B6EE95A0B72FE311FEBEB1C910568AB2A92359CC99F0A23A"
+  },
+  "source_record": "934/Native/NewtonRejected.00003.bin",
+  "surface_crossings_at_minimum_fraction": [
+    {
+      "current_trial_yield_MPa": -1.888111109948909e-05,
+      "point": 11,
+      "side": -1,
+      "station_z_over_L": -0.001,
+      "trial_yield_MPa": 3.671877711042271e-05
+    }
+  ]
+}

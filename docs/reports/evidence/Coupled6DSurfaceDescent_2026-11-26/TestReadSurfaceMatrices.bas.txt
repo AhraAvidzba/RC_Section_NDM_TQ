@@ -1,0 +1,88 @@
+Public Function TestReadSurfaceMatrices() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Читает касательные по обе стороны фактической поверхности из точной истории25, не решая и не принимая новое НДС.
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна точная принятая история25 для чтения поверхностей."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\FrozenNewton.bin" For Binary Access Read As #inputHandle
+    Dim meta As Variant, current() As Double, accepted() As Double, residual() As Double, rhs() As Double, movement() As Double
+    meta = TestReadPolishVector(inputHandle): current = TestReadPolishVector(inputHandle)
+    accepted = TestReadPolishVector(inputHandle): residual = TestReadPolishVector(inputHandle)
+    rhs = TestReadPolishVector(inputHandle): movement = TestReadPolishVector(inputHandle)
+    Dim size As Long: size = UBound(rhs)
+    Dim original() As Double, expected() As Double, vector As Variant, row As Long, column As Long
+    ReDim original(1 To size, 1 To size): ReDim expected(1 To size, 1 To size)
+    For row = 1 To size
+        vector = TestReadPolishVector(inputHandle)
+        For column = 1 To size: original(column, row) = vector(column): Next column
+    Next row
+    For row = 1 To size
+        vector = TestReadPolishVector(inputHandle)
+        For column = 1 To size: expected(column, row) = vector(column): Next column
+    Next row
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or CDbl(meta(7)) <> 0# Then Err.Raise 5, , "Неверная записанная система поверхности."
+    Close #inputHandle
+    Dim checked() As Double: mReverseSolverTest.CopyAccepted checked
+    For column = 1 To UBound(accepted)
+        If checked(column) <> accepted(column) Then Err.Raise 5, , "Принятое поле не совпало с источником матрицы."
+    Next column
+    Open mPolishRootTest & "\Input\SurfaceMatrixLevels.bin" For Binary Access Read As #inputHandle
+    Dim levels As Variant: levels = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or levels(1) <> 0# Then Err.Raise 5, , "Первой должна читаться фактическая исходная матрица."
+    Close #inputHandle
+    Dim projection() As Double: ReDim projection(1 To UBound(current))
+    For column = 1 To UBound(current): projection(column) = original(column, size) / CDbl(meta(5)): Next column
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\SurfaceMatrices.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMSURFMATRIX001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(UBound(levels))
+    Dim index As Long, seed() As Double, seedLambda As Double, zero() As Double, scales As Variant
+    Dim values() As Double, jacobian() As Double, ready As Boolean, outputRow() As Double, rowMaximum As Double
+    ReDim outputRow(1 To size): ReDim zero(1 To size)
+    For index = 1 To UBound(levels)
+        seed = current
+        For column = 1 To UBound(seed): seed(column) = current(column) + CDbl(levels(index)) * movement(column): Next column
+        seedLambda = CDbl(meta(3)) + CDbl(levels(index)) * movement(size)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, _
+                CDbl(meta(6)), seed, seedLambda) Then Err.Raise 5, , "Не открыт контекст чтения поверхности."
+        scales = mReverseSolverTest.ReadNewtonLineScalesTest
+        ready = mReverseSolverTest.TryReadBranchLinearization(zero, values, jacobian)
+        TestWriteReverseBinaryVector handle, Array(levels(index), seedLambda, Abs(CLng(ready)))
+        TestWriteReverseBinaryVector handle, seed
+        TestWriteReverseBinaryVector handle, scales
+        If ready Then
+            For row = CLng(meta(4)) To size - 1: values(row) = values(row) / CDbl(meta(5)): Next row
+            TestWriteReverseBinaryVector handle, values
+            For row = 1 To size
+                rowMaximum = 0#
+                If index = 1 Then
+                    For column = 1 To size: rowMaximum = GeomMax(rowMaximum, Abs(expected(column, row))): Next column
+                End If
+                For column = 1 To size
+                    outputRow(column) = jacobian(column, row) / CDbl(scales(column))
+                    If row >= CLng(meta(4)) And row < size Then outputRow(column) = outputRow(column) / CDbl(meta(5))
+                    If index = 1 And Abs(outputRow(column) - expected(column, row)) > 0.000000000002 * rowMaximum + 0.000000000001 Then _
+                        Err.Raise 5, , "Исходная уточнённая матрица не воспроизведена."
+                Next column
+                TestWriteReverseBinaryVector handle, outputRow
+            Next row
+            If index = 1 Then
+                For row = 1 To size - 1
+                    If values(row) <> residual(row) Then Err.Raise 5, , "Исходная невязка не совпала побитно; соседние матрицы запрещены."
+                Next row
+            End If
+        ElseIf index = 1 Then
+            Err.Raise 5, , "Исходная уточнённая матрица недоступна."
+        End If
+        mReverseSolverTest.EndNewtonLineTest
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Чтение матриц изменило принятую ревизию."
+    Next index
+    Close #handle
+    mReverseSolverTest.CopyAccepted checked
+    For column = 1 To UBound(accepted)
+        If checked(column) <> accepted(column) Then Err.Raise 5, , "Чтение матриц изменило принятое поле."
+    Next column
+    TestReadSurfaceMatrices = "TOTAL_SURFACE_MATRICES_TEST: passed=1; failed=0; readonly; no new NDS or history acceptance"
+End Function

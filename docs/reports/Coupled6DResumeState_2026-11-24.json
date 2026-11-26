@@ -17772,6 +17772,139 @@
     "true20_history_unchanged": true,
     "whole_goal_completed": false
   },
+  "latest_shared_line934": {
+    "accepted_history_unchanged_by_native_guard": true,
+    "actual_components": 257,
+    "actual_rejected_direction_records": [
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693016227,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 4,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 1,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6042159608416117,
+        "current_lambda": 1.1024974179997635,
+        "final_valid_trial_norm_MPa": 0.0624909595083548,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06242030274306588,
+        "iteration": 10,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 2,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6042159608416117,
+        "current_lambda": 1.1024974179997635,
+        "final_valid_trial_norm_MPa": 0.062490966493304274,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06242030274306588,
+        "iteration": 13,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 3,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693016227,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 4,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 4,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6042159608416117,
+        "current_lambda": 1.1024974179997635,
+        "final_valid_trial_norm_MPa": 0.0624909595083548,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06242030274306588,
+        "iteration": 10,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 5,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6042159608416117,
+        "current_lambda": 1.1024974179997635,
+        "final_valid_trial_norm_MPa": 0.062490966493304274,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06242030274306588,
+        "iteration": 13,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 6,
+        "valid_probe_count": 17
+      }
+    ],
+    "all_material_laws_exact933": true,
+    "base_residual_max_error_MPa": 0.0,
+    "cases": [
+      {
+        "case": 1,
+        "effort": [
+          19.0,
+          647.0,
+          3.0,
+          3.0,
+          428.0,
+          0.0,
+          27.0,
+          0.062490966493304274
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 1.1034606586655773,
+        "result_code": 10,
+        "solved": false
+      },
+      {
+        "case": 2,
+        "effort": [
+          30.0,
+          1332.0,
+          14.0,
+          9.0,
+          1113.0,
+          0.0,
+          27.0,
+          0.062490966493304274
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 0.0,
+        "result_code": 10,
+        "solved": false
+      }
+    ],
+    "control_max_error_MPa": 1.5246593050577406e-16,
+    "diagnostic_last_norm_is_restored_context_not_minimum_over_all_attempts": true,
+    "exact_recorded_system_reproduced_before_attempts": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_release_promotion": true,
+    "no_working_or_release_promotion": true,
+    "numerical_change_only_finer_line_candidates": true,
+    "original30_budget_and_material_force_control_acceptance_unchanged": true,
+    "original30_iterations_and_all_acceptance_unchanged": true,
+    "other256_components_preserved": true,
+    "physical_capacity_certified": false,
+    "primary_and_prospective_floor_identical1_over65536": true,
+    "reference_modes_change_full_recovery_algorithm_not_only_lambda_guard": true,
+    "refined_matrix_max_relative_row_error": 1.3671403428910857e-16,
+    "whole_goal_completed": false
+  },
   "latest_side_steel_boundary_native": {
     "failed": 0,
     "macros": 1,
@@ -17853,6 +17986,27 @@
     "own_process_closed": true,
     "passed": 164,
     "timeout600": false
+  },
+  "latest_surface_descent_evidence": "docs/reports/evidence/Coupled6DSurfaceDescent_2026-11-26",
+  "latest_surface_descent_summary": {
+    "all_raw_hashes_read_back": true,
+    "all_started_stages_terminal": true,
+    "archived_helpers": 81,
+    "exact_compiled931_and934_books_included": true,
+    "free_commit_before": 16844050432,
+    "free_physical_before": 17451397120,
+    "full_acceptance_not_run": true,
+    "no_working_release_main_promotion": true,
+    "physical_capacity_certified": false,
+    "raw_archive": "RawEvidence.tar.xz",
+    "raw_archive_bytes": 60024464,
+    "raw_bytes": 338333445,
+    "raw_files": 894,
+    "release_hashes_unchanged": {
+      "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+      "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+    },
+    "whole_goal_completed": false
   },
   "latest_tangent_cycle_evidence": "docs/reports/evidence/Coupled6DTangentCycleAndRejectedPredictor_2026-11-26",
   "latest_tangent_two_cycle907": {
@@ -18927,7 +19081,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "922-929 complete and archived. Frozen exact54/55 R0/A1.37e-16.927 bounded corrector no gain.929 finer line reaches R0.0627188467 then point5 plus station trial surface still crossed even at1/65536. Next use recorded929 stop/history25 to inspect plus-station one-sided actual stress/tangent and event-aware continuation; do not merely add halvings. No working/release/main promotion or physical ultimate.",
+  "next_action": "930-934 archived: real point5 plus continuity and missed descent window verified;933 crossed that boundary,934 shared floor no extra root. New actual934 record3 now crosses point11 minus surface at smallest fraction: F=-1.8881e-5 ->+3.6719e-5. Next export incoming/outgoing matrices at this exact new point/history25 and compare matched seed vs modified-current residual corrections with actual six-force material verification; not just more damping. No new cold maximum/physical capacity/main promotion; all native closed. Pure bending comparison deferred.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -19208,7 +19362,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:923 cold trace and entire checkpoints bit-exact920,55 real failed Newton contexts captured;924 all25 final states reassembled from exact921 tensors.925 R exact,A1.37e-16, both reference policies fail30.926 localized point5 finite active-set crossing, near direction accurate2.38e-6 relative.927 bounded3 uncommitted corrector gains no root; not promoted.928 central surface stress difference scales from1.34e-5 to1.34e-11MPa as width decreases1e6; no jump at that surface.929 directed fine line outcome preserved separately. Exact books/proofs archived; physical ultimate and full SOW remain open.",
+  "previous_goal_turn_classification": "progress:930 actual plus-station surface continuous, all17 recorded probes independently reconstructed.931 exact current R and refined matrix reproduced; incoming/outgoing Newton directions independently checked.932 actual nonlinear material reveals missed descent window1/256.933 one extra helper half accepts the previously missed branch step but no root;934 shared line range outcome preserved explicitly. No physical capacity, cold gain or release promotion claimed.",
   "previous_goal_turn_revalidation": "Previous acknowledgement only deferred pure-bending CDP/SP comparison; no numerical progress claimed. Revalidated branch, terminal handles, staged926 and exact925 evidence before continuing.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
@@ -21015,6 +21169,7 @@
     1055,
     1057,
     1109,
+    1195,
     1625,
     1801,
     1809,
@@ -21134,6 +21289,7 @@
     20496,
     20542,
     20931,
+    20996,
     21051,
     21364,
     21410,
@@ -21161,12 +21317,14 @@
     27029,
     27095,
     27422,
+    28130,
     28317,
     28422,
     28499,
     28604,
     28703,
     28797,
+    29022,
     29563,
     29628,
     29834,
@@ -21235,6 +21393,7 @@
     40081,
     40234,
     40463,
+    40708,
     40717,
     40742,
     40770,
@@ -21255,6 +21414,7 @@
     43814,
     43829,
     43884,
+    43920,
     44224,
     44434,
     44649,
@@ -21299,6 +21459,7 @@
     52136,
     52358,
     52416,
+    52705,
     52709,
     52768,
     52825,
@@ -21348,6 +21509,7 @@
     62785,
     62845,
     62866,
+    62904,
     62959,
     63145,
     63225,
@@ -21411,6 +21573,7 @@
     75181,
     75856,
     75997,
+    76147,
     76344,
     76431,
     76667,
@@ -21442,6 +21605,7 @@
     81541,
     81545,
     81619,
+    81704,
     81866,
     81919,
     82906,
@@ -21485,6 +21649,7 @@
     88284,
     88306,
     88605,
+    89093,
     89156,
     89231,
     89569,
@@ -21532,6 +21697,7 @@
     96393,
     96407,
     96656,
+    96865,
     97005,
     97029,
     97145,
@@ -21553,7 +21719,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T07:46:59.582832+03:00",
+  "updated_local": "2026-11-26T08:12:30.016174+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
