@@ -1,0 +1,112 @@
+Public Function TestProspectiveBranchMatrix() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Читает касательные за фактической границей ветви и проверяет одну поправку от исходного неудачного поля.
+    ' Полные скалярная строка управления и столбец нагрузки берутся из записи исходной системы без восстановления проекции.
+    If mReverseFieldsTest.Count <> 32 Then Err.Raise 5, , "Нужна точная история32 для проверки активной ветви."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\FrozenNewton.bin" For Binary Access Read As #inputHandle
+    Dim meta As Variant, current() As Double, accepted() As Double, residual() As Double, rhs() As Double, movement() As Double
+    meta = TestReadPolishVector(inputHandle): current = TestReadPolishVector(inputHandle)
+    accepted = TestReadPolishVector(inputHandle): residual = TestReadPolishVector(inputHandle)
+    rhs = TestReadPolishVector(inputHandle): movement = TestReadPolishVector(inputHandle)
+    Dim size As Long: size = UBound(rhs)
+    Dim original() As Double, vector As Variant, row As Long, column As Long
+    ReDim original(1 To size, 1 To size)
+    For row = 1 To size
+        vector = TestReadPolishVector(inputHandle)
+        For column = 1 To size: original(column, row) = vector(column): Next column
+    Next row
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Лишние данные исходной системы Newton."
+    Close #inputHandle
+    Dim checked() As Double: mReverseSolverTest.CopyAccepted checked
+    For column = 1 To UBound(accepted)
+        If checked(column) <> accepted(column) Then Err.Raise 5, , "Принятая история не совпадает с фактическим отказом Newton."
+    Next column
+    Dim projection() As Double: ReDim projection(1 To UBound(current))
+    For column = 1 To UBound(current): projection(column) = original(column, size) / CDbl(meta(5)): Next column
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ProspectiveBranchMatrix.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPROSPNEWTON01"
+    Put #handle, , magic
+    Dim level As Variant, fraction As Variant, seed() As Double, seedFactor As Double, zero() As Double
+    Dim scales As Variant, values() As Double, jacobian() As Double, augmented() As Double, working() As Double
+    Dim solution() As Double, probe() As Double, trial() As Double, actualFactor As Double, norm As Double
+    Dim matrixReady As Boolean, linearReady As Boolean, trialReady As Boolean, outputRow() As Double
+    Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+    Dim system As New CCoupledLinearSystem
+    ReDim outputRow(1 To size)
+    For Each level In Array(0#, 0.00390625, 0.0078125, 0.015625, 0.03125, 0.25, 1#)
+        seed = current
+        For column = 1 To UBound(seed): seed(column) = current(column) + CDbl(level) * movement(column): Next column
+        seedFactor = CDbl(meta(3)) + CDbl(level) * movement(size)
+        ReDim zero(1 To size)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, _
+                CDbl(meta(6)), seed, seedFactor) Then Err.Raise 5, , "Не открыт читающий контекст активной ветви."
+        scales = mReverseSolverTest.ReadNewtonLineScalesTest
+        matrixReady = mReverseSolverTest.TryReadBranchLinearization(zero, values, jacobian)
+        linearReady = False: augmented = original: solution = rhs
+        If matrixReady Then
+            For row = 1 To size - 1
+                For column = 1 To size - 1
+                    augmented(column, row) = jacobian(column, row) / CDbl(scales(column))
+                    If row >= CLng(meta(4)) Then augmented(column, row) = augmented(column, row) / CDbl(meta(5))
+                Next column
+            Next row
+            working = augmented: linearReady = system.Solve(working, solution, size)
+        End If
+        TestWriteReverseBinaryVector handle, Array(CDbl(level), seedFactor, Abs(CLng(matrixReady)), Abs(CLng(linearReady)))
+        TestWriteReverseBinaryVector handle, seed
+        TestWriteReverseBinaryVector handle, scales
+        If Not matrixReady Then
+            mReverseSolverTest.EndNewtonLineTest
+            GoTo NextLevelTest
+        End If
+        TestWriteReverseBinaryVector handle, values
+        For row = 1 To size
+            For column = 1 To size: outputRow(column) = augmented(column, row): Next column
+            TestWriteReverseBinaryVector handle, outputRow
+        Next row
+        If Not linearReady Then
+            mReverseSolverTest.EndNewtonLineTest
+            GoTo NextLevelTest
+        End If
+        TestWriteReverseBinaryVector handle, solution
+        mReverseSolverTest.EndNewtonLineTest
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, _
+                CDbl(meta(6)), current, CDbl(meta(3))) Then Err.Raise 5, , "Не восстановлен контекст исходной точки."
+        scales = mReverseSolverTest.ReadNewtonLineScalesTest
+        For Each fraction In Array(1#, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125)
+            ReDim probe(1 To size): trial = current
+            For column = 1 To size
+                probe(column) = CDbl(fraction) * solution(column) / CDbl(scales(column))
+                If column < size Then trial(column) = current(column) + CDbl(scales(column)) * probe(column)
+            Next column
+            actualFactor = CDbl(meta(3)) + CDbl(scales(size)) * probe(size)
+            trialReady = equations.TryEvaluate(probe, False, values, jacobian)
+            norm = -1#
+            If trialReady Then
+                values(size) = -rhs(size) ' Точное управление исходной системы; фиктивная строка читающего контекста не используется.
+                For column = 1 To size - 1
+                    values(size) = values(size) + original(column, size) * (trial(column) - current(column))
+                Next column
+                values(size) = values(size) + original(size, size) * (actualFactor - CDbl(meta(3)))
+                norm = Abs(values(size))
+                For row = 1 To CLng(meta(4)) - 1: norm = GeomMax(norm, Abs(values(row))): Next row
+            End If
+            TestWriteReverseBinaryVector handle, Array(CDbl(fraction), Abs(CLng(trialReady)), actualFactor, norm)
+            TestWriteReverseBinaryVector handle, trial
+            If trialReady Then TestWriteReverseBinaryVector handle, values
+        Next fraction
+        mReverseSolverTest.EndNewtonLineTest
+NextLevelTest:
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Чтение активной ветви изменило ревизию истории."
+    Next level
+    Close #handle
+    mReverseSolverTest.CopyAccepted checked
+    For column = 1 To UBound(accepted)
+        If checked(column) <> accepted(column) Then Err.Raise 5, , "Проверка изменила принятое поле."
+    Next column
+    TestProspectiveBranchMatrix = "TOTAL_PROSPECTIVE_BRANCH_MATRIX_TEST: passed=1; failed=0; readonly; directions not accepted equilibria"
+End Function

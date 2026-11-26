@@ -1,0 +1,51 @@
+' Проверяет касательную за отклонённой конечной поправкой от той же принятой истории.
+' Остаток, строка управления и нагрузка относятся к исходной точке; новое поле проходит обычный поиск доли.
+' Материальная история не принимается. При неудаче весь исходный контекст восстанавливается, кроме счётчика проб.
+Private Function TryProspectiveBranchStep(ByRef current() As Double, ByRef currentLambda As Double, _
+        ByRef load() As Double, ByVal initialNorm As Double, ByVal absoluteTolerance As Double, _
+        ByVal relativeTolerance As Double) As Boolean
+    Dim oldResidual() As Double, oldMatrix() As Double, oldExternal() As Double, oldResultants() As Double
+    Dim oldCandidate() As Double, oldLoad() As Double, oldNorm As Double, oldLambda As Double
+    Dim oldCode As ESolverFailureCode, oldPoint As Long, oldLastPoint As Long, oldSide As Long, oldFailures As Long
+    oldResidual = mResidual: oldMatrix = mMatrix: oldExternal = mExternal: oldResultants = mTrialResultants
+    oldCandidate = mCandidate: oldLoad = load: oldNorm = mLastNorm: oldLambda = mCurrentControlLambda
+    oldCode = mFailureCode: oldPoint = mMaterialPoint: oldLastPoint = mLastFailedPoint
+    oldSide = mLastFailedSide: oldFailures = mMaterialFailures
+    Dim errorNumber As Long, errorSource As String, errorReason As String
+    On Error GoTo FailedRecovery
+    Dim prospective() As Double, correction() As Double, trial() As Double, fraction As Double
+    Dim trialLambda As Double, trialNorm As Double, trialTolerance As Double, i As Long
+    If Not Evaluate(oldCandidate, True, recordTrial:=False, consistentBranch:=True, refinedBranch:=True) Then GoTo RestoreFailure
+    prospective = mMatrix
+    SetControlledLoad currentLambda, load
+    If Not Evaluate(current, False, recordTrial:=False) Then GoTo RestoreFailure
+    mMatrix = prospective ' Меняется только линеаризация; остаток и управляющая строка принадлежат текущей точке.
+    If Not SolveCorrection(current, correction) Then GoTo RestoreFailure
+    fraction = 1#
+    Do While fraction >= MIN_FRACTION
+        trial = current
+        For i = 1 To mDegreeCount: trial(i) = current(i) + fraction * correction(i): Next i
+        trialLambda = currentLambda + fraction * correction(mDegreeCount + 1)
+        SetControlledLoad trialLambda, load
+        If Evaluate(trial, False, recordTrial:=False) Then
+            trialNorm = EquilibriumNorm(load, trial): trialTolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+            If trialNorm <= trialTolerance Or trialNorm < initialNorm * (1# - MIN_PROGRESS * fraction) Then
+                current = trial: currentLambda = trialLambda
+                mMinimumPivot = mSystem.MinimumPivot
+                TryProspectiveBranchStep = True
+                Exit Function
+            End If
+        End If
+        fraction = fraction * 0.5
+    Loop
+    GoTo RestoreFailure
+FailedRecovery:
+    errorNumber = Err.Number: errorSource = Err.Source: errorReason = Err.Description
+RestoreFailure:
+    mResidual = oldResidual: mMatrix = oldMatrix: mExternal = oldExternal: mTrialResultants = oldResultants
+    mCandidate = oldCandidate: mLastNorm = oldNorm: mCurrentControlLambda = oldLambda
+    For i = 1 To COMPONENT_COUNT: load(i) = oldLoad(i): Next i
+    mFailureCode = oldCode: mMaterialPoint = oldPoint: mLastFailedPoint = oldLastPoint
+    mLastFailedSide = oldSide: mMaterialFailures = oldFailures
+    If errorNumber <> 0 Then Err.Raise errorNumber, errorSource, errorReason
+End Function

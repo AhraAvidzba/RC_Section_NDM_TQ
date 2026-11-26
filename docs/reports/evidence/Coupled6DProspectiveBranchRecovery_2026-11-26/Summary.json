@@ -1,0 +1,4990 @@
+{
+  "all_archived_native_stages_terminal": true,
+  "all_raw_hashes_read_back": true,
+  "current_cold920_explicitly_not_included_as_completed": true,
+  "free_commit_before": 16561082368,
+  "free_physical_before": 17316356096,
+  "no_clean_timing_claim": true,
+  "no_working_release_main_promotion": true,
+  "physical_capacity_certified": false,
+  "proofs": {
+    "914": {
+      "actual_components": 256,
+      "base_matrix_relative_difference_from_actual_refined_capture": 1.6079526891176291e-16,
+      "base_residual_maximum_difference_from_actual_capture_MPa": 0.0,
+      "exact_original_scalar_control_row_and_load_column": true,
+      "independent_six_force_and_local_material_root_validation_not_yet_done": true,
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "no_accepted_history_change_by_native_guard": true,
+      "other255_components_preserved": true,
+      "physical_capacity_certified": false,
+      "prospective_directions_not_accepted_NDS": true,
+      "records": [
+        {
+          "independent_scaled_linear_solution_difference": 4.8065551949724575e-15,
+          "lambda_increment": 7.517979684507852e-11,
+          "level": 0,
+          "linear_backward_error": 7.758751424868558e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": 9.029097726129084e-18,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 1.2209961323106957e-16,
+              "lambda_value": 1.102444652775366,
+              "norm_below_original_bound": false,
+              "norm_reduction": -35.4674265807267,
+              "row53_residual_MPa": -2.5554457886433095e-06,
+              "weak_and_control_norm_MPa": 2.5554457886433095e-06
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.7805579577603718e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 1.1711869347379323e-16,
+              "lambda_value": 1.102444652737776,
+              "norm_below_original_bound": false,
+              "norm_reduction": -17.65036718579838,
+              "row53_residual_MPa": -1.3069198117420357e-06,
+              "weak_and_control_norm_MPa": 1.3069198117420357e-06
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.675095946180428e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 3.044479603532046e-16,
+              "lambda_value": 1.102444652718981,
+              "norm_below_original_bound": false,
+              "norm_reduction": -8.741839966783601,
+              "row53_residual_MPa": -6.826569969681185e-07,
+              "weak_and_control_norm_MPa": 6.826569969681185e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.0076200172713124e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 2.957059537482262e-16,
+              "lambda_value": 1.1024446527095835,
+              "norm_below_original_bound": false,
+              "norm_reduction": -4.287573906294417,
+              "row53_residual_MPa": -3.7052541782922437e-07,
+              "weak_and_control_norm_MPa": 3.7052541782922437e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.9509009523999526e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 7.610423527005847e-17,
+              "lambda_value": 1.1024446527048848,
+              "norm_below_original_bound": false,
+              "norm_reduction": -2.060441211472155,
+              "row53_residual_MPa": -2.1445965176441302e-07,
+              "weak_and_control_norm_MPa": 2.1445965176441302e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.2675208263932793e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 1.0606342458702201e-16,
+              "lambda_value": 1.1024446527025356,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.9468753430561374,
+              "row53_residual_MPa": -1.3642680229747003e-07,
+              "weak_and_control_norm_MPa": 1.3642680229747003e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.0811168758074857e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 4.784024922094578e-17,
+              "lambda_value": 1.1024446527013607,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.39009224476864834,
+              "row53_residual_MPa": -9.741036606617003e-08,
+              "weak_and_control_norm_MPa": 9.741036606617003e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.090194480704912e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 2.555879525333458e-16,
+              "lambda_value": 1.1024446527007734,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.11170122225159118,
+              "row53_residual_MPa": -7.790218485375332e-08,
+              "weak_and_control_norm_MPa": 7.790218485375332e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 6.664434846121135e-15,
+          "lambda_increment": 7.517846714220008e-11,
+          "level": 0.00390625,
+          "linear_backward_error": 6.453874801918508e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": -1.8010209205023877e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 2.164455074533951e-16,
+              "lambda_value": 1.1024446527753646,
+              "norm_below_original_bound": false,
+              "norm_reduction": -35.46741881320073,
+              "row53_residual_MPa": -2.5554452443358718e-06,
+              "weak_and_control_norm_MPa": 2.5554452443358718e-06
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.5095872594472964e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 1.5002936661392255e-16,
+              "lambda_value": 1.1024446527377754,
+              "norm_below_original_bound": false,
+              "norm_reduction": -17.65036328290417,
+              "row53_residual_MPa": -1.3069195382477009e-06,
+              "weak_and_control_norm_MPa": 1.3069195382477009e-06
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.6572911543919e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 1.8038017425214167e-16,
+              "lambda_value": 1.1024446527189806,
+              "norm_below_original_bound": false,
+              "norm_reduction": -8.741838342115347,
+              "row53_residual_MPa": -6.826568831198973e-07,
+              "weak_and_control_norm_MPa": 6.826568831198973e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.770476442432736e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 1.716699624019583e-16,
+              "lambda_value": 1.1024446527095835,
+              "norm_below_original_bound": false,
+              "norm_reduction": -4.287573497190946,
+              "row53_residual_MPa": -3.7052538916140104e-07,
+              "weak_and_control_norm_MPa": 3.7052538916140104e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.5246518523040134e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 2.936067244499315e-16,
+              "lambda_value": 1.1024446527048848,
+              "norm_below_original_bound": false,
+              "norm_reduction": -2.0604410764681953,
+              "row53_residual_MPa": -2.1445964230404433e-07,
+              "weak_and_control_norm_MPa": 2.1445964230404433e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.282695441358246e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 4.435135649356196e-16,
+              "lambda_value": 1.1024446527025353,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.9468750791271985,
+              "row53_residual_MPa": -1.364267838027157e-07,
+              "weak_and_control_norm_MPa": 1.364267838027157e-07
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.6582398031853555e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 6.106996914296576e-17,
+              "lambda_value": 1.1024446527013607,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.39009258083461584,
+              "row53_residual_MPa": -9.741038961590858e-08,
+              "weak_and_control_norm_MPa": 9.741038961590858e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.8897495044934285e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 4.2888952869356493e-16,
+              "lambda_value": 1.1024446527007734,
+              "norm_below_original_bound": false,
+              "norm_reduction": -0.11170074958185072,
+              "row53_residual_MPa": -7.790215173153958e-08,
+              "weak_and_control_norm_MPa": 7.790215173153958e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 1.630503774088223e-14,
+          "lambda_increment": 6.043143028965237e-09,
+          "level": 0.0078125,
+          "linear_backward_error": 8.524875358009134e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": 6.842994295503057e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 7.369946613300196e-17,
+              "lambda_value": 1.1024446587433292,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.8333060341754528,
+              "row53_residual_MPa": 1.1681037926150866e-08,
+              "weak_and_control_norm_MPa": 1.1681037926150866e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.477752953673342e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 4.8790214455674646e-17,
+              "lambda_value": 1.1024446557217575,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.6666932635777545,
+              "row53_residual_MPa": -2.3356386117106154e-08,
+              "weak_and_control_norm_MPa": 2.3356386117106154e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.320778385149733e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 1.644990819729478e-16,
+              "lambda_value": 1.1024446542109718,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.4166900448991734,
+              "row53_residual_MPa": -4.087529908194639e-08,
+              "weak_and_control_norm_MPa": 4.087529908194639e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.3687535600312427e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 1.129388464409862e-16,
+              "lambda_value": 1.102444653455579,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.21576153416522936,
+              "row53_residual_MPa": -5.4955314172586145e-08,
+              "weak_and_control_norm_MPa": 5.4955314172586145e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.0652216774340866e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 1.6259760053984154e-16,
+              "lambda_value": 1.1024446530778826,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.1078807770071808,
+              "row53_residual_MPa": -6.25150312243204e-08,
+              "weak_and_control_norm_MPa": 6.25150312243204e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.958218079297748e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 3.510412348007267e-16,
+              "lambda_value": 1.1024446528890344,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.05394126913380193,
+              "row53_residual_MPa": -6.629482873570739e-08,
+              "weak_and_control_norm_MPa": 6.629482873570739e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.1079918203884926e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 3.213216693674621e-16,
+              "lambda_value": 1.1024446527946101,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.026969110195635304,
+              "row53_residual_MPa": -6.818489602127735e-08,
+              "weak_and_control_norm_MPa": 6.818489602127735e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.9214952695410383e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 2.787322075786381e-16,
+              "lambda_value": 1.1024446527473981,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.013485482802607973,
+              "row53_residual_MPa": -6.912975783544655e-08,
+              "weak_and_control_norm_MPa": 6.912975783544655e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 1.525783836834942e-14,
+          "lambda_increment": 6.043143817115346e-09,
+          "level": 0.015625,
+          "linear_backward_error": 3.6941123786898865e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": 2.8387599608120025e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 1.680818080010681e-16,
+              "lambda_value": 1.1024446587433299,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.8333052758918787,
+              "row53_residual_MPa": 1.1681091062682499e-08,
+              "weak_and_control_norm_MPa": 1.1681091062682499e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.1458838331688524e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 7.305193880973779e-17,
+              "lambda_value": 1.102444655721758,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.6666926759914564,
+              "row53_residual_MPa": -2.33564272920689e-08,
+              "weak_and_control_norm_MPa": 2.33564272920689e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.0792284268393349e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 2.311556221779436e-16,
+              "lambda_value": 1.102444654210972,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.4166905716492506,
+              "row53_residual_MPa": -4.0875262170066585e-08,
+              "weak_and_control_norm_MPa": 4.0875262170066585e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.9655631482131837e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 8.194516437044853e-17,
+              "lambda_value": 1.1024446534555792,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.21576144904403094,
+              "row53_residual_MPa": -5.495532013743282e-08,
+              "weak_and_control_norm_MPa": 5.495532013743282e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.0166194067500136e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 1.7327443429636974e-16,
+              "lambda_value": 1.1024446530778826,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.1078812234587071,
+              "row53_residual_MPa": -6.251499993934146e-08,
+              "weak_and_control_norm_MPa": 6.251499993934146e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.7297431214008432e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 3.0632074895881294e-16,
+              "lambda_value": 1.1024446528890344,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.05394093604466277,
+              "row53_residual_MPa": -6.629485207684544e-08,
+              "weak_and_control_norm_MPa": 6.629485207684544e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.7815095891543283e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 2.7202506528054014e-16,
+              "lambda_value": 1.1024446527946101,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.026969319288426497,
+              "row53_residual_MPa": -6.818488136915235e-08,
+              "weak_and_control_norm_MPa": 6.818488136915235e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.6038821341245825e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 1.0238066140357108e-16,
+              "lambda_value": 1.1024446527473981,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.013485179141365933,
+              "row53_residual_MPa": -6.912977911443206e-08,
+              "weak_and_control_norm_MPa": 6.912977911443206e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 2.9840133928065443e-14,
+          "lambda_increment": 6.043143044924033e-09,
+          "level": 0.03125,
+          "linear_backward_error": 4.815194424287482e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": -6.503828432953083e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 1.229006859555389e-16,
+              "lambda_value": 1.1024446587433292,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.8333064569314879,
+              "row53_residual_MPa": 1.1681008301627546e-08,
+              "weak_and_control_norm_MPa": 1.1681008301627546e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.479691206843314e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 1.5487302608830337e-16,
+              "lambda_value": 1.1024446557217575,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.666692155919129,
+              "row53_residual_MPa": -2.3356463736007044e-08,
+              "weak_and_control_norm_MPa": 2.3356463736007044e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.4933916132696933e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 9.10958498968164e-17,
+              "lambda_value": 1.1024446542109718,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.4166891970013086,
+              "row53_residual_MPa": -4.0875358498177004e-08,
+              "weak_and_control_norm_MPa": 4.0875358498177004e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.254738155826789e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 6.08097949909237e-17,
+              "lambda_value": 1.102444653455579,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.21576161550040962,
+              "row53_residual_MPa": -5.4955308473043744e-08,
+              "weak_and_control_norm_MPa": 5.4955308473043744e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.2115198696711903e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 1.9969199812189922e-16,
+              "lambda_value": 1.1024446530778826,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.10788118197496466,
+              "row53_residual_MPa": -6.251500284630432e-08,
+              "weak_and_control_norm_MPa": 6.251500284630432e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.2957961566990087e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 4.719954613773517e-16,
+              "lambda_value": 1.1024446528890344,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.053940315617326484,
+              "row53_residual_MPa": -6.629489555313572e-08,
+              "weak_and_control_norm_MPa": 6.629489555313572e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.3608267546884453e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 3.675683034395362e-16,
+              "lambda_value": 1.1024446527946101,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.026969107778896273,
+              "row53_residual_MPa": -6.818489619062973e-08,
+              "weak_and_control_norm_MPa": 6.818489619062973e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.138047090396798e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 2.77206834830302e-16,
+              "lambda_value": 1.1024446527473981,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.013485766486299622,
+              "row53_residual_MPa": -6.912973795638287e-08,
+              "weak_and_control_norm_MPa": 6.912973795638287e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 4.076258324994925e-14,
+          "lambda_increment": 6.043143824552564e-09,
+          "level": 0.25,
+          "linear_backward_error": 5.185592902968678e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": -1.2470990057659227e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 1.22285728868894e-16,
+              "lambda_value": 1.1024446587433299,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.8333073487422116,
+              "row53_residual_MPa": 1.1680945808214323e-08,
+              "weak_and_control_norm_MPa": 1.1680945808214323e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.0476172714413526e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 7.753887664495512e-17,
+              "lambda_value": 1.102444655721758,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.6666926091458795,
+              "row53_residual_MPa": -2.3356431976255965e-08,
+              "weak_and_control_norm_MPa": 2.3356431976255965e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.336976764201613e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 1.8380780391540828e-16,
+              "lambda_value": 1.102444654210972,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.4166893749178575,
+              "row53_residual_MPa": -4.087534603071938e-08,
+              "weak_and_control_norm_MPa": 4.087534603071938e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.3353298248202534e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 1.5915291027644102e-16,
+              "lambda_value": 1.1024446534555792,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.21576116920669852,
+              "row53_residual_MPa": -5.495533974696383e-08,
+              "weak_and_control_norm_MPa": 5.495533974696383e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.698319201121748e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 3.008163789701554e-16,
+              "lambda_value": 1.1024446530778826,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.10788159362668748,
+              "row53_residual_MPa": -6.25149739999129e-08,
+              "weak_and_control_norm_MPa": 6.25149739999129e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.6958003591410197e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 1.2792503269497427e-16,
+              "lambda_value": 1.1024446528890344,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.05394076275736037,
+              "row53_residual_MPa": -6.629486421990977e-08,
+              "weak_and_control_norm_MPa": 6.629486421990977e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.428082311592027e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 1.3276791668753082e-16,
+              "lambda_value": 1.1024446527946101,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.026968985741313678,
+              "row53_residual_MPa": -6.818490474238279e-08,
+              "weak_and_control_norm_MPa": 6.818490474238279e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.539272866375596e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 3.503890545865169e-16,
+              "lambda_value": 1.1024446527473981,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.013484821491846044,
+              "row53_residual_MPa": -6.912980417663264e-08,
+              "weak_and_control_norm_MPa": 6.912980417663264e-08
+            }
+          ]
+        },
+        {
+          "independent_scaled_linear_solution_difference": 1.419139532370459e-14,
+          "lambda_increment": 6.043150191783192e-09,
+          "level": 1,
+          "linear_backward_error": 9.09320069804024e-16,
+          "linear_solved": true,
+          "matrix_available": true,
+          "probes": [
+            {
+              "available": true,
+              "control_residual_MPa": 4.1696364108535636e-17,
+              "fraction": 1,
+              "gauge_scaled_norm_MPa": 8.134571692028901e-17,
+              "lambda_value": 1.1024446587433363,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.8333077061751224,
+              "row53_residual_MPa": 1.1680920761192575e-08,
+              "weak_and_control_norm_MPa": 1.1680920761192575e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -1.758551239415346e-16,
+              "fraction": 0.5,
+              "gauge_scaled_norm_MPa": 1.1747153770383538e-16,
+              "lambda_value": 1.102444655721761,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.6666905461574507,
+              "row53_residual_MPa": -2.3356576539653676e-08,
+              "weak_and_control_norm_MPa": 2.3356576539653676e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.2082627519679078e-16,
+              "fraction": 0.25,
+              "gauge_scaled_norm_MPa": 1.5292113833661965e-16,
+              "lambda_value": 1.1024446542109736,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.4166900965604504,
+              "row53_residual_MPa": -4.0875295461795334e-08,
+              "weak_and_control_norm_MPa": 4.0875295461795334e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.377192723465997e-16,
+              "fraction": 0.125,
+              "gauge_scaled_norm_MPa": 3.2158610866953764e-16,
+              "lambda_value": 1.1024446534555798,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.2157625092420491,
+              "row53_residual_MPa": -5.495524584432209e-08,
+              "weak_and_control_norm_MPa": 5.495524584432209e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.993848941149261e-16,
+              "fraction": 0.0625,
+              "gauge_scaled_norm_MPa": 2.422729296106563e-16,
+              "lambda_value": 1.102444653077883,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.10788144509780839,
+              "row53_residual_MPa": -6.251498440803692e-08,
+              "weak_and_control_norm_MPa": 6.251498440803692e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.410185133686096e-16,
+              "fraction": 0.03125,
+              "gauge_scaled_norm_MPa": 3.662305972926731e-16,
+              "lambda_value": 1.1024446528890346,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.05394049387116662,
+              "row53_residual_MPa": -6.629488306204249e-08,
+              "weak_and_control_norm_MPa": 6.629488306204249e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -2.831923492125637e-16,
+              "fraction": 0.015625,
+              "gauge_scaled_norm_MPa": 2.7656938877075334e-16,
+              "lambda_value": 1.1024446527946103,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.026969674936632826,
+              "row53_residual_MPa": -6.818485644719333e-08,
+              "weak_and_control_norm_MPa": 6.818485644719333e-08
+            },
+            {
+              "available": true,
+              "control_residual_MPa": -3.7420390182967347e-16,
+              "fraction": 0.0078125,
+              "gauge_scaled_norm_MPa": 3.976414885846672e-16,
+              "lambda_value": 1.1024446527473981,
+              "norm_below_original_bound": false,
+              "norm_reduction": 0.013484817394839088,
+              "row53_residual_MPa": -6.912980446372938e-08,
+              "weak_and_control_norm_MPa": 6.912980446372938e-08
+            }
+          ]
+        }
+      ],
+      "whole_goal_completed": false
+    },
+    "915": {
+      "actual_component_count": 256,
+      "actual_prospective_diagnostic_records": 1,
+      "all_available_roots_independently_equilibrated": true,
+      "cases": [
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 6,
+          "case": 1,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446587208732,
+            1.1024446606976126,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            3.4967469199715284e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            14.0,
+            6.0,
+            20.0,
+            8.371831793120454e-05,
+            6.10468875450465e-09,
+            8.409778675116164e-10,
+            1.1024446690388827,
+            1.1024446689081482,
+            8.371831793120454e-05,
+            1.0,
+            1.1024446690388827,
+            2.0,
+            0.0,
+            9.017451808050557e-05,
+            0.00010929902223202709,
+            1.0,
+            8.371831793120454e-05
+          ],
+          "event_found": true,
+          "event_phase_iterations": 14,
+          "field_error": 8.371831793120454e-05,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662265698252,
+              "lambda_value": 1.1024446587208732,
+              "maximum_three_station_steel_utilization": 0.00478216835299591,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639857493e-06,
+                "force_residual_MPa": 8.943364567433796e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465872087,
+                "residual_MPa": 2.8338021762063653e-11,
+                "steel_utilization": 0.00478216835299591
+              }
+            },
+            {
+              "H_MPa": 0.00015336620992658013,
+              "lambda_value": 1.1024446606976126,
+              "maximum_three_station_steel_utilization": 0.004782168228382559,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652669694e-06,
+                "force_residual_MPa": 4.884323398410171e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466069761,
+                "residual_MPa": 6.356037658000746e-13,
+                "steel_utilization": 0.00478216822838256
+              }
+            },
+            {
+              "H_MPa": 0.0001533662018581554,
+              "lambda_value": 1.1024446690388827,
+              "maximum_three_station_steel_utilization": 0.004782168153705385,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706733482e-06,
+                "force_residual_MPa": 2.7126521605101453e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466903888,
+                "residual_MPa": 9.950829049643062e-11,
+                "steel_utilization": 0.00478216815370538
+              }
+            }
+          ],
+          "joint_error": 9.017451808050557e-05,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": true,
+          "radius": 3.4967469199715284e-11,
+          "ratio": 1.0,
+          "restored": true,
+          "selected_kind": 2,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 20
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 2,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.102444660697599,
+            1.1024446666569376,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.5,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            1.7483734599857642e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            15.0,
+            4.0,
+            21.0,
+            0.28178090781754156,
+            3.837235418302498e-09,
+            8.409778675116164e-10,
+            1.1024446683344074,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.28227959701778715,
+            0.00010929902223202709,
+            1.0,
+            0.28227959701778715
+          ],
+          "event_found": false,
+          "event_phase_iterations": 15,
+          "field_error": 0.28178090781754156,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620992658262,
+              "lambda_value": 1.102444660697599,
+              "maximum_three_station_steel_utilization": 0.004782168228382856,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474652669629e-06,
+                "force_residual_MPa": 1.1789746134093516e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.1024446606976,
+                "residual_MPa": 1.145539284090613e-13,
+                "steel_utilization": 0.00478216822838285
+              }
+            },
+            {
+              "H_MPa": 0.00015336620344707675,
+              "lambda_value": 1.1024446666569376,
+              "maximum_three_station_steel_utilization": 0.0047821681272676286,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474691294983e-06,
+                "force_residual_MPa": 1.3636823005089516e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466665694,
+                "residual_MPa": 3.3912895278445654e-13,
+                "steel_utilization": 0.00478216812726763
+              }
+            }
+          ],
+          "joint_error": 0.28227959701778715,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": false,
+          "radius": 1.7483734599857642e-11,
+          "ratio": 0.5,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": true,
+          "total_primary_iterations": 21
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 6,
+          "case": 3,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446666569412,
+            1.1024446689901792,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.25,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            8.741867299928821e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            7.0,
+            14.0,
+            6.0,
+            21.0,
+            3.766582877495104e-05,
+            2.5443764872790098e-09,
+            8.409778675116164e-10,
+            1.102444669036921,
+            1.1024446689081635,
+            3.766582877495104e-05,
+            1.0,
+            1.102444669036921,
+            2.0,
+            0.0,
+            3.840888893313098e-05,
+            0.00010929902223202709,
+            1.0,
+            3.766582877495104e-05
+          ],
+          "event_found": true,
+          "event_phase_iterations": 14,
+          "field_error": 3.766582877495104e-05,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620344707721,
+              "lambda_value": 1.1024446666569412,
+              "maximum_three_station_steel_utilization": 0.00478216812726759,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474691294983e-06,
+                "force_residual_MPa": 4.547473508864642e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466665694,
+                "residual_MPa": 6.664507812802201e-13,
+                "steel_utilization": 0.00478216812726759
+              }
+            },
+            {
+              "H_MPa": 0.00015336620158541494,
+              "lambda_value": 1.1024446689901792,
+              "maximum_three_station_steel_utilization": 0.004782168177765101,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3692948010025755e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.819769914123431e-11,
+                "steel_utilization": 0.0047821681777651
+              }
+            },
+            {
+              "H_MPa": 0.00015336620185844575,
+              "lambda_value": 1.102444669036921,
+              "maximum_three_station_steel_utilization": 0.004782168153691285,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706720779e-06,
+                "force_residual_MPa": 3.065333994864314e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466903692,
+                "residual_MPa": 2.3490482508378013e-11,
+                "steel_utilization": 0.00478216815369129
+              }
+            }
+          ],
+          "joint_error": 3.840888893313098e-05,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 7,
+          "pair_verified": true,
+          "radius": 8.741867299928821e-12,
+          "ratio": 0.25,
+          "restored": true,
+          "selected_kind": 2,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 21
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 4,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446689901815,
+            1.102444668886827,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.125,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            4.3709336499644106e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            7.0,
+            7.0,
+            4.0,
+            7.0,
+            0.0005820254458147857,
+            4.4317882696987e-12,
+            8.409778675116164e-10,
+            1.1024446689901815,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0005924733583487869,
+            0.00010929902223202709,
+            1.0,
+            0.0005820254458147857
+          ],
+          "event_found": false,
+          "event_phase_iterations": 7,
+          "field_error": 0.0005820254458147857,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.000153366201585415,
+              "lambda_value": 1.1024446689901815,
+              "maximum_three_station_steel_utilization": 0.004782168177765087,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3664315769414385e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.825998568868187e-11,
+                "steel_utilization": 0.00478216817776509
+              }
+            },
+            {
+              "H_MPa": 0.00015336620094809824,
+              "lambda_value": 1.102444668886827,
+              "maximum_three_station_steel_utilization": 0.004782168233878396,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.145474501161114e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1324420844420133e-10,
+                "steel_utilization": 0.00478216823387839
+              }
+            },
+            {
+              "H_MPa": 0.000153366201585415,
+              "lambda_value": 1.1024446689901815,
+              "maximum_three_station_steel_utilization": 0.004782168177765087,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3664315769414385e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.825998568868187e-11,
+                "steel_utilization": 0.00478216817776509
+              }
+            }
+          ],
+          "joint_error": 0.0005924733583487869,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 7,
+          "pair_verified": true,
+          "radius": 4.3709336499644106e-12,
+          "ratio": 0.125,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 7
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 5,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446688868257,
+            1.1024446688373588,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.0625,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            2.1854668249822053e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            5.0,
+            5.0,
+            4.0,
+            5.0,
+            0.0023313319776096706,
+            8.851142041521598e-12,
+            8.409778675116164e-10,
+            1.1024446688868257,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0023729495854345178,
+            0.00010929902223202709,
+            1.0,
+            0.0023313319776096706
+          ],
+          "event_found": false,
+          "event_phase_iterations": 5,
+          "field_error": 0.0023313319776096706,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662009480983,
+              "lambda_value": 1.1024446688868257,
+              "maximum_three_station_steel_utilization": 0.004782168233878439,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.165685494533844e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1265978465879387e-10,
+                "steel_utilization": 0.00478216823387844
+              }
+            },
+            {
+              "H_MPa": 0.00015336620062925377,
+              "lambda_value": 1.1024446688373588,
+              "maximum_three_station_steel_utilization": 0.004782168261921881,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.13368475502702e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1219160767506758e-10,
+                "steel_utilization": 0.00478216826192188
+              }
+            },
+            {
+              "H_MPa": 0.0001533662009480983,
+              "lambda_value": 1.1024446688868257,
+              "maximum_three_station_steel_utilization": 0.004782168233878439,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.165685494533844e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1265978465879387e-10,
+                "steel_utilization": 0.00478216823387844
+              }
+            }
+          ],
+          "joint_error": 0.0023729495854345178,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 5,
+          "pair_verified": true,
+          "radius": 2.1854668249822053e-12,
+          "ratio": 0.0625,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 5
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 6,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446688373581,
+            1.102444668803781,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.03125,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            1.0927334124911026e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            4.0,
+            4.0,
+            4.0,
+            4.0,
+            0.004680839107125081,
+            8.836931186806396e-12,
+            8.409778675116164e-10,
+            1.1024446688373581,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.004763483193974861,
+            0.00010929902223202709,
+            1.0,
+            0.004680839107125081
+          ],
+          "event_found": false,
+          "event_phase_iterations": 4,
+          "field_error": 0.004680839107125081,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620062925358,
+              "lambda_value": 1.1024446688373581,
+              "maximum_three_station_steel_utilization": 0.00478216826192185,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.12526350778838e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1244683179381654e-10,
+                "steel_utilization": 0.00478216826192185
+              }
+            },
+            {
+              "H_MPa": 0.0001533662004706107,
+              "lambda_value": 1.102444668803781,
+              "maximum_three_station_steel_utilization": 0.004782168275996379,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705209685e-06,
+                "force_residual_MPa": 1.443401776702592e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466880378,
+                "residual_MPa": 1.0773147299377936e-10,
+                "steel_utilization": 0.00478216827599638
+              }
+            },
+            {
+              "H_MPa": 0.00015336620062925358,
+              "lambda_value": 1.1024446688373581,
+              "maximum_three_station_steel_utilization": 0.00478216826192185,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.12526350778838e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1244683179381654e-10,
+                "steel_utilization": 0.00478216826192185
+              }
+            }
+          ],
+          "joint_error": 0.004763483193974861,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 4,
+          "pair_verified": true,
+          "radius": 1.0927334124911026e-12,
+          "ratio": 0.03125,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 4
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 3,
+          "calls": 2,
+          "case": 7,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.1024446587161405,
+            1.1024446607271137,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967343323923257e-11,
+            3.4967343323923257e-11,
+            6.730781596484815e-07,
+            3.433468512483763e-05,
+            34.0,
+            34.0,
+            8.0,
+            0.0,
+            2.0,
+            8.0,
+            0.19395759388004624,
+            6.040953959285389e-09,
+            8.409778675116164e-10,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1944836693498744,
+            0.00010929902223202709,
+            0.0,
+            0.1944836693498744
+          ],
+          "event_found": false,
+          "event_phase_iterations": 0,
+          "field_error": 0.19395759388004624,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": null
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336622644415048,
+              "lambda_value": 1.1024446587161405,
+              "maximum_three_station_steel_utilization": 0.004782168353495551,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639826835e-06,
+                "force_residual_MPa": 1.8526743925004096e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465871614,
+                "residual_MPa": 7.818477310884975e-13,
+                "steel_utilization": 0.00478216835349555
+              }
+            },
+            {
+              "H_MPa": 0.00015336620986634275,
+              "lambda_value": 1.1024446607271137,
+              "maximum_three_station_steel_utilization": 0.004782168227292184,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652860897e-06,
+                "force_residual_MPa": 6.905422735683345e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466072711,
+                "residual_MPa": 1.3367823558166347e-12,
+                "steel_utilization": 0.00478216822729218
+              }
+            }
+          ],
+          "joint_error": 0.1944836693498744,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": false,
+          "pair_iterations": 8,
+          "pair_verified": false,
+          "radius": 3.4967343323923257e-11,
+          "ratio": 1,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": false,
+          "total_primary_iterations": 8
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 4,
+          "calls": 3,
+          "case": 8,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.1024446587208732,
+            1.1024446606976126,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            3.4967469199715284e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            0.0,
+            3.0,
+            6.0,
+            0.19334266756935828,
+            6.10468875450465e-09,
+            8.409778675116164e-10,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.19387855090889727,
+            0.00010929902223202709,
+            1.0,
+            0.19387855090889727
+          ],
+          "event_found": false,
+          "event_phase_iterations": 0,
+          "field_error": 0.19334266756935828,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662265698252,
+              "lambda_value": 1.1024446587208732,
+              "maximum_three_station_steel_utilization": 0.00478216835299591,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639857493e-06,
+                "force_residual_MPa": 8.943364567433796e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465872087,
+                "residual_MPa": 2.8338021762063653e-11,
+                "steel_utilization": 0.00478216835299591
+              }
+            },
+            {
+              "H_MPa": 0.00015336620992658013,
+              "lambda_value": 1.1024446606976126,
+              "maximum_three_station_steel_utilization": 0.004782168228382559,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652669694e-06,
+                "force_residual_MPa": 4.884323398410171e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466069761,
+                "residual_MPa": 6.356037658000746e-13,
+                "steel_utilization": 0.00478216822838256
+              }
+            }
+          ],
+          "joint_error": 0.19387855090889727,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": false,
+          "radius": 3.4967469199715284e-11,
+          "ratio": 1,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": true,
+          "total_primary_iterations": 6
+        }
+      ],
+      "cold_and_regression_verification_still_required": true,
+      "directed_nonregression_passed": true,
+      "gained_original_cases": [],
+      "lost_original_cases": [],
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "no_original_history_accepted": true,
+      "no_working_promotion": true,
+      "numerical_source_exactly_reconstructed_from_stager": true,
+      "only_prospective_branch_recovery_added": true,
+      "original_budget_and_force_acceptance_unchanged": true,
+      "physical_capacity_certified": false,
+      "source_states": 32
+    },
+    "916": {
+      "accepted_history_native_guard_unchanged": true,
+      "actual_components": 256,
+      "affine_branch_matrix_and_seed_residual_used": true,
+      "all_material_and_kinematic_sources_unchanged": true,
+      "directions_are_predictions_not_equilibria": true,
+      "endpoint_results": [
+        {
+          "bound_MPa": 1.214547470504934e-10,
+          "case": 1,
+          "gauge_scaled_norm_MPa": 3.049318610115481e-16,
+          "independently_equilibrated": false,
+          "lambda_value": 1.1024446687790408,
+          "maximum_three_station_steel_utilization": 0.004782168290018096,
+          "name": "accepted_zero",
+          "physical_weak_norm_MPa": 5.52148441985284e-13,
+          "scalar_control_residual_MPa": -1.0490202999203382e-06,
+          "six_force_norm_MPa": 7.07384768045611e-15,
+          "total_norm_MPa": 1.0490202999203382e-06
+        },
+        {
+          "bound_MPa": 1.2145474600834542e-10,
+          "case": 2,
+          "gauge_scaled_norm_MPa": 3.049318610115481e-16,
+          "independently_equilibrated": false,
+          "lambda_value": 1.102444652700186,
+          "maximum_three_station_steel_utilization": 0.004782168360462875,
+          "name": "actual_failed_current",
+          "physical_weak_norm_MPa": 7.007493204713028e-08,
+          "scalar_control_residual_MPa": -2.999195763418954e-16,
+          "six_force_norm_MPa": 1.0344954009471825e-08,
+          "total_norm_MPa": 7.007493204713028e-08
+        },
+        {
+          "bound_MPa": 1.2145474639827063e-10,
+          "case": 3,
+          "gauge_scaled_norm_MPa": 4.0657581468206416e-16,
+          "independently_equilibrated": true,
+          "lambda_value": 1.1024446587161751,
+          "maximum_three_station_steel_utilization": 0.004782168353497496,
+          "name": "affine_Newton_from_postyield_0.0078125",
+          "physical_weak_norm_MPa": 2.737809978725636e-13,
+          "scalar_control_residual_MPa": 8.608011333207588e-17,
+          "six_force_norm_MPa": 1.0105496686365871e-15,
+          "total_norm_MPa": 2.737809978725636e-13
+        },
+        {
+          "bound_MPa": 1.214547463982698e-10,
+          "case": 4,
+          "gauge_scaled_norm_MPa": 4.0657581468206416e-16,
+          "independently_equilibrated": true,
+          "lambda_value": 1.1024446587161627,
+          "maximum_three_station_steel_utilization": 0.00478216835349725,
+          "name": "affine_Newton_from_postyield_0.015625",
+          "physical_weak_norm_MPa": 3.2600945597607844e-13,
+          "scalar_control_residual_MPa": 8.579565711220656e-17,
+          "six_force_norm_MPa": 1.6842494477276451e-15,
+          "total_norm_MPa": 3.2600945597607844e-13
+        },
+        {
+          "bound_MPa": 1.2145474639827032e-10,
+          "case": 5,
+          "gauge_scaled_norm_MPa": 1.7787691892340307e-16,
+          "independently_equilibrated": true,
+          "lambda_value": 1.1024446587161705,
+          "maximum_three_station_steel_utilization": 0.00478216835349704,
+          "name": "affine_Newton_from_postyield_0.03125",
+          "physical_weak_norm_MPa": 5.087131345511697e-13,
+          "scalar_control_residual_MPa": 9.604416141886408e-18,
+          "six_force_norm_MPa": 6.73699779091058e-16,
+          "total_norm_MPa": 5.087131345511697e-13
+        },
+        {
+          "bound_MPa": 1.2145474639827e-10,
+          "case": 6,
+          "gauge_scaled_norm_MPa": 1.5246593050577406e-16,
+          "independently_equilibrated": true,
+          "lambda_value": 1.1024446587161656,
+          "maximum_three_station_steel_utilization": 0.004782168353496541,
+          "name": "affine_Newton_from_postyield_0.25",
+          "physical_weak_norm_MPa": 3.2129838069619443e-13,
+          "scalar_control_residual_MPa": -8.288752998669715e-17,
+          "six_force_norm_MPa": 6.73699779091058e-16,
+          "total_norm_MPa": 3.2129838069619443e-13
+        },
+        {
+          "bound_MPa": 1.2145474639826742e-10,
+          "case": 7,
+          "gauge_scaled_norm_MPa": 2.286988957586611e-16,
+          "independently_equilibrated": true,
+          "lambda_value": 1.1024446587161258,
+          "maximum_three_station_steel_utilization": 0.004782168353494792,
+          "name": "affine_Newton_from_postyield_1",
+          "physical_weak_norm_MPa": 7.088740944065364e-13,
+          "scalar_control_residual_MPa": -2.3055133830614004e-17,
+          "six_force_norm_MPa": 1.0105496686365871e-15,
+          "total_norm_MPa": 7.088740944065364e-13
+        }
+      ],
+      "exact_captured_control_checked_independently": true,
+      "immutable_actual_compiled_book900_reused": true,
+      "independent_yield_max_error_MPa": 7.707029628476348e-14,
+      "independently_equilibrated_affine_predictions": 5,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_native_Newton_or_history_acceptance": true,
+      "no_new_NDS_or_material_acceptance": true,
+      "physical_capacity_certified": false,
+      "segments": [
+        {
+          "case": 1,
+          "name": "accepted_zero",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 43,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 42,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 41,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 40,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 39,
+                  "value_MPa": 0.0
+                },
+                {
+                  "kind": "steel_minus_replaced_concrete",
+                  "point": 38,
+                  "value_MPa": 0.0
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "row53_derivative_MPa": 0.0,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 0.0,
+              "row53_steel_MPa": 0.0,
+              "row53_subtracted_concrete_MPa": -0.0,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            }
+          ]
+        },
+        {
+          "case": 2,
+          "name": "actual_failed_current",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.131166721459522e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4016644551447826e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.195904530959524e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537664880099328e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221764685207745e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.647372513019945e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 2.8948666094749664e-06,
+              "physical_residual_MPa": 9.046402939765072e-08,
+              "row53_derivative_MPa": 2.8948666094749664e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.955167586193852e-06,
+              "row53_steel_MPa": -7.599557605431073e-08,
+              "row53_subtracted_concrete_MPa": 1.5694599621654537e-08,
+              "six_force_residual_MPa": 1.9022885074567363e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.5577385603648963e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4016317701789376e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.1959357948398974e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537693301808758e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221125196745561e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.64703145250678e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.3214641012976314e-06,
+              "physical_residual_MPa": 8.259095418265998e-08,
+              "row53_derivative_MPa": 1.3214641012976314e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.3817645028169068e-06,
+              "row53_steel_MPa": -7.599557616533303e-08,
+              "row53_subtracted_concrete_MPa": 1.569517491103664e-08,
+              "six_force_residual_MPa": 3.8045724674399635e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.710248084435989e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4016474021191243e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.0718399440511348e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.1959361501112653e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 9.68287849900662e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537695078165598e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 8.028514711386561e-07,
+              "physical_residual_MPa": 1.0035588174389003e-07,
+              "row53_derivative_MPa": 8.028514711386561e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 8.631517212087658e-07,
+              "row53_steel_MPa": -7.599535301050508e-08,
+              "row53_subtracted_concrete_MPa": 1.569510302019267e-08,
+              "six_force_residual_MPa": 6.3707382112086105e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.401671915843508e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.7766800353722374e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.1959439660813587e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.1263598054256363e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.53768797273824e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221121644031882e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 3.0263804904674153e-07,
+              "physical_residual_MPa": 7.56589601132434e-08,
+              "row53_derivative_MPa": 3.0263804904674153e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.6451413332194704e-07,
+              "row53_steel_MPa": -7.599533438651385e-08,
+              "row53_subtracted_concrete_MPa": 1.4119250109465194e-08,
+              "six_force_residual_MPa": 6.7829954854527464e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.401703890266617e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.809895211479784e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.1959439660813587e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537691969541129e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221079011467737e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.64712027034875e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 8.579552654831932e-08,
+              "physical_residual_MPa": 4.289721112571768e-08,
+              "row53_derivative_MPa": 8.579552654831932e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.548279415786169e-07,
+              "row53_steel_MPa": -7.59953902168542e-08,
+              "row53_subtracted_concrete_MPa": 6.962975203903855e-09,
+              "six_force_residual_MPa": 3.0713804503816565e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4017440359311877e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.1959466898285123e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.1543008030893513e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537693301808758e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221065984850914e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.64712027034875e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 1.8119096977138593e-08,
+              "physical_residual_MPa": 1.358987488129593e-08,
+              "row53_derivative_MPa": -1.8119096977138593e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.8621492748646133e-08,
+              "row53_steel_MPa": -7.599537780548597e-08,
+              "row53_subtracted_concrete_MPa": 9.254788065751173e-09,
+              "six_force_residual_MPa": 3.6367883795820596e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4017800071571855e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.195946008891724e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.537689971139685e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.221059471542503e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.265036099963652e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.64712027034875e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 7.007437989868829e-08,
+              "physical_residual_MPa": 7.007493204713028e-08,
+              "row53_derivative_MPa": -7.007437989868829e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": -4.47960668559233e-09,
+              "row53_steel_MPa": -7.599540415709205e-08,
+              "row53_subtracted_concrete_MPa": 1.0400630945107394e-08,
+              "six_force_residual_MPa": 1.0344954009471825e-08
+            }
+          ]
+        },
+        {
+          "case": 3,
+          "name": "affine_Newton_from_postyield_0.0078125",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.1357657803710026e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403392495078151e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.349122365165385e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307903781063942e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279045005110675e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 3.039436728151726e-06,
+              "physical_residual_MPa": 9.498184560629945e-08,
+              "row53_derivative_MPa": 3.039436728151726e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.0932674908168423e-06,
+              "row53_steel_MPa": -6.667658714043512e-08,
+              "row53_subtracted_concrete_MPa": 1.2845824098016434e-08,
+              "six_force_residual_MPa": 2.701653001066815e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.5623388982533015e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033910739926796e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249920189333352e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348795515506936e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307875359354512e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279030794255959e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.4660136198321391e-06,
+              "physical_residual_MPa": 9.162529909106671e-08,
+              "row53_derivative_MPa": 1.4660136198321391e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.5198437219865468e-06,
+              "row53_steel_MPa": -6.667643803748291e-08,
+              "row53_subtracted_concrete_MPa": 1.284633606738958e-08,
+              "six_force_residual_MPa": 5.403300275685508e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.756254394308826e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403375442052493e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.168656010326231e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 1.0694400032207341e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348482876703201e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 9.33005238288806e-07,
+              "physical_residual_MPa": 1.1662510263765876e-07,
+              "row53_derivative_MPa": 9.33005238288806e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 9.868350736574882e-07,
+              "row53_steel_MPa": -6.667651242242556e-08,
+              "row53_subtracted_concrete_MPa": 1.284667711077235e-08,
+              "six_force_residual_MPa": 8.529682249731937e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033917845354154e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.8226863896539953e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.2231600621248617e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348557483690456e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307847825823501e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 4.275572859872151e-07,
+              "physical_residual_MPa": 1.0688876934836179e-07,
+              "row53_derivative_MPa": 4.275572859872151e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.82753912400824e-07,
+              "row53_steel_MPa": -6.667641944124725e-08,
+              "row53_subtracted_concrete_MPa": 1.1479793057670752e-08,
+              "six_force_residual_MPa": 1.0355780870196653e-08
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403428022214939e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.8559020098507517e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249800285246693e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348520180196829e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843829020612e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.27876078801637e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 2.0651782861298793e-07,
+              "physical_residual_MPa": 1.0325836215805198e-07,
+              "row53_derivative_MPa": 2.0651782861298793e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.6815411946490286e-07,
+              "row53_steel_MPa": -6.66763729367803e-08,
+              "row53_subtracted_concrete_MPa": 5.0400820891479715e-09,
+              "six_force_residual_MPa": 8.243858718304655e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403466628370249e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249813015804042e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.200307734687082e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348533798932597e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842496752983e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630266196656521e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 8.219032187240134e-08,
+              "physical_residual_MPa": 6.164218925585902e-08,
+              "row53_derivative_MPa": 8.219032187240134e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.415347920252774e-07,
+              "row53_steel_MPa": -6.667638224877592e-08,
+              "row53_subtracted_concrete_MPa": 7.331912087876757e-09,
+              "six_force_residual_MPa": 4.1219291907273825e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403505915462347e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249819825171926e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348559260047296e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842052663773e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.725103972651027e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630259979407583e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 7.094319706343888e-13,
+              "physical_residual_MPa": 2.737809978725636e-13,
+              "row53_derivative_MPa": 7.094319706343888e-13,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 5.8199340902120866e-08,
+              "row53_steel_MPa": -6.667639154689375e-08,
+              "row53_subtracted_concrete_MPa": 8.477760079318502e-09,
+              "six_force_residual_MPa": 1.0105496686365871e-15
+            }
+          ]
+        },
+        {
+          "case": 4,
+          "name": "affine_Newton_from_postyield_0.015625",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.135766419859465e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403392495078151e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348468665848486e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307903781063942e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279016583401244e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 3.0394306858184256e-06,
+              "physical_residual_MPa": 9.498165678338381e-08,
+              "row53_derivative_MPa": 3.0394306858184256e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.093261166986494e-06,
+              "row53_steel_MPa": -6.667643792646061e-08,
+              "row53_subtracted_concrete_MPa": 1.284595656150106e-08,
+              "six_force_residual_MPa": 2.701651485242312e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.5623388982533015e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403359810112306e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348795515506936e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843384931402e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.278718155452225e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.4660143079761254e-06,
+              "physical_residual_MPa": 9.162534210006585e-08,
+              "row53_derivative_MPa": 1.4660143079761254e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.519844183839325e-06,
+              "row53_steel_MPa": -6.667636365254026e-08,
+              "row53_subtracted_concrete_MPa": 1.2846487741201978e-08,
+              "six_force_residual_MPa": 5.403297749311337e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.75625279558767e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403375442052493e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.1686400231146763e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 1.0694400032207341e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348639196105069e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 9.330017921838595e-07,
+              "physical_residual_MPa": 1.1662467187454045e-07,
+              "row53_derivative_MPa": 9.330017921838595e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 9.868315564709462e-07,
+              "row53_steel_MPa": -6.667640078950043e-08,
+              "row53_subtracted_concrete_MPa": 1.2846636508485193e-08,
+              "six_force_residual_MPa": 8.52968090233238e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403383613293954e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.8226864340629163e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.2231598844891778e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348561036404135e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307847825823501e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 4.275589333975049e-07,
+              "physical_residual_MPa": 1.0688918120093423e-07,
+              "row53_derivative_MPa": 4.275589333975049e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.827555855069221e-07,
+              "row53_steel_MPa": -6.667643803748291e-08,
+              "row53_subtracted_concrete_MPa": 1.1479785978914768e-08,
+              "six_force_residual_MPa": 1.035577901752226e-08
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403428022214939e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.8559024095310406e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249800285246693e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348559260047296e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843829020612e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.27876078801637e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 2.0651949611560395e-07,
+              "physical_residual_MPa": 1.0325919590935999e-07,
+              "row53_derivative_MPa": 2.0651949611560395e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.681556982020439e-07,
+              "row53_steel_MPa": -6.667635434054464e-08,
+              "row53_subtracted_concrete_MPa": 5.040152278336634e-09,
+              "six_force_residual_MPa": 8.243859392004433e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403466628370249e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249786370451451e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.200307734687082e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348558667928349e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842792812455e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.63024132766077e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 8.218921917467943e-08,
+              "physical_residual_MPa": 6.164136223256759e-08,
+              "row53_derivative_MPa": 8.218921917467943e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.4153373509295797e-07,
+              "row53_steel_MPa": -6.667638844752115e-08,
+              "row53_subtracted_concrete_MPa": 7.331872530977335e-09,
+              "six_force_residual_MPa": 4.121929527577272e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403505915462347e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249819825171926e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348539720122062e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842052663773e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.72510408367333e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.63024043948235e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 8.781578979613625e-13,
+              "physical_residual_MPa": 3.2600945597607844e-13,
+              "row53_derivative_MPa": 8.781578979613625e-13,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 5.819951326424544e-08,
+              "row53_steel_MPa": -6.667639154689375e-08,
+              "row53_subtracted_concrete_MPa": 8.477756445777552e-09,
+              "six_force_residual_MPa": 1.6842494477276451e-15
+            }
+          ]
+        },
+        {
+          "case": 5,
+          "name": "affine_Newton_from_postyield_0.03125",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.135766419859465e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403392495078151e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.349122365165385e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307903781063942e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279016583401244e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 3.039430747990915e-06,
+              "physical_residual_MPa": 9.498165872627411e-08,
+              "row53_derivative_MPa": 3.039430747990915e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.093261229381028e-06,
+              "row53_steel_MPa": -6.667643792646061e-08,
+              "row53_subtracted_concrete_MPa": 1.284595656150106e-08,
+              "six_force_residual_MPa": 2.7016504746926435e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.5623388982533015e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033910739926796e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249920189333352e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348795515506936e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843384931402e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.278718155452225e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.4660208636696134e-06,
+              "physical_residual_MPa": 9.162575183090885e-08,
+              "row53_derivative_MPa": 1.4660208636696134e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.519850720832494e-06,
+              "row53_steel_MPa": -6.667636365254026e-08,
+              "row53_subtracted_concrete_MPa": 1.284650666139725e-08,
+              "six_force_residual_MPa": 5.403297244036502e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.756254394308826e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403375442052493e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.168656010326231e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 1.0694400032207341e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348639196105069e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 9.330052395078829e-07,
+              "physical_residual_MPa": 1.1662510279004338e-07,
+              "row53_derivative_MPa": 9.330052395078829e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 9.868349648001207e-07,
+              "row53_steel_MPa": -6.667640078950043e-08,
+              "row53_subtracted_concrete_MPa": 1.2846675500298443e-08,
+              "six_force_residual_MPa": 8.529680397057545e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033917845354154e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.8226856347023386e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224984025327558e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.2231598844891778e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348561036404135e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307847825823501e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 4.275571308914438e-07,
+              "physical_residual_MPa": 1.0688873057441897e-07,
+              "row53_derivative_MPa": 4.275571308914438e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.827538413465504e-07,
+              "row53_steel_MPa": -6.667641946900282e-08,
+              "row53_subtracted_concrete_MPa": 1.1479709070491562e-08,
+              "six_force_residual_MPa": 1.0355778849097316e-08
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403431930199986e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.8559024095310406e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249800285246693e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348520180196829e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843829020612e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.27876078801637e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 2.065202419312311e-07,
+              "physical_residual_MPa": 1.0325956881717356e-07,
+              "row53_derivative_MPa": 2.065202419312311e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.6815652587330874e-07,
+              "row53_steel_MPa": -6.667637295065809e-08,
+              "row53_subtracted_concrete_MPa": 5.040089007550454e-09,
+              "six_force_residual_MPa": 8.243857202480152e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403466628370249e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249813015804042e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.200307468233556e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348532614694705e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842792812455e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630267380894414e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 8.218892829046458e-08,
+              "physical_residual_MPa": 6.164114406940644e-08,
+              "row53_derivative_MPa": 8.218892829046458e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.4153343053102674e-07,
+              "row53_steel_MPa": -6.66763760500307e-08,
+              "row53_subtracted_concrete_MPa": 7.3318738079506535e-09,
+              "six_force_residual_MPa": 4.1219291907273825e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403505915462347e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249819825171926e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348539720122062e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842052663773e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.725102085271885e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630259979407583e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 1.0608615765364537e-12,
+              "physical_residual_MPa": 5.087131345511697e-13,
+              "row53_derivative_MPa": 1.0608615765364537e-12,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 5.819968312836821e-08,
+              "row53_steel_MPa": -6.667640084501159e-08,
+              "row53_subtracted_concrete_MPa": 8.477778582041727e-09,
+              "six_force_residual_MPa": 6.73699779091058e-16
+            }
+          ]
+        },
+        {
+          "case": 6,
+          "name": "affine_Newton_from_postyield_0.25",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.135766419859465e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403392495078151e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348468665848486e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307839832217724e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279016583401244e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 3.039444507005676e-06,
+              "physical_residual_MPa": 9.498208869548538e-08,
+              "row53_derivative_MPa": 3.039444507005676e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.093274800747281e-06,
+              "row53_steel_MPa": -6.667643792646061e-08,
+              "row53_subtracted_concrete_MPa": 1.2846144438992402e-08,
+              "six_force_residual_MPa": 2.701650137842754e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.5623388982533015e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033910739926796e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249920189333352e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348795515506936e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843384931402e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279045005110675e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.466020751661988e-06,
+              "physical_residual_MPa": 9.162574483043227e-08,
+              "row53_derivative_MPa": 1.466020751661988e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.5198508718228254e-06,
+              "row53_steel_MPa": -6.667643803748291e-08,
+              "row53_subtracted_concrete_MPa": 1.2846318057490452e-08,
+              "six_force_residual_MPa": 5.4032948860872756e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.756254483126668e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403375442052493e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.1686400231146763e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 1.0694400032207341e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348639196105069e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 9.330035505121514e-07,
+              "physical_residual_MPa": 1.1662489166557695e-07,
+              "row53_derivative_MPa": 9.330035505121514e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 9.868332351281595e-07,
+              "row53_steel_MPa": -6.667640078950043e-08,
+              "row53_subtracted_concrete_MPa": 1.284671617219138e-08,
+              "six_force_residual_MPa": 8.529678207533264e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033917845354154e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.822687233423494e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.2231598844891778e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348561036404135e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307847825823501e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 4.2755581588539704e-07,
+              "physical_residual_MPa": 1.0688840182290727e-07,
+              "row53_derivative_MPa": 4.2755581588539704e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.827524801853667e-07,
+              "row53_steel_MPa": -6.667645666147415e-08,
+              "row53_subtracted_concrete_MPa": 1.1479792380044394e-08,
+              "six_force_residual_MPa": 1.0355776154298198e-08
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403427844579255e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.8559024095310406e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249800285246693e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348559260047296e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843829020612e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.278759011659531e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 2.0651944848692778e-07,
+              "physical_residual_MPa": 1.032591720950219e-07,
+              "row53_derivative_MPa": 2.0651944848692778e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.6815566878113373e-07,
+              "row53_steel_MPa": -6.667637295065809e-08,
+              "row53_subtracted_concrete_MPa": 5.0401526637705064e-09,
+              "six_force_residual_MPa": 8.24385854987971e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403466628370249e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249813015804042e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.2003077494900557e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348558667928349e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842792812455e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630267380894414e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 8.218945171667436e-08,
+              "physical_residual_MPa": 6.164153663906378e-08,
+              "row53_derivative_MPa": 8.218945171667436e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.4153396491837592e-07,
+              "row53_steel_MPa": -6.667638844752115e-08,
+              "row53_subtracted_concrete_MPa": 7.33187524343433e-09,
+              "six_force_residual_MPa": 4.1219291907273825e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403506004280189e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249799841157483e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348539720122062e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307842052663773e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.725102085271885e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630259979407583e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 8.734468226814784e-13,
+              "physical_residual_MPa": 3.2129838069619443e-13,
+              "row53_derivative_MPa": 8.734468226814784e-13,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 5.8199512154022415e-08,
+              "row53_steel_MPa": -6.667639154689375e-08,
+              "row53_subtracted_concrete_MPa": 8.477752848557374e-09,
+              "six_force_residual_MPa": 6.73699779091058e-16
+            }
+          ]
+        },
+        {
+          "case": 7,
+          "name": "affine_Newton_from_postyield_1",
+          "samples": [
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "level": 0.0,
+              "physical_residual_MPa": 5.52148441985284e-13,
+              "six_force_residual_MPa": 7.07384768045611e-15
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.135766419859465e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403392495078151e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.224960044510226e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348468665848486e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307839832217724e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279045005110675e-08
+                }
+              ],
+              "level": 0.03125,
+              "physical_derivative_norm_MPa": 3.0394510658806467e-06,
+              "physical_residual_MPa": 9.498229366032823e-08,
+              "row53_derivative_MPa": 3.0394510658806467e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 3.0932810535233557e-06,
+              "row53_steel_MPa": -6.667673546623121e-08,
+              "row53_subtracted_concrete_MPa": 1.2846747726377727e-08,
+              "six_force_residual_MPa": 2.7016467693438584e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.562338560745502e-06
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033910739926796e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249920189333352e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348468665848486e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307843384931402e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.279045005110675e-08
+                }
+              ],
+              "level": 0.0625,
+              "physical_derivative_norm_MPa": 1.4660304793389853e-06,
+              "physical_residual_MPa": 9.16263528102446e-08,
+              "row53_derivative_MPa": 1.4660304793389853e-06,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.5198600111787641e-06,
+              "row53_steel_MPa": -6.667636365254026e-08,
+              "row53_subtracted_concrete_MPa": 1.284683200921885e-08,
+              "six_force_residual_MPa": 5.403287306964761e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 7.756252884405512e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403375442052493e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 2.1686400231146763e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 4,
+                  "value_MPa": 1.0694400032207341e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348639196105069e-08
+                }
+              ],
+              "level": 0.125,
+              "physical_derivative_norm_MPa": 9.330034428998817e-07,
+              "physical_residual_MPa": 1.1662487821404322e-07,
+              "row53_derivative_MPa": 9.330034428998817e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 9.86833090743655e-07,
+              "row53_steel_MPa": -6.667640084501159e-08,
+              "row53_subtracted_concrete_MPa": 1.2846753006225467e-08,
+              "six_force_residual_MPa": 8.529672649510086e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4033917845354154e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 3.8226863896539953e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249760317217806e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 3,
+                  "value_MPa": 1.2231598844891778e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348561036404135e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307839832217724e-08
+                }
+              ],
+              "level": 0.25,
+              "physical_derivative_norm_MPa": 4.2755742301193826e-07,
+              "physical_residual_MPa": 1.0688880360454258e-07,
+              "row53_derivative_MPa": 4.2755742301193826e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 4.827540267537955e-07,
+              "row53_steel_MPa": -6.667640087276716e-08,
+              "row53_subtracted_concrete_MPa": 1.1479797184361061e-08,
+              "six_force_residual_MPa": 1.035577160682469e-08
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.4034239365942085e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.8559024095310406e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249800285246693e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348520180196829e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307839832217724e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 5,
+                  "value_MPa": 8.278759011659531e-08
+                }
+              ],
+              "level": 0.5,
+              "physical_derivative_norm_MPa": 2.0651984258140705e-07,
+              "physical_residual_MPa": 1.0325936914226154e-07,
+              "row53_derivative_MPa": 2.0651984258140705e-07,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 2.681560923312176e-07,
+              "row53_steel_MPa": -6.667641945512504e-08,
+              "row53_subtracted_concrete_MPa": 5.040169710139163e-09,
+              "six_force_residual_MPa": 8.24385956042938e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403466628370249e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249813015804042e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 1.2003077494900557e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348559852166242e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307837463741937e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.630240143422877e-08
+                }
+              ],
+              "level": 0.75,
+              "physical_derivative_norm_MPa": 8.218874666000159e-08,
+              "physical_residual_MPa": 6.16410078465592e-08,
+              "row53_derivative_MPa": 8.218874666000159e-08,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 1.415332528953428e-07,
+              "row53_steel_MPa": -6.667639465551822e-08,
+              "row53_subtracted_concrete_MPa": 7.331888418514569e-09,
+              "six_force_residual_MPa": 4.121929864427162e-09
+            },
+            {
+              "all_local_returns_available": true,
+              "failed_points": [],
+              "largest_row53_points": [
+                {
+                  "kind": "real_concrete",
+                  "point": 21,
+                  "value_MPa": 4.403505915462347e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 16,
+                  "value_MPa": -1.2249819825171926e-07
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 17,
+                  "value_MPa": -9.348539720122062e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 11,
+                  "value_MPa": -9.307837833816279e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 7,
+                  "value_MPa": 8.725102085271885e-08
+                },
+                {
+                  "kind": "real_concrete",
+                  "point": 18,
+                  "value_MPa": -7.63024043948235e-08
+                }
+              ],
+              "level": 1.0,
+              "physical_derivative_norm_MPa": 7.586515508688219e-13,
+              "physical_residual_MPa": 7.088740944065364e-13,
+              "row53_derivative_MPa": -1.5672565242125236e-13,
+              "row53_other_MPa": 0.0,
+              "row53_real_concrete_MPa": 5.819848047927678e-08,
+              "row53_steel_MPa": -6.667639620289156e-08,
+              "row53_subtracted_concrete_MPa": 8.477758993679762e-09,
+              "six_force_residual_MPa": 1.0105496686365871e-15
+            }
+          ]
+        }
+      ],
+      "source32_history_and_stresses_exact": true,
+      "whole_goal_completed": false,
+      "zero_equilibrium_MPa": 5.52148441985284e-13,
+      "zero_increment_stress_drift_MPa": 0.0
+    },
+    "917": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "918": {
+      "actual_component_count": 256,
+      "actual_prospective_diagnostic_records": 1,
+      "all_available_roots_independently_equilibrated": true,
+      "cases": [
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 6,
+          "case": 1,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446587208732,
+            1.1024446606976126,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            3.4967469199715284e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            14.0,
+            6.0,
+            20.0,
+            8.371831793120454e-05,
+            6.10468875450465e-09,
+            8.409778675116164e-10,
+            1.1024446690388827,
+            1.1024446689081482,
+            8.371831793120454e-05,
+            1.0,
+            1.1024446690388827,
+            2.0,
+            0.0,
+            9.017451808050557e-05,
+            0.00010929902223202709,
+            1.0,
+            8.371831793120454e-05
+          ],
+          "event_found": true,
+          "event_phase_iterations": 14,
+          "field_error": 8.371831793120454e-05,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662265698252,
+              "lambda_value": 1.1024446587208732,
+              "maximum_three_station_steel_utilization": 0.00478216835299591,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639857493e-06,
+                "force_residual_MPa": 8.943364567433796e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465872087,
+                "residual_MPa": 2.8338021762063653e-11,
+                "steel_utilization": 0.00478216835299591
+              }
+            },
+            {
+              "H_MPa": 0.00015336620992658013,
+              "lambda_value": 1.1024446606976126,
+              "maximum_three_station_steel_utilization": 0.004782168228382559,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652669694e-06,
+                "force_residual_MPa": 4.884323398410171e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466069761,
+                "residual_MPa": 6.356037658000746e-13,
+                "steel_utilization": 0.00478216822838256
+              }
+            },
+            {
+              "H_MPa": 0.0001533662018581554,
+              "lambda_value": 1.1024446690388827,
+              "maximum_three_station_steel_utilization": 0.004782168153705385,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706733482e-06,
+                "force_residual_MPa": 2.7126521605101453e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466903888,
+                "residual_MPa": 9.950829049643062e-11,
+                "steel_utilization": 0.00478216815370538
+              }
+            }
+          ],
+          "joint_error": 9.017451808050557e-05,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": true,
+          "radius": 3.4967469199715284e-11,
+          "ratio": 1.0,
+          "restored": true,
+          "selected_kind": 2,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 20
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 2,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.102444660697599,
+            1.1024446666569376,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.5,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            1.7483734599857642e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            15.0,
+            4.0,
+            21.0,
+            0.28178090781754156,
+            3.837235418302498e-09,
+            8.409778675116164e-10,
+            1.1024446683344074,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.28227959701778715,
+            0.00010929902223202709,
+            1.0,
+            0.28227959701778715
+          ],
+          "event_found": false,
+          "event_phase_iterations": 15,
+          "field_error": 0.28178090781754156,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620992658262,
+              "lambda_value": 1.102444660697599,
+              "maximum_three_station_steel_utilization": 0.004782168228382856,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474652669629e-06,
+                "force_residual_MPa": 1.1789746134093516e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.1024446606976,
+                "residual_MPa": 1.145539284090613e-13,
+                "steel_utilization": 0.00478216822838285
+              }
+            },
+            {
+              "H_MPa": 0.00015336620344707675,
+              "lambda_value": 1.1024446666569376,
+              "maximum_three_station_steel_utilization": 0.0047821681272676286,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474691294983e-06,
+                "force_residual_MPa": 1.3636823005089516e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466665694,
+                "residual_MPa": 3.3912895278445654e-13,
+                "steel_utilization": 0.00478216812726763
+              }
+            }
+          ],
+          "joint_error": 0.28227959701778715,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": false,
+          "radius": 1.7483734599857642e-11,
+          "ratio": 0.5,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": true,
+          "total_primary_iterations": 21
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 6,
+          "case": 3,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446666569412,
+            1.1024446689901792,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.25,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            8.741867299928821e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            7.0,
+            14.0,
+            6.0,
+            21.0,
+            3.766582877495104e-05,
+            2.5443764872790098e-09,
+            8.409778675116164e-10,
+            1.102444669036921,
+            1.1024446689081635,
+            3.766582877495104e-05,
+            1.0,
+            1.102444669036921,
+            2.0,
+            0.0,
+            3.840888893313098e-05,
+            0.00010929902223202709,
+            1.0,
+            3.766582877495104e-05
+          ],
+          "event_found": true,
+          "event_phase_iterations": 14,
+          "field_error": 3.766582877495104e-05,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620344707721,
+              "lambda_value": 1.1024446666569412,
+              "maximum_three_station_steel_utilization": 0.00478216812726759,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474691294983e-06,
+                "force_residual_MPa": 4.547473508864642e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466665694,
+                "residual_MPa": 6.664507812802201e-13,
+                "steel_utilization": 0.00478216812726759
+              }
+            },
+            {
+              "H_MPa": 0.00015336620158541494,
+              "lambda_value": 1.1024446689901792,
+              "maximum_three_station_steel_utilization": 0.004782168177765101,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3692948010025755e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.819769914123431e-11,
+                "steel_utilization": 0.0047821681777651
+              }
+            },
+            {
+              "H_MPa": 0.00015336620185844575,
+              "lambda_value": 1.102444669036921,
+              "maximum_three_station_steel_utilization": 0.004782168153691285,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706720779e-06,
+                "force_residual_MPa": 3.065333994864314e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466903692,
+                "residual_MPa": 2.3490482508378013e-11,
+                "steel_utilization": 0.00478216815369129
+              }
+            }
+          ],
+          "joint_error": 3.840888893313098e-05,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 7,
+          "pair_verified": true,
+          "radius": 8.741867299928821e-12,
+          "ratio": 0.25,
+          "restored": true,
+          "selected_kind": 2,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 21
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 4,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446689901815,
+            1.102444668886827,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.125,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            4.3709336499644106e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            7.0,
+            7.0,
+            4.0,
+            7.0,
+            0.0005820254458147857,
+            4.4317882696987e-12,
+            8.409778675116164e-10,
+            1.1024446689901815,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0005924733583487869,
+            0.00010929902223202709,
+            1.0,
+            0.0005820254458147857
+          ],
+          "event_found": false,
+          "event_phase_iterations": 7,
+          "field_error": 0.0005820254458147857,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.000153366201585415,
+              "lambda_value": 1.1024446689901815,
+              "maximum_three_station_steel_utilization": 0.004782168177765087,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3664315769414385e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.825998568868187e-11,
+                "steel_utilization": 0.00478216817776509
+              }
+            },
+            {
+              "H_MPa": 0.00015336620094809824,
+              "lambda_value": 1.102444668886827,
+              "maximum_three_station_steel_utilization": 0.004782168233878396,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.145474501161114e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1324420844420133e-10,
+                "steel_utilization": 0.00478216823387839
+              }
+            },
+            {
+              "H_MPa": 0.000153366201585415,
+              "lambda_value": 1.1024446689901815,
+              "maximum_three_station_steel_utilization": 0.004782168177765087,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474706417833e-06,
+                "force_residual_MPa": 1.3664315769414385e-12,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466899018,
+                "residual_MPa": 4.825998568868187e-11,
+                "steel_utilization": 0.00478216817776509
+              }
+            }
+          ],
+          "joint_error": 0.0005924733583487869,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 7,
+          "pair_verified": true,
+          "radius": 4.3709336499644106e-12,
+          "ratio": 0.125,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 7
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 5,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446688868257,
+            1.1024446688373588,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.0625,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            2.1854668249822053e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            5.0,
+            5.0,
+            4.0,
+            5.0,
+            0.0023313319776096706,
+            8.851142041521598e-12,
+            8.409778675116164e-10,
+            1.1024446688868257,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0023729495854345178,
+            0.00010929902223202709,
+            1.0,
+            0.0023313319776096706
+          ],
+          "event_found": false,
+          "event_phase_iterations": 5,
+          "field_error": 0.0023313319776096706,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662009480983,
+              "lambda_value": 1.1024446688868257,
+              "maximum_three_station_steel_utilization": 0.004782168233878439,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.165685494533844e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1265978465879387e-10,
+                "steel_utilization": 0.00478216823387844
+              }
+            },
+            {
+              "H_MPa": 0.00015336620062925377,
+              "lambda_value": 1.1024446688373588,
+              "maximum_three_station_steel_utilization": 0.004782168261921881,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.13368475502702e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1219160767506758e-10,
+                "steel_utilization": 0.00478216826192188
+              }
+            },
+            {
+              "H_MPa": 0.0001533662009480983,
+              "lambda_value": 1.1024446688868257,
+              "maximum_three_station_steel_utilization": 0.004782168233878439,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474705747972e-06,
+                "force_residual_MPa": 9.165685494533844e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466888683,
+                "residual_MPa": 1.1265978465879387e-10,
+                "steel_utilization": 0.00478216823387844
+              }
+            }
+          ],
+          "joint_error": 0.0023729495854345178,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 5,
+          "pair_verified": true,
+          "radius": 2.1854668249822053e-12,
+          "ratio": 0.0625,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 5
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 12,
+          "calls": 4,
+          "case": 6,
+          "certificate": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.1024446688373581,
+            1.102444668803781,
+            1.1024446687790408,
+            1.1024446668089076,
+            0.03125,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            1.0927334124911026e-12,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            4.0,
+            4.0,
+            4.0,
+            4.0,
+            0.004680839107125081,
+            8.836931186806396e-12,
+            8.409778675116164e-10,
+            1.1024446688373581,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.004763483193974861,
+            0.00010929902223202709,
+            1.0,
+            0.004680839107125081
+          ],
+          "event_found": false,
+          "event_phase_iterations": 4,
+          "field_error": 0.004680839107125081,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.00015336620062925358,
+              "lambda_value": 1.1024446688373581,
+              "maximum_three_station_steel_utilization": 0.00478216826192185,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.12526350778838e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1244683179381654e-10,
+                "steel_utilization": 0.00478216826192185
+              }
+            },
+            {
+              "H_MPa": 0.0001533662004706107,
+              "lambda_value": 1.102444668803781,
+              "maximum_three_station_steel_utilization": 0.004782168275996379,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474705209685e-06,
+                "force_residual_MPa": 1.443401776702592e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466880378,
+                "residual_MPa": 1.0773147299377936e-10,
+                "steel_utilization": 0.00478216827599638
+              }
+            },
+            {
+              "H_MPa": 0.00015336620062925358,
+              "lambda_value": 1.1024446688373581,
+              "maximum_three_station_steel_utilization": 0.00478216826192185,
+              "role": "Returned",
+              "weak": {
+                "bound_MPa": 1.2145474705427334e-06,
+                "force_residual_MPa": 9.12526350778838e-13,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466883736,
+                "residual_MPa": 1.1244683179381654e-10,
+                "steel_utilization": 0.00478216826192185
+              }
+            }
+          ],
+          "joint_error": 0.004763483193974861,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 4,
+          "pair_verified": true,
+          "radius": 1.0927334124911026e-12,
+          "ratio": 0.03125,
+          "restored": true,
+          "selected_kind": 1,
+          "solved": true,
+          "tangent_read": true,
+          "total_primary_iterations": 4
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 3,
+          "calls": 2,
+          "case": 7,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.1024446587161751,
+            1.1024446607271137,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967343323923257e-11,
+            3.4967343323923257e-11,
+            6.730781596484815e-07,
+            3.433468512483763e-05,
+            34.0,
+            34.0,
+            7.0,
+            0.0,
+            2.0,
+            7.0,
+            0.19395810814224296,
+            6.040988598243757e-09,
+            8.409778675116164e-10,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.19448418872389953,
+            0.00010929902223202709,
+            0.0,
+            0.19448418872389953
+          ],
+          "event_found": false,
+          "event_phase_iterations": 0,
+          "field_error": 0.19395810814224296,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": null
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662264441733,
+              "lambda_value": 1.1024446587161751,
+              "maximum_three_station_steel_utilization": 0.004782168353497496,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639827093e-06,
+                "force_residual_MPa": 5.052748343182936e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465871618,
+                "residual_MPa": 2.561284517810236e-13,
+                "steel_utilization": 0.0047821683534975
+              }
+            },
+            {
+              "H_MPa": 0.00015336620986634275,
+              "lambda_value": 1.1024446607271137,
+              "maximum_three_station_steel_utilization": 0.004782168227292184,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652860897e-06,
+                "force_residual_MPa": 6.905422735683345e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466072711,
+                "residual_MPa": 1.3367823558166347e-12,
+                "steel_utilization": 0.00478216822729218
+              }
+            }
+          ],
+          "joint_error": 0.19448418872389953,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": false,
+          "pair_iterations": 7,
+          "pair_verified": false,
+          "radius": 3.4967343323923257e-11,
+          "ratio": 1,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": false,
+          "total_primary_iterations": 7
+        },
+        {
+          "H_guide_called": false,
+          "call_allowance": 4,
+          "calls": 3,
+          "case": 8,
+          "certificate": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.1024446587208732,
+            1.1024446606976126,
+            1.1024446687790408,
+            1.1024446668089076,
+            1.0,
+            0.00010929902223202709,
+            3.4967469199715284e-11,
+            3.4967469199715284e-11,
+            7.341921985527827e-07,
+            3.4049843023896085e-05,
+            34.0,
+            34.0,
+            6.0,
+            0.0,
+            3.0,
+            6.0,
+            0.19334266756935828,
+            6.10468875450465e-09,
+            8.409778675116164e-10,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.19387855090889727,
+            0.00010929902223202709,
+            1.0,
+            0.19387855090889727
+          ],
+          "event_found": false,
+          "event_phase_iterations": 0,
+          "field_error": 0.19334266756935828,
+          "fixed_alpha": 0.00010929902223202709,
+          "full_root_found": true,
+          "guide_headers": {
+            "H": null,
+            "Loading": null,
+            "Tangent": [
+              0.0009765625,
+              2.149024727784142e-09,
+              0.01627095297637079,
+              5.689476344320488e-13,
+              0.00010929902223202709
+            ]
+          },
+          "half_root_found": true,
+          "independently_rebuilt_roots": [
+            {
+              "H_MPa": 0.0001533662265698252,
+              "lambda_value": 1.1024446587208732,
+              "maximum_three_station_steel_utilization": 0.00478216835299591,
+              "role": "Full",
+              "weak": {
+                "bound_MPa": 1.2145474639857493e-06,
+                "force_residual_MPa": 8.943364567433796e-14,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244465872087,
+                "residual_MPa": 2.8338021762063653e-11,
+                "steel_utilization": 0.00478216835299591
+              }
+            },
+            {
+              "H_MPa": 0.00015336620992658013,
+              "lambda_value": 1.1024446606976126,
+              "maximum_three_station_steel_utilization": 0.004782168228382559,
+              "role": "Half",
+              "weak": {
+                "bound_MPa": 1.2145474652669694e-06,
+                "force_residual_MPa": 4.884323398410171e-15,
+                "fraction": 1.0,
+                "index": 33,
+                "lambda": 1.10244466069761,
+                "residual_MPa": 6.356037658000746e-13,
+                "steel_utilization": 0.00478216822838256
+              }
+            }
+          ],
+          "joint_error": 0.19387855090889727,
+          "loading_guide_called": false,
+          "outgoing_tangent_used": true,
+          "pair_iterations": 6,
+          "pair_verified": false,
+          "radius": 3.4967469199715284e-11,
+          "ratio": 1,
+          "restored": false,
+          "selected_kind": 0,
+          "solved": false,
+          "tangent_read": true,
+          "total_primary_iterations": 6
+        }
+      ],
+      "cold_and_regression_verification_still_required": true,
+      "directed_nonregression_passed": true,
+      "gained_original_cases": [],
+      "lost_original_cases": [],
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "no_original_history_accepted": true,
+      "no_working_promotion": true,
+      "numerical_source_exactly_reconstructed_from_stager": true,
+      "only_matched_affine_branch_recovery_added": true,
+      "original_budget_and_force_acceptance_unchanged": true,
+      "physical_capacity_certified": false,
+      "source_states": 32
+    },
+    "919": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    }
+  },
+  "raw_archive": "RawEvidence.tar.xz",
+  "raw_archive_bytes": 12799232,
+  "raw_bytes": 185615482,
+  "raw_files": 540,
+  "whole_goal_completed": false
+}

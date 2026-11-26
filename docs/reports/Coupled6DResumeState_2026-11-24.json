@@ -1,8 +1,14 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_exec_session": 41762,
+  "active_jobs": [
+    {
+      "root": "Cold920AffineRecoveryCold96_20261126",
+      "session": 41762,
+      "stage": "true_cold_hardshear_both_excel_exact918_96_30"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1980,7 +1986,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -16891,6 +16897,28 @@
     "same_exact32_history": true,
     "source_input_sha256": "DC6DA39E382372247D7473CD8603D361413FA204B72A975E40D0589A348459FA"
   },
+  "latest_prospective_recovery_evidence": "docs/reports/evidence/Coupled6DProspectiveBranchRecovery_2026-11-26",
+  "latest_prospective_recovery_summary": {
+    "actual_failed_current_reproduced_bit_exact": true,
+    "affine_recovery_regression919": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "all5_original_arc_acceptances_retained": true,
+    "five_affine_predictions_independently_equilibrated": true,
+    "modified_recovery_regression917": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "physical_capacity_certified": false,
+    "root_case7_full_newly_available": true
+  },
   "latest_refined_corrector_proof": {
     "actual_components": 256,
     "all_new_H_strictly_growing": false,
@@ -18105,7 +18133,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Actual failed Newton911/scan913 confirms finite surface kink in real concrete point5 at plus station: Ftrial sign crosses between1/256 and1/128; infinitesimal row53 direction matchesA within0.2%. Additional five halvings912 only lower norm0.44%, then fail again; all40 root/operator exports exact baseline, zero cases gained/lost. Do not promote floor change or run cold for it. Next inspect prospective active-branch tangent across that exact surface at frozen actual failing current, preserving scalar arc projection/target and same history32, then test any correction against original equilibrium/full-half gates.",
+  "next_action": "Poll existing41762 only; genuine cold920 single HardShear exact compiled918, no warm fields, same96/30,watchdog1200; do not restart on silence. Then Check-TestAffineRecoveryCold96.py saved/reopened256 Results audit and trajectory comparison; exact material bridge if raw trajectory bit-identical898 or fresh native material replay otherwise.914-919 completed, both164 regPASS. Corrected prior station label to dimensionlessz/L.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -18386,7 +18414,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:911 actual rejected augmented matrix/RHS/correction/valid probes captured with exact accepted32 history; all43 baseline native files exact; actual256 sources verified.912 five more halvings yield0.44% local norm reduction then rejection repeats; all40 root/operator exports exact baseline, zero gained/lost cases; not selected.913 immutable compiled900 local stress scan independently rebuilds actual failed residual within2.43e-13MPa and captured probes6.06e-13; point5 plus-station trial-yield crosses between1/256 and1/128; near direction agrees approximately withA, finite kink is localized. No physical ultimate or production promotion. All native processes closed.",
+  "previous_goal_turn_classification": "progress: actual failed Newton capture911, finite surface kink point5 confirmed913 and extended damping912 not selected. Current continuation914 reproduces exact failed residual and refined matrix,915/918 solve previously failedCase7Full within original control/material budget, all5 original Arc cases retained,917/919 all164PASS,916 five affine roots independently rebuilt. Cold920 is separate ongoing stage; no completion or physical-capacity claim.",
   "previous_goal_turn_revalidation": "Previous user-facing acknowledgement only deferred pure-bending comparison; no numerical progress claimed. Revalidated clean worktree and terminal jobs; continued actual Newton capture instead of repeating a plan.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
@@ -20193,6 +20221,7 @@
     1055,
     1057,
     1109,
+    1625,
     1801,
     1809,
     2002,
@@ -20220,6 +20249,7 @@
     6079,
     6268,
     6585,
+    6603,
     7564,
     7846,
     7867,
@@ -20235,6 +20265,7 @@
     9618,
     9644,
     9759,
+    9936,
     9957,
     10205,
     10530,
@@ -20281,6 +20312,7 @@
     16553,
     16755,
     17157,
+    17170,
     17224,
     17269,
     17621,
@@ -20399,6 +20431,7 @@
     39642,
     39874,
     39957,
+    40081,
     40234,
     40463,
     40717,
@@ -20461,11 +20494,13 @@
     52136,
     52358,
     52416,
+    52709,
     52768,
     52825,
     52995,
     53259,
     53557,
+    53566,
     53617,
     54096,
     54856,
@@ -20497,6 +20532,7 @@
     60275,
     60472,
     60838,
+    61504,
     61773,
     61803,
     61911,
@@ -20523,6 +20559,7 @@
     66517,
     66996,
     67035,
+    67233,
     67411,
     67422,
     67662,
@@ -20530,6 +20567,7 @@
     67949,
     68103,
     68359,
+    68395,
     68396,
     68487,
     68552,
@@ -20673,6 +20711,7 @@
     94735,
     94788,
     94892,
+    94939,
     95552,
     95559,
     95769,
@@ -20690,6 +20729,7 @@
     97846,
     97867,
     98340,
+    98751,
     98786,
     98993,
     99214,
@@ -20702,7 +20742,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T05:54:48.436341+03:00",
+  "updated_local": "2026-11-26T06:23:55.035442+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
