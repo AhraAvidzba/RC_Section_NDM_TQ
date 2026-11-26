@@ -1,0 +1,72 @@
+Public Function TestSolveOriginalControlReturn() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Возвращается к исходной линейной цели из непринятого материального равновесия, сохраняя историю25 и все силовые уравнения.
+    ' Два режима используют один начальный прогноз; найденные поля не принимаются и требуют независимой проверки.
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна точная принятая история25."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\RecordedYieldSeed.bin" For Binary Access Read As #inputHandle
+    Dim meta As Variant, seed() As Double, accepted() As Double, expected() As Double, projection() As Double
+    meta = TestReadPolishVector(inputHandle): seed = TestReadPolishVector(inputHandle)
+    accepted = TestReadPolishVector(inputHandle): expected = TestReadPolishVector(inputHandle)
+    projection = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(meta) <> 10 Then Err.Raise 5, , "Неверный вход возврата исходной цели."
+    Close #inputHandle
+    If meta(6) <> mReverseOptionsTest(3) Or meta(7) <> mReverseOptionsTest(4) Or meta(8) <> mReverseOptionsTest(2) Then _
+        Err.Raise 5, , "Нельзя менять точность или бюджет исходного расчёта."
+    Dim checked() As Double, i As Long: mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Принятая история отличается от источника отказа."
+    Next i
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\OriginalControlReturn.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMORIGCTRL00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(2#)
+    Dim caseIndex As Long, zero() As Double, values() As Double, matrix() As Double, solution() As Double
+    Dim equations As ICoupledEquationSystem, solver As CCoupledHybridSolver, field() As Double, forces() As Double
+    Dim tolerance As Double, factor As Double, norm As Double, solved As Boolean, materialReady As Boolean, raw As Double
+    For caseIndex = 1 To 2
+        ReDim zero(1 To UBound(seed) + 1)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, _
+                CDbl(meta(5)), seed, CDbl(meta(4))) Then Err.Raise 5, , "Не открыт исходный линейный контекст."
+        Set equations = mReverseSolverTest
+        If Not equations.TryEvaluate(zero, False, values, matrix) Then Err.Raise 5, , "Не прочитана исходная невязка."
+        For i = 1 To UBound(seed)
+            raw = values(i)
+            If i > mReverseSolverTest.PhysicalDegreeCount Then raw = raw / CDbl(meta(9))
+            If raw <> expected(i) Then Err.Raise 5, , "Начальная невязка не совпала побитно с нативным материальным корнем."
+        Next i
+        Set solver = New CCoupledHybridSolver
+        tolerance = mReverseSolverTest.ControlledLoadTolerance(mReverseBaseTest, mReverseDirectionTest, CDbl(meta(4)), CDbl(meta(6)), CDbl(meta(7)))
+        Dim maximumCalls As Long: maximumCalls = CLng((2# * UBound(zero) + 1#) * (CDbl(meta(8)) + 1#) + CDbl(meta(8)))
+        solved = solver.TrySolve(equations, zero, maximumCalls, CLng(meta(8)), tolerance, 0.00000000001, 0.2, solution, _
+            relativeDifferenceStep:=0.000001, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=(caseIndex = 1))
+        materialReady = False: norm = -1#: factor = CDbl(meta(4))
+        If solver.HasBestPoint Then
+            mReverseSolverTest.ReadNewtonLineFieldTest solution, field, factor
+            materialReady = equations.TryEvaluate(solution, False, values, matrix)
+            If materialReady Then
+                mReverseSolverTest.CopyEquationResultantResidual forces
+                norm = 0#
+                For i = 1 To UBound(values): norm = GeomMax(norm, Abs(values(i))): Next i
+                For i = 1 To 6: norm = GeomMax(norm, Abs(forces(i))): Next i
+            End If
+        End If
+        TestWriteReverseBinaryVector handle, Array(caseIndex, Abs(CLng(solved)), Abs(CLng(materialReady)), factor, norm, tolerance, _
+            solver.Steps, solver.FunctionCalls, solver.JacobianCalls, solver.BestResidual, solver.StopCode)
+        If materialReady Then
+            TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, values
+            TestWriteReverseBinaryVector handle, forces: TestWriteRecordedYieldStressTest handle, field
+        End If
+        mReverseSolverTest.EndNewtonLineTest
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Возврат исходной цели изменил принятую ревизию."
+    Next caseIndex
+    Close #handle
+    mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Возврат исходной цели изменил принятое поле."
+    Next i
+    TestSolveOriginalControlReturn = "TOTAL_ORIGINAL_CONTROL_RETURN_TEST: passed=1; failed=0; numerical outcomes recorded; no history acceptance or capacity claim"
+End Function

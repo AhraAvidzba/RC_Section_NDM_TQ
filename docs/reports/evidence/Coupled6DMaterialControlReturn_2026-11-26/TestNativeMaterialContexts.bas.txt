@@ -1,0 +1,59 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет пять локальных отказов после собственной истории 74 полей; материал не восстанавливается из округлённых напряжений.
+Private Function RunMaterialContextsTest(ByRef report As String, ByVal tracePath As String) As Boolean
+    Dim section As CSectionModel, transverse As CTransverseRebarLayout, steel As Object
+    Set section = BuildWangMVT2SectionTest(transverse, steel)
+    Dim operators As New CCoupledElasticState
+    operators.PrepareModel section, 30000#, 0.2, 2, 2, 5, transverse, steelModels:=steel, useFullSpanGauss5:=True
+    Dim history As Collection, force() As Double, torque() As Double
+    ReadControlHistoryTest Environ$("NDM_MVT_FLOW_FOLDER") & "\AcceptedHistory.csv", history, force, torque
+    If history.Count <> 74 Then Err.Raise 5, , "Нужны все 74 принятых состояния материальной проверки."
+    Dim source As Integer, line As String, row As Variant, point As Long, side As Long, count As Long, failures As Long
+    source = FreeFile: Open Environ$("NDM_MVT_FLOW_FOLDER") & "\Data\FailureContexts.csv" For Input As #source
+    Do While Not EOF(source)
+        Line Input #source, line: row = Split(line, ";")
+        If UBound(row) <> 27 Or row(0) <> "MATERIAL_CONTEXT" Then Err.Raise 5, , "Неверный контекст материальной пробы."
+        point = CLng(row(3)): side = CLng(row(2)): count = count + 1
+        Dim concrete As New CCoupledConcreteResponse, response As ICoupledPointResponse
+        Set concrete = New CCoupledConcreteResponse
+        concrete.InitializeASD 1, modTestCoupledASDMaterial.TestReadFlow(Environ$("NDM_MVT_FLOW_FOLDER") & "\Data", "default")
+        Set response = concrete
+        Dim field() As Double, strain(1 To 6) As Double, gradient(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+        Dim index As Long, i As Long, code As ESolverFailureCode
+        For index = 1 To history.Count
+            field = history(index): operators.PointStrain point, field, strain
+            For i = 1 To 6: gradient(i) = 0#: Next i
+            operators.AxialGradientAtPoint point, field, gradient
+            For i = 1 To 6: strain(i) = strain(i) + CDbl(side) * 0.001 * gradient(i): Next i
+            code = response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly)
+            If code <> sfcNone Then Err.Raise 5, , "Не восстановлена локальная история принятого поля."
+            response.AcceptTrial
+        Next index
+        For i = 1 To 6: strain(i) = Val(row(i + 9)): Next i
+        Dim reference(1 To 6) As Double, unused(1 To 6, 1 To 6) As Double
+        code = response.EvaluatePoint(1, strain, reference, unused, ctmStressOnly, False)
+        If code <> sfcNone Then Err.Raise 5, , "Не вычисляются напряжения сохранённого контекста."
+        code = response.EvaluatePoint(1, strain, stress, tangent, ctmFullBranchConsistent, False)
+        If code <> sfcNone Then failures = failures + 1
+        Dim error As Double: error = 0#
+        If code = sfcNone Then
+            For i = 1 To 6: error = GeomMax(error, Abs(stress(i) - reference(i))): Next i
+            If error <> 0# Then Err.Raise 5, , "Построение касательной изменило напряжения контекста."
+        End If
+        Dim plastic As Boolean, signValue As Long, substeps As Long
+        If Not concrete.TryReadConcreteBranch(1, strain, plastic, signValue, substeps) Then Err.Raise 5, , "Нет признаков ветви контекста."
+        AddExperimentTraceTest report, tracePath, "MATERIAL_CONTEXT_RESULT;" & CStr(count) & ";" & row(1) & ";" & CStr(side) & ";" & _
+            CStr(point) & ";" & CStr(code) & ";" & CStr(plastic) & ";" & CStr(signValue) & ";" & ExperimentNumberTest(error)
+        ' Успешная или отвергнутая полная проба не меняет принятую историю точки.
+        field = history(history.Count): operators.PointStrain point, field, strain
+        For i = 1 To 6: gradient(i) = 0#: Next i
+        operators.AxialGradientAtPoint point, field, gradient
+        For i = 1 To 6: strain(i) = strain(i) + CDbl(side) * 0.001 * gradient(i): Next i
+        If response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly, False) <> sfcNone Then _
+            Err.Raise 5, , "Отклонённая касательная повредила принятую историю."
+    Loop
+    Close #source
+    If count <> 5 Then Err.Raise 5, , "Должны быть проверены все пять исходных контекстов."
+    RunMaterialContextsTest = (failures = 0)
+    AddExperimentTraceTest report, tracePath, "MATERIAL_CONTEXT_SUMMARY;" & CStr(count) & ";" & CStr(failures)
+End Function

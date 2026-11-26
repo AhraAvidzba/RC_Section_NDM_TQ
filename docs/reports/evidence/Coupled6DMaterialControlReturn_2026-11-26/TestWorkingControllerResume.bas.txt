@@ -1,0 +1,48 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает рабочий контроллер от проверенной истории; не передаёт ему номер точки, уровень CDP или будущее поле.
+Private Sub TestIntegratedYieldEvent()
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double
+    Dim unusedTrial() As Double, unusedProjection() As Double, unusedContext() As Double
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, unusedTrial, unusedProjection, unusedContext
+    Dim fraction As Double, previousFactor As Double, currentFactor As Double
+    trace.ReadPoint trace.Count-1, fraction, previousFactor
+    trace.ReadPoint trace.Count, fraction, currentFactor
+    Dim load(1 To 6) As Double, i As Long, seed As Variant, checked() As Double, actual() As Double
+    For i = 1 To 6: load(i) = mReverseBaseTest(i)+currentFactor*mReverseDirectionTest(i): Next i
+    seed = accepted
+    If Not mReverseSolverTest.TryStep(load(1),load(2),load(3),load(4),load(5),load(6), _
+            mReverseOptionsTest(3),mReverseOptionsTest(4),1,initialField:=seed) Then Err.Raise 5, , "Не подтверждено исходное равновесие продолжения."
+    mReverseSolverTest.CopyTrial checked,actual
+    For i = 1 To UBound(checked): If checked(i) <> accepted(i) Then Err.Raise 5, , "Изменилось поле перед запуском контроллера."
+    Next i
+    mReverseSolverTest.DiscardStep
+    Dim controller As New CCoupledDeformationContinuation, observer As New CCoupledProgressObserverTest
+    observer.TestInitialize mPolishRootTest & "\Native\Controller.Checkpoints.csv"
+    Dim initialCount As Long: initialCount = fields.Count
+    Dim started As Double: started = Timer
+    controller.Trace mReverseSolverTest,mReverseReinforcedTest,mReverseBaseTest,mReverseDirectionTest,fields, _
+        previousFactor,currentFactor,actual,mReverseOptionsTest(6),mReverseOptionsTest(5),CLng(mReverseOptionsTest(2)), _
+        mReverseOptionsTest(3),mReverseOptionsTest(4),loadTrace:=trace,observer:=observer
+    Dim elapsed As Double: elapsed = Timer-started: If elapsed < 0# Then elapsed = elapsed+86400#
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\IntegratedEvent.csv" For Output As #handle
+    Print #handle, "MODE;WorkingControllerResume;VerifiedHistory;NoPrescribedMaterialPoint;NotCapacityUnlessExplicitlyCertified"
+    Print #handle, "START" & TestHardPreparedVector(Array(initialCount,previousFactor,currentFactor))
+    Print #handle, "CONTROLLER" & TestHardPreparedVector(Array(elapsed,controller.BestAdmissibleLambda, _
+        controller.ResultMeta.InternalStatus,controller.ResultMeta.ResultCode,observer.TestCallCount))
+    Print #handle, "DETAILS;" & controller.ResultMeta.DiagnosticDetails
+    Print #handle, "COMMENT;" & controller.ResultMeta.ResultComment
+    Dim peak As Double, accuracy As Double, design As Boolean, low As Double, high As Double, steel As Long
+    Dim hasPeak As Boolean, hasSteel As Boolean
+    hasPeak = controller.CopyPeak(peak,accuracy,design)
+    hasSteel = controller.CopySteelLimit(low,high,steel)
+    Print #handle, "PEAK" & TestHardPreparedVector(Array(hasPeak,peak,accuracy,design))
+    Print #handle, "STEEL" & TestHardPreparedVector(Array(hasSteel,low,high,steel))
+    Close #handle
+    Set mReverseFieldsTest = controller.AcceptedFields: Set mReverseTraceTest = controller.SavedTrace
+    If mReverseFieldsTest Is Nothing Or mReverseTraceTest Is Nothing Then Err.Raise 5, , "Не сохранён рабочий путь контроллера."
+    mHardPreparedPathTest = mPolishRootTest & "\Native\IntegratedEvent"
+    TestWriteHardPreparedOperators mReverseOperatorsTest,mHardPreparedPathTest & ".Operators.csv"
+    TestExportReverseCandidate 999
+    mPolishExecutedTest = True
+End Sub

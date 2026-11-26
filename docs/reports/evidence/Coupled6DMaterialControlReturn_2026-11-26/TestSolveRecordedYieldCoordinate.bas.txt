@@ -1,0 +1,115 @@
+Public Function TestSolveRecordedYieldCoordinate() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Решает силовые уравнения с материальной координатой вместо записанной линейной проекции, сохраняя историю25 и шесть направлений нагрузки.
+    ' Найденные поля не принимаются; равновесие, поверхность и напряжения отдельно проверяются по экспорту.
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна точная принятая история25."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\RecordedYieldSeed.bin" For Binary Access Read As #inputHandle
+    Dim meta As Variant, seed() As Double, accepted() As Double, expected() As Double, projection() As Double
+    meta = TestReadPolishVector(inputHandle): seed = TestReadPolishVector(inputHandle)
+    accepted = TestReadPolishVector(inputHandle): expected = TestReadPolishVector(inputHandle)
+    projection = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(meta) <> 10 Then Err.Raise 5, , "Неверный вход материальной координаты."
+    Close #inputHandle
+    If meta(6) <> mReverseOptionsTest(3) Or meta(7) <> mReverseOptionsTest(4) Or meta(8) <> mReverseOptionsTest(2) Then _
+        Err.Raise 5, , "Нельзя менять допуски или бюджет относительно исходного расчёта."
+    Dim checked() As Double: mReverseSolverTest.CopyAccepted checked
+    Dim i As Long
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Принятое поле не совпало с источником отказа."
+    Next i
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\RecordedYieldCoordinate.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPOINTYIELD001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(4#)
+    Dim caseIndex As Long, target As Double, complete As Boolean, zero() As Double, values() As Double, matrix() As Double
+    Dim scalar As ICoupledScalarConstraint, equations As ICoupledEquationSystem, constrained As ICoupledEquationSystem
+    Dim projected As CCoupledConstraintEquations, solver As CCoupledHybridSolver, solution() As Double, mapped() As Double
+    Dim solved As Boolean, mappedReady As Boolean, materialReady As Boolean, scales As Variant
+    Dim field() As Double, factor As Double, value As Double, gradient() As Double, forces() As Double
+    Dim tolerance As Double, maximumCalls As Long, norm As Double, raw As Double
+    For caseIndex = 1 To 4
+        target = CDbl(meta(3)): If caseIndex > 2 Then target = CDbl(meta(10))
+        complete = (caseIndex Mod 2 = 1)
+        ReDim zero(1 To UBound(seed) + 1)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, _
+                CDbl(meta(5)), seed, CDbl(meta(4))) Then Err.Raise 5, , "Не открыт исходный читающий контекст."
+        Set equations = mReverseSolverTest
+        If Not equations.TryEvaluate(zero, False, values, matrix) Then Err.Raise 5, , "Не прочитана исходная система перед сменой координаты."
+        For i = 1 To UBound(seed)
+            raw = values(i)
+            If i > mReverseSolverTest.PhysicalDegreeCount Then raw = raw / CDbl(meta(9))
+            If raw <> expected(i) Then Err.Raise 5, , "Невязка не совпала побитно с фактическим отказом."
+        Next i
+        scales = mReverseSolverTest.ReadNewtonLineScalesTest
+        Set scalar = mReverseSolverTest.CreateMaterialConstraint(CLng(meta(1)), CLng(meta(2)), 0, target)
+        If scalar Is Nothing Then Err.Raise 5, , "Не создана материальная координата существующим ядром."
+        Set projected = New CCoupledConstraintEquations
+        projected.Initialize mReverseSolverTest, scalar, zero, 0.000000000002, 16
+        Set constrained = projected: Set solver = New CCoupledHybridSolver
+        tolerance = mReverseSolverTest.ControlledLoadTolerance(mReverseBaseTest, mReverseDirectionTest, CDbl(meta(4)), CDbl(meta(6)), CDbl(meta(7)))
+        maximumCalls = CLng((2# * UBound(zero) + 1#) * (CDbl(meta(8)) + 1#) + CDbl(meta(8)))
+        solved = solver.TrySolve(constrained, zero, maximumCalls, CLng(meta(8)), tolerance, 0.00000000001, 0.2, solution, _
+            relativeDifferenceStep:=0.000001, automaticScaling:=True, freshJacobian:=True, completeNewtonLineSearch:=complete)
+        mappedReady = False: materialReady = False: factor = CDbl(meta(4)): value = 0#: norm = -1#
+        If solver.HasBestPoint Then mappedReady = projected.TryMap(solution, mapped)
+        If mappedReady Then
+            mReverseSolverTest.ReadNewtonLineFieldTest mapped, field, factor
+            materialReady = equations.TryEvaluate(mapped, False, values, matrix)
+            If materialReady Then
+                If Not scalar.TryEvaluate(mapped, False, value, gradient) Then Err.Raise 5, , "Не прочитана итоговая материальная координата."
+                mReverseSolverTest.CopyEquationResultantResidual forces
+                norm = 0#
+                For i = 1 To UBound(seed): norm = GeomMax(norm, Abs(values(i))): Next i
+                For i = 1 To 6: norm = GeomMax(norm, Abs(forces(i))): Next i
+            End If
+        End If
+        TestWriteReverseBinaryVector handle, Array(caseIndex, target, Abs(CLng(complete)), Abs(CLng(solved)), _
+            Abs(CLng(mappedReady)), Abs(CLng(materialReady)), factor, value, tolerance, norm, solver.Steps, solver.FunctionCalls, _
+            solver.JacobianCalls, solver.BestResidual, solver.StopCode)
+        If materialReady Then
+            TestWriteReverseBinaryVector handle, field
+            TestWriteReverseBinaryVector handle, values
+            TestWriteReverseBinaryVector handle, forces
+            TestWriteRecordedYieldStressTest handle, field
+        End If
+        Dim logHandle As Integer: logHandle = FreeFile
+        Open mPolishRootTest & "\Native\RecordedYieldCoordinate.Case" & CStr(caseIndex) & ".txt" For Output As #logHandle
+        Print #logHandle, "Материальная координата заменяет линейное управление; история не принимается."
+        Print #logHandle, "Итерации: " & CStr(solver.Steps) & "; чтения: " & CStr(solver.FunctionCalls) & "; норма: " & CStr(norm)
+        Close #logHandle
+        mReverseSolverTest.EndNewtonLineTest
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Материальная координата изменила принятую ревизию."
+    Next caseIndex
+    Close #handle
+    mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Принятое поле изменилось в диагностической проверке."
+    Next i
+    TestSolveRecordedYieldCoordinate = "TOTAL_RECORDED_YIELD_COORDINATE_TEST: passed=1; failed=0; numerical outcomes recorded; no capacity claim"
+End Function
+
+Public Sub TestWriteRecordedYieldStressTest(ByVal handle As Integer, ByRef field() As Double)
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Экспортирует все бетонные напряжения трёх станций от прежней истории для независимой сборки каждого пригодного поля.
+    Dim side As Long, point As Long, i As Long, response As ICoupledPointResponse, code As ESolverFailureCode
+    Dim strain(1 To 6) As Double, slope(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    For side = -1 To 1
+        Select Case side
+            Case -1: Set response = mReverseSidesTest(1)
+            Case 0: Set response = mReverseConcreteTest
+            Case 1: Set response = mReverseSidesTest(3)
+        End Select
+        For point = 1 To mReverseOperatorsTest.PointCount
+            mReverseOperatorsTest.PointStrain point, field, strain
+            mReverseOperatorsTest.AxialGradientAtPoint point, field, slope
+            For i = 1 To 6: strain(i) = strain(i) + side * 0.001 * slope(i): Next i
+            code = response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly, recordTrial:=False)
+            TestWriteReverseBinaryVector handle, Array(point, side, code)
+            TestWriteReverseBinaryVector handle, stress
+        Next point
+    Next side
+End Sub
