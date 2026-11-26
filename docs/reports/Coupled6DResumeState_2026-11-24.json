@@ -9035,6 +9035,32 @@
       }
     ]
   },
+  "latest_base_to_endpoint_yield_crossing": {
+    "all129_locations_scanned": true,
+    "crossings": [
+      {
+        "after_trial_yield_MPa": 0.00840337247719541,
+        "before_trial_yield_MPa": -0.00689118266847697,
+        "endpoint": "full",
+        "point": 18,
+        "real_concrete": true,
+        "side": 0
+      },
+      {
+        "after_trial_yield_MPa": 0.000489491745712273,
+        "before_trial_yield_MPa": -0.00689118266847697,
+        "endpoint": "half",
+        "point": 18,
+        "real_concrete": true,
+        "side": 0
+      }
+    ],
+    "diagnosis": "Base-to-endpoint loading change; full and half endpoints share the same active signatures.",
+    "intermediate_equilibrium_on_surface_not_yet_solved": true,
+    "not_a_physical_failure_or_capacity_claim": true,
+    "source_native_arc_scan_sha256": "814509DEEE0A432AFCDD3E6040B48F57437997D07BD8BA7279F4D4A85C013A25",
+    "threshold_MPa": 3.2e-11
+  },
   "latest_bounded_branch927": {
     "accepted_history_unchanged_by_native_guard": true,
     "actual_components": 257,
@@ -21296,7 +21322,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "947-950 archived749 raw files/523 exact duplicate links, all SHA readback verified. Working secant full/quarter steps rejected by preserved.5% half-shape guard, not equilibrium;949 full/half equilibria verified with0 active-branch signature differences;950 base stress reread exact R1.66e-7. Next quantify accepted-state equilibrium sensitivity (native Jacobian/read-only correction) and distinguish base numerical uncertainty from curve resolution before adaptive controller changes. Generic material guide selection, full budget, sequential accepted history and fresh cold remain; goal active.",
+  "next_action": "All stages terminal. Additional950 base-vs-full/half scan finds exactly one strict CDP loading crossing at real concrete point18 middle station, Fbase-.006891, Fhalf+.000489,Ffull+.008403. Full and half signatures same but transition lies before half. Next use generic event locator to solve equilibrium on this surface, preferably source accepted25 native R/A read then material-coordinate root; preserve17+return budget, history, half/uncertainty guards. Base sensitivity remains possible contributor, not sole explanation. No capacity/cold gain claimed; goal active.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",

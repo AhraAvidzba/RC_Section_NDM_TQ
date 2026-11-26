@@ -1,0 +1,26 @@
+{
+  "all129_locations_scanned": true,
+  "crossings": [
+    {
+      "after_trial_yield_MPa": 0.00840337247719541,
+      "before_trial_yield_MPa": -0.00689118266847697,
+      "endpoint": "full",
+      "point": 18,
+      "real_concrete": true,
+      "side": 0
+    },
+    {
+      "after_trial_yield_MPa": 0.000489491745712273,
+      "before_trial_yield_MPa": -0.00689118266847697,
+      "endpoint": "half",
+      "point": 18,
+      "real_concrete": true,
+      "side": 0
+    }
+  ],
+  "diagnosis": "Base-to-endpoint loading change; full and half endpoints share the same active signatures.",
+  "intermediate_equilibrium_on_surface_not_yet_solved": true,
+  "not_a_physical_failure_or_capacity_claim": true,
+  "source_native_arc_scan_sha256": "814509DEEE0A432AFCDD3E6040B48F57437997D07BD8BA7279F4D4A85C013A25",
+  "threshold_MPa": 3.2e-11
+}

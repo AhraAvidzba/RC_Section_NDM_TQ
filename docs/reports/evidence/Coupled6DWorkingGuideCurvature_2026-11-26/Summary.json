@@ -3,6 +3,32 @@
   "actual_full_and_half_states_verified": true,
   "all_logical_raw_hashes_read_back": true,
   "all_numerical_stages_terminal": true,
+  "base_to_endpoint_crossing_analysis": {
+    "all129_locations_scanned": true,
+    "crossings": [
+      {
+        "after_trial_yield_MPa": 0.00840337247719541,
+        "before_trial_yield_MPa": -0.00689118266847697,
+        "endpoint": "full",
+        "point": 18,
+        "real_concrete": true,
+        "side": 0
+      },
+      {
+        "after_trial_yield_MPa": 0.000489491745712273,
+        "before_trial_yield_MPa": -0.00689118266847697,
+        "endpoint": "half",
+        "point": 18,
+        "real_concrete": true,
+        "side": 0
+      }
+    ],
+    "diagnosis": "Base-to-endpoint loading change; full and half endpoints share the same active signatures.",
+    "intermediate_equilibrium_on_surface_not_yet_solved": true,
+    "not_a_physical_failure_or_capacity_claim": true,
+    "source_native_arc_scan_sha256": "814509DEEE0A432AFCDD3E6040B48F57437997D07BD8BA7279F4D4A85C013A25",
+    "threshold_MPa": 3.2e-11
+  },
   "cold_gain_claimed": false,
   "earlier_failed_primary_effort_not_included": true,
   "exact_duplicate_hardlinks": 523,
