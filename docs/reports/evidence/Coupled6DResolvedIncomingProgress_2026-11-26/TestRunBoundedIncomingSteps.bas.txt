@@ -1,0 +1,125 @@
+Public Function TestRunBoundedIncomingSteps() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Проверяет короткое продвижение штатным возвратом с прежними половинным критерием, неопределённостью lambda и общим бюджетом каждой принятой ступени.
+    ' Новая ступень получает фактически принятую историю; дальний прогноз остаётся только направлением поиска события, исходная история25 восстанавливается.
+    On Error GoTo TestFailure
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна исходная история25."
+    mReverseSolverTest.DiscardStep
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\BoundedIncoming.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, original() As Double, guide() As Double, ends() As Double, eventInfo As Variant
+    context = TestReadPolishVector(inputHandle): original = TestReadPolishVector(inputHandle)
+    guide = TestReadPolishVector(inputHandle): ends = TestReadPolishVector(inputHandle): eventInfo = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(context) <> 9 Then Err.Raise 5, , "Неверные данные входящих ступеней."
+    Close #inputHandle: inputHandle = 0
+    If context(1) <> mReverseOptionsTest(3) Or context(2) <> mReverseOptionsTest(4) Or context(3) <> mReverseOptionsTest(2) Then Err.Raise 5, , "Изменены исходные допуски или бюджет."
+    If context(4) < 1 Or context(4) > 8 Then Err.Raise 5, , "Недопустимое число диагностических ступеней."
+    Dim accepted() As Double, i As Long: mReverseSolverTest.CopyAccepted accepted
+    For i = 1 To UBound(original)
+        If accepted(i) <> original(i) Then Err.Raise 5, , "Изменена исходная принятая точка."
+    Next i
+    Dim reference As Double, traceFraction As Double
+    mReverseTraceTest.ReadPoint 25, traceFraction, reference
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\BoundedIncoming.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMINCOMING00001"
+    Put #handle, , magic: TestWriteReverseBinaryVector handle, context
+    TestWriteReverseBinaryVector handle, Array(reference): TestWriteReverseBinaryVector handle, original
+    Dim baseline(1 To 129, 1 To 19) As Double
+    Dim point As Long, side As Long, component As Long, record As Long, value As Double
+    Dim material As CCoupledConcreteResponse, steel As CCoupledReinforcedResponse, state As Variant
+    Dim tension As Double, compression As Double, bar As Double, stress(1 To 6) As Double
+    ' INITIAL_HISTORY_TEST
+    Dim cycle As Long, attempt As Long, guideSolved As Boolean, solved As Boolean, acceptedStep As Boolean, reached As Boolean
+    Dim guideLambda As Double: guideLambda = context(5)
+    Dim effort As Variant, steps As Long, calls As Long, matrices As Long, revision As Long, acceptedCount As Long
+    Dim movement() As Double, projection() As Double, target As Double, length As Double, coordinate As Double
+    Dim fraction As Double, factor As Double, field() As Double, actual() As Double, details As String
+    Dim recoveredProjection() As Double, uncertainty As Double
+    Dim pairs As Collection, pair As Variant, pairBefore As Long, pairIndex As Long, j As Long
+    Dim logHandle As Integer: logHandle = FreeFile
+    Open mPolishRootTest & "\Native\BoundedIncoming.Diagnostics.txt" For Output As #logHandle
+    For cycle = 1 To CLng(context(4))
+        guideSolved = True: acceptedStep = False
+        If cycle = 1 Then
+            steps = CLng(context(6)): calls = CLng(context(7)): matrices = CLng(context(8))
+        Else
+            guideSolved = mReverseSolverTest.TryLoadingYieldBoundary(mReverseBaseTest, mReverseDirectionTest, ends, reference, CDbl(context(9)), _
+                CDbl(context(1)), CDbl(context(2)), CLng(context(3)), guide, guideLambda, eventInfo)
+            effort = mReverseSolverTest.ReadPolishEffortTest
+            steps = CLng(effort(0)): calls = CLng(effort(4)): matrices = CLng(effort(3))
+        End If
+        revision = mReverseSolverTest.AcceptedRevision: mReverseSolverTest.CopyAccepted accepted
+        TestWriteReverseBinaryVector handle, Array(1#, cycle, reference, revision, Abs(CLng(guideSolved)), guideLambda, steps, calls, matrices, acceptedCount)
+        TestWriteReverseBinaryVector handle, accepted: TestWriteReverseBinaryVector handle, eventInfo
+        ' CYCLE_HISTORY_TEST
+        If Not guideSolved Then Exit For
+        TestWriteReverseBinaryVector handle, guide: TestWriteRecordedYieldStressTest handle, guide
+        movement = guide
+        For i = 1 To UBound(accepted): movement(i) = guide(i) - accepted(i): Next i
+        If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, guide, movement, projection, target, length) Then Err.Raise 5, , "Не построена мера входящей ступени."
+        coordinate = target - length: fraction = 1#: attempt = 0
+        Do While steps < context(3) And attempt < 8
+            attempt = attempt + 1: details = vbNullString
+            Set pairs = mReverseSolverTest.TestReadGuideReturnPairs(): pairBefore = 0
+            If Not pairs Is Nothing Then pairBefore = pairs.Count
+            solved = mReverseSolverTest.TestMaterialGuideOriginalReturn(mReverseBaseTest, mReverseDirectionTest, guide, guideLambda, _
+                projection, coordinate + fraction * length, reference, CDbl(context(1)), CDbl(context(2)), CLng(context(3)), _
+                steps, calls, matrices, factor, details)
+            effort = mReverseSolverTest.ReadPolishEffortTest
+            If effort(0) < steps Or effort(0) > context(3) Then Err.Raise 5, , "Нарушен общий бюджет входящей ступени."
+            steps = CLng(effort(0)): calls = CLng(effort(4)): matrices = CLng(effort(3))
+            If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Непринятая проба изменила историю."
+            Set pairs = mReverseSolverTest.TestReadGuideReturnPairs()
+            TestWriteReverseBinaryVector handle, Array(2#, cycle, attempt, fraction, coordinate + fraction * length, Abs(CLng(solved)), factor, pairs.Count - pairBefore)
+            TestWriteReverseBinaryVector handle, effort
+            Print #logHandle, CStr(cycle) & ";" & CStr(attempt) & ";" & TestOnsetNumber(fraction) & ";" & CStr(solved) & ";" & details
+            For pairIndex = pairBefore + 1 To pairs.Count
+                pair = pairs(pairIndex)
+                TestWriteReverseBinaryVector handle, pair(4)
+                For j = 0 To 3: TestWriteReverseBinaryVector handle, pair(j): Next j
+                field = pair(1): TestWriteRecordedYieldStressTest handle, field
+                field = pair(2): TestWriteRecordedYieldStressTest handle, field
+            Next pairIndex
+            If solved Then
+                mReverseSolverTest.CopyTrial field, actual
+                If Not mReverseSolverTest.CopyRecoveredControl(recoveredProjection, uncertainty) Then Err.Raise 5, , "Не сохранено подтверждённое управление ступени."
+                mReverseSolverTest.AcceptStep: acceptedCount = acceptedCount + 1
+                reference = factor: acceptedStep = True: reached = (fraction = 1#)
+                TestWriteReverseBinaryVector handle, Array(3#, cycle, reference, mReverseSolverTest.AcceptedRevision, acceptedCount, Abs(CLng(reached)), uncertainty)
+                TestWriteReverseBinaryVector handle, field
+                TestWriteReverseBinaryVector handle, recoveredProjection
+                Exit Do
+            End If
+            mReverseSolverTest.DiscardStep: fraction = 0.5 * fraction
+        Loop
+        If Not acceptedStep Or reached Then Exit For
+    Next cycle
+    mReverseSolverTest.DiscardStep: mReverseSolverTest.CopyAccepted accepted
+    TestWriteReverseBinaryVector handle, Array(4#, acceptedCount, reference, mReverseSolverTest.AcceptedRevision, Abs(CLng(reached)))
+    TestWriteReverseBinaryVector handle, accepted
+    ' FINAL_HISTORY_TEST
+    If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, 25) Then Err.Raise 5, , "Не восстановлена исходная история25."
+    mReverseSolverTest.CopyAccepted accepted
+    For i = 1 To UBound(original)
+        If accepted(i) <> original(i) Then Err.Raise 5, , "Восстановление изменило исходное поле."
+    Next i
+    TestWriteReverseBinaryVector handle, Array(5#, mReverseSolverTest.AcceptedRevision)
+    TestWriteReverseBinaryVector handle, accepted
+    ' RESTORED_HISTORY_TEST
+    Close #logHandle: logHandle = 0: Close #handle: handle = 0
+    If mReverseFieldsTest.Count <> 25 Or mReverseTraceTest.Count <> 25 Then Err.Raise 5, , "Изменены исходные коллекции25."
+    TestRunBoundedIncomingSteps = "TOTAL_BOUNDED_INCOMING_STEPS_TEST: passed=1; failed=0; numerical outcomes recorded; original25 restored; no capacity claim"
+    Exit Function
+TestFailure:
+    Dim failureNumber As Long, failureText As String
+    failureNumber = Err.Number: failureText = Err.Description
+    On Error Resume Next
+    If inputHandle <> 0 Then Close #inputHandle
+    If handle <> 0 Then Close #handle
+    If logHandle <> 0 Then Close #logHandle
+    mReverseSolverTest.DiscardStep
+    mReverseSolverTest.ReplayAcceptedFields mReverseFieldsTest, 25
+    On Error GoTo 0
+    Err.Raise failureNumber, "TestRunBoundedIncomingSteps", failureText
+End Function

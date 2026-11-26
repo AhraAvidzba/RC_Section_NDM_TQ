@@ -1,0 +1,43 @@
+Public Function TestRunFieldProgressSteps() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Переиспользует последовательную проверку коротких ступеней и отдельно проверяет нулевую, обратную цель и исчерпанный бюджет.
+    ' Принятие по полю не подтверждает рост нагрузки или физический предел; исходная история остаётся восстановленной.
+    Dim report As String: report = TestRunBoundedIncomingSteps()
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\BoundedIncoming.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, accepted() As Double, guide() As Double, ends() As Double, eventInfo As Variant
+    context = TestReadPolishVector(inputHandle): accepted = TestReadPolishVector(inputHandle)
+    guide = TestReadPolishVector(inputHandle): ends = TestReadPolishVector(inputHandle): eventInfo = TestReadPolishVector(inputHandle)
+    Close #inputHandle
+    Dim movement() As Double: movement = guide
+    Dim i As Long, projection() As Double, target As Double, length As Double
+    For i = 1 To UBound(accepted): movement(i) = guide(i) - accepted(i): Next i
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, guide, movement, projection, target, length) Then Err.Raise 5, , "Не построена мера защитных проверок."
+    Dim reference As Double, fraction As Double: mReverseTraceTest.ReadPoint 25, fraction, reference
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\IncomingProgressGuards.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMINCGUARDS0001"
+    Put #handle, , magic
+    Dim index As Long, checks As Long, factor As Double, solved As Boolean, details As String, steps As Long, checked() As Double
+    For index = 1 To 3
+        target = 0#: For i = 1 To UBound(accepted): target = target + projection(i) * accepted(i): Next i
+        steps = CLng(context(6))
+        If index = 2 Then target = target - 0.25 * length
+        If index = 3 Then target = target + 0.0625 * length: steps = CLng(context(3))
+        details = vbNullString
+        solved = mReverseSolverTest.TestMaterialGuideOriginalReturn(mReverseBaseTest, mReverseDirectionTest, guide, CDbl(context(5)), _
+            projection, target, reference, CDbl(context(1)), CDbl(context(2)), CLng(context(3)), steps, CLng(context(7)), CLng(context(8)), factor, details)
+        TestWriteReverseBinaryVector handle, Array(index, Abs(CLng(solved)), target, reference)
+        TestWriteReverseBinaryVector handle, mReverseSolverTest.ReadPolishEffortTest
+        If solved Then Err.Raise 5, , "Защитная входящая проба ошибочно принята."
+        mReverseSolverTest.DiscardStep: mReverseSolverTest.CopyAccepted checked
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Защитная проба изменила принятую ревизию."
+        For i = 1 To UBound(accepted)
+            If checked(i) <> accepted(i) Then Err.Raise 5, , "Защитная проба изменила исходное поле."
+        Next i
+        checks = checks + 1
+    Next index
+    Close #handle
+    TestRunFieldProgressSteps = Replace(report, "TOTAL_BOUNDED_INCOMING_STEPS_TEST", "TOTAL_FIELD_PROGRESS_STEPS_TEST") & "; negative_guards=" & CStr(checks)
+End Function

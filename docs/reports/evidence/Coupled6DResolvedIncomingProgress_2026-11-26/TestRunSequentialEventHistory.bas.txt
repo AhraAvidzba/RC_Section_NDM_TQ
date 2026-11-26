@@ -1,0 +1,136 @@
+Public Function TestRunSequentialEventHistory() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Сопоставляет один полный переход с двумя последовательными материальными подшагами в отдельной книге.
+    ' Временное принятие половины диагностическое: геометрическая приёмка не подменяется силовой, исходная история восстанавливается.
+    On Error GoTo TestFailure
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна точная история25."
+    mReverseSolverTest.DiscardStep
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\SequentialEvent.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, face() As Double, ends() As Double, accepted() As Double
+    context = TestReadPolishVector(inputHandle): face = TestReadPolishVector(inputHandle)
+    ends = TestReadPolishVector(inputHandle): accepted = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(context) <> 7 Then Err.Raise 5, , "Неверный вход последовательной проверки."
+    Close #inputHandle: inputHandle = 0
+    If context(3) <> mReverseOptionsTest(3) Or context(4) <> mReverseOptionsTest(4) Or context(5) <> mReverseOptionsTest(2) Then Err.Raise 5, , "Изменены исходные точности или бюджет."
+    Dim checked() As Double, movement() As Double, projection() As Double, target As Double, spacing As Double, i As Long
+    mReverseSolverTest.CopyAccepted checked: movement = face
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Изменена исходная принятая точка."
+        movement(i) = face(i) - accepted(i)
+    Next i
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, face, movement, projection, target, spacing) Then Err.Raise 5, , "Не построена мера подхода."
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\SequentialEvent.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMSEQEVENT00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, context: TestWriteReverseBinaryVector handle, projection
+    TestWriteReverseBinaryVector handle, Array(target, spacing)
+    Dim stage As Long, solved As Boolean, halfSolved As Boolean, eventSolved As Boolean, trialReady As Boolean
+    Dim half() As Double, eventField() As Double, trialField() As Double, actual() As Double, seed() As Double
+    Dim halfLambda As Double, eventLambda As Double, factor As Double, trialLambda As Double, total As Long
+    Dim effort As Variant, eventInfo As Variant, prediction As Variant, replay As Collection
+    Dim point As Long, side As Long, component As Long, material As CCoupledConcreteResponse, steel As CCoupledReinforcedResponse
+    Dim state As Variant, tension As Double, compression As Double, bar As Double, stress(1 To 6) As Double
+    Dim baseline(1 To 129, 1 To 19) As Double, record As Long, value As Double
+    total = CLng(context(6))
+    For stage = 0 To 5
+        solved = True: trialReady = False: effort = Array(0#, 0#, 0#, 0#, 0#, 0#, 0#, 0#): eventInfo = Array(0#)
+        Select Case stage
+            Case 0
+                factor = context(1): trialReady = True: trialField = face: trialLambda = context(2)
+            Case 1
+                seed = accepted
+                For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = 0.5 * (accepted(i) + face(i)): Next i
+                prediction = seed
+                halfSolved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target - 0.5 * spacing, _
+                    0.5 * (context(1) + context(2)), halfLambda, 0.0001 * CDbl(context(3)), 0.0001 * CDbl(context(4)), CLng(context(5)) - total, _
+                    consistentControl:=True, initialField:=prediction, allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+                effort = mReverseSolverTest.ReadPolishEffortTest: total = total + CLng(effort(0))
+                solved = halfSolved: factor = halfLambda
+                If solved Then
+                    mReverseSolverTest.CopyTrial half, actual: trialField = half: trialLambda = halfLambda: trialReady = True
+                End If
+            Case 2
+                If halfSolved And total < context(5) Then
+                    eventSolved = mReverseSolverTest.TryLoadingYieldBoundary(mReverseBaseTest, mReverseDirectionTest, ends, halfLambda, CDbl(context(7)), _
+                        CDbl(context(3)), CDbl(context(4)), CLng(context(5)) - total, eventField, eventLambda, eventInfo)
+                    effort = mReverseSolverTest.ReadPolishEffortTest: total = total + CLng(effort(0))
+                End If
+                solved = eventSolved: factor = eventLambda
+                If solved Then trialField = eventField: trialLambda = eventLambda: trialReady = True
+            Case 3, 5
+                mReverseSolverTest.DiscardStep
+                If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, 25) Then Err.Raise 5, , "Не восстановлена исходная история25."
+                factor = context(1)
+            Case 4
+                Set replay = New Collection
+                For i = 1 To 25: checked = mReverseFieldsTest(i): replay.Add checked: Next i
+                replay.Add face
+                If Not mReverseSolverTest.ReplayAcceptedFields(replay, 26) Then Err.Raise 5, , "Не воспроизведён полный материальный шаг."
+                factor = context(2)
+        End Select
+        If total > context(5) Then Err.Raise 5, , "Превышен общий бюджет последовательной проверки."
+        TestWriteReverseBinaryVector handle, Array(stage, Abs(CLng(solved)), factor, mReverseSolverTest.AcceptedRevision, total, Abs(CLng(trialReady)))
+        TestWriteReverseBinaryVector handle, effort: TestWriteReverseBinaryVector handle, eventInfo
+        If trialReady Then
+            TestWriteReverseBinaryVector handle, trialField: TestWriteReverseBinaryVector handle, Array(trialLambda)
+            TestWriteRecordedYieldStressTest handle, trialField
+        End If
+        If stage = 1 And halfSolved Then mReverseSolverTest.AcceptStep
+        If stage = 2 And eventSolved Then
+            Set replay = New Collection
+            For i = 1 To 25: checked = mReverseFieldsTest(i): replay.Add checked: Next i
+            replay.Add half: replay.Add eventField
+            If Not mReverseSolverTest.ReplayAcceptedFields(replay, 27) Then Err.Raise 5, , "Не воспроизведены последовательные материальные подшаги."
+        End If
+        mReverseSolverTest.CopyAccepted checked: TestWriteReverseBinaryVector handle, checked
+        record = 0
+        For side = -1 To 1
+            Select Case side
+                Case -1: Set material = mReverseSidesTest(1): Set steel = mReverseSidesTest(2)
+                Case 0: Set material = mReverseConcreteTest: Set steel = mReverseReinforcedTest
+                Case 1: Set material = mReverseSidesTest(3): Set steel = mReverseSidesTest(4)
+            End Select
+            For point = 1 To mReverseOperatorsTest.PointCount
+                record = record + 1: state = material.ReadNewtonYieldEventStateTest(point)
+                material.AcceptedPointDamage point, tension, compression: material.CopyAcceptedStress point, stress
+                bar = 0#: If point > mReverseOperatorsTest.ConcretePointCount Then bar = steel.AcceptedSteelStress(point)
+                TestWriteReverseBinaryVector handle, Array(point, side): TestWriteReverseBinaryVector handle, state
+                TestWriteReverseBinaryVector handle, Array(tension, compression, bar): TestWriteReverseBinaryVector handle, stress
+                For component = 1 To 19
+                    Select Case component
+                        Case 1 To 10: value = state(LBound(state) + component - 1)
+                        Case 11: value = tension
+                        Case 12: value = compression
+                        Case 13: value = bar
+                        Case Else: value = stress(component - 13)
+                    End Select
+                    If stage = 0 Then baseline(record, component) = value
+                    If stage = 3 Or stage = 5 Then
+                        If value <> baseline(record, component) Then Err.Raise 5, , "Восстановление изменило материальную историю, энергию или напряжение."
+                    End If
+                Next component
+            Next point
+        Next side
+        If stage = 3 Or stage = 5 Then
+            For i = 1 To UBound(accepted)
+                If checked(i) <> accepted(i) Then Err.Raise 5, , "Не восстановлено исходное поле."
+            Next i
+        End If
+    Next stage
+    Close #handle: handle = 0
+    If mReverseFieldsTest.Count <> 25 Or mReverseTraceTest.Count <> 25 Then Err.Raise 5, , "Изменены исходные коллекции истории."
+    TestRunSequentialEventHistory = "TOTAL_SEQUENTIAL_EVENT_HISTORY_TEST: passed=1; failed=0; outcomes recorded; original history restored; not capacity"
+    Exit Function
+TestFailure:
+    Dim failureNumber As Long, failureText As String
+    failureNumber = Err.Number: failureText = Err.Description
+    On Error Resume Next
+    If inputHandle <> 0 Then Close #inputHandle
+    If handle <> 0 Then Close #handle
+    mReverseSolverTest.DiscardStep
+    mReverseSolverTest.ReplayAcceptedFields mReverseFieldsTest, 25
+    On Error GoTo 0
+    Err.Raise failureNumber, "TestRunSequentialEventHistory", failureText
+End Function
