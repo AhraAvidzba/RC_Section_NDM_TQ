@@ -4336,7 +4336,7 @@
     "independent raw replay and detailed reporting for side-governing limit;core aggregate and native localization implemented"
   ],
   "goal_pause_tool_pending": false,
-  "goal_status": "paused",
+  "goal_status": "active",
   "goal_tool_pause_after_git_checkpoint_requested": false,
   "guide_half_confirmation756": {
     "accepted_coordinate": 0.00011677014367737244,
@@ -16191,6 +16191,168 @@
     "whole_goal_completed": false,
     "zero_increment_repeated10_times_per_point_is_numerically_identical": true
   },
+  "latest_four_part957": {
+    "accepted_revision_changes_on_replay_are_intentional": true,
+    "actual_components": 257,
+    "all256_other_components_preserved": true,
+    "cold_gain_claimed": false,
+    "comparison": {
+      "absolute_tensor_strain_RMS_difference": 2.210369725878665e-08,
+      "combined_steps_including_source_full_event": 12,
+      "earlier_predictor_and_failed_primary_effort_excluded": true,
+      "endpoint_difference_below_existing_half_field_and_lambda_thresholds": false,
+      "endpoint_field_error_relative_to_full_increment": 0.032905393624622456,
+      "endpoint_lambda_difference": 7.46114338356918e-06,
+      "existing_lambda_noise": 8.41384263466231e-06,
+      "intermediate_steps": [
+        3,
+        3,
+        2
+      ],
+      "last_intermediate_steps": 2,
+      "maximum_concrete_energy_fraction_difference": 2.6103071724348226e-05,
+      "maximum_concrete_plastic_state_difference": 8.64528466986516e-09,
+      "maximum_concrete_stress_difference_MPa": 0.000698468096124838,
+      "maximum_real_concrete_tensor_strain_difference": 4.963692582016576e-08,
+      "maximum_steel_axial_strain_difference": 2.4021001319590654e-08,
+      "same_terminal_yield_surface": true,
+      "second_event_steps": 2,
+      "selected_event": [
+        1.0,
+        18.0,
+        0.0,
+        -0.001833944985417505,
+        0.008403372477195411,
+        0.1799526819959283,
+        30.0
+      ]
+    },
+    "diagnostic_temporary_material_history_only": true,
+    "geometric_half_guard_unchanged_and_not_claimed_passed": true,
+    "half_solved": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_production_history_acceptance": true,
+    "numerical_sources_exact954": true,
+    "original25_field_concrete_state_energy_stress_and_steel_stress_restored_bitexact_twice": true,
+    "original_history_collections_not_extended": true,
+    "physical_capacity_certified": false,
+    "quarter_states": [
+      {
+        "bound_MPa": 1.2152548310605774e-06,
+        "fraction": 0.25,
+        "iterations": 3,
+        "lambda_value": 1.1035360250648911,
+        "maximum_steel_strain_utilization": 0.003602989890071595,
+        "residual_MPa": 4.950848774996561e-11,
+        "six_force_residual_MPa": 1.684249447727645e-13
+      },
+      {
+        "bound_MPa": 1.2153064498772793e-06,
+        "fraction": 0.5,
+        "iterations": 3,
+        "lambda_value": 1.1036156655249452,
+        "maximum_steel_strain_utilization": 0.0036057612885781864,
+        "residual_MPa": 3.3372189018297804e-12,
+        "six_force_residual_MPa": 1.1789746134093515e-14
+      },
+      {
+        "bound_MPa": 1.2153601828509645e-06,
+        "fraction": 0.75,
+        "iterations": 2,
+        "lambda_value": 1.1036985678272022,
+        "maximum_steel_strain_utilization": 0.0036083408370714866,
+        "residual_MPa": 3.4000664263234004e-11,
+        "six_force_residual_MPa": 4.46326103647826e-14
+      }
+    ],
+    "results": {
+      "four_committed": {
+        "bound_MPa": 1.2154167837905632e-06,
+        "lambda_value": 1.1037858949911548,
+        "maximum_steel_strain_utilization": 0.0036110341859023056,
+        "residual_MPa": 4.5462161270791446e-11,
+        "six_force_residual_MPa": 1.068656274583191e-12
+      },
+      "four_substeps": {
+        "bound_MPa": 1.2154167837905632e-06,
+        "lambda_value": 1.1037858949911548,
+        "maximum_steel_strain_utilization": 0.0036110341859023056,
+        "residual_MPa": 4.5462161270791446e-11,
+        "six_force_residual_MPa": 1.068656274583191e-12,
+        "trial_yield_MPa": 0.0
+      },
+      "full_committed": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11
+      },
+      "last_intermediate": {
+        "bound_MPa": 1.2153601828509645e-06,
+        "lambda_value": 1.1036985678272022,
+        "maximum_steel_strain_utilization": 0.0036083408370714866,
+        "residual_MPa": 3.4000664263234004e-11,
+        "six_force_residual_MPa": 4.46326103647826e-14
+      },
+      "last_intermediate_committed": {
+        "bound_MPa": 1.2153601828509645e-06,
+        "lambda_value": 1.1036985678272022,
+        "maximum_steel_strain_utilization": 0.0036083408370714866,
+        "residual_MPa": 3.4000664263234004e-11,
+        "six_force_residual_MPa": 4.46326103647826e-14
+      },
+      "one_full": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11,
+        "trial_yield_MPa": 7.105427357601002e-15
+      },
+      "restored_0": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_3": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_5": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      }
+    },
+    "second_event_solved": true,
+    "source_history25_validated": true,
+    "subdivisions": 4,
+    "two_to_four_refinement": {
+      "below_existing_field_and_lambda_noise_thresholds": false,
+      "does_not_establish_rigorous_error_bound_or_physical_capacity": true,
+      "endpoint_field_difference_relative_to_original_increment": 0.012720151887211144,
+      "endpoint_lambda_difference": 3.3406975825656104e-06,
+      "four_lambda": 1.1037858949911548,
+      "original_geometric_guard_not_changed": true,
+      "same_terminal_yield_surface": true,
+      "two_lambda": 1.1037892356887373
+    },
+    "whole_goal_completed": false
+  },
   "latest_fresh_arc_cold897": {
     "accepted_states": 32,
     "cold": {
@@ -19818,6 +19980,126 @@
     ],
     "total_budget": 30
   },
+  "latest_refined_sequential956": {
+    "accepted_revision_changes_on_replay_are_intentional": true,
+    "actual_components": 257,
+    "all256_other_components_preserved": true,
+    "cold_gain_claimed": false,
+    "comparison": {
+      "absolute_tensor_strain_RMS_difference": 1.3584654030806316e-08,
+      "combined_steps_including_source_full_event": 8,
+      "earlier_predictor_and_failed_primary_effort_excluded": true,
+      "endpoint_difference_below_existing_half_field_and_lambda_thresholds": false,
+      "endpoint_field_error_relative_to_full_increment": 0.020223240614657866,
+      "endpoint_lambda_difference": 4.120445801003569e-06,
+      "existing_lambda_noise": 8.41384263466231e-06,
+      "half_steps": 3,
+      "maximum_concrete_energy_fraction_difference": 1.695297544723577e-05,
+      "maximum_concrete_plastic_state_difference": 5.6215089432322634e-09,
+      "maximum_concrete_stress_difference_MPa": 0.00043950775489570715,
+      "maximum_real_concrete_tensor_strain_difference": 2.9735335866097964e-08,
+      "maximum_steel_axial_strain_difference": 1.5076094236577297e-08,
+      "same_terminal_yield_surface": true,
+      "second_event_steps": 3,
+      "selected_event": [
+        1.0,
+        18.0,
+        0.0,
+        -0.0035154427143343787,
+        0.008403372477195411,
+        0.2962884623557329,
+        28.0
+      ]
+    },
+    "diagnostic_temporary_material_history_only": true,
+    "geometric_half_guard_unchanged_and_not_claimed_passed": true,
+    "half_and_full_source_unchanged": true,
+    "half_solved": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_production_history_acceptance": true,
+    "numerical_sources_exact954": true,
+    "original25_field_concrete_state_energy_stress_and_steel_stress_restored_bitexact_twice": true,
+    "original_acceptance955_preserved": true,
+    "original_history_collections_not_extended": true,
+    "physical_capacity_certified": false,
+    "results": {
+      "full_committed": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11
+      },
+      "half": {
+        "bound_MPa": 1.2153099446081558e-06,
+        "lambda_value": 1.1036210573954406,
+        "maximum_steel_strain_utilization": 0.0036055200558124984,
+        "residual_MPa": 8.447016035858373e-12,
+        "six_force_residual_MPa": 5.120118321092041e-14
+      },
+      "half_committed": {
+        "bound_MPa": 1.2153099446081558e-06,
+        "lambda_value": 1.1036210573954406,
+        "maximum_steel_strain_utilization": 0.0036055200558124984,
+        "residual_MPa": 8.447016035858373e-12,
+        "six_force_residual_MPa": 5.120118321092041e-14
+      },
+      "one_full": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11,
+        "trial_yield_MPa": 7.105427357601002e-15
+      },
+      "restored_0": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_3": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_5": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "two_committed": {
+        "bound_MPa": 1.215418949057515e-06,
+        "lambda_value": 1.1037892356887373,
+        "maximum_steel_strain_utilization": 0.0036106836802035957,
+        "residual_MPa": 9.252936416202784e-14,
+        "six_force_residual_MPa": 2.947436533523379e-16
+      },
+      "two_substeps": {
+        "bound_MPa": 1.215418949057515e-06,
+        "lambda_value": 1.1037892356887373,
+        "maximum_steel_strain_utilization": 0.0036106836802035957,
+        "residual_MPa": 9.252936416202784e-14,
+        "six_force_residual_MPa": 2.947436533523379e-16,
+        "trial_yield_MPa": -3.552713678800501e-15
+      }
+    },
+    "second_event_solved": true,
+    "second_event_tolerance_factor": 0.0001,
+    "source_history25_validated": true,
+    "whole_goal_completed": false
+  },
   "latest_residual_predictor_regressions910": {
     "failed": 0,
     "macros": 5,
@@ -20081,6 +20363,124 @@
     "source_states": 56,
     "verified_pairs": 3
   },
+  "latest_sequential_history955": {
+    "accepted_revision_changes_on_replay_are_intentional": true,
+    "actual_components": 257,
+    "all256_other_components_preserved": true,
+    "cold_gain_claimed": false,
+    "comparison": {
+      "absolute_tensor_strain_RMS_difference": 1.3477599960243159e-08,
+      "combined_steps_including_source_full_event": 6,
+      "earlier_predictor_and_failed_primary_effort_excluded": true,
+      "endpoint_difference_below_existing_half_field_and_lambda_thresholds": false,
+      "endpoint_field_error_relative_to_full_increment": 0.02006387106259804,
+      "endpoint_lambda_difference": 3.648413477996826e-06,
+      "existing_lambda_noise": 8.41384263466231e-06,
+      "half_steps": 3,
+      "maximum_concrete_energy_fraction_difference": 1.63599340943215e-05,
+      "maximum_concrete_plastic_state_difference": 5.50971039867454e-09,
+      "maximum_concrete_stress_difference_MPa": 0.00043656485694487657,
+      "maximum_real_concrete_tensor_strain_difference": 2.9687973615296233e-08,
+      "maximum_steel_axial_strain_difference": 1.4905180684933504e-08,
+      "same_terminal_yield_surface": true,
+      "second_event_steps": 1,
+      "selected_event": [
+        1.0,
+        18.0,
+        0.0,
+        -0.0035154427143343787,
+        0.008403372477195411,
+        0.2962884623557329,
+        28.0
+      ]
+    },
+    "diagnostic_temporary_material_history_only": true,
+    "geometric_half_guard_unchanged_and_not_claimed_passed": true,
+    "half_solved": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_production_history_acceptance": true,
+    "numerical_sources_exact954": true,
+    "original25_field_concrete_state_energy_stress_and_steel_stress_restored_bitexact_twice": true,
+    "original_history_collections_not_extended": true,
+    "physical_capacity_certified": false,
+    "results": {
+      "full_committed": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11
+      },
+      "half": {
+        "bound_MPa": 1.2153099446081558e-06,
+        "lambda_value": 1.1036210573954406,
+        "maximum_steel_strain_utilization": 0.0036055200558124984,
+        "residual_MPa": 8.447016035858373e-12,
+        "six_force_residual_MPa": 5.120118321092041e-14
+      },
+      "half_committed": {
+        "bound_MPa": 1.2153099446081558e-06,
+        "lambda_value": 1.1036210573954406,
+        "maximum_steel_strain_utilization": 0.0036055200558124984,
+        "residual_MPa": 8.447016035858373e-12,
+        "six_force_residual_MPa": 5.120118321092041e-14
+      },
+      "one_full": {
+        "bound_MPa": 1.2154216197168304e-06,
+        "lambda_value": 1.1037933561345383,
+        "maximum_steel_strain_utilization": 0.0036101115261291897,
+        "residual_MPa": 5.989333011209401e-10,
+        "six_force_residual_MPa": 1.4140284663342218e-11,
+        "trial_yield_MPa": 7.105427357601002e-15
+      },
+      "restored_0": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_3": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "restored_5": {
+        "bound_MPa": 1.2152059824684297e-06,
+        "lambda_value": 1.1034606586655773,
+        "maximum_steel_strain_utilization": 0.0035999903633605135,
+        "residual_MPa": 1.6644509700657235e-07,
+        "six_force_residual_MPa": 8.788794258618039e-10
+      },
+      "two_committed": {
+        "bound_MPa": 1.215419255004391e-06,
+        "lambda_value": 1.1037897077210603,
+        "maximum_steel_strain_utilization": 0.003610674905174398,
+        "residual_MPa": 1.0323265642028573e-06,
+        "six_force_residual_MPa": 5.497686050956772e-07
+      },
+      "two_substeps": {
+        "bound_MPa": 1.215419255004391e-06,
+        "lambda_value": 1.1037897077210603,
+        "maximum_steel_strain_utilization": 0.003610674905174398,
+        "residual_MPa": 1.0323265642028573e-06,
+        "six_force_residual_MPa": 5.497686050956772e-07,
+        "trial_yield_MPa": -3.552713678800501e-15
+      }
+    },
+    "second_event_solved": true,
+    "source_history25_validated": true,
+    "whole_goal_completed": false
+  },
+  "latest_sequential_history_evidence": "docs/reports/evidence/Coupled6DSequentialEventHistory_2026-11-26",
   "latest_shared_curve_control_proof": {
     "absent_or_unattempted_half_roots_not_counted": true,
     "actual_components": 256,
@@ -21639,7 +22039,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "PAUSED at explicit user request after completed and published951-954. On explicit resume: compare one full event step with two sequential material-history substeps in a separate book; verify original25 history restoration; distinguish integration error from geometric curvature, retain force/steel/budget guards. This diagnostic has not started. Physical capacity, fresh cold repeat and full acceptance remain open.",
+  "next_action": "955-957 archived595 raw files/347 exact duplicate links; all hashes read back; exact saved books reconstructed from public954 plus segments; all5 sheets values/formulas/types identical public954. True path dependence remains: refined1->2 defect2.022%;2->4 defect1.272%, deltaLambda3.3407e-6. Next bounded short incoming steps with actual committed history and unchanged force/steel/local shape/budget checks, and endpoint8 refinement for remaining path error. No production acceptance, fresh cold improvement or physical capacity; goal active and pause explicitly revoked.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -21651,7 +22051,7 @@
     "publication": "Only original-target NDS after verification. Restore original control and expose recovered projection/uncertainty for outer unchanged direction/steel/peak checks.",
     "required_checks": "Actual255 source audit, focused regressions105, independent directed guide case, then true cold HardShear Both/Excel with same96probe30iteration budgets and saved reopen; no physical limit claim without mechanism."
   },
-  "no_new_experiments_added_after_pause_request": true,
+  "no_new_experiments_added_after_pause_request": false,
   "operational_arc_controller_evidence": "docs/reports/evidence/Coupled6DOperationalArcController_2026-11-25",
   "operational_cold785_summary": {
     "accepted_states": 60,
@@ -21749,13 +22149,13 @@
     "source_lambda": 1.1058869810286156
   },
   "outgoing_loading_pause_evidence": "docs/reports/evidence/Coupled6DOutgoingLoadingPause_2026-11-25",
-  "pause_after_current_stage": true,
-  "pause_checkpoint_ready": true,
+  "pause_after_current_stage": false,
+  "pause_checkpoint_ready": false,
   "pause_goal_tool_was_not_called": false,
   "pause_request": "дойди до логического завершения текущего этапа и поставь цель на паузу",
-  "pause_request_revoked": false,
-  "pause_requested_after_logical_stage": true,
-  "pause_requested_explicitly": true,
+  "pause_request_revoked": true,
+  "pause_requested_after_logical_stage": false,
+  "pause_requested_explicitly": false,
   "pause_revoked_replay_evidence": "docs/reports/evidence/Coupled6DPauseRevokedReplay_2026-11-25",
   "pause_revoked_user_message": "Паузу не включай пока я сам об этом чётко не попрошу",
   "peak_accuracy716": {
@@ -21921,7 +22321,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:951 exact half reproduced but far-seed eventF0 failed.952 existing generic detector selected event18 and solved it in2steps with independent force/yield verification.953 same-tolerance event half failed geometric criterion.954 tighter half residual~8.45e-12 leaves3.574% geometric defect, so ordinary half solve tolerance is not main cause. No thresholds relaxed, history accepted, capacity or cold gain claimed.",
+  "previous_goal_turn_classification": "progress:955 real two-substep history endpoint verified and original25 restored twice;956 tighter second equilibrium leaves2.022% endpoint defect and4.12e-6 lambda difference;957 four-step refinement independently verified and archived. No geometric/force/steel guards relaxed, production acceptance or physical capacity claimed.",
   "previous_goal_turn_revalidation": "Previous acknowledgement only deferred pure-bending CDP/SP comparison; no numerical progress claimed. Revalidated branch, terminal handles, staged926 and exact925 evidence before continuing.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
@@ -23745,6 +24145,7 @@
     3073,
     3074,
     3133,
+    3186,
     3333,
     3987,
     4235,
@@ -23810,6 +24211,7 @@
     12556,
     12646,
     12697,
+    12709,
     13003,
     13187,
     13811,
@@ -23929,6 +24331,7 @@
     34937,
     35024,
     35133,
+    35305,
     35394,
     35593,
     35629,
@@ -24040,6 +24443,7 @@
     52768,
     52825,
     52995,
+    53248,
     53259,
     53557,
     53566,
@@ -24085,8 +24489,10 @@
     61803,
     61911,
     62007,
+    62433,
     62471,
     62785,
+    62797,
     62845,
     62866,
     62904,
@@ -24099,6 +24505,7 @@
     63902,
     64100,
     64297,
+    64610,
     64786,
     65220,
     65352,
@@ -24111,6 +24518,7 @@
     66517,
     66996,
     67035,
+    67214,
     67233,
     67411,
     67422,
@@ -24228,6 +24636,7 @@
     86451,
     86463,
     86488,
+    86874,
     86985,
     87181,
     87203,
@@ -24248,6 +24657,7 @@
     89093,
     89156,
     89231,
+    89262,
     89569,
     89834,
     89910,
@@ -24316,7 +24726,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T13:31:33.609849+03:00",
+  "updated_local": "2026-11-26T13:52:41.247822+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",

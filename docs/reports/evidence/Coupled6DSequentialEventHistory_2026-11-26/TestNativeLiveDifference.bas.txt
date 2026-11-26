@@ -1,0 +1,80 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет целиком рабочее управляемое решение на точном префиксе; номер материальной точки и уровень не передаются решателю.
+Public Sub TestRunReversePolishModel(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal calibration As Variant, ByVal options As Variant)
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced: Set mReverseSidesTest = sides
+    mReverseCalibrationTest = calibration: mReverseOptionsTest = options: mReverseModulusTest = calibration(0)
+    path.Components mReverseBaseTest, mReverseDirectionTest
+    mHardPreparedPathTest = mPolishRootTest & "\Native\LiveDifference"
+    TestWriteHardPreparedOperators operators, mHardPreparedPathTest & ".Operators.csv"
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double
+    Dim original() As Double, projection() As Double, context() As Double
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, original, projection, context
+    If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена исходная история живого перехода."
+    Dim movement() As Double, seed() As Double, coordinate As Double, spacing As Double, degree As Long
+    movement = accepted
+    For degree = 1 To UBound(movement): movement(degree) = accepted(degree) - previous(degree): Next degree
+    If Not solver.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then _
+        Err.Raise 5, , "Не построена исходная пространственная мера."
+    Dim fraction As Double, currentFactor As Double, previousFactor As Double, seedFactor As Double, seedVariant As Variant
+    trace.ReadPoint fields.Count, fraction, currentFactor
+    trace.ReadPoint fields.Count - 1, fraction, previousFactor
+    seedFactor = currentFactor + 0.5 * (currentFactor - previousFactor): seed = accepted
+    For degree = 1 To solver.PhysicalDegreeCount: seed(degree) = accepted(degree) + 0.5 * movement(degree): Next degree
+    seedVariant = seed
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".csv" For Output As #handle
+    Print #handle, "MODE;WorkingTryDeformationStep;LiveMatrixCapture;NoSuppliedMaterialPointOrLevel;NoCapacityCertification"
+    Print #handle, "INPUT;" & TestOnsetNumber(seedFactor) & ";" & TestOnsetNumber(coordinate + 0.5 * spacing) & TestHardPreparedVector(seed)
+    Dim solved As Boolean, started As Double, seconds As Double, factor As Double, revision As Long
+    revision = solver.AcceptedRevision: started = Timer
+    solved = solver.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate + 0.5 * spacing, seedFactor, _
+        factor, options(3), options(4), CLng(options(2)), initialField:=seedVariant, allowHybridRecovery:=True, conditionHybridRecovery:=True, referenceLambda:=currentFactor)
+    seconds = Timer - started
+    Print #handle, "RESULT;" & CStr(solved) & ";" & TestOnsetNumber(seconds) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(solver.ReadPolishEffortTest)
+    Print #handle, "DETAILS;" & solver.ResultMeta.DiagnosticDetails
+    Dim check() As Double: solver.CopyAccepted check
+    If solver.AcceptedRevision <> revision Then Err.Raise 5, , "Живой решатель изменил принятую ревизию до приёмки."
+    For degree = 1 To UBound(accepted)
+        If check(degree) <> accepted(degree) Then Err.Raise 5, , "Живой решатель изменил принятое поле до приёмки."
+    Next degree
+    If solved Then
+        Dim recovered() As Double, bound As Double, changed As Boolean
+        changed = solver.CopyRecoveredControl(recovered, bound)
+        Print #handle, "RECOVERED;" & CStr(changed) & ";" & TestOnsetNumber(bound) & ";" & TestOnsetNumber(factor - currentFactor)
+        Dim field() As Double, actual() As Double, unchanged As Boolean, verified As Boolean, forward As Boolean
+        Dim advance As Double, reference As Double, steel As Double, load(1 To 6) As Double
+        solver.CopyTrial field, actual
+        Print #handle, "FINAL;" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+        solver.DiscardStep
+        For degree = 1 To 6: load(degree) = mReverseBaseTest(degree) + factor * mReverseDirectionTest(degree): Next degree
+        seedVariant = field
+        verified = solver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), options(3), options(4), 1, initialField:=seedVariant)
+        If verified Then
+            solver.CopyTrial check, actual: unchanged = True
+            For degree = 1 To UBound(field): If field(degree) <> check(degree) Then unchanged = False
+            Next degree
+            forward = solver.SpatialIncrementAdvances(previous, accepted, field, advance, reference)
+            steel = reinforced.TrialSteelUtilization
+        End If
+        Print #handle, "NATIVE;" & CStr(verified) & ";" & CStr(unchanged) & ";" & CStr(forward) & ";" & TestOnsetNumber(steel)
+        If verified And unchanged And forward And steel <= 1# And factor-currentFactor > bound + 8#*options(4)*(1#+Abs(currentFactor)) Then
+            solver.AcceptStep
+            Set mReverseFieldsTest = New Collection
+            For degree = 1 To fields.Count: check = fields(degree): mReverseFieldsTest.Add check: Next degree
+            Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+            mReverseFieldsTest.Add field: mReverseTraceTest.Add 1#, factor
+            TestExportReverseCandidate 20
+            Print #handle, "ACCEPTED;" & TestOnsetNumber(factor) & ";" & CStr(solver.AcceptedRevision)
+        Else
+            solver.DiscardStep
+            Print #handle, "STOP;UnverifiedOrUnresolvedStateNotAccepted;NotPhysicalFailure"
+        End If
+    Else
+        solver.DiscardStep
+        Print #handle, "STOP;NumericalRecoveryNotFound;NotPhysicalFailure"
+    End If
+    Close #handle: mPolishExecutedTest = True
+End Sub
