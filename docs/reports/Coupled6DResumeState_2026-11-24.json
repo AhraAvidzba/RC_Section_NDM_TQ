@@ -6551,6 +6551,18 @@
   },
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
+  "latest_actual_cold890_comparison": {
+    "H_growth_change_did_not_affect_actual_cold_path": true,
+    "active_final_control": "пространственная мера проверенной знаковой дуги",
+    "all56_fields_fractions_lambdas_bit_identical880": true,
+    "clean_performance_comparison_not_claimed": true,
+    "global_probes_max": 96,
+    "observed_seconds": 731.138671875,
+    "own_study891_overlapped_cold": true,
+    "physical_capacity_not_certified": true,
+    "previous_observed_seconds": 748.125,
+    "verified_accelerated_H_attempts": 0
+  },
   "latest_actual_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold853LoadingSecantCold_20261125",
   "latest_actual_cold_summary": {
     "accepted_states": 49,
@@ -7569,6 +7581,1144 @@
     "last_equilibrium_residual_MPa": 5.514533274464384e-11,
     "stress_MPa": 0,
     "weak_equation_MPa": 0
+  },
+  "latest_cold56_larger_H_pairs": {
+    "actual_component_count": 256,
+    "all_working_sources_exact881": true,
+    "cases": [
+      {
+        "actual_turn": false,
+        "case": 1,
+        "field_error": 0.00013437642667668236,
+        "full_output_exact_after_half": true,
+        "full_steps": 1,
+        "half_steps": 1,
+        "joint_error": 0.00014742007002657267,
+        "lambda_bound": 4.086604293427787e-07,
+        "lambda_error": 4.956975052650137e-09,
+        "primary_iterations": 2,
+        "probes": 2,
+        "ratio": 1.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.0001534000004123603,
+            "H_increment": 5.645734112635567e-09,
+            "H_target": 0.00015340000041423103,
+            "direction_cosine": 0.9999999095477419,
+            "lambda_value": 1.1024449607128735,
+            "length_over_incoming": 1.0002620461538483,
+            "maximum_three_station_steel_utilization": 0.004782002362810003,
+            "raw_force_residual_MPa": 8.421247238638226e-16,
+            "weak": {
+              "bound_MPa": 1.2145476597213046e-06,
+              "force_residual_MPa": 4.715898453637406e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244496071287,
+              "residual_MPa": 6.055195407583813e-13,
+              "steel_utilization": 0.00478200236281
+            }
+          },
+          "Half": {
+            "H_MPa": 0.00015339717754729793,
+            "H_increment": 2.822869050273999e-09,
+            "H_target": 0.00015339717754623937,
+            "direction_cosine": 0.9999999515079337,
+            "lambda_value": 1.1024449628937734,
+            "length_over_incoming": 0.5000970149660192,
+            "maximum_three_station_steel_utilization": 0.004782016224251145,
+            "raw_force_residual_MPa": 5.052748343182936e-16,
+            "weak": {
+              "bound_MPa": 1.214547661134851e-06,
+              "force_residual_MPa": 4.0421986745463485e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244496289377,
+              "residual_MPa": 4.809884586974567e-13,
+              "steel_utilization": 0.00478201622425114
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "actual_turn": false,
+        "case": 2,
+        "field_error": 0.00026941124057309454,
+        "full_output_exact_after_half": true,
+        "full_steps": 1,
+        "half_steps": 1,
+        "joint_error": 0.00029546191289031055,
+        "lambda_bound": 8.16540902555564e-07,
+        "lambda_error": 1.9839204279392675e-08,
+        "primary_iterations": 2,
+        "probes": 2,
+        "ratio": 2.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015340564615021462,
+            "H_increment": 1.1291471966961251e-08,
+            "H_target": 0.00015340564615021432,
+            "direction_cosine": 0.9999997852981959,
+            "lambda_value": 1.102444941468839,
+            "length_over_incoming": 2.0007996689382463,
+            "maximum_three_station_steel_utilization": 0.004781974634826928,
+            "raw_force_residual_MPa": 2.8632240611369967e-15,
+            "weak": {
+              "bound_MPa": 1.2145476472483222e-06,
+              "force_residual_MPa": 2.5175673240165264e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244494146884,
+              "residual_MPa": 1.3732942734379083e-12,
+              "steel_utilization": 0.00478197463482693
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534000004151371,
+            "H_increment": 5.645736889439961e-09,
+            "H_target": 0.00015340000041423103,
+            "direction_cosine": 0.9999999095477825,
+            "lambda_value": 1.1024449607128708,
+            "length_over_incoming": 1.0002625380638102,
+            "maximum_three_station_steel_utilization": 0.004782002362796566,
+            "raw_force_residual_MPa": 4.195945540027544e-16,
+            "weak": {
+              "bound_MPa": 1.2145476597213046e-06,
+              "force_residual_MPa": 2.0210993372731743e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244496071287,
+              "residual_MPa": 2.6049681075418496e-13,
+              "steel_utilization": 0.00478200236279656
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "actual_turn": false,
+        "case": 3,
+        "field_error": 0.0005395752172513966,
+        "full_output_exact_after_half": true,
+        "full_steps": 1,
+        "half_steps": 1,
+        "joint_error": 0.0005917424910908465,
+        "lambda_bound": 1.6263544056608607e-06,
+        "lambda_error": 7.948411595570803e-08,
+        "primary_iterations": 2,
+        "probes": 2,
+        "ratio": 4.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015341693762218535,
+            "H_increment": 2.2582943937690106e-08,
+            "H_target": 0.0001534169376221809,
+            "direction_cosine": 0.9999993749852708,
+            "lambda_value": 1.1024448433359155,
+            "length_over_incoming": 4.002700821100719,
+            "maximum_three_station_steel_utilization": 0.004781919158771595,
+            "raw_force_residual_MPa": 3.0316490059097614e-14,
+            "weak": {
+              "bound_MPa": 1.2145475836436518e-06,
+              "force_residual_MPa": 2.947436533523379e-14,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244484333592,
+              "residual_MPa": 1.2360134075094231e-11,
+              "steel_utilization": 0.00478191915877159
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534056461502145,
+            "H_increment": 1.1291471966852831e-08,
+            "H_target": 0.00015340564615021432,
+            "direction_cosine": 0.9999997852984891,
+            "lambda_value": 1.1024449414688648,
+            "length_over_incoming": 2.0007996695297927,
+            "maximum_three_station_steel_utilization": 0.004781974634826551,
+            "raw_force_residual_MPa": 1.6842494477276451e-15,
+            "weak": {
+              "bound_MPa": 1.2145476472483352e-06,
+              "force_residual_MPa": 5.558023177501229e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244494146886,
+              "residual_MPa": 5.132561042842099e-13,
+              "steel_utilization": 0.00478197463482655
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "actual_turn": false,
+        "case": 4,
+        "field_error": 0.0010817253954232546,
+        "full_output_exact_after_half": true,
+        "full_steps": 2,
+        "half_steps": 1,
+        "joint_error": 0.0011863851026683702,
+        "lambda_bound": 3.1960947979682466e-06,
+        "lambda_error": 3.1899320429573663e-07,
+        "primary_iterations": 3,
+        "probes": 2,
+        "ratio": 8.0,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015343952056611398,
+            "H_increment": 4.516588786632712e-08,
+            "H_target": 0.00015343952056611407,
+            "direction_cosine": 0.999997903631117,
+            "lambda_value": 1.1024444075611595,
+            "length_over_incoming": 8.009823781807228,
+            "maximum_three_station_steel_utilization": 0.00478180812751929,
+            "raw_force_residual_MPa": 5.052748343182936e-16,
+            "weak": {
+              "bound_MPa": 1.2145473011970482e-06,
+              "force_residual_MPa": 7.342904695048201e-16,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244440756116,
+              "residual_MPa": 1.949551631241775e-13,
+              "steel_utilization": 0.00478180812751929
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534169376221841,
+            "H_increment": 2.2582943936443273e-08,
+            "H_target": 0.0001534169376221809,
+            "direction_cosine": 0.9999993749879701,
+            "lambda_value": 1.102444843336031,
+            "length_over_incoming": 4.002700818875224,
+            "maximum_three_station_steel_utilization": 0.004781919158773904,
+            "raw_force_residual_MPa": 2.2568942599550444e-14,
+            "weak": {
+              "bound_MPa": 1.2145475836437233e-06,
+              "force_residual_MPa": 2.3747917212959797e-14,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244484333603,
+              "residual_MPa": 7.19520764583953e-12,
+              "steel_utilization": 0.0047819191587739
+            }
+          }
+        },
+        "solved": true
+      },
+      {
+        "case": 5,
+        "primary_iterations": 30,
+        "probes": 1,
+        "ratio": 16.0,
+        "solved": false
+      },
+      {
+        "case": 6,
+        "primary_iterations": 30,
+        "probes": 2,
+        "ratio": 32.0,
+        "solved": false
+      }
+    ],
+    "global_working_continuation_unchanged": true,
+    "independently_rebuilt_roots": 8,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_history_or_capacity_acceptance": true,
+    "original_cold_history_equilibrium": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "DiagnosticReSolve",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.10428336769878,
+      "meta": [
+        "4",
+        "0",
+        "Контрольное повторное равновесие. Контроллер его не принимал",
+        " это не предел."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.01
+      ],
+      "orientation": [
+        {
+          "current_length": 2.8691419507951455e-05,
+          "field": 3,
+          "previous_length": 2.732475555800678e-05,
+          "signed_advance": 2.8653276141942285e-05
+        },
+        {
+          "current_length": 5.3409483407228394e-05,
+          "field": 4,
+          "previous_length": 2.8691419507951455e-05,
+          "signed_advance": 4.6254947901656596e-05
+        },
+        {
+          "current_length": 3.2689940336340645e-05,
+          "field": 5,
+          "previous_length": 5.3409483407228394e-05,
+          "signed_advance": 3.134750362800135e-05
+        },
+        {
+          "current_length": 4.267402409347975e-05,
+          "field": 6,
+          "previous_length": 3.2689940336340645e-05,
+          "signed_advance": 4.038270384485889e-05
+        },
+        {
+          "current_length": 3.217498149484515e-06,
+          "field": 7,
+          "previous_length": 4.267402409347975e-05,
+          "signed_advance": 2.906725801351069e-06
+        },
+        {
+          "current_length": 3.1269185807350574e-06,
+          "field": 8,
+          "previous_length": 3.217498149484515e-06,
+          "signed_advance": 2.765256162312595e-06
+        },
+        {
+          "current_length": 6.743789996717289e-06,
+          "field": 9,
+          "previous_length": 3.1269185807350574e-06,
+          "signed_advance": 1.538159686099474e-06
+        },
+        {
+          "current_length": 3.950483862327787e-06,
+          "field": 10,
+          "previous_length": 6.743789996717289e-06,
+          "signed_advance": 1.2023478252433907e-06
+        },
+        {
+          "current_length": 7.72055062677927e-06,
+          "field": 11,
+          "previous_length": 3.950483862327787e-06,
+          "signed_advance": 7.36165771821546e-06
+        },
+        {
+          "current_length": 5.130216874609992e-06,
+          "field": 12,
+          "previous_length": 7.72055062677927e-06,
+          "signed_advance": 4.782812514948704e-06
+        },
+        {
+          "current_length": 1.6861850577768636e-06,
+          "field": 13,
+          "previous_length": 5.130216874609992e-06,
+          "signed_advance": 1.5249124183928007e-06
+        },
+        {
+          "current_length": 2.16047880541392e-06,
+          "field": 14,
+          "previous_length": 1.6861850577768636e-06,
+          "signed_advance": 2.1344065711553146e-06
+        },
+        {
+          "current_length": 2.712649072653542e-06,
+          "field": 15,
+          "previous_length": 2.16047880541392e-06,
+          "signed_advance": 2.7118848201581836e-06
+        },
+        {
+          "current_length": 1.6313596623508114e-06,
+          "field": 16,
+          "previous_length": 2.712649072653542e-06,
+          "signed_advance": 1.5914535050252572e-06
+        },
+        {
+          "current_length": 2.1518818184717736e-06,
+          "field": 17,
+          "previous_length": 1.6313596623508114e-06,
+          "signed_advance": 1.976428190102783e-06
+        },
+        {
+          "current_length": 2.562125110176509e-06,
+          "field": 18,
+          "previous_length": 2.1518818184717736e-06,
+          "signed_advance": 2.4664183376551014e-06
+        },
+        {
+          "current_length": 3.409952089069204e-06,
+          "field": 19,
+          "previous_length": 2.562125110176509e-06,
+          "signed_advance": 3.3727403953508936e-06
+        },
+        {
+          "current_length": 1.7137081783576366e-06,
+          "field": 20,
+          "previous_length": 3.409952089069204e-06,
+          "signed_advance": 1.0811987685591452e-06
+        },
+        {
+          "current_length": 3.007747832677635e-09,
+          "field": 21,
+          "previous_length": 1.7137081783576366e-06,
+          "signed_advance": 1.6084888296515537e-09
+        },
+        {
+          "current_length": 1.8013464900307915e-10,
+          "field": 22,
+          "previous_length": 3.007747832677635e-09,
+          "signed_advance": 1.4739002650620108e-10
+        },
+        {
+          "current_length": 3.602692884572097e-10,
+          "field": 23,
+          "previous_length": 1.8013464900307915e-10,
+          "signed_advance": 3.6026928842267455e-10
+        },
+        {
+          "current_length": 1.0433648721192045e-10,
+          "field": 24,
+          "previous_length": 3.602692884572097e-10,
+          "signed_advance": 1.0433648720516724e-10
+        },
+        {
+          "current_length": 1.0446571988725077e-10,
+          "field": 25,
+          "previous_length": 1.0433648721192045e-10,
+          "signed_advance": 1.0433648728918442e-10
+        },
+        {
+          "current_length": 1.04345843326022e-10,
+          "field": 26,
+          "previous_length": 1.0446571988725077e-10,
+          "signed_advance": 1.0420856816706839e-10
+        },
+        {
+          "current_length": 1.0434584236740112e-10,
+          "field": 27,
+          "previous_length": 1.04345843326022e-10,
+          "signed_advance": 1.0434584235121892e-10
+        },
+        {
+          "current_length": 1.0434584959109879e-10,
+          "field": 28,
+          "previous_length": 1.0434584236740112e-10,
+          "signed_advance": 1.0434584958627236e-10
+        },
+        {
+          "current_length": 6.521615828344352e-11,
+          "field": 29,
+          "previous_length": 1.0434584959109879e-10,
+          "signed_advance": 6.521615828286279e-11
+        },
+        {
+          "current_length": 8.408115930538871e-11,
+          "field": 30,
+          "previous_length": 6.521615828344352e-11,
+          "signed_advance": 8.158170039138512e-11
+        },
+        {
+          "current_length": 1.0273703576323085e-10,
+          "field": 31,
+          "previous_length": 8.408115930538871e-11,
+          "signed_advance": 1.0163141445599581e-10
+        },
+        {
+          "current_length": 1.0216397714220053e-10,
+          "field": 32,
+          "previous_length": 1.0273703576323085e-10,
+          "signed_advance": 1.0133423869522905e-10
+        },
+        {
+          "current_length": 1.042217862290052e-10,
+          "field": 33,
+          "previous_length": 1.0216397714220053e-10,
+          "signed_advance": 1.0127184206409473e-10
+        },
+        {
+          "current_length": 1.0302075218040426e-10,
+          "field": 34,
+          "previous_length": 1.042217862290052e-10,
+          "signed_advance": 9.93009900401613e-11
+        },
+        {
+          "current_length": 1.0302041058088613e-10,
+          "field": 35,
+          "previous_length": 1.0302075218040426e-10,
+          "signed_advance": 1.0302041050393846e-10
+        },
+        {
+          "current_length": 1.0302036620791774e-10,
+          "field": 36,
+          "previous_length": 1.0302041058088613e-10,
+          "signed_advance": 1.0302036620668745e-10
+        },
+        {
+          "current_length": 1.2877539638122642e-10,
+          "field": 37,
+          "previous_length": 1.0302036620791774e-10,
+          "signed_advance": 1.2877539637925947e-10
+        },
+        {
+          "current_length": 1.6096914707894097e-10,
+          "field": 38,
+          "previous_length": 1.2877539638122642e-10,
+          "signed_advance": 1.6096914707505622e-10
+        },
+        {
+          "current_length": 2.01211282477129e-10,
+          "field": 39,
+          "previous_length": 1.6096914707894097e-10,
+          "signed_advance": 2.0121128246961502e-10
+        },
+        {
+          "current_length": 2.5151386527847035e-10,
+          "field": 40,
+          "previous_length": 2.01211282477129e-10,
+          "signed_advance": 2.515138652636944e-10
+        },
+        {
+          "current_length": 3.1439195904646463e-10,
+          "field": 41,
+          "previous_length": 2.5151386527847035e-10,
+          "signed_advance": 3.1439195901763527e-10
+        },
+        {
+          "current_length": 3.929893703715946e-10,
+          "field": 42,
+          "previous_length": 3.1439195904646463e-10,
+          "signed_advance": 3.9298937031543e-10
+        },
+        {
+          "current_length": 4.912358062917729e-10,
+          "field": 43,
+          "previous_length": 3.929893703715946e-10,
+          "signed_advance": 4.912358061818233e-10
+        },
+        {
+          "current_length": 6.14043342481505e-10,
+          "field": 44,
+          "previous_length": 4.912358062917729e-10,
+          "signed_advance": 6.140433422669593e-10
+        },
+        {
+          "current_length": 7.675519666754514e-10,
+          "field": 45,
+          "previous_length": 6.14043342481505e-10,
+          "signed_advance": 7.675519662562458e-10
+        },
+        {
+          "current_length": 9.594365056103387e-10,
+          "field": 46,
+          "previous_length": 7.675519666754514e-10,
+          "signed_advance": 9.594365047916164e-10
+        },
+        {
+          "current_length": 1.1992902386409422e-09,
+          "field": 47,
+          "previous_length": 9.594365056103387e-10,
+          "signed_advance": 1.199290237041398e-09
+        },
+        {
+          "current_length": 1.4991043760308547e-09,
+          "field": 48,
+          "previous_length": 1.1992902386409422e-09,
+          "signed_advance": 1.4991043729063162e-09
+        },
+        {
+          "current_length": 1.8738673208020533e-09,
+          "field": 49,
+          "previous_length": 1.4991043760308547e-09,
+          "signed_advance": 1.8738673146978607e-09
+        },
+        {
+          "current_length": 2.342313622653893e-09,
+          "field": 50,
+          "previous_length": 1.8738673208020533e-09,
+          "signed_advance": 2.3423136107278065e-09
+        },
+        {
+          "current_length": 2.9278599915649658e-09,
+          "field": 51,
+          "previous_length": 2.342313622653893e-09,
+          "signed_advance": 2.9278599682635824e-09
+        },
+        {
+          "current_length": 3.6597750013241474e-09,
+          "field": 52,
+          "previous_length": 2.9278599915649658e-09,
+          "signed_advance": 3.659774955790761e-09
+        },
+        {
+          "current_length": 4.5746407886601405e-09,
+          "field": 53,
+          "previous_length": 3.6597750013241474e-09,
+          "signed_advance": 4.574640699675016e-09
+        },
+        {
+          "current_length": 5.718179442594215e-09,
+          "field": 54,
+          "previous_length": 4.5746407886601405e-09,
+          "signed_advance": 5.7181792686640115e-09
+        },
+        {
+          "current_length": 7.147534930094791e-09,
+          "field": 55,
+          "previous_length": 5.718179442594215e-09,
+          "signed_advance": 7.147534590068854e-09
+        },
+        {
+          "current_length": 8.93412381963408e-09,
+          "field": 56,
+          "previous_length": 7.147534930094791e-09,
+          "signed_advance": 8.934123154739951e-09
+        },
+        {
+          "current_length": 3.576062472875231e-08,
+          "field": 57,
+          "previous_length": 8.93412381963408e-09,
+          "signed_advance": 3.5760602377932374e-08
+        }
+      ],
+      "phase": "Cold56H.Case4Half.Sequence",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 6.62037037037037e-07,
+          "force_residual_MPa": 2.097972770013772e-16,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 0.25,
+          "residual_MPa": 3.4861002973229915e-14,
+          "steel_utilization": 0.00060954479702768
+        },
+        {
+          "bound_MPa": 8.240740740740741e-07,
+          "force_residual_MPa": 5.052748343182936e-16,
+          "fraction": 1.0,
+          "index": 2,
+          "lambda": 0.5,
+          "residual_MPa": 8.870681966755001e-14,
+          "steel_utilization": 0.00121908959405536
+        },
+        {
+          "bound_MPa": 9.861111111111112e-07,
+          "force_residual_MPa": 3.746727425432592e-10,
+          "fraction": 1.0,
+          "index": 3,
+          "lambda": 0.75,
+          "residual_MPa": 1.7501566862421214e-10,
+          "steel_utilization": 0.0018283898092604
+        },
+        {
+          "bound_MPa": 1.1481481481481482e-06,
+          "force_residual_MPa": 1.6017212247889905e-13,
+          "fraction": 1.0,
+          "index": 4,
+          "lambda": 1.0,
+          "residual_MPa": 9.241792444172892e-13,
+          "steel_utilization": 0.0024116343422555
+        },
+        {
+          "bound_MPa": 1.1824553764640373e-06,
+          "force_residual_MPa": 4.5202711960343926e-10,
+          "fraction": 1.0,
+          "index": 5,
+          "lambda": 1.0529311522588,
+          "residual_MPa": 3.598856512278259e-09,
+          "steel_utilization": 0.00261635366427362
+        },
+        {
+          "bound_MPa": 1.2090585959465166e-06,
+          "force_residual_MPa": 8.090349301373527e-08,
+          "fraction": 1.0,
+          "index": 6,
+          "lambda": 1.09397611946034,
+          "residual_MPa": 7.939878532425837e-08,
+          "steel_utilization": 0.00393024841662227
+        },
+        {
+          "bound_MPa": 1.2119558927550482e-06,
+          "force_residual_MPa": 2.1526205239718336e-09,
+          "fraction": 1.0,
+          "index": 7,
+          "lambda": 1.09844623453636,
+          "residual_MPa": 2.1787509517210866e-09,
+          "steel_utilization": 0.00397022021534495
+        },
+        {
+          "bound_MPa": 1.213560674030115e-06,
+          "force_residual_MPa": 1.3768343436553283e-09,
+          "fraction": 1.0,
+          "index": 8,
+          "lambda": 1.10092218278932,
+          "residual_MPa": 1.4347209442624326e-09,
+          "steel_utilization": 0.0040910644344458
+        },
+        {
+          "bound_MPa": 1.2066270962233258e-06,
+          "force_residual_MPa": 8.198522091670722e-11,
+          "fraction": 1.0,
+          "index": 9,
+          "lambda": 1.09022466274456,
+          "residual_MPa": 1.315934910952471e-10,
+          "steel_utilization": 0.00410622483339314
+        },
+        {
+          "bound_MPa": 1.2093683622509556e-06,
+          "force_residual_MPa": 1.1372051007869975e-07,
+          "fraction": 1.0,
+          "index": 10,
+          "lambda": 1.09445404461576,
+          "residual_MPa": 7.76227725567645e-07,
+          "steel_utilization": 0.00423497670103606
+        },
+        {
+          "bound_MPa": 1.2119754034958055e-06,
+          "force_residual_MPa": 5.183294517876305e-11,
+          "fraction": 1.0,
+          "index": 11,
+          "lambda": 1.0984763368221,
+          "residual_MPa": 1.885199599888348e-09,
+          "steel_utilization": 0.00454567174607796
+        },
+        {
+          "bound_MPa": 1.2130281291062026e-06,
+          "force_residual_MPa": 6.182007281394262e-10,
+          "fraction": 1.0,
+          "index": 12,
+          "lambda": 1.10010054204957,
+          "residual_MPa": 1.2806653071351093e-07,
+          "steel_utilization": 0.00471414526644702
+        },
+        {
+          "bound_MPa": 1.213034090837088e-06,
+          "force_residual_MPa": 2.120638479633878e-12,
+          "fraction": 1.0,
+          "index": 13,
+          "lambda": 1.10010974014865,
+          "residual_MPa": 2.8924950786326023e-10,
+          "steel_utilization": 0.00476728841029795
+        },
+        {
+          "bound_MPa": 1.213092693210048e-06,
+          "force_residual_MPa": 4.454118490886888e-07,
+          "fraction": 1.0,
+          "index": 14,
+          "lambda": 1.10020015523836,
+          "residual_MPa": 8.612071411562283e-07,
+          "steel_utilization": 0.0048322500546053
+        },
+        {
+          "bound_MPa": 1.2130985088030482e-06,
+          "force_residual_MPa": 7.322834209602587e-07,
+          "fraction": 1.0,
+          "index": 15,
+          "lambda": 1.10020912786756,
+          "residual_MPa": 7.322834207901252e-07,
+          "steel_utilization": 0.00491278500330251
+        },
+        {
+          "bound_MPa": 1.213442745483948e-06,
+          "force_residual_MPa": 5.490653199592124e-13,
+          "fraction": 1.0,
+          "index": 16,
+          "lambda": 1.10074023588952,
+          "residual_MPa": 7.267086932216671e-11,
+          "steel_utilization": 0.00492999996902067
+        },
+        {
+          "bound_MPa": 1.214520905209741e-06,
+          "force_residual_MPa": 2.085947452342649e-11,
+          "fraction": 1.0,
+          "index": 17,
+          "lambda": 1.1024036823236,
+          "residual_MPa": 2.3156433437421242e-09,
+          "steel_utilization": 0.00487775296741098
+        },
+        {
+          "bound_MPa": 1.2154069938327472e-06,
+          "force_residual_MPa": 1.6842494477276451e-15,
+          "fraction": 1.0,
+          "index": 18,
+          "lambda": 1.10377079048481,
+          "residual_MPa": 7.01236323782245e-13,
+          "steel_utilization": 0.00484834605163616
+        },
+        {
+          "bound_MPa": 1.2157392198047649e-06,
+          "force_residual_MPa": 2.7554320964824273e-13,
+          "fraction": 1.0,
+          "index": 19,
+          "lambda": 1.10428336769878,
+          "residual_MPa": 5.5144777633131525e-11,
+          "steel_utilization": 0.0048159571192246
+        },
+        {
+          "bound_MPa": 1.2145490496252953e-06,
+          "force_residual_MPa": 4.0894502928023476e-11,
+          "fraction": 1.0,
+          "index": 20,
+          "lambda": 1.10244710513617,
+          "residual_MPa": 1.0500372460420238e-08,
+          "steel_utilization": 0.00478226466395898
+        },
+        {
+          "bound_MPa": 1.2145474933681326e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 21,
+          "lambda": 1.10244470405369,
+          "residual_MPa": 2.8236087513261454e-12,
+          "steel_utilization": 0.00478218258590575
+        },
+        {
+          "bound_MPa": 1.2145474880341779e-06,
+          "force_residual_MPa": 6.231722956592287e-15,
+          "fraction": 1.0,
+          "index": 22,
+          "lambda": 1.10244469582416,
+          "residual_MPa": 2.2278698796809188e-11,
+          "steel_utilization": 0.00478218110372853
+        },
+        {
+          "bound_MPa": 1.2145474773486713e-06,
+          "force_residual_MPa": 1.6783782160110175e-15,
+          "fraction": 1.0,
+          "index": 23,
+          "lambda": 1.10244467933795,
+          "residual_MPa": 6.963268395047961e-13,
+          "steel_utilization": 0.00478217813941098
+        },
+        {
+          "bound_MPa": 1.214547474249499e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 24,
+          "lambda": 1.10244467455637,
+          "residual_MPa": 1.6235608398060958e-11,
+          "steel_utilization": 0.00478217728094557
+        },
+        {
+          "bound_MPa": 1.2145474670186677e-06,
+          "force_residual_MPa": 5.170645804523871e-14,
+          "fraction": 1.0,
+          "index": 25,
+          "lambda": 1.10244466340023,
+          "residual_MPa": 9.35729651315581e-12,
+          "steel_utilization": 0.00478217674655407
+        },
+        {
+          "bound_MPa": 1.2145474628324991e-06,
+          "force_residual_MPa": 5.423283221683017e-14,
+          "fraction": 1.0,
+          "index": 26,
+          "lambda": 1.10244465694157,
+          "residual_MPa": 1.2648831689086176e-11,
+          "steel_utilization": 0.00478217585726072
+        },
+        {
+          "bound_MPa": 1.2145474586452546e-06,
+          "force_residual_MPa": 4.715898453637406e-15,
+          "fraction": 1.0,
+          "index": 27,
+          "lambda": 1.10244465048125,
+          "residual_MPa": 6.781247113320232e-13,
+          "steel_utilization": 0.00478217496807303
+        },
+        {
+          "bound_MPa": 1.214547454455489e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 28,
+          "lambda": 1.10244464401704,
+          "residual_MPa": 5.39748746999219e-13,
+          "steel_utilization": 0.00478217407884611
+        },
+        {
+          "bound_MPa": 1.2145474518358558e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 29,
+          "lambda": 1.10244463997532,
+          "residual_MPa": 2.2458516166570797e-13,
+          "steel_utilization": 0.00478217352308298
+        },
+        {
+          "bound_MPa": 1.2145474591177027e-06,
+          "force_residual_MPa": 1.2800295802730103e-14,
+          "fraction": 1.0,
+          "index": 30,
+          "lambda": 1.10244465121017,
+          "residual_MPa": 6.5232151819950845e-12,
+          "steel_utilization": 0.00478217153197752
+        },
+        {
+          "bound_MPa": 1.2145474666628213e-06,
+          "force_residual_MPa": 1.908254624275422e-13,
+          "fraction": 1.0,
+          "index": 31,
+          "lambda": 1.10244466285121,
+          "residual_MPa": 9.20889479038775e-11,
+          "steel_utilization": 0.00478216997738086
+        },
+        {
+          "bound_MPa": 1.214547468991099e-06,
+          "force_residual_MPa": 1.65224870822082e-13,
+          "fraction": 1.0,
+          "index": 32,
+          "lambda": 1.10244466644341,
+          "residual_MPa": 4.426401346152575e-11,
+          "steel_utilization": 0.00478216926145912
+        },
+        {
+          "bound_MPa": 1.21454746414345e-06,
+          "force_residual_MPa": 1.1318156288729776e-13,
+          "fraction": 1.0,
+          "index": 33,
+          "lambda": 1.10244465896418,
+          "residual_MPa": 1.2081780915345133e-10,
+          "steel_utilization": 0.00478216828942554
+        },
+        {
+          "bound_MPa": 1.2145474649701435e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 34,
+          "lambda": 1.10244466023965,
+          "residual_MPa": 3.886021821171426e-13,
+          "steel_utilization": 0.00478216796897844
+        },
+        {
+          "bound_MPa": 1.2145474657917815e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 35,
+          "lambda": 1.10244466150732,
+          "residual_MPa": 5.752615723185472e-13,
+          "steel_utilization": 0.00478216764830777
+        },
+        {
+          "bound_MPa": 1.2145474666116889e-06,
+          "force_residual_MPa": 2.694799116364232e-15,
+          "fraction": 1.0,
+          "index": 36,
+          "lambda": 1.10244466277232,
+          "residual_MPa": 6.644554156019777e-13,
+          "steel_utilization": 0.00478216732763942
+        },
+        {
+          "bound_MPa": 1.214547467634149e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 37,
+          "lambda": 1.10244466434983,
+          "residual_MPa": 1.2367884494324244e-13,
+          "steel_utilization": 0.00478216692680816
+        },
+        {
+          "bound_MPa": 1.2145474689084407e-06,
+          "force_residual_MPa": 3.536923840228055e-15,
+          "fraction": 1.0,
+          "index": 38,
+          "lambda": 1.10244466631588,
+          "residual_MPa": 2.2792878695554464e-13,
+          "steel_utilization": 0.00478216642577354
+        },
+        {
+          "bound_MPa": 1.214547470495399e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 39,
+          "lambda": 1.10244466876433,
+          "residual_MPa": 1.7570737616615095e-13,
+          "steel_utilization": 0.00478216579948897
+        },
+        {
+          "bound_MPa": 1.2145474724698528e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 40,
+          "lambda": 1.10244467181063,
+          "residual_MPa": 3.0245711534274133e-13,
+          "steel_utilization": 0.00478216501664587
+        },
+        {
+          "bound_MPa": 1.2145474749235084e-06,
+          "force_residual_MPa": 1.048986385006886e-15,
+          "fraction": 1.0,
+          "index": 41,
+          "lambda": 1.10244467559627,
+          "residual_MPa": 2.7685568681351524e-13,
+          "steel_utilization": 0.00478216403811112
+        },
+        {
+          "bound_MPa": 1.2145474779680157e-06,
+          "force_residual_MPa": 2.8632240611369967e-15,
+          "fraction": 1.0,
+          "index": 42,
+          "lambda": 1.10244468029351,
+          "residual_MPa": 2.0432733196379393e-13,
+          "steel_utilization": 0.00478216281497485
+        },
+        {
+          "bound_MPa": 1.21454748173841e-06,
+          "force_residual_MPa": 2.0210993372731743e-15,
+          "fraction": 1.0,
+          "index": 43,
+          "lambda": 1.10244468611069,
+          "residual_MPa": 3.8242363919679945e-13,
+          "steel_utilization": 0.00478216128610324
+        },
+        {
+          "bound_MPa": 1.2145474863963463e-06,
+          "force_residual_MPa": 1.8526743925004096e-15,
+          "fraction": 1.0,
+          "index": 44,
+          "lambda": 1.10244469329722,
+          "residual_MPa": 4.5197179332490123e-13,
+          "steel_utilization": 0.00478215937508973
+        },
+        {
+          "bound_MPa": 1.2145474921327427e-06,
+          "force_residual_MPa": 5.558023177501229e-15,
+          "fraction": 1.0,
+          "index": 45,
+          "lambda": 1.10244470214766,
+          "residual_MPa": 2.2265674547161662e-13,
+          "steel_utilization": 0.00478215698644175
+        },
+        {
+          "bound_MPa": 1.2145474991687925e-06,
+          "force_residual_MPa": 3.0316490059097614e-15,
+          "fraction": 1.0,
+          "index": 46,
+          "lambda": 1.10244471300328,
+          "residual_MPa": 5.247990627135768e-13,
+          "steel_utilization": 0.00478215400081827
+        },
+        {
+          "bound_MPa": 1.2145475077538e-06,
+          "force_residual_MPa": 1.1789746134093516e-15,
+          "fraction": 1.0,
+          "index": 47,
+          "lambda": 1.10244472624872,
+          "residual_MPa": 4.382050278195493e-13,
+          "steel_utilization": 0.00478215026907991
+        },
+        {
+          "bound_MPa": 1.2145475181567917e-06,
+          "force_residual_MPa": 7.915972404319932e-15,
+          "fraction": 1.0,
+          "index": 48,
+          "lambda": 1.10244474229905,
+          "residual_MPa": 4.571343303894082e-13,
+          "steel_utilization": 0.00478214560486173
+        },
+        {
+          "bound_MPa": 1.2145475306475332e-06,
+          "force_residual_MPa": 1.8357261737620503e-15,
+          "fraction": 1.0,
+          "index": 49,
+          "lambda": 1.10244476157048,
+          "residual_MPa": 7.829596888365986e-13,
+          "steel_utilization": 0.00478213977530072
+        },
+        {
+          "bound_MPa": 1.2145475454593e-06,
+          "force_residual_MPa": 2.661802951954973e-15,
+          "fraction": 1.0,
+          "index": 50,
+          "lambda": 1.10244478442292,
+          "residual_MPa": 1.0579315201653117e-12,
+          "steel_utilization": 0.00478213248946102
+        },
+        {
+          "bound_MPa": 1.214547562721177e-06,
+          "force_residual_MPa": 1.2463445913184574e-14,
+          "fraction": 1.0,
+          "index": 51,
+          "lambda": 1.10244481105553,
+          "residual_MPa": 1.5806245201588354e-12,
+          "steel_utilization": 0.00478212338390118
+        },
+        {
+          "bound_MPa": 1.2145475823404268e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 52,
+          "lambda": 1.10244484132523,
+          "residual_MPa": 2.486566508252963e-12,
+          "steel_utilization": 0.00478211200467077
+        },
+        {
+          "bound_MPa": 1.2145476038040797e-06,
+          "force_residual_MPa": 8.562351367618706e-15,
+          "fraction": 1.0,
+          "index": 53,
+          "lambda": 1.10244487444058,
+          "residual_MPa": 4.35895763928329e-12,
+          "steel_utilization": 0.00478209778488975
+        },
+        {
+          "bound_MPa": 1.2145476258498665e-06,
+          "force_residual_MPa": 2.509531677114191e-14,
+          "fraction": 1.0,
+          "index": 54,
+          "lambda": 1.10244490845408,
+          "residual_MPa": 6.757816528590865e-12,
+          "steel_utilization": 0.00478208001682534
+        },
+        {
+          "bound_MPa": 1.2145476459288029e-06,
+          "force_residual_MPa": 2.4590041936823618e-14,
+          "fraction": 1.0,
+          "index": 55,
+          "lambda": 1.10244493943301,
+          "residual_MPa": 1.028599427854715e-11,
+          "steel_utilization": 0.00478205781717635
+        },
+        {
+          "bound_MPa": 1.2145476593355463e-06,
+          "force_residual_MPa": 5.035905848705659e-14,
+          "fraction": 1.0,
+          "index": 56,
+          "lambda": 1.1024449601177,
+          "residual_MPa": 1.6915358003188885e-11,
+          "steel_utilization": 0.00478203008395726
+        },
+        {
+          "bound_MPa": 1.2145475836437233e-06,
+          "force_residual_MPa": 2.3747917212959797e-14,
+          "fraction": 1.0,
+          "index": 57,
+          "lambda": 1.10244484333603,
+          "residual_MPa": 7.19520764583953e-12,
+          "steel_utilization": 0.0047819191587739
+        }
+      ]
+    },
+    "physical_capacity_certified": false,
+    "source_is_exact_actual_cold880": true,
+    "source_states": 56,
+    "strict_force_and_material_targets_and30iterations_unchanged": true,
+    "verified_pairs": 4
   },
   "latest_cold_budget_and_controls_evidence": "docs/reports/evidence/Coupled6DColdBudgetAndControls_2026-11-25",
   "latest_cold_stress_continuity_evidence": "docs/reports/evidence/Coupled6DColdStressContinuity_2026-11-25",
@@ -8618,6 +9768,1054 @@
     "only_test_module_imported": false,
     "physical_capacity_certified": false,
     "source_root": "Cold880CriticalHCold96_20261126",
+    "source_states": 56,
+    "source_workflow_incomplete": false,
+    "whole_goal_completed": false
+  },
+  "latest_completed_cold890": {
+    "accepted_states": 56,
+    "cold": {
+      "all_saved_sources_exact": 256,
+      "capacity": "NumFail",
+      "code": "NUMERICAL_FAILURE",
+      "direct": "OK",
+      "limit": "",
+      "lower": 1.10428336769878,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 28,
+        "timeout600": false
+      },
+      "results_checksum": "43CAB25554E6CEA458BD4415B99A080E943D13F5EDD145B22429D3C73113AC1B",
+      "saved_book_sha256": "48A69237E42C80D9B754D20C9688C602C5DD9DB5AD08097CB1B3257173D38874",
+      "seconds": 731.138671875
+    },
+    "entire_new_cold_trajectory_stress_replay_still_required": true,
+    "full_cold_from_zero": true,
+    "global_probe_limit96": true,
+    "last_accepted_lambda": 1.1024449601176982,
+    "maximum_accepted_lambda": 1.1042833676987807,
+    "negative853_exact_prefix_states": 4,
+    "no_release_promotion": true,
+    "no_warm_fields_passed_to_stock_macro": true,
+    "original_materials_and_force_tolerances": true,
+    "physical_capacity_certified": false,
+    "physical_progress": [
+      {
+        "concrete_principal_max": 0.00022106324989033845,
+        "concrete_principal_min": -0.00016500188736872078,
+        "lambda_value": 1.0,
+        "max_abs_hoop_strain": 2.3133498717014012e-05,
+        "max_abs_long_steel_strain": 6.0290858556387436e-05,
+        "maximum_lambda_so_far": 1.0,
+        "maximum_three_station_steel_utilization": 0.002411634342255497,
+        "state": 4
+      },
+      {
+        "concrete_principal_max": 0.00037503886562140253,
+        "concrete_principal_min": -0.00021410014760745198,
+        "lambda_value": 1.0984462345363621,
+        "max_abs_hoop_strain": 7.940440430689897e-05,
+        "max_abs_long_steel_strain": 7.459705736509992e-05,
+        "maximum_lambda_so_far": 1.0984462345363621,
+        "maximum_three_station_steel_utilization": 0.0039702202153449485,
+        "state": 7
+      },
+      {
+        "concrete_principal_max": 0.0004411866943447973,
+        "concrete_principal_min": -0.0002468834365834714,
+        "lambda_value": 1.1042833676987807,
+        "max_abs_hoop_strain": 9.631914238449196e-05,
+        "max_abs_long_steel_strain": 8.356720270471763e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004815957119224598,
+        "state": 19
+      },
+      {
+        "concrete_principal_max": 0.0004416777690804396,
+        "concrete_principal_min": -0.00024822470606515747,
+        "lambda_value": 1.1024447615704829,
+        "max_abs_hoop_strain": 9.564279550601442e-05,
+        "max_abs_long_steel_strain": 8.378072841152607e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004782139775300721,
+        "state": 49
+      },
+      {
+        "concrete_principal_max": 0.0004417125440922663,
+        "concrete_principal_min": -0.0002482581711934878,
+        "lambda_value": 1.1024449601176982,
+        "max_abs_hoop_strain": 9.564060167914524e-05,
+        "max_abs_long_steel_strain": 8.378794541611962e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004782030083957262,
+        "state": 56
+      }
+    ],
+    "raw_history": {
+      "bytes": 903124,
+      "complete_bytes": 903124,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "AEF949CE632DBAA05BE3A6A6E3979C356CD08F27386BE20815A99E02BFE0D202"
+    },
+    "regressions": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "same_actual_compiled_kernel888": true,
+    "whole_goal_completed": false
+  },
+  "latest_completed_cold890_stress": {
+    "H_MPa": [
+      0.0,
+      0.0,
+      3.923243523785656e-06,
+      3.5164098362815754e-05,
+      6.647721431274299e-05,
+      0.00011238569684518864,
+      0.0001156832480179072,
+      0.00011933527357074076,
+      0.00012303388081079728,
+      0.0001267757577013535,
+      0.00013491999115148464,
+      0.00013928400077811826,
+      0.0001407731348895929,
+      0.00014275085754876567,
+      0.00014523186574834336,
+      0.0001466584193207501,
+      0.0001481593217438756,
+      0.00015018398543491953,
+      0.00015266491345041535,
+      0.00015336446669456737,
+      0.00015336544779610372,
+      0.00015336554180203323,
+      0.00015336572981203492,
+      0.00015336578426063344,
+      0.00015336584014376004,
+      0.00015336589422625227,
+      0.0001533659483089789,
+      0.00015336600239130406,
+      0.00015336603619265737,
+      0.0001533660720635901,
+      0.00015336612547326507,
+      0.00015336618410976538,
+      0.00015336623941968104,
+      0.0001533663045993305,
+      0.000153366369777275,
+      0.00015336643495499568,
+      0.0001533665164268354,
+      0.00015336661826613511,
+      0.00015336674556449414,
+      0.00015336690468623328,
+      0.0001533671035865166,
+      0.0001533673522089346,
+      0.00015336766298235362,
+      0.00015336805144193803,
+      0.00015336853700518394,
+      0.00015336914394169254,
+      0.000153369902584899,
+      0.00015337085084605006,
+      0.00015337203610552236,
+      0.0001533735175752111,
+      0.00015337536924879381,
+      0.00015337768358521695,
+      0.00015338057610637452,
+      0.00015338419113366492,
+      0.00015338870894226453,
+      0.00015339435467824777
+    ],
+    "H_is_continuation_coordinate_not_failure_criterion": true,
+    "actual_components": 256,
+    "all_raw_fields_fractions_and_lambdas_exact": true,
+    "all_six_forces_and_all_56_physical_and4_gauge_equations": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "AcceptedPostCrackTestPath",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.10428336769878,
+      "meta": [
+        "4",
+        "0",
+        "Принятая контрольная последовательность. Это не предел."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.01
+      ],
+      "orientation": [
+        {
+          "current_length": 2.8691419507951455e-05,
+          "field": 3,
+          "previous_length": 2.732475555800678e-05,
+          "signed_advance": 2.8653276141942285e-05
+        },
+        {
+          "current_length": 5.3409483407228394e-05,
+          "field": 4,
+          "previous_length": 2.8691419507951455e-05,
+          "signed_advance": 4.6254947901656596e-05
+        },
+        {
+          "current_length": 3.2689940336340645e-05,
+          "field": 5,
+          "previous_length": 5.3409483407228394e-05,
+          "signed_advance": 3.134750362800135e-05
+        },
+        {
+          "current_length": 4.267402409347975e-05,
+          "field": 6,
+          "previous_length": 3.2689940336340645e-05,
+          "signed_advance": 4.038270384485889e-05
+        },
+        {
+          "current_length": 3.217498149484515e-06,
+          "field": 7,
+          "previous_length": 4.267402409347975e-05,
+          "signed_advance": 2.906725801351069e-06
+        },
+        {
+          "current_length": 3.1269185807350574e-06,
+          "field": 8,
+          "previous_length": 3.217498149484515e-06,
+          "signed_advance": 2.765256162312595e-06
+        },
+        {
+          "current_length": 6.743789996717289e-06,
+          "field": 9,
+          "previous_length": 3.1269185807350574e-06,
+          "signed_advance": 1.538159686099474e-06
+        },
+        {
+          "current_length": 3.950483862327787e-06,
+          "field": 10,
+          "previous_length": 6.743789996717289e-06,
+          "signed_advance": 1.2023478252433907e-06
+        },
+        {
+          "current_length": 7.72055062677927e-06,
+          "field": 11,
+          "previous_length": 3.950483862327787e-06,
+          "signed_advance": 7.36165771821546e-06
+        },
+        {
+          "current_length": 5.130216874609992e-06,
+          "field": 12,
+          "previous_length": 7.72055062677927e-06,
+          "signed_advance": 4.782812514948704e-06
+        },
+        {
+          "current_length": 1.6861850577768636e-06,
+          "field": 13,
+          "previous_length": 5.130216874609992e-06,
+          "signed_advance": 1.5249124183928007e-06
+        },
+        {
+          "current_length": 2.16047880541392e-06,
+          "field": 14,
+          "previous_length": 1.6861850577768636e-06,
+          "signed_advance": 2.1344065711553146e-06
+        },
+        {
+          "current_length": 2.712649072653542e-06,
+          "field": 15,
+          "previous_length": 2.16047880541392e-06,
+          "signed_advance": 2.7118848201581836e-06
+        },
+        {
+          "current_length": 1.6313596623508114e-06,
+          "field": 16,
+          "previous_length": 2.712649072653542e-06,
+          "signed_advance": 1.5914535050252572e-06
+        },
+        {
+          "current_length": 2.1518818184717736e-06,
+          "field": 17,
+          "previous_length": 1.6313596623508114e-06,
+          "signed_advance": 1.976428190102783e-06
+        },
+        {
+          "current_length": 2.562125110176509e-06,
+          "field": 18,
+          "previous_length": 2.1518818184717736e-06,
+          "signed_advance": 2.4664183376551014e-06
+        },
+        {
+          "current_length": 3.409952089069204e-06,
+          "field": 19,
+          "previous_length": 2.562125110176509e-06,
+          "signed_advance": 3.3727403953508936e-06
+        },
+        {
+          "current_length": 1.7137081783576366e-06,
+          "field": 20,
+          "previous_length": 3.409952089069204e-06,
+          "signed_advance": 1.0811987685591452e-06
+        },
+        {
+          "current_length": 3.007747832677635e-09,
+          "field": 21,
+          "previous_length": 1.7137081783576366e-06,
+          "signed_advance": 1.6084888296515537e-09
+        },
+        {
+          "current_length": 1.8013464900307915e-10,
+          "field": 22,
+          "previous_length": 3.007747832677635e-09,
+          "signed_advance": 1.4739002650620108e-10
+        },
+        {
+          "current_length": 3.602692884572097e-10,
+          "field": 23,
+          "previous_length": 1.8013464900307915e-10,
+          "signed_advance": 3.6026928842267455e-10
+        },
+        {
+          "current_length": 1.0433648721192045e-10,
+          "field": 24,
+          "previous_length": 3.602692884572097e-10,
+          "signed_advance": 1.0433648720516724e-10
+        },
+        {
+          "current_length": 1.0446571988725077e-10,
+          "field": 25,
+          "previous_length": 1.0433648721192045e-10,
+          "signed_advance": 1.0433648728918442e-10
+        },
+        {
+          "current_length": 1.04345843326022e-10,
+          "field": 26,
+          "previous_length": 1.0446571988725077e-10,
+          "signed_advance": 1.0420856816706839e-10
+        },
+        {
+          "current_length": 1.0434584236740112e-10,
+          "field": 27,
+          "previous_length": 1.04345843326022e-10,
+          "signed_advance": 1.0434584235121892e-10
+        },
+        {
+          "current_length": 1.0434584959109879e-10,
+          "field": 28,
+          "previous_length": 1.0434584236740112e-10,
+          "signed_advance": 1.0434584958627236e-10
+        },
+        {
+          "current_length": 6.521615828344352e-11,
+          "field": 29,
+          "previous_length": 1.0434584959109879e-10,
+          "signed_advance": 6.521615828286279e-11
+        },
+        {
+          "current_length": 8.408115930538871e-11,
+          "field": 30,
+          "previous_length": 6.521615828344352e-11,
+          "signed_advance": 8.158170039138512e-11
+        },
+        {
+          "current_length": 1.0273703576323085e-10,
+          "field": 31,
+          "previous_length": 8.408115930538871e-11,
+          "signed_advance": 1.0163141445599581e-10
+        },
+        {
+          "current_length": 1.0216397714220053e-10,
+          "field": 32,
+          "previous_length": 1.0273703576323085e-10,
+          "signed_advance": 1.0133423869522905e-10
+        },
+        {
+          "current_length": 1.042217862290052e-10,
+          "field": 33,
+          "previous_length": 1.0216397714220053e-10,
+          "signed_advance": 1.0127184206409473e-10
+        },
+        {
+          "current_length": 1.0302075218040426e-10,
+          "field": 34,
+          "previous_length": 1.042217862290052e-10,
+          "signed_advance": 9.93009900401613e-11
+        },
+        {
+          "current_length": 1.0302041058088613e-10,
+          "field": 35,
+          "previous_length": 1.0302075218040426e-10,
+          "signed_advance": 1.0302041050393846e-10
+        },
+        {
+          "current_length": 1.0302036620791774e-10,
+          "field": 36,
+          "previous_length": 1.0302041058088613e-10,
+          "signed_advance": 1.0302036620668745e-10
+        },
+        {
+          "current_length": 1.2877539638122642e-10,
+          "field": 37,
+          "previous_length": 1.0302036620791774e-10,
+          "signed_advance": 1.2877539637925947e-10
+        },
+        {
+          "current_length": 1.6096914707894097e-10,
+          "field": 38,
+          "previous_length": 1.2877539638122642e-10,
+          "signed_advance": 1.6096914707505622e-10
+        },
+        {
+          "current_length": 2.01211282477129e-10,
+          "field": 39,
+          "previous_length": 1.6096914707894097e-10,
+          "signed_advance": 2.0121128246961502e-10
+        },
+        {
+          "current_length": 2.5151386527847035e-10,
+          "field": 40,
+          "previous_length": 2.01211282477129e-10,
+          "signed_advance": 2.515138652636944e-10
+        },
+        {
+          "current_length": 3.1439195904646463e-10,
+          "field": 41,
+          "previous_length": 2.5151386527847035e-10,
+          "signed_advance": 3.1439195901763527e-10
+        },
+        {
+          "current_length": 3.929893703715946e-10,
+          "field": 42,
+          "previous_length": 3.1439195904646463e-10,
+          "signed_advance": 3.9298937031543e-10
+        },
+        {
+          "current_length": 4.912358062917729e-10,
+          "field": 43,
+          "previous_length": 3.929893703715946e-10,
+          "signed_advance": 4.912358061818233e-10
+        },
+        {
+          "current_length": 6.14043342481505e-10,
+          "field": 44,
+          "previous_length": 4.912358062917729e-10,
+          "signed_advance": 6.140433422669593e-10
+        },
+        {
+          "current_length": 7.675519666754514e-10,
+          "field": 45,
+          "previous_length": 6.14043342481505e-10,
+          "signed_advance": 7.675519662562458e-10
+        },
+        {
+          "current_length": 9.594365056103387e-10,
+          "field": 46,
+          "previous_length": 7.675519666754514e-10,
+          "signed_advance": 9.594365047916164e-10
+        },
+        {
+          "current_length": 1.1992902386409422e-09,
+          "field": 47,
+          "previous_length": 9.594365056103387e-10,
+          "signed_advance": 1.199290237041398e-09
+        },
+        {
+          "current_length": 1.4991043760308547e-09,
+          "field": 48,
+          "previous_length": 1.1992902386409422e-09,
+          "signed_advance": 1.4991043729063162e-09
+        },
+        {
+          "current_length": 1.8738673208020533e-09,
+          "field": 49,
+          "previous_length": 1.4991043760308547e-09,
+          "signed_advance": 1.8738673146978607e-09
+        },
+        {
+          "current_length": 2.342313622653893e-09,
+          "field": 50,
+          "previous_length": 1.8738673208020533e-09,
+          "signed_advance": 2.3423136107278065e-09
+        },
+        {
+          "current_length": 2.9278599915649658e-09,
+          "field": 51,
+          "previous_length": 2.342313622653893e-09,
+          "signed_advance": 2.9278599682635824e-09
+        },
+        {
+          "current_length": 3.6597750013241474e-09,
+          "field": 52,
+          "previous_length": 2.9278599915649658e-09,
+          "signed_advance": 3.659774955790761e-09
+        },
+        {
+          "current_length": 4.5746407886601405e-09,
+          "field": 53,
+          "previous_length": 3.6597750013241474e-09,
+          "signed_advance": 4.574640699675016e-09
+        },
+        {
+          "current_length": 5.718179442594215e-09,
+          "field": 54,
+          "previous_length": 4.5746407886601405e-09,
+          "signed_advance": 5.7181792686640115e-09
+        },
+        {
+          "current_length": 7.147534930094791e-09,
+          "field": 55,
+          "previous_length": 5.718179442594215e-09,
+          "signed_advance": 7.147534590068854e-09
+        },
+        {
+          "current_length": 8.93412381963408e-09,
+          "field": 56,
+          "previous_length": 7.147534930094791e-09,
+          "signed_advance": 8.934123154739951e-09
+        }
+      ],
+      "phase": "EnvelopeEnergy.Accepted",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 6.62037037037037e-07,
+          "force_residual_MPa": 2.097972770013772e-16,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 0.25,
+          "residual_MPa": 3.4861002973229915e-14,
+          "steel_utilization": 0.00060954479702768
+        },
+        {
+          "bound_MPa": 8.240740740740741e-07,
+          "force_residual_MPa": 5.052748343182936e-16,
+          "fraction": 1.0,
+          "index": 2,
+          "lambda": 0.5,
+          "residual_MPa": 8.870681966755001e-14,
+          "steel_utilization": 0.00121908959405536
+        },
+        {
+          "bound_MPa": 9.861111111111112e-07,
+          "force_residual_MPa": 3.746727425432592e-10,
+          "fraction": 1.0,
+          "index": 3,
+          "lambda": 0.75,
+          "residual_MPa": 1.7501566862421214e-10,
+          "steel_utilization": 0.0018283898092604
+        },
+        {
+          "bound_MPa": 1.1481481481481482e-06,
+          "force_residual_MPa": 1.6017212247889905e-13,
+          "fraction": 1.0,
+          "index": 4,
+          "lambda": 1.0,
+          "residual_MPa": 9.241792444172892e-13,
+          "steel_utilization": 0.0024116343422555
+        },
+        {
+          "bound_MPa": 1.1824553764640373e-06,
+          "force_residual_MPa": 4.5202711960343926e-10,
+          "fraction": 1.0,
+          "index": 5,
+          "lambda": 1.0529311522588,
+          "residual_MPa": 3.598856512278259e-09,
+          "steel_utilization": 0.00261635366427362
+        },
+        {
+          "bound_MPa": 1.2090585959465166e-06,
+          "force_residual_MPa": 8.090349301373527e-08,
+          "fraction": 1.0,
+          "index": 6,
+          "lambda": 1.09397611946034,
+          "residual_MPa": 7.939878532425837e-08,
+          "steel_utilization": 0.00393024841662227
+        },
+        {
+          "bound_MPa": 1.2119558927550482e-06,
+          "force_residual_MPa": 2.1526205239718336e-09,
+          "fraction": 1.0,
+          "index": 7,
+          "lambda": 1.09844623453636,
+          "residual_MPa": 2.1787509517210866e-09,
+          "steel_utilization": 0.00397022021534495
+        },
+        {
+          "bound_MPa": 1.213560674030115e-06,
+          "force_residual_MPa": 1.3768343436553283e-09,
+          "fraction": 1.0,
+          "index": 8,
+          "lambda": 1.10092218278932,
+          "residual_MPa": 1.4347209442624326e-09,
+          "steel_utilization": 0.0040910644344458
+        },
+        {
+          "bound_MPa": 1.2066270962233258e-06,
+          "force_residual_MPa": 8.198522091670722e-11,
+          "fraction": 1.0,
+          "index": 9,
+          "lambda": 1.09022466274456,
+          "residual_MPa": 1.315934910952471e-10,
+          "steel_utilization": 0.00410622483339314
+        },
+        {
+          "bound_MPa": 1.2093683622509556e-06,
+          "force_residual_MPa": 1.1372051007869975e-07,
+          "fraction": 1.0,
+          "index": 10,
+          "lambda": 1.09445404461576,
+          "residual_MPa": 7.76227725567645e-07,
+          "steel_utilization": 0.00423497670103606
+        },
+        {
+          "bound_MPa": 1.2119754034958055e-06,
+          "force_residual_MPa": 5.183294517876305e-11,
+          "fraction": 1.0,
+          "index": 11,
+          "lambda": 1.0984763368221,
+          "residual_MPa": 1.885199599888348e-09,
+          "steel_utilization": 0.00454567174607796
+        },
+        {
+          "bound_MPa": 1.2130281291062026e-06,
+          "force_residual_MPa": 6.182007281394262e-10,
+          "fraction": 1.0,
+          "index": 12,
+          "lambda": 1.10010054204957,
+          "residual_MPa": 1.2806653071351093e-07,
+          "steel_utilization": 0.00471414526644702
+        },
+        {
+          "bound_MPa": 1.213034090837088e-06,
+          "force_residual_MPa": 2.120638479633878e-12,
+          "fraction": 1.0,
+          "index": 13,
+          "lambda": 1.10010974014865,
+          "residual_MPa": 2.8924950786326023e-10,
+          "steel_utilization": 0.00476728841029795
+        },
+        {
+          "bound_MPa": 1.213092693210048e-06,
+          "force_residual_MPa": 4.454118490886888e-07,
+          "fraction": 1.0,
+          "index": 14,
+          "lambda": 1.10020015523836,
+          "residual_MPa": 8.612071411562283e-07,
+          "steel_utilization": 0.0048322500546053
+        },
+        {
+          "bound_MPa": 1.2130985088030482e-06,
+          "force_residual_MPa": 7.322834209602587e-07,
+          "fraction": 1.0,
+          "index": 15,
+          "lambda": 1.10020912786756,
+          "residual_MPa": 7.322834207901252e-07,
+          "steel_utilization": 0.00491278500330251
+        },
+        {
+          "bound_MPa": 1.213442745483948e-06,
+          "force_residual_MPa": 5.490653199592124e-13,
+          "fraction": 1.0,
+          "index": 16,
+          "lambda": 1.10074023588952,
+          "residual_MPa": 7.267086932216671e-11,
+          "steel_utilization": 0.00492999996902067
+        },
+        {
+          "bound_MPa": 1.214520905209741e-06,
+          "force_residual_MPa": 2.085947452342649e-11,
+          "fraction": 1.0,
+          "index": 17,
+          "lambda": 1.1024036823236,
+          "residual_MPa": 2.3156433437421242e-09,
+          "steel_utilization": 0.00487775296741098
+        },
+        {
+          "bound_MPa": 1.2154069938327472e-06,
+          "force_residual_MPa": 1.6842494477276451e-15,
+          "fraction": 1.0,
+          "index": 18,
+          "lambda": 1.10377079048481,
+          "residual_MPa": 7.01236323782245e-13,
+          "steel_utilization": 0.00484834605163616
+        },
+        {
+          "bound_MPa": 1.2157392198047649e-06,
+          "force_residual_MPa": 2.7554320964824273e-13,
+          "fraction": 1.0,
+          "index": 19,
+          "lambda": 1.10428336769878,
+          "residual_MPa": 5.5144777633131525e-11,
+          "steel_utilization": 0.0048159571192246
+        },
+        {
+          "bound_MPa": 1.2145490496252953e-06,
+          "force_residual_MPa": 4.0894502928023476e-11,
+          "fraction": 1.0,
+          "index": 20,
+          "lambda": 1.10244710513617,
+          "residual_MPa": 1.0500372460420238e-08,
+          "steel_utilization": 0.00478226466395898
+        },
+        {
+          "bound_MPa": 1.2145474933681326e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 21,
+          "lambda": 1.10244470405369,
+          "residual_MPa": 2.8236087513261454e-12,
+          "steel_utilization": 0.00478218258590575
+        },
+        {
+          "bound_MPa": 1.2145474880341779e-06,
+          "force_residual_MPa": 6.231722956592287e-15,
+          "fraction": 1.0,
+          "index": 22,
+          "lambda": 1.10244469582416,
+          "residual_MPa": 2.2278698796809188e-11,
+          "steel_utilization": 0.00478218110372853
+        },
+        {
+          "bound_MPa": 1.2145474773486713e-06,
+          "force_residual_MPa": 1.6783782160110175e-15,
+          "fraction": 1.0,
+          "index": 23,
+          "lambda": 1.10244467933795,
+          "residual_MPa": 6.963268395047961e-13,
+          "steel_utilization": 0.00478217813941098
+        },
+        {
+          "bound_MPa": 1.214547474249499e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 24,
+          "lambda": 1.10244467455637,
+          "residual_MPa": 1.6235608398060958e-11,
+          "steel_utilization": 0.00478217728094557
+        },
+        {
+          "bound_MPa": 1.2145474670186677e-06,
+          "force_residual_MPa": 5.170645804523871e-14,
+          "fraction": 1.0,
+          "index": 25,
+          "lambda": 1.10244466340023,
+          "residual_MPa": 9.35729651315581e-12,
+          "steel_utilization": 0.00478217674655407
+        },
+        {
+          "bound_MPa": 1.2145474628324991e-06,
+          "force_residual_MPa": 5.423283221683017e-14,
+          "fraction": 1.0,
+          "index": 26,
+          "lambda": 1.10244465694157,
+          "residual_MPa": 1.2648831689086176e-11,
+          "steel_utilization": 0.00478217585726072
+        },
+        {
+          "bound_MPa": 1.2145474586452546e-06,
+          "force_residual_MPa": 4.715898453637406e-15,
+          "fraction": 1.0,
+          "index": 27,
+          "lambda": 1.10244465048125,
+          "residual_MPa": 6.781247113320232e-13,
+          "steel_utilization": 0.00478217496807303
+        },
+        {
+          "bound_MPa": 1.214547454455489e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 28,
+          "lambda": 1.10244464401704,
+          "residual_MPa": 5.39748746999219e-13,
+          "steel_utilization": 0.00478217407884611
+        },
+        {
+          "bound_MPa": 1.2145474518358558e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 29,
+          "lambda": 1.10244463997532,
+          "residual_MPa": 2.2458516166570797e-13,
+          "steel_utilization": 0.00478217352308298
+        },
+        {
+          "bound_MPa": 1.2145474591177027e-06,
+          "force_residual_MPa": 1.2800295802730103e-14,
+          "fraction": 1.0,
+          "index": 30,
+          "lambda": 1.10244465121017,
+          "residual_MPa": 6.5232151819950845e-12,
+          "steel_utilization": 0.00478217153197752
+        },
+        {
+          "bound_MPa": 1.2145474666628213e-06,
+          "force_residual_MPa": 1.908254624275422e-13,
+          "fraction": 1.0,
+          "index": 31,
+          "lambda": 1.10244466285121,
+          "residual_MPa": 9.20889479038775e-11,
+          "steel_utilization": 0.00478216997738086
+        },
+        {
+          "bound_MPa": 1.214547468991099e-06,
+          "force_residual_MPa": 1.65224870822082e-13,
+          "fraction": 1.0,
+          "index": 32,
+          "lambda": 1.10244466644341,
+          "residual_MPa": 4.426401346152575e-11,
+          "steel_utilization": 0.00478216926145912
+        },
+        {
+          "bound_MPa": 1.21454746414345e-06,
+          "force_residual_MPa": 1.1318156288729776e-13,
+          "fraction": 1.0,
+          "index": 33,
+          "lambda": 1.10244465896418,
+          "residual_MPa": 1.2081780915345133e-10,
+          "steel_utilization": 0.00478216828942554
+        },
+        {
+          "bound_MPa": 1.2145474649701435e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 34,
+          "lambda": 1.10244466023965,
+          "residual_MPa": 3.886021821171426e-13,
+          "steel_utilization": 0.00478216796897844
+        },
+        {
+          "bound_MPa": 1.2145474657917815e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 35,
+          "lambda": 1.10244466150732,
+          "residual_MPa": 5.752615723185472e-13,
+          "steel_utilization": 0.00478216764830777
+        },
+        {
+          "bound_MPa": 1.2145474666116889e-06,
+          "force_residual_MPa": 2.694799116364232e-15,
+          "fraction": 1.0,
+          "index": 36,
+          "lambda": 1.10244466277232,
+          "residual_MPa": 6.644554156019777e-13,
+          "steel_utilization": 0.00478216732763942
+        },
+        {
+          "bound_MPa": 1.214547467634149e-06,
+          "force_residual_MPa": 4.210623619319113e-15,
+          "fraction": 1.0,
+          "index": 37,
+          "lambda": 1.10244466434983,
+          "residual_MPa": 1.2367884494324244e-13,
+          "steel_utilization": 0.00478216692680816
+        },
+        {
+          "bound_MPa": 1.2145474689084407e-06,
+          "force_residual_MPa": 3.536923840228055e-15,
+          "fraction": 1.0,
+          "index": 38,
+          "lambda": 1.10244466631588,
+          "residual_MPa": 2.2792878695554464e-13,
+          "steel_utilization": 0.00478216642577354
+        },
+        {
+          "bound_MPa": 1.214547470495399e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 39,
+          "lambda": 1.10244466876433,
+          "residual_MPa": 1.7570737616615095e-13,
+          "steel_utilization": 0.00478216579948897
+        },
+        {
+          "bound_MPa": 1.2145474724698528e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 40,
+          "lambda": 1.10244467181063,
+          "residual_MPa": 3.0245711534274133e-13,
+          "steel_utilization": 0.00478216501664587
+        },
+        {
+          "bound_MPa": 1.2145474749235084e-06,
+          "force_residual_MPa": 1.048986385006886e-15,
+          "fraction": 1.0,
+          "index": 41,
+          "lambda": 1.10244467559627,
+          "residual_MPa": 2.7685568681351524e-13,
+          "steel_utilization": 0.00478216403811112
+        },
+        {
+          "bound_MPa": 1.2145474779680157e-06,
+          "force_residual_MPa": 2.8632240611369967e-15,
+          "fraction": 1.0,
+          "index": 42,
+          "lambda": 1.10244468029351,
+          "residual_MPa": 2.0432733196379393e-13,
+          "steel_utilization": 0.00478216281497485
+        },
+        {
+          "bound_MPa": 1.21454748173841e-06,
+          "force_residual_MPa": 2.0210993372731743e-15,
+          "fraction": 1.0,
+          "index": 43,
+          "lambda": 1.10244468611069,
+          "residual_MPa": 3.8242363919679945e-13,
+          "steel_utilization": 0.00478216128610324
+        },
+        {
+          "bound_MPa": 1.2145474863963463e-06,
+          "force_residual_MPa": 1.8526743925004096e-15,
+          "fraction": 1.0,
+          "index": 44,
+          "lambda": 1.10244469329722,
+          "residual_MPa": 4.5197179332490123e-13,
+          "steel_utilization": 0.00478215937508973
+        },
+        {
+          "bound_MPa": 1.2145474921327427e-06,
+          "force_residual_MPa": 5.558023177501229e-15,
+          "fraction": 1.0,
+          "index": 45,
+          "lambda": 1.10244470214766,
+          "residual_MPa": 2.2265674547161662e-13,
+          "steel_utilization": 0.00478215698644175
+        },
+        {
+          "bound_MPa": 1.2145474991687925e-06,
+          "force_residual_MPa": 3.0316490059097614e-15,
+          "fraction": 1.0,
+          "index": 46,
+          "lambda": 1.10244471300328,
+          "residual_MPa": 5.247990627135768e-13,
+          "steel_utilization": 0.00478215400081827
+        },
+        {
+          "bound_MPa": 1.2145475077538e-06,
+          "force_residual_MPa": 1.1789746134093516e-15,
+          "fraction": 1.0,
+          "index": 47,
+          "lambda": 1.10244472624872,
+          "residual_MPa": 4.382050278195493e-13,
+          "steel_utilization": 0.00478215026907991
+        },
+        {
+          "bound_MPa": 1.2145475181567917e-06,
+          "force_residual_MPa": 7.915972404319932e-15,
+          "fraction": 1.0,
+          "index": 48,
+          "lambda": 1.10244474229905,
+          "residual_MPa": 4.571343303894082e-13,
+          "steel_utilization": 0.00478214560486173
+        },
+        {
+          "bound_MPa": 1.2145475306475332e-06,
+          "force_residual_MPa": 1.8357261737620503e-15,
+          "fraction": 1.0,
+          "index": 49,
+          "lambda": 1.10244476157048,
+          "residual_MPa": 7.829596888365986e-13,
+          "steel_utilization": 0.00478213977530072
+        },
+        {
+          "bound_MPa": 1.2145475454593e-06,
+          "force_residual_MPa": 2.661802951954973e-15,
+          "fraction": 1.0,
+          "index": 50,
+          "lambda": 1.10244478442292,
+          "residual_MPa": 1.0579315201653117e-12,
+          "steel_utilization": 0.00478213248946102
+        },
+        {
+          "bound_MPa": 1.214547562721177e-06,
+          "force_residual_MPa": 1.2463445913184574e-14,
+          "fraction": 1.0,
+          "index": 51,
+          "lambda": 1.10244481105553,
+          "residual_MPa": 1.5806245201588354e-12,
+          "steel_utilization": 0.00478212338390118
+        },
+        {
+          "bound_MPa": 1.2145475823404268e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 52,
+          "lambda": 1.10244484132523,
+          "residual_MPa": 2.486566508252963e-12,
+          "steel_utilization": 0.00478211200467077
+        },
+        {
+          "bound_MPa": 1.2145476038040797e-06,
+          "force_residual_MPa": 8.562351367618706e-15,
+          "fraction": 1.0,
+          "index": 53,
+          "lambda": 1.10244487444058,
+          "residual_MPa": 4.35895763928329e-12,
+          "steel_utilization": 0.00478209778488975
+        },
+        {
+          "bound_MPa": 1.2145476258498665e-06,
+          "force_residual_MPa": 2.509531677114191e-14,
+          "fraction": 1.0,
+          "index": 54,
+          "lambda": 1.10244490845408,
+          "residual_MPa": 6.757816528590865e-12,
+          "steel_utilization": 0.00478208001682534
+        },
+        {
+          "bound_MPa": 1.2145476459288029e-06,
+          "force_residual_MPa": 2.4590041936823618e-14,
+          "fraction": 1.0,
+          "index": 55,
+          "lambda": 1.10244493943301,
+          "residual_MPa": 1.028599427854715e-11,
+          "steel_utilization": 0.00478205781717635
+        },
+        {
+          "bound_MPa": 1.2145476593355463e-06,
+          "force_residual_MPa": 5.035905848705659e-14,
+          "fraction": 1.0,
+          "index": 56,
+          "lambda": 1.1024449601177,
+          "residual_MPa": 1.6915358003188885e-11,
+          "steel_utilization": 0.00478203008395726
+        }
+      ]
+    },
+    "all_three_station_steel_limits_checked": true,
+    "all_working_sources_exact_source": false,
+    "immutable_compiled_book_reused": true,
+    "material_and_kinematic_files_and_replay_methods_exact_source": true,
+    "maximum_three_station_steel_utilization": 0.0049299999690206675,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_new_NDS_or_capacity_search": true,
+    "only_test_module_imported": false,
+    "physical_capacity_certified": false,
+    "source_root": "Cold890StrictGrowthCold96_20261126",
     "source_states": 56,
     "source_workflow_incomplete": false,
     "whole_goal_completed": false
@@ -9705,6 +11903,249 @@
     ],
     "whole_goal_completed": false,
     "zero_increment_repeated10_times_per_point_is_numerically_identical": true
+  },
+  "latest_independent_steel_boundary": {
+    "all_six_forces_and_all_physical_and_gauge_equations": true,
+    "independent_zero_start_boundary_roots": [
+      {
+        "cold_zero_start": true,
+        "factor": 1.6392967139708858,
+        "field": [
+          1.953065333692158e-29,
+          1.742131082897797e-29,
+          -2.2480225220771787e-27,
+          0.0008465571091268067,
+          0.0,
+          0.0,
+          0.13019035325752293,
+          0.0,
+          0.0,
+          0.15756978677449832,
+          0.0,
+          0.0,
+          -0.15705109799566663,
+          0.0,
+          0.0,
+          -0.12963580438757089,
+          0.0,
+          0.0,
+          0.13061055702656624,
+          0.0,
+          0.0,
+          0.15765194233622098,
+          0.0,
+          0.0,
+          -0.1575699821911205,
+          0.0,
+          0.0,
+          -0.1304809546379026,
+          0.0,
+          0.0,
+          0.1290793885972032,
+          0.0,
+          0.0,
+          0.16504486215760736,
+          0.0,
+          0.0,
+          -0.1663454668940651,
+          0.0,
+          0.0,
+          -0.13010230844290685,
+          0.0,
+          0.0,
+          0.13139396421545974,
+          0.0,
+          0.0,
+          0.15798632213222108,
+          0.0,
+          0.0,
+          -0.1574538974778529,
+          0.0,
+          0.0,
+          -0.13079259370278082,
+          0.002550252200744569,
+          0.00227481168354573,
+          -0.3017322459014172,
+          0.0,
+          0.0,
+          0.0,
+          1.0798178236135448e-13,
+          0.0
+        ],
+        "governing_side": -1,
+        "iteration_residuals": [
+          3.0,
+          28.056066028641453,
+          7.759488148906257e-05,
+          1.7053025658242404e-13
+        ],
+        "iterations": 3,
+        "maximum_steel_utilization": 1.0,
+        "native_bracket": [
+          1.63922119140625,
+          1.639312744140625
+        ],
+        "residual_MPa": 1.7053025658242404e-13,
+        "sign": -1
+      },
+      {
+        "cold_zero_start": true,
+        "factor": 1.6392967139708858,
+        "field": [
+          1.953065333692158e-29,
+          1.742131082897797e-29,
+          -2.2480225220771787e-27,
+          -0.0008465571091268067,
+          0.0,
+          0.0,
+          -0.13019035325752293,
+          0.0,
+          0.0,
+          -0.15756978677449832,
+          0.0,
+          0.0,
+          0.15705109799566663,
+          0.0,
+          0.0,
+          0.12963580438757089,
+          0.0,
+          0.0,
+          -0.13061055702656624,
+          0.0,
+          0.0,
+          -0.15765194233622098,
+          0.0,
+          0.0,
+          0.1575699821911205,
+          0.0,
+          0.0,
+          0.1304809546379026,
+          0.0,
+          0.0,
+          -0.1290793885972032,
+          0.0,
+          0.0,
+          -0.16504486215760736,
+          0.0,
+          0.0,
+          0.1663454668940651,
+          0.0,
+          0.0,
+          0.13010230844290685,
+          0.0,
+          0.0,
+          -0.13139396421545974,
+          0.0,
+          0.0,
+          -0.15798632213222108,
+          0.0,
+          0.0,
+          0.1574538974778529,
+          0.0,
+          0.0,
+          0.13079259370278082,
+          -0.002550252200744569,
+          -0.00227481168354573,
+          0.3017322459014172,
+          0.0,
+          0.0,
+          0.0,
+          -1.0798178236135448e-13,
+          0.0
+        ],
+        "governing_side": 1,
+        "iteration_residuals": [
+          3.0,
+          28.056066028641453,
+          7.759488148906257e-05,
+          1.7053025658242404e-13
+        ],
+        "iterations": 3,
+        "maximum_steel_utilization": 1.0,
+        "native_bracket": [
+          1.63922119140625,
+          1.639312744140625
+        ],
+        "residual_MPa": 1.7053025658242404e-13,
+        "sign": 1
+      }
+    ],
+    "material_response_reimplemented_independently": true,
+    "matrix_law_is_synthetic_cubic": true,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 14,
+      "timeout600": false
+    },
+    "no_VBA_fields_used_to_initialize_independent_roots": true,
+    "no_release_promotion": true,
+    "physical_HardShear_capacity_certified": false,
+    "raw_Double_fields": true,
+    "raw_sha256": "F7A28EE6DC7607A36F266F5387919BCB7472E6BD99E62E2355BA627A63D70A54",
+    "raw_states": [
+      {
+        "bound_MPa": 1.389888888888889e-05,
+        "factor": 1.0,
+        "force_residual_MPa": 3.449342868946217e-13,
+        "kind": 0,
+        "residual_MPa": 1.1368683772161603e-12,
+        "side": -1,
+        "sign": -1,
+        "utilization": 0.6145077779762728
+      },
+      {
+        "bound_MPa": 2.277696099175348e-05,
+        "factor": 1.63922119140625,
+        "force_residual_MPa": 1.0531823305469134e-13,
+        "kind": 1,
+        "residual_MPa": 2.2737367544323206e-12,
+        "side": -1,
+        "sign": -1,
+        "utilization": 0.9999549867773535
+      },
+      {
+        "bound_MPa": 2.2778232557508682e-05,
+        "factor": 1.639312744140625,
+        "force_residual_MPa": 8.126503585285888e-14,
+        "kind": 2,
+        "residual_MPa": 2.507381395844277e-07,
+        "side": -1,
+        "sign": -1,
+        "utilization": 1.0000095544422172
+      },
+      {
+        "bound_MPa": 1.389888888888889e-05,
+        "factor": 1.0,
+        "force_residual_MPa": 3.449342868946217e-13,
+        "kind": 0,
+        "residual_MPa": 1.1368683772161603e-12,
+        "side": 1,
+        "sign": 1,
+        "utilization": 0.6145077779762728
+      },
+      {
+        "bound_MPa": 2.277696099175348e-05,
+        "factor": 1.63922119140625,
+        "force_residual_MPa": 1.0531823305469134e-13,
+        "kind": 1,
+        "residual_MPa": 2.2737367544323206e-12,
+        "side": 1,
+        "sign": 1,
+        "utilization": 0.9999549867773535
+      },
+      {
+        "bound_MPa": 2.2778232557508682e-05,
+        "factor": 1.639312744140625,
+        "force_residual_MPa": 8.126503585285888e-14,
+        "kind": 2,
+        "residual_MPa": 2.507381395844277e-07,
+        "side": 1,
+        "sign": 1,
+        "utilization": 1.0000095544422172
+      }
+    ]
   },
   "latest_native_tangent_pair_proof": {
     "actual_components": 256,
@@ -10956,6 +13397,180 @@
     "whole_goal_completed": false,
     "working_kernel_changed_and_verified": true
   },
+  "latest_sequential_accepted_H": {
+    "all_three_station_steel_checked": true,
+    "all_working_sources_exact888": true,
+    "cases": [
+      {
+        "attempted": true,
+        "case": 1,
+        "field_error": 0.0010817253954232546,
+        "full_steps": 2,
+        "half_steps": 1,
+        "joint_error": 0.0011863851026683702,
+        "primary_iterations": 3,
+        "probes": 2,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015343952056611398,
+            "lambda_value": 1.1024444075611595,
+            "maximum_three_station_steel_utilization": 0.00478180812751929,
+            "raw_force_residual_MPa": 5.052748343182936e-16,
+            "weak": {
+              "bound_MPa": 1.2145473011970482e-06,
+              "force_residual_MPa": 7.342904695048201e-16,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244440756116,
+              "residual_MPa": 1.949551631241775e-13,
+              "steel_utilization": 0.00478180812751929
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534169376221841,
+            "lambda_value": 1.102444843336031,
+            "maximum_three_station_steel_utilization": 0.004781919158773904,
+            "raw_force_residual_MPa": 2.2568942599550444e-14,
+            "weak": {
+              "bound_MPa": 1.2145475836437233e-06,
+              "force_residual_MPa": 2.3747917212959797e-14,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244484333603,
+              "residual_MPa": 7.19520764583953e-12,
+              "steel_utilization": 0.0047819191587739
+            }
+          }
+        },
+        "solved": true,
+        "target_H_MPa": 0.00015343952056611407
+      },
+      {
+        "attempted": true,
+        "case": 2,
+        "field_error": 0.0005395752172513966,
+        "full_steps": 1,
+        "half_steps": 1,
+        "joint_error": 0.0005917424910908465,
+        "primary_iterations": 2,
+        "probes": 2,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.00015341693762218535,
+            "lambda_value": 1.1024448433359155,
+            "maximum_three_station_steel_utilization": 0.004781919158771595,
+            "raw_force_residual_MPa": 3.0316490059097614e-14,
+            "weak": {
+              "bound_MPa": 1.2145475836436518e-06,
+              "force_residual_MPa": 2.947436533523379e-14,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244484333592,
+              "residual_MPa": 1.2360134075094231e-11,
+              "steel_utilization": 0.00478191915877159
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534056461502145,
+            "lambda_value": 1.1024449414688648,
+            "maximum_three_station_steel_utilization": 0.004781974634826551,
+            "raw_force_residual_MPa": 1.6842494477276451e-15,
+            "weak": {
+              "bound_MPa": 1.2145476472483352e-06,
+              "force_residual_MPa": 5.558023177501229e-15,
+              "fraction": 1.0,
+              "index": 57,
+              "lambda": 1.10244494146886,
+              "residual_MPa": 5.132561042842099e-13,
+              "steel_utilization": 0.00478197463482655
+            }
+          }
+        },
+        "solved": true,
+        "target_H_MPa": 0.0001534169376221809
+      },
+      {
+        "attempted": true,
+        "case": 3,
+        "field_error": 0.0005421462782863032,
+        "full_steps": 1,
+        "half_steps": 1,
+        "joint_error": 0.0005946497266874704,
+        "primary_iterations": 2,
+        "probes": 2,
+        "roots": {
+          "Full": {
+            "H_MPa": 0.0001534395205661242,
+            "lambda_value": 1.1024444029533578,
+            "maximum_three_station_steel_utilization": 0.004781808429198864,
+            "raw_force_residual_MPa": 6.652785318524198e-14,
+            "weak": {
+              "bound_MPa": 1.2145472982105112e-06,
+              "force_residual_MPa": 6.518045362705987e-14,
+              "fraction": 1.0,
+              "index": 58,
+              "lambda": 1.10244440295336,
+              "residual_MPa": 3.1710074453392134e-11,
+              "steel_utilization": 0.00478180842919886
+            }
+          },
+          "Half": {
+            "H_MPa": 0.0001534282290941499,
+            "lambda_value": 1.1024446631534324,
+            "maximum_three_station_steel_utilization": 0.004781863807003213,
+            "raw_force_residual_MPa": 1.6842494477276451e-15,
+            "weak": {
+              "bound_MPa": 1.2145474668587046e-06,
+              "force_residual_MPa": 3.3684988954552903e-15,
+              "fraction": 1.0,
+              "index": 58,
+              "lambda": 1.10244466315343,
+              "residual_MPa": 9.10197373200916e-13,
+              "steel_utilization": 0.00478186380700321
+            }
+          }
+        },
+        "solved": true,
+        "target_H_MPa": 0.00015343952056611407
+      },
+      {
+        "attempted": true,
+        "case": 4,
+        "primary_iterations": 14,
+        "probes": 2,
+        "solved": false,
+        "target_H_MPa": 0.0001534846864539804
+      }
+    ],
+    "independent_weak_and_force_assembly": true,
+    "intermediate_fields_replayed_as_accepted": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_working_promotion": true,
+    "original56_restored_at_end": true,
+    "physical_capacity_certified": false,
+    "sequential_history_comparison": {
+      "full_internal_material_state_vector_not_compared": true,
+      "lambda_difference": -4.607801695755143e-09,
+      "maximum_bar_stress_difference_MPa": 3.646558450087767e-06,
+      "maximum_concrete_stress_difference_MPa": 4.374578619903424e-07,
+      "maximum_energy_coordinate_difference": 1.3467205406403338e-08,
+      "not_an_automatic_acceptance_or_failure_criterion": true,
+      "one_full_step_H_ratio": 8,
+      "relative_field_difference": 0.00016194612361839408,
+      "two_sequential_accepted_half_H_ratios": [
+        4,
+        4
+      ]
+    },
+    "source_states": 56,
+    "verified_pairs": 3
+  },
   "latest_shared_curve_control_proof": {
     "absent_or_unattempted_half_roots_not_counted": true,
     "actual_components": 256,
@@ -11256,6 +13871,13 @@
     "timeout600": false
   },
   "latest_steel_guard_and_automatic_Hwalk_evidence": "docs/reports/evidence/Coupled6DSteelActivityHGuideWalk_2026-11-25",
+  "latest_strict_growth_regressions": {
+    "failed": 0,
+    "macros": 5,
+    "own_process_closed": true,
+    "passed": 164,
+    "timeout600": false
+  },
   "latest_two_branch_direction_approximation": {
     "cases": [
       {
@@ -11502,6 +14124,7 @@
   "latest_verified_automatic_Hwalk_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold852AutomaticLoadingSecantWalk_20261125",
   "latest_verified_cold_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold832GatedLoadingCold_20261125",
   "latest_verified_extended_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold838ElasticPrincipalArc_20261125",
+  "latest_verified_growth_history_evidence": "docs/reports/evidence/Coupled6DVerifiedGrowthAndHistory_2026-11-26",
   "latest_verified_loading_boundary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold841HGuideMaterialEvent_20261125",
   "latest_verified_loading_secant_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold851LoadingSecantReparameterization_20261125",
   "latest_verified_spectral_event_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold837ElasticPrincipalEvent_20261125",
@@ -11556,7 +14179,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Capture raw fields/operators and independently verify the new synthetic side-governing steel boundary; correct its test-law description, add side metadata in load-controlled event reports, then return to cold continuation bottleneck. Do not repeat long cold run without a specific numerical hypothesis.",
+  "next_action": "Target the actual signed-arc continuation at cold state56 and earlier state19: explain why valid strict H pairs are not selected on actual path, compare Arc radius with H-guide desired scale and TryEvent eligibility. Inspect exact source before asserting H-handoff bug: H-guide currently seeds a material-event search and is not automatically an H-controlled candidate. Do not repeat cold run for unused H-growth change. Preserve cold890 and sequential891 evidence; independent full internal material-state vectors and full SOW/physical ultimate remain open.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -11837,7 +14460,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:cold880 terminal56states/max1.104283/748s/directOK/capacityNumFail; savedreopened256verified; pure frozenstress882 verifies all56sixforces/56+4/all3steel. New881 aggregates all3station steel in common response, station projection/direct boundaryscreen/deformation event side/transverse fields, native31PASS;883unchanged164PASS. Native884real3stationQx± force solver localizes side-steel physical boundary [1.63922119140625,1.639312744140625],12PASS. Failed compile privateaccess and inheritedrunner preserved/fixed. MainHardShear limit still unconfirmed;no release/main promotion.",
+  "previous_goal_turn_classification": "progress:885native14PASS six raw equilibria independently rebuilt; cold-zero separate Newton finds steel side boundary1.6392967139708858 in3iterations within native brackets.886actualcold56 strictH ratios1,2,4,8 confirmed2/2/2/3iterations,16/32unconfirmed; full32root alone not admitted due half16.888conditional pairedHgrowth2 compiled;887nearresolution bypass counterexample preserved/fixed.889all164PASS.890actualcold complete731.138671875s/directOK/capacityNumFail/max1.1042833676987807,all56fields/fractions/lambdas bitidentical880,acceleratedHattempts0,actualfinalcontrol signedspatialarc.892all56stresses/sixforces/56+4/all3steel verified.891full8 versus accepted4+4 difference1.619461e-4increment/lambda4.6e-9; next accepted8+8unconfirmed. No physicalultimate/release/main promotion.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -13641,6 +16264,7 @@
   },
   "terminal_sessions_this_stage": [
     1055,
+    1057,
     1109,
     1801,
     1809,
@@ -13654,6 +16278,7 @@
     3074,
     3333,
     3987,
+    4235,
     4388,
     4426,
     4559,
@@ -13663,6 +16288,7 @@
     4873,
     5187,
     5291,
+    6054,
     6079,
     6268,
     6585,
@@ -13674,6 +16300,7 @@
     8222,
     8464,
     8852,
+    8910,
     8978,
     9088,
     9618,
@@ -13688,18 +16315,21 @@
     11425,
     11456,
     11628,
+    11697,
     11968,
     12133,
     12140,
     12165,
     12254,
     12388,
+    12556,
     12646,
     12697,
     13003,
     13811,
     13850,
     13853,
+    14300,
     14384,
     14589,
     14711,
@@ -13803,12 +16433,14 @@
     35896,
     36027,
     36034,
+    36350,
     36412,
     36441,
     36477,
     36943,
     37102,
     37183,
+    37300,
     37351,
     37430,
     37439,
@@ -13849,6 +16481,7 @@
     45282,
     45411,
     46166,
+    46513,
     46709,
     47141,
     47167,
@@ -13871,9 +16504,11 @@
     50872,
     51125,
     51230,
+    51267,
     51591,
     51817,
     51910,
+    52136,
     52358,
     52416,
     52768,
@@ -13921,6 +16556,7 @@
     63225,
     63350,
     63362,
+    64100,
     64297,
     64786,
     65220,
@@ -13944,6 +16580,7 @@
     68709,
     68748,
     68966,
+    69079,
     69179,
     69420,
     69525,
@@ -14058,6 +16695,7 @@
     91793,
     92127,
     92582,
+    92693,
     92701,
     92748,
     92960,
@@ -14099,7 +16737,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T02:33:20.402616+03:00",
+  "updated_local": "2026-11-26T03:18:16.442657+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
