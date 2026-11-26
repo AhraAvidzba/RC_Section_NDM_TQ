@@ -1,0 +1,77 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет копии только отклонённых равновесий; история контроллера и материалы не изменяются.
+Public Sub TestRememberSpatialReverse(ByVal history As Collection, ByVal prefix As Long, ByVal trace As CCoupledLoadTrace, _
+        ByRef previous() As Double, ByRef accepted() As Double, ByRef trial() As Double, ByRef actual() As Double, _
+        ByRef projection() As Double, ByVal context As Variant, ByVal advance As Double, ByVal reference As Double, _
+        ByVal revision As Long, ByVal fieldChanges As Long)
+    If mReverseSnapshotsTest Is Nothing Then Exit Sub
+    Dim item As New Collection, fields As New Collection, i As Long, field() As Double
+    For i = 1 To prefix: field = history(i): fields.Add field: Next i
+    item.Add fields: item.Add trace.CopyPrefix(prefix)
+    item.Add previous: item.Add accepted: item.Add trial: item.Add actual: item.Add projection
+    item.Add context: item.Add Array(advance, reference, revision, fieldChanges)
+    mReverseSnapshotsTest.Add item
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' После завершения основного пути экспортирует свидетели; временное принятие отклонённого поля служит только чтению напряжений.
+Private Sub TestExportSpatialReverses(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal calibration As Variant, ByVal options As Variant, ByRef offset() As Double, ByRef direction() As Double)
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced: Set mReverseSidesTest = sides
+    mReverseCalibrationTest = calibration: mReverseOptionsTest = options: mReverseModulusTest = calibration(0)
+    mReverseBaseTest = offset: mReverseDirectionTest = direction
+    Dim index As Long, item As Collection, trial() As Double, context As Variant, metrics As Variant
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".ReverseIndex.csv" For Output As #handle
+    Print #handle, "MODE;RejectedSpatialEquilibria;NotAcceptedContinuation;NotACapacityResult"
+    For index = 1 To mReverseSnapshotsTest.Count
+        Set item = mReverseSnapshotsTest(index)
+        Set mReverseFieldsTest = item(1): Set mReverseTraceTest = item(2)
+        trial = item(5): context = item(8): metrics = item(9)
+        Print #handle, "REVERSE;" & CStr(index) & ";" & CStr(mReverseFieldsTest.Count) & _
+            TestHardPreparedVector(context) & TestHardPreparedVector(metrics)
+        TestWriteReverseBinary mHardPreparedPathTest & ".Reverse" & CStr(index) & ".bin", item
+        mReverseFieldsTest.Add trial: mReverseTraceTest.Add 1#, CDbl(context(0))
+        TestExportReverseCandidate index
+    Next index
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Двоичный контрольный формат содержит точные Double и длины векторов; это не формат пользовательского снимка .ndm.
+Private Sub TestWriteReverseBinary(ByVal path As String, ByVal item As Collection)
+    Dim handle As Integer: handle = FreeFile
+    Open path For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMREVTEST000001"
+    Put #handle, , magic
+    Dim size As Long: size = mReverseOperatorsTest.DegreeCount
+    Put #handle, , size
+    TestWriteReverseBinaryVector handle, mReverseCalibrationTest
+    TestWriteReverseBinaryVector handle, mReverseOptionsTest
+    TestWriteReverseBinaryVector handle, mReverseBaseTest
+    TestWriteReverseBinaryVector handle, mReverseDirectionTest
+    Dim fields As Collection, trace As CCoupledLoadTrace, count As Long, i As Long, field() As Double
+    Set fields = item(1): Set trace = item(2): count = fields.Count
+    Put #handle, , count
+    Dim fraction As Double, factor As Double
+    For i = 1 To count
+        trace.ReadPoint i, fraction, factor: field = fields(i)
+        Put #handle, , fraction: Put #handle, , factor
+        TestWriteReverseBinaryVector handle, field
+    Next i
+    For i = 3 To 9: TestWriteReverseBinaryVector handle, item(i): Next i
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает длину и значения вектора без преобразования в десятичный текст.
+Private Sub TestWriteReverseBinaryVector(ByVal handle As Integer, ByVal values As Variant)
+    Dim count As Long: count = UBound(values) - LBound(values) + 1
+    Put #handle, , count
+    Dim i As Long, value As Double
+    For i = LBound(values) To UBound(values)
+        value = CDbl(values(i)): Put #handle, , value
+    Next i
+End Sub

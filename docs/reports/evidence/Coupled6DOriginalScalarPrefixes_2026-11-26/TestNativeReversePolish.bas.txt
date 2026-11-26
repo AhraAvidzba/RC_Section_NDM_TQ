@@ -1,0 +1,155 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Готовит тот же штатный материал и геометрию; поиск до 26-го поля заменён точным восстановлением двоичной истории.
+Public Function RunTestReversePolish(ByVal outputRoot As String) As String
+    On Error GoTo Failed
+    mPolishRootTest = outputRoot: mPolishExecutedTest = False: ReversePolishRequestedTest = True
+    Dim units As CUnitSystem: Set units = TestPrepareCoupledTimingBook(ThisWorkbook, "Capacity", "Excel", TestHardShearLoads())
+    Dim message As String: message = RunSectionCalculationForWorkbook(ThisWorkbook)
+    ReversePolishRequestedTest = False
+    If Not mPolishExecutedTest Then Err.Raise 5, , "Не выполнен контроль восстановленной истории. " & message
+    RunTestReversePolish = "TOTAL_REVERSE_POLISH_STUDY_TEST: passed=1; failed=0; numerical_outcomes_recorded_not_asserted; capacity_certified=False"
+    Exit Function
+Failed:
+    ReversePolishRequestedTest = False
+    RunTestReversePolish = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет неизменность всех записанных параметров и четыре исходных равновесия; результаты строгих проб не предопределены.
+Public Sub TestRunReversePolishModel(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal calibration As Variant, ByVal options As Variant)
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced: Set mReverseSidesTest = sides
+    mReverseCalibrationTest = calibration: mReverseOptionsTest = options: mReverseModulusTest = calibration(0)
+    path.Components mReverseBaseTest, mReverseDirectionTest
+    mHardPreparedPathTest = mPolishRootTest & "\Native\ReversePolish"
+    TestWriteHardPreparedOperators operators, mHardPreparedPathTest & ".Operators.csv"
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".csv" For Output As #handle
+    Print #handle, "MODE;SameExactHistory;OriginalToleranceAndTwoStrictSeeds;NotAcceptedContinuation;NotACapacityResult"
+    Dim index As Long, probeVariant As Long, fields As Collection, trace As CCoupledLoadTrace
+    Dim previous() As Double, accepted() As Double, original() As Double, projection() As Double, context() As Double
+    Dim seed() As Double, trial() As Double, actual() As Double, copy() As Double, seedVariant As Variant
+    Dim factor As Double, seedFactor As Double, solved As Boolean, started As Double, seconds As Double, stats As Variant
+    Dim degree As Long, currentCoordinate As Double, oldStep As Double, ratio As Double, fraction As Double, currentFactor As Double, previousFactor As Double
+    Dim absTol As Double, relTol As Double, advance As Double, reference As Double, steelUse As Double, controlError As Double, values As Variant
+    For index = 1 To 4
+        TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse" & CStr(index) & ".bin", fields, trace, previous, accepted, original, projection, context
+        Set mReverseFieldsTest = fields: Set mReverseTraceTest = trace
+        For probeVariant = 0 To 2
+            If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена полная исходная история."
+            Dim revision As Long: revision = solver.AcceptedRevision
+            seed = original: seedFactor = context(1)
+            absTol = options(3): relTol = options(4)
+            If probeVariant > 0 Then absTol = GeomMin(absTol, 0.0000000001): relTol = GeomMin(relTol, 0.0000000001)
+            If probeVariant = 2 Then
+                currentCoordinate = 0#: oldStep = 0#
+                For degree = 1 To solver.PhysicalDegreeCount
+                    currentCoordinate = currentCoordinate + projection(degree) * accepted(degree)
+                    oldStep = oldStep + projection(degree) * (accepted(degree) - previous(degree))
+                Next degree
+                If oldStep <= 0# Then Err.Raise 5, , "Исходная проекция не направлена вдоль принятой секущей."
+                ratio = (context(2) - currentCoordinate) / oldStep
+                If ratio <= 0# Then Err.Raise 5, , "Новая цель не лежит впереди исходной координаты."
+                seed = accepted
+                For degree = 1 To solver.PhysicalDegreeCount: seed(degree) = accepted(degree) + ratio * (accepted(degree) - previous(degree)): Next degree
+                trace.ReadPoint fields.Count, fraction, currentFactor
+                trace.ReadPoint fields.Count - 1, fraction, previousFactor
+                seedFactor = currentFactor + ratio * (currentFactor - previousFactor)
+            End If
+            seedVariant = seed: started = Timer
+            solved = solver.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, context(2), seedFactor, factor, _
+                absTol, relTol, CLng(options(2)), initialField:=seedVariant, allowHybridRecovery:=(probeVariant > 0))
+            seconds = Timer - started: stats = solver.ReadPolishEffortTest
+            solver.CopyAccepted copy
+            For degree = 1 To UBound(accepted)
+                If accepted(degree) <> copy(degree) Then Err.Raise 5, , "Численная проба изменила принятое поле."
+            Next degree
+            If revision <> solver.AcceptedRevision Or stats(0) > options(2) Then Err.Raise 5, , "Нарушена ревизия истории или общий бюджет."
+            advance = 0#: reference = 0#: steelUse = 0#: controlError = 0#
+            If solved Then
+                solver.CopyTrial trial, actual
+                If probeVariant = 0 Then
+                    If factor <> context(1) Then Err.Raise 5, , "Исходный множитель изменился при штатном повторе."
+                    For degree = 1 To UBound(original)
+                        If trial(degree) <> original(degree) Then Err.Raise 5, , "Исходное равновесие изменилось при штатном повторе."
+                    Next degree
+                End If
+                Dim forward As Boolean: forward = solver.SpatialIncrementAdvances(previous, accepted, trial, advance, reference)
+                steelUse = reinforced.TrialSteelUtilization
+                For degree = 1 To solver.PhysicalDegreeCount: controlError = controlError + projection(degree) * trial(degree): Next degree
+                controlError = Abs(controlError - context(2)) * calibration(0)
+            ElseIf probeVariant = 0 Then
+                Err.Raise 5, , "Исходная отклонённая проба не воспроизвела равновесие."
+            End If
+            Print #handle, "PROBE;" & CStr(index) & ";" & CStr(probeVariant) & ";" & CStr(solved) & ";" & TestOnsetNumber(factor) & _
+                ";" & TestOnsetNumber(seconds) & TestHardPreparedVector(stats) & TestHardPreparedVector(Array(advance, reference, steelUse, controlError))
+            Print #handle, "TOLERANCE;" & CStr(index) & ";" & CStr(probeVariant) & ";" & TestOnsetNumber(absTol) & ";" & TestOnsetNumber(relTol)
+            Print #handle, "DETAILS;" & CStr(index) & ";" & CStr(probeVariant) & ";" & solver.ResultMeta.DiagnosticDetails
+            solver.DiscardStep
+            If solved Then
+                Set mReverseFieldsTest = New Collection
+                For degree = 1 To fields.Count: copy = fields(degree): mReverseFieldsTest.Add copy: Next degree
+                Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+                mReverseFieldsTest.Add trial: mReverseTraceTest.Add 1#, factor
+                TestExportReverseCandidate index * 10 + probeVariant
+            End If
+        Next probeVariant
+    Next index
+    Close #handle
+    mPolishExecutedTest = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает точные поля и сверяет все записанные параметры с заново построенной штатной моделью.
+Private Sub TestReadPolishSnapshot(ByVal path As String, ByRef fields As Collection, ByRef trace As CCoupledLoadTrace, _
+        ByRef previous() As Double, ByRef accepted() As Double, ByRef trial() As Double, ByRef projection() As Double, ByRef context() As Double)
+    Dim handle As Integer: handle = FreeFile
+    Open path For Binary Access Read As #handle
+    Dim magic As String * 16, size As Long, count As Long
+    Get #handle, , magic: Get #handle, , size
+    If magic <> "NDMREVTEST000001" Or size <> mReverseOperatorsTest.DegreeCount Then Err.Raise 5, , "Неверный заголовок тестового снимка."
+    TestPolishSameVector TestReadPolishVector(handle), mReverseCalibrationTest, "материал"
+    TestPolishSameVector TestReadPolishVector(handle), mReverseOptionsTest, "расчётные параметры"
+    TestPolishSameVector TestReadPolishVector(handle), mReverseBaseTest, "постоянная нагрузка"
+    TestPolishSameVector TestReadPolishVector(handle), mReverseDirectionTest, "траектория нагрузки"
+    Get #handle, , count
+    If count < 2 Or count > 1000 Then Err.Raise 5, , "Неверное число исходных полей."
+    Set fields = New Collection: Set trace = New CCoupledLoadTrace
+    Dim index As Long, fraction As Double, factor As Double, field() As Double, unused As Variant
+    For index = 1 To count
+        Get #handle, , fraction: Get #handle, , factor
+        field = TestReadPolishVector(handle)
+        If UBound(field) <> size Then Err.Raise 5, , "Неверная длина исходного поля."
+        fields.Add field: trace.Add fraction, factor
+    Next index
+    previous = TestReadPolishVector(handle): accepted = TestReadPolishVector(handle): trial = TestReadPolishVector(handle)
+    unused = TestReadPolishVector(handle): projection = TestReadPolishVector(handle): context = TestReadPolishVector(handle)
+    unused = TestReadPolishVector(handle)
+    If Seek(handle) <> LOF(handle) + 1 Then Err.Raise 5, , "Лишние данные в тестовом снимке."
+    Close #handle
+    TestPolishSameVector previous, fields(fields.Count - 1), "предыдущее поле"
+    TestPolishSameVector accepted, fields(fields.Count), "текущее поле"
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает длину и исходные Double; текстовое округление не применяется.
+Private Function TestReadPolishVector(ByVal handle As Integer) As Variant
+    Dim count As Long: Get #handle, , count
+    If count < 1 Or count > 10000 Then Err.Raise 5, , "Неверная длина вектора снимка."
+    Dim values() As Double: ReDim values(1 To count)
+    Dim index As Long
+    For index = 1 To count: Get #handle, , values(index): Next index
+    TestReadPolishVector = values
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Требует точного равенства исходных чисел независимо от нижней границы массива.
+Private Sub TestPolishSameVector(ByVal actual As Variant, ByVal expected As Variant, ByVal label As String)
+    If UBound(actual) - LBound(actual) <> UBound(expected) - LBound(expected) Then Err.Raise 5, , "Размеры различаются: " & label
+    Dim index As Long
+    For index = 0 To UBound(actual) - LBound(actual)
+        If actual(LBound(actual) + index) <> expected(LBound(expected) + index) Then Err.Raise 5, , "Исходные числа различаются: " & label
+    Next index
+End Sub

@@ -1,0 +1,81 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет явный отказ координаты из закрытого или заменённого контекста.
+Private Function TestConstraintContextRejected(ByVal constraint As ICoupledScalarConstraint) As Boolean
+    On Error GoTo Rejected
+    Dim x(1 To 61) As Double, value As Double, gradient() As Double, read As Boolean
+    read = constraint.TryEvaluate(x, False, value, gradient)
+    Exit Function
+Rejected:
+    TestConstraintContextRejected = (Err.Number = 5)
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет ту же цель от исходной истории общим гибридным решателем и отдельно проверяет его действительное физическое поле.
+Private Sub TestGenericHybridCase(ByVal solver As CCoupledNewtonSolver, ByVal probeCase As Long, ByVal report As Integer, _
+        ByRef seed() As Double, ByVal seedFactor As Double, ByRef projection() As Double, ByVal target As Double, _
+        ByVal previousConstraint As ICoupledScalarConstraint)
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double
+    Dim original() As Double, oldProjection() As Double, context() As Double
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, original, oldProjection, context
+    ReturnPrecisionFactorTest = 0#
+    If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена исходная история для общего решателя."
+    ReturnPrecisionFactorTest = 0.0001
+    If Not solver.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, target, seed, seedFactor) Then _
+        Err.Raise 5, , "Не открыт контекст общего решателя."
+    If Not TestConstraintContextRejected(previousConstraint) Then Err.Raise 5, , "Прежняя координата принята в новом контексте."
+    Dim constraint As ICoupledScalarConstraint: Set constraint = solver.CreateMaterialConstraint(25, 1, 0, target)
+    Dim zero(1 To 61) As Double, mapped() As Double, adapter As New CCoupledConstraintEquations
+    adapter.Initialize solver, constraint, zero, 0.000000000002, 16
+    Dim spy As New CProjectedEquationsTest: spy.InitializeTest adapter, solver
+    Dim equations As ICoupledEquationSystem: Set equations = spy
+    mYieldProjectionHandleTest = FreeFile
+    Open mHardPreparedPathTest & ".HybridProjection" & CStr(probeCase) & ".bin" For Binary Access Write As #mYieldProjectionHandleTest
+    Dim magic As String * 16: magic = "NDMQPROJECT00001"
+    Dim pivot As Long: pivot = adapter.Pivot
+    Put #mYieldProjectionHandleTest, , magic: Put #mYieldProjectionHandleTest, , pivot
+    Dim hybrid As New CCoupledHybridSolver, solution() As Double, solved As Boolean, started As Double, seconds As Double
+    started = Timer
+    solved = hybrid.TrySolve(equations, zero, 4500, 30, 0.0000000001, 0.00000000001, 0.2, solution, _
+        relativeDifferenceStep:=0.000001, automaticScaling:=True, freshJacobian:=True)
+    seconds = Timer - started
+    Dim calls As Long: calls = spy.EvaluationCallsTest
+    If calls <> hybrid.FunctionCalls Then Err.Raise 5, , "Счётчик полного отклика общего решателя не совпадает с фактическими запросами."
+    Dim residual() As Double, unused() As Double, maximum As Double, degree As Long
+    If Not equations.TryEvaluate(solution, False, residual, unused) Then Err.Raise 5, , "Не проверено лучшее поле общего решателя."
+    For degree = 1 To UBound(residual): If Abs(residual(degree)) > maximum Then maximum = Abs(residual(degree))
+    Next degree
+    If solved And maximum > 0.0000000001 Then Err.Raise 5, , "Общий решатель объявил корень вне строгого допуска."
+    If Not adapter.TryMap(solution, mapped) Then Err.Raise 5, , "Не восстановлено действительное поле общего решателя."
+    Dim field() As Double, factor As Double: solver.ReadNewtonLineFieldTest mapped, field, factor
+    Print #report, "HYBRID_RESULT;" & CStr(probeCase) & ";" & CStr(solved) & ";" & TestOnsetNumber(seconds) & ";" & _
+        TestOnsetNumber(maximum) & ";" & CStr(hybrid.Steps) & ";" & CStr(hybrid.FunctionCalls) & ";" & _
+        CStr(hybrid.JacobianCalls) & ";" & CStr(hybrid.StopCode) & ";" & CStr(calls) & ";" & CStr(adapter.ProjectionCalls)
+    Print #report, "HYBRID_FINAL;" & CStr(probeCase) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+    Print #report, "HYBRID_RESIDUAL;" & CStr(probeCase) & TestHardPreparedVector(residual)
+    Close #mYieldProjectionHandleTest: mYieldProjectionHandleTest = 0
+    solver.EndNewtonLineTest
+    If Not TestConstraintContextRejected(constraint) Then Err.Raise 5, , "Материальная координата осталась действительной после закрытия контекста."
+    Dim load(1 To 6) As Double, seedVariant As Variant, verified As Boolean, unchanged As Boolean, forward As Boolean
+    Dim checked() As Double, actual() As Double, advance As Double, reference As Double, steel As Double
+    For degree = 1 To 6: load(degree) = mReverseBaseTest(degree) + factor * mReverseDirectionTest(degree): Next degree
+    seedVariant = field
+    verified = solver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mReverseOptionsTest(3), mReverseOptionsTest(4), 1, initialField:=seedVariant)
+    If verified Then
+        unchanged = True: solver.CopyTrial checked, actual
+        For degree = 1 To UBound(field): If checked(degree) <> field(degree) Then unchanged = False
+        Next degree
+        forward = solver.SpatialIncrementAdvances(previous, accepted, checked, advance, reference)
+        steel = mReverseReinforcedTest.TrialSteelUtilization
+    End If
+    Print #report, "HYBRID_NATIVE;" & CStr(probeCase) & ";" & CStr(verified) & ";" & CStr(unchanged) & ";" & CStr(forward) & ";" & _
+        TestOnsetNumber(advance) & ";" & TestOnsetNumber(reference) & ";" & TestOnsetNumber(steel)
+    solver.DiscardStep
+    If verified And unchanged Then
+        Set mReverseFieldsTest = New Collection
+        Dim copy() As Double
+        For degree = 1 To fields.Count: copy = fields(degree): mReverseFieldsTest.Add copy: Next degree
+        Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+        mReverseFieldsTest.Add field: mReverseTraceTest.Add 1#, factor
+        TestExportReverseCandidate 40 + probeCase
+    End If
+End Sub

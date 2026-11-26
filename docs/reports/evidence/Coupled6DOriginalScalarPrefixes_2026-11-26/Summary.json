@@ -1,0 +1,516 @@
+{
+  "all_logical_raw_hashes_read_back": true,
+  "all_numerical_stages_terminal": true,
+  "all_saved_books_rebuilt_bitexact_from_archived_segments": true,
+  "book_reconstruction": {
+    "965": {
+      "actual_saved_book_sha256": "A7613F05B40BBC9CB5DEF709AE30DB3FD3C1641E155977545C9E7D749C8FFA5C",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_all_rejected": true,
+      "manifest_member": "965/ActualSavedBookSegments.json",
+      "new_segment_bytes": 12918647,
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15532533
+    },
+    "966": {
+      "actual_saved_book_sha256": "A7613F05B40BBC9CB5DEF709AE30DB3FD3C1641E155977545C9E7D749C8FFA5C",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_all_rejected": true,
+      "manifest_member": "966/ActualSavedBookSegments.json",
+      "new_segment_bytes": 12918647,
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15532533
+    },
+    "967": {
+      "actual_saved_book_sha256": "F7A73E99E5DAB5F4CE00F0B7FB5BBD135A24A5685A0936AB33C9CD03B5B5BAE1",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_all_rejected": true,
+      "manifest_member": "967/ActualSavedBookSegments.json",
+      "new_segment_bytes": 13134946,
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15532914
+    }
+  },
+  "cold_gain_claimed": false,
+  "exact_duplicate_hardlinks": 1453,
+  "full_acceptance_not_run": true,
+  "physical_capacity_certified": false,
+  "proofs": {
+    "965": {
+      "actual_components": 257,
+      "all_working_newton_methods_exact960": true,
+      "attempts": [
+        {
+          "confirmed": false,
+          "fraction": 1.0,
+          "full_root": false,
+          "index": 1,
+          "root_effort": [
+            3.0,
+            24.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            0.07008264499451945
+          ],
+          "secant_ratio": 1.000000000000011,
+          "target": 7.237782135158301e-05,
+          "total_steps": 3
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.5,
+          "full_root": false,
+          "index": 2,
+          "root_effort": [
+            4.0,
+            13.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            0.000126243163288311
+          ],
+          "secant_ratio": 0.5000000000000112,
+          "target": 7.17717525041875e-05,
+          "total_steps": 7
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.25,
+          "full_root": false,
+          "index": 3,
+          "root_effort": [
+            4.0,
+            12.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            0.0014117773606627361
+          ],
+          "secant_ratio": 0.25,
+          "target": 7.146871808048974e-05,
+          "total_steps": 11
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.125,
+          "full_root": false,
+          "index": 4,
+          "root_effort": [
+            4.0,
+            16.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            2.4308625558987326e-05
+          ],
+          "secant_ratio": 0.125,
+          "target": 7.131720086864086e-05,
+          "total_steps": 15
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.0625,
+          "full_root": false,
+          "index": 5,
+          "root_effort": [
+            4.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            1.1298604085453019e-05
+          ],
+          "secant_ratio": 0.06250000000000559,
+          "target": 7.124144226271643e-05,
+          "total_steps": 19
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.03125,
+          "full_root": false,
+          "index": 6,
+          "root_effort": [
+            4.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            5.419402392472367e-06
+          ],
+          "secant_ratio": 0.031249999999997204,
+          "target": 7.12035629597542e-05,
+          "total_steps": 23
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.015625,
+          "full_root": false,
+          "index": 7,
+          "root_effort": [
+            4.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            2.642682139135128e-06
+          ],
+          "secant_ratio": 0.015624999999998602,
+          "target": 7.11846233082731e-05,
+          "total_steps": 27
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.0078125,
+          "full_root": false,
+          "index": 8,
+          "root_effort": [
+            1.0,
+            3.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            3.86821585057116e-05
+          ],
+          "secant_ratio": 0.007812500000004892,
+          "target": 7.117515348253255e-05,
+          "total_steps": 28
+        }
+      ],
+      "cold_gain_claimed": false,
+      "entry_summary_explicitly_checked_separately_from_outer_TOTAL": true,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "native_lambda_uncertainty": null,
+      "original25_revision_and_field_unchanged_before_diagnostic_exports": true,
+      "other_parent_components_preserved": 255,
+      "pairs": [],
+      "physical_capacity_certified": false,
+      "returned": null,
+      "returned_verified_candidate": false,
+      "root_step_budget": 4,
+      "shared_step_budget": 30,
+      "source_history25_exact960": true,
+      "standalone_diagnostic_budget_not_remaining_full_cold": true,
+      "supplied_future_guide": false,
+      "total_steps": 28
+    },
+    "966": {
+      "actual_components": 257,
+      "all_working_newton_methods_exact960": true,
+      "attempts": [
+        {
+          "confirmed": false,
+          "fraction": 0.015625,
+          "full_root": false,
+          "index": 1,
+          "root_effort": [
+            4.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            2.642682139135128e-06
+          ],
+          "secant_ratio": 0.015624999999998602,
+          "target": 7.11846233082731e-05,
+          "total_steps": 4
+        },
+        {
+          "confirmed": false,
+          "fraction": 0.0078125,
+          "full_root": false,
+          "index": 2,
+          "root_effort": [
+            4.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            27.0,
+            1.2988641189289182e-06
+          ],
+          "secant_ratio": 0.007812500000004892,
+          "target": 7.117515348253255e-05,
+          "total_steps": 8
+        },
+        {
+          "confirmed": true,
+          "fraction": 0.00390625,
+          "full_root": true,
+          "index": 3,
+          "root": {
+            "bound_MPa": 1.2152070298879787e-06,
+            "force_residual_MPa": 3.155104490428198e-12,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.10346227468431,
+            "original_requested_bound_MPa": 1.2152070298879804e-06,
+            "original_scalar_residual_MPa": -8.131516293641283e-16,
+            "residual_MPa": 6.588436208788354e-07,
+            "steel_utilization": 0.0036001096714316
+          },
+          "root_effort": [
+            3.0,
+            9.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            6.588444167924634e-07
+          ],
+          "secant_ratio": 0.0039062499999968554,
+          "target": 7.117041856966226e-05,
+          "total_steps": 11
+        }
+      ],
+      "cold_gain_claimed": false,
+      "entry_summary_explicitly_checked_separately_from_outer_TOTAL": true,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "native_lambda_uncertainty": 8.57322871730373e-06,
+      "original25_revision_and_field_unchanged_before_diagnostic_exports": true,
+      "other_parent_components_preserved": 255,
+      "pairs": [
+        {
+          "field_error": 9.292132687828079e-12,
+          "full": {
+            "bound_MPa": 1.2152070298879787e-06,
+            "force_residual_MPa": 3.155104490428198e-12,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.10346227468431,
+            "original_requested_bound_MPa": 1.2152070298879804e-06,
+            "original_scalar_residual_MPa": 0.0,
+            "residual_MPa": 6.588436208788354e-07,
+            "steel_utilization": 0.0036001096714316
+          },
+          "half": {
+            "bound_MPa": 1.2152065061782084e-06,
+            "force_residual_MPa": 2.2585094551754152e-10,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.10346146667495,
+            "original_requested_bound_MPa": 1.215206506178205e-06,
+            "original_scalar_residual_MPa": 0.0,
+            "residual_MPa": 2.7554054005682685e-07,
+            "steel_utilization": 0.00360005001739606
+          },
+          "joint_error": 1.0555005839593723e-11,
+          "lambda_bound": 8.41384263466231e-06,
+          "lambda_error": 2.220446049250313e-16,
+          "passes_original_half_check": true
+        }
+      ],
+      "physical_capacity_certified": false,
+      "returned": {
+        "bound_MPa": 1.2152070298879787e-06,
+        "force_residual_MPa": 3.155104490428198e-12,
+        "fraction": 1.0,
+        "index": 26,
+        "lambda": 1.10346227468431,
+        "original_requested_bound_MPa": 1.2152070298879804e-06,
+        "original_scalar_residual_MPa": 0.0,
+        "residual_MPa": 6.588436208788354e-07,
+        "steel_utilization": 0.0036001096714316
+      },
+      "returned_verified_candidate": true,
+      "root_step_budget": 4,
+      "shared_step_budget": 30,
+      "source_history25_exact960": true,
+      "standalone_diagnostic_budget_not_remaining_full_cold": true,
+      "supplied_future_guide": false,
+      "total_steps": 11
+    },
+    "967": {
+      "actual_components": 257,
+      "all_working_newton_methods_exact960": true,
+      "attempts": [
+        {
+          "confirmed": false,
+          "fraction": 0.015625,
+          "full_root": false,
+          "index": 1,
+          "root_effort": [
+            10.0,
+            176.0,
+            1.0,
+            1.0,
+            124.0,
+            0.0,
+            27.0,
+            3.0689324022490022e-06
+          ],
+          "secant_ratio": 0.015624999999998602,
+          "target": 7.11846233082731e-05,
+          "total_steps": 10
+        },
+        {
+          "confirmed": true,
+          "fraction": 0.0078125,
+          "full_root": true,
+          "index": 2,
+          "root": {
+            "bound_MPa": 1.2152081868904259e-06,
+            "force_residual_MPa": 2.0722872603881928e-07,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.1034640597738,
+            "original_requested_bound_MPa": 1.2152081868904236e-06,
+            "original_scalar_residual_MPa": -4.0657581468206416e-16,
+            "residual_MPa": 6.723756347248866e-07,
+            "steel_utilization": 0.00360022964858937
+          },
+          "root_effort": [
+            8.0,
+            45.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            6.723757514560258e-07
+          ],
+          "secant_ratio": 0.007812500000004892,
+          "target": 7.117515348253255e-05,
+          "total_steps": 18
+        }
+      ],
+      "cold_gain_claimed": false,
+      "entry_summary_explicitly_checked_separately_from_outer_TOTAL": true,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "native_lambda_uncertainty": 8.573964880296852e-06,
+      "original25_revision_and_field_unchanged_before_diagnostic_exports": true,
+      "other_parent_components_preserved": 256,
+      "pairs": [
+        {
+          "field_error": 3.735598282941117e-12,
+          "full": {
+            "bound_MPa": 1.2152081868904259e-06,
+            "force_residual_MPa": 2.0722872603881928e-07,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.1034640597738,
+            "original_requested_bound_MPa": 1.2152081868904236e-06,
+            "original_scalar_residual_MPa": 4.0657581468206416e-16,
+            "residual_MPa": 6.723756347248866e-07,
+            "steel_utilization": 0.00360022964858937
+          },
+          "half": {
+            "bound_MPa": 1.2152070846794285e-06,
+            "force_residual_MPa": 1.0288106784207265e-07,
+            "fraction": 1.0,
+            "index": 26,
+            "lambda": 1.10346235921969,
+            "original_requested_bound_MPa": 1.2152070846794268e-06,
+            "original_scalar_residual_MPa": 4.0657581468206416e-16,
+            "residual_MPa": 3.834056846452327e-07,
+            "steel_utilization": 0.00360011000597494
+          },
+          "joint_error": 4.49747802918786e-12,
+          "lambda_bound": 8.41384263466231e-06,
+          "lambda_error": 2.220446049250313e-16,
+          "passes_original_half_check": true
+        }
+      ],
+      "physical_capacity_certified": false,
+      "returned": {
+        "bound_MPa": 1.2152081868904259e-06,
+        "force_residual_MPa": 2.0722872603881928e-07,
+        "fraction": 1.0,
+        "index": 26,
+        "lambda": 1.1034640597738,
+        "original_requested_bound_MPa": 1.2152081868904236e-06,
+        "original_scalar_residual_MPa": 4.0657581468206416e-16,
+        "residual_MPa": 6.723756347248866e-07,
+        "steel_utilization": 0.00360022964858937
+      },
+      "returned_verified_candidate": true,
+      "root_step_budget": 10,
+      "shared_step_budget": 30,
+      "source_history25_exact960": true,
+      "standalone_diagnostic_budget_not_remaining_full_cold": true,
+      "supplied_future_guide": false,
+      "total_steps": 18
+    }
+  },
+  "publication_scope_verification": {
+    "965": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "geometry_materials_and_original25_input_bitexact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    },
+    "966": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "geometry_materials_and_original25_input_bitexact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    },
+    "967": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "geometry_materials_and_original25_input_bitexact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    }
+  },
+  "raw_archive_bytes": 57522384,
+  "raw_bytes": 319637459,
+  "raw_files": 2205,
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "whole_goal_completed": false
+}
