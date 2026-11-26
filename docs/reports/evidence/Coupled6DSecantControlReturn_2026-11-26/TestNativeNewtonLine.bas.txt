@@ -1,0 +1,225 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сравнивает полный Newton из секущего и близкого прогноза на одном неизменном материальном префиксе.
+Public Sub TestRunReversePolishModel(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal calibration As Variant, ByVal options As Variant)
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced: Set mReverseSidesTest = sides
+    mReverseCalibrationTest = calibration: mReverseOptionsTest = options: mReverseModulusTest = calibration(0)
+    If CLng(options(2)) <> 30 Then Err.Raise 5, , "Бюджет опыта не совпадает с исходным решателем."
+    path.Components mReverseBaseTest, mReverseDirectionTest
+    mHardPreparedPathTest = mPolishRootTest & "\Native\NewtonLine"
+    TestWriteHardPreparedOperators operators, mHardPreparedPathTest & ".Operators.csv"
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double
+    Dim original() As Double, projection() As Double, context() As Double
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, original, projection, context
+    Dim movement() As Double, coordinate As Double, spacing As Double, degree As Long
+    movement = accepted
+    For degree = 1 To UBound(movement): movement(degree) = accepted(degree) - previous(degree): Next degree
+    If Not solver.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then _
+        Err.Raise 5, , "Не построена полная секущая мера."
+    Dim target As Double: target = coordinate + 0.5 * spacing
+    Dim fraction As Double, currentFactor As Double, previousFactor As Double
+    trace.ReadPoint fields.Count, fraction, currentFactor
+    trace.ReadPoint fields.Count - 1, fraction, previousFactor
+    Dim probeCase As Long, seed() As Double, seedFactor As Double, coordinates() As Double
+    Dim field() As Double, checked() As Double, actual() As Double, copy() As Double, factor As Double
+    Dim solved As Boolean, verified As Boolean, unchanged As Boolean, forward As Boolean, revision As Long
+    Dim advance As Double, reference As Double, steelUse As Double, started As Double, seconds As Double
+    Dim load(1 To 6) As Double, seedVariant As Variant, outcome As String, effort As Variant
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".csv" For Output As #handle
+    Print #handle, "MODE;CompleteNewtonWithArmijoLineSearch;SameExactHistory;NotACapacityResult"
+    Print #handle, "CONTROL;" & TestOnsetNumber(target) & TestHardPreparedVector(projection)
+    For probeCase = 0 To 1
+        If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена исходная история Newton."
+        revision = solver.AcceptedRevision
+        seed = accepted: seedFactor = currentFactor + 0.5 * (currentFactor - previousFactor)
+        For degree = 1 To solver.PhysicalDegreeCount: seed(degree) = accepted(degree) + 0.5 * movement(degree): Next degree
+        If probeCase = 1 Then
+            Dim seedHandle As Integer: seedHandle = FreeFile
+            Open mPolishRootTest & "\Input\NearSeed.bin" For Binary Access Read As #seedHandle
+            Dim nearSeed As Variant: nearSeed = TestReadPolishVector(seedHandle)
+            If UBound(nearSeed) <> 61 Or Seek(seedHandle) <> LOF(seedHandle) + 1 Then Err.Raise 5, , "Неверный близкий прогноз."
+            Close #seedHandle
+            For degree = 1 To UBound(seed): seed(degree) = nearSeed(degree): Next degree
+            seedFactor = nearSeed(61)
+        End If
+        Print #handle, "SEED;" & CStr(probeCase) & ";" & TestOnsetNumber(seedFactor) & TestHardPreparedVector(seed)
+        If Not solver.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, target, seed, seedFactor) Then _
+            Err.Raise 5, , "Не подготовлен интерфейс полной системы."
+        Dim scales As Variant: scales = solver.ReadNewtonLineScalesTest
+        started = Timer
+        solved = TestCompleteNewtonLine(solver, probeCase, handle, seed, seedFactor, projection, target, scales, coordinates, outcome, effort)
+        seconds = Timer - started
+        solver.ReadNewtonLineFieldTest coordinates, field, factor
+        solver.EndNewtonLineTest
+        solver.CopyAccepted copy
+        For degree = 1 To UBound(accepted)
+            If copy(degree) <> accepted(degree) Then Err.Raise 5, , "Полный Newton изменил принятую историю."
+        Next degree
+        If solver.AcceptedRevision <> revision Then Err.Raise 5, , "Полный Newton изменил материальную ревизию."
+        Print #handle, "RESULT;" & CStr(probeCase) & ";" & CStr(solved) & ";" & TestOnsetNumber(seconds) & ";" & outcome & TestHardPreparedVector(effort)
+        Print #handle, "FINAL;" & CStr(probeCase) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+        For degree = 1 To 6: load(degree) = mReverseBaseTest(degree) + factor * mReverseDirectionTest(degree): Next degree
+        seedVariant = field
+        verified = solver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), options(3), options(4), 1, initialField:=seedVariant)
+        unchanged = False: forward = False: steelUse = 0#: advance = 0#: reference = 0#
+        If verified Then
+            solver.CopyTrial checked, actual: unchanged = True
+            For degree = 1 To UBound(field)
+                If checked(degree) <> field(degree) Then unchanged = False
+            Next degree
+            forward = solver.SpatialIncrementAdvances(previous, accepted, checked, advance, reference)
+            steelUse = reinforced.TrialSteelUtilization
+        End If
+        Print #handle, "NATIVE;" & CStr(probeCase) & ";" & CStr(verified) & ";" & CStr(unchanged) & ";" & CStr(forward) & ";" & _
+            TestOnsetNumber(advance) & ";" & TestOnsetNumber(reference) & ";" & TestOnsetNumber(steelUse)
+        solver.DiscardStep
+        If verified And unchanged Then
+            Set mReverseFieldsTest = New Collection
+            For degree = 1 To fields.Count: copy = fields(degree): mReverseFieldsTest.Add copy: Next degree
+            Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+            mReverseFieldsTest.Add field: mReverseTraceTest.Add 1#, factor
+            TestExportReverseCandidate 20 + probeCase
+        End If
+    Next probeCase
+    Close #handle: mPolishExecutedTest = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Решает действующий адаптер полными центральными разностями и штатным LU; каждая проба шага пересчитывает фактическую невязку.
+Private Function TestCompleteNewtonLine(ByVal solver As CCoupledNewtonSolver, ByVal probeCase As Long, ByVal report As Integer, _
+        ByRef seed() As Double, ByVal seedFactor As Double, ByRef projection() As Double, ByVal target As Double, ByVal scales As Variant, _
+        ByRef x() As Double, ByRef outcome As String, ByRef effort As Variant) As Boolean
+    Const count As Long = 61, maximumSteps As Long = 30, maximumCalls As Long = 4500
+    Dim equations As ICoupledEquationSystem: Set equations = solver
+    Dim linear As New CCoupledLinearSystem, norms As New CCoupledHybridFactorization
+    ReDim x(1 To count)
+    Dim residual() As Double, unused() As Double, approximate() As Double, jacobian() As Double, sizes() As Double
+    Dim positiveSamples() As Double, negativeSamples() As Double, beforeMatrix() As Double
+    Dim point() As Double, plus() As Double, minus() As Double, correction() As Double, errorVector() As Double
+    Dim calls As Long, iteration As Long, column As Long, row As Long, usedSteps As Long, delta As Double
+    Dim baseNorm As Double, trialNorm As Double, baseMaximum As Double, alpha As Double, chosen As Long, division As Long
+    Dim trialCoordinates As Collection, trialResiduals As Collection, trialFlags As Collection, trialAlphas As Collection
+    outcome = "STEP_BUDGET"
+    If Not equations.TryEvaluate(x, False, residual, unused) Then
+        ReDim residual(1 To count): residual(1) = 1E+300
+        outcome = "INITIAL_MATERIAL_FAILURE": GoTo Finished
+    End If
+    calls = calls + 1
+    For iteration = 0 To maximumSteps - 1
+        baseNorm = norms.VectorNorm(residual, 1, count): baseMaximum = TestNewtonMaximum(residual)
+        Print #report, "BASE;" & CStr(probeCase) & ";" & CStr(iteration) & ";" & CStr(calls) & ";" & TestOnsetNumber(baseNorm) & ";" & TestOnsetNumber(baseMaximum)
+        If baseMaximum <= 0.0000000001 Then TestCompleteNewtonLine = True: outcome = "STRICT_RESIDUAL": Exit For
+        If calls + 2 * count + 22 > maximumCalls Then outcome = "FUNCTION_BUDGET": Exit For
+        ReDim jacobian(1 To count, 1 To count): ReDim sizes(1 To count)
+        ReDim positiveSamples(1 To count, 1 To count): ReDim negativeSamples(1 To count, 1 To count)
+        For column = 1 To count
+            delta = 0.000001 * (1# + Abs(x(column))): sizes(column) = delta
+            point = x: point(column) = x(column) + delta: calls = calls + 1
+            If Not equations.TryEvaluate(point, False, plus, unused) Then outcome = "PLUS_MATERIAL_FAILURE": GoTo Finished
+            point(column) = x(column) - delta: calls = calls + 1
+            If Not equations.TryEvaluate(point, False, minus, unused) Then outcome = "MINUS_MATERIAL_FAILURE": GoTo Finished
+            For row = 1 To count
+                positiveSamples(column, row) = plus(row): negativeSamples(column, row) = minus(row)
+                jacobian(column, row) = (plus(row) - minus(row)) / (2# * delta)
+            Next row
+        Next column
+        calls = calls + 1
+        beforeMatrix = residual
+        If Not equations.TryEvaluate(x, True, residual, approximate) Then outcome = "ASSEMBLED_MATERIAL_FAILURE": Exit For
+        For row = 1 To count
+            If beforeMatrix(row) <> residual(row) Then Err.Raise 5, , "Запрос матрицы изменил фактическую невязку."
+        Next row
+        ReDim correction(1 To count): ReDim errorVector(1 To count)
+        For row = 1 To count: correction(row) = -residual(row): Next row
+        If Not linear.Solve(jacobian, correction, count) Then outcome = "SINGULAR_COMPLETE_MATRIX": Exit For
+        For row = 1 To count
+            errorVector(row) = residual(row)
+            For column = 1 To count: errorVector(row) = errorVector(row) + jacobian(column, row) * correction(column): Next column
+        Next row
+        Set trialCoordinates = New Collection: Set trialResiduals = New Collection
+        Set trialFlags = New Collection: Set trialAlphas = New Collection
+        alpha = 1#: chosen = 0
+        For division = 0 To 20
+            point = x
+            For column = 1 To count: point(column) = x(column) + alpha * correction(column): Next column
+            ReDim plus(1 To count)
+            calls = calls + 1
+            Dim evaluated As Boolean: evaluated = equations.TryEvaluate(point, False, plus, unused)
+            trialCoordinates.Add point: trialResiduals.Add plus: trialFlags.Add evaluated: trialAlphas.Add alpha
+            If evaluated Then
+                trialNorm = norms.VectorNorm(plus, 1, count)
+                Print #report, "LINE;" & CStr(probeCase) & ";" & CStr(iteration) & ";" & CStr(division) & ";" & _
+                    TestOnsetNumber(alpha) & ";" & TestOnsetNumber(trialNorm) & ";" & TestOnsetNumber(TestNewtonMaximum(plus))
+                If trialNorm <= (1# - 0.0001 * alpha) * baseNorm Then chosen = division + 1: Exit For
+            Else
+                Print #report, "LINE_MATERIAL_FAILURE;" & CStr(probeCase) & ";" & CStr(iteration) & ";" & CStr(division)
+            End If
+            alpha = alpha * 0.5
+        Next division
+        TestWriteNewtonIteration probeCase, iteration, seed, seedFactor, projection, target, scales, x, residual, sizes, _
+            positiveSamples, negativeSamples, jacobian, approximate, correction, errorVector, _
+            trialCoordinates, trialResiduals, trialFlags, trialAlphas, chosen
+        usedSteps = usedSteps + 1
+        If chosen = 0 Then outcome = "NO_DESCENT_WITHIN_LINE_BUDGET": Exit For
+        x = trialCoordinates(chosen): residual = trialResiduals(chosen)
+    Next iteration
+    If TestNewtonMaximum(residual) <= 0.0000000001 Then TestCompleteNewtonLine = True: outcome = "STRICT_RESIDUAL"
+Finished:
+    effort = Array(usedSteps, calls, maximumSteps, maximumCalls, TestNewtonMaximum(residual))
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает точные Double полной и собранной касательных, направления и всех фактических проб линии.
+Private Sub TestWriteNewtonIteration(ByVal probeCase As Long, ByVal iteration As Long, ByRef seed() As Double, ByVal seedFactor As Double, _
+        ByRef projection() As Double, ByVal target As Double, ByVal scales As Variant, ByRef x() As Double, ByRef residual() As Double, _
+        ByRef sizes() As Double, ByRef positiveSamples() As Double, ByRef negativeSamples() As Double, _
+        ByRef jacobian() As Double, ByRef approximate() As Double, ByRef correction() As Double, _
+        ByRef linearError() As Double, ByVal trialCoordinates As Collection, ByVal trialResiduals As Collection, _
+        ByVal trialFlags As Collection, ByVal trialAlphas As Collection, ByVal chosen As Long)
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".C" & CStr(probeCase) & "I" & CStr(iteration) & ".bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMNEWTONTEST001"
+    Dim count As Long: count = UBound(x)
+    Put #handle, , magic: Put #handle, , count: Put #handle, , probeCase: Put #handle, , iteration
+    Put #handle, , seedFactor: Put #handle, , target
+    TestWriteReverseBinaryVector handle, scales: TestWriteReverseBinaryVector handle, seed
+    TestWriteReverseBinaryVector handle, projection: TestWriteReverseBinaryVector handle, x
+    TestWriteReverseBinaryVector handle, residual: TestWriteReverseBinaryVector handle, sizes
+    TestWriteReverseBinaryVector handle, TestNewtonFlatten(positiveSamples)
+    TestWriteReverseBinaryVector handle, TestNewtonFlatten(negativeSamples)
+    TestWriteReverseBinaryVector handle, TestNewtonFlatten(jacobian)
+    TestWriteReverseBinaryVector handle, TestNewtonFlatten(approximate)
+    TestWriteReverseBinaryVector handle, correction: TestWriteReverseBinaryVector handle, linearError
+    Dim trials As Long: trials = trialCoordinates.Count
+    Put #handle, , trials: Put #handle, , chosen
+    Dim index As Long, flag As Long, alpha As Double
+    For index = 1 To trials
+        alpha = trialAlphas(index): flag = IIf(trialFlags(index), 1, 0)
+        Put #handle, , alpha: Put #handle, , flag
+        TestWriteReverseBinaryVector handle, trialCoordinates(index)
+        TestWriteReverseBinaryVector handle, trialResiduals(index)
+    Next index
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Переводит матрицу со столбцом в первом индексе в последовательность строк для внешней проверки.
+Private Function TestNewtonFlatten(ByRef matrix() As Double) As Variant
+    Dim count As Long: count = UBound(matrix, 1)
+    Dim flat() As Double: ReDim flat(1 To count * count)
+    Dim row As Long, column As Long
+    For row = 1 To count
+        For column = 1 To count: flat((row - 1) * count + column) = matrix(column, row): Next column
+    Next row
+    TestNewtonFlatten = flat
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает максимальную компоненту нормированной невязки; нулевое значение не заменяет проверки всех сил и связей.
+Private Function TestNewtonMaximum(ByRef residual() As Double) As Double
+    Dim row As Long
+    For row = 1 To UBound(residual): TestNewtonMaximum = GeomMax(TestNewtonMaximum, Abs(residual(row))): Next row
+End Function
