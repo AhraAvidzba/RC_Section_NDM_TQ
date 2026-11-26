@@ -1,0 +1,933 @@
+{
+  "all_logical_raw_hashes_read_back": true,
+  "all_numerical_stages_terminal": true,
+  "all_saved_books_rebuilt_bitexact_from_archived_segments": true,
+  "book_reconstruction": {
+    "979": {
+      "actual_saved_book_sha256": "2D7E2FEA34165BA699C4E7BD08127ECAF479446E6CF05A90A72F5EA6C7F13E18",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_all_rejected": true,
+      "manifest_member": "979/ActualSavedBookSegments.json",
+      "new_segment_bytes": 12940345,
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15554231
+    },
+    "980": {
+      "actual_saved_book_sha256": "19644FA3DB2184F1C91F672468648006E3EBCFAC7CEB48982358B1BE22A1E51F",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_all_rejected": true,
+      "manifest_member": "980/ActualSavedBookSegments.json",
+      "new_segment_bytes": 13165602,
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15563570
+    }
+  },
+  "cold_gain_claimed": false,
+  "exact_duplicate_hardlinks": 765,
+  "full_acceptance_not_run": true,
+  "physical_capacity_certified": false,
+  "proofs": {
+    "979": {
+      "accepted_history_unchanged_by_native_guard": true,
+      "actual_components": 257,
+      "all256_other_source_components_preserved": true,
+      "all257_sources_and_actual_saved_book_bitexact978": true,
+      "all_numerical_inputs_bitexact978": true,
+      "cases": [
+        {
+          "all_material_returns_available": true,
+          "calls": 2142,
+          "case": 1,
+          "complete_Newton_line_search": true,
+          "gauge_scaled_norm_MPa": 6.0986372202309624e-15,
+          "independent_trial_yield_residual_MPa": 0.0,
+          "independently_equilibrated": true,
+          "jacobians": 17,
+          "lambda_value": 1.1034631661074341,
+          "mapped_ready": true,
+          "material_ready": true,
+          "maximum_real_concrete_strain_increment_from_accepted": 1.2794329096057316e-08,
+          "maximum_three_station_steel_utilization": 0.0036000962778493344,
+          "native_best_residual_MPa": 3.018029190111947e-07,
+          "native_coordinate_residual_MPa": -3.828534711480813e-15,
+          "native_final_total_norm_MPa": 3.018029190111947e-07,
+          "native_gauge_reconstruction_difference_MPa": 2.1672933380107736e-16,
+          "native_physical_reconstruction_difference_MPa": 8.186431133677674e-15,
+          "native_solved": true,
+          "native_start_tolerance_MPa": 1.2152101763130423e-06,
+          "original_final_load_bound_MPa": 1.2152076076622258e-06,
+          "original_linear_control_residual_MPa": -0.0004185558335457974,
+          "original_projection_fraction_of_requested_progress": 0.26335175005095823,
+          "original_projection_progress_from_accepted_MPa": 0.00014963371088693488,
+          "original_projection_requested_progress_MPa": 0.0005681895444324214,
+          "projection_progress_exceeds_16_source_force_bounds": true,
+          "six_force_norm_MPa": 2.9320079496149753e-08,
+          "six_force_reconstruction_difference_MPa": 3.3684988557016023e-16,
+          "solves_original_linear_control": false,
+          "steps": 17,
+          "stop_code": 1,
+          "target_trial_yield_MPa": 0.00024129568430097947,
+          "total_residual_MPa": 3.018029108247636e-07,
+          "trial_yield_reconstruction_difference_MPa": 3.828534711480813e-15
+        },
+        {
+          "all_material_returns_available": true,
+          "calls": 2227,
+          "case": 2,
+          "complete_Newton_line_search": false,
+          "gauge_scaled_norm_MPa": 1.3305791685997462e-06,
+          "independent_trial_yield_residual_MPa": -3.552713678800501e-15,
+          "independently_equilibrated": false,
+          "jacobians": 18,
+          "lambda_value": 1.1034509393347727,
+          "mapped_ready": true,
+          "material_ready": true,
+          "maximum_real_concrete_strain_increment_from_accepted": 7.951781916894534e-09,
+          "maximum_three_station_steel_utilization": 0.0036000555705878808,
+          "native_best_residual_MPa": 1.339927939388708e-05,
+          "native_coordinate_residual_MPa": 2.5517782331618832e-15,
+          "native_final_total_norm_MPa": 1.339927939388708e-05,
+          "native_gauge_reconstruction_difference_MPa": 2.590985641284831e-16,
+          "native_physical_reconstruction_difference_MPa": 2.3323763710322853e-15,
+          "native_solved": false,
+          "native_start_tolerance_MPa": 1.2152101763130423e-06,
+          "original_final_load_bound_MPa": 1.2151996829021673e-06,
+          "original_linear_control_residual_MPa": -0.0006273890091861435,
+          "original_projection_fraction_of_requested_progress": -0.1041896411736331,
+          "original_projection_progress_from_accepted_MPa": -5.919946475302404e-05,
+          "original_projection_requested_progress_MPa": 0.0005681895444324214,
+          "projection_progress_exceeds_16_source_force_bounds": false,
+          "six_force_norm_MPa": 4.450039616333218e-06,
+          "six_force_reconstruction_difference_MPa": 1.0105499048646644e-15,
+          "solves_original_linear_control": false,
+          "steps": 30,
+          "stop_code": 2,
+          "target_trial_yield_MPa": 0.00024129568430097947,
+          "total_residual_MPa": 1.3399279394238424e-05,
+          "trial_yield_reconstruction_difference_MPa": 6.104491911962384e-15
+        },
+        {
+          "all_material_returns_available": true,
+          "calls": 2291,
+          "case": 3,
+          "complete_Newton_line_search": true,
+          "gauge_scaled_norm_MPa": 3.6591823321385775e-15,
+          "independent_trial_yield_residual_MPa": 0.0,
+          "independently_equilibrated": true,
+          "jacobians": 18,
+          "lambda_value": 1.1034622739323396,
+          "mapped_ready": true,
+          "material_ready": true,
+          "maximum_real_concrete_strain_increment_from_accepted": 6.398869000562322e-09,
+          "maximum_three_station_steel_utilization": 0.0036000609057357663,
+          "native_best_residual_MPa": 1.0218928349435258e-06,
+          "native_coordinate_residual_MPa": -1.4866580189121237e-15,
+          "native_final_total_norm_MPa": 1.0218928349435258e-06,
+          "native_gauge_reconstruction_difference_MPa": 2.1279686547021198e-16,
+          "native_physical_reconstruction_difference_MPa": 9.853012503113767e-15,
+          "native_solved": true,
+          "native_start_tolerance_MPa": 1.2152101763130423e-06,
+          "original_final_load_bound_MPa": 1.2152070294005905e-06,
+          "original_linear_control_residual_MPa": -0.0004891939211410011,
+          "original_projection_fraction_of_requested_progress": 0.13903040643010092,
+          "original_projection_progress_from_accepted_MPa": 7.899562329177344e-05,
+          "original_projection_requested_progress_MPa": 0.0005681895444324214,
+          "projection_progress_exceeds_16_source_force_bounds": true,
+          "six_force_norm_MPa": 6.082246062322628e-07,
+          "six_force_reconstruction_difference_MPa": 8.421246030831985e-16,
+          "solves_original_linear_control": false,
+          "steps": 18,
+          "stop_code": 1,
+          "target_trial_yield_MPa": 0.00012064784214871338,
+          "total_residual_MPa": 1.0218928352331889e-06,
+          "trial_yield_reconstruction_difference_MPa": 1.4866580189121237e-15
+        },
+        {
+          "all_material_returns_available": true,
+          "calls": 2348,
+          "case": 4,
+          "complete_Newton_line_search": false,
+          "gauge_scaled_norm_MPa": 9.800388138507277e-07,
+          "independent_trial_yield_residual_MPa": 0.0,
+          "independently_equilibrated": false,
+          "jacobians": 19,
+          "lambda_value": 1.1034630862306252,
+          "mapped_ready": true,
+          "material_ready": true,
+          "maximum_real_concrete_strain_increment_from_accepted": 9.085870528803656e-09,
+          "maximum_three_station_steel_utilization": 0.003600142349806074,
+          "native_best_residual_MPa": 6.846500643697661e-06,
+          "native_coordinate_residual_MPa": -1.2455314557513475e-15,
+          "native_final_total_norm_MPa": 6.846500643697661e-06,
+          "native_gauge_reconstruction_difference_MPa": 1.9333071740870256e-16,
+          "native_physical_reconstruction_difference_MPa": 1.3353684477634964e-14,
+          "native_solved": false,
+          "native_start_tolerance_MPa": 1.2152101763130423e-06,
+          "original_final_load_bound_MPa": 1.21520755589022e-06,
+          "original_linear_control_residual_MPa": -0.0004000435269362697,
+          "original_projection_fraction_of_requested_progress": 0.2959329666387931,
+          "original_projection_progress_from_accepted_MPa": 0.00016814601749703083,
+          "original_projection_requested_progress_MPa": 0.0005681895444324214,
+          "projection_progress_exceeds_16_source_force_bounds": true,
+          "six_force_norm_MPa": 6.382145035534923e-07,
+          "six_force_reconstruction_difference_MPa": 1.1789745978411996e-15,
+          "solves_original_linear_control": false,
+          "steps": 29,
+          "stop_code": 4,
+          "target_trial_yield_MPa": 0.00012064784214871338,
+          "total_residual_MPa": 6.846500643677145e-06,
+          "trial_yield_reconstruction_difference_MPa": 1.2455314557513475e-15
+        }
+      ],
+      "cold_gain_claimed": false,
+      "independently_verified_material_coordinate_equilibria": 2,
+      "material_coordinate_intentionally_replaces_original_linear_control": true,
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "native_H_or_lambda_uncertainty_not_recorded": true,
+      "no_material_acceptance_or_capacity_claim": true,
+      "no_new_compilation": true,
+      "no_shared_budget_pair_claim": true,
+      "original30_steps_per_independent_case": true,
+      "original_linear_control_equilibria": 0,
+      "physical_capacity_certified": false,
+      "same_six_component_load_direction_and_all_materials": true,
+      "source_actual968_state25_and_initial_residual_bitexact_by_native_guard": true,
+      "whole_goal_completed": false
+    },
+    "980": {
+      "actual_components": 257,
+      "actual_shared_step_budget": 30,
+      "all256_numerical_components_preserved": true,
+      "all_eligible_fields_published_unchanged": true,
+      "all_publications_have_checked_native_lambda_uncertainty": true,
+      "automatic_station_selection_cost_not_included_here": true,
+      "cases": [
+        {
+          "bound_MPa": 1.2152076076622258e-06,
+          "budget": 20,
+          "calls": 2142,
+          "case": 1,
+          "coordinate_reconstruction_difference_MPa": 3.828534711480813e-15,
+          "gauge_residual_MPa": 6.0986372202309624e-15,
+          "independent_coordinate_residual_MPa": 0.0,
+          "independently_equilibrated": true,
+          "jacobians": 17,
+          "lambda_value": 1.1034631661074341,
+          "material_ready": true,
+          "native_coordinate_residual_MPa": -3.828534711480813e-15,
+          "native_norm_MPa": 3.018029190111947e-07,
+          "native_solved": true,
+          "physical_residual_MPa": 3.018029108247636e-07,
+          "residual_MPa": 3.018029108247636e-07,
+          "seed_lambda": 1.103467129168694,
+          "six_force_residual_MPa": 2.9320079496149753e-08,
+          "steel_utilization": 0.0036000962778493344,
+          "steps": 17,
+          "stop_code": 1,
+          "target_MPa": 0.00024129568430097947,
+          "total_steps": 17,
+          "worst_physical_equation_1based": 53
+        },
+        {
+          "bound_MPa": 1.2152067950653278e-06,
+          "budget": 13,
+          "calls": 1,
+          "case": 2,
+          "coordinate_reconstruction_difference_MPa": 8.32320323773672e-15,
+          "gauge_residual_MPa": 3.0493186101154812e-15,
+          "independent_coordinate_residual_MPa": -7.105427357601002e-15,
+          "independently_equilibrated": true,
+          "jacobians": 0,
+          "lambda_value": 1.1034619123865057,
+          "material_ready": true,
+          "native_coordinate_residual_MPa": 1.2177758801357186e-15,
+          "native_norm_MPa": 1.9800089112769403e-07,
+          "native_solved": true,
+          "physical_residual_MPa": 1.980008846901352e-07,
+          "residual_MPa": 1.980008846901352e-07,
+          "seed_lambda": 1.1034619123865057,
+          "six_force_residual_MPa": 1.4742273816847487e-08,
+          "steel_utilization": 0.003600043320604923,
+          "steps": 0,
+          "stop_code": 1,
+          "target_MPa": 0.00012064784214871338,
+          "total_steps": 17,
+          "worst_physical_equation_1based": 53
+        }
+      ],
+      "cold_gain_claimed": false,
+      "direction_records": [
+        {
+          "H_available": true,
+          "H_increment": 1.194440685600576e-09,
+          "accepted_H": 0.0001655111711413778,
+          "all_concrete_predictors_strictly_elastic": false,
+          "case": 1,
+          "existing_H_resolution": 1.2152059824684298e-10,
+          "forward_along_previous_spatial_secant": true,
+          "independently_equilibrated": true,
+          "lambda_decrease_beyond_existing_noise": false,
+          "lambda_value": 1.1034631661074341,
+          "native_solved": true,
+          "no_acceptance_or_capacity_claim": true,
+          "ordinary_elastic_unloading": false,
+          "rejected_by_existing_unloading_rule": false,
+          "resolved_H_growth": true,
+          "signed_spatial_advance": 4.98779036289783e-09,
+          "steel_plastic_increment": false,
+          "trial_H": 0.0001655123655820634
+        },
+        {
+          "H_available": true,
+          "H_increment": 5.972802395086494e-10,
+          "accepted_H": 0.0001655111711413778,
+          "all_concrete_predictors_strictly_elastic": false,
+          "case": 2,
+          "existing_H_resolution": 1.2152059824684298e-10,
+          "forward_along_previous_spatial_secant": true,
+          "independently_equilibrated": true,
+          "lambda_decrease_beyond_existing_noise": false,
+          "lambda_value": 1.1034619123865057,
+          "native_solved": true,
+          "no_acceptance_or_capacity_claim": true,
+          "ordinary_elastic_unloading": false,
+          "rejected_by_existing_unloading_rule": false,
+          "resolved_H_growth": true,
+          "signed_spatial_advance": 2.493895434675474e-09,
+          "steel_plastic_increment": false,
+          "trial_H": 0.00016551176842161732
+        }
+      ],
+      "eligible_publications": 2,
+      "equilibrated_cases_with_resolved_H_growth": 2,
+      "existing_unloading_guard_not_relaxed": true,
+      "first_initial_residual_bitexact_actual968_guard": true,
+      "half_seed_and_lambda_midpoint_verified_native": true,
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "native_lambda_uncertainty_not_recorded": false,
+      "no_material_history_acceptance": true,
+      "not_automatic_station_recovery_or_cold_search": true,
+      "not_production_recovery_acceptance": true,
+      "only_new_test_entry_added": false,
+      "only_test_phase_budget15_to20": true,
+      "ordinary_elastic_unloading_cases": 0,
+      "original25_history_and_revision_unchanged_by_native_guards": true,
+      "original_force_path_and_materials_and_tolerances_preserved": true,
+      "original_material_pair_binary_bitexact975": false,
+      "pair": {
+        "existing_spatial_field_resolution": 6.481107240865204e-10,
+        "field_error": 5.707615556313336e-07,
+        "field_length": 5.760544427045201e-09,
+        "full_lambda": 1.1034631661074341,
+        "full_plus_half_steps": 17,
+        "half_lambda": 1.1034619123865057,
+        "joint_error": 5.701167104336672e-07,
+        "lambda_bound": 8.41384263466231e-06,
+        "lambda_error": 0.0,
+        "material_target_half_of_original_increment": true,
+        "passes_existing_independent_half_limits": true,
+        "passes_existing_shape_and_resolution_limits": true,
+        "resolved_spatial_field_advance": true
+      },
+      "physical_capacity_certified": false,
+      "publication_records": [
+        {
+          "absolute_lambda_change_exceeds_uncertainty_and_noise": false,
+          "actual_six_force_residual_MPa": 2.9320079832999645e-08,
+          "adjoint_index": 1,
+          "adjoint_l1": 18.16813616896939,
+          "adjoint_native_backward_error": 1.2637239574118028e-15,
+          "adjoint_weights_relative_difference_from_independent_solve": 2.167724339648858e-13,
+          "after_effort": [
+            0.0,
+            3.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            3.018029190111947e-07
+          ],
+          "before_effort": [
+            0.0,
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            3.018029190111947e-07
+          ],
+          "candidate_retained_after_uncertainty": true,
+          "case": 1,
+          "concrete_predictors_positive_beyond_existing_return_tolerance": [
+            [
+              7,
+              -1
+            ],
+            [
+              8,
+              -1
+            ],
+            [
+              11,
+              -1
+            ],
+            [
+              12,
+              -1
+            ],
+            [
+              15,
+              -1
+            ],
+            [
+              17,
+              -1
+            ],
+            [
+              18,
+              -1
+            ],
+            [
+              20,
+              -1
+            ],
+            [
+              21,
+              -1
+            ],
+            [
+              24,
+              -1
+            ],
+            [
+              25,
+              -1
+            ],
+            [
+              26,
+              -1
+            ],
+            [
+              27,
+              -1
+            ],
+            [
+              28,
+              -1
+            ],
+            [
+              33,
+              -1
+            ],
+            [
+              34,
+              -1
+            ],
+            [
+              35,
+              -1
+            ],
+            [
+              36,
+              -1
+            ],
+            [
+              37,
+              -1
+            ],
+            [
+              39,
+              -1
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              7,
+              0
+            ],
+            [
+              8,
+              0
+            ],
+            [
+              12,
+              0
+            ],
+            [
+              15,
+              0
+            ],
+            [
+              17,
+              0
+            ],
+            [
+              20,
+              0
+            ],
+            [
+              21,
+              0
+            ],
+            [
+              24,
+              0
+            ],
+            [
+              25,
+              0
+            ],
+            [
+              26,
+              0
+            ],
+            [
+              27,
+              0
+            ],
+            [
+              33,
+              0
+            ],
+            [
+              34,
+              0
+            ],
+            [
+              35,
+              0
+            ],
+            [
+              36,
+              0
+            ],
+            [
+              37,
+              0
+            ],
+            [
+              39,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              7,
+              1
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              15,
+              1
+            ],
+            [
+              17,
+              1
+            ],
+            [
+              20,
+              1
+            ],
+            [
+              21,
+              1
+            ],
+            [
+              25,
+              1
+            ],
+            [
+              26,
+              1
+            ],
+            [
+              27,
+              1
+            ],
+            [
+              33,
+              1
+            ],
+            [
+              34,
+              1
+            ],
+            [
+              35,
+              1
+            ],
+            [
+              36,
+              1
+            ],
+            [
+              37,
+              1
+            ],
+            [
+              39,
+              1
+            ]
+          ],
+          "direction_metrics_are_equilibrium": true,
+          "eligible": true,
+          "field_unchanged_bitexact": true,
+          "forward_along_previous_spatial_secant": true,
+          "independent_uncertainty": 2.207806149650118e-05,
+          "lambda_change_from_accepted": 2.5074418568138412e-06,
+          "lambda_value": 1.1034631661074341,
+          "maximum_concrete_elastic_predictor_loading_value_MPa": 0.000427059459173762,
+          "native_material_gradient_checked_by_independent_differences": [
+            {
+              "maximum_relative_gradient_error": 6.544401168806969e-10,
+              "physical_strain_difference_step": 1e-08
+            },
+            {
+              "maximum_relative_gradient_error": 3.618064506673828e-11,
+              "physical_strain_difference_step": 1e-09
+            }
+          ],
+          "native_uncertainty": 2.2078061496501167e-05,
+          "native_uncertainty_available": true,
+          "previous_spatial_increment": 1.2121376947910317e-06,
+          "publication_iterations_zero": true,
+          "published": true,
+          "signed_spatial_advance_along_previous_secant": 4.987790362897837e-09,
+          "total_steps": 17,
+          "uncertainty_norm_MPa": 1.2152076076622258e-06
+        },
+        {
+          "absolute_lambda_change_exceeds_uncertainty_and_noise": false,
+          "actual_six_force_residual_MPa": 1.4742274490547265e-08,
+          "adjoint_index": 2,
+          "adjoint_l1": 18.243605892795333,
+          "adjoint_native_backward_error": 8.420845592831115e-16,
+          "adjoint_weights_relative_difference_from_independent_solve": 9.258979682324527e-14,
+          "after_effort": [
+            0.0,
+            3.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            1.9800089112769403e-07
+          ],
+          "before_effort": [
+            0.0,
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            27.0,
+            1.9800089112769403e-07
+          ],
+          "candidate_retained_after_uncertainty": true,
+          "case": 2,
+          "concrete_predictors_positive_beyond_existing_return_tolerance": [
+            [
+              7,
+              -1
+            ],
+            [
+              8,
+              -1
+            ],
+            [
+              11,
+              -1
+            ],
+            [
+              12,
+              -1
+            ],
+            [
+              15,
+              -1
+            ],
+            [
+              17,
+              -1
+            ],
+            [
+              18,
+              -1
+            ],
+            [
+              20,
+              -1
+            ],
+            [
+              21,
+              -1
+            ],
+            [
+              24,
+              -1
+            ],
+            [
+              25,
+              -1
+            ],
+            [
+              26,
+              -1
+            ],
+            [
+              27,
+              -1
+            ],
+            [
+              28,
+              -1
+            ],
+            [
+              33,
+              -1
+            ],
+            [
+              34,
+              -1
+            ],
+            [
+              35,
+              -1
+            ],
+            [
+              36,
+              -1
+            ],
+            [
+              37,
+              -1
+            ],
+            [
+              39,
+              -1
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              7,
+              0
+            ],
+            [
+              8,
+              0
+            ],
+            [
+              12,
+              0
+            ],
+            [
+              15,
+              0
+            ],
+            [
+              17,
+              0
+            ],
+            [
+              20,
+              0
+            ],
+            [
+              21,
+              0
+            ],
+            [
+              24,
+              0
+            ],
+            [
+              25,
+              0
+            ],
+            [
+              26,
+              0
+            ],
+            [
+              27,
+              0
+            ],
+            [
+              33,
+              0
+            ],
+            [
+              34,
+              0
+            ],
+            [
+              35,
+              0
+            ],
+            [
+              36,
+              0
+            ],
+            [
+              37,
+              0
+            ],
+            [
+              39,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              7,
+              1
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              15,
+              1
+            ],
+            [
+              17,
+              1
+            ],
+            [
+              20,
+              1
+            ],
+            [
+              21,
+              1
+            ],
+            [
+              25,
+              1
+            ],
+            [
+              26,
+              1
+            ],
+            [
+              27,
+              1
+            ],
+            [
+              33,
+              1
+            ],
+            [
+              34,
+              1
+            ],
+            [
+              35,
+              1
+            ],
+            [
+              36,
+              1
+            ],
+            [
+              37,
+              1
+            ],
+            [
+              39,
+              1
+            ]
+          ],
+          "direction_metrics_are_equilibrium": true,
+          "eligible": true,
+          "field_unchanged_bitexact": true,
+          "forward_along_previous_spatial_secant": true,
+          "independent_uncertainty": 2.2169758054342572e-05,
+          "lambda_change_from_accepted": 1.2537209284069206e-06,
+          "lambda_value": 1.1034619123865057,
+          "maximum_concrete_elastic_predictor_loading_value_MPa": 0.00021352709650201973,
+          "native_material_gradient_checked_by_independent_differences": [
+            {
+              "maximum_relative_gradient_error": 6.544696047744402e-10,
+              "physical_strain_difference_step": 1e-08
+            },
+            {
+              "maximum_relative_gradient_error": 5.044258283370636e-11,
+              "physical_strain_difference_step": 1e-09
+            }
+          ],
+          "native_uncertainty": 2.2169758054342565e-05,
+          "native_uncertainty_available": true,
+          "previous_spatial_increment": 1.2121376947910317e-06,
+          "publication_iterations_zero": true,
+          "published": true,
+          "signed_spatial_advance_along_previous_secant": 2.4938954346754795e-09,
+          "total_steps": 17,
+          "uncertainty_norm_MPa": 1.2152067950653278e-06
+        }
+      ],
+      "saved_book_bitexact974_and_only_numerical_target_increment16x": false,
+      "successful_publications": 2,
+      "total_steps": 17,
+      "whole_goal_completed": false
+    }
+  },
+  "publication_scope_verification": {
+    "979": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "geometry_materials_and_original25_input_bitexact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    },
+    "980": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "geometry_materials_and_original25_input_bitexact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    }
+  },
+  "raw_archive_bytes": 57425712,
+  "raw_bytes": 217806080,
+  "raw_files": 1544,
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "whole_goal_completed": false
+}

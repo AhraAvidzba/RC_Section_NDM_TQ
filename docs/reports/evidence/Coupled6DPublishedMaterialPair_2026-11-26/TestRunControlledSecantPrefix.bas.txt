@@ -1,0 +1,69 @@
+Public Function TestRunControlledSecantPrefix() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Проверяет исходную неудачную управляющую меру без будущего равновесия; экспортирует полные и половинные корни для независимой сборки.
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ControlledPrefix.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, projection() As Double
+    context = TestReadPolishVector(inputHandle): projection = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(context) <> 6 Then Err.Raise 5, , "Неверный вход проверки префикса."
+    Close #inputHandle
+    If context(2) <> mReverseOptionsTest(3) Or context(3) <> mReverseOptionsTest(4) Or context(4) <> mReverseOptionsTest(2) Then Err.Raise 5, , "Изменены исходные допуски или общий бюджет."
+    Dim accepted() As Double, previous() As Double, reference As Double, before As Double, unused As Double
+    mReverseSolverTest.DiscardStep: mReverseSolverTest.CopyAccepted accepted
+    previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, unused, reference
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count - 1, unused, before
+    If reference <> context(5) Then Err.Raise 5, , "Изменена исходная принятая нагрузка."
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim solved As Boolean, factor As Double, attempts As Collection, pairs As Collection, details As String
+    solved = mReverseSolverTest.TestTryControlledSecantPrefix(mReverseBaseTest, mReverseDirectionTest, previous, before, projection, _
+        CDbl(context(1)), reference, CDbl(context(2)), CDbl(context(3)), CLng(context(4)), CDbl(context(6)), factor, attempts, details)
+    If mReverseSolverTest.AcceptedRevision <> revision Or mReverseSolverTest.IterationCount > context(4) Then Err.Raise 5, , "Префикс изменил историю или бюджет."
+    Dim checked() As Double, i As Long: mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted): If checked(i) <> accepted(i) Then Err.Raise 5, , "Изменено принятое поле до экспорта."
+    Next i
+    Set pairs = mReverseSolverTest.TestReadGuideReturnPairs()
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ControlledPrefix.Result.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMSECPREFIX0001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, context
+    TestWriteReverseBinaryVector handle, Array(Abs(CLng(solved)), factor, revision, mReverseSolverTest.AcceptedRevision, attempts.Count, pairs.Count)
+    TestWriteReverseBinaryVector handle, mReverseSolverTest.ReadPolishEffortTest
+    TestWriteReverseBinaryVector handle, accepted: TestWriteReverseBinaryVector handle, projection
+    Dim record As Variant, vector As Variant, field() As Double, actual() As Double, recovered() As Double, uncertainty As Double
+    If solved Then
+        mReverseSolverTest.CopyTrial field, actual
+        If Not mReverseSolverTest.CopyRecoveredControl(recovered, uncertainty) Then Err.Raise 5, , "Нет проверенной восстановленной меры."
+        TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+        TestWriteReverseBinaryVector handle, recovered: TestWriteReverseBinaryVector handle, Array(uncertainty)
+    End If
+    For Each record In attempts
+        For Each vector In record: TestWriteReverseBinaryVector handle, vector: Next vector
+    Next record
+    For Each record In pairs
+        For Each vector In record: TestWriteReverseBinaryVector handle, vector: Next vector
+    Next record
+    Close #handle
+    handle = FreeFile
+    Open mPolishRootTest & "\Native\ControlledPrefix.Outcome.txt" For Output As #handle
+    Print #handle, "SOLVED;" & CStr(solved) & ";LAMBDA;" & CStr(factor) & ";ATTEMPTS;" & CStr(attempts.Count) & ";PAIRS;" & CStr(pairs.Count)
+    Print #handle, details
+    Close #handle
+    mReverseSolverTest.DiscardStep
+    Dim meta As Variant, traceField() As Double, index As Long
+    If solved Then TestExportSignedArcTrial "ControlledPrefix.Full", field, factor
+    For index = 1 To attempts.Count
+        record = attempts(index): meta = record(0)
+        If meta(5) Then
+            traceField = record(1): TestExportSignedArcTrial "ControlledPrefix.Root" & CStr(index), traceField, CDbl(meta(7))
+        End If
+    Next index
+    For index = 1 To pairs.Count
+        record = pairs(index): meta = record(4)
+        traceField = record(1): TestExportSignedArcTrial "ControlledPrefix.PairFull" & CStr(index), traceField, CDbl(meta(0))
+        traceField = record(2): TestExportSignedArcTrial "ControlledPrefix.PairHalf" & CStr(index), traceField, CDbl(meta(1))
+    Next index
+    If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, mReverseFieldsTest.Count) Then Err.Raise 5, , "Не восстановлена исходная история после экспорта."
+    TestRunControlledSecantPrefix = "TOTAL_CONTROLLED_SECANT_PREFIX_TEST;1;0;root_and_half_check_not_capacity"
+End Function

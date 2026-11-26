@@ -1,0 +1,61 @@
+Public Function TestRunMaterialDirectionAudit() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Переиспользует публикацию пары и проверяет направление по штатной H, пластическому продвижению стали и прежней пространственной секущей.
+    ' Наличие равновесия не подменяет пригодность ветви для поиска предела; поля и принятая история не меняются.
+    mReverseSolverTest.DiscardStep
+    Dim reference As Double, unused As Double, baseline As Double, resolution As Double
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, unused, reference
+    If Not mReverseSolverTest.TryEnvelopeControlState(mReverseBaseTest, mReverseDirectionTest, reference, mReverseOptionsTest(3), _
+            mReverseOptionsTest(4), baseline, resolution) Then Err.Raise 5, , "Не прочитана исходная материальная координата H."
+    Dim report As String: report = TestRunPublishedMaterialPair()
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim checkedBaseline As Double
+    If Not mReverseSolverTest.TryReadEnvelopeCoordinate(True, checkedBaseline) Or checkedBaseline <> baseline Then Err.Raise 5, , "Проверка публикации изменила принятую H."
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Native\MaterialMidpointPair.bin" For Binary Access Read As #inputHandle
+    Dim magic As String * 16: Get #inputHandle, , magic
+    If magic <> "NDMMATPAIR000001" Then Err.Raise 5, , "Неверный формат записанной материальной пары."
+    Dim meta As Variant, context As Variant, accepted() As Double, projection() As Double
+    meta = TestReadPolishVector(inputHandle): context = TestReadPolishVector(inputHandle)
+    accepted = TestReadPolishVector(inputHandle): projection = TestReadPolishVector(inputHandle)
+    If context(1) <> reference Or context(2) <> revision Then Err.Raise 5, , "Материальная пара принадлежит другой принятой истории."
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\MaterialDirection.bin" For Binary Access Write As #handle
+    magic = "NDMMATDIREC00001": Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(reference, revision, baseline, resolution)
+    Dim tag As Variant, seed As Variant, initial As Variant, info As Variant, values As Variant, forces As Variant, ignored As Variant
+    Dim field() As Double, previous() As Double, coordinate As Double, energyReady As Boolean, plasticSteel As Boolean
+    Dim advances As Boolean, advance As Double, oldLength As Double, decreased As Boolean, rejectedByUnloading As Boolean
+    Dim i As Long, point As Long, checked() As Double
+    previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+    tag = TestReadPolishVector(inputHandle)
+    Do While tag(1) > 0#
+        seed = TestReadPolishVector(inputHandle): initial = TestReadPolishVector(inputHandle): info = TestReadPolishVector(inputHandle)
+        If info(6) Then
+            field = TestReadPolishVector(inputHandle): values = TestReadPolishVector(inputHandle): forces = TestReadPolishVector(inputHandle)
+            For point = 1 To 3 * mReverseOperatorsTest.PointCount
+                ignored = TestReadPolishVector(inputHandle): ignored = TestReadPolishVector(inputHandle)
+            Next point
+            coordinate = 0#: energyReady = mReverseSolverTest.TryEnvelopeCoordinateAt(field, coordinate)
+            plasticSteel = mReverseSolverTest.HasSteelPlasticIncrement(field)
+            advances = mReverseSolverTest.SpatialIncrementAdvances(previous, accepted, field, advance, oldLength)
+            decreased = CDbl(info(7)) < reference - 8# * mReverseOptionsTest(4) * (1# + Abs(reference))
+            rejectedByUnloading = False
+            If energyReady And baseline > 0# And decreased And Not plasticSteel Then rejectedByUnloading = (coordinate <= baseline)
+            TestWriteReverseBinaryVector handle, Array(tag(1), info(7), Abs(CLng(info(4))), Abs(CLng(energyReady)), baseline, coordinate, _
+                resolution, Abs(CLng(plasticSteel)), Abs(CLng(advances)), advance, oldLength, Abs(CLng(decreased)), _
+                Abs(CLng(rejectedByUnloading)), revision, mReverseSolverTest.AcceptedRevision)
+        End If
+        tag = TestReadPolishVector(inputHandle)
+    Loop
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Не прочитан хвост материальной пары."
+    Close #inputHandle
+    TestWriteReverseBinaryVector handle, Array(0#, revision, mReverseSolverTest.AcceptedRevision)
+    Close #handle
+    mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Аудит направления изменил принятое поле."
+    Next i
+    If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Аудит направления изменил принятую ревизию."
+    TestRunMaterialDirectionAudit = Replace(report, "TOTAL_PUBLISHED_MATERIAL_PAIR_TEST", "TOTAL_MATERIAL_DIRECTION_AUDIT_TEST") & "; direction_recorded_not_capacity"
+End Function

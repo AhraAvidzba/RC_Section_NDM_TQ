@@ -1,0 +1,9 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает точные координаты и найденную компоненту поля, чтобы исключение нелинейного условия проверялось независимо.
+Public Sub TestRecordYieldProjection(ByRef coordinates() As Double, ByRef field() As Double, ByVal pivot As Long, ByVal value As Double)
+    If mYieldProjectionHandleTest = 0 Then Exit Sub
+    Dim index As Long, item As Double
+    For index = 1 To UBound(coordinates): item = coordinates(index): Put #mYieldProjectionHandleTest, , item: Next index
+    item = field(pivot): Put #mYieldProjectionHandleTest, , item
+    Put #mYieldProjectionHandleTest, , value
+End Sub
