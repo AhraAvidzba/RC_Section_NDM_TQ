@@ -1,0 +1,43 @@
+{
+  "accepted25_field_bitexact": true,
+  "current_lambda": 1.1019956891292115,
+  "initial_physical_norm_MPa": 0.06271884670790451,
+  "minimum_fraction": 1.52587890625e-05,
+  "no_new_material_evaluation_or_NDS_search": true,
+  "only_trial_surface_not_actual_stress_continuity_checked": true,
+  "physical_capacity_certified": false,
+  "plus_station_crossing_fraction_bracket": [
+    6.167872809629168e-06,
+    6.167872809629169e-06
+  ],
+  "recorded_source": "929/Native/NewtonRejected.00001.bin",
+  "source_hashes": {
+    "Cold926RecordedTailStressScan_20261126/Input/Reverse1.bin": "67DA25C7D304CBEAED4C60FEF18BAFCBB89445074DEAC359A9166DB33E33AD59",
+    "Cold926RecordedTailStressScan_20261126/Native/ArcScan.States.bin": "DC8BA8520327F789C7818D2EA7F50F936540C0C1CB34CAAF6E8878A7DCDC5CC2",
+    "Cold926RecordedTailStressScan_20261126/Native/EnvelopeEnergy.Accepted.Operators.csv": "13A27E4211BD9362DB034C589BD41B04614644088E8959402508446647C46018",
+    "Cold929RecordedTailFineLine_20261126/Native/NewtonRejected.00001.bin": "855B52B33B469452E8CAE8B7FD79A00E4771ACCA7F5584FF2F086EEF133B6F29"
+  },
+  "surfaces": [
+    {
+      "current_trial_yield_MPa": -0.023868243910296627,
+      "minimum_fraction_trial_yield_MPa": -0.023848669083085028,
+      "point": 5,
+      "side": -1,
+      "station_z_over_L": -0.001
+    },
+    {
+      "current_trial_yield_MPa": 0.0006583884484570035,
+      "minimum_fraction_trial_yield_MPa": 0.000677976980437478,
+      "point": 5,
+      "side": 0,
+      "station_z_over_L": 0.0
+    },
+    {
+      "current_trial_yield_MPa": -7.92392246040663e-06,
+      "minimum_fraction_trial_yield_MPa": 1.1679183199220233e-05,
+      "point": 5,
+      "side": 1,
+      "station_z_over_L": 0.001
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Продолжает проверенный снимок пространственной секущей; каждый шаг требует равновесия, ориентации и различимой нагрузки.
+Public Sub TestRunReversePolishModel(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal calibration As Variant, ByVal options As Variant)
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced: Set mReverseSidesTest = sides
+    mReverseCalibrationTest = calibration: mReverseOptionsTest = options: mReverseModulusTest = calibration(0)
+    path.Components mReverseBaseTest, mReverseDirectionTest
+    mHardPreparedPathTest = mPolishRootTest & "\Native\SpatialSequence"
+    TestWriteHardPreparedOperators operators, mHardPreparedPathTest & ".Operators.csv"
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double
+    Dim original() As Double, projection() As Double, context() As Double
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, original, projection, context
+    Set mReverseFieldsTest = fields: Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+    TestExportReverseCandidate 0
+    If Not solver.ReplayAcceptedFields(fields, fields.Count) Then Err.Raise 5, , "Не восстановлена история пространственного продолжения."
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".csv" For Output As #handle
+    Print #handle, "MODE;SpatialSecantSequence;OriginalForceTolerance;ResolvedLoadBothDirections;NotPhysicalCapacity"
+    Dim attempt As Long, acceptedCount As Long, degree As Long, movement() As Double, coordinate As Double, spacing As Double
+    Dim currentFactor As Double, previousFactor As Double, fraction As Double, desired As Double, initialDesired As Double, ratio As Double
+    Dim seed() As Double, field() As Double, checked() As Double, actual() As Double, factor As Double, seedVariant As Variant
+    Dim solved As Boolean, boundReady As Boolean, bound As Double, currentBound As Double, resolution As Double
+    Dim verified As Boolean, unchanged As Boolean, forward As Boolean, advance As Double, reference As Double, steel As Double
+    Dim started As Double, seconds As Double, load(1 To 6) As Double, revision As Long, lowerUnresolved As Double, upperFailed As Double
+    Dim iterations As Variant, stopReason As String
+    For attempt = 1 To 24
+        accepted = fields(fields.Count): previous = fields(fields.Count - 1)
+        trace.ReadPoint trace.Count, fraction, currentFactor
+        trace.ReadPoint trace.Count - 1, fraction, previousFactor
+        movement = accepted
+        For degree = 1 To UBound(movement): movement(degree) = accepted(degree) - previous(degree): Next degree
+        If Not solver.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then _
+            Err.Raise 5, , "Не построена пространственная секущая принятой пары."
+        If desired = 0# Then desired = 0.5 * spacing: initialDesired = desired
+        If desired < initialDesired / 1024# Then stopReason = "MinimumNumericalStep;NotPhysicalFailure": Exit For
+        revision = solver.AcceptedRevision
+        seedVariant = accepted
+        solved = solver.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate, currentFactor, factor, _
+            options(3), options(4), 1, initialField:=seedVariant)
+        If Not solved Then Err.Raise 5, , "Текущее принятое поле не подтвердило исходное равновесие."
+        boundReady = solver.TrialLambdaUncertainty(options(3), options(4), currentBound)
+        solver.DiscardStep
+        If Not boundReady Then stopReason = "CurrentUncertaintyUnavailable;NotPhysicalFailure": Exit For
+        ratio = desired / spacing: seed = accepted
+        For degree = 1 To solver.PhysicalDegreeCount: seed(degree) = accepted(degree) + ratio * movement(degree): Next degree
+        seedVariant = seed
+        Print #handle, "BEGIN;" & CStr(attempt) & ";" & CStr(fields.Count) & ";" & TestOnsetNumber(currentFactor) & ";" & _
+            TestOnsetNumber(currentBound) & ";" & TestOnsetNumber(desired) & ";" & TestOnsetNumber(ratio)
+        started = Timer
+        solved = solver.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate + desired, _
+            currentFactor + ratio * (currentFactor - previousFactor), factor, options(3), options(4), CLng(options(2)), _
+            initialField:=seedVariant, allowHybridRecovery:=True, conditionHybridRecovery:=True, referenceLambda:=currentFactor)
+        seconds = Timer - started: iterations = solver.ReadPolishEffortTest
+        Print #handle, "RESULT;" & CStr(attempt) & ";" & CStr(solved) & ";" & TestOnsetNumber(seconds) & ";" & _
+            TestOnsetNumber(factor) & TestHardPreparedVector(iterations)
+        Print #handle, "DETAILS;" & CStr(attempt) & ";" & solver.ResultMeta.DiagnosticDetails
+        If solver.AcceptedRevision <> revision Then Err.Raise 5, , "Численная проба изменила принятую историю до приёмки."
+        If Not solved Then
+            solver.DiscardStep
+            upperFailed = desired
+            If lowerUnresolved > 0# And lowerUnresolved < upperFailed Then
+                desired = Sqr(lowerUnresolved * upperFailed)
+            Else
+                desired = desired * 0.5
+            End If
+        Else
+            boundReady = solver.TrialLambdaUncertainty(options(3), options(4), bound)
+            resolution = 8# * options(4) * (1# + Abs(currentFactor))
+            Print #handle, "UNCERTAINTY;" & CStr(attempt) & ";" & CStr(boundReady) & ";" & TestOnsetNumber(bound) & ";" & _
+                TestOnsetNumber(currentBound) & ";" & TestOnsetNumber(resolution) & ";" & TestOnsetNumber(factor - currentFactor)
+            If Not boundReady Then
+                solver.DiscardStep: stopReason = "CandidateUncertaintyUnavailable;NotPhysicalFailure": Exit For
+            End If
+            solver.CopyTrial field, actual
+            Print #handle, "FINAL;" & CStr(attempt) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+            solver.DiscardStep
+            seedVariant = field
+            For degree = 1 To 6: load(degree) = mReverseBaseTest(degree) + factor * mReverseDirectionTest(degree): Next degree
+            verified = solver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), options(3), options(4), 1, initialField:=seedVariant)
+            unchanged = False: forward = False: steel = 0#
+            If verified Then
+                unchanged = True: solver.CopyTrial checked, actual
+                For degree = 1 To UBound(field): If checked(degree) <> field(degree) Then unchanged = False
+                Next degree
+                forward = solver.SpatialIncrementAdvances(previous, accepted, field, advance, reference)
+                steel = reinforced.TrialSteelUtilization
+            End If
+            Print #handle, "NATIVE;" & CStr(attempt) & ";" & CStr(verified) & ";" & CStr(unchanged) & ";" & CStr(forward) & ";" & TestOnsetNumber(steel)
+            If Not verified Or Not unchanged Or Not forward Or factor <= 0# Then
+                solver.DiscardStep: upperFailed = desired: desired = desired * 0.5
+            ElseIf steel > 1# Then
+                solver.DiscardStep: stopReason = "EquilibriumSteelCrossingObserved;NeedsLimitBracketing": Exit For
+            ElseIf Abs(factor - currentFactor) <= bound + currentBound + resolution Then
+                solver.DiscardStep: lowerUnresolved = desired
+                If upperFailed > lowerUnresolved Then desired = Sqr(lowerUnresolved * upperFailed) Else desired = desired * 2#
+                Print #handle, "UNRESOLVED;" & CStr(attempt) & ";NotAccepted;NotPhysicalFailure"
+            Else
+                solver.AcceptStep: fields.Add field: trace.Add 1#, factor
+                acceptedCount = acceptedCount + 1: lowerUnresolved = 0#: upperFailed = 0#
+                Print #handle, "ACCEPTED;" & CStr(attempt) & ";" & CStr(fields.Count) & ";" & TestOnsetNumber(factor) & ";" & CStr(solver.AcceptedRevision)
+                TestWriteSpatialSequenceSnapshot fields, trace, projection, coordinate + desired, actual, attempt
+                If CLng(iterations(0)) <= 15 Then desired = desired * 1.25
+                If desired > initialDesired * 16# Then desired = initialDesired * 16#
+                If acceptedCount >= 12 Then stopReason = "RequestedTwelveStepsCompleted;NotPhysicalLimit": Exit For
+            End If
+        End If
+    Next attempt
+    If Len(stopReason) = 0 Then stopReason = "AttemptBudget;NotPhysicalFailure"
+    Print #handle, "END;" & CStr(acceptedCount) & ";" & CStr(fields.Count) & ";" & stopReason
+    Close #handle
+    If acceptedCount > 0 Then
+        Set mReverseFieldsTest = fields: Set mReverseTraceTest = trace.CopyPrefix(trace.Count)
+        TestExportReverseCandidate 999
+    End If
+    mPolishExecutedTest = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет неизменяемый двоичный снимок всех принятых Double перед следующей пробой; старые снимки не перезаписываются.
+Private Sub TestWriteSpatialSequenceSnapshot(ByVal fields As Collection, ByVal trace As CCoupledLoadTrace, _
+        ByRef projection() As Double, ByVal coordinate As Double, ByRef actual() As Double, ByVal attempt As Long)
+    Dim file As String: file = mHardPreparedPathTest & ".Accepted" & CStr(fields.Count) & ".bin"
+    If Len(Dir$(file)) > 0 Then Err.Raise 5, , "Двоичный контрольный снимок уже существует."
+    Dim handle As Integer: handle = FreeFile
+    Open file For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMREVTEST000001"
+    Dim count As Long: count = mReverseOperatorsTest.DegreeCount
+    Put #handle, , magic: Put #handle, , count
+    TestWriteReverseBinaryVector handle, mReverseCalibrationTest: TestWriteReverseBinaryVector handle, mReverseOptionsTest
+    TestWriteReverseBinaryVector handle, mReverseBaseTest: TestWriteReverseBinaryVector handle, mReverseDirectionTest
+    count = fields.Count: Put #handle, , count
+    Dim index As Long, fraction As Double, factor As Double, field() As Double
+    For index = 1 To fields.Count
+        trace.ReadPoint index, fraction, factor: Put #handle, , fraction: Put #handle, , factor
+        field = fields(index): TestWriteReverseBinaryVector handle, field
+    Next index
+    field = fields(fields.Count - 1): TestWriteReverseBinaryVector handle, field
+    field = fields(fields.Count): TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, field
+    TestWriteReverseBinaryVector handle, actual: TestWriteReverseBinaryVector handle, projection
+    TestWriteReverseBinaryVector handle, Array(factor, coordinate, factor, 0#)
+    TestWriteReverseBinaryVector handle, Array(0#, 0#, CDbl(mReverseSolverTest.AcceptedRevision), CDbl(attempt))
+    Close #handle
+End Sub

@@ -7112,6 +7112,69 @@
     "physical_progress_small": true,
     "total_states": 92
   },
+  "latest_bounded_branch927": {
+    "accepted_history_unchanged_by_native_guard": true,
+    "actual_components": 257,
+    "all256_other_source_components_preserved": true,
+    "all_additional_steps_inside_original30_budget": true,
+    "base_residual_max_error_MPa": 0.0,
+    "cases": [
+      {
+        "case": 1,
+        "effort": [
+          30.0,
+          3021.0,
+          22.0,
+          23.0,
+          2973.0,
+          0.0,
+          27.0,
+          0.07008264314316316
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 1.1034606586655773,
+        "result_code": 10,
+        "solved": false
+      },
+      {
+        "case": 2,
+        "effort": [
+          30.0,
+          1892.0,
+          24.0,
+          15.0,
+          1855.0,
+          0.0,
+          27.0,
+          0.07008264314316316
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 0.0,
+        "result_code": 10,
+        "solved": false
+      }
+    ],
+    "control_max_error_MPa": 1.5246593050577406e-16,
+    "diagnostic_last_norm_is_restored_context_not_minimum_over_all_attempts": true,
+    "exact_recorded_system_reproduced_before_attempts": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_working_or_release_promotion": true,
+    "original_material_and_force_acceptance_unchanged": true,
+    "other256_components_preserved": true,
+    "physical_capacity_certified": false,
+    "reference_modes_change_full_recovery_algorithm_not_only_lambda_guard": true,
+    "refined_matrix_max_relative_row_error": 1.3671403428910857e-16,
+    "temporary_branch_steps_limited_to_three": true,
+    "whole_goal_completed": false
+  },
   "latest_branch_consistency_evidence": "docs/reports/evidence/Coupled6DBranchConsistencyStudy_2026-11-26",
   "latest_branch_consistent_predictor_proof": {
     "actual_components": 256,
@@ -12899,6 +12962,170 @@
     "source_states": 32,
     "whole_goal_completed": false
   },
+  "latest_exact_system925": {
+    "accepted_history_unchanged_by_native_guard": true,
+    "actual_components": 257,
+    "base_residual_max_error_MPa": 0.0,
+    "cases": [
+      {
+        "case": 1,
+        "effort": [
+          30.0,
+          3021.0,
+          22.0,
+          23.0,
+          2973.0,
+          0.0,
+          27.0,
+          0.07008264314316316
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 1.1034606586655773,
+        "result_code": 10,
+        "solved": false
+      },
+      {
+        "case": 2,
+        "effort": [
+          30.0,
+          1892.0,
+          24.0,
+          15.0,
+          1855.0,
+          0.0,
+          27.0,
+          0.07008264314316316
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 0.0,
+        "result_code": 10,
+        "solved": false
+      }
+    ],
+    "control_max_error_MPa": 1.5246593050577406e-16,
+    "exact_recorded_system_reproduced_before_attempts": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "other256_components_preserved": true,
+    "physical_capacity_certified": false,
+    "reference_modes_change_full_recovery_algorithm_not_only_lambda_guard": true,
+    "refined_matrix_max_relative_row_error": 1.3671403428910857e-16,
+    "whole_goal_completed": false
+  },
+  "latest_fine_line929": {
+    "accepted_history_unchanged_by_native_guard": true,
+    "actual_components": 257,
+    "actual_rejected_direction_records": [
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693016227,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 4,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 1,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693547627,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 7,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 2,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693016227,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 4,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 3,
+        "valid_probe_count": 17
+      },
+      {
+        "actual_current_max_abs_field": 0.6039067233140596,
+        "current_lambda": 1.1019956891292115,
+        "final_valid_trial_norm_MPa": 0.06274042693547627,
+        "governing_row": 55,
+        "initial_norm_MPa": 0.06271884670790451,
+        "iteration": 7,
+        "minimum_fraction": 1.52587890625e-05,
+        "serial": 4,
+        "valid_probe_count": 17
+      }
+    ],
+    "base_residual_max_error_MPa": 0.0,
+    "cases": [
+      {
+        "case": 1,
+        "effort": [
+          18.0,
+          1212.0,
+          8.0,
+          8.0,
+          1097.0,
+          0.0,
+          27.0,
+          0.06274042693547627
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 1.1034606586655773,
+        "result_code": 10,
+        "solved": false
+      },
+      {
+        "case": 2,
+        "effort": [
+          30.0,
+          1600.0,
+          20.0,
+          12.0,
+          1485.0,
+          0.0,
+          27.0,
+          0.06274042693547627
+        ],
+        "internal_status": 6,
+        "lambda_value": 1.101938279847916,
+        "reference_lambda": 0.0,
+        "result_code": 10,
+        "solved": false
+      }
+    ],
+    "control_max_error_MPa": 1.5246593050577406e-16,
+    "diagnostic_last_norm_is_restored_context_not_minimum_over_all_attempts": true,
+    "exact_recorded_system_reproduced_before_attempts": true,
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_working_or_release_promotion": true,
+    "numerical_change_only_finer_line_candidates": true,
+    "original30_budget_and_material_force_control_acceptance_unchanged": true,
+    "other256_components_preserved": true,
+    "physical_capacity_certified": false,
+    "reference_modes_change_full_recovery_algorithm_not_only_lambda_guard": true,
+    "refined_matrix_max_relative_row_error": 1.3671403428910857e-16,
+    "whole_goal_completed": false
+  },
   "latest_fixed_metric_cold_proof": {
     "accepted_states": 20,
     "cold": {
@@ -17004,6 +17231,33 @@
     "physical_capacity_certified": false,
     "root_case7_full_newly_available": true
   },
+  "latest_recorded_newton_tail_evidence": "docs/reports/evidence/Coupled6DRecordedNewtonTail_2026-11-26",
+  "latest_recorded_newton_tail_summary": {
+    "actual_compiled925_and929_workbooks_in_archive": true,
+    "all_intermediate_removed_prefixes_not_independently_replayed": true,
+    "all_raw_hashes_read_back": true,
+    "all_started_stages_terminal": true,
+    "archived_helpers": 86,
+    "captured_final_pair54_55_has_exact_accepted25_prefix": true,
+    "central_surface_continuity_only_not_all_station_continuity": true,
+    "final_diagnostic_norm_not_minimum_over_all_attempts": true,
+    "free_commit_before": 16768024576,
+    "free_physical_before": 15265628160,
+    "full_acceptance_not_run": true,
+    "no_working_release_main_promotion": true,
+    "physical_capacity_certified": false,
+    "raw_archive": "RawEvidence.tar.xz",
+    "raw_archive_bytes": 72173636,
+    "raw_bytes": 493955287,
+    "raw_files": 1412,
+    "reference921_tensors_included": true,
+    "release_hashes_unchanged": {
+      "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+      "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+    },
+    "saved_reopened257_component_workbook_in_archive": true,
+    "whole_goal_completed": false
+  },
   "latest_refined_corrector_proof": {
     "actual_components": 256,
     "all_new_H_strictly_growing": false,
@@ -18673,7 +18927,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Cold920 verified: directOK/CapacityNumFail,787.162109375s,25states,max1.1052194649105769,last1.1034606586655773; all256 saved/reopened sources exact. Fresh material replay921 verifies all25/raw fields/fractions/lambdas,all6forces/56+4/three-stationsteel. Final cached diagnostics now row55/My gradient with residual~0.07MPa and a reported point11/station-1 transition; do NOT assume it refers last accepted25 without context capture. Stock.HRequests.bin absent. Next capture exact failed axis-control projection/target/current/matrix/accepted history at this cold transition via test-only capture-folder setter (no warm preload) or independently reproduce a completely recorded control; compare trajectory bit-exact to920. No tolerance relaxation based on small first-case noise; final residual is large. Keep918 private pending global limit solution and full dependency audit. ONQ010/012 and all full SOW requirements remain open.",
+  "next_action": "922-929 complete and archived. Frozen exact54/55 R0/A1.37e-16.927 bounded corrector no gain.929 finer line reaches R0.0627188467 then point5 plus station trial surface still crossed even at1/65536. Next use recorded929 stop/history25 to inspect plus-station one-sided actual stress/tangent and event-aware continuation; do not merely add halvings. No working/release/main promotion or physical ultimate.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -18954,8 +19208,8 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:914 reproduced actual failed matrix/residual and found83%descent;915/918 restored previously unavailableCase7Full, all5 Arc acceptances retained and917/919 each164PASS.916 five matched-branch affine predictions independently equilibrated.920 true cold source918 completed787.162109375s/directOK/capacityNumFail/25states/max1.1052194649105769; actual256 save/reopen exact.921 fresh replay independently verified every new state/all6/56+4/three-stationsteel. First7states exact904, then trajectory differs; final diagnostic row55/point11-station-1 is a different large-residual failure, exact failed context still required. No physical ultimate or release promotion; all processes closed.",
-  "previous_goal_turn_revalidation": "Previous user-facing acknowledgement only deferred pure-bending comparison; no numerical progress claimed. Revalidated clean worktree and terminal jobs; continued actual Newton capture instead of repeating a plan.",
+  "previous_goal_turn_classification": "progress:923 cold trace and entire checkpoints bit-exact920,55 real failed Newton contexts captured;924 all25 final states reassembled from exact921 tensors.925 R exact,A1.37e-16, both reference policies fail30.926 localized point5 finite active-set crossing, near direction accurate2.38e-6 relative.927 bounded3 uncommitted corrector gains no root; not promoted.928 central surface stress difference scales from1.34e-5 to1.34e-11MPa as width decreases1e6; no jump at that surface.929 directed fine line outcome preserved separately. Exact books/proofs archived; physical ultimate and full SOW remain open.",
+  "previous_goal_turn_revalidation": "Previous acknowledgement only deferred pure-bending CDP/SP comparison; no numerical progress claimed. Revalidated branch, terminal handles, staged926 and exact925 evidence before continuing.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -20771,6 +21025,7 @@
     2570,
     2735,
     3065,
+    3073,
     3074,
     3133,
     3333,
@@ -20779,6 +21034,7 @@
     4388,
     4426,
     4559,
+    4596,
     4763,
     4781,
     4784,
@@ -20810,6 +21066,7 @@
     10205,
     10530,
     10660,
+    11010,
     11035,
     11110,
     11153,
@@ -20831,6 +21088,7 @@
     12646,
     12697,
     13003,
+    13187,
     13811,
     13850,
     13853,
@@ -20889,6 +21147,7 @@
     23260,
     23313,
     23322,
+    23541,
     23911,
     24444,
     24511,
@@ -20952,6 +21211,7 @@
     36412,
     36441,
     36477,
+    36844,
     36943,
     37102,
     37183,
@@ -20960,6 +21220,7 @@
     37430,
     37439,
     37524,
+    37575,
     37896,
     38077,
     38101,
@@ -20994,7 +21255,9 @@
     43814,
     43829,
     43884,
+    44224,
     44434,
+    44649,
     44891,
     44935,
     45060,
@@ -21017,6 +21280,7 @@
     49065,
     49125,
     49126,
+    49131,
     49446,
     49844,
     50037,
@@ -21059,6 +21323,7 @@
     57659,
     57786,
     57914,
+    58032,
     58105,
     58207,
     58326,
@@ -21073,6 +21338,7 @@
     60275,
     60472,
     60838,
+    60851,
     61504,
     61773,
     61803,
@@ -21169,6 +21435,7 @@
     80666,
     80784,
     80871,
+    80894,
     80903,
     81179,
     81294,
@@ -21222,6 +21489,7 @@
     89231,
     89569,
     89834,
+    89910,
     89949,
     90074,
     90257,
@@ -21234,6 +21502,7 @@
     91568,
     91793,
     92127,
+    92365,
     92582,
     92693,
     92701,
@@ -21284,7 +21553,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T06:42:11.441397+03:00",
+  "updated_local": "2026-11-26T07:46:59.582832+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
