@@ -1,0 +1,241 @@
+{
+  "all_raw_files_read_back_and_hashed": true,
+  "all_three_actual_saved_books_included": true,
+  "archive_bytes": 47417628,
+  "books": {
+    "1039": {
+      "exact_saved_book_included": true,
+      "member": "1039/docs/regression/Diagnostic.xlsm",
+      "sha256": "9B85651CDFA0C2A9F904CB12B45F910AD87236720C519F1BF677E912232E2192"
+    },
+    "1040": {
+      "exact_saved_book_included": true,
+      "member": "1040/docs/regression/Diagnostic.xlsm",
+      "sha256": "9B85651CDFA0C2A9F904CB12B45F910AD87236720C519F1BF677E912232E2192"
+    },
+    "1041": {
+      "exact_saved_book_included": true,
+      "member": "1041/docs/regression/Diagnostic.xlsm",
+      "sha256": "7DE3D5B841E88E8E5A2BE3912B4869CCA73DA4A435F0E4790DBC50BB71543585"
+    }
+  },
+  "created_local": "2026-11-27T00:20:55.120055+03:00",
+  "full_acceptance_not_run": true,
+  "independent_axial_continuation": {
+    "actual_OpenSees_material": true,
+    "complete_path_replayed_states": 43,
+    "elapsed_seconds": 60.710379800002556,
+    "final_N_N": 98281.64986089355,
+    "final_steel_utilization": 1.0000000004735303,
+    "independent_OpenSees_structural_model": false,
+    "independent_SciPy_global_driver": true,
+    "inherited_states": 22,
+    "new_states": 21,
+    "original_tolerances_unchanged": true
+  },
+  "logical_files": 2005,
+  "native_equilibrium_replay": {
+    "1039": {
+      "accepted_states": 22,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        100000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.07182129999273457,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "2A9BC40F030695C5E78925C240D9F4689D04763161B21ED759399ADA908B0BDC",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 2.2461608750745653e-13,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.05126296119124163,
+      "maximum_lambda": 0.9120281016780255,
+      "maximum_moment_error_Nmm": 2.2461608750745654e-07,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    },
+    "1040": {
+      "accepted_states": 34,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        -100000.0,
+        -0.0,
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.08480979999876581,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "E8918B5AF53FC3C499215BD742744EC596BE3500C4E834DC9C4A629BF4218BFA",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 1.609145065024495e-05,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.3638735277345404,
+      "maximum_lambda": 7.359230737157219,
+      "maximum_moment_error_Nmm": 29.347185600548983,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    },
+    "1041": {
+      "accepted_states": 72,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "base_component_Nmm": 0.0,
+      "controlled_component": 0,
+      "declared_absolute_tolerance_MPa": 5e-07,
+      "declared_relative_tolerance": 5e-07,
+      "direction_N_Nmm": [
+        100000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "elapsed_seconds": 0.1475648000196088,
+      "engine_version": "3.8.0",
+      "full_steel_plastic_history_replayed": true,
+      "input_history_sha256": "18E6247C8AA446C956B7C0F55D4BC4DA12A4B090742AA52FA2100F3570C3A07B",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_contract_sha256": "D525BC8949CA3CD57328D6C730F8D33E585888E084528DBA3CDBA36FC5A433B4",
+      "maximum_Mx_kNm": 3.3190008252859116e-12,
+      "maximum_T_kNm": 0.0,
+      "maximum_force_error_N": 0.05635413162235636,
+      "maximum_lambda": 0.9723437703665107,
+      "maximum_moment_error_Nmm": 3.3190008252859116e-06,
+      "offset_N_Nmm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "physical_capacity_certified": false,
+      "reference_tolerance_violated_states": 0,
+      "section_equilibrium_not_solved_by_OpenSees": true,
+      "whole_goal_completed": false
+    }
+  },
+  "native_execution": {
+    "1039": {
+      "confirmed_lower_lambda": 0.9120281016780255,
+      "elapsed_seconds": 3.832977294921875,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 0.9120281016780255,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1040": {
+      "confirmed_lower_lambda": 7.359230737157219,
+      "elapsed_seconds": 5.996002197265625,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.359230737157219,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1041": {
+      "confirmed_lower_lambda": 0.9723437703665107,
+      "elapsed_seconds": 13.7490234375,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 0.9723437703665107,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    }
+  },
+  "next_stage": "Pure N; budget192 test1042 is not part of this closed packet",
+  "physical_capacity_certified": false,
+  "unique_payloads": 704,
+  "whole_goal_completed": false,
+  "working_solver_not_changed": true
+}
