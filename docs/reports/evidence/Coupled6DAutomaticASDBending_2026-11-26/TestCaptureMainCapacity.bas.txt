@@ -1,0 +1,21 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет точные принятые поля и операторы без проб материалов и без изменения истории решателя.
+Public Sub TestCaptureMainCapacity(ByVal controlled As CCoupledDeformationContinuation, ByVal operators As CCoupledElasticState)
+    Dim history As Collection, trace As CCoupledLoadTrace
+    Set history = controlled.AcceptedFields: Set trace = controlled.SavedTrace
+    If history Is Nothing Or trace Is Nothing Then Err.Raise 5, , "Не сохранена история контрольного продолжения."
+    If history.Count <> trace.Count Then Err.Raise 5, , "История полей и трасса множителей имеют разную длину."
+    TestWriteHardPreparedOperators operators, mMainCapacityFolderTest & "\Native\MainCapacity.Operators.csv"
+    Dim handle As Integer: handle = FreeFile
+    Open mMainCapacityFolderTest & "\Native\MainCapacityHistory.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMMAINHIST00001": Put #handle, , magic
+    Dim area As Double, length As Double: operators.CopyResultantResidualScales area, length
+    TestWriteVector handle, Array(operators.DegreeCount, operators.PointCount, operators.ConcretePointCount, area, length, 0.001, 0.0000005, 0.0000005, 1000000#)
+    TestWriteVector handle, Array(history.Count)
+    Dim index As Long, fraction As Double, factor As Double, field() As Double
+    For index = 1 To history.Count
+        trace.ReadPoint index, fraction, factor: field = history.Item(index)
+        TestWriteVector handle, Array(fraction, factor): TestWriteVector handle, field
+    Next index
+    Close #handle
+End Sub

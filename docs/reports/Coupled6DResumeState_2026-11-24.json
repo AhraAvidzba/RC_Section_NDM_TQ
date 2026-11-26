@@ -7,6 +7,11 @@
       "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1019PureBendingCDP90_20261126",
       "session": 38865,
       "stage": "User-authorized CDP5400s comparison"
+    },
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1029ASDTwoPointStart_20261126",
+      "session": 36906,
+      "stage": "Compile ASD initial two-point handoff for doubled-base regression"
     }
   ],
   "actual_H_derivative748": {
@@ -2103,6 +2108,17 @@
       "sha256": "E1BB37707A40FEF6E78F1C865FA901FF2CF7DFD2930AE6B02DE17C7CF837722F"
     },
     "steel_event_localized": false
+  },
+  "automatic_ASD_bending_cold_repeat": {
+    "actual_OpenSees_material_replay": true,
+    "driver_only_parameterized": true,
+    "exact_full_53_state_history_repeat": true,
+    "first_elapsed_seconds": 12.3125,
+    "independently_verified_again": true,
+    "numerical_kernels_unchanged": true,
+    "other_load_scales_not_yet_accepted": true,
+    "repeat_elapsed_seconds": 12.0625,
+    "sha256": "7F24801284165F6A8E9C3B5678317671754B806191CF3414153DF1D1BD4C732B"
   },
   "automatic_H_guide_evidence": "docs/reports/evidence/Coupled6DAutomaticHGuideArc_2026-11-25",
   "automatic_H_guide_summary": {
@@ -9440,7 +9456,39 @@
       "has_steel_limit": 0.0,
       "has_ultimate_point": 0.0,
       "physical_capacity_certified": false
+    },
+    "1025": {
+      "confirmed_lower_lambda": 3.860089023665022,
+      "elapsed_seconds": 30.671875,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "physical_capacity_certified": false,
+      "steel_limit_lambda": 0.0
+    },
+    "1026": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 12.3125,
+      "has_steel_limit": 1.0,
+      "has_ultimate_point": 0.0,
+      "physical_capacity_certified": false,
+      "steel_limit_lambda": 4.657850580869645
     }
+  },
+  "latest_automatic_ASD_steel_event": {
+    "accepted_states": 53,
+    "actual_OpenSees_material_replay": true,
+    "admissible_Mx_kNm": 4.657850580869645,
+    "case": "forced coupled pure bending",
+    "cold_start": true,
+    "concrete_failure_criterion_unresolved": true,
+    "elapsed_seconds": 12.3125,
+    "files_sha256": "2F184AB20A660BA5E155E9A24D426E5E15F7AA32A6D216C9F111AA4C2A654413",
+    "full_global_capacity_not_certified": true,
+    "independently_verified_all56plus4_equations_and_six_forces": true,
+    "path": "docs/reports/evidence/Coupled6DAutomaticASDBending_2026-11-26",
+    "private_early_deformation_controller_not_promoted": true,
+    "ready_equilibrium_fields_not_used": true,
+    "results_output_target_time_not_verified": true
   },
   "latest_automatic_Hwalk_summary": {
     "accepted": 22,
@@ -36223,7 +36271,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Finish exact CDP90 then check completed tensors/equilibrium. ASD private192 probes stops3.8157; adaptive1024 stops3.7614 after immediate material recovery. Next inspect accepted field history, try ordinary geometric step division before material switching, preserve96 budget and independent material replay. Visual dropdown still pending with monitor off. Commit and push fresh selectable material source/evidence checkpoint without replacing release or merging main.",
+  "next_action": "Audit/run1029, independently replay full history, then test more base moment scales before promoting.1026 automatic steel event4.65785kNm/12.31s and exact cold repeat passed;1028 doubled base stalled at4.28735kNm with89 correct states. Finish unchanged CDP90 and independently check its terminal prefix. Preserve full concrete criterion and UI pending.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -38373,6 +38421,7 @@
     1057,
     1085,
     1109,
+    1164,
     1195,
     1537,
     1571,
@@ -38399,6 +38448,7 @@
     3333,
     3987,
     4235,
+    4382,
     4388,
     4426,
     4559,
@@ -38426,6 +38476,7 @@
     7057,
     7102,
     7564,
+    7647,
     7846,
     7867,
     7997,
@@ -38557,6 +38608,7 @@
     24703,
     24815,
     25036,
+    25042,
     25261,
     25835,
     26138,
@@ -38729,6 +38781,7 @@
     49125,
     49126,
     49131,
+    49400,
     49446,
     49523,
     49844,
@@ -38789,6 +38842,7 @@
     57659,
     57760,
     57786,
+    57904,
     57914,
     57993,
     58032,
@@ -38994,7 +39048,9 @@
     84744,
     84774,
     84979,
+    85028,
     85277,
+    85313,
     85485,
     85752,
     85813,
@@ -39061,6 +39117,7 @@
     92693,
     92701,
     92748,
+    92844,
     92960,
     93011,
     93106,
@@ -39115,12 +39172,12 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T22:37:19.118636+03:00",
+  "updated_local": "2026-11-26T22:59:11.177363+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
-    "commit": "0d07a25",
+    "commit": "9cb2b21aae355325730354c9bdf12102f0b02353",
     "remote_branch": "codex/coupled-6d",
-    "scope": "Completed ASD steel boundary and CDP1800 timeout archive; selectable source checkpoint not yet committed.",
+    "scope": "Selectable CDP/native ASD candidate source and evidence, UI acceptance pending, release unchanged, main not merged.",
     "successful_push_verified": true
   },
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",

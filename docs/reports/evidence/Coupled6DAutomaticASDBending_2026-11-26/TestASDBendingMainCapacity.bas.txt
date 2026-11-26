@@ -1,0 +1,58 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Вызывает штатный SolveCapacity рабочего ASD на чистом изгибе; исход поиска сохраняется отдельно от успешного исполнения теста.
+Public Function TestRunASDBendingMainCapacity(ByVal folder As String) As String
+    On Error GoTo Failed
+    Dim geometry As CGeometryRegion, mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder, section As CSectionModel
+    Set geometry = TestFixtureBox(180#, 120#): mesh.BuildMesh geometry, 18#, 12#, cellGeometry:="Contour"
+    Set section = builder.BuildFromGenerated(mesh, Nothing): geometry.BuildContours section.Contours
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout: layout.AddContourGroup section, "TestASDCapacityHoop", "", 8#, 100#, 10#, "A240"
+    Dim c As New CConcreteMaterialParameters, s As New CSteelMaterialParameters, provider As New CMaterialModelProvider
+    c.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    s.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#, 0.018, 0.025
+    provider.TestInitializeFromParameters c, s, "ThreeLine", "UseDiagram", "TwoLine", diagramExtensionEnabled:=False, plateauSlopeFactor:=0.0075
+    Dim hoop As New CCoupledSteelModel, grades As Object, supplementary As Object
+    hoop.Initialize 200000#, 240#, 240#, 1500#, 1500#, 0.02, 0.02
+    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "A240", hoop
+    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades
+    Dim analysis As New CCoupledSectionAnalysis, spec As New CMaterialModelSpec, loads As New CSectionLoadState
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary, concreteLaw:="ASD"
+    spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+    loads.Initialize 0#, 1000000#, 0#, 0#, 0#: loads.SetSpatialComponents 0#, 0#, 0#
+    Dim capacity As CCapacityResult, trace As CCoupledLoadTrace, started As Double, elapsed As Double
+    started = Timer
+    Set capacity = analysis.SolveCapacity(loads, ChrW$(&H3BB) & "*Mx", spec, 1#, 10#, 0.001, 30, trace)
+    elapsed = Timer - started: If elapsed < 0# Then elapsed = elapsed + 86400#
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\MainCapacity.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMMAINCAP000001": Put #handle, , magic
+    TestWriteVector handle, Array(elapsed, Abs(CLng(capacity.HasUltimatePoint)), capacity.LambdaCapacity, _
+        Abs(CLng(capacity.HasSteelLimitPoint)), capacity.CoupledLimitLambda, capacity.PeakLambda, capacity.PeakAccuracy, _
+        Abs(CLng(capacity.HasConfirmedLowerBound)), capacity.ConfirmedLowerLambda, capacity.MxUltimate)
+    Dim index As Long, offset As Double, factor As Double
+    If trace Is Nothing Then
+        TestWriteVector handle, Array(0#)
+    Else
+        TestWriteVector handle, Array(trace.Count)
+        For index = 1 To trace.Count
+            trace.ReadPoint index, offset, factor: TestWriteVector handle, Array(offset, factor)
+        Next index
+    End If
+    Close #handle: handle = 0
+    Dim diagnostic As String
+    diagnostic = "Status=" & capacity.Status & "; LimitState=" & capacity.LimitState & "; Method=" & capacity.SolutionMethod & vbCrLf & _
+        "Comment=" & capacity.ResultMeta.ResultComment & vbCrLf & "Details=" & capacity.ResultMeta.DiagnosticDetails & vbCrLf & _
+        "DiagnosticLog=" & capacity.DiagnosticLog & vbCrLf & "LastSolver=" & capacity.LastSolverDiagnosticLog
+    Dim stream As Object: Set stream = CreateObject("ADODB.Stream")
+    stream.Type = 2: stream.Charset = "utf-8": stream.Open
+    stream.WriteText diagnostic: stream.SaveToFile folder & "\Native\MainCapacity.txt", 2: stream.Close
+    TestRunASDBendingMainCapacity = "MAIN_ASD_CAPACITY: seconds=" & CStr(elapsed) & "; status=" & capacity.Status & _
+        "; lambda=" & CStr(capacity.LambdaCapacity) & "; steel_lambda=" & CStr(capacity.CoupledLimitLambda) & _
+        "; physical_acceptance_not_implied_by_test_execution=True" & vbCrLf & "TOTAL_MAIN_ASD_CAPACITY_EXECUTION: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If handle <> 0 Then Close #handle
+    TestRunASDBendingMainCapacity = "RUNTIME ERROR: " & reason
+End Function
