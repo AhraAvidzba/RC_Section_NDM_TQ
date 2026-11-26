@@ -1,0 +1,92 @@
+{
+  "all_started_stages_terminal": true,
+  "checked_local": "2026-11-26T13:31:33.609849+03:00",
+  "completed_stage": "951-954",
+  "evidence_files_verified": 80,
+  "evidence_index": "docs\\reports\\evidence\\Coupled6DDetectedEventApproach_2026-11-26\\Files.json",
+  "evidence_index_sha256": "59777E879D26B4FE369A345FA0C21E27B9FE6B98D9BB314331BD4EC154AA7AAE",
+  "no_new_numerical_stage_started": true,
+  "numerical_checkpoint": "52b8888",
+  "physical_capacity_certified": false,
+  "process_checks": [
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4565868Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold951Point18EventRoots_20261126\\CompilePointClosure.json",
+      "PID": 27552,
+      "PIDExists": false,
+      "Root": "Cold951Point18EventRoots_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312826449080256"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4693432Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold951Point18EventRoots_20261126\\Native\\RealColdReplay.txt.ProcessClosure.json",
+      "PID": 21304,
+      "PIDExists": false,
+      "Root": "Cold951Point18EventRoots_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312836507731655"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4709436Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold952DetectedLoadingBoundary_20261126\\CompilePointClosure.json",
+      "PID": 4764,
+      "PIDExists": false,
+      "Root": "Cold952DetectedLoadingBoundary_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312839775104491"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4717759Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold952DetectedLoadingBoundary_20261126\\Native\\RealColdReplay.txt.ProcessClosure.json",
+      "PID": 6224,
+      "PIDExists": false,
+      "Root": "Cold952DetectedLoadingBoundary_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312840977159987"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4726971Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold953DetectedEventApproach_20261126\\CompilePointClosure.json",
+      "PID": 14584,
+      "PIDExists": false,
+      "Root": "Cold953DetectedEventApproach_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312843896979943"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4735078Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold953DetectedEventApproach_20261126\\Native\\RealColdReplay.txt.ProcessClosure.json",
+      "PID": 24832,
+      "PIDExists": false,
+      "Root": "Cold953DetectedEventApproach_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312845510543704"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4744112Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold954RefinedEventApproach_20261126\\CompilePointClosure.json",
+      "PID": 28968,
+      "PIDExists": false,
+      "Root": "Cold954RefinedEventApproach_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312848989238737"
+    },
+    {
+      "CheckedUTC": "2026-11-26T10:31:24.4752367Z",
+      "Closure": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold954RefinedEventApproach_20261126\\Native\\RealColdReplay.txt.ProcessClosure.json",
+      "PID": 23680,
+      "PIDExists": false,
+      "Root": "Cold954RefinedEventApproach_20261126",
+      "SameProcessRunning": false,
+      "StartTicksUTC": "639312850049919139"
+    }
+  ],
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "sequential_material_substeps_not_started": true,
+  "user_requested_pause": "дойди до логического завершения текущего этапа и поставь цель на паузу",
+  "whole_goal_completed": false
+}

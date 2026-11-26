@@ -4336,7 +4336,7 @@
     "independent raw replay and detailed reporting for side-governing limit;core aggregate and native localization implemented"
   ],
   "goal_pause_tool_pending": false,
-  "goal_status": "active",
+  "goal_status": "paused",
   "goal_tool_pause_after_git_checkpoint_requested": false,
   "guide_half_confirmation756": {
     "accepted_coordinate": 0.00011677014367737244,
@@ -18632,6 +18632,7 @@
     "zero_equilibrium_MPa": 5.52148441985284e-13,
     "zero_increment_stress_drift_MPa": 0.0
   },
+  "latest_pause954_proof": "docs/reports/Coupled6DPauseAfter954_2026-11-26.json",
   "latest_point_derivative_audit": {
     "actual_components": 256,
     "all_working_material_methods_exact867": true,
@@ -21638,7 +21639,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "951-954 archived750 raw files with507 exact duplicate links; all hashes read back.952 generic event18 solved2steps verified;953/954 approach geometrical guard fails~3.57% even when half residual8.45e-12. Next inspect existing ordered replay tests (§148-149) and test one full event vs two sequential material-history substeps, restoring original25 exactly; quantify endpoint integration/path error separately from geometric midpoint curvature, retain original force/steel/budget guards. No physical limit or fresh cold gain claimed; goal active.",
+  "next_action": "PAUSED at explicit user request after completed and published951-954. On explicit resume: compare one full event step with two sequential material-history substeps in a separate book; verify original25 history restoration; distinguish integration error from geometric curvature, retain force/steel/budget guards. This diagnostic has not started. Physical capacity, fresh cold repeat and full acceptance remain open.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -21748,13 +21749,13 @@
     "source_lambda": 1.1058869810286156
   },
   "outgoing_loading_pause_evidence": "docs/reports/evidence/Coupled6DOutgoingLoadingPause_2026-11-25",
-  "pause_after_current_stage": false,
-  "pause_checkpoint_ready": false,
-  "pause_goal_tool_was_not_called": true,
-  "pause_request": "До технологического завершения текущего этапа поставим задачу на паузу.",
-  "pause_request_revoked": true,
-  "pause_requested_after_logical_stage": false,
-  "pause_requested_explicitly": false,
+  "pause_after_current_stage": true,
+  "pause_checkpoint_ready": true,
+  "pause_goal_tool_was_not_called": false,
+  "pause_request": "дойди до логического завершения текущего этапа и поставь цель на паузу",
+  "pause_request_revoked": false,
+  "pause_requested_after_logical_stage": true,
+  "pause_requested_explicitly": true,
   "pause_revoked_replay_evidence": "docs/reports/evidence/Coupled6DPauseRevokedReplay_2026-11-25",
   "pause_revoked_user_message": "Паузу не включай пока я сам об этом чётко не попрошу",
   "peak_accuracy716": {
@@ -24315,7 +24316,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T13:21:47.212961+03:00",
+  "updated_local": "2026-11-26T13:31:33.609849+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
