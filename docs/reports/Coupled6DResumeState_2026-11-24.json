@@ -6588,6 +6588,338 @@
     "last_accepted_lambda": 1.1058792735611647,
     "maximum_accepted_lambda": 1.1058869810286156
   },
+  "latest_actual_newton_kink_diagnosis": {
+    "accepted_material_history_unchanged": true,
+    "active_surface_crossing_fraction_bracket": [
+      0.00390625,
+      0.0078125
+    ],
+    "actual_failing_step_not_accepted_state_predictor": true,
+    "additional_arc_cases_solved": 0,
+    "all40_root_and_operator_exports_exact_baseline": [
+      "Arc32.Case1Full.Sequence.csv",
+      "Arc32.Case1Full.Sequence.Operators.csv",
+      "Arc32.Case1Half.Sequence.csv",
+      "Arc32.Case1Half.Sequence.Operators.csv",
+      "Arc32.Case1Returned.Sequence.csv",
+      "Arc32.Case1Returned.Sequence.Operators.csv",
+      "Arc32.Case2Full.Sequence.csv",
+      "Arc32.Case2Full.Sequence.Operators.csv",
+      "Arc32.Case2Half.Sequence.csv",
+      "Arc32.Case2Half.Sequence.Operators.csv",
+      "Arc32.Case3Full.Sequence.csv",
+      "Arc32.Case3Full.Sequence.Operators.csv",
+      "Arc32.Case3Half.Sequence.csv",
+      "Arc32.Case3Half.Sequence.Operators.csv",
+      "Arc32.Case3Returned.Sequence.csv",
+      "Arc32.Case3Returned.Sequence.Operators.csv",
+      "Arc32.Case4Full.Sequence.csv",
+      "Arc32.Case4Full.Sequence.Operators.csv",
+      "Arc32.Case4Half.Sequence.csv",
+      "Arc32.Case4Half.Sequence.Operators.csv",
+      "Arc32.Case4Returned.Sequence.csv",
+      "Arc32.Case4Returned.Sequence.Operators.csv",
+      "Arc32.Case5Full.Sequence.csv",
+      "Arc32.Case5Full.Sequence.Operators.csv",
+      "Arc32.Case5Half.Sequence.csv",
+      "Arc32.Case5Half.Sequence.Operators.csv",
+      "Arc32.Case5Returned.Sequence.csv",
+      "Arc32.Case5Returned.Sequence.Operators.csv",
+      "Arc32.Case6Full.Sequence.csv",
+      "Arc32.Case6Full.Sequence.Operators.csv",
+      "Arc32.Case6Half.Sequence.csv",
+      "Arc32.Case6Half.Sequence.Operators.csv",
+      "Arc32.Case6Returned.Sequence.csv",
+      "Arc32.Case6Returned.Sequence.Operators.csv",
+      "Arc32.Case7Half.Sequence.csv",
+      "Arc32.Case7Half.Sequence.Operators.csv",
+      "Arc32.Case8Full.Sequence.csv",
+      "Arc32.Case8Full.Sequence.Operators.csv",
+      "Arc32.Case8Half.Sequence.csv",
+      "Arc32.Case8Half.Sequence.Operators.csv"
+    ],
+    "base_residual_reconstruction_error_MPa": 2.4296944056801875e-13,
+    "cold_for_unhelpful_damping_not_run": true,
+    "current_norm_MPa": 7.007474966697763e-08,
+    "exact_linear_system_maximum_backward_error": 5.769372707798227e-16,
+    "extended_damping_not_selected_as_a_solution": true,
+    "finite_fraction1_over128_direction_MPa": -1.0016881810126499e-06,
+    "later_rejected_directions": [
+      {
+        "failure": [
+          1.1024446527005156,
+          6.976697484507334e-08,
+          1.2145474600836677e-10,
+          6.996894569961075e-08,
+          1.0,
+          0.000244140625
+        ],
+        "meta": [
+          34.0,
+          3.0,
+          1.1024446527005156,
+          57.0,
+          30000.0,
+          3.433472009218095e-05,
+          6.730781596484815e-07,
+          1.0,
+          0.0
+        ],
+        "serial": 1,
+        "valid_samples": [
+          [
+            1.0,
+            1.1024446527752272,
+            2.5553285384517658e-06,
+            1.2145474601320916e-10,
+            -8.908269252558135e-17,
+            0.0
+          ],
+          [
+            0.5,
+            1.1024446527378713,
+            1.3123454279045997e-06,
+            1.2145474601078795e-10,
+            -3.2292458142353983e-16,
+            0.0
+          ],
+          [
+            0.25,
+            1.1024446527191936,
+            6.908536963696403e-07,
+            1.2145474600957737e-10,
+            -1.473079629800041e-16,
+            0.0
+          ],
+          [
+            0.125,
+            1.1024446527098546,
+            3.8010791677406137e-07,
+            1.2145474600897206e-10,
+            9.380364194091909e-17,
+            0.0
+          ],
+          [
+            0.0625,
+            1.102444652705185,
+            2.247349008081801e-07,
+            1.214547460086694e-10,
+            -3.0735978060504327e-16,
+            0.0
+          ],
+          [
+            0.03125,
+            1.1024446527028504,
+            1.470485808207733e-07,
+            1.214547460085181e-10,
+            -1.5333593428268344e-16,
+            0.0
+          ],
+          [
+            0.015625,
+            1.102444652701683,
+            1.0820538543898205e-07,
+            1.214547460084424e-10,
+            -1.760267228996898e-16,
+            0.0
+          ],
+          [
+            0.0078125,
+            1.1024446527010994,
+            8.87835902783061e-08,
+            1.2145474600840459e-10,
+            -6.190439979744544e-17,
+            0.0
+          ],
+          [
+            0.00390625,
+            1.1024446527008074,
+            7.907290400867338e-08,
+            1.2145474600838566e-10,
+            -2.708637575118735e-16,
+            0.0
+          ],
+          [
+            0.001953125,
+            1.1024446527006615,
+            7.421741033910743e-08,
+            1.214547460083762e-10,
+            -3.884467599836619e-16,
+            0.0
+          ],
+          [
+            0.0009765625,
+            1.1024446527005887,
+            7.178975223819497e-08,
+            1.214547460083715e-10,
+            -2.054795003158627e-16,
+            0.0
+          ],
+          [
+            0.00048828125,
+            1.102444652700552,
+            7.057607064015576e-08,
+            1.2145474600836912e-10,
+            -1.8974581471163618e-16,
+            0.0
+          ],
+          [
+            0.000244140625,
+            1.1024446527005338,
+            6.996894569961075e-08,
+            1.2145474600836793e-10,
+            -2.0777358717187525e-16,
+            0.0
+          ]
+        ]
+      },
+      {
+        "failure": [
+          1.1024446527005156,
+          6.976697484507334e-08,
+          1.2145474600836677e-10,
+          6.99690335772868e-08,
+          1.0,
+          0.000244140625
+        ],
+        "meta": [
+          34.0,
+          4.0,
+          1.1024446527005156,
+          57.0,
+          30000.0,
+          3.433472009218095e-05,
+          6.730781596484815e-07,
+          1.0,
+          1.0
+        ],
+        "serial": 2,
+        "valid_samples": [
+          [
+            1.0,
+            1.1024446527753669,
+            2.5554468528936683e-06,
+            1.2145474601321823e-10,
+            -1.6038318916379312e-16,
+            0.0
+          ],
+          [
+            0.5,
+            1.1024446527379412,
+            1.3124044526902556e-06,
+            1.214547460107925e-10,
+            -2.942955048361379e-16,
+            0.0
+          ],
+          [
+            0.25,
+            1.1024446527192284,
+            6.908832214663633e-07,
+            1.2145474600957962e-10,
+            -3.1306262137891143e-17,
+            0.0
+          ],
+          [
+            0.125,
+            1.102444652709872,
+            3.8012278036060566e-07,
+            1.214547460089732e-10,
+            -1.1580464013788182e-16,
+            0.0
+          ],
+          [
+            0.0625,
+            1.1024446527051939,
+            2.2474240321231423e-07,
+            1.2145474600866998e-10,
+            8.25982078430355e-17,
+            0.0
+          ],
+          [
+            0.03125,
+            1.1024446527028546,
+            1.4705221637389488e-07,
+            1.2145474600851835e-10,
+            -7.076405554799529e-17,
+            0.0
+          ],
+          [
+            0.015625,
+            1.1024446527016851,
+            1.0820713299128024e-07,
+            1.2145474600844256e-10,
+            -2.1181072879361124e-16,
+            0.0
+          ],
+          [
+            0.0078125,
+            1.1024446527011005,
+            8.878455189337102e-08,
+            1.2145474600840466e-10,
+            -2.3226138087813087e-16,
+            0.0
+          ],
+          [
+            0.00390625,
+            1.102444652700808,
+            7.907333408527489e-08,
+            1.2145474600838572e-10,
+            -1.6462397693215147e-16,
+            0.0
+          ],
+          [
+            0.001953125,
+            1.1024446527006617,
+            7.42177530862055e-08,
+            1.2145474600837623e-10,
+            -3.1035581459052493e-16,
+            0.0
+          ],
+          [
+            0.0009765625,
+            1.1024446527005887,
+            7.178986121721001e-08,
+            1.214547460083715e-10,
+            -2.306703932040534e-16,
+            0.0
+          ],
+          [
+            0.00048828125,
+            1.1024446527005523,
+            7.057601123650189e-08,
+            1.2145474600836915e-10,
+            -8.768053978753193e-17,
+            0.0
+          ],
+          [
+            0.000244140625,
+            1.1024446527005338,
+            6.99690335772868e-08,
+            1.2145474600836793e-10,
+            -2.3368222791569447e-16,
+            0.0
+          ]
+        ]
+      }
+    ],
+    "local_material_returns_all_available": true,
+    "local_norm_reduction_from_five_more_halvings": 0.004392093063007141,
+    "material_local_active_set_transition_is_not_physical_failure": true,
+    "matrix_direction_MPa": 7.007474966697784e-08,
+    "near_direction_MPa": 6.999027456211504e-08,
+    "near_direction_relative_difference": 0.0012054999163644275,
+    "near_fraction": 0.00390625,
+    "no_general_cause_of_all_NumFail_claimed": true,
+    "original_arc_cases_lost": 0,
+    "physical_capacity_certified": false,
+    "real_concrete_point5_station_plus_trial_yield_MPa": {
+      "2": -4.04274261636695e-09,
+      "4": 2.89823675128642e-09,
+      "5": -5.72252458960754e-10
+    },
+    "whole_goal_completed": false
+  },
+  "latest_actual_newton_kink_evidence": "docs/reports/evidence/Coupled6DActualNewtonMaterialKink_2026-11-26",
   "latest_analytical_arc_metric_counterexample": {
     "alpha_must_not_diverge_as_inverse_current_load_slope": true,
     "analytical_model": "lambda(u)=lambda_peak-c*u^2; u0=-d, half=u0+h/2, full=u0+h, h=1.5d",
@@ -17773,7 +18105,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Capture the actual rejected Newton iterate, full correction/Jacobian/control and exact accepted material history at a real failing transition; accepted-state32 probes are not a substitute. Independently localize directional derivative and substep/active-branch changes; inspect numerical material error budget against gradient amplification. Do not repeat known tolerance tightening blindly (Progress653/earlier1e-14 tests). Do not promote908 or run cold for it; it lost a valid event. Preserve full SOW, ONQ010/012 and deferred pure bending CDP/SP comparison; goal remains active.",
+  "next_action": "Actual failed Newton911/scan913 confirms finite surface kink in real concrete point5 at plus station: Ftrial sign crosses between1/256 and1/128; infinitesimal row53 direction matchesA within0.2%. Additional five halvings912 only lower norm0.44%, then fail again; all40 root/operator exports exact baseline, zero cases gained/lost. Do not promote floor change or run cold for it. Next inspect prospective active-branch tangent across that exact surface at frozen actual failing current, preserving scalar arc projection/target and same history32, then test any correction against original equilibrium/full-half gates.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -18054,7 +18386,8 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress: cold904 completed814.57421875s/directOK/capacityNumFail/max1.1042833676987807; all32 raw fields/fractions/lambdas exact897; actual refined marker observed.905 exact material bridge rebuilt all6/56+4/all3steel without duplicate native replay.906zero drift/all129 local returns/independent yield7.25e-14.907all12 tangent reads verified, persistent two-cycle and geometric row53 error gain1021.83, no physical limit.908actual residual predictor active7cases and4 verified pairs; original9095pairs, candidate loses original event case1; strict regression gateFAIL candidate rejected despite910all164PASS. No promotion. All native stages closed.",
+  "previous_goal_turn_classification": "progress:911 actual rejected augmented matrix/RHS/correction/valid probes captured with exact accepted32 history; all43 baseline native files exact; actual256 sources verified.912 five more halvings yield0.44% local norm reduction then rejection repeats; all40 root/operator exports exact baseline, zero gained/lost cases; not selected.913 immutable compiled900 local stress scan independently rebuilds actual failed residual within2.43e-13MPa and captured probes6.06e-13; point5 plus-station trial-yield crosses between1/256 and1/128; near direction agrees approximately withA, finite kink is localized. No physical ultimate or production promotion. All native processes closed.",
+  "previous_goal_turn_revalidation": "Previous user-facing acknowledgement only deferred pure-bending comparison; no numerical progress claimed. Revalidated clean worktree and terminal jobs; continued actual Newton capture instead of repeating a plan.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -19870,6 +20203,7 @@
     2735,
     3065,
     3074,
+    3133,
     3333,
     3987,
     4235,
@@ -19897,6 +20231,7 @@
     8910,
     8978,
     9088,
+    9487,
     9618,
     9644,
     9759,
@@ -19904,6 +20239,7 @@
     10205,
     10530,
     10660,
+    11035,
     11110,
     11153,
     11192,
@@ -19956,6 +20292,7 @@
     18344,
     18643,
     18664,
+    18676,
     18716,
     18956,
     19123,
@@ -20021,6 +20358,7 @@
     31802,
     31923,
     32063,
+    32138,
     32493,
     32513,
     33763,
@@ -20076,6 +20414,7 @@
     42373,
     42421,
     42590,
+    43203,
     43419,
     43669,
     43814,
@@ -20125,6 +20464,7 @@
     52768,
     52825,
     52995,
+    53259,
     53557,
     53617,
     54096,
@@ -20145,6 +20485,7 @@
     57914,
     58105,
     58207,
+    58326,
     59158,
     59224,
     59690,
@@ -20174,6 +20515,7 @@
     64786,
     65220,
     65352,
+    65461,
     65581,
     65737,
     65812,
@@ -20289,6 +20631,7 @@
     87296,
     87359,
     87569,
+    87573,
     87682,
     87769,
     87972,
@@ -20359,7 +20702,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T05:27:38.996245+03:00",
+  "updated_local": "2026-11-26T05:54:48.436341+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",

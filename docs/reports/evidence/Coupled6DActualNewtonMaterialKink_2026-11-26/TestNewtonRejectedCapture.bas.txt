@@ -1,0 +1,46 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Копирует действительную систему до исключения и пробы отклонённого направления.
+' Материалы повторно не вызываются; сохраняются только уже вычисленные значения.
+Public Sub TestNewtonRejectedCapture(ByVal phase As Long, ByRef matrix() As Double, ByRef rhs() As Double, _
+        ByRef field() As Double, ByRef history() As Double, ByRef residual() As Double, ByVal meta As Variant)
+    Static savedMatrix() As Double, savedRhs() As Double, savedField() As Double, savedHistory() As Double
+    Static savedResidual() As Double, savedMeta As Variant, probes As Collection, serial As Long
+    If Len(mPolishRootTest) = 0 Then Exit Sub
+    If phase = 1 Then
+        savedMatrix = matrix: savedRhs = rhs: savedField = field: savedHistory = history
+        savedResidual = residual: savedMeta = meta: Set probes = New Collection
+    ElseIf phase = 2 Then
+        If probes Is Nothing Then Err.Raise 5, , "Не сохранена исходная система теста Newton."
+        probes.Add Array(meta, field, residual) ' Копии не используют изменяемые массивы решателя после возврата.
+    ElseIf phase = 3 Then
+        If probes Is Nothing Then Err.Raise 5, , "Нет проб отклонённого направления Newton."
+        serial = serial + 1
+        If serial > 8192 Then Err.Raise 5, , "Превышен явный лимит записей теста Newton."
+        Dim handle As Integer: handle = FreeFile
+        Open mPolishRootTest & "\Native\NewtonRejected." & Format$(serial, "00000") & ".bin" For Binary Access Write As #handle
+        TestWriteReverseBinaryVector handle, savedMeta
+        TestWriteReverseBinaryVector handle, savedField
+        TestWriteReverseBinaryVector handle, savedHistory
+        TestWriteReverseBinaryVector handle, savedResidual
+        TestWriteReverseBinaryVector handle, savedRhs
+        TestWriteReverseBinaryVector handle, rhs ' Поправка после фактического решения линейной системы.
+        Dim column As Long, row As Long, vector() As Double
+        ReDim vector(1 To UBound(savedMatrix, 1))
+        For row = 1 To UBound(savedMatrix, 2)
+            For column = 1 To UBound(vector): vector(column) = savedMatrix(column, row): Next column
+            TestWriteReverseBinaryVector handle, vector
+        Next row
+        TestWriteReverseBinaryVector handle, meta
+        TestWriteReverseBinaryVector handle, Array(probes.Count)
+        Dim probe As Variant
+        For Each probe In probes
+            TestWriteReverseBinaryVector handle, probe(0)
+            TestWriteReverseBinaryVector handle, probe(1)
+            TestWriteReverseBinaryVector handle, probe(2)
+        Next probe
+        Close #handle
+        Set probes = Nothing
+    Else
+        Err.Raise 5, , "Неизвестная фаза записи Newton."
+    End If
+End Sub
