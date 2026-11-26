@@ -1,0 +1,97 @@
+Public Function TestRunPureBendingCurvature(ByVal folder As String) As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Прослеживает тот же пространственный закон по возрастающей kappaX; lambda остаётся неизвестной полной системы равновесия.
+    ' Используется штатный TryDeformationStep. Пройденная кривая сама по себе не назначает глобальную несущую способность.
+    On Error GoTo Failed
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open folder & "\Input\CurvatureOptions.bin" For Binary Access Read As #inputHandle
+    Dim options As Variant: options = TestReadPolishVector(inputHandle): Close #inputHandle: inputHandle = 0
+    If UBound(options) <> 3 Or (options(1) <> 1# And options(1) <> 2#) Or options(2) <= 0# Or options(3) <= 0# Then _
+        Err.Raise 5, , "Нужны модель, плоский момент и плоская кривизна для сравнения."
+    Dim model As Long: model = CLng(options(1))
+    Dim section As CSectionModel: Set section = TestHardShearSection()
+    Dim layout As New CTransverseRebarLayout: layout.AddContourGroup section, "TestBendingHoop", "", 8#, 100#, 10#, "A240"
+    Dim operators As New CCoupledElasticState: operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
+    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
+    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1500#, 0.025, 0.018
+    hoop.Initialize 200000#, 240#, 240#, 1500#, 1500#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary"): models.Add "A400", longitudinal: models.Add "A240", hoop
+    Dim flow As CCoupledASDFlow: Set flow = modTestCoupledASDMaterial.TestReadFlow(folder & "\Input", "matched")
+    TestWriteHardPreparedOperators operators, folder & "\Native\PureBending.Operators.csv"
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\CurvatureBaseline.bin" For Binary Access Write As #handle
+    Dim baseline As String: baseline = TestPureBendingCoupledCaseTest(handle, operators, models, flow, model, CDbl(options(2)), 0.25)
+    Close #handle: handle = 0
+    Dim solver As CCoupledNewtonSolver: Set solver = mReverseSolverTest
+    inputHandle = FreeFile
+    Open folder & "\Native\CurvatureBaseline.bin" For Binary Access Read As #inputHandle
+    Dim baselineMeta As Variant: baselineMeta = TestReadPolishVector(inputHandle)
+    Dim field() As Double, actual() As Double
+    field = TestReadPolishVector(inputHandle): actual = TestReadPolishVector(inputHandle)
+    Close #inputHandle: inputHandle = 0
+    If baselineMeta(4) <> 1# Or baselineMeta(5) <> 1# Then Err.Raise 5, , "Не решено начальное силовое состояние кривой: " & baseline
+    Dim acceptedCheck() As Double: solver.CopyAccepted acceptedCheck
+    Dim degree As Long
+    For degree = 1 To UBound(field)
+        If field(degree) <> acceptedCheck(degree) Then Err.Raise 5, , "Исходный снимок не совпадает с принятой историей решателя."
+    Next degree
+    Dim area As Double, lengthScale As Double: operators.CopyResultantResidualScales area, lengthScale
+    Dim baseLoad(1 To 6) As Double, direction(1 To 6) As Double, projection() As Double
+    direction(2) = options(2): ReDim projection(1 To operators.DegreeCount): projection(2) = 1#
+    Dim factor As Double: factor = actual(2) / CDbl(options(2))
+    Dim previous() As Double, previousFactor As Double, lastControl As Double, delta As Double, target As Double, maximum As Double
+    previous = field: previousFactor = factor: lastControl = field(2)
+    If lastControl <= 0# Then Err.Raise 5, , "У начального состояния нет положительной кривизны."
+    delta = 0.25 * lastControl: maximum = 1.5 * CDbl(options(3)) * lengthScale
+    handle = FreeFile
+    Open folder & "\Native\PureBendingCurvature.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMBENDCURV00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(model, options(2), options(3), lengthScale, operators.DegreeCount, operators.PointCount, operators.ConcretePointCount, 0.001, 0.0000005, 0.0000005)
+    TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+    TestWriteASDColdStressTest handle, field
+    Dim attempt As Long, acceptedCount As Long, rejectedCount As Long, solved As Boolean, predicted() As Double, guess As Double, trialFactor As Double
+    Dim i As Long, multiplier As Double, nextField() As Double, effort As Variant, progress As Integer, stopReason As String
+    For attempt = 1 To 100
+        target = GeomMin(maximum, lastControl + delta): predicted = field
+        If acceptedCount = 0 Then
+            multiplier = target / lastControl
+            For i = 1 To UBound(predicted): predicted(i) = multiplier * field(i): Next i
+            guess = multiplier * factor
+        Else
+            multiplier = (target - lastControl) / (lastControl - previous(2))
+            For i = 1 To UBound(predicted): predicted(i) = field(i) + multiplier * (field(i) - previous(i)): Next i
+            guess = factor + multiplier * (factor - previousFactor)
+        End If
+        solved = solver.TryDeformationStep(baseLoad, direction, projection, target, guess, trialFactor, 0.0000005, 0.0000005, 30, initialField:=predicted)
+        effort = solver.ReadPolishEffortTest
+        TestWriteReverseBinaryVector handle, Array(attempt, target, Abs(CLng(solved)), trialFactor, effort(0), effort(1), effort(7))
+        If solved Then
+            solver.CopyTrial nextField, actual
+            TestWriteReverseBinaryVector handle, nextField: TestWriteReverseBinaryVector handle, actual
+            TestWriteASDColdStressTest handle, nextField
+            solver.AcceptStep: acceptedCount = acceptedCount + 1
+            previous = field: previousFactor = factor: field = nextField: factor = trialFactor: lastControl = field(2)
+            progress = FreeFile
+            Open folder & "\Native\Curvature.Progress.txt" For Append As #progress
+            Print #progress, "model=" & CStr(model) & "; kappaX=" & CStr(lastControl / lengthScale) & "; lambda=" & CStr(factor) & "; steel=" & CStr(mReverseReinforcedTest.AcceptedLongitudinalUtilization)
+            Close #progress
+            If mReverseReinforcedTest.AcceptedLongitudinalUtilization >= 1# Or mReverseReinforcedTest.AcceptedTransverseSteelUtilization >= 1# Then stopReason = "steel_strain_crossed": Exit For
+            If target = maximum Then stopReason = "prescribed_curvature_reached": Exit For
+            delta = 0.25 * lastControl
+        Else
+            solver.DiscardStep: rejectedCount = rejectedCount + 1: delta = 0.5 * delta
+            If delta < 0.000001 * lastControl Then stopReason = "curvature_increment_unresolved": Exit For
+        End If
+    Next attempt
+    TestWriteReverseBinaryVector handle, Array(0#, factor, lastControl / lengthScale, acceptedCount, rejectedCount)
+    Close #handle: handle = 0
+    TestRunPureBendingCurvature = "CURVATURE_TRACE: model=" & CStr(model) & "; accepted=" & CStr(acceptedCount) & "; lambda=" & CStr(factor) & "; stop=" & stopReason & _
+        "; physical_capacity_certified=False" & vbCrLf & "TOTAL_PURE_BENDING_CURVATURE_EXECUTION: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If inputHandle <> 0 Then Close #inputHandle
+    If handle <> 0 Then Close #handle
+    TestRunPureBendingCurvature = "RUNTIME ERROR: " & reason
+End Function

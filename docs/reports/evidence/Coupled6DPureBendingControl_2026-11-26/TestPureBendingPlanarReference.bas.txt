@@ -1,0 +1,60 @@
+Public Function TestRunPureBendingPlanarReference(ByVal folder As String) As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Находит штатный плоский предел Mx без продолжения диаграмм для геометрии последующего независимого контроля.
+    ' Растянутый бетон выключен в расчёте прочности; исходные узлы диаграмм и фактическое предельное поле сохраняются полностью.
+    On Error GoTo Failed
+    Dim started As Double: started = Timer
+    Dim section As CSectionModel: Set section = TestHardShearSection()
+    Dim c As New CConcreteMaterialParameters, s As New CSteelMaterialParameters, provider As New CMaterialModelProvider
+    c.Initialize 30#, 3#, 30#, 3#, 30000#, 30000#, rbMc2:=15#
+    s.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#, 0.018, 0.025
+    provider.TestInitializeFromParameters c, s, "ThreeLine", "Ignore", "TwoLine", diagramExtensionEnabled:=False
+    Dim concrete As CMaterialDiagram, steel As CMaterialDiagram
+    Set concrete = provider.ConcreteMaterial(cpStrength): Set steel = provider.SteelMaterial(cpStrength)
+    If concrete.HasCompressionExtension Or concrete.HasTensionExtension Or steel.HasCompressionExtension Or steel.HasTensionExtension Then _
+        Err.Raise 5, , "Диаграммы плоского контроля не должны иметь искусственного продолжения."
+    Dim cap As New CCapacitySolver
+    cap.ConcreteCompressionLimit = -Abs(concrete.UltimateCompressionStrain)
+    cap.ConcreteTensionLimitEnabled = False
+    cap.SteelCompressionLimit = Abs(steel.UltimateCompressionStrain): cap.SteelTensionLimit = steel.UltimateTensionStrain
+    cap.LambdaTolerance = 0.00001: cap.StrainTolerance = 0.0000001
+    cap.MaxLambda = 64#: cap.InitialLambdaStep = 1#: cap.MaxRetries = 4
+    cap.SolverBaseLoadSteps = 8: cap.SolverMaxIterations = 80
+    cap.SolverToleranceN = 0.1: cap.SolverToleranceMx = 10#: cap.SolverToleranceMy = 10#
+    cap.DiagnosticsEnabled = True
+    cap.SolveByUltimateStrain section, concrete, steel, 0#, 1000000#, 0#
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\PlanarReference.txt" For Output As #handle
+    Print #handle, "CONVERGED;" & CStr(cap.Converged) & ";" & cap.SolutionMethod & ";" & cap.LimitState & ";" & cap.StopReason
+    Print #handle, cap.DiagnosticLog
+    Close #handle: handle = 0
+    If Not cap.Converged Then Err.Raise 5, , "Штатный плоский предел не подтверждён: " & cap.StopReason
+    Dim state As CSectionSolver: Set state = cap.LastSolver
+    If state Is Nothing Then Err.Raise 5, , "У плоского предела отсутствует фактическое НДС."
+    handle = FreeFile
+    Open folder & "\Native\PlanarReference.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPLANEMOM00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(cap.LambdaUltimate, cap.MxUltimate, cap.NUltimate, cap.MyUltimate, Timer - started)
+    TestWriteReverseBinaryVector handle, Array(state.Epsilon0, state.KappaX, state.KappaY, state.Nint, state.Mxint, state.Myint, _
+        state.MinConcreteStrain, state.MaxConcreteStrain, state.MinSteelStrain, state.MaxSteelStrain)
+    TestWriteReverseBinaryVector handle, Array(concrete.UltimateCompressionStrain, concrete.UltimateTensionStrain, steel.UltimateCompressionStrain, steel.UltimateTensionStrain, _
+        section.ConcreteCount, section.RebarCount, concrete.PointCount, steel.PointCount, 0.1, 10#, 10#)
+    Dim i As Long
+    For i = 1 To concrete.PointCount: TestWriteReverseBinaryVector handle, Array(concrete.PointStrain(i), concrete.PointStress(i)): Next i
+    For i = 1 To steel.PointCount: TestWriteReverseBinaryVector handle, Array(steel.PointStrain(i), steel.PointStress(i)): Next i
+    For i = 1 To section.ConcreteCount
+        TestWriteReverseBinaryVector handle, Array(section.ConcreteX(i), section.ConcreteY(i), section.ConcreteArea(i))
+    Next i
+    For i = 1 To section.RebarCount
+        TestWriteReverseBinaryVector handle, Array(section.RebarX(i), section.RebarY(i), section.RebarArea(i))
+    Next i
+    Close #handle: handle = 0
+    TestRunPureBendingPlanarReference = "PLANAR_REFERENCE: Mx_Nmm=" & CStr(cap.MxUltimate) & "; lambda=" & CStr(cap.LambdaUltimate) & _
+        "; limit=" & cap.LimitState & "; method=" & cap.SolutionMethod & "; seconds=" & CStr(Timer - started) & vbCrLf & "TOTAL_PURE_BENDING_REFERENCE: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If handle <> 0 Then Close #handle
+    TestRunPureBendingPlanarReference = "RUNTIME ERROR: " & reason
+End Function

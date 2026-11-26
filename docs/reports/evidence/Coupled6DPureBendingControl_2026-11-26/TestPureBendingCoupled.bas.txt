@@ -1,0 +1,90 @@
+Public Function TestRunPureBendingCoupled(ByVal folder As String) As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Принудительно проверяет чистый Mx пространственным ядром, обходя штатный выбор плоской ветки при T=Q=0.
+    ' Каждый момент и каждый закон начинаются с новой истории. Последняя решённая ступень не подменяет заданный момент.
+    On Error GoTo Failed
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open folder & "\Input\MxReference.bin" For Binary Access Read As #inputHandle
+    Dim reference As Variant: reference = TestReadPolishVector(inputHandle)
+    If UBound(reference) <> 1 Or reference(1) <= 0# Or Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Неверный плоский эталон момента."
+    Close #inputHandle: inputHandle = 0
+    Dim section As CSectionModel: Set section = TestHardShearSection()
+    Dim layout As New CTransverseRebarLayout: layout.AddContourGroup section, "TestBendingHoop", "", 8#, 100#, 10#, "A240"
+    Dim operators As New CCoupledElasticState: operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
+    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
+    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1500#, 0.025, 0.018
+    hoop.Initialize 200000#, 240#, 240#, 1500#, 1500#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary"): models.Add "A400", longitudinal: models.Add "A240", hoop
+    Dim flow As CCoupledASDFlow: Set flow = modTestCoupledASDMaterial.TestReadFlow(folder & "\Input", "matched")
+    TestWriteHardPreparedOperators operators, folder & "\Native\PureBending.Operators.csv"
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\PureBendingCoupled.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMPURECOUP00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(reference(1), 2#, 11#, operators.DegreeCount, operators.PointCount, operators.ConcretePointCount, 0.001, 0.0000005, 0.0000005)
+    Dim ratios As Variant: ratios = Array(0.25, 0.5, 0.75, 0.9, 0.95, 0.98, 1#, 1.02, 1.05, 1.1, 1.2)
+    Dim ratio As Variant, model As Long, report As String, progress As Integer
+    For model = 1 To 2
+        For Each ratio In ratios
+            report = TestPureBendingCoupledCaseTest(handle, operators, models, flow, model, CDbl(reference(1)), CDbl(ratio))
+            progress = FreeFile
+            Open folder & "\Native\PureBending.Progress.txt" For Append As #progress
+            Print #progress, report: Close #progress
+        Next ratio
+    Next model
+    Close #handle: handle = 0
+    TestRunPureBendingCoupled = "PURE_BENDING_CASES: completed=22; each_case_cold=True; physical_capacity_not_certified" & vbCrLf & "TOTAL_PURE_BENDING_COUPLED_EXECUTION: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If inputHandle <> 0 Then Close #inputHandle
+    If handle <> 0 Then Close #handle
+    TestRunPureBendingCoupled = "RUNTIME ERROR: " & reason
+End Function
+
+Private Function TestPureBendingCoupledCaseTest(ByVal handle As Integer, ByVal operators As CCoupledElasticState, ByVal models As Object, _
+        ByVal flow As CCoupledASDFlow, ByVal model As Long, ByVal reference As Double, ByVal ratio As Double) As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Создаёт независимые материальные буферы трёх станций и применяет штатное продолжение по усилиям с исходными допусками.
+    Dim started As Double: started = Timer
+    Dim concrete As New CCoupledConcreteResponse, negative As New CCoupledConcreteResponse, positive As New CCoupledConcreteResponse
+    Dim material As CCoupledConcreteResponse, side As Variant
+    For Each side In Array(-1, 0, 1)
+        Select Case CLng(side)
+            Case -1: Set material = negative
+            Case 0: Set material = concrete
+            Case 1: Set material = positive
+        End Select
+        If model = 1 Then
+            material.Initialize operators.PointCount, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+        Else
+            material.InitializeASDNativeUpdateTest operators.PointCount, flow
+        End If
+    Next side
+    Dim center As New CCoupledReinforcedResponse, minus As New CCoupledReinforcedResponse, plus As New CCoupledReinforcedResponse
+    center.Initialize operators, concrete, models: minus.Initialize operators, negative, models: plus.Initialize operators, positive, models
+    Dim solver As New CCoupledNewtonSolver: solver.Initialize operators, center, 30000#, plus, minus
+    Dim path As New CLoadPathVector, branch As New CCoupledLoadContinuation
+    path.Initialize 0#, 0#, 0#, reference * ratio, 0#, 0#, 0#, 0#, 0#, 0#, 0#, 0#
+    branch.Initialize solver, path, 4, 60, 30, 0.0000005, 0.0000005, True
+    Dim solved As Boolean: solved = branch.Advance(1#)
+    Dim field() As Double, actual() As Double
+    ReDim field(1 To operators.DegreeCount): ReDim actual(1 To 6)
+    If branch.HasAcceptedVariableState Then branch.CopyAccepted field, actual
+    If solved And Abs(branch.AcceptedLambda - 1#) > 0.000000000001 Then Err.Raise 5, , "Промежуточное поле не равно заданному моменту."
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = center
+    Set mReverseSidesTest = New Collection
+    mReverseSidesTest.Add negative: mReverseSidesTest.Add minus: mReverseSidesTest.Add positive: mReverseSidesTest.Add plus
+    TestWriteReverseBinaryVector handle, Array(model, ratio, reference * ratio, Abs(CLng(solved)), branch.AcceptedLambda, Timer - started, branch.RejectedAttempts, branch.SavedFieldCount)
+    TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+    TestWriteASDColdStressTest handle, field
+    Dim index As Long, saved() As Double, fraction As Double, factor As Double
+    For index = 1 To branch.SavedFieldCount
+        branch.CopySavedField index, saved: branch.SavedTrace.ReadPoint index, fraction, factor
+        TestWriteReverseBinaryVector handle, Array(fraction, factor): TestWriteReverseBinaryVector handle, saved
+    Next index
+    TestPureBendingCoupledCaseTest = "MODEL=" & CStr(model) & "; ratio=" & CStr(ratio) & "; target_Mx_Nmm=" & CStr(reference * ratio) & _
+        "; target_equilibrium=" & CStr(solved) & "; last_lambda=" & CStr(branch.AcceptedLambda) & "; seconds=" & CStr(Timer - started) & _
+        "; " & branch.ResultMeta.ResultComment & "; " & branch.ResultMeta.DiagnosticDetails
+End Function

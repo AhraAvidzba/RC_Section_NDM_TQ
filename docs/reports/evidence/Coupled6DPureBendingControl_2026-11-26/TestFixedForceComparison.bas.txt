@@ -1,0 +1,106 @@
+Public Function TestStartFixedForceComparison(ByVal folder As String) As Variant
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Готовит одну фиксированную нагрузку для сравнения штатного Newton и внешнего алгоритма на тех же60 уравнениях и принятом префиксе.
+    ' Масштабированное известное поле используется только как начальное приближение; новые состояния материалов не принимаются.
+    Dim report As String: report = TestStartExternalEnvelope(folder)
+    If Left$(report, 14) = "RUNTIME ERROR:" Then Err.Raise 5, , report
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Input\FixedForceCase.bin" For Binary Access Read As #handle
+    Dim meta As Variant: meta = TestReadPolishVector(handle)
+    If UBound(meta) <> 3 Or Seek(handle) <> LOF(handle) + 1 Then Err.Raise 5, , "Нужны lambda, принятый префикс и номер известного начального поля."
+    Close #handle
+    mFixedForceLambdaTest = meta(1): mFixedForcePrefixTest = CLng(meta(2))
+    If meta(2) <> mFixedForcePrefixTest Or mFixedForcePrefixTest < 0 Or mFixedForcePrefixTest > mReverseFieldsTest.Count Then _
+        Err.Raise 5, , "Неверный префикс фиксированной силовой пробы."
+    Dim seedIndex As Long: seedIndex = CLng(meta(3))
+    If seedIndex < 1 Or seedIndex > mReverseFieldsTest.Count Or seedIndex <> meta(3) Then Err.Raise 5, , "Неверный номер начального поля."
+    Dim reference As Double, unused As Double, i As Long
+    mReverseTraceTest.ReadPoint seedIndex, unused, reference
+    mFixedForceSeedTest = mReverseFieldsTest(seedIndex)
+    For i = 1 To UBound(mFixedForceSeedTest): mFixedForceSeedTest(i) = mFixedForceSeedTest(i) * (mFixedForceLambdaTest / reference): Next i
+    mReverseSolverTest.DiscardStep
+    If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, mFixedForcePrefixTest) Then Err.Raise 5, , "Не воспроизведена исходная история силовой пробы."
+    TestWriteLoadingStateTest folder & "\Native\FixedForceAcceptedBefore.bin"
+    Dim load(1 To 6) As Double
+    For i = 1 To 6: load(i) = mReverseBaseTest(i) + mFixedForceLambdaTest * mReverseDirectionTest(i): Next i
+    Dim solved As Boolean, effort As Variant, field() As Double, actual() As Double
+    solved = mReverseSolverTest.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
+        mReverseOptionsTest(3), mReverseOptionsTest(4), mReverseOptionsTest(2), initialField:=mFixedForceSeedTest)
+    effort = mReverseSolverTest.ReadPolishEffortTest
+    handle = FreeFile
+    Open folder & "\Native\FixedForceNative.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMFIXNATIVE0001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(mFixedForceLambdaTest, mFixedForcePrefixTest, Abs(CLng(solved)))
+    TestWriteReverseBinaryVector handle, effort
+    If solved Then
+        mReverseSolverTest.CopyTrial field, actual
+        TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+        TestWriteRecordedYieldStressTest handle, field
+    End If
+    Close #handle
+    mReverseSolverTest.DiscardStep
+    TestWriteLoadingStateTest folder & "\Native\FixedForceAfterNative.bin"
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double, trial() As Double, context() As Double
+    TestReadPolishSnapshot folder & "\Input\Reverse1.bin", fields, trace, previous, accepted, trial, mFixedForceProjectionTest, context
+    Dim target As Double
+    For i = 1 To UBound(mFixedForceSeedTest): target = target + mFixedForceProjectionTest(i) * mFixedForceSeedTest(i): Next i
+    If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, mFixedForceProjectionTest, target, _
+            mFixedForceSeedTest, mFixedForceLambdaTest) Then Err.Raise 5, , "Не открыт контекст фиксированной нагрузки."
+    mFixedForceRevisionTest = mReverseSolverTest.AcceptedRevision
+    Dim tolerance As Double
+    tolerance = mReverseSolverTest.ControlledLoadTolerance(mReverseBaseTest, mReverseDirectionTest, mFixedForceLambdaTest, _
+        mReverseOptionsTest(3), mReverseOptionsTest(4))
+    TestStartFixedForceComparison = Array(60#, mFixedForceLambdaTest, mFixedForcePrefixTest, mFixedForceRevisionTest, tolerance)
+End Function
+
+Public Function TestEvaluateFixedForceComparison(ByVal source As Variant) As Variant
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Возвращает56 физических невязок и четыре связи при точно фиксированной lambda; алгоритм снаружи меняет только поле.
+    Dim coordinates() As Double, values() As Double, matrix() As Double, field() As Double, factor As Double
+    TestFixedForceCoordinates source, coordinates
+    Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+    If Not equations.TryEvaluate(coordinates, False, values, matrix) Then Err.Raise 5, , "Не вычислен материальный отклик фиксированной силовой пробы."
+    mReverseSolverTest.ReadNewtonLineFieldTest coordinates, field, factor
+    If factor <> mFixedForceLambdaTest Or mReverseSolverTest.AcceptedRevision <> mFixedForceRevisionTest Then _
+        Err.Raise 5, , "Изменилась фиксированная нагрузка или принятая история."
+    Dim result() As Double, i As Long: ReDim result(1 To 60)
+    For i = 1 To 60: result(i) = values(i): Next i
+    TestEvaluateFixedForceComparison = result
+End Function
+
+Public Sub TestFixedForceCoordinates(ByVal source As Variant, ByRef coordinates() As Double)
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Дополняет60 полевых координат нулевой поправкой нагрузки; lambda не становится неизвестной оптимизатора.
+    If UBound(source) - LBound(source) + 1 <> 60 Then Err.Raise 5, , "Нужны60 координат поля фиксированной нагрузки."
+    ReDim coordinates(1 To 61)
+    Dim i As Long
+    For i = 1 To 60: coordinates(i) = CDbl(source(LBound(source) + i - 1)): Next i
+    coordinates(61) = 0#
+End Sub
+
+Public Function TestFinishFixedForceComparison(ByVal source As Variant) As Variant
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Сохраняет окончательный отклик без улучшения поля штатным решателем; равновесие и неизменность истории проверяются отдельно.
+    Dim coordinates() As Double, values() As Double, matrix() As Double, field() As Double, factor As Double, forces() As Double
+    TestFixedForceCoordinates source, coordinates
+    Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+    If Not equations.TryEvaluate(coordinates, False, values, matrix) Then Err.Raise 5, , "Не вычислен окончательный силовой отклик."
+    mReverseSolverTest.ReadNewtonLineFieldTest coordinates, field, factor
+    mReverseSolverTest.CopyEquationResultantResidual forces
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\FixedForceExternal.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMFIXEXTERN0001"
+    Put #handle, , magic
+    Dim tolerance As Double, norm As Double, i As Long
+    tolerance = mReverseSolverTest.ControlledLoadTolerance(mReverseBaseTest, mReverseDirectionTest, factor, mReverseOptionsTest(3), mReverseOptionsTest(4))
+    For i = 1 To 60: norm = GeomMax(norm, Abs(values(i))): Next i
+    For i = 1 To 6: norm = GeomMax(norm, Abs(forces(i))): Next i
+    TestWriteReverseBinaryVector handle, Array(factor, tolerance, norm, mReverseSolverTest.AcceptedRevision, mFixedForcePrefixTest)
+    TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, values: TestWriteReverseBinaryVector handle, forces
+    TestWriteRecordedYieldStressTest handle, field
+    Close #handle
+    mReverseSolverTest.EndNewtonLineTest: mReverseSolverTest.DiscardStep
+    TestWriteLoadingStateTest mPolishRootTest & "\Native\FixedForceAcceptedAfter.bin"
+    TestFinishFixedForceComparison = Array(factor, tolerance, norm, mFixedForceRevisionTest, mReverseSolverTest.AcceptedRevision)
+End Function

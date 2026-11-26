@@ -482,15 +482,20 @@ def main():
                    help="reference axial force at the cut in N, positive for tension (default: %(default)g)")
     p.add_argument("--qx",type=float,default=TARGET[4],help="reference transverse force Qx at the cut in N")
     p.add_argument("--qy",type=float,default=TARGET[5],help="reference transverse force Qy at the cut in N")
+    p.add_argument("--moment-x",type=float,default=TARGET[1],help="reference bending moment Mx at the cut in N.mm")
+    p.add_argument("--moment-y",type=float,default=TARGET[2],help="reference bending moment My at the cut in N.mm")
+    p.add_argument("--torque",type=float,default=TARGET[3],help="reference torque T at the cut in N.mm")
     p.add_argument("--out",type=Path,required=True)
     opts=p.parse_args()
     if not math.isfinite(opts.axial_force):
         p.error("--axial-force must be finite")
     if not math.isfinite(opts.qx) or not math.isfinite(opts.qy):
         p.error("--qx and --qy must be finite")
+    if any(not math.isfinite(value) for value in (opts.moment_x,opts.moment_y,opts.torque)):
+        p.error("--moment-x, --moment-y and --torque must be finite")
     if any(not math.isfinite(mark) or mark<=0. for mark in opts.mark):
         p.error("--mark must be finite and positive")
-    section_target = (opts.axial_force,*TARGET[1:4],opts.qx,opts.qy)
+    section_target = (opts.axial_force,opts.moment_x,opts.moment_y,opts.torque,opts.qx,opts.qy)
     analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target,opts.end_condition,opts.nonlinear_length),opts)
     print("saved",opts.out,flush=True)
 
