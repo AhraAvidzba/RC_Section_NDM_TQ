@@ -1,0 +1,68 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет холодный прямой расчёт чистого N; успешное выполнение макроса не означает сходимости каждого сочетания.
+Public Function TestRunASDDirectPureN(ByVal folder As String) As String
+    On Error GoTo Failed
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Input\DirectLoads.bin" For Binary Access Read As #handle
+    Dim count As Long, index As Long, target As Double, report As String
+    Get #handle, , count
+    If count <> 6 Or LOF(handle) <> 52 Then Err.Raise 5, , "Для осевого контроля нужны шесть заданных нагрузок."
+    For index = 1 To count
+        Get #handle, , target
+        TestRunASDDirectPureNCase folder & "\Case" & Format$(index, "00"), target, report
+    Next index
+    Close #handle: handle = 0
+    TestRunASDDirectPureN = report & "TOTAL_ASD_DIRECT_N_EXECUTION: passed=6; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If handle <> 0 Then Close #handle
+    TestRunASDDirectPureN = "RUNTIME ERROR: " & reason
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Создаёт независимый набор объектов и нулевую материальную историю для одной нагрузки; сохраняет только фактически возвращённое НДС.
+Private Sub TestRunASDDirectPureNCase(ByVal folder As String, ByVal target As Double, ByRef report As String)
+    mMainCapacityFolderTest = folder
+    'TEST_DIRECT_SETUP_INSERT'
+    loads.Initialize target, 0#, 0#, 0#, 0#: loads.SetSpatialComponents 0#, 0#, 0#
+    Dim field() As Double, resultants() As Double, state As CSectionStateResult, trace As CCoupledLoadTrace, meta As CResultMeta
+    Dim started As Double: started = Timer
+    Set meta = analysis.SolveTarget(loads, ChrW$(&H3BB) & "*N", spec, field, resultants, True, state, trace)
+    Dim elapsed As Double: elapsed = Timer - started
+    If elapsed < 0# Then elapsed = elapsed + 86400#
+    Dim fieldCount As Long, resultantCount As Long
+    On Error Resume Next
+    fieldCount = UBound(field) - LBound(field) + 1: Err.Clear
+    resultantCount = UBound(resultants) - LBound(resultants) + 1: Err.Clear
+    On Error GoTo 0
+    Dim traceCount As Long, hasState As Long, actualLaw As String
+    If Not trace Is Nothing Then traceCount = trace.Count
+    If Not state Is Nothing Then
+        hasState = 1
+        If Not state.CoupledMaterialCurves Is Nothing Then actualLaw = state.CoupledMaterialCurves.ConcreteLawIdentifier
+    End If
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\DirectState.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMASDDIRECT0001": Put #handle, , magic
+    TestWriteVector handle, Array(target, elapsed, meta.InternalStatus, meta.ResultCode, fieldCount, resultantCount, traceCount, hasState)
+    Dim emptyCount As Long
+    If fieldCount > 0 Then TestWriteVector handle, field Else Put #handle, , emptyCount
+    If resultantCount > 0 Then TestWriteVector handle, resultants Else Put #handle, , emptyCount
+    Close #handle
+    Dim diagnostic As String, policy As New CResultStatusPolicy, status As String
+    status = policy.ExternalStatus(meta)
+    diagnostic = "Status=" & status & "; returned_state=" & CStr(hasState) & "; law=" & actualLaw & vbCrLf & _
+        "Comment=" & meta.ResultComment & vbCrLf & "Details=" & meta.DiagnosticDetails
+    Dim stream As Object: Set stream = CreateObject("ADODB.Stream")
+    stream.Type = 2: stream.Charset = "utf-8": stream.Open
+    stream.WriteText diagnostic: stream.SaveToFile folder & "\Native\DirectState.txt", 2: stream.Close
+    report = report & "ASD_DIRECT_N: N=" & CStr(target) & "; seconds=" & CStr(elapsed) & "; status=" & status & _
+        "; returned_state=" & CStr(hasState) & "; physical_acceptance_not_implied_by_test_execution=True" & vbCrLf
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает все принятые поля прямого расчёта без коммита, повторных материальных проб и изменения численного пути.
+Public Sub TestCaptureDirectHistory(ByVal continuation As CCoupledLoadContinuation, ByVal operators As CCoupledElasticState, ByVal loadPath As CLoadPathVector)
+    'TEST_DIRECT_HISTORY_INSERT'
+End Sub

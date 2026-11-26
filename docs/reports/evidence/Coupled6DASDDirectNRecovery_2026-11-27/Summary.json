@@ -1,0 +1,703 @@
+{
+  "actual_saved_books": {
+    "1061": {
+      "exact_saved_book_included": true,
+      "member": "1061/docs/regression/Diagnostic.xlsm",
+      "sha256": "083BB1B0A1B85C154406E67176EC149210F3923B42253A1238C8899927D27E0F"
+    },
+    "1062": {
+      "exact_saved_book_included": true,
+      "member": "1062/docs/regression/Diagnostic.xlsm",
+      "sha256": "AB83ABE5BB55CDB9BDC62D93815C03E72CE2E09D3CFF833D46706481FAAA279C"
+    },
+    "1063": {
+      "exact_saved_book_included": true,
+      "member": "1063/docs/regression/Diagnostic.xlsm",
+      "sha256": "BA8B523F63F3DAA5A3A16F865D5A95D4DDE4ABC7B648E35677F03CEBA3CC8CC0"
+    },
+    "1064": {
+      "exact_saved_book_included": true,
+      "member": "1064/docs/regression/Diagnostic.xlsm",
+      "sha256": "98C95CC308EB71B9168A5BB36D0B583F4C576FE3441CB31B3075F2C4B419D115"
+    },
+    "1065": {
+      "exact_saved_book_included": true,
+      "member": "1065/docs/regression/Diagnostic.xlsm",
+      "sha256": "EB7A723279F019E1308095CA0904DE57110A9ED7735B77C86AD650D2EBBFDCE8"
+    },
+    "1066": {
+      "exact_saved_book_included": true,
+      "member": "1066/docs/regression/Diagnostic.xlsm",
+      "sha256": "EB7A723279F019E1308095CA0904DE57110A9ED7735B77C86AD650D2EBBFDCE8"
+    }
+  },
+  "all6_cold_histories_bitexact": true,
+  "all_objects_read_back_and_hashed": true,
+  "archives": {
+    "RawEvidence01.tar.xz": {
+      "all_objects_read_back_and_hashed": true,
+      "bytes": 62135736,
+      "cases": [
+        1061,
+        1062,
+        1063
+      ],
+      "logical_files": 2215,
+      "sha256": "2F79017934096F8B7B0D6BC22DD9E076074E8E2E687B5F44A8A4EBC6A6258EC8"
+    },
+    "RawEvidence02.tar.xz": {
+      "all_objects_read_back_and_hashed": true,
+      "bytes": 48075292,
+      "cases": [
+        1064,
+        1065,
+        1066
+      ],
+      "logical_files": 2306,
+      "sha256": "AC945DC9CBDC06FD11173693BC5CC5B911BE2CE47E1EF5DB6F0C2189C693D206"
+    }
+  },
+  "created_local": "2026-11-27T02:49:09.525716+03:00",
+  "execution_proofs": {
+    "1061": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.5830078125,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 4.880859375,
+          "index": 2,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.75390625,
+          "last_steel_utilization": 0.003985633645572021,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 5,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 5.10400390625,
+          "index": 3,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.689453125,
+          "last_steel_utilization": 0.00396888342936048,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 5,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 5.61767578125,
+          "index": 4,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.67626953125,
+          "last_steel_utilization": 0.003972439982117316,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.994140625,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 7,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 20.0439453125,
+          "index": 6,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.9765625,
+          "last_steel_utilization": 0.11348863722115336,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    },
+    "1062": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.5634765625,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.72265625,
+          "index": 2,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.75390625,
+          "last_steel_utilization": 0.003985633645572021,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 5,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.666015625,
+          "index": 3,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.689453125,
+          "last_steel_utilization": 0.00396888342936048,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 61,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.23828125,
+          "index": 4,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9827867194890765,
+          "last_steel_utilization": 0.9996489406500425,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 1.0849609375,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 11,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 25.7490234375,
+          "index": 6,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9812303744985357,
+          "last_steel_utilization": 0.11655335537878127,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    },
+    "1063": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.59375,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 13.455078125,
+          "index": 2,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.75390625,
+          "last_steel_utilization": 0.003985633645572021,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 5,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.3330078125,
+          "index": 3,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.689453125,
+          "last_steel_utilization": 0.00396888342936048,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 61,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.7001953125,
+          "index": 4,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9827867194890765,
+          "last_steel_utilization": 0.9996489406500425,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.9599609375,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 11,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 24.5400390625,
+          "index": 6,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9812303744985357,
+          "last_steel_utilization": 0.11655335537878127,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    },
+    "1064": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.5263671875,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 45,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 10.580078125,
+          "index": 2,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.07946613695783547,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 5,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 13.0517578125,
+          "index": 3,
+          "internal_status": 6,
+          "last_accepted_lambda": 0.689453125,
+          "last_steel_utilization": 0.00396888342936048,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 10,
+          "returned_state": false,
+          "status": "NumFail",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 61,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.0888671875,
+          "index": 4,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9827867194890765,
+          "last_steel_utilization": 0.9996489406500425,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 1.1142578125,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 11,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 25.533203125,
+          "index": 6,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9812303744985357,
+          "last_steel_utilization": 0.11655335537878127,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    },
+    "1065": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.62109375,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 29,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 13.837890625,
+          "index": 2,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.07946614350444604,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 41,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 18.1767578125,
+          "index": 3,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.9667955928182518,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 86,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 22.083984375,
+          "index": 4,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9827991402298653,
+          "last_steel_utilization": 0.9997947701436556,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 1.109375,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 12,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 30.603515625,
+          "index": 6,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9812994477217422,
+          "last_steel_utilization": 0.11662446618298841,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    },
+    "1066": {
+      "CDP_not_run": true,
+      "actual_OpenSees_material_replay": true,
+      "all56plus4_equations_and_six_resultants_verified": true,
+      "cases": [
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 0.521484375,
+          "index": 1,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.00293702421970027,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "accepted_states": 29,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 12.787109375,
+          "index": 2,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.07946614350444604,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 90000.0
+        },
+        {
+          "accepted_states": 41,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 16.2177734375,
+          "index": 3,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.9667955928182518,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 98000.0
+        },
+        {
+          "accepted_states": 86,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 20.8759765625,
+          "index": 4,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9827991402298653,
+          "last_steel_utilization": 0.9997947701436556,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "accepted_states": 4,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 1.01171875,
+          "index": 5,
+          "internal_status": 4,
+          "last_accepted_lambda": 1.0,
+          "last_steel_utilization": 0.10369017470910263,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 0,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "accepted_states": 12,
+          "all_accepted_equilibria_verified": true,
+          "elapsed_seconds": 32.203125,
+          "index": 6,
+          "internal_status": 5,
+          "last_accepted_lambda": 0.9812994477217422,
+          "last_steel_utilization": 0.11662446618298841,
+          "partial_state_not_substituted_for_target": true,
+          "result_code": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "independent_OpenSees_structural_analysis": false,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "numerical_failure_not_physical_failure": true,
+      "same_ASD_material_and_tolerances": true,
+      "whole_goal_completed": false,
+      "working_solver_not_changed": true
+    }
+  },
+  "full_acceptance_not_run": true,
+  "full_user_run_10second_target_not_proved": true,
+  "independent_OpenSees_material_replay": true,
+  "independent_OpenSees_structural_analysis": false,
+  "independently_started_cases": 36,
+  "last_revision_all6_expected_direct_statuses_verified": true,
+  "logical_files": 4521,
+  "native_jobs": 6,
+  "native_macro_invocations": 6,
+  "observation_all6_histories_bitexact": true,
+  "original_materials_and_equilibrium_tolerances_unchanged": true,
+  "public_solver_not_updated": true,
+  "public_workbook_not_updated": true,
+  "scope": "Pure N ASD,one section and chosen materials;working output not updated",
+  "source_harness_corrections": [
+    "Explicit zero-length vectors belong only to absent returned NDS,not to the nonempty history-vector contract.",
+    "Compiler imports dependencies before their consumer; source audit checks the actual expected module order.",
+    "Method insertion comparison preserves the exact blank line added by the prepared source template."
+  ],
+  "successful_elastic_cases_unchanged": true,
+  "unique_payloads": 942,
+  "whole_goal_completed": false
+}
