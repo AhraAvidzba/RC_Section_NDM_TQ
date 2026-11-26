@@ -1,0 +1,2172 @@
+{
+  "actual_compiled947_and949_books_included": true,
+  "actual_full_and_half_states_verified": true,
+  "all_logical_raw_hashes_read_back": true,
+  "all_numerical_stages_terminal": true,
+  "cold_gain_claimed": false,
+  "earlier_failed_primary_effort_not_included": true,
+  "exact_duplicate_hardlinks": 523,
+  "full_acceptance_not_run": true,
+  "generic_secant_is_private_working_variant_not_release": true,
+  "guide17_steps_counted_in30": true,
+  "half_field_limit_preserved": 0.005,
+  "physical_capacity_certified": false,
+  "proofs": {
+    "947": {
+      "WorkingSecantReturnProof.json": {
+        "actual_components": 257,
+        "cases": [
+          {
+            "case": 1,
+            "diagnostics": "; \u043f\u0440\u043e\u0433\u043d\u043e\u0437 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u043f\u043e \u0441\u0435\u043a\u0443\u0449\u0435\u0439: \u0434\u043e\u043b\u044f 0.60260445928591; \u043f\u043e\u043b\u043d\u044b\u0439/\u043f\u043e\u043b\u043e\u0432\u0438\u043d\u043d\u044b\u0439 \u0432\u043e\u0437\u0432\u0440\u0430\u0442: \u043e\u0448\u0438\u0431\u043a\u0430 \u043f\u043e\u043b\u044f 3.48693106915878E-02; \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u043d\u0430\u044f \u043e\u0448\u0438\u0431\u043a\u0430 3.50250281836514E-02; \u043e\u0448\u0438\u0431\u043a\u0430 lambda 4.95355943013198E-05; \u0434\u043e\u043f\u0443\u0441\u043a lambda 8.41384263466231E-06; \u0432\u043e\u0437\u0432\u0440\u0430\u0442 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u0438\u0437 \u043d\u0435\u043f\u0440\u0438\u043d\u044f\u0442\u043e\u0433\u043e \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u043a\u043e\u0440\u043d\u044f: False; \u0438\u0442\u0435\u0440\u0430\u0446\u0438\u0438 \u0434\u043e / \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: 17 / 5; \u043e\u0431\u0449\u0438\u0439 \u043b\u0438\u043c\u0438\u0442: 30 | \u041f\u0440\u043e\u0431\u0430 \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: \u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 2; \u043f\u0440\u043e\u0431\u044b: 4; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 6.28230886800044E-10; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 7.48431796265812E-03\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 2; \u043f\u0440\u043e\u0431\u044b: 4; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 6.28230886800044E-10; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 7.48431796265812E-03\n",
+            "effort": [
+              22.0,
+              13.0,
+              17.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              6.282308868000436e-10
+            ],
+            "guide_steps": 17,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "result_code_snapshot": 0,
+            "total_budget": 30,
+            "total_steps_including_guide": 22
+          },
+          {
+            "case": 2,
+            "diagnostics": "\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 0; \u043f\u0440\u043e\u0431\u044b: 2; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 7.06377308541456E-08; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 0\n",
+            "effort": [
+              30.0,
+              2.0,
+              30.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              7.063773085414556e-08
+            ],
+            "guide_steps": 30,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "no_new_iterations_or_hybrid_matrices": true,
+            "result_code_snapshot": 0,
+            "synthetic_exhausted_budget": true,
+            "total_budget": 30,
+            "total_steps_including_guide": 30
+          }
+        ],
+        "cold_gain_claimed": false,
+        "declared_components_changed": 2,
+        "earlier_primary_failure_effort_not_included": true,
+        "guide17_steps_in_total30": true,
+        "initial_guide938_residual_bitexact_guard": true,
+        "native": {
+          "failed": 0,
+          "macros": 2,
+          "own_process_closed": true,
+          "passed": 2,
+          "timeout600": false
+        },
+        "no_half_uncertainty_direction_or_steel_guard_relaxed": true,
+        "no_material_history_acceptance": true,
+        "other255_components_preserved": true,
+        "physical_capacity_certified": false,
+        "source_history25_and_all_materials_unchanged": true,
+        "verified_working_original_returns": 0,
+        "whole_goal_completed": false,
+        "working_original_return_used": true
+      }
+    },
+    "948": {
+      "WorkingSecantReturnProof.json": {
+        "actual_components": 257,
+        "all_original_tolerances_and_guards_preserved": true,
+        "cases": [
+          {
+            "case": 1,
+            "diagnostics": "; \u043f\u0440\u043e\u0433\u043d\u043e\u0437 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u043f\u043e \u0441\u0435\u043a\u0443\u0449\u0435\u0439: \u0434\u043e\u043b\u044f 0.150651114821489; \u043f\u043e\u043b\u043d\u044b\u0439/\u043f\u043e\u043b\u043e\u0432\u0438\u043d\u043d\u044b\u0439 \u0432\u043e\u0437\u0432\u0440\u0430\u0442: \u043e\u0448\u0438\u0431\u043a\u0430 \u043f\u043e\u043b\u044f 4.33152479706815E-02; \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u043d\u0430\u044f \u043e\u0448\u0438\u0431\u043a\u0430 4.34275065551777E-02; \u043e\u0448\u0438\u0431\u043a\u0430 lambda 1.25560795432023E-05; \u0434\u043e\u043f\u0443\u0441\u043a lambda 8.41384263466231E-06; \u0432\u043e\u0437\u0432\u0440\u0430\u0442 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u0438\u0437 \u043d\u0435\u043f\u0440\u0438\u043d\u044f\u0442\u043e\u0433\u043e \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u043a\u043e\u0440\u043d\u044f: False; \u0438\u0442\u0435\u0440\u0430\u0446\u0438\u0438 \u0434\u043e / \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: 17 / 3; \u043e\u0431\u0449\u0438\u0439 \u043b\u0438\u043c\u0438\u0442: 30 | \u041f\u0440\u043e\u0431\u0430 \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: \u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 1; \u043f\u0440\u043e\u0431\u044b: 2; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 3.58302027826955E-07; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 6.16096778434554E-03\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 1; \u043f\u0440\u043e\u0431\u044b: 2; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 3.58302027826955E-07; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 6.16096778434554E-03\n",
+            "effort": [
+              20.0,
+              9.0,
+              17.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              3.5830202782695516e-07
+            ],
+            "guide_steps": 17,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "result_code_snapshot": 0,
+            "total_budget": 30,
+            "total_steps_including_guide": 20
+          },
+          {
+            "case": 2,
+            "diagnostics": "\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 0; \u043f\u0440\u043e\u0431\u044b: 2; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 7.06377308541456E-08; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 0\n",
+            "effort": [
+              30.0,
+              2.0,
+              30.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              7.063773085414556e-08
+            ],
+            "guide_steps": 30,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "no_new_iterations_or_hybrid_matrices": true,
+            "result_code_snapshot": 0,
+            "synthetic_exhausted_budget": true,
+            "total_budget": 30,
+            "total_steps_including_guide": 30
+          }
+        ],
+        "cold_gain_claimed": false,
+        "declared_components_changed": 2,
+        "earlier_primary_failure_effort_not_included": true,
+        "full_original_target_not_claimed_solved": true,
+        "guide17_steps_in_total30": true,
+        "immutable_compiled947_reused": true,
+        "initial_guide938_residual_bitexact_guard": true,
+        "native": {
+          "failed": 0,
+          "macros": 2,
+          "own_process_closed": true,
+          "passed": 2,
+          "timeout600": false
+        },
+        "no_half_uncertainty_direction_or_steel_guard_relaxed": true,
+        "no_material_history_acceptance": true,
+        "other255_components_preserved": true,
+        "physical_capacity_certified": false,
+        "reduced_control_increment_fraction": 0.25,
+        "source_history25_and_all_materials_unchanged": true,
+        "verified_working_original_returns": 0,
+        "whole_goal_completed": false,
+        "working_original_return_used": true
+      }
+    },
+    "949": {
+      "WorkingGuidePairProof.json": {
+        "actual_primary_binary_exact947": true,
+        "all_full_and_half_equilibria_independently_verified": true,
+        "all_guard_tolerances_preserved": true,
+        "native": {
+          "failed": 0,
+          "macros": 2,
+          "own_process_closed": true,
+          "passed": 2,
+          "timeout600": false
+        },
+        "no_new_accepted_history": true,
+        "pairs": [
+          {
+            "branch_differences": [],
+            "field_error": 0.034869310691587815,
+            "joint_error": 0.03502502818365144,
+            "lambda_error": 4.953559430131982e-05,
+            "length": 1.4544561270066422e-06,
+            "max_increment_full": 3.366206458464455e-06,
+            "max_increment_half": 1.624706400428809e-06,
+            "native_lambda_bound": 8.41384263466231e-06,
+            "native_metric_independently_reproduced": true,
+            "states": [
+              {
+                "branches": [
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.04585429643263339
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.046678753608055956
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.047612070839232246
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.2039945254100921
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.20680092234142222
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.20960693779210615
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0699255071888949
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0701895424173955
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.07045345635518885
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.055616580747884115
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.053122609398787546
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.05062700789610375
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.024166794291859972
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0012517011053709837
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.001508359878290122
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.064471430562687
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.06602802625082838
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.06758405862051298
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.01752269939802531
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.01709235090245187
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.016662207580626642
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.005757366111822648
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.005470973922946598
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.00518458369623076
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.022748613214531588
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.022847311433121575
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.022946007958715597
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.6795107751585618
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.6511104749621417
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.6226923206056352
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.00911851299570543
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0013462511704389613
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.015946758604407307
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0030822514699053727
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.003833646582201311
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.004584365750492481
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.09720976505301948
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.09853967343362591
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.09986918673032541
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.10430339956309176
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.10486076626504826
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.1054182061116542
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.05553937620130611
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.055068137514201254
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.05459682800277221
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -1.6442888542230918
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -1.6647272830223248
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -1.6863512204205744
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.029825074890297287
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.028491024000430798
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.02715593685412898
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.016404702719817976
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.00840337247720413
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.009934760097848994
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.8565907138895721
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.8584391390627228
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.8602868966984865
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.074540922027861
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.07372906867080431
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.07291654444469486
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.0716951928140972
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.06968532540388495
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.06766737385037302
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.031281535839436714
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.03280686903357655
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.03433144832235868
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.03994635273420499
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.04122760995439201
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.04250806528147422
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.0014320538381582537
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0003064681261797375
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.0008188558875055207
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.10449057296735376
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.10327749420302723
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.10206434688279131
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.026547433052517277
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.026301336423539823
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.02605523521149422
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.041918747808857404
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.04073597356988401
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.039553513421374475
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.00816235094141149
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.008629585196882061
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.009096649969830395
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0986527188493227
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.10083095078239523
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.10300904904043406
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.009603301421812205
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.008000981930024409
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.006397801602787467
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.06270694611660055
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0577815760540652
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.05284989475332047
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -3.1596411284796613
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -3.1217747093487773
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -3.083884867096481
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.06046616690433737
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.060207648669589275
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.059949588386164265
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.08862189793812547
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0879305081521018
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.08723916499315365
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.1129819246774666
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.1119104594639424
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.1108389400770875
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.08551728120423263
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.08434832345662358
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.08317932854358645
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.004986619376776247
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0038473278157908908
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.0027084594280388785
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.033239868124042005
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0346776928588195
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.03611473268437315
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.057787936679279284
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.05595516717616533
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.05412155064949786
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -2.2658403495457033
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -2.2962772930726896
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -2.326681841938246
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -1.316483873809407
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -1.3341631376178142
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -1.3518278245870636
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.021112932084047742
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.022520434158302294
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.024287993676402664
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.10969443476055751
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.11094131749151082
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.11218820885384595
+                  }
+                ],
+                "final_bound_MPa": 1.2156305892708262e-06,
+                "independent_total_residual_MPa": 3.6709871253925996e-13,
+                "lambda_value": 1.1041157663035606,
+                "name": "full",
+                "original_control_residual_MPa": 8.131516293641283e-16,
+                "steel_strain_utilization": 0.0036207648556954865,
+                "target": 7.237782135158301e-05
+              },
+              {
+                "branches": [
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.021417849631600205
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.02197140696097577
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 1,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.02262690527186706
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.2444979788748185
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.24717748771987402
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 2,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.24985664167980204
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.11472379982984293
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.11491618781737856
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 3,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.11510845759481825
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0779397253544758
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.07546009979007096
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 4,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.07297891065551809
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.024687007269807992
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0006051385624203931
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 5,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.0007317134355737664
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0359374538246513
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.03706001992559749
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 6,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.03818221619334672
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.011114931325298727
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.010904564400963324
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 7,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.010694295942084153
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.005547657313790921
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0054088800093197165
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 8,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.005270103419391603
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.009142542393952624
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.00918766482357114
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 9,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.009232785111112918
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.698682049576572
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.6702203184706086
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 10,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.6417411205453512
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.004396312536744773
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.005496058960627437
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 11,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.01952466890745086
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0004275491408272103
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0007920640733267703
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 12,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.0011562555847532963
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0699888195461007
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.07104576444347188
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 13,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.07210240524781675
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.06590144825088728
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.06629149205772933
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 14,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.06668159288206432
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.02617435816488367
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.025951194081596185
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 15,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.025728026184861363
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -1.6790006661298769
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -1.6987108298081175
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 16,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -1.7196076898950832
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.014479352242201315
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.01383207536532538
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 17,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.013184290151919242
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.00791528215031434
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.0004894917457178849
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 18,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.01727331002731347
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.8649588341737378
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.8663635138972872
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 19,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.8677676086343507
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.03558975179275947
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.035202449316603435
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 20,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.03481483015691467
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.0357466498515322
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.03476823593609524
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 21,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.033786605850497864
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.016217972311139306
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.016956741620553828
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 22,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.01769517829839984
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": -0.020808234298026917
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": -0.02142852154827679
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 23,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.022048432771210713
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.0007318079908813502
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.00018931027448587656
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 24,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": -0.0003530690579793827
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": -1,
+                    "trial_yield_MPa": 0.05280985896570556
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": 0,
+                    "trial_yield_MPa": 0.05222762656293156
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 25,
+                    "real_concrete": true,
+                    "side": 1,
+                    "trial_yield_MPa": 0.051645365688738565
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.016129332896927195
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.01600954647540931
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 26,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.015889757814726124
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.02032348200646794
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.019752514995428072
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 27,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.019181694586457354
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0024030574473705713
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.0026353224821242804
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 28,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.0028675052410953583
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.139261784523935
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.14132151683977767
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 29,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.1433811279350472
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.03682936031052719
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.035209195031892904
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 30,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.03358820260634232
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.0658515075583086
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.06101757675223851
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 31,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.05617772442648317
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -3.170636213065741
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -3.132848347919472
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 32,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -3.095037706579715
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.028664727721015026
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.028543433234368365
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 33,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.02842237812325621
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.042361401850371294
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.04203131396262094
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 34,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.041701260088988334
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.05522899889859545
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.054715365645357394
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 35,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.054201713697782594
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.043548209172570296
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.04298747086405186
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 36,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.04242671704922785
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.0020682346693519094
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.001518360465261992
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 37,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.0009686824321981646
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.017303415402075473
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.017999574895146253
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 38,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.018695379495230924
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": 0.028665605042569098
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": 0.027774190236289797
+                  },
+                  {
+                    "branch": "plastic_loading",
+                    "point": 39,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": 0.02688234627978403
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -2.287471144300575
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -2.3169251011679073
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 40,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -2.3463474807973146
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -1.3500140851074018
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -1.3670282776356277
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 41,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -1.3840285494889066
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.010263156095490444
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.011185338447148752
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 42,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.012467864304170462
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": -1,
+                    "trial_yield_MPa": -0.06361508440419428
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": 0,
+                    "trial_yield_MPa": -0.06449930835173845
+                  },
+                  {
+                    "branch": "elastic_unloading",
+                    "point": 43,
+                    "real_concrete": false,
+                    "side": 1,
+                    "trial_yield_MPa": -0.0653835571803647
+                  }
+                ],
+                "final_bound_MPa": 1.215434339071485e-06,
+                "independent_total_residual_MPa": 6.282442131626265e-10,
+                "lambda_value": 1.1038129802817196,
+                "name": "half",
+                "original_control_residual_MPa": 4.0657581468206416e-16,
+                "steel_strain_utilization": 0.0036107834420164033,
+                "target": 7.17717525041875e-05
+              }
+            ],
+            "working_field_error_limit": 0.005
+          }
+        ],
+        "passive_capture_did_not_change_outcome": true,
+        "physical_capacity_certified": false,
+        "source_history25_unchanged": true,
+        "strain_metric_and_half_defect_independently_reproduced": true
+      },
+      "WorkingSecantReturnProof.json": {
+        "actual_components": 257,
+        "cases": [
+          {
+            "case": 1,
+            "diagnostics": "; \u043f\u0440\u043e\u0433\u043d\u043e\u0437 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u043f\u043e \u0441\u0435\u043a\u0443\u0449\u0435\u0439: \u0434\u043e\u043b\u044f 0.60260445928591; \u043f\u043e\u043b\u043d\u044b\u0439/\u043f\u043e\u043b\u043e\u0432\u0438\u043d\u043d\u044b\u0439 \u0432\u043e\u0437\u0432\u0440\u0430\u0442: \u043e\u0448\u0438\u0431\u043a\u0430 \u043f\u043e\u043b\u044f 3.48693106915878E-02; \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u043d\u0430\u044f \u043e\u0448\u0438\u0431\u043a\u0430 3.50250281836514E-02; \u043e\u0448\u0438\u0431\u043a\u0430 lambda 4.95355943013198E-05; \u0434\u043e\u043f\u0443\u0441\u043a lambda 8.41384263466231E-06; \u0432\u043e\u0437\u0432\u0440\u0430\u0442 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u0438 \u0438\u0437 \u043d\u0435\u043f\u0440\u0438\u043d\u044f\u0442\u043e\u0433\u043e \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u043a\u043e\u0440\u043d\u044f: False; \u0438\u0442\u0435\u0440\u0430\u0446\u0438\u0438 \u0434\u043e / \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: 17 / 5; \u043e\u0431\u0449\u0438\u0439 \u043b\u0438\u043c\u0438\u0442: 30 | \u041f\u0440\u043e\u0431\u0430 \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430: \u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 2; \u043f\u0440\u043e\u0431\u044b: 4; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 6.28230886800044E-10; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 7.48431796265812E-03\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 2; \u043f\u0440\u043e\u0431\u044b: 4; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 6.28230886800044E-10; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 7.48431796265812E-03\n",
+            "effort": [
+              22.0,
+              13.0,
+              17.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              6.282308868000436e-10
+            ],
+            "guide_steps": 17,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "result_code_snapshot": 0,
+            "total_budget": 30,
+            "total_steps_including_guide": 22
+          },
+          {
+            "case": 2,
+            "diagnostics": "\n\n\u0418\u0442\u0435\u0440\u0430\u0446\u0438\u0438: 0; \u043f\u0440\u043e\u0431\u044b: 2; \u043d\u0435\u0432\u044f\u0437\u043a\u0430, \u041c\u041f\u0430: 7.06377308541456E-08; \u043c\u0438\u043d. \u0432\u0435\u0434\u0443\u0449\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442: 0\n",
+            "effort": [
+              30.0,
+              2.0,
+              30.0,
+              17.0,
+              2160.0,
+              0.0,
+              27.0,
+              7.063773085414556e-08
+            ],
+            "guide_steps": 30,
+            "independently_solves_original_control": false,
+            "internal_status_snapshot": 4,
+            "lambda_value": 1.1048692201205874,
+            "native_solved": false,
+            "no_new_iterations_or_hybrid_matrices": true,
+            "result_code_snapshot": 0,
+            "synthetic_exhausted_budget": true,
+            "total_budget": 30,
+            "total_steps_including_guide": 30
+          }
+        ],
+        "cold_gain_claimed": false,
+        "declared_components_changed": 2,
+        "earlier_primary_failure_effort_not_included": true,
+        "guide17_steps_in_total30": true,
+        "initial_guide938_residual_bitexact_guard": true,
+        "native": {
+          "failed": 0,
+          "macros": 2,
+          "own_process_closed": true,
+          "passed": 2,
+          "timeout600": false
+        },
+        "no_half_uncertainty_direction_or_steel_guard_relaxed": true,
+        "no_material_history_acceptance": true,
+        "other255_components_preserved": true,
+        "physical_capacity_certified": false,
+        "source_history25_and_all_materials_unchanged": true,
+        "verified_working_original_returns": 0,
+        "whole_goal_completed": false,
+        "working_original_return_used": true
+      }
+    },
+    "950": {
+      "GuidePairBaseScanProof.json": {
+        "immutable_compiled949_reused": true,
+        "native": {
+          "failed": 0,
+          "macros": 1,
+          "own_process_closed": true,
+          "passed": 1,
+          "timeout600": false
+        },
+        "original25_history_unchanged": true,
+        "physical_capacity_certified": false,
+        "readonly_no_new_NDS_or_acceptance": true,
+        "states": [
+          {
+            "lambda_value": 1.1034606586655773,
+            "largest_stress_differences": [
+              {
+                "max_stress_difference_MPa": 0.0,
+                "point": 1,
+                "side": -1
+              },
+              {
+                "max_stress_difference_MPa": 0.0,
+                "point": 2,
+                "side": -1
+              },
+              {
+                "max_stress_difference_MPa": 0.0,
+                "point": 3,
+                "side": -1
+              },
+              {
+                "max_stress_difference_MPa": 0.0,
+                "point": 4,
+                "side": -1
+              },
+              {
+                "max_stress_difference_MPa": 0.0,
+                "point": 5,
+                "side": -1
+              }
+            ],
+            "maximum_stored_vs_reread_stress_difference_MPa": 0.0,
+            "name": "accepted25_read_again",
+            "physical_residual_MPa": 1.6644536409966913e-07,
+            "six_force_residual_MPa": 8.788797627116934e-10
+          },
+          {
+            "lambda_value": 1.1041157663035606,
+            "name": "actual_full949",
+            "physical_residual_MPa": 7.147892304090742e-13,
+            "six_force_residual_MPa": 1.6842494477276451e-15
+          },
+          {
+            "lambda_value": 1.1038129802817196,
+            "name": "actual_half949",
+            "physical_residual_MPa": 6.279884441780757e-10,
+            "six_force_residual_MPa": 6.636279673936467e-12
+          }
+        ]
+      }
+    }
+  },
+  "raw_archive_bytes": 53093392,
+  "raw_bytes": 259074962,
+  "raw_files": 749,
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "source_base_reread_matches_saved_stress": true,
+  "whole_goal_completed": false
+}

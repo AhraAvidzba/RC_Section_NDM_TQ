@@ -1,0 +1,28 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Публикует проверенный непринятый материальный корень и вызывает штатный возврат с действительными затратами его вычисления.
+' Половинный шаг, неопределённость lambda, допустимость стали и общий лимит проверяет сам рабочий метод.
+Friend Function TestMaterialGuideOriginalReturn(ByRef baseLoad() As Double, ByRef direction() As Double, _
+        ByRef guide() As Double, ByVal guideLambda As Double, ByRef projection() As Double, ByVal target As Double, _
+        ByVal referenceLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maximumSteps As Long, ByVal guideSteps As Long, ByVal guideCalls As Long, ByVal guideMatrices As Long, _
+        ByRef resultLambda As Double, ByRef details As String) As Boolean
+    If mCandidateReady Or mHybridActive Then Err.Raise 5, , "Перед проверкой возврата завершите предыдущую пробу."
+    If guideSteps < 0 Or guideSteps > maximumSteps Or guideCalls < 0 Or guideMatrices < 0 Then Err.Raise 5, , "Неверные записанные затраты материального корня."
+    ConfigureControlledLoad baseLoad, direction: ResetSolveState
+    mControlActive = True: mConsistentControl = True: mArcLoadProjection = 0#
+    mControlProjection = projection: mTargetControl = 0#
+    Dim i As Long, load(1 To COMPONENT_COUNT) As Double
+    For i = 1 To mGaugeStart - 1: mTargetControl = mTargetControl + projection(i) * guide(i): Next i
+    SetControlledLoad guideLambda, load
+    If Not Evaluate(guide, False) Then Err.Raise 5, , "Материальный корень не читается от исходной принятой истории."
+    Dim tolerance As Double: tolerance = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    If EquilibriumNorm(load, guide) > tolerance Or Not GaugesVerified(tolerance) Then Err.Raise 5, , "Материальный корень не удовлетворяет исходным силовым уравнениям."
+    If Not PrincipalSteelWithinLimits(guide) Then Err.Raise 5, , "Материальный корень превышает допустимые деформации стали."
+    mCandidate = guide: PublishCandidate guideLambda
+    mIterations = guideSteps: mHybridSteps = guideSteps
+    mHybridEvaluations = guideCalls: mHybridMatrices = guideMatrices
+    resultLambda = guideLambda
+    TestMaterialGuideOriginalReturn = TryReturnOriginalMaterialControl(guide, guideLambda, projection, target, True, load, _
+        absoluteTolerance, relativeTolerance, maximumSteps, referenceLambda, details)
+    If TestMaterialGuideOriginalReturn Then resultLambda = mTrialLambda Else DiscardStep
+End Function

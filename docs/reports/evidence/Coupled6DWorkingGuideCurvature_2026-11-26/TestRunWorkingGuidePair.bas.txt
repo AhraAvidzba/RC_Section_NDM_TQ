@@ -1,0 +1,22 @@
+Public Function TestRunWorkingGuidePair() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Переиспользует проверку штатного возврата и сохраняет фактические полное/половинное состояния до отклонения по кривизне.
+    Dim result As String: result = TestRunWorkingGuideReturn()
+    Dim pairs As Collection: Set pairs = mReverseSolverTest.TestReadGuideReturnPairs()
+    If pairs Is Nothing Then Err.Raise 5, , "Не записаны состояния штатной половинной проверки."
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\WorkingGuidePairs.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMGUIDEPAIR0001"
+    Put #handle, , magic: TestWriteReverseBinaryVector handle, Array(pairs.Count)
+    Dim index As Long, pair As Variant, field() As Double
+    For index = 1 To pairs.Count
+        pair = pairs(index)
+        TestWriteReverseBinaryVector handle, pair(4)
+        TestWriteReverseBinaryVector handle, pair(0): TestWriteReverseBinaryVector handle, pair(1)
+        TestWriteReverseBinaryVector handle, pair(2): TestWriteReverseBinaryVector handle, pair(3)
+        field = pair(1): TestWriteRecordedYieldStressTest handle, field
+        field = pair(2): TestWriteRecordedYieldStressTest handle, field
+    Next index
+    Close #handle
+    TestRunWorkingGuidePair = result & "; recorded_full_half_pairs=" & CStr(pairs.Count)
+End Function
