@@ -1,0 +1,97 @@
+Public Function TestReadCold32TangentConeIterations() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Читает четыре последовательных касательных по собственному направлению при трёх масштабах прогноза; равновесия не решает и материал не принимает.
+    Dim accepted() As Double, previous() As Double, incoming() As Double, movement() As Double, referenceProjection() As Double
+    mReverseSolverTest.DiscardStep: mReverseSolverTest.CopyAccepted accepted
+    previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1): incoming = accepted
+    Dim size As Long, i As Long, j As Long: size = UBound(accepted) + 1
+    For i = 1 To UBound(incoming): incoming(i) = accepted(i) - previous(i): Next i
+    Dim coordinate As Double, spacing As Double, alpha As Double
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(previous, accepted, incoming, referenceProjection, coordinate, spacing) Then _
+        Err.Raise 5, , "Не определена исходная принятая мера касательного опыта."
+    If Not mReverseSolverTest.TryElasticArcScale(mReverseDirectionTest, alpha) Then Err.Raise 5, , "Не определён постоянный масштаб нагрузки."
+    Dim factor As Double, previousFactor As Double, fraction As Double
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, fraction, factor
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count - 1, fraction, previousFactor
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\Cold32TangentConeIterations.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMCONETAN320001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(3#, 4#, factor, previousFactor, spacing, alpha, size, revision)
+    TestWriteReverseBinaryVector handle, accepted
+    TestWriteReverseBinaryVector handle, incoming
+    TestWriteReverseBinaryVector handle, referenceProjection
+    Dim denominator As Variant, iteration As Long, group As Long, probe() As Double, zero() As Double, projection() As Double
+    Dim residual() As Double, matrix() As Double, scales As Variant, physical() As Double, rightHandSide() As Double, tangent() As Double
+    Dim system As CCoupledLinearSystem, ready As Boolean, tangentLength As Double, orientation As Double, tangentScale As Double
+    Dim column() As Double: ReDim column(1 To size)
+    Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+    Dim beta As Variant, x() As Double, actual() As Double, unused() As Double
+    For Each denominator In Array(1024#, 64#, 8#)
+        group = group + 1: movement = incoming
+        For iteration = 1 To 4
+            probe = accepted
+            For i = 1 To UBound(probe): probe(i) = accepted(i) + movement(i) / CDbl(denominator): Next i
+            ReDim zero(1 To size): ReDim projection(1 To size - 1)
+            ready = mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, 0#, probe, factor)
+            If ready Then ready = mReverseSolverTest.TryReadBranchLinearization(zero, residual, matrix)
+            If Not ready Then
+                mReverseSolverTest.EndNewtonLineTest
+                TestWriteReverseBinaryVector handle, Array(group, denominator, iteration, 0#)
+                GoTo Finished
+            End If
+            scales = mReverseSolverTest.ReadNewtonLineScalesTest
+            ReDim physical(1 To size - 1, 1 To size - 1): ReDim rightHandSide(1 To size - 1)
+            For i = 1 To size - 1
+                rightHandSide(i) = -matrix(size, i) / scales(size)
+                For j = 1 To size - 1: physical(j, i) = matrix(j, i): Next j
+            Next i
+            Set system = New CCoupledLinearSystem: ready = system.Solve(physical, rightHandSide, size - 1)
+            mReverseSolverTest.EndNewtonLineTest
+            If Not ready Then
+                TestWriteReverseBinaryVector handle, Array(group, denominator, iteration, 0#)
+                GoTo Finished
+            End If
+            ReDim tangent(1 To size - 1)
+            For i = 1 To size - 1: tangent(i) = rightHandSide(i) * scales(i): Next i
+            Dim zeroField() As Double: ReDim zeroField(1 To size - 1)
+            tangentLength = mReverseSolverTest.SpatialFieldDistance(zeroField, tangent)
+            orientation = alpha * alpha * (factor - previousFactor)
+            For i = 1 To size - 1: orientation = orientation + referenceProjection(i) * tangent(i) * spacing: Next i
+            If tangentLength <= 0# Or orientation = 0# Then Err.Raise 5, , "Не определено направление диагностической касательной."
+            tangentScale = Sgn(orientation) * spacing / tangentLength
+            TestWriteReverseBinaryVector handle, Array(group, denominator, iteration, 1#, tangentScale, tangentLength, orientation)
+            TestWriteReverseBinaryVector handle, probe
+            TestWriteReverseBinaryVector handle, movement
+            TestWriteReverseBinaryVector handle, scales
+            TestWriteReverseBinaryVector handle, residual
+            For j = 1 To size
+                For i = 1 To size: column(i) = matrix(j, i): Next i
+                TestWriteReverseBinaryVector handle, column
+            Next j
+            TestWriteReverseBinaryVector handle, tangent
+            For i = 1 To size - 1: movement(i) = tangentScale * tangent(i): Next i
+            If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, 0#, accepted, factor) Then _
+                Err.Raise 5, , "Не подготовлено чтение фактического приращения невязки."
+            For Each beta In Array(0#, 0.0009765625, 0.000244140625)
+                ReDim x(1 To size)
+                For i = 1 To size - 1: x(i) = CDbl(beta) * movement(i) / scales(i): Next i
+                x(size) = CDbl(beta) * tangentScale / scales(size)
+                ready = equations.TryEvaluate(x, False, actual, unused)
+                TestWriteReverseBinaryVector handle, Array(CDbl(beta), Abs(CLng(ready)))
+                If Not ready Then Err.Raise 5, , "Не прочитан фактический отклик прогнозного направления."
+                TestWriteReverseBinaryVector handle, actual
+            Next beta
+            mReverseSolverTest.EndNewtonLineTest
+            If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Касательное чтение изменило принятую ревизию."
+        Next iteration
+    Next denominator
+Finished:
+    Close #handle
+    Dim checked() As Double: mReverseSolverTest.CopyAccepted checked
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Касательное чтение изменило принятое поле."
+    Next i
+    TestReadCold32TangentConeIterations = "TOTAL_COLD32_CONE_READ_EXECUTION_TEST: passed=1; failed=0; matrix and directional outcomes recorded separately; not capacity"
+End Function

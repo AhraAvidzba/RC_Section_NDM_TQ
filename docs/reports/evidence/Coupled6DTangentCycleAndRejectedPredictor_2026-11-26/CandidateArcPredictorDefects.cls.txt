@@ -1,0 +1,45 @@
+' Читает изменение полной силовой невязки для двух прогнозов от одной точной принятой истории.
+' Это сравнение начальных направлений, а не приёмка НДС: материал не записывается, скалярное управление исключено из нормы.
+Friend Function TryReadArcPredictorDefects(ByRef baseLoad() As Double, ByRef direction() As Double, _
+        ByRef accepted() As Double, ByVal factor As Double, ByRef firstMovement() As Double, ByVal firstLambda As Double, _
+        ByRef secondMovement() As Double, ByVal secondLambda As Double, ByVal firstFraction As Double, ByVal secondFraction As Double, _
+        ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, ByRef quality As Variant) As Boolean
+    quality = Empty
+    If Not mUseSpatialHistory Or mCandidateReady Or mHybridActive Then Exit Function
+    If absoluteTolerance <= 0# Or relativeTolerance <= 0# Or firstFraction <= 0# Or secondFraction <= 0# Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Не заданы положительные точности и масштабы сравнения прогнозов."
+    If UBound(accepted) <> mDegreeCount Or UBound(firstMovement) <> mDegreeCount Or UBound(secondMovement) <> mDegreeCount Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Размеры прогнозов не совпадают с подготовленным сечением."
+    Dim i As Long, revision As Long: revision = mAcceptedRevision
+    For i = 1 To mDegreeCount
+        If accepted(i) <> mAccepted(i) Then Err.Raise 5, "CCoupledNewtonSolver", "Сравнение прогнозов требует точной принятой истории."
+    Next i
+    Dim projection() As Double, zero() As Double, coordinates() As Double
+    ReDim projection(1 To mDegreeCount): ReDim zero(1 To mDegreeCount + 1): ReDim coordinates(1 To mDegreeCount + 1)
+    Dim origin() As Double, first() As Double, second() As Double, unused() As Double, bound As Double
+    On Error GoTo Failed
+    If Not BeginControlLinearization(baseLoad, direction, projection, 0#, accepted, factor) Then Exit Function
+    If Not ReadEquationSystem(zero, False, origin, unused, False) Then GoTo Finished
+    bound = EquilibriumTolerance(absoluteTolerance, relativeTolerance)
+    For i = 1 To mDegreeCount: coordinates(i) = firstFraction * firstMovement(i) / mHybridScales(i): Next i
+    coordinates(mDegreeCount + 1) = firstFraction * firstLambda / mHybridScales(mDegreeCount + 1)
+    If Not ReadEquationSystem(coordinates, False, first, unused, False) Then GoTo Finished
+    For i = 1 To mDegreeCount: coordinates(i) = secondFraction * secondMovement(i) / mHybridScales(i): Next i
+    coordinates(mDegreeCount + 1) = secondFraction * secondLambda / mHybridScales(mDegreeCount + 1)
+    If Not ReadEquationSystem(coordinates, False, second, unused, False) Then GoTo Finished
+    Dim firstDefect As Double, secondDefect As Double
+    For i = 1 To mDegreeCount
+        firstDefect = GeomMax(firstDefect, Abs(first(i) - origin(i)))
+        secondDefect = GeomMax(secondDefect, Abs(second(i) - origin(i)))
+    Next i
+    quality = Array(firstDefect, secondDefect, bound, firstFraction, secondFraction)
+    TryReadArcPredictorDefects = True
+Finished:
+    EndControlLinearization
+    If mAcceptedRevision <> revision Then Err.Raise 5, "CCoupledNewtonSolver", "Сравнение прогнозов изменило принятую историю."
+    Exit Function
+Failed:
+    Dim number As Long, description As String: number = Err.Number: description = Err.Description
+    EndControlLinearization
+    Err.Raise number, "CCoupledNewtonSolver.TryReadArcPredictorDefects", description
+End Function

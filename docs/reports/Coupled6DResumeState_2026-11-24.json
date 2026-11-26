@@ -1,14 +1,8 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": 90074,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold904ConsistentRefinementCold96_20261126",
-      "session": 90074,
-      "stage": "True cold Both/Excel exact901 after164/5 regression; one Newton mismatch refinement gate changed; original96/30"
-    }
-  ],
+  "active_exec_session": null,
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1986,7 +1980,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": false,
+  "all_started_stages_terminal": true,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -11558,6 +11552,95 @@
     "source_workflow_incomplete": false,
     "whole_goal_completed": false
   },
+  "latest_completed_cold904": {
+    "accepted_states": 32,
+    "cold": {
+      "all_saved_sources_exact": 256,
+      "capacity": "NumFail",
+      "code": "NUMERICAL_FAILURE",
+      "direct": "OK",
+      "limit": "",
+      "lower": 1.10428336769878,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 28,
+        "timeout600": false
+      },
+      "results_checksum": "5627D1CA743F115355228406BAED2682B1C810885A4D8C34287220227743F373",
+      "saved_book_sha256": "993A3AA38644664874805B169528AD3ADEB56E34A90FE0B8EAE03B82A60B0F36",
+      "seconds": 814.57421875
+    },
+    "entire_new_cold_trajectory_stress_replay_still_required": true,
+    "full_cold_from_zero": true,
+    "global_probe_limit96": true,
+    "last_accepted_lambda": 1.1024446687790408,
+    "maximum_accepted_lambda": 1.1042833676987807,
+    "negative853_exact_prefix_states": 4,
+    "no_release_promotion": true,
+    "no_warm_fields_passed_to_stock_macro": true,
+    "original_materials_and_force_tolerances": true,
+    "physical_capacity_certified": false,
+    "physical_progress": [
+      {
+        "concrete_principal_max": 0.00022106324989033845,
+        "concrete_principal_min": -0.00016500188736872078,
+        "lambda_value": 1.0,
+        "max_abs_hoop_strain": 2.3133498717014012e-05,
+        "max_abs_long_steel_strain": 6.0290858556387436e-05,
+        "maximum_lambda_so_far": 1.0,
+        "maximum_three_station_steel_utilization": 0.002411634342255497,
+        "state": 4
+      },
+      {
+        "concrete_principal_max": 0.00037503886562140253,
+        "concrete_principal_min": -0.00021410014760745198,
+        "lambda_value": 1.0984462345363621,
+        "max_abs_hoop_strain": 7.940440430689897e-05,
+        "max_abs_long_steel_strain": 7.459705736509992e-05,
+        "maximum_lambda_so_far": 1.0984462345363621,
+        "maximum_three_station_steel_utilization": 0.0039702202153449485,
+        "state": 7
+      },
+      {
+        "concrete_principal_max": 0.0004411866943447973,
+        "concrete_principal_min": -0.0002468834365834714,
+        "lambda_value": 1.1042833676987807,
+        "max_abs_hoop_strain": 9.631914238449196e-05,
+        "max_abs_long_steel_strain": 8.356720270471763e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004815957119224598,
+        "state": 19
+      },
+      {
+        "concrete_principal_max": 0.00044166867304223586,
+        "concrete_principal_min": -0.0002482159553660933,
+        "lambda_value": 1.1024446687790408,
+        "max_abs_hoop_strain": 9.564336580036192e-05,
+        "max_abs_long_steel_strain": 8.37788375159346e-05,
+        "maximum_lambda_so_far": 1.1042833676987807,
+        "maximum_three_station_steel_utilization": 0.004782168290018096,
+        "state": 32
+      }
+    ],
+    "raw_history": {
+      "bytes": 302392,
+      "complete_bytes": 302392,
+      "incomplete_tail_bytes": 0,
+      "original_binary_Double": true,
+      "sha256": "F8795250174A0D84E800D58658339B48D10C6F6144E2E0EAE1DC1D3AA597E9B2"
+    },
+    "regressions": {
+      "failed": 0,
+      "macros": 5,
+      "own_process_closed": true,
+      "passed": 164,
+      "timeout600": false
+    },
+    "same_actual_compiled_kernel901": true,
+    "whole_goal_completed": false
+  },
   "latest_consistent_refinement_evidence": "docs/reports/evidence/Coupled6DConsistentRefinement_2026-11-26",
   "latest_consistent_refinement_local_comparison": {
     "all_three_lambda_fields_and_resultants_bit_identical": true,
@@ -11804,6 +11887,594 @@
       "passed": 164,
       "timeout600": false
     }
+  },
+  "latest_exact_material_bridge905": {
+    "CSV_LAW_matches15digit_Str_representation": true,
+    "CSV_OPTIONS_contract_first6_parameters": true,
+    "CSV_material_max_textual_difference": 1.0658141036401503e-14,
+    "all_three_station_steel_limits_independently_checked": true,
+    "cold_seconds": 814.57421875,
+    "entire_raw_trajectory_bit_identical897_and898": true,
+    "full_binary_input_keys_bit_exact": true,
+    "independently_reassembled_equilibrium": {
+      "CSV_rounding_allowance_MPa": 1e-09,
+      "details": [
+        "AcceptedPostCrackTestPath",
+        "capacity_certified=False"
+      ],
+      "material": [
+        30000.0,
+        0.2,
+        30.0,
+        3.0,
+        16.0,
+        0.002,
+        0.12,
+        80.0,
+        125.0
+      ],
+      "maximum_lambda": 1.10428336769878,
+      "meta": [
+        "4",
+        "0",
+        "Принятая контрольная последовательность. Это не предел."
+      ],
+      "options": [
+        4.0,
+        64.0,
+        30.0,
+        5e-07,
+        5e-07,
+        0.01
+      ],
+      "orientation": [
+        {
+          "current_length": 2.8691419507951455e-05,
+          "field": 3,
+          "previous_length": 2.732475555800678e-05,
+          "signed_advance": 2.8653276141942285e-05
+        },
+        {
+          "current_length": 5.3409483407228394e-05,
+          "field": 4,
+          "previous_length": 2.8691419507951455e-05,
+          "signed_advance": 4.6254947901656596e-05
+        },
+        {
+          "current_length": 3.2689940336340645e-05,
+          "field": 5,
+          "previous_length": 5.3409483407228394e-05,
+          "signed_advance": 3.134750362800135e-05
+        },
+        {
+          "current_length": 4.267402409347975e-05,
+          "field": 6,
+          "previous_length": 3.2689940336340645e-05,
+          "signed_advance": 4.038270384485889e-05
+        },
+        {
+          "current_length": 3.217498149484515e-06,
+          "field": 7,
+          "previous_length": 4.267402409347975e-05,
+          "signed_advance": 2.906725801351069e-06
+        },
+        {
+          "current_length": 3.1269185807350574e-06,
+          "field": 8,
+          "previous_length": 3.217498149484515e-06,
+          "signed_advance": 2.765256162312595e-06
+        },
+        {
+          "current_length": 6.743789996717289e-06,
+          "field": 9,
+          "previous_length": 3.1269185807350574e-06,
+          "signed_advance": 1.538159686099474e-06
+        },
+        {
+          "current_length": 3.950483862327787e-06,
+          "field": 10,
+          "previous_length": 6.743789996717289e-06,
+          "signed_advance": 1.2023478252433907e-06
+        },
+        {
+          "current_length": 7.72055062677927e-06,
+          "field": 11,
+          "previous_length": 3.950483862327787e-06,
+          "signed_advance": 7.36165771821546e-06
+        },
+        {
+          "current_length": 5.130216874609992e-06,
+          "field": 12,
+          "previous_length": 7.72055062677927e-06,
+          "signed_advance": 4.782812514948704e-06
+        },
+        {
+          "current_length": 1.6861850577768636e-06,
+          "field": 13,
+          "previous_length": 5.130216874609992e-06,
+          "signed_advance": 1.5249124183928007e-06
+        },
+        {
+          "current_length": 2.16047880541392e-06,
+          "field": 14,
+          "previous_length": 1.6861850577768636e-06,
+          "signed_advance": 2.1344065711553146e-06
+        },
+        {
+          "current_length": 2.712649072653542e-06,
+          "field": 15,
+          "previous_length": 2.16047880541392e-06,
+          "signed_advance": 2.7118848201581836e-06
+        },
+        {
+          "current_length": 1.6313596623508114e-06,
+          "field": 16,
+          "previous_length": 2.712649072653542e-06,
+          "signed_advance": 1.5914535050252572e-06
+        },
+        {
+          "current_length": 2.1518818184717736e-06,
+          "field": 17,
+          "previous_length": 1.6313596623508114e-06,
+          "signed_advance": 1.976428190102783e-06
+        },
+        {
+          "current_length": 2.562125110176509e-06,
+          "field": 18,
+          "previous_length": 2.1518818184717736e-06,
+          "signed_advance": 2.4664183376551014e-06
+        },
+        {
+          "current_length": 3.409952089069204e-06,
+          "field": 19,
+          "previous_length": 2.562125110176509e-06,
+          "signed_advance": 3.3727403953508936e-06
+        },
+        {
+          "current_length": 1.7137081783576366e-06,
+          "field": 20,
+          "previous_length": 3.409952089069204e-06,
+          "signed_advance": 1.0811987685591452e-06
+        },
+        {
+          "current_length": 3.007747832677635e-09,
+          "field": 21,
+          "previous_length": 1.7137081783576366e-06,
+          "signed_advance": 1.6084888296515537e-09
+        },
+        {
+          "current_length": 1.8013464900307915e-10,
+          "field": 22,
+          "previous_length": 3.007747832677635e-09,
+          "signed_advance": 1.4739002650620108e-10
+        },
+        {
+          "current_length": 3.602692884572097e-10,
+          "field": 23,
+          "previous_length": 1.8013464900307915e-10,
+          "signed_advance": 3.6026928842267455e-10
+        },
+        {
+          "current_length": 1.0433648721192045e-10,
+          "field": 24,
+          "previous_length": 3.602692884572097e-10,
+          "signed_advance": 1.0433648720516724e-10
+        },
+        {
+          "current_length": 1.0446571988725077e-10,
+          "field": 25,
+          "previous_length": 1.0433648721192045e-10,
+          "signed_advance": 1.0433648728918442e-10
+        },
+        {
+          "current_length": 1.0446571878403601e-10,
+          "field": 26,
+          "previous_length": 1.0446571988725077e-10,
+          "signed_advance": 1.0432830563652311e-10
+        },
+        {
+          "current_length": 2.0893143352993687e-10,
+          "field": 27,
+          "previous_length": 1.0446571878403601e-10,
+          "signed_advance": 2.0893143352238786e-10
+        },
+        {
+          "current_length": 1.0970849410971203e-10,
+          "field": 28,
+          "previous_length": 2.0893143352993687e-10,
+          "signed_advance": 1.0970849410631153e-10
+        },
+        {
+          "current_length": 1.1446181038799335e-10,
+          "field": 29,
+          "previous_length": 1.0970849410971203e-10,
+          "signed_advance": 1.097084941265493e-10
+        },
+        {
+          "current_length": 1.1446181038622644e-10,
+          "field": 30,
+          "previous_length": 1.1446181038799335e-10,
+          "signed_advance": 1.0925580609890857e-10
+        },
+        {
+          "current_length": 2.715401294703218e-11,
+          "field": 31,
+          "previous_length": 1.1446181038622644e-10,
+          "signed_advance": 2.7154012938908302e-11
+        },
+        {
+          "current_length": 3.4966680332943e-11,
+          "field": 32,
+          "previous_length": 2.715401294703218e-11,
+          "signed_advance": 2.7154013003103702e-11
+        }
+      ],
+      "phase": "EnvelopeEnergy.Accepted",
+      "physical_capacity_certified": false,
+      "reversed_fields": [],
+      "states": [
+        {
+          "bound_MPa": 6.62037037037037e-07,
+          "force_residual_MPa": 2.097972770013772e-16,
+          "fraction": 1.0,
+          "index": 1,
+          "lambda": 0.25,
+          "residual_MPa": 3.4861002973229915e-14,
+          "steel_utilization": 0.00060954479702768
+        },
+        {
+          "bound_MPa": 8.240740740740741e-07,
+          "force_residual_MPa": 5.052748343182936e-16,
+          "fraction": 1.0,
+          "index": 2,
+          "lambda": 0.5,
+          "residual_MPa": 8.870681966755001e-14,
+          "steel_utilization": 0.00121908959405536
+        },
+        {
+          "bound_MPa": 9.861111111111112e-07,
+          "force_residual_MPa": 3.746727425432592e-10,
+          "fraction": 1.0,
+          "index": 3,
+          "lambda": 0.75,
+          "residual_MPa": 1.7501566862421214e-10,
+          "steel_utilization": 0.0018283898092604
+        },
+        {
+          "bound_MPa": 1.1481481481481482e-06,
+          "force_residual_MPa": 1.6017212247889905e-13,
+          "fraction": 1.0,
+          "index": 4,
+          "lambda": 1.0,
+          "residual_MPa": 9.241792444172892e-13,
+          "steel_utilization": 0.0024116343422555
+        },
+        {
+          "bound_MPa": 1.1824553764640373e-06,
+          "force_residual_MPa": 4.5202711960343926e-10,
+          "fraction": 1.0,
+          "index": 5,
+          "lambda": 1.0529311522588,
+          "residual_MPa": 3.598856512278259e-09,
+          "steel_utilization": 0.00261635366427362
+        },
+        {
+          "bound_MPa": 1.2090585959465166e-06,
+          "force_residual_MPa": 8.090349301373527e-08,
+          "fraction": 1.0,
+          "index": 6,
+          "lambda": 1.09397611946034,
+          "residual_MPa": 7.939878532425837e-08,
+          "steel_utilization": 0.00393024841662227
+        },
+        {
+          "bound_MPa": 1.2119558927550482e-06,
+          "force_residual_MPa": 2.1526205239718336e-09,
+          "fraction": 1.0,
+          "index": 7,
+          "lambda": 1.09844623453636,
+          "residual_MPa": 2.1787509517210866e-09,
+          "steel_utilization": 0.00397022021534495
+        },
+        {
+          "bound_MPa": 1.213560674030115e-06,
+          "force_residual_MPa": 1.3768343436553283e-09,
+          "fraction": 1.0,
+          "index": 8,
+          "lambda": 1.10092218278932,
+          "residual_MPa": 1.4347209442624326e-09,
+          "steel_utilization": 0.0040910644344458
+        },
+        {
+          "bound_MPa": 1.2066270962233258e-06,
+          "force_residual_MPa": 8.198522091670722e-11,
+          "fraction": 1.0,
+          "index": 9,
+          "lambda": 1.09022466274456,
+          "residual_MPa": 1.315934910952471e-10,
+          "steel_utilization": 0.00410622483339314
+        },
+        {
+          "bound_MPa": 1.2093683622509556e-06,
+          "force_residual_MPa": 1.1372051007869975e-07,
+          "fraction": 1.0,
+          "index": 10,
+          "lambda": 1.09445404461576,
+          "residual_MPa": 7.76227725567645e-07,
+          "steel_utilization": 0.00423497670103606
+        },
+        {
+          "bound_MPa": 1.2119754034958055e-06,
+          "force_residual_MPa": 5.183294517876305e-11,
+          "fraction": 1.0,
+          "index": 11,
+          "lambda": 1.0984763368221,
+          "residual_MPa": 1.885199599888348e-09,
+          "steel_utilization": 0.00454567174607796
+        },
+        {
+          "bound_MPa": 1.2130281291062026e-06,
+          "force_residual_MPa": 6.182007281394262e-10,
+          "fraction": 1.0,
+          "index": 12,
+          "lambda": 1.10010054204957,
+          "residual_MPa": 1.2806653071351093e-07,
+          "steel_utilization": 0.00471414526644702
+        },
+        {
+          "bound_MPa": 1.213034090837088e-06,
+          "force_residual_MPa": 2.120638479633878e-12,
+          "fraction": 1.0,
+          "index": 13,
+          "lambda": 1.10010974014865,
+          "residual_MPa": 2.8924950786326023e-10,
+          "steel_utilization": 0.00476728841029795
+        },
+        {
+          "bound_MPa": 1.213092693210048e-06,
+          "force_residual_MPa": 4.454118490886888e-07,
+          "fraction": 1.0,
+          "index": 14,
+          "lambda": 1.10020015523836,
+          "residual_MPa": 8.612071411562283e-07,
+          "steel_utilization": 0.0048322500546053
+        },
+        {
+          "bound_MPa": 1.2130985088030482e-06,
+          "force_residual_MPa": 7.322834209602587e-07,
+          "fraction": 1.0,
+          "index": 15,
+          "lambda": 1.10020912786756,
+          "residual_MPa": 7.322834207901252e-07,
+          "steel_utilization": 0.00491278500330251
+        },
+        {
+          "bound_MPa": 1.213442745483948e-06,
+          "force_residual_MPa": 5.490653199592124e-13,
+          "fraction": 1.0,
+          "index": 16,
+          "lambda": 1.10074023588952,
+          "residual_MPa": 7.267086932216671e-11,
+          "steel_utilization": 0.00492999996902067
+        },
+        {
+          "bound_MPa": 1.214520905209741e-06,
+          "force_residual_MPa": 2.085947452342649e-11,
+          "fraction": 1.0,
+          "index": 17,
+          "lambda": 1.1024036823236,
+          "residual_MPa": 2.3156433437421242e-09,
+          "steel_utilization": 0.00487775296741098
+        },
+        {
+          "bound_MPa": 1.2154069938327472e-06,
+          "force_residual_MPa": 1.6842494477276451e-15,
+          "fraction": 1.0,
+          "index": 18,
+          "lambda": 1.10377079048481,
+          "residual_MPa": 7.01236323782245e-13,
+          "steel_utilization": 0.00484834605163616
+        },
+        {
+          "bound_MPa": 1.2157392198047649e-06,
+          "force_residual_MPa": 2.7554320964824273e-13,
+          "fraction": 1.0,
+          "index": 19,
+          "lambda": 1.10428336769878,
+          "residual_MPa": 5.5144777633131525e-11,
+          "steel_utilization": 0.0048159571192246
+        },
+        {
+          "bound_MPa": 1.2145490496252953e-06,
+          "force_residual_MPa": 4.0894502928023476e-11,
+          "fraction": 1.0,
+          "index": 20,
+          "lambda": 1.10244710513617,
+          "residual_MPa": 1.0500372460420238e-08,
+          "steel_utilization": 0.00478226466395898
+        },
+        {
+          "bound_MPa": 1.2145474933681326e-06,
+          "force_residual_MPa": 1.5158245029548807e-15,
+          "fraction": 1.0,
+          "index": 21,
+          "lambda": 1.10244470405369,
+          "residual_MPa": 2.8236087513261454e-12,
+          "steel_utilization": 0.00478218258590575
+        },
+        {
+          "bound_MPa": 1.2145474880341779e-06,
+          "force_residual_MPa": 6.231722956592287e-15,
+          "fraction": 1.0,
+          "index": 22,
+          "lambda": 1.10244469582416,
+          "residual_MPa": 2.2278698796809188e-11,
+          "steel_utilization": 0.00478218110372853
+        },
+        {
+          "bound_MPa": 1.2145474773486713e-06,
+          "force_residual_MPa": 1.6783782160110175e-15,
+          "fraction": 1.0,
+          "index": 23,
+          "lambda": 1.10244467933795,
+          "residual_MPa": 6.963268395047961e-13,
+          "steel_utilization": 0.00478217813941098
+        },
+        {
+          "bound_MPa": 1.214547474249499e-06,
+          "force_residual_MPa": 3.2000739506825256e-15,
+          "fraction": 1.0,
+          "index": 24,
+          "lambda": 1.10244467455637,
+          "residual_MPa": 1.6235608398060958e-11,
+          "steel_utilization": 0.00478217728094557
+        },
+        {
+          "bound_MPa": 1.2145474670186677e-06,
+          "force_residual_MPa": 5.170645804523871e-14,
+          "fraction": 1.0,
+          "index": 25,
+          "lambda": 1.10244466340023,
+          "residual_MPa": 9.35729651315581e-12,
+          "steel_utilization": 0.00478217674655407
+        },
+        {
+          "bound_MPa": 1.2145474628281759e-06,
+          "force_residual_MPa": 5.2211732879557e-15,
+          "fraction": 1.0,
+          "index": 26,
+          "lambda": 1.1024446569349,
+          "residual_MPa": 2.7980563829452243e-13,
+          "steel_utilization": 0.00478217585628498
+        },
+        {
+          "bound_MPa": 1.2145474544410805e-06,
+          "force_residual_MPa": 7.342904695048201e-16,
+          "fraction": 1.0,
+          "index": 27,
+          "lambda": 1.10244464399481,
+          "residual_MPa": 2.3592239273284576e-13,
+          "steel_utilization": 0.0047821740757788
+        },
+        {
+          "bound_MPa": 1.2145474500336926e-06,
+          "force_residual_MPa": 6.130667989728628e-14,
+          "fraction": 1.0,
+          "index": 28,
+          "lambda": 1.10244463719484,
+          "residual_MPa": 8.13358869188388e-12,
+          "steel_utilization": 0.00478217314085445
+        },
+        {
+          "bound_MPa": 1.214547465996175e-06,
+          "force_residual_MPa": 3.824930495789482e-13,
+          "fraction": 1.0,
+          "index": 29,
+          "lambda": 1.10244466182267,
+          "residual_MPa": 5.712084744004947e-11,
+          "steel_utilization": 0.00478217017995444
+        },
+        {
+          "bound_MPa": 1.2145474686088212e-06,
+          "force_residual_MPa": 4.884323398410171e-15,
+          "fraction": 1.0,
+          "index": 30,
+          "lambda": 1.10244466585361,
+          "residual_MPa": 3.034239526300553e-13,
+          "steel_utilization": 0.00478216937815298
+        },
+        {
+          "bound_MPa": 1.2145474692279972e-06,
+          "force_residual_MPa": 3.536923840228055e-15,
+          "fraction": 1.0,
+          "index": 31,
+          "lambda": 1.10244466680891,
+          "residual_MPa": 5.089890640040673e-13,
+          "steel_utilization": 0.00478216918790873
+        },
+        {
+          "bound_MPa": 1.2145474705049333e-06,
+          "force_residual_MPa": 7.915972404319932e-15,
+          "fraction": 1.0,
+          "index": 32,
+          "lambda": 1.10244466877904,
+          "residual_MPa": 6.070767261286136e-13,
+          "steel_utilization": 0.00478216829001809
+        }
+      ]
+    },
+    "material_and_kinematic_scope": {
+      "different_search_algorithms_not_called": true,
+      "entire_Newton_class_identity_not_claimed": true,
+      "exact_replay_methods": {
+        "src/Solver/CCoupledNewtonSolver.cls": [
+          "ReplayAcceptedFields",
+          "EvaluatePointResponses",
+          "AcceptMaterialTrials",
+          "Evaluate",
+          "TestEquilibriumLinearization",
+          "PrepareRecentLoadingBoundary",
+          "PrepareAcceptedEnvelopeSegment"
+        ],
+        "tests/modTestCoupledElasticState.bas": [
+          "TestRunReversePolishModel",
+          "TestExportFastFrozenReplay",
+          "TestObserveFrozenReplay",
+          "TestWriteHardPreparedStress",
+          "TestWriteHardPreparedOperators"
+        ]
+      },
+      "unchanged_material_and_kinematic_files": [
+        "src\\Excel\\CNDMResultsWriter.cls",
+        "src\\Interfaces\\ICoupledContinuationProgress.cls",
+        "src\\Interfaces\\ICoupledDifferenceObserver.cls",
+        "src\\Interfaces\\ICoupledEquationSystem.cls",
+        "src\\Interfaces\\ICoupledScalarConstraint.cls",
+        "src\\Materials\\CCoupledASDFlow.cls",
+        "src\\Materials\\CCoupledASDTangent.cls",
+        "src\\Materials\\CCoupledConcreteBackbone.cls",
+        "src\\Materials\\CCoupledConcreteResponse.cls",
+        "src\\Materials\\CCoupledConcreteReturn.cls",
+        "src\\Materials\\CCoupledMaterialFailure.cls",
+        "src\\Materials\\CCoupledMaterialSnapshot.cls",
+        "src\\Materials\\CCoupledReinforcedResponse.cls",
+        "src\\Materials\\modCoupledConcreteTensor.bas",
+        "src\\Solver\\CCoupledConstraintEquations.cls",
+        "src\\Solver\\CCoupledDiscretization.cls",
+        "src\\Solver\\CCoupledElasticState.cls",
+        "src\\Solver\\CCoupledEnvelopeEquations.cls",
+        "src\\Solver\\CCoupledFieldSubspace.cls",
+        "src\\Solver\\CCoupledHybridFactorization.cls",
+        "src\\Solver\\CCoupledHybridSolver.cls",
+        "src\\Solver\\CCoupledMaterialConstraint.cls",
+        "src\\Solver\\CCoupledPrincipalTransition.cls",
+        "src\\Solver\\CCoupledSectionAnalysis.cls",
+        "src\\Solver\\CCoupledSectionQuadrature.cls",
+        "src\\Solver\\CCubicSplineBasis.cls"
+      ]
+    },
+    "maximum_three_station_steel_utilization": 0.0049299999690206675,
+    "native_ownership_not_fabricated": true,
+    "no_clean_speed_claim": true,
+    "no_new_NDS_or_capacity_search": true,
+    "no_new_native_replay_needed_for_exact_trajectory": true,
+    "physical_capacity_certified": false,
+    "prior_seconds": 820.4443359375,
+    "referenced_native_replay": "Cold898FreshArcColdStress_20261126",
+    "refinement_diagnostic_records": 35,
+    "refinement_seen_in_diagnostics": true,
+    "same_input_calibration_options_load_direction_and_offset": true,
+    "source_cold": "Cold904ConsistentRefinementCold96_20261126",
+    "source_hashes": {
+      "Cold898FreshArcColdStress_20261126\\Input\\Reverse1.bin": "DC6DA39E382372247D7473CD8603D361413FA204B72A975E40D0589A348459FA",
+      "Cold898FreshArcColdStress_20261126\\Native\\EnvelopeEnergy.Accepted.Operators.csv": "13A27E4211BD9362DB034C589BD41B04614644088E8959402508446647C46018",
+      "Cold898FreshArcColdStress_20261126\\Native\\EnvelopeEnergy.Accepted.csv": "A778572E235D76FBE901C975FA586818E4CFCCE23FA445306E214041CF71F5E7",
+      "Cold898FreshArcColdStress_20261126\\VerifiedColdStressReplayProof.json": "F49F3EDEE07F6665E6A2635E6F72E894B70CBA30AF7D90E8F4A9B4DF434D26DD",
+      "Cold904ConsistentRefinementCold96_20261126\\ConsistentRefinementCold96Proof.json": "54BA404DEC794F4358B53161F16DD8BC70830440AAA66EE13FF8DA6F06B9A855",
+      "Cold904ConsistentRefinementCold96_20261126\\Native\\Stock.RawHistory.bin": "F8795250174A0D84E800D58658339B48D10C6F6144E2E0EAE1DC1D3AA597E9B2"
+    },
+    "source_states": 32,
+    "whole_goal_completed": false
   },
   "latest_fixed_metric_cold_proof": {
     "accepted_states": 20,
@@ -13905,6 +14576,1013 @@
     "true_source19_history_and_final_restored_csv_bit_identical": true,
     "whole_goal_completed": false
   },
+  "latest_outgoing_local_stress906": {
+    "accepted_history_native_guard_unchanged": true,
+    "actual_components": 256,
+    "all_material_and_kinematic_sources_unchanged": true,
+    "directions_are_predictions_not_equilibria": true,
+    "immutable_actual_compiled_book900_reused": true,
+    "independent_yield_max_error_MPa": 7.25391970832044e-14,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_new_NDS_or_material_acceptance": true,
+    "physical_capacity_certified": false,
+    "segments": [
+      {
+        "case": 1,
+        "name": "zero",
+        "samples": [
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "level": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.03125,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.0625,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.125,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.25,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.5,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 0.75,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 43,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 42,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 41,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 40,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 39,
+                "value_MPa": 0.0
+              },
+              {
+                "kind": "steel_minus_replaced_concrete",
+                "point": 38,
+                "value_MPa": 0.0
+              }
+            ],
+            "level": 1.0,
+            "physical_derivative_norm_MPa": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "row53_derivative_MPa": 0.0,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 0.0,
+            "row53_steel_MPa": 0.0,
+            "row53_subtracted_concrete_MPa": -0.0,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          }
+        ]
+      },
+      {
+        "case": 2,
+        "name": "incoming_secant",
+        "samples": [
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "level": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.132627206056895e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.803648951361538e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4639368828284205e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026685508066294e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1303043834232085e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167344382556621e-07
+              }
+            ],
+            "level": 0.03125,
+            "physical_derivative_norm_MPa": 7.456506523340067e-10,
+            "physical_residual_MPa": 2.3295587681104735e-11,
+            "row53_derivative_MPa": -4.0358515140948015e-12,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.77628716974732e-08,
+            "row53_steel_MPa": -1.0025372954025613e-07,
+            "row53_subtracted_concrete_MPa": 2.248682220810927e-08,
+            "six_force_residual_MPa": 2.3295190961410605e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.132624186250268e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.803616266395693e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.463935461742949e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026689060779972e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1303036728804727e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167045954607602e-07
+              }
+            ],
+            "level": 0.0625,
+            "physical_derivative_norm_MPa": 7.456364414792915e-10,
+            "physical_residual_MPa": 4.6596282388122745e-11,
+            "row53_derivative_MPa": 5.379871895194732e-12,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.777215760285117e-08,
+            "row53_steel_MPa": -1.0025343200048553e-07,
+            "row53_subtracted_concrete_MPa": 2.248665422008994e-08,
+            "six_force_residual_MPa": 4.659577152105394e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.132622409893429e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.8036318983358797e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.463968146708794e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026689060779972e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1303040281518406e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167195168582111e-07
+              }
+            ],
+            "level": 0.125,
+            "physical_derivative_norm_MPa": 7.456382178361309e-10,
+            "physical_residual_MPa": 9.319878202518339e-11,
+            "row53_derivative_MPa": 1.0023930470393072e-11,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.77768072168783e-08,
+            "row53_steel_MPa": -1.002536923477848e-07,
+            "row53_subtracted_concrete_MPa": 2.2486909128380597e-08,
+            "six_force_residual_MPa": 9.319777476506447e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.8036478855474343e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 3.594064024170507e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.46396796907311e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026672185389998e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.130288040940286e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167120561594857e-07
+              }
+            ],
+            "level": 0.25,
+            "physical_derivative_norm_MPa": 2.5384548666437627e-07,
+            "physical_residual_MPa": 6.346192381453605e-08,
+            "row53_derivative_MPa": -2.5384548666437627e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -1.760788382043632e-07,
+            "row53_steel_MPa": -1.0025363653132224e-07,
+            "row53_subtracted_concrete_MPa": 2.2486988009618077e-08,
+            "six_force_residual_MPa": 1.8640110755330646e-10
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.8036800376062274e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 1.627281620564247e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4639719658759986e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026671741300788e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.130288040940286e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167120561594857e-07
+              }
+            ],
+            "level": 0.5,
+            "physical_derivative_norm_MPa": 4.505174355309838e-07,
+            "physical_residual_MPa": 2.2525926991393387e-07,
+            "row53_derivative_MPa": -4.505174355309838e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -3.7275072362064066e-07,
+            "row53_steel_MPa": -1.0025369232002923e-07,
+            "row53_subtracted_concrete_MPa": 2.2486980428822276e-08,
+            "six_force_residual_MPa": 3.728096258041829e-10
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.8037092290702884e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4639706928202637e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.302666952085474e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.130288040940286e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167120561594857e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 1,
+                "value_MPa": -1.0243467111574016e-07
+              }
+            ],
+            "level": 0.75,
+            "physical_derivative_norm_MPa": 5.160739929248084e-07,
+            "physical_residual_MPa": 3.8705604684204824e-07,
+            "row53_derivative_MPa": -5.160739929248084e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -4.38307250864393e-07,
+            "row53_steel_MPa": -1.002536675343002e-07,
+            "row53_subtracted_concrete_MPa": 2.2486925486064034e-08,
+            "six_force_residual_MPa": 5.592171335053907e-10
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.803737946839192e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4639719658759986e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3026671963345393e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.130287996531365e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1167119673416437e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 1,
+                "value_MPa": -1.0243459414027711e-07
+              }
+            ],
+            "level": 1.0,
+            "physical_derivative_norm_MPa": 5.488506943551372e-07,
+            "physical_residual_MPa": 5.488512465035792e-07,
+            "row53_derivative_MPa": -5.488506943551372e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -4.7108391521000215e-07,
+            "row53_steel_MPa": -1.0025369233390702e-07,
+            "row53_subtracted_concrete_MPa": 2.2486913193488223e-08,
+            "six_force_residual_MPa": 7.456254833313223e-10
+          }
+        ]
+      },
+      {
+        "case": 3,
+        "name": "actual_outgoing_tangent",
+        "samples": [
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "level": 0.0,
+            "physical_residual_MPa": 5.52148441985284e-13,
+            "six_force_residual_MPa": 7.07384768045611e-15
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.205465652442399e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7919988926660153e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672011161565024e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.307859065491357e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.13772813392643e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1190394388904679e-07
+              }
+            ],
+            "level": 0.03125,
+            "physical_derivative_norm_MPa": 7.24289056681926e-09,
+            "physical_residual_MPa": 2.2689247865508716e-10,
+            "row53_derivative_MPa": -7.24289056681926e-09,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.082586073181574e-08,
+            "row53_steel_MPa": -1.0068767597459782e-07,
+            "row53_subtracted_concrete_MPa": 2.2618925120919398e-08,
+            "six_force_residual_MPa": 1.818820978601084e-12
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.205472224962705e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7920315776318603e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672323800368758e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3078654603759787e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.13772813392643e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1190081750100944e-07
+              }
+            ],
+            "level": 0.0625,
+            "physical_derivative_norm_MPa": 7.243121703109923e-09,
+            "physical_residual_MPa": 4.5324725488635545e-10,
+            "row53_derivative_MPa": -7.243121703109923e-09,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.082619812859292e-08,
+            "row53_steel_MPa": -1.0068782485550543e-07,
+            "row53_subtracted_concrete_MPa": 2.2618504865509065e-08,
+            "six_force_residual_MPa": 3.644715804882624e-12
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 6.20546884988471e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7920315776318603e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.467232024765508e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3078640392905072e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1377121467148754e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.118991832527172e-07
+              }
+            ],
+            "level": 0.125,
+            "physical_derivative_norm_MPa": 7.2338032673299746e-09,
+            "physical_residual_MPa": 9.047775568582321e-10,
+            "row53_derivative_MPa": -7.2338032673299746e-09,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": 7.083551745168393e-08,
+            "row53_steel_MPa": -1.006874901232635e-07,
+            "row53_subtracted_concrete_MPa": 2.261816944978609e-08,
+            "six_force_residual_MPa": 7.296000182611385e-12
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7920401041446894e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 3.590905661710053e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672400183712853e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3078631511120875e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1377119690791915e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1189840165570786e-07
+              }
+            ],
+            "level": 0.25,
+            "physical_derivative_norm_MPa": 2.686853923241587e-07,
+            "physical_residual_MPa": 6.717190022948166e-08,
+            "row53_derivative_MPa": -2.686853923241587e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -1.906164437404101e-07,
+            "row53_steel_MPa": -1.0068747158253899e-07,
+            "row53_subtracted_concrete_MPa": 2.261852303348487e-08,
+            "six_force_residual_MPa": 1.459671626367641e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7920640849620213e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 7,
+                "value_MPa": 1.6241224143342947e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672400183712853e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3078623961604308e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1377079722763028e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1189840165570786e-07
+              }
+            ],
+            "level": 0.5,
+            "physical_derivative_norm_MPa": 4.653585872246412e-07,
+            "physical_residual_MPa": 2.326798457607626e-07,
+            "row53_derivative_MPa": -4.653585872246412e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -3.87289597073015e-07,
+            "row53_steel_MPa": -1.0068744367430771e-07,
+            "row53_subtracted_concrete_MPa": 2.2618453522518876e-08,
+            "six_force_residual_MPa": 2.920000110019896e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7920960001732357e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672400183712853e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.307862647810983e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1377066400086733e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.118986621880443e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 1,
+                "value_MPa": -1.034810637179362e-07
+              }
+            ],
+            "level": 0.75,
+            "physical_derivative_norm_MPa": 5.309163276528943e-07,
+            "physical_residual_MPa": 3.981877978881127e-07,
+            "row53_derivative_MPa": -5.309163276528943e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -4.528472944779575e-07,
+            "row53_steel_MPa": -1.0068745296779961e-07,
+            "row53_subtracted_concrete_MPa": 2.2618419791634037e-08,
+            "six_force_residual_MPa": 4.380244381199764e-11
+          },
+          {
+            "all_local_returns_available": true,
+            "failed_points": [],
+            "largest_row53_points": [
+              {
+                "kind": "real_concrete",
+                "point": 21,
+                "value_MPa": 3.7921259909978744e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 16,
+                "value_MPa": -1.4672399739623643e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 11,
+                "value_MPa": -1.3078625960005752e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 6,
+                "value_MPa": -1.1377059738748585e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 17,
+                "value_MPa": -1.1189859705496019e-07
+              },
+              {
+                "kind": "real_concrete",
+                "point": 1,
+                "value_MPa": -1.0348100154544682e-07
+              }
+            ],
+            "level": 1.0,
+            "physical_derivative_norm_MPa": 5.636924352772762e-07,
+            "physical_residual_MPa": 5.636929874257182e-07,
+            "row53_derivative_MPa": -5.636924352772762e-07,
+            "row53_other_MPa": 0.0,
+            "row53_real_concrete_MPa": -4.856233914996011e-07,
+            "row53_steel_MPa": -1.0068748551583795e-07,
+            "row53_subtracted_concrete_MPa": 2.261844173482891e-08,
+            "six_force_residual_MPa": 5.840589707346496e-11
+          }
+        ]
+      }
+    ],
+    "source32_history_and_stresses_exact": true,
+    "whole_goal_completed": false,
+    "zero_equilibrium_MPa": 5.52148441985284e-13,
+    "zero_increment_stress_drift_MPa": 0.0
+  },
   "latest_point_derivative_audit": {
     "actual_components": 256,
     "all_working_material_methods_exact867": true,
@@ -14772,6 +16450,115 @@
     "physical_capacity_certified": false,
     "source20_exact": true
   },
+  "latest_predictor_candidate_rejected908": {
+    "baseline_solved": 5,
+    "candidate_accepted": false,
+    "candidate_solved": 4,
+    "gained": [],
+    "losing_valid_event_cannot_be_hidden_by164_synthetic_regressions": true,
+    "lost": [
+      {
+        "allowance": 12,
+        "baseline_kind": 2,
+        "baseline_roots": [
+          {
+            "H_MPa": 0.0001533662265698252,
+            "lambda_value": 1.1024446587208732,
+            "maximum_three_station_steel_utilization": 0.00478216835299591,
+            "role": "Full",
+            "weak": {
+              "bound_MPa": 1.2145474639857493e-06,
+              "force_residual_MPa": 8.943364567433796e-14,
+              "fraction": 1.0,
+              "index": 33,
+              "lambda": 1.10244465872087,
+              "residual_MPa": 2.8338021762063653e-11,
+              "steel_utilization": 0.00478216835299591
+            }
+          },
+          {
+            "H_MPa": 0.00015336620992658013,
+            "lambda_value": 1.1024446606976126,
+            "maximum_three_station_steel_utilization": 0.004782168228382559,
+            "role": "Half",
+            "weak": {
+              "bound_MPa": 1.2145474652669694e-06,
+              "force_residual_MPa": 4.884323398410171e-15,
+              "fraction": 1.0,
+              "index": 33,
+              "lambda": 1.10244466069761,
+              "residual_MPa": 6.356037658000746e-13,
+              "steel_utilization": 0.00478216822838256
+            }
+          },
+          {
+            "H_MPa": 0.0001533662018581554,
+            "lambda_value": 1.1024446690388827,
+            "maximum_three_station_steel_utilization": 0.004782168153705385,
+            "role": "Returned",
+            "weak": {
+              "bound_MPa": 1.2145474706733482e-06,
+              "force_residual_MPa": 2.7126521605101453e-12,
+              "fraction": 1.0,
+              "index": 33,
+              "lambda": 1.10244466903888,
+              "residual_MPa": 9.950829049643062e-11,
+              "steel_utilization": 0.00478216815370538
+            }
+          }
+        ],
+        "candidate_certificate": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.1024446607271137,
+          1.1024446687790408,
+          1.1024446668089076,
+          1.0,
+          0.00010929902223202709,
+          3.4967343323923257e-11,
+          3.4967343323923257e-11,
+          6.730781596484815e-07,
+          3.433468512483763e-05,
+          34.0,
+          34.0,
+          30.0,
+          15.0,
+          4.0,
+          45.0,
+          -1.0,
+          -1.0,
+          0.0,
+          1.1024446683353,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.00010929902223202709,
+          0.0,
+          -1.0
+        ],
+        "candidate_predictor_comparison": [
+          0.0,
+          2.330118335693715e-11,
+          2.2603247604776472e-10,
+          1.214547470504934e-10,
+          0.03125,
+          0.031249887507582372
+        ],
+        "case": 1,
+        "ratio": 1.0
+      }
+    ],
+    "physical_capacity_certified": false,
+    "same_exact32_history": true,
+    "source_input_sha256": "DC6DA39E382372247D7473CD8603D361413FA204B72A975E40D0589A348459FA"
+  },
   "latest_refined_corrector_proof": {
     "actual_components": 256,
     "all_new_H_strictly_growing": false,
@@ -14879,6 +16666,13 @@
     "unchanged_materials_and_force_tolerances": true,
     "whole_goal_completed": false,
     "working_kernel_changed_and_verified": true
+  },
+  "latest_residual_predictor_regressions910": {
+    "failed": 0,
+    "macros": 5,
+    "own_process_closed": true,
+    "passed": 164,
+    "timeout600": false
   },
   "latest_sequential_accepted_H": {
     "all_three_station_steel_checked": true,
@@ -15361,6 +17155,323 @@
     "passed": 164,
     "timeout600": false
   },
+  "latest_tangent_cycle_evidence": "docs/reports/evidence/Coupled6DTangentCycleAndRejectedPredictor_2026-11-26",
+  "latest_tangent_two_cycle907": {
+    "actual_components": 256,
+    "all12_available": true,
+    "all_available_linear_tangents_independently_solved": true,
+    "all_working_sources_exact895": true,
+    "diagnostic_probes_are_not_accepted_history": true,
+    "generated_probe_arithmetic_exactly_explained": [
+      {
+        "component": 51,
+        "direct_Double_result": -2.1247364928876147e-06,
+        "group": 3,
+        "iteration": 4,
+        "native": -2.124736492887615e-06,
+        "native_equals_exact64bit_mantissa_then_Double": true
+      },
+      {
+        "component": 52,
+        "direct_Double_result": 6.887105801725909e-06,
+        "group": 3,
+        "iteration": 4,
+        "native": 6.887105801725908e-06,
+        "native_equals_exact64bit_mantissa_then_Double": true
+      }
+    ],
+    "native": {
+      "failed": 0,
+      "macros": 2,
+      "own_process_closed": true,
+      "passed": 2,
+      "timeout600": false
+    },
+    "no_new_NDS_or_material_acceptance": true,
+    "physical_capacity_certified": false,
+    "raw_history_keys_still_bit_exact": true,
+    "readings": [
+      {
+        "denominator": 1024.0,
+        "group": 1,
+        "independent_linear_relative_error": 1.174265994968228e-12,
+        "iteration": 1,
+        "lambda_increment": 2.149024727784142e-09,
+        "linear_predicted_physical_derivative_MPa": 2.0120801584037243e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.245045730019939e-09,
+            "actual_row53_derivative_MPa": -7.245045730019939e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.245045730019515e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.28061055887963e-09,
+            "actual_row53_derivative_MPa": -7.28061055887963e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.2806105588792064e-09
+          }
+        ]
+      },
+      {
+        "denominator": 1024.0,
+        "group": 1,
+        "independent_linear_relative_error": 1.1156482725032476e-12,
+        "iteration": 2,
+        "lambda_increment": 1.5827794673301117e-09,
+        "linear_predicted_physical_derivative_MPa": 1.284211493090603e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.879061709152978e-09,
+            "actual_row53_derivative_MPa": 6.879061709152978e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.8790617091527665e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.846656435717136e-09,
+            "actual_row53_derivative_MPa": 7.846656435717136e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.846656435716925e-09
+          }
+        ]
+      },
+      {
+        "denominator": 1024.0,
+        "group": 1,
+        "independent_linear_relative_error": 6.044056171104186e-13,
+        "iteration": 3,
+        "lambda_increment": 2.149028128400675e-09,
+        "linear_predicted_physical_derivative_MPa": 4.870439446712227e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.215328168275192e-09,
+            "actual_row53_derivative_MPa": -7.215328168275192e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.215328168280063e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.235622545564979e-09,
+            "actual_row53_derivative_MPa": -7.235622545564979e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.23562254556985e-09
+          }
+        ]
+      },
+      {
+        "denominator": 1024.0,
+        "group": 1,
+        "independent_linear_relative_error": 5.404488213469579e-13,
+        "iteration": 4,
+        "lambda_increment": 1.582780935268108e-09,
+        "linear_predicted_physical_derivative_MPa": 2.4881592825595072e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.892153459059358e-09,
+            "actual_row53_derivative_MPa": 6.892153459059358e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.892153459059993e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.846656435717136e-09,
+            "actual_row53_derivative_MPa": 7.846656435717136e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.846656435717772e-09
+          }
+        ]
+      },
+      {
+        "denominator": 64.0,
+        "group": 2,
+        "independent_linear_relative_error": 1.7049428303296788e-13,
+        "iteration": 1,
+        "lambda_increment": 2.149030360662092e-09,
+        "linear_predicted_physical_derivative_MPa": 1.138200522872966e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.222500209014271e-09,
+            "actual_row53_derivative_MPa": -7.222500209014271e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.22250020901533e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.272002333635896e-09,
+            "actual_row53_derivative_MPa": -7.272002333635896e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.272002333636955e-09
+          }
+        ]
+      },
+      {
+        "denominator": 64.0,
+        "group": 2,
+        "independent_linear_relative_error": 1.805892114782813e-12,
+        "iteration": 2,
+        "lambda_increment": 1.582782800106263e-09,
+        "linear_predicted_physical_derivative_MPa": 2.117582368135751e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.8697753596858036e-09,
+            "actual_row53_derivative_MPa": 6.8697753596858036e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.869775359687921e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.857569483959992e-09,
+            "actual_row53_derivative_MPa": 7.857569483959992e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.85756948396211e-09
+          }
+        ]
+      },
+      {
+        "denominator": 64.0,
+        "group": 2,
+        "independent_linear_relative_error": 2.4786325793046283e-13,
+        "iteration": 3,
+        "lambda_increment": 2.1490314418208675e-09,
+        "linear_predicted_physical_derivative_MPa": 3.97439604816416e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.202071050649295e-09,
+            "actual_row53_derivative_MPa": -7.202071050649295e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.202071050647177e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.271611535131228e-09,
+            "actual_row53_derivative_MPa": -7.271611535131228e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.271611535129111e-09
+          }
+        ]
+      },
+      {
+        "denominator": 64.0,
+        "group": 2,
+        "independent_linear_relative_error": 1.1255362504083792e-12,
+        "iteration": 4,
+        "lambda_increment": 1.582781912717775e-09,
+        "linear_predicted_physical_derivative_MPa": 2.7725026181246105e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.866404500538437e-09,
+            "actual_row53_derivative_MPa": 6.866404500538437e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.866404500538648e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.856958417207238e-09,
+            "actual_row53_derivative_MPa": 7.856958417207238e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.85695841720745e-09
+          }
+        ]
+      },
+      {
+        "denominator": 8.0,
+        "group": 3,
+        "independent_linear_relative_error": 1.3245391038097936e-12,
+        "iteration": 1,
+        "lambda_increment": 2.1489915746828785e-09,
+        "linear_predicted_physical_derivative_MPa": 5.717472393966527e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.18568832214217e-09,
+            "actual_row53_derivative_MPa": -7.18568832214217e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.185688322136452e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.1610930518772875e-09,
+            "actual_row53_derivative_MPa": -7.1610930518772875e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.16109305187157e-09
+          }
+        ]
+      },
+      {
+        "denominator": 8.0,
+        "group": 3,
+        "independent_linear_relative_error": 1.4090544829668234e-12,
+        "iteration": 2,
+        "lambda_increment": 1.5827391066238086e-09,
+        "linear_predicted_physical_derivative_MPa": 3.1763735522036263e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.864152302110682e-09,
+            "actual_row53_derivative_MPa": 6.864152302110682e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.8641523021138584e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.958498526861035e-09,
+            "actual_row53_derivative_MPa": 7.958498526861035e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.958498526864212e-09
+          }
+        ]
+      },
+      {
+        "denominator": 8.0,
+        "group": 3,
+        "independent_linear_relative_error": 6.9691262006441e-14,
+        "iteration": 3,
+        "lambda_increment": 2.1489896064244433e-09,
+        "linear_predicted_physical_derivative_MPa": 2.752857078576476e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 7.188621531373229e-09,
+            "actual_row53_derivative_MPa": -7.188621531373229e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 7.1886215313704765e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.279953306849052e-09,
+            "actual_row53_derivative_MPa": -7.279953306849052e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.279953306846299e-09
+          }
+        ]
+      },
+      {
+        "denominator": 8.0,
+        "group": 3,
+        "independent_linear_relative_error": 1.3711622237183717e-12,
+        "iteration": 4,
+        "lambda_increment": 1.5827437786271291e-09,
+        "linear_predicted_physical_derivative_MPa": 1.4823076576950256e-21,
+        "matrix_available": true,
+        "samples": [
+          {
+            "actual_physical_derivative_MPa": 6.8614555703838676e-09,
+            "actual_row53_derivative_MPa": 6.8614555703838676e-09,
+            "beta": 0.0009765625,
+            "derivative_defect_MPa": 6.861455570384503e-09
+          },
+          {
+            "actual_physical_derivative_MPa": 7.92264809312826e-09,
+            "actual_row53_derivative_MPa": 7.92264809312826e-09,
+            "beta": 0.000244140625,
+            "derivative_defect_MPa": 7.922648093128895e-09
+          }
+        ]
+      }
+    ],
+    "true_history32_unchanged": true,
+    "whole_goal_completed": false,
+    "zero_reading_drift_MPa": 0.0
+  },
   "latest_two_branch_direction_approximation": {
     "cases": [
       {
@@ -15662,7 +17773,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Poll90074 same handle. On terminal run Check-TestConsistentRefinementCold96.py then full cold stress replay. Compare897 max/time/path and verify refinement actually activates; no current physical capacity claim.",
+  "next_action": "Capture the actual rejected Newton iterate, full correction/Jacobian/control and exact accepted material history at a real failing transition; accepted-state32 probes are not a substitute. Independently localize directional derivative and substep/active-branch changes; inspect numerical material error budget against gradient amplification. Do not repeat known tolerance tightening blindly (Progress653/earlier1e-14 tests). Do not promote908 or run cold for it; it lost a valid event. Preserve full SOW, ONQ010/012 and deferred pure bending CDP/SP comparison; goal remains active.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -15943,7 +18054,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:897 completed cold/directOK/capacityNumFail32states max1.1042833676987807 in820.4443359375s;898all32stresses verified;899actual directional derivative differs by side at accepted boundary;900operative1/1024 predictor independently verified rel1.174e-12.901one existing Newton refinement gate corrected,902original baseline; three strict roots bitidentical/4,4,1iterations/new refinement inactive. No robustness or capacity claim. Later directed regressions/cold activity preserved by active_jobs.",
+  "previous_goal_turn_classification": "progress: cold904 completed814.57421875s/directOK/capacityNumFail/max1.1042833676987807; all32 raw fields/fractions/lambdas exact897; actual refined marker observed.905 exact material bridge rebuilt all6/56+4/all3steel without duplicate native replay.906zero drift/all129 local returns/independent yield7.25e-14.907all12 tangent reads verified, persistent two-cycle and geometric row53 error gain1021.83, no physical limit.908actual residual predictor active7cases and4 verified pairs; original9095pairs, candidate loses original event case1; strict regression gateFAIL candidate rejected despite910all164PASS. No promotion. All native stages closed.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -17793,6 +19904,7 @@
     10205,
     10530,
     10660,
+    11110,
     11153,
     11192,
     11312,
@@ -17824,6 +19936,7 @@
     15150,
     15306,
     15415,
+    15427,
     15533,
     16147,
     16158,
@@ -17840,6 +19953,7 @@
     18119,
     18194,
     18337,
+    18344,
     18643,
     18664,
     18716,
@@ -17856,6 +19970,7 @@
     21051,
     21364,
     21410,
+    21509,
     21859,
     22012,
     22694,
@@ -18019,6 +20134,7 @@
     55089,
     55381,
     55638,
+    55897,
     56016,
     56270,
     57469,
@@ -18049,6 +20165,7 @@
     62845,
     62866,
     62959,
+    63145,
     63225,
     63350,
     63362,
@@ -18129,6 +20246,7 @@
     80177,
     80580,
     80666,
+    80784,
     80871,
     80903,
     81179,
@@ -18182,6 +20300,7 @@
     89569,
     89834,
     89949,
+    90074,
     90257,
     90605,
     90746,
@@ -18225,6 +20344,7 @@
     97145,
     97396,
     97673,
+    97846,
     97867,
     98340,
     98786,
@@ -18233,12 +20353,13 @@
     99254,
     99292,
     99354,
+    99606,
     99831,
     99841,
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T04:28:11.746330+03:00",
+  "updated_local": "2026-11-26T05:27:38.996245+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
