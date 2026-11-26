@@ -1,4 +1,4 @@
-Attribute VB_Name = "modCoupledWorkbookInput"
+﻿Attribute VB_Name = "modCoupledWorkbookInput"
 Option Explicit
 
 ' ==========================================================================
@@ -16,6 +16,8 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
         ByVal provider As CMaterialModelProvider, ByVal batch As CBatchSectionCalculator)
     On Error GoTo Failed
     settings.LoadCoupledSettings workbook
+    Dim concreteLaw As String: concreteLaw = UCase$(Trim$(settings.GetString("Coupled.ConcreteLaw", "CDP")))
+    If concreteLaw <> "CDP" And concreteLaw <> "ASD" Then CalibrationError settings, "Coupled.ConcreteLaw", "Выберите CDP или ASD."
     Dim poisson As Double, gt As Double, gc As Double, length As Double, yieldRatio As Double, peak As Double
     poisson = settings.GetRequiredDouble("Coupled.Poisson")
     If poisson < 0# Or poisson >= 0.5 Then CalibrationError settings, "Coupled.Poisson", "Введите число от 0 включительно до 0,5."
@@ -41,7 +43,7 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
 
     Dim analysis As New CCoupledSectionAnalysis
     analysis.Initialize section, layout, provider, poisson, gt, gc, length, yieldRatio, peak, steelClass, _
-        settings.GetRequiredLong("Solver.MaxIterations"), supplementary
+        settings.GetRequiredLong("Solver.MaxIterations"), supplementary, concreteLaw:=concreteLaw
     batch.ConfigureCoupledAnalysis analysis
     Exit Sub
 Failed:

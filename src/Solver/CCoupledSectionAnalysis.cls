@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -31,6 +31,7 @@ Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели
 Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
 Private mDiagramCache As Object ' Точки фактических диаграмм для публикации одного набора характеристик.
 Private mASDFlow As CCoupledASDFlow ' Необязательный неизменяемый закон по явно подготовленным таблицам.
+Private mCalibratedASD As Boolean, mASDFlowCache As Object ' Табличные законы разных наборов характеристик одного запуска не разделяют историю.
 Private mDiscretization As CCoupledDiscretization ' Общая неизменяемая точность всех сочетаний одного запуска.
 
 ' Принимает калибровку в мм, МПа и Н/мм, а размеры деформаций в долях единицы.
@@ -39,7 +40,10 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
         ByVal provider As CMaterialModelProvider, ByVal poisson As Double, ByVal gt As Double, ByVal gc As Double, _
         ByVal localizationLength As Double, ByVal yieldRatio As Double, ByVal peakStrain As Double, _
         ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing, _
-        Optional ByVal asdFlow As CCoupledASDFlow = Nothing, Optional ByVal discretization As CCoupledDiscretization = Nothing)
+        Optional ByVal asdFlow As CCoupledASDFlow = Nothing, Optional ByVal discretization As CCoupledDiscretization = Nothing, _
+        Optional ByVal concreteLaw As String = "CDP")
+    concreteLaw = UCase$(Trim$(concreteLaw))
+    If concreteLaw <> "CDP" And concreteLaw <> "ASD" Then Err.Raise 5, "CCoupledSectionAnalysis", "Выберите закон пространственного бетона CDP или ASD."
     If section Is Nothing Or transverse Is Nothing Or provider Is Nothing Then _
         Err.Raise 5, "CCoupledSectionAnalysis", "Передайте сечение, поперечное армирование и параметры материалов."
     If Not transverse.IsSpecified Then _
@@ -59,6 +63,8 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     mSteelClass = Trim$(steelClass): mMaxIterations = maxIterations
     Set mSupplementarySteel = supplementarySteel
     Set mASDFlow = asdFlow
+    mCalibratedASD = (concreteLaw = "ASD" And asdFlow Is Nothing)
+    Set mASDFlowCache = CreateObject("Scripting.Dictionary")
     If discretization Is Nothing Then
         Set discretization = New CCoupledDiscretization
         discretization.Initialize 1, 1, 5
@@ -317,12 +323,13 @@ Private Function PrepareResponse(ByVal spec As CMaterialModelSpec, ByVal concret
     On Error GoTo InvalidMaterialOrGeometry
     Dim meta As CResultMeta
     Set models = SteelModels(spec)
+    fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
+    ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
+    If mCalibratedASD Then PrepareCalibratedASD spec, fc, ft
     PrepareOperators spec, models
     Set meta = mOperators.ResultMeta
     Set PrepareResponse = meta
     If meta.InternalStatus <> rsUnset Then Exit Function
-    fc = mProvider.ConcreteCompressionResistanceFromSpec(spec)
-    ft = mProvider.ConcreteTensionResistanceFromSpec(spec)
     If Not mASDFlow Is Nothing Then
         If Abs(fc - mASDFlow.PeakStress(True)) > 0.000000000001 * GeomMax(1#, Abs(fc)) Or _
                 Abs(ft - mASDFlow.PeakStress(False)) > 0.000000000001 * GeomMax(1#, Abs(ft)) Then _
@@ -340,6 +347,20 @@ InvalidMaterialOrGeometry:
         Err.Raise number, source, reason
     End If
 End Function
+
+' Готовит один неизменяемый ASD для набора характеристик; ключ точный, параметры профиля и провайдера внутри запуска неизменны.
+' Используются та же калибровка огибающих и однократное обновление ASDConcrete3D, которое сверяется отдельно по тензорам.
+Private Sub PrepareCalibratedASD(ByVal spec As CMaterialModelSpec, ByVal fc As Double, ByVal ft As Double)
+    Dim key As String: key = spec.ValueSetText
+    If mASDFlowCache.Exists(key) Then
+        Set mASDFlow = mASDFlowCache(key)
+    Else
+        Dim calibration As New CCoupledConcreteCalibration
+        calibration.Initialize mProvider.ConcreteElasticModulusFromSpec(spec), mYieldRatio * fc, fc, ft, mPeakStrain, mGt, mGc, mLength
+        Set mASDFlow = calibration.CreateASDFlow(mPoisson, True)
+        mASDFlowCache.Add key, mASDFlow
+    End If
+End Sub
 
 ' Инициализирует одну независимую историю бетона и стали. История использует
 ' общие операторы геометрии и неизменяемые диаграммы всех классов стали.

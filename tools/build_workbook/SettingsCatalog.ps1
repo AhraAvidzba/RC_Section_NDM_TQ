@@ -2266,6 +2266,7 @@ function Add-CoupledAnalysisGuide {
 
     $row = Add-GuideParagraph $Sheet $StartRow "Режим вычисляет прочность сечения при совместном действии продольной силы N, изгибающих моментов Mx и My, крутящего момента T и поперечных сил Qx и Qy." -Emphasis
     $row = Add-GuideTitle $Sheet $row "1. Ввод и запуск" 13
+    $row = Add-GuideParagraph $Sheet $row "В блоке калибровки Config выберите Coupled.ConcreteLaw: CDP или ASD. По умолчанию используется CDP. Оба закона получают заданные сопротивления, модуль, энергии, характерную длину и параметры пика через общую калибровку огибающих. ASD использует однократное обновление ASDConcrete3D с упрощённой пластичностью; CDP — итерационный возврат на поверхность текучести. Одинаковые одноосные кривые не делают их пространственный отклик одинаковым. Выбор закона не меняет диаграммы обычного плоского NM."
     $row = Add-GuideParagraph $Sheet $row "Сформируйте сечение. Добавьте в таблицу сочетаний на Config одну строку для всех усилий, выберите профиль и заполните T, Qx, Qy в единицах INPUT. Пустая ячейка соответствует нулю. Связанный режим включается, когда хотя бы одно из трёх усилий ненулевое и профиль запрашивает НДС прочности или поиск несущей способности."
     $row = Add-GuideParagraph $Sheet $row "Знаки N, Mx, My заданы настройками Sign.N.User, Sign.Mx.User и Sign.My.User. Положительные Qx и Qy направлены вдоль +X и +Y, положительный T действует вокруг продольной оси +Z по правилу правой руки. Все усилия задаются в одной точке. Load.ReferenceOffsetX и Load.ReferenceOffsetY отсчитываются от центра бетона без арматуры. Программа учитывает моменты от переноса сил к расчётному центру."
     $row = Add-GuideParagraph $Sheet $row "На листе «Сечения» заполните блок Transverse выбранного типа. Для импорта используйте блок «AutoCAD — поперечное армирование импортированного сечения». Одна строка описывает группу одинаковых хомутов или ветвей. Для «Контура» задайте диаметр, шаг и защитный слой. Если подходящих контуров несколько, укажите нужный. Для «Ветви» введите диаметр, шаг и координаты оси в формате «x1; y1; x2; y2» в единицах длины INPUT."
@@ -4042,7 +4043,7 @@ function Add-CoupledMaterialSettingsTable {
     $title.Interior.Color = $script:ConfigGroupHeaderColor
     $title.Font.Bold = $true
 
-    $table = $Sheet.Range('H122:M129')
+    $table = $Sheet.Range('H122:M130')
     $rows = @(
         @('Параметр', 'Значение', 'Ед.', 'Комментарий'),
         @('Coupled.Poisson', 0.2, '-', 'Начальный коэффициент Пуассона бетона.'),
@@ -4051,7 +4052,8 @@ function Add-CoupledMaterialSettingsTable {
         @('Coupled.Localization', '', 'мм', 'Характерная длина зоны локализации.'),
         @('Coupled.YieldRatio', '', '-', 'Отношение начала пластичности к пику сжатия.'),
         @('Coupled.PeakStrain', '', '-', 'Модуль полной деформации у пика сжатия.'),
-        @('Coupled.SteelClass', '', '-', 'Класс стали, для которого заданы параметры Config.')
+        @('Coupled.SteelClass', '', '-', 'Класс стали, для которого заданы параметры Config.'),
+        @('Coupled.ConcreteLaw', 'CDP', '-', 'Пространственный закон бетона: CDP или ASD. Огибающие задаются общей калибровкой.')
     )
     for ($r = 0; $r -lt $rows.Count; $r++) {
         for ($col = 0; $col -lt 4; $col++) {
@@ -4064,7 +4066,14 @@ function Add-CoupledMaterialSettingsTable {
     $table.Rows.Item(1).Interior.Color = $script:ConfigTableHeaderColor
     for ($r = 1; $r -le $table.Rows.Count; $r++) { $table.Cells.Item($r, 4).Resize(1, 3).Merge() }
     $table.WrapText = $false
-    Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 129 13
+    Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 130 13
+    $lawCell = $table.Cells.Item($table.Rows.Count, 2)
+    $lawCell.Validation.Delete()
+    $lawList = Get-ConfigValidationListAddress $Sheet @('CDP', 'ASD')
+    $lawCell.Validation.Add(3, 1, 1, $lawList)
+    $lawCell.Validation.IgnoreBlank = $false
+    $lawCell.Validation.InCellDropdown = $true
+    $lawCell.Validation.ShowError = $true
 }
 
 # Добавляет характеристики дополнительных классов для связанного расчёта.

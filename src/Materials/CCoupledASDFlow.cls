@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -13,9 +13,9 @@ Option Explicit
 ' Спектральное пластическое повреждение бетона по подготовленным ветвям ASD
 ' ==========================================================================
 ' Математический закон Petracca и соавт. (2023), невязкая изотропная постановка
-' ASDConcrete3D с cdf=0 и без фиксированных плоскостей трещин. Рабочий шаг
-' дополнительно замыкает историю при фиксированной деформации; это явная
-' интеграция проекта, а не единственное обновление внешней библиотеки.
+' ASDConcrete3D с cdf=0 и без фиксированных плоскостей трещин. Интеграция
+' задаётся при подготовке: одно обновление внешней библиотеки либо повторное
+' замыкание истории при фиксированной деформации. Режим отражён в LawIdentifier.
 ' Таблицы неизменяемы, состояния принадлежат вызывающему материалу.
 
 Private Const ALPHA As Double = 4# / 33#
@@ -26,10 +26,11 @@ Private mTension As CCoupledConcreteBackbone, mCompression As CCoupledConcreteBa
 Private mModulus As Double, mPoisson As Double, mShear As Double, mLame As Double
 Private mStrengthRatio As Double, mBeta As Double, mReady As Boolean
 Private mTangent As CCoupledASDTangent
+Private mNativeSingleUpdate As Boolean ' Однократное обновление ASDConcrete3D либо замыкание истории при фиксированной деформации.
 
 ' Подключает две подготовленные ветви и согласованные упругие параметры один раз.
 Friend Sub Initialize(ByVal tension As CCoupledConcreteBackbone, ByVal compression As CCoupledConcreteBackbone, _
-        ByVal modulus As Double, ByVal poisson As Double)
+        ByVal modulus As Double, ByVal poisson As Double, Optional ByVal nativeSingleUpdate As Boolean = False)
     If mReady Then Err.Raise 5, "CCoupledASDFlow", "Подготовленный спектральный закон неизменяем. Создайте новый материал."
     If tension Is Nothing Or compression Is Nothing Then Err.Raise 5, "CCoupledASDFlow", "Подготовьте обе ветви спектрального бетона."
     If Not tension.IsReady Or Not compression.IsReady Or Not (modulus > 0#) Or poisson <= -1# Or poisson >= 0.5 Then _
@@ -37,6 +38,7 @@ Friend Sub Initialize(ByVal tension As CCoupledConcreteBackbone, ByVal compressi
     If compression.PeakStress <= tension.PeakStress Then Err.Raise 5, "CCoupledASDFlow", "Прочность бетона на сжатие должна превышать прочность на растяжение."
     Set mTension = tension: Set mCompression = compression
     mModulus = modulus: mPoisson = poisson
+    mNativeSingleUpdate = nativeSingleUpdate
     mShear = modulus / (2# * (1# + poisson)): mLame = 2# * mShear * poisson / (1# - 2# * poisson)
     mStrengthRatio = GeomMax(5#, compression.PeakStress / tension.PeakStress)
     mBeta = (1# - ALPHA) * mStrengthRatio - (1# + ALPHA)
@@ -57,7 +59,7 @@ End Property
 
 ' Возвращает явное обозначение фактически применённого алгоритма интеграции.
 Friend Property Get LawIdentifier() As String
-    LawIdentifier = "ASD-Closed-Cdf0"
+    If mNativeSingleUpdate Then LawIdentifier = "ASD-NativeStep-Cdf0" Else LawIdentifier = "ASD-Closed-Cdf0"
 End Property
 
 ' Возвращает номинальную прочность выбранной ветви, МПа.
@@ -70,7 +72,7 @@ End Function
 Friend Function TryTangent(ByRef strain() As Double, ByRef oldStrain() As Double, ByRef oldEffective() As Double, _
         ByVal oldT As Double, ByVal oldC As Double, ByRef stress() As Double, ByRef effective() As Double, _
         ByVal newT As Double, ByVal newC As Double, ByRef tangent() As Double) As Boolean
-    If mTangent Is Nothing Then Exit Function
+    If mTangent Is Nothing Or mNativeSingleUpdate Then Exit Function ' Касательная замкнутой пробы не относится к однократному обновлению; вызывающий использует общий разностный путь.
     TryTangent = mTangent.TryBuild(strain, oldStrain, oldEffective, oldT, oldC, stress, effective, newT, newC, tangent)
 End Function
 
@@ -82,7 +84,7 @@ Friend Function TryReadPrincipalBoundary(ByRef strain() As Double, ByRef oldStra
     TryReadPrincipalBoundary = mTangent.TryReadPrincipalBoundary(strain, oldStrain, oldEffective, principalIndex, value, gradient, needGradient)
 End Function
 
-' Выполняет замкнутую пробу от переданного принятого состояния без его изменения.
+' Выполняет выбранное при подготовке обновление от принятого состояния без его изменения.
 ' Отказ означает численную неудачу материала, а не физическое разрушение.
 Friend Function TryStep(ByRef strain() As Double, ByRef oldStrain() As Double, ByRef oldEffective() As Double, _
         ByVal oldT As Double, ByVal oldC As Double, ByRef newT As Double, ByRef newC As Double, _
@@ -92,6 +94,7 @@ Friend Function TryStep(ByRef strain() As Double, ByRef oldStrain() As Double, B
     Dim priorEffective(1 To 6) As Double, priorNominal(1 To 6) As Double
     Dim priorT As Double, priorC As Double, maximum As Double, i As Long, iteration As Long
     SingleStep strain, oldStrain, oldEffective, oldT, oldC, newT, newC, effective, nominal, plastic, damageT, damageC
+    If mNativeSingleUpdate Then TryStep = True: Exit Function
     For iteration = 1 To CLOSURE_ITERATIONS
         priorT = newT: priorC = newC
         For i = 1 To 6: priorEffective(i) = effective(i): priorNominal(i) = nominal(i): Next i

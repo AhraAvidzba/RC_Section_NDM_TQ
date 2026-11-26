@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -70,6 +70,43 @@ End Sub
 Friend Property Get HalfStrengthPlasticStrain() As Double
     HalfStrengthPlasticStrain = mPlasticPeak + Log(2#) / mSoftening
 End Property
+
+' Готовит неизменяемую табличную ветвь ASD из этой же огибающей и деградации.
+' Упрочнение разбито на 40 отрезков, спад — с шагом 0,05 по показателю экспоненты до 13,8.
+' Ограничение таблицы при полной деформации 0,1 либо почти единичном повреждении не является критерием прочности.
+Friend Function PrepareASDBackbone(ByVal modulus As Double) As CCoupledConcreteBackbone
+    If mPeak <= 0# Or modulus <= 0# Then InvalidEnvelope "Подготовьте огибающую и положительный модуль бетона для ASD."
+    Dim strain(1 To 318) As Double, nominal(1 To 318) As Double, effective(1 To 318) As Double
+    Dim count As Long: count = 1
+    Dim index As Long, plastic As Double, stress As Double, cohesion As Double, damage As Double, energy As Double, epsilon As Double
+    If mPlasticPeak > 0# Then
+        For index = 0 To 39
+            plastic = mPlasticPeak * CDbl(index) / 40#
+            Evaluate plastic, stress, cohesion, damage, energy
+            epsilon = plastic + cohesion / modulus
+            If epsilon > 0.1 Or damage > 1# - 0.000000000001 Then Exit For
+            count = count + 1: strain(count) = epsilon: nominal(count) = stress: effective(count) = cohesion
+        Next index
+    End If
+    For index = 0 To 276
+        plastic = mPlasticPeak + CDbl(index) / 20# / mSoftening
+        Evaluate plastic, stress, cohesion, damage, energy
+        epsilon = plastic + cohesion / modulus
+        If epsilon > 0.1 Or damage > 1# - 0.000000000001 Then Exit For
+        count = count + 1: strain(count) = epsilon: nominal(count) = stress: effective(count) = cohesion
+    Next index
+    Dim minimumJump As Double, jump As Double
+    For index = 2 To count
+        jump = Abs(nominal(index) - nominal(index - 1))
+        If jump > 0# Then
+            If minimumJump = 0# Or jump < minimumJump Then minimumJump = jump
+        End If
+    Next index
+    If count < 2 Or minimumJump <= 0# Then InvalidEnvelope "Огибающая не даёт пригодной табличной ветви ASD."
+    Dim branch As New CCoupledConcreteBackbone
+    branch.Initialize strain, nominal, effective, count, 0.000001 * minimumJump ' Тот же нижний уровень интерполяции, что у ASDConcrete3D: минимум ненулевого соседнего скачка напряжения.
+    Set PrepareASDBackbone = branch
+End Function
 
 ' Снимает точки от начала до нисходящей ветви. Полная деформация включает
 ' пластическое смещение и упругую долю от эффективного напряжения.

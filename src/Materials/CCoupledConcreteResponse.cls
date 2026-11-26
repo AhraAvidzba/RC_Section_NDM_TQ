@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -88,13 +88,9 @@ Friend Sub Initialize(ByVal pointCount As Long, ByVal modulus As Double, ByVal p
     CoupledElasticTensor modulus, poisson, mElastic
     mPressureModulus = modulus / (1# - 2# * poisson)
     mDeviatorCompliance = 1# / (2# * mElastic(4, 4))
-    Set mTension = New CCoupledConcreteEnvelope: Set mCompression = New CCoupledConcreteEnvelope
-    Dim halfTension As Double, compressDamage As Double, plasticPeak As Double
-    halfTension = Log(2#) * gt / (ft * localizationLength)
-    compressDamage = 0.423 * (1# - fc / (peakCompression * modulus))
-    plasticPeak = peakCompression - fc / ((1# - compressDamage) * modulus)
-    mTension.Initialize ft, ft, 0#, gt, localizationLength, 0.5, halfTension
-    mCompression.Initialize fc0, fc, plasticPeak, gc, localizationLength, compressDamage, plasticPeak
+    Dim calibration As New CCoupledConcreteCalibration
+    calibration.Initialize modulus, fc0, fc, ft, peakCompression, gt, gc, localizationLength
+    Set mTension = calibration.TensionEnvelope: Set mCompression = calibration.CompressionEnvelope
     mTensionEnergyDensity = gt / localizationLength: mCompressionEnergyDensity = gc / localizationLength
     mAlpha = alpha: mGamma = gamma
     mFt = ft: mFc = fc
