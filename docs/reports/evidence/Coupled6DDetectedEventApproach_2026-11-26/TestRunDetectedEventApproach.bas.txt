@@ -1,0 +1,63 @@
+Public Function TestRunDetectedEventApproach() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Проверяет половинный подход к найденному общим механизмом событию; исходная точность и общий бюджет сохраняются.
+    ' Материальная история не принимается независимо от результата проверки локальности.
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна история25."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\ResolvedEventApproach.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, face() As Double, accepted() As Double
+    context = TestReadPolishVector(inputHandle): face = TestReadPolishVector(inputHandle): accepted = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(context) <> 6 Then Err.Raise 5, , "Неверный вход подхода к событию."
+    Close #inputHandle
+    If context(3) <> mReverseOptionsTest(3) Or context(4) <> mReverseOptionsTest(4) Or context(5) <> mReverseOptionsTest(2) Then Err.Raise 5, , "Нельзя менять допуски или общий бюджет."
+    Dim checked() As Double, movement() As Double, projection() As Double, faceTarget As Double, spacing As Double, i As Long
+    mReverseSolverTest.CopyAccepted checked: movement = face
+    For i = 1 To UBound(accepted)
+        If checked(i) <> accepted(i) Then Err.Raise 5, , "Изменена принятая исходная точка."
+        movement(i) = face(i) - accepted(i)
+    Next i
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(accepted, face, movement, projection, faceTarget, spacing) Then Err.Raise 5, , "Не построена общая пространственная мера подхода."
+    Dim halfTarget As Double: halfTarget = faceTarget - 0.5 * spacing
+    Dim seed() As Double: seed = accepted
+    For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = 0.5 * (accepted(i) + face(i)): Next i
+    Dim prediction As Variant: prediction = seed
+    Dim halfLambda As Double, half() As Double, actual() As Double, solved As Boolean, verified As Boolean, effort As Variant
+    solved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, halfTarget, _
+        0.5 * (context(1) + context(2)), halfLambda, CDbl(context(3)), CDbl(context(4)), CLng(context(5) - context(6)), _
+        consistentControl:=True, initialField:=prediction, allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+    effort = mReverseSolverTest.ReadPolishEffortTest
+    Dim doubled() As Double, fieldError As Double, lambdaError As Double, lambdaBound As Double, alpha As Double, joint As Double, stepError As Double
+    fieldError = -1#: lambdaError = -1#
+    If solved Then
+        mReverseSolverTest.CopyTrial half, actual: doubled = accepted
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: doubled(i) = 2# * half(i) - accepted(i): Next i
+        fieldError = mReverseSolverTest.SpatialFieldDistance(face, doubled) / spacing
+        lambdaError = Abs(2# * halfLambda - context(1) - context(2))
+        If Not mReverseSolverTest.TryElasticArcScale(mReverseDirectionTest, alpha) Then Err.Raise 5, , "Не получен масштаб силовой части дуги."
+        lambdaBound = mReverseSolverTest.CurveLambdaBound(spacing, fieldError, CDbl(context(2)), CDbl(context(1)), lambdaError, alpha, 0.005, CDbl(context(4)), joint, stepError)
+        verified = fieldError <= 0.005 And lambdaError <= lambdaBound And halfLambda > 0#
+    End If
+    If effort(0) + context(6) > context(5) Then Err.Raise 5, , "Подход к событию превысил общий бюджет."
+    Dim logHandle As Integer: logHandle = FreeFile
+    Dim result As CResultMeta: Set result = mReverseSolverTest.ResultMeta
+    Open mPolishRootTest & "\Native\ResolvedEventApproach.Diagnostics.txt" For Output As #logHandle
+    Print #logHandle, result.ResultComment: Print #logHandle, result.DiagnosticDetails
+    Close #logHandle
+    mReverseSolverTest.DiscardStep
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\ResolvedEventApproach.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMEVAPPROACH001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(Abs(CLng(solved)), Abs(CLng(verified)), context(1), context(2), halfLambda, fieldError, _
+        lambdaError, lambdaBound, spacing, faceTarget, halfTarget, alpha, joint, stepError, context(6))
+    TestWriteReverseBinaryVector handle, effort
+    TestWriteReverseBinaryVector handle, accepted: TestWriteReverseBinaryVector handle, face: TestWriteReverseBinaryVector handle, projection
+    If solved Then TestWriteReverseBinaryVector handle, half
+    TestWriteRecordedYieldStressTest handle, face
+    If solved Then TestWriteRecordedYieldStressTest handle, half
+    Close #handle
+    If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Половинный подход изменил принятую историю."
+    TestRunDetectedEventApproach = "TOTAL_DETECTED_EVENT_APPROACH_TEST: passed=1; failed=0; numerical outcome recorded; no history acceptance"
+End Function

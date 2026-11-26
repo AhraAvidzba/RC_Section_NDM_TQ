@@ -1,0 +1,52 @@
+Public Function TestRunDetectedLoadingBoundary() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Вызывает общий рабочий поиск первого события по всем точкам; номер материальной точки не задаётся.
+    ' Найденное поле не принимается; отдельно сохраняются уравнения, напряжения и диагностика существующего решателя.
+    If mReverseFieldsTest.Count <> 25 Then Err.Raise 5, , "Нужна точная история25."
+    mReverseSolverTest.DiscardStep
+    Dim revision As Long: revision = mReverseSolverTest.AcceptedRevision
+    Dim inputHandle As Integer: inputHandle = FreeFile
+    Open mPolishRootTest & "\Input\DetectedEvent.bin" For Binary Access Read As #inputHandle
+    Dim context As Variant, ends() As Double, originalProjection() As Double
+    context = TestReadPolishVector(inputHandle): ends = TestReadPolishVector(inputHandle): originalProjection = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Or UBound(context) <> 5 Then Err.Raise 5, , "Неверный вход общего события."
+    Close #inputHandle
+    If context(3) <> mReverseOptionsTest(3) Or context(4) <> mReverseOptionsTest(4) Or context(5) <> mReverseOptionsTest(2) Then Err.Raise 5, , "Нельзя менять точности или бюджет."
+    Dim field() As Double, factor As Double, eventInfo As Variant, solved As Boolean, effort As Variant
+    mReverseSolverTest.TestStartYieldCoordinateCapture
+    solved = mReverseSolverTest.TryLoadingYieldBoundary(mReverseBaseTest, mReverseDirectionTest, ends, CDbl(context(1)), CDbl(context(2)), _
+        CDbl(context(3)), CDbl(context(4)), CLng(context(5)), field, factor, eventInfo)
+    effort = mReverseSolverTest.ReadPolishEffortTest
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\DetectedLoadingBoundary.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMDETECTEV00001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(Abs(CLng(solved)), factor, revision)
+    TestWriteReverseBinaryVector handle, eventInfo: TestWriteReverseBinaryVector handle, effort
+    Dim capture As Collection: Set capture = mReverseSolverTest.TestYieldCoordinateCapture
+    TestWriteReverseBinaryVector handle, Array(capture.Count)
+    Dim packet As Variant, index As Long, logHandle As Integer: logHandle = FreeFile
+    Open mPolishRootTest & "\Native\DetectedLoadingBoundary.Diagnostics.txt" For Output As #logHandle
+    For index = 1 To capture.Count
+        packet = capture(index): Print #logHandle, CStr(packet(0)) & TestHardPreparedVector(packet(1))
+        TestWriteReverseBinaryVector handle, packet(1)
+    Next index
+    Close #logHandle
+    If solved Then
+        mReverseSolverTest.DiscardStep
+        Dim target As Double, i As Long, zero() As Double, values() As Double, matrix() As Double, forces() As Double
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: target = target + originalProjection(i) * field(i): Next i
+        ReDim zero(1 To UBound(field) + 1)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, originalProjection, target, field, factor) Then Err.Raise 5, , "Не открыт контроль найденного события."
+        Dim equations As ICoupledEquationSystem: Set equations = mReverseSolverTest
+        If Not equations.TryEvaluate(zero, False, values, matrix) Then Err.Raise 5, , "Не прочитаны уравнения события."
+        mReverseSolverTest.CopyEquationResultantResidual forces
+        TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, values: TestWriteReverseBinaryVector handle, forces
+        mReverseSolverTest.EndNewtonLineTest
+        TestWriteRecordedYieldStressTest handle, field
+    End If
+    Close #handle
+    mReverseSolverTest.DiscardStep
+    If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Общий поиск события изменил принятую историю."
+    TestRunDetectedLoadingBoundary = "TOTAL_DETECTED_LOADING_BOUNDARY_TEST: passed=1; failed=0; numerical outcome recorded; no acceptance or capacity claim"
+End Function
