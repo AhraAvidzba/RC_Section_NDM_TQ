@@ -1,0 +1,105 @@
+Public Function TestRunASDHardShearCold(ByVal folder As String) As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Нагружает с нуля без готовых полей, используя заданные таблицы ASD; замыкание материального шага НДМ сохраняется явно.
+    ' Численная остановка не является несущей способностью. Три материальные истории независимы.
+    On Error GoTo Failed
+    Dim started As Double: started = Timer
+    Dim section As CSectionModel: Set section = TestHardShearSection()
+    Dim layout As New CTransverseRebarLayout
+    layout.AddContourGroup section, "TestASDHoop", "", 8#, 100#, 10#, "A240"
+    Dim operators As New CCoupledElasticState
+    operators.PrepareModel section, 30000#, 0.2, 1, 1, 5, layout, 200000#
+    Dim flow As CCoupledASDFlow: Set flow = modTestCoupledASDMaterial.TestReadFlow(folder & "\Input", "matched")
+    Dim longitudinal As New CCoupledSteelModel, hoop As New CCoupledSteelModel, models As Object
+    longitudinal.Initialize 200000#, 400#, 350#, 1500#, 1500#, 0.025, 0.018
+    hoop.Initialize 200000#, 240#, 240#, 1500#, 1500#, 0.02, 0.02
+    Set models = CreateObject("Scripting.Dictionary")
+    models.Add "A400", longitudinal: models.Add "A240", hoop
+    Dim concrete As New CCoupledConcreteResponse, negative As New CCoupledConcreteResponse, positive As New CCoupledConcreteResponse
+    concrete.InitializeASD operators.PointCount, flow
+    negative.InitializeASD operators.PointCount, flow: positive.InitializeASD operators.PointCount, flow
+    Dim reinforced As New CCoupledReinforcedResponse, minus As New CCoupledReinforcedResponse, plus As New CCoupledReinforcedResponse
+    reinforced.Initialize operators, concrete, models
+    minus.Initialize operators, negative, models: plus.Initialize operators, positive, models
+    Dim solver As New CCoupledNewtonSolver: solver.Initialize operators, reinforced, 30000#, plus, minus
+    Set mReverseSolverTest = solver: Set mReverseOperatorsTest = operators
+    Set mReverseConcreteTest = concrete: Set mReverseReinforcedTest = reinforced
+    Set mReverseSidesTest = New Collection
+    mReverseSidesTest.Add negative: mReverseSidesTest.Add minus
+    mReverseSidesTest.Add positive: mReverseSidesTest.Add plus
+    TestWriteHardPreparedOperators operators, folder & "\Native\ASDCold.Operators.csv"
+    TestWriteLoadingStateTest folder & "\Native\ASDCold.InitialState.bin"
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\ASDCold.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMASDCOLD000001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(operators.DegreeCount, operators.PointCount, operators.ConcretePointCount, 0.001, 0.0000005, 0.0000005, 30#)
+    Dim loads As Variant: loads = TestHardShearLoads()
+    TestWriteReverseBinaryVector handle, loads
+    Dim mark As Variant, marks As Variant: marks = Array(0.5, 0.65, 0.699036407470703, 1#, 1.10521946491058, 1.2)
+    Dim factor As Double, target As Double, increment As Double: increment = 0.05
+    Dim attempt As Long, acceptedCount As Long, rejectedCount As Long, revision As Long, solved As Boolean, stopped As Boolean
+    Dim field() As Double, actual() As Double, effort As Variant, oldField() As Double, after() As Double, i As Long
+    For attempt = 1 To 200
+        target = GeomMin(1.2, factor + increment)
+        For Each mark In marks
+            If CDbl(mark) > factor And CDbl(mark) < target Then target = CDbl(mark)
+        Next mark
+        revision = solver.AcceptedRevision: solver.CopyAccepted oldField
+        solved = solver.TryStep(target * loads(0), target * loads(1), target * loads(2), target * loads(3), target * loads(4), target * loads(5), 0.0000005, 0.0000005, 30)
+        effort = solver.ReadPolishEffortTest
+        TestWriteReverseBinaryVector handle, Array(attempt, factor, target, Abs(CLng(solved)), effort(0), effort(1), revision)
+        If solver.AcceptedRevision <> revision Then Err.Raise 5, , "Силовая проба изменила принятую материальную ревизию."
+        solver.CopyAccepted after
+        For i = 1 To UBound(after)
+            If after(i) <> oldField(i) Then Err.Raise 5, , "Силовая проба изменила принятое поле."
+        Next i
+        If solved Then
+            solver.CopyTrial field, actual
+            TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+            TestWriteASDColdStressTest handle, field
+            solver.AcceptStep: acceptedCount = acceptedCount + 1: factor = target
+            TestWriteLoadingStateTest folder & "\Native\ASDCold.State" & Format$(acceptedCount, "000") & ".bin"
+            increment = GeomMin(0.05, increment * 1.25)
+            If factor = 1.2 Then Exit For
+        Else
+            solver.DiscardStep: rejectedCount = rejectedCount + 1
+            increment = (target - factor) / 2#
+            If increment < 0.0003 Then stopped = True: Exit For
+        End If
+    Next attempt
+    TestWriteReverseBinaryVector handle, Array(0#, factor, Timer - started, acceptedCount, rejectedCount, Abs(CLng(stopped)))
+    Close #handle: handle = 0
+    TestRunASDHardShearCold = "ASD_COLD: lambda=" & CStr(factor) & "; accepted=" & CStr(acceptedCount) & "; rejected=" & CStr(rejectedCount) & "; seconds=" & CStr(Timer - started) & _
+        "; closed_ASD_integration_not_identical_OpenSees_single_update; physical_capacity_certified=False" & vbCrLf & "TOTAL_ASD_COLD_EXECUTION: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If handle <> 0 Then Close #handle
+    TestRunASDHardShearCold = "RUNTIME ERROR: " & reason
+End Function
+
+Public Sub TestWriteASDColdStressTest(ByVal handle As Integer, ByRef field() As Double)
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Сохраняет инженерные деформации и полный поправочный отклик армирования до принятия для независимой сборки равновесия.
+    Dim side As Long, point As Long, i As Long, response As ICoupledPointResponse, material As ICoupledPointResponse
+    Dim code As ESolverFailureCode, concreteCode As ESolverFailureCode
+    Dim strain(1 To 6) As Double, gradient(1 To 6) As Double, stress(1 To 6) As Double, concreteStress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    For side = -1 To 1
+        Select Case side
+            Case -1: Set material = mReverseSidesTest(1): Set response = mReverseSidesTest(2)
+            Case 0: Set material = mReverseConcreteTest: Set response = mReverseReinforcedTest
+            Case 1: Set material = mReverseSidesTest(3): Set response = mReverseSidesTest(4)
+        End Select
+        For point = 1 To mReverseOperatorsTest.PointCount
+            mReverseOperatorsTest.PointStrain point, field, strain
+            mReverseOperatorsTest.AxialGradientAtPoint point, field, gradient
+            For i = 1 To 6: strain(i) = strain(i) + side * 0.001 * gradient(i): Next i
+            code = response.EvaluatePoint(point, strain, stress, tangent, ctmStressOnly, recordTrial:=False)
+            concreteCode = material.EvaluatePoint(point, strain, concreteStress, tangent, ctmStressOnly, recordTrial:=False)
+            If code <> sfcNone Or concreteCode <> sfcNone Then Err.Raise 5, , "Не воспроизведён материальный отклик принятой силовой пробы ASD."
+            TestWriteReverseBinaryVector handle, Array(point, side, code)
+            TestWriteReverseBinaryVector handle, strain: TestWriteReverseBinaryVector handle, stress: TestWriteReverseBinaryVector handle, concreteStress
+        Next point
+    Next side
+End Sub
