@@ -1,8 +1,14 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_exec_session": 90074,
+  "active_jobs": [
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold904ConsistentRefinementCold96_20261126",
+      "session": 90074,
+      "stage": "True cold Both/Excel exact901 after164/5 regression; one Newton mismatch refinement gate changed; original96/30"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1980,7 +1986,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -7582,6 +7588,13 @@
     "stress_MPa": 0,
     "weak_equation_MPa": 0
   },
+  "latest_cold32_outgoing_predictor": {
+    "cosine_with_incoming_secant": 0.9999699229469261,
+    "native_TrySpatialLoadTangent_probe_is_exact_1_over1024": true,
+    "normalized_linear_residual_MPa": 1.4779288903810084e-12,
+    "predictor_not_equilibrium": true,
+    "relative_difference_from_independent_linear_solve": 1.174265994968228e-12
+  },
   "latest_cold56_arc_follow_on894": {
     "actual_components": 256,
     "all_new_H_strictly_growing": true,
@@ -11544,6 +11557,21 @@
     "source_states": 56,
     "source_workflow_incomplete": false,
     "whole_goal_completed": false
+  },
+  "latest_consistent_refinement_evidence": "docs/reports/evidence/Coupled6DConsistentRefinement_2026-11-26",
+  "latest_consistent_refinement_local_comparison": {
+    "all_three_lambda_fields_and_resultants_bit_identical": true,
+    "iterations_and_evaluations_identical": true,
+    "no_robustness_or_speed_improvement_proven": true,
+    "physical_capacity_certified": false,
+    "refinement_not_activated_on_any_local_probe": true
+  },
+  "latest_consistent_refinement_regressions903": {
+    "failed": 0,
+    "macros": 5,
+    "own_process_closed": true,
+    "passed": 164,
+    "timeout600": false
   },
   "latest_continuation_physical_progress_audit": {
     "additional_warm_states": 6,
@@ -15634,7 +15662,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Audit actual outgoing Jacobian/residual at cold897 state32, especially row53. Fresh policy activated3times but no improvement:32states/max1.1042833676987807/820.4443359375s/NumFail versus56states/731.138671875s in890; no promotion. Separate follow-on894 is not capacity. Preserve exact material/history and96/30 budgets. Full SOW remains active; pure bending CDP versus SP deferred.",
+  "next_action": "Poll90074 same handle. On terminal run Check-TestConsistentRefinementCold96.py then full cold stress replay. Compare897 max/time/path and verify refinement actually activates; no current physical capacity claim.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -15915,7 +15943,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress: actual arc56 roots and14 follow-on pairs independently equilibrated; fresh spatial context compiled and164 regressions passed; cold897 and complete frozen stress replay898 verified. No confirmed physical ultimate.",
+  "previous_goal_turn_classification": "progress:897 completed cold/directOK/capacityNumFail32states max1.1042833676987807 in820.4443359375s;898all32stresses verified;899actual directional derivative differs by side at accepted boundary;900operative1/1024 predictor independently verified rel1.174e-12.901one existing Newton refinement gate corrected,902original baseline; three strict roots bitidentical/4,4,1iterations/new refinement inactive. No robustness or capacity claim. Later directed regressions/cold activity preserved by active_jobs.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
     "capacity718_last_states": 65,
@@ -17761,6 +17789,7 @@
     9618,
     9644,
     9759,
+    9957,
     10205,
     10530,
     10660,
@@ -17810,6 +17839,7 @@
     17992,
     18119,
     18194,
+    18337,
     18643,
     18664,
     18716,
@@ -17877,6 +17907,7 @@
     31923,
     32063,
     32493,
+    32513,
     33763,
     33931,
     34055,
@@ -17919,6 +17950,7 @@
     40463,
     40717,
     40742,
+    40770,
     40853,
     41572,
     41724,
@@ -17951,6 +17983,7 @@
     48073,
     48427,
     48848,
+    48897,
     48946,
     49056,
     49065,
@@ -18039,6 +18072,8 @@
     68103,
     68359,
     68396,
+    68487,
+    68552,
     68652,
     68709,
     68748,
@@ -18175,6 +18210,7 @@
     94733,
     94735,
     94788,
+    94892,
     95552,
     95559,
     95769,
@@ -18189,6 +18225,7 @@
     97145,
     97396,
     97673,
+    97867,
     98340,
     98786,
     98993,
@@ -18201,7 +18238,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T04:05:27.630827+03:00",
+  "updated_local": "2026-11-26T04:28:11.746330+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",

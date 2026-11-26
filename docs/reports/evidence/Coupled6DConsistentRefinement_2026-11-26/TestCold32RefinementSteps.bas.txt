@@ -1,0 +1,64 @@
+Public Function TestReadCold32RefinementSteps() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Решает независимые пробы одной меры от точной холодной истории32; численные исходы записывает отдельно от выполнения процедуры.
+    Dim accepted() As Double, previous() As Double, movement() As Double, projection() As Double
+    accepted = mReverseFieldsTest(mReverseFieldsTest.Count): previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+    movement = accepted
+    Dim i As Long
+    For i = 1 To UBound(movement): movement(i) = accepted(i) - previous(i): Next i
+    Dim coordinate As Double, spacing As Double
+    If Not mReverseSolverTest.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then _
+        Err.Raise 5, , "Не определена мера холодной секущей."
+    Dim fraction As Double, factor As Double, previousFactor As Double
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count, fraction, factor
+    mReverseTraceTest.ReadPoint mReverseTraceTest.Count - 1, fraction, previousFactor
+    Dim absTol As Double, relTol As Double
+    absTol = mReverseOptionsTest(3) * 0.0001: relTol = mReverseOptionsTest(4) * 0.0001
+    Dim handle As Integer: handle = FreeFile
+    Open mPolishRootTest & "\Native\Cold32RefinementSteps.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMREFINE32S0001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(3#, mReverseFieldsTest.Count, 30#, absTol, relTol, coordinate, spacing)
+    TestWriteReverseBinaryVector handle, projection
+    Dim report As Integer: report = FreeFile
+    Open mPolishRootTest & "\Native\Cold32RefinementSteps.txt" For Output As #report
+    Dim index As Long, ratio As Double, seed() As Double, prediction As Variant, solved As Boolean
+    Dim returned As Double, revision As Long, field() As Double, actual() As Double, checked() As Double
+    Dim fields(1 To 3) As Variant, factors(1 To 3) As Double, started As Double, elapsed As Double
+    For index = 1 To 3
+        If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, mReverseFieldsTest.Count) Then _
+            Err.Raise 5, , "Не восстановлена исходная история перед независимой пробой."
+        revision = mReverseSolverTest.AcceptedRevision
+        ratio = 0.5 ^ (index - 1): seed = accepted
+        For i = 1 To UBound(seed): seed(i) = accepted(i) + ratio * movement(i): Next i
+        prediction = seed: started = Timer
+        solved = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate + ratio * spacing, _
+            factor + ratio * (factor - previousFactor), returned, absTol, relTol, 30, consistentControl:=True, initialField:=prediction, _
+            allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True, allowRefinedRestart:=True)
+        elapsed = Timer - started
+        TestWriteReverseBinaryVector handle, Array(index, ratio, Abs(CLng(solved)), returned, revision, mReverseSolverTest.AcceptedRevision, elapsed)
+        TestWriteReverseBinaryVector handle, mReverseSolverTest.ReadPolishEffortTest
+        Print #report, CStr(index) & ";" & CStr(solved) & ";" & mReverseSolverTest.ResultMeta.DiagnosticDetails
+        If mReverseSolverTest.AcceptedRevision <> revision Then Err.Raise 5, , "Численная проба приняла материал."
+        mReverseSolverTest.CopyAccepted checked
+        For i = 1 To UBound(accepted)
+            If checked(i) <> accepted(i) Then Err.Raise 5, , "Численная проба изменила принятое поле."
+        Next i
+        If solved Then
+            mReverseSolverTest.CopyTrial field, actual
+            TestWriteReverseBinaryVector handle, field: TestWriteReverseBinaryVector handle, actual
+            fields(index) = field: factors(index) = returned
+        End If
+        mReverseSolverTest.DiscardStep
+    Next index
+    Close #handle: Close #report
+    For index = 1 To 3
+        If IsArray(fields(index)) Then
+            field = fields(index)
+            TestExportSignedArcTrial "Cold32Refined.Case" & CStr(index), field, factors(index)
+        End If
+    Next index
+    If Not mReverseSolverTest.ReplayAcceptedFields(mReverseFieldsTest, mReverseFieldsTest.Count) Then _
+        Err.Raise 5, , "Не восстановлена исходная история после экспорта проб."
+    TestReadCold32RefinementSteps = "TOTAL_COLD32_REFINEMENT_EXECUTION_TEST: passed=1; failed=0; outcomes recorded separately; not capacity"
+End Function
