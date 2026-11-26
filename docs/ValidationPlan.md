@@ -1,5 +1,10 @@
 # Проверки
 
+Отложенная обязательная проверка после стабилизации CDP и ASD:
+[сравнение обеих моделей по 15 опытам Wang–Huang 2017](Coupled6DExperimentalComparisonPlan.md),
+задача `WH2017-CDP-ASD-15`. Сначала выполняются простые контрольные
+нагружения обоих законов; прежний отдельный MVT2 не заменяет всю серию.
+
 После исправлений приёмки 22.10 использовать направленные
 RunAudit03ImportedSnapshotUnitChangeTests, RunAudit03GeometrySnapshotTests,
 modTestPlotConfig.RunAudit03SnapshotMetadataTests, RunPreviewSnapshotContractTests,

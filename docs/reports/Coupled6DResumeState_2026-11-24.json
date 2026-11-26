@@ -1,8 +1,19 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": null,
-  "active_jobs": [],
+  "active_exec_session": 51124,
+  "active_jobs": [
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1014PureBendingCDPLong_20261126",
+      "session": 51124,
+      "stage": "User-authorized CDP1800s curvature control"
+    },
+    {
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1016PureBendingSteelLimitFixed_20261126",
+      "session": 74098,
+      "stage": "Audit actual corrected test components"
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1980,7 +1991,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": true,
+  "all_started_stages_terminal": false,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -2300,6 +2311,24 @@
     "plan": "docs/ValidationPlan.md",
     "requested": "2026-11-25",
     "status": "not run"
+  },
+  "deferred_validations": {
+    "WH2017-CDP-ASD-15": {
+      "automatically_revisit_after_prerequisites": true,
+      "existing_MVT2_does_not_replace_complete_series": true,
+      "existing_source_PDF_verified": true,
+      "explicit_user_requested": true,
+      "plan": "docs/Coupled6DExperimentalComparisonPlan.md",
+      "prerequisite_sequence": [
+        "pure bending CDP/ASD",
+        "torsion CDP/ASD",
+        "NMT CDP/ASD",
+        "all6 with physical limits"
+      ],
+      "preserve_both_material_laws": true,
+      "sample_count": 15,
+      "status": "queued_after_both_laws_stabilize"
+    }
   },
   "departure_candidate749": {
     "accepted_revision_unchanged": 48,
@@ -35647,7 +35676,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Locate ASD steel strain limit on the verified postcracking bending branch, test displacement control in 3D OpenSees, then verify corresponding controls for six-force LoadPaths; CDP checks remain incomplete, no default material change.",
+  "next_action": "Fix only test-driver array allocation for ASD strain-limit control; preserve failed1015; CDP1800s remains active.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -36806,6 +36835,47 @@
       "timeout600": false
     },
     "proof": "docs/reports/evidence/Coupled6DPriorDilationCurve_2026-11-24/711/PriorDilationCurveProof.json"
+  },
+  "selectable_materials_in_progress": {
+    "CDP_directed_test_watchdog_seconds": 1800,
+    "CDP_test_root": "Cold1014PureBendingCDPLong_20261126",
+    "completed_comparison_commit": "ad02336",
+    "completed_comparison_pushed": true,
+    "current_default_CDP_retained": true,
+    "explicit_user_request": true,
+    "important_explanation_correction": "ASD includes simplified plasticity; cdf=0 does not disable plasticity.",
+    "keep_both_CDP_and_ASD": true,
+    "native_dropdown_saved_reopened_validation_pending": true,
+    "native_single_update_ASD_not_closed": true,
+    "options": [
+      "CDP",
+      "ASD"
+    ],
+    "ordered_validation": [
+      "pure bending",
+      "torsion",
+      "NMT",
+      "all6 with longitudinal and hoop strain limits"
+    ],
+    "public_switch_key": "Coupled.ConcreteLaw",
+    "saved_workbook_not_yet_updated": true,
+    "shared_envelope_calibration": true,
+    "source_edits_not_yet_compiled_or_tested": true,
+    "source_sha256": {
+      ".gitattributes": "E9F78C364BCF1659B2004B729DC72FD69847BE8A46756C45ADFA112FDC98C0F8",
+      "docs/Coupled6DMaterialContract.md": "2BC35741F38B1BAA4A229560AD135C8F724B61C5AC27EACB05483159C77C79EE",
+      "docs/NDM_User_Guide.md": "3F1D49AB5D35303C5ABFD2A2DEEE2D563F3C188A5DD225833E339E865910F3F0",
+      "src/Excel/modCoupledWorkbookInput.bas": "C5A1462874DB43C845370865972357A57E212D27EFA401ED524FC7112CE95E1F",
+      "src/Materials/CCoupledASDFlow.cls": "9105A2E3B613B874D8CC908CA081DC2002CAE5726C587D88FD55119AAC8655AB",
+      "src/Materials/CCoupledConcreteCalibration.cls": "EE855C2CC60F4E18F45F2E7C58D7B3ABCB5FA0F6DB6174E7FBAD10E5A9CA6B37",
+      "src/Materials/CCoupledConcreteEnvelope.cls": "27832BEE99DB59FDD098B61530C9085161E6B1D76DD629FFCEA37FBC27F48618",
+      "src/Materials/CCoupledConcreteResponse.cls": "73A44B7C12490E3BA7A346BAE0B93EDBDCB0C845AE2EAEA2EA267438139A7969",
+      "src/Solver/CCoupledSectionAnalysis.cls": "851314F06A62530B06A3ED5A6576BCC14B495285C9DD4C318D24FE55E9B0CE06",
+      "tools/build_workbook/SettingsCatalog.ps1": "EC2D6E5D9FC8B2991DFBC7DBE33ABC2069E370530FBAFA2C2C473875FE77EE3E",
+      "tools/build_workbook/WorkbookLayout.json": "4984E95B279576C5CD18D4CAD461E1E296E715D2692AAA3ACF72E3C71F59B182"
+    },
+    "steel_control_corrected_driver_root": "Cold1016PureBendingSteelLimitFixed_20261126",
+    "steel_control_failed_driver_root": "Cold1015PureBendingSteelLimit_20261126"
   },
   "shoulder717": {
     "analytical_reference_misses": [
@@ -38080,6 +38150,7 @@
     47167,
     47876,
     47981,
+    47982,
     48073,
     48427,
     48814,
@@ -38213,6 +38284,7 @@
     67035,
     67214,
     67233,
+    67377,
     67411,
     67422,
     67662,
@@ -38250,6 +38322,7 @@
     71270,
     71464,
     71706,
+    71723,
     71731,
     71847,
     72043,
@@ -38268,6 +38341,7 @@
     73914,
     73975,
     74004,
+    74418,
     74473,
     74939,
     75081,
@@ -38466,7 +38540,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T20:56:58.008892+03:00",
+  "updated_local": "2026-11-26T21:19:52.708081+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",
