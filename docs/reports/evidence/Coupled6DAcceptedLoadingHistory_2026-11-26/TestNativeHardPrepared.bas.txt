@@ -1,0 +1,178 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает фактическую подготовку HardShear и сохраняет штатную траекторию с полями вместо пользовательского отчёта.
+Public Function RunTestHardPrepared(ByVal outputRoot As String, ByVal mode As String) As String
+    On Error GoTo Failed
+    If Not ThisWorkbook.ReadOnly Or InStr(1, ThisWorkbook.Path, "RC_NDM_ModeSuite_", vbTextCompare) = 0 Then _
+        Err.Raise 5, , "Требуется частная проверочная книга."
+    Dim loads As Variant: loads = TestHardShearLoads()
+    Dim units As CUnitSystem: Set units = TestPrepareCoupledTimingBook(ThisWorkbook, "Capacity", "Excel", loads)
+    If mode <> "Baseline" And mode <> "EarlyField" Then Err.Raise 5, , "Неизвестный направленный режим."
+    EarlyFieldRequestedTest = (mode = "EarlyField")
+    mHardPreparedPathTest = outputRoot & "\Native\Hard" & mode
+    mHardPreparedReportTest = vbNullString: HardPreparedRequestedTest = True
+    Dim message As String: message = RunSectionCalculationForWorkbook(ThisWorkbook)
+    HardPreparedRequestedTest = False: EarlyFieldRequestedTest = False
+    If Len(mHardPreparedReportTest) = 0 Then Err.Raise 5, , "Не получен подготовленный расчёт. " & Replace(message, vbCrLf, " | ")
+    RunTestHardPrepared = mHardPreparedReportTest & vbCrLf & "TOTAL_HARD_PREPARED_TEST: passed=1; failed=0"
+    Exit Function
+Failed:
+    HardPreparedRequestedTest = False
+    EarlyFieldRequestedTest = False
+    RunTestHardPrepared = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет рабочую силовую ветвь и деформационное продолжение с читающим наблюдателем; численные параметры передаёт рабочий вызывающий код.
+Public Sub RunPreparedHardContinuationTest(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal path As CLoadPathVector, ByVal calibration As Variant, ByVal initialSteps As Long, ByVal attempts As Long, _
+        ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
+        ByVal maxIterations As Long, ByVal absTol As Double, ByVal relTol As Double)
+    If Not HardPreparedRequestedTest Then Err.Raise 5, , "Нет запроса направленной проверки."
+    HardPreparedRequestedTest = False
+    Dim started As Double: started = Timer
+    Dim branch As New CCoupledLoadContinuation, controlled As New CCoupledDeformationContinuation
+    branch.Initialize solver, path, initialSteps, attempts, maxIterations, absTol, relTol, True
+    branch.TraceSteelLimit reinforced, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
+    Dim fields As Collection, trace As CCoupledLoadTrace, actual() As Double, field() As Double
+    Set fields = branch.AcceptedFields: Set trace = branch.SavedTrace
+    branch.CopyAccepted field, actual
+    Dim observer As New CCoupledProgressObserverTest
+    observer.TestInitialize mHardPreparedPathTest & ".Checkpoint.csv"
+    Dim offset() As Double, direction() As Double
+    path.Components offset, direction
+    controlled.Trace solver, reinforced, offset, direction, fields, branch.PreviousAcceptedLambda, branch.AcceptedLambda, _
+        actual, maximumLambda, lambdaTolerance, maxIterations, absTol, relTol, trace, observer
+    Set fields = controlled.AcceptedFields: Set trace = controlled.SavedTrace
+    Dim meta As CResultMeta: Set meta = controlled.ResultMeta
+    If fields Is Nothing Or trace Is Nothing Then Err.Raise 5, , "Не сохранён путь контроллера."
+    If fields.Count <> trace.Count Then Err.Raise 5, , "Поля и нагрузки имеют разную длину."
+    Dim handle As Integer: handle = FreeFile
+    Open mHardPreparedPathTest & ".csv" For Output As #handle
+    Print #handle, "DIM;" & CStr(operators.DegreeCount) & ";" & CStr(solver.PhysicalDegreeCount) & ";" & CStr(operators.PointCount) & _
+        ";" & CStr(operators.ConcretePointCount) & ";" & TestOnsetNumber(HARD_PREPARED_HALF_TEST)
+    Print #handle, "LAW" & TestHardPreparedVector(calibration)
+    Print #handle, "OPTIONS;" & CStr(initialSteps) & ";" & CStr(attempts) & ";" & CStr(maxIterations) & _
+        ";" & TestOnsetNumber(absTol) & ";" & TestOnsetNumber(relTol) & ";" & TestOnsetNumber(lambdaTolerance)
+    Print #handle, "OFFSET" & TestHardPreparedVector(offset)
+    Print #handle, "DIRECTION" & TestHardPreparedVector(direction)
+    Print #handle, "META;" & CStr(meta.InternalStatus) & ";" & CStr(meta.ResultCode) & ";" & meta.ResultComment
+    Print #handle, "DETAILS;" & meta.DiagnosticDetails
+    Print #handle, "SOLVER_SECONDS;" & TestOnsetNumber(Timer - started)
+    TestWriteHardPreparedOperators operators, mHardPreparedPathTest & ".Operators.csv"
+    Dim i As Long, j As Long, fraction As Double, factor As Double, seed As Variant, target() As Double, checked() As Double
+    Dim external() As Double, weak() As Double, matrix() As Double, norm As Double, externalNorm As Double, bound As Double
+    Dim same As Boolean, steelUse As Double
+    solver.ResetHistory
+    For i = 1 To fields.Count
+        field = fields.Item(i): trace.ReadPoint i, fraction, factor
+        ReDim target(1 To 6)
+        For j = 1 To 6: target(j) = fraction * offset(j) + factor * direction(j): Next j
+        seed = field
+        If Not solver.TryStep(target(1), target(2), target(3), target(4), target(5), target(6), absTol, relTol, 1, initialField:=seed) Then
+            Print #handle, "REPLAY_FAILURE;" & CStr(i) & ";" & solver.ResultMeta.DiagnosticDetails
+            Close #handle
+            Err.Raise 5, , "Сохранённое поле не подтвердило точную силовую нагрузку: " & CStr(i)
+        End If
+        solver.CopyTrial checked, actual
+        same = True
+        For j = 1 To UBound(field)
+            If checked(j) <> field(j) Then same = False: Exit For
+        Next j
+        If Not same Then Close #handle: Err.Raise 5, , "Сохранённое поле потребовало поправки: " & CStr(i)
+        solver.AcceptStep
+        operators.LoadEquations target(1), target(2), target(3), target(4), target(5), target(6), external
+        If Not solver.TestEquilibriumLinearization(field, False, True, weak, matrix) Then _
+            Err.Raise 5, , "Не вычислена невязка сохранённого поля."
+        norm = 0#: externalNorm = 0#
+        For j = 1 To solver.PhysicalDegreeCount
+            norm = GeomMax(norm, Abs(weak(j) - external(j))): externalNorm = GeomMax(externalNorm, Abs(external(j)))
+        Next j
+        For j = solver.PhysicalDegreeCount + 1 To operators.DegreeCount
+            norm = GeomMax(norm, CDbl(calibration(0)) * Abs(weak(j) - external(j)))
+        Next j
+        bound = absTol + relTol * externalNorm: steelUse = reinforced.AcceptedSteelUtilization
+        Print #handle, "F;" & CStr(i) & ";" & TestOnsetNumber(fraction) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+        Print #handle, "R;" & CStr(i) & ";" & TestOnsetNumber(norm) & ";" & TestOnsetNumber(bound) & ";" & TestOnsetNumber(steelUse)
+        TestWriteHardPreparedStress handle, i, operators, concrete, reinforced, sides
+        If norm > bound Or steelUse > 1# Then Close #handle: Err.Raise 5, , "Нарушена допустимость сохранённого поля: " & CStr(i)
+    Next i
+    Close #handle
+    mHardPreparedReportTest = "HARD_PREPARED_RESULT;" & CStr(fields.Count) & ";" & TestOnsetNumber(controlled.BestAdmissibleLambda) & _
+        ";" & CStr(meta.InternalStatus) & ";" & meta.ResultComment & vbCrLf & meta.DiagnosticDetails
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Сохраняет геометрические операторы единичных полей и нагрузок для независимой сборки всех уравнений.
+Private Sub TestWriteHardPreparedOperators(ByVal operators As CCoupledElasticState, ByVal path As String)
+    Dim handle As Integer: handle = FreeFile
+    Open path For Output As #handle
+    Dim size As Long: size = operators.DegreeCount
+    Dim field() As Double, zeroLoad() As Double, residual() As Double, matrix() As Double, vector() As Double
+    Dim strain(1 To 6) As Double, gradient(1 To 6) As Double, projection(1 To 6) As Double
+    Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double, resultants(1 To 6) As Double
+    Dim point As Long, degree As Long, component As Long, x As Double, y As Double, weight As Double
+    ReDim field(1 To size): ReDim zeroLoad(1 To size)
+    For degree = 1 To size
+        field(degree) = 1#: operators.StartEquations field, zeroLoad, residual, matrix, False
+        Print #handle, "G;" & CStr(degree) & TestHardPreparedVector(residual)
+        For point = 1 To operators.PointCount
+            operators.PointStrain point, field, strain: operators.AxialGradientAtPoint point, field, gradient
+            Print #handle, "B;" & CStr(point) & ";" & CStr(degree) & TestHardPreparedVector(strain) & TestHardPreparedVector(gradient)
+        Next point
+        field(degree) = 0#
+    Next degree
+    For component = 1 To 6
+        ReDim vector(1 To 6): vector(component) = 1#
+        operators.LoadEquations vector(1), vector(2), vector(3), vector(4), vector(5), vector(6), residual
+        Print #handle, "L;" & CStr(component) & TestHardPreparedVector(residual)
+    Next component
+    For point = 1 To operators.PointCount
+        operators.Point point, x, y, weight
+        Print #handle, "P;" & CStr(point) & ";" & TestOnsetNumber(x) & ";" & TestOnsetNumber(y) & ";" & TestOnsetNumber(weight)
+        If point > operators.ConcretePointCount Then
+            operators.SteelProjection point, projection
+            Print #handle, "A;" & CStr(point) & TestHardPreparedVector(projection)
+        End If
+        For component = 1 To 6: gradient(component) = 0#: Next component
+        For component = 1 To 6
+            ReDim residual(1 To size): stress(component) = 1#
+            operators.AddSpatialPointEquilibrium point, stress, tangent, gradient, tangent, tangent, residual, matrix, False, resultants
+            Print #handle, "W;" & CStr(point) & ";" & CStr(component) & TestHardPreparedVector(residual)
+            stress(component) = 0#: gradient(component) = 1#: ReDim residual(1 To size)
+            operators.AddSpatialPointEquilibrium point, stress, tangent, gradient, tangent, tangent, residual, matrix, False, resultants
+            Print #handle, "V;" & CStr(point) & ";" & CStr(component) & TestHardPreparedVector(residual)
+            gradient(component) = 0#
+        Next component
+    Next point
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Записывает фактические центральную и боковые истории, сталь и повреждения без изменения принятых буферов.
+Private Sub TestWriteHardPreparedStress(ByVal handle As Integer, ByVal index As Long, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection)
+    Dim material As CCoupledConcreteResponse, steel As CCoupledReinforcedResponse, side As Long, point As Long
+    Dim stress(1 To 6) As Double, tension As Double, compression As Double, bar As Double
+    For side = -1 To 1
+        Select Case side
+            Case -1: Set material = sides(1): Set steel = sides(2)
+            Case 0: Set material = concrete: Set steel = reinforced
+            Case 1: Set material = sides(3): Set steel = sides(4)
+        End Select
+        For point = 1 To operators.PointCount
+            material.CopyAcceptedStress point, stress: material.AcceptedPointDamage point, tension, compression
+            bar = 0#
+            If point > operators.ConcretePointCount Then bar = steel.AcceptedSteelStress(point)
+            Print #handle, "S;" & CStr(index) & ";" & CStr(side) & ";" & CStr(point) & TestHardPreparedVector(stress) & _
+                ";" & TestOnsetNumber(tension) & ";" & TestOnsetNumber(compression) & ";" & TestOnsetNumber(bar)
+        Next point
+    Next side
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Преобразует числовой вектор в инвариантную запись без изменения значений внутри VBA.
+Private Function TestHardPreparedVector(ByVal values As Variant) As String
+    Dim i As Long
+    For i = LBound(values) To UBound(values): TestHardPreparedVector = TestHardPreparedVector & ";" & TestOnsetNumber(CDbl(values(i))): Next i
+End Function

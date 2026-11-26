@@ -1,0 +1,71 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет короткие префиксы исходной меры по двум принятым полям без будущего корня; общая история не принимается.
+' Все реальные затраты полных проб, штатного возврата и половинного подтверждения делят один указанный бюджет.
+Friend Function TestTryControlledSecantPrefix(ByRef baseLoad() As Double, ByRef direction() As Double, _
+        ByRef previous() As Double, ByVal previousLambda As Double, ByRef projection() As Double, ByVal requestedTarget As Double, _
+        ByVal referenceLambda As Double, ByVal absoluteTolerance As Double, ByVal relativeTolerance As Double, _
+        ByVal maximumSteps As Long, ByVal initialFraction As Double, ByRef resultLambda As Double, _
+        ByRef attempts As Collection, ByRef details As String) As Boolean
+    If mCandidateReady Or mHybridActive Then Err.Raise 5, "CCoupledNewtonSolver", "Перед префиксом завершите предыдущую пробу."
+    If LBound(previous) <> 1 Or UBound(previous) <> mDegreeCount Or LBound(projection) <> 1 Or UBound(projection) <> mDegreeCount Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Размер предыдущего поля или исходной меры не совпадает с решателем."
+    If maximumSteps < 1 Or absoluteTolerance <= 0# Or relativeTolerance <= 0# Or initialFraction <= 0# Or initialFraction > 1# Then _
+        Err.Raise 5, "CCoupledNewtonSolver", "Для проверки префикса нужны положительные допуски, бюджет и доля в интервале (0;1]."
+    ConfigureControlledLoad baseLoad, direction: ResetSolveState
+    Set attempts = New Collection: Set mGuideReturnPairsTest = New Collection
+    Dim accepted() As Double: accepted = mAccepted
+    Dim origin As Double, before As Double, increment As Double, i As Long
+    For i = 1 To mGaugeStart - 1
+        origin = origin + projection(i) * accepted(i): before = before + projection(i) * previous(i)
+    Next i
+    increment = requestedTarget - origin
+    If increment * (origin - before) <= 0# Then
+        details = "Нет разрешённого прямого приращения исходной меры по принятой секущей.": Exit Function
+    End If
+    Dim total As TSolveEffort, revision As Long: revision = mAcceptedRevision
+    Dim level As Long, fraction As Double, ratio As Double, target As Double, budget As Long, solved As Boolean, confirmed As Boolean
+    Dim seed() As Double, prediction As Variant, field() As Double, actual() As Double, factor As Double, load(1 To COMPONENT_COUNT) As Double
+    Dim errorNumber As Long, errorSource As String, errorText As String, phase As String, rootEffort As Variant
+    fraction = initialFraction: mGuideReturnCaptureTest = True
+    On Error GoTo InterruptedPrefix
+    For level = 1 To 8
+        budget = maximumSteps - total.Iterations - 2 ' Две итерации резервируются для штатного возврата и его половины.
+        If budget < 1 Then Exit For
+        If budget > 4 Then budget = 4
+        target = origin + fraction * increment: ratio = (target - origin) / (origin - before)
+        seed = accepted
+        For i = 1 To mGaugeStart - 1: seed(i) = accepted(i) + ratio * (accepted(i) - previous(i)): Next i
+        prediction = seed
+        solved = TryDeformationStep(baseLoad, direction, projection, target, referenceLambda + ratio * (referenceLambda - previousLambda), _
+            factor, absoluteTolerance, relativeTolerance, budget, consistentControl:=True, initialField:=prediction, _
+            allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        rootEffort = ReadPolishEffortTest
+        AddSolveEffort total: ReadSolveEffort total
+        confirmed = False: phase = vbNullString
+        If solved Then
+            CopyTrial field, actual: SetControlledLoad factor, load
+            confirmed = TryReturnOriginalMaterialControl(field, factor, projection, target, True, load, absoluteTolerance, _
+                relativeTolerance, maximumSteps, referenceLambda, phase)
+            ReadSolveEffort total
+        Else
+            ReDim field(1 To 1): ReDim actual(1 To 1)
+        End If
+        attempts.Add Array(Array(level, fraction, target, ratio, budget, Abs(CLng(solved)), Abs(CLng(confirmed)), factor, total.Iterations), _
+            field, actual, rootEffort)
+        details = details & "; доля " & CStr(fraction) & "; корень / подтверждение " & CStr(solved) & " / " & CStr(confirmed) & _
+            "; всего итераций " & CStr(total.Iterations) & " | " & phase
+        If mAcceptedRevision <> revision Or total.Iterations > maximumSteps Then Err.Raise 5, "CCoupledNewtonSolver", "Префикс изменил историю или превысил общий бюджет."
+        If confirmed Then
+            resultLambda = mTrialLambda: TestTryControlledSecantPrefix = True: Exit For
+        End If
+        DiscardStep: fraction = 0.5 * fraction
+    Next level
+FinishPrefix:
+    mGuideReturnCaptureTest = False
+    If Not TestTryControlledSecantPrefix Then DiscardStep
+    If errorNumber <> 0 Then Err.Raise errorNumber, errorSource, errorText
+    Exit Function
+InterruptedPrefix:
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    Resume FinishPrefix
+End Function

@@ -2141,6 +2141,7 @@
   "automatic_recovery_evidence_groups": {
     "arc": "docs/reports/evidence/Coupled6DAutomaticEventRecovery_2026-11-26",
     "capture": "docs/reports/evidence/Coupled6DPrefixNewtonDirection_2026-11-26",
+    "history": "docs/reports/evidence/Coupled6DAcceptedLoadingHistory_2026-11-26",
     "loading": "docs/reports/evidence/Coupled6DLoadingBudgetPair_2026-11-26",
     "midpoint": "docs/reports/evidence/Coupled6DMidpointMaterialPair_2026-11-26",
     "prefix": "docs/reports/evidence/Coupled6DOriginalScalarPrefixes_2026-11-26",
@@ -2293,7 +2294,7 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress:979 proved Newton loading root17;980 passed native midpoint/loading/publication/shared30 with no material or tolerance change",
+  "current_goal_turn_classification": "progress:984 native acceptance/idempotence and updated-history3 steps verified;985 accepted5 growing steps, isolated attempt6 rejection as half-field accuracy only",
   "deferred_CDP_versus_SP_pure_bending_check": {
     "after": "primary coupled convergence and confirmed ultimate problems",
     "plan": "docs/ValidationPlan.md",
@@ -6561,6 +6562,30 @@
   },
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
+  "latest_accepted_loading_history": {
+    "accepted_fixed_steps": 3,
+    "accepted_growing_steps": 5,
+    "all_H_reconstructed_from_saved_energies": true,
+    "all_accepted_states_post_commit_bitexact": true,
+    "all_publication_adjoint_uncertainties_verified": true,
+    "field_error_limit": 0.005,
+    "last_accepted_lambda": 1.1035002796079805,
+    "negative_preparations_preserved": [
+      981,
+      982,
+      983
+    ],
+    "no_cold_gain_claimed": true,
+    "physical_capacity_certified": false,
+    "rejected_full_equilibrium_lambda": 1.1035403229833465,
+    "rejected_step_field_error": 0.018978667782198897,
+    "remaining_original30": 26,
+    "roots": [
+      984,
+      985
+    ],
+    "used_iterations_before_retry": 4
+  },
   "latest_accurate_incoming959": {
     "accepted_steps": 1,
     "actual_components": 257,
@@ -9390,7 +9415,7 @@
       "original5_sheet_data_exact_public954": true
     }
   },
-  "latest_automatic_recovery_evidence_group": "docs/reports/evidence/Coupled6DLoadingBudgetPair_2026-11-26",
+  "latest_automatic_recovery_evidence_group": "docs/reports/evidence/Coupled6DAcceptedLoadingHistory_2026-11-26",
   "latest_automatic_recovery_proofs": {
     "961": {
       "all257_actual_components_and_saved_book_bitexact960": true,
@@ -14273,6 +14298,971 @@
       "saved_book_bitexact974_and_only_numerical_target_increment16x": false,
       "successful_publications": 2,
       "total_steps": 17,
+      "whole_goal_completed": false
+    },
+    "984": {
+      "accepted_steps": 3,
+      "actual_components": 257,
+      "all256_numerical_components_exact980": true,
+      "all_accepted_states_idempotent": true,
+      "automatic_cold_controller_not_tested": true,
+      "cold_gain_claimed": false,
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "no_future_equilibrium_input": true,
+      "original_first_pair_bitexact980": true,
+      "original_materials_load_path_tolerances_and_shared30_per_step": true,
+      "physical_capacity_certified": false,
+      "stages": [
+        {
+          "H_after": 0.0001655123655820634,
+          "H_before": 0.0001655111711413778,
+          "H_full": 0.0001655123655820634,
+          "H_resolution": 1.2152059824684298e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.2152076076622258e-06,
+            "norm": 3.018029108247636e-07,
+            "steel_utilization": 0.0036000962778493344,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.2152076076622258e-06,
+            "norm": 3.018029108247636e-07,
+            "steel_utilization": 0.0036000962778493344,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 5.707615556313329e-07,
+          "field_length": 5.760544427045204e-09,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 17,
+          "native_field_error": 5.707615556313326e-07,
+          "native_field_length": 5.760544427045205e-09,
+          "native_lambda_pair_bound": 8.41384263466231e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152076076622258e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034631661074341,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 3.018029108247636e-07,
+                "scalar_reconstruction_difference": 3.828534711480813e-15,
+                "scalar_residual": 0.0,
+                "steel_utilization": 0.0036000962778493344,
+                "steps": 17,
+                "verified": true
+              },
+              {
+                "bound": 1.2152067950653278e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034619123865057,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 1.980008846901352e-07,
+                "scalar_reconstruction_difference": 8.32320323773672e-15,
+                "scalar_residual": -7.105427357601002e-15,
+                "steel_utilization": 0.003600043320604923,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 17
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 1.2637239574118028e-15,
+              "case": 1,
+              "independent_gradient_relative_error": 3.618064506673828e-11,
+              "independent_uncertainty": 2.207806149650118e-05,
+              "independent_weights_relative_error": 2.167724339648858e-13,
+              "lambda_value": 1.1034631661074341,
+              "published": true,
+              "uncertainty": 2.2078061496501167e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 8.420845592831115e-16,
+              "case": 2,
+              "independent_gradient_relative_error": 5.044258283370636e-11,
+              "independent_uncertainty": 2.2169758054342572e-05,
+              "independent_weights_relative_error": 9.258979682324527e-14,
+              "lambda_value": 1.1034619123865057,
+              "published": true,
+              "uncertainty": 2.2169758054342565e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 28,
+          "revision_before": 27,
+          "signed_advance": 4.98779036289783e-09,
+          "stage": 1,
+          "total_steps_with_publications_and_post_commit": 17
+        },
+        {
+          "H_after": 0.00016551355982920356,
+          "H_before": 0.0001655123655820634,
+          "H_full": 0.00016551355982920356,
+          "H_resolution": 1.2152076076622258e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.215209232856022e-06,
+            "norm": 6.913302721568292e-07,
+            "steel_utilization": 0.0036002021923381565,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.215209232856022e-06,
+            "norm": 6.913302721568292e-07,
+            "steel_utilization": 0.0036002021923381565,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 5.70752282069657e-07,
+          "field_length": 5.760543044055396e-09,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 0,
+          "native_field_error": 5.707522820696567e-07,
+          "native_field_length": 5.7605430440554e-09,
+          "native_lambda_pair_bound": 8.413852664429737e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.215209232856022e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.103465673549291,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 6.913302721568292e-07,
+                "scalar_reconstruction_difference": 1.8231943732516243e-15,
+                "scalar_residual": -2.813721478034381e-15,
+                "steel_utilization": 0.0036002021923381565,
+                "steps": 0,
+                "verified": true
+              },
+              {
+                "bound": 1.2152084202591238e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034644198283625,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 4.6045936232956596e-07,
+                "scalar_reconstruction_difference": 2.5309615514501616e-15,
+                "scalar_residual": -2.813721478034381e-15,
+                "steel_utilization": 0.0036001492350937452,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 0
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 6.32187393288464e-16,
+              "case": 1,
+              "independent_gradient_relative_error": 3.3009691828181404e-11,
+              "independent_uncertainty": 2.197852717689721e-05,
+              "independent_weights_relative_error": 1.0415958742150484e-12,
+              "lambda_value": 1.103465673549291,
+              "published": true,
+              "uncertainty": 2.1978527176897204e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 1.5797387192659106e-15,
+              "case": 2,
+              "independent_gradient_relative_error": 3.1469479168996365e-11,
+              "independent_uncertainty": 2.20679681603417e-05,
+              "independent_weights_relative_error": 9.94177835983197e-13,
+              "lambda_value": 1.1034644198283625,
+              "published": true,
+              "uncertainty": 2.2067968160341696e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 29,
+          "revision_before": 28,
+          "signed_advance": 5.760543044040432e-09,
+          "stage": 2,
+          "total_steps_with_publications_and_post_commit": 0
+        },
+        {
+          "H_after": 0.00016551475390416388,
+          "H_before": 0.00016551355982920356,
+          "H_full": 0.00016551475390416388,
+          "H_resolution": 1.2152092328560218e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.2152108580498178e-06,
+            "norm": 2.775364643207718e-07,
+            "steel_utilization": 0.0036003081068269787,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.2152108580498178e-06,
+            "norm": 2.775364643207718e-07,
+            "steel_utilization": 0.0036003081068269787,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 5.704368715988652e-07,
+          "field_length": 5.760164485981656e-09,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 1,
+          "native_field_error": 5.704368715988654e-07,
+          "native_field_length": 5.760164485981656e-09,
+          "native_lambda_pair_bound": 8.413862694197163e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152108580498178e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034681809911477,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 2.775364643207718e-07,
+                "scalar_reconstruction_difference": 8.182690636182599e-15,
+                "scalar_residual": -8.262487916077532e-15,
+                "steel_utilization": 0.0036003081068269787,
+                "steps": 1,
+                "verified": true
+              },
+              {
+                "bound": 1.2152100454529199e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034669272702193,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 3.5504181782291915e-07,
+                "scalar_reconstruction_difference": 7.603292995206345e-15,
+                "scalar_residual": 2.3956531203239706e-15,
+                "steel_utilization": 0.0036002551495825682,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 1
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 2.108354298540066e-15,
+              "case": 1,
+              "independent_gradient_relative_error": 5.5633710603168725e-11,
+              "independent_uncertainty": 2.1881205398414063e-05,
+              "independent_weights_relative_error": 4.0308998896477177e-13,
+              "lambda_value": 1.1034681809911477,
+              "published": true,
+              "uncertainty": 2.188120539841407e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 3.5565840927242356e-16,
+              "case": 2,
+              "independent_gradient_relative_error": 1.5755622104506036e-11,
+              "independent_uncertainty": 2.1969074784321696e-05,
+              "independent_weights_relative_error": 3.8945935073171003e-13,
+              "lambda_value": 1.1034669272702193,
+              "published": true,
+              "uncertainty": 2.19690747843217e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 30,
+          "revision_before": 29,
+          "signed_advance": 5.760163067807553e-09,
+          "stage": 3,
+          "total_steps_with_publications_and_post_commit": 1
+        }
+      ],
+      "whole_goal_completed": false
+    },
+    "985": {
+      "accepted_steps": 5,
+      "actual_components": 257,
+      "all256_numerical_components_exact980": true,
+      "all_accepted_states_idempotent": true,
+      "automatic_cold_controller_not_tested": true,
+      "cold_gain_claimed": false,
+      "native": {
+        "failed": 0,
+        "macros": 2,
+        "own_process_closed": true,
+        "passed": 2,
+        "timeout600": false
+      },
+      "no_future_equilibrium_input": true,
+      "original_first_pair_bitexact980": true,
+      "original_materials_load_path_tolerances_and_shared30_per_step": true,
+      "physical_capacity_certified": false,
+      "stages": [
+        {
+          "H_after": 0.0001655123655820634,
+          "H_before": 0.0001655111711413778,
+          "H_full": 0.0001655123655820634,
+          "H_resolution": 1.2152059824684298e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.2152076076622258e-06,
+            "norm": 3.018029108247636e-07,
+            "steel_utilization": 0.0036000962778493344,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.2152076076622258e-06,
+            "norm": 3.018029108247636e-07,
+            "steel_utilization": 0.0036000962778493344,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 5.707615556313329e-07,
+          "field_length": 5.760544427045204e-09,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 17,
+          "native_field_error": 5.707615556313326e-07,
+          "native_field_length": 5.760544427045205e-09,
+          "native_lambda_pair_bound": 8.41384263466231e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152076076622258e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034631661074341,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 3.018029108247636e-07,
+                "scalar_reconstruction_difference": 3.828534711480813e-15,
+                "scalar_residual": 0.0,
+                "steel_utilization": 0.0036000962778493344,
+                "steps": 17,
+                "verified": true
+              },
+              {
+                "bound": 1.2152067950653278e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034619123865057,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 1.980008846901352e-07,
+                "scalar_reconstruction_difference": 8.32320323773672e-15,
+                "scalar_residual": -7.105427357601002e-15,
+                "steel_utilization": 0.003600043320604923,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 17
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 1.2637239574118028e-15,
+              "case": 1,
+              "independent_gradient_relative_error": 3.618064506673828e-11,
+              "independent_uncertainty": 2.207806149650118e-05,
+              "independent_weights_relative_error": 2.167724339648858e-13,
+              "lambda_value": 1.1034631661074341,
+              "published": true,
+              "uncertainty": 2.2078061496501167e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 8.420845592831115e-16,
+              "case": 2,
+              "independent_gradient_relative_error": 5.044258283370636e-11,
+              "independent_uncertainty": 2.2169758054342572e-05,
+              "independent_weights_relative_error": 9.258979682324527e-14,
+              "lambda_value": 1.1034619123865057,
+              "published": true,
+              "uncertainty": 2.2169758054342565e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 28,
+          "revision_before": 27,
+          "signed_advance": 4.98779036289783e-09,
+          "stage": 1,
+          "total_steps_with_publications_and_post_commit": 17
+        },
+        {
+          "H_after": 0.00016551355982920356,
+          "H_before": 0.0001655123655820634,
+          "H_full": 0.00016551355982920356,
+          "H_resolution": 1.2152076076622258e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.215209232856022e-06,
+            "norm": 6.913302721568292e-07,
+            "steel_utilization": 0.0036002021923381565,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.215209232856022e-06,
+            "norm": 6.913302721568292e-07,
+            "steel_utilization": 0.0036002021923381565,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 5.70752282069657e-07,
+          "field_length": 5.760543044055396e-09,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 0,
+          "native_field_error": 5.707522820696567e-07,
+          "native_field_length": 5.7605430440554e-09,
+          "native_lambda_pair_bound": 8.413852664429737e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.215209232856022e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.103465673549291,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 6.913302721568292e-07,
+                "scalar_reconstruction_difference": 1.8231943732516243e-15,
+                "scalar_residual": -2.813721478034381e-15,
+                "steel_utilization": 0.0036002021923381565,
+                "steps": 0,
+                "verified": true
+              },
+              {
+                "bound": 1.2152084202591238e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034644198283625,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 4.6045936232956596e-07,
+                "scalar_reconstruction_difference": 2.5309615514501616e-15,
+                "scalar_residual": -2.813721478034381e-15,
+                "steel_utilization": 0.0036001492350937452,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 0
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 6.32187393288464e-16,
+              "case": 1,
+              "independent_gradient_relative_error": 3.3009691828181404e-11,
+              "independent_uncertainty": 2.197852717689721e-05,
+              "independent_weights_relative_error": 1.0415958742150484e-12,
+              "lambda_value": 1.103465673549291,
+              "published": true,
+              "uncertainty": 2.1978527176897204e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 1.5797387192659106e-15,
+              "case": 2,
+              "independent_gradient_relative_error": 3.1469479168996365e-11,
+              "independent_uncertainty": 2.20679681603417e-05,
+              "independent_weights_relative_error": 9.94177835983197e-13,
+              "lambda_value": 1.1034644198283625,
+              "published": true,
+              "uncertainty": 2.2067968160341696e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 29,
+          "revision_before": 28,
+          "signed_advance": 5.760543044040432e-09,
+          "stage": 2,
+          "total_steps_with_publications_and_post_commit": 0
+        },
+        {
+          "H_after": 0.00016551594771969745,
+          "H_before": 0.00016551355982920356,
+          "H_full": 0.00016551594771969745,
+          "H_resolution": 1.2152092328560218e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.215212483243614e-06,
+            "norm": 4.215398791840709e-07,
+            "steel_utilization": 0.003600414021315801,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.215212483243614e-06,
+            "norm": 4.215398791840709e-07,
+            "steel_utilization": 0.003600414021315801,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 1.1415079894706033e-06,
+          "field_length": 1.1520766576239205e-08,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 1,
+          "native_field_error": 1.1415079894706035e-06,
+          "native_field_length": 1.1520766576239208e-08,
+          "native_lambda_pair_bound": 8.413862694197163e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.215212483243614e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034706884330046,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 4.215398791840709e-07,
+                "scalar_reconstruction_difference": 1.0356299151581538e-15,
+                "scalar_residual": -1.1570605584765303e-15,
+                "steel_utilization": 0.003600414021315801,
+                "steps": 1,
+                "verified": true
+              },
+              {
+                "bound": 1.2152108580498178e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034681809911477,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 4.121012529219358e-07,
+                "scalar_reconstruction_difference": 8.161873954470877e-15,
+                "scalar_residual": -8.262487916077532e-15,
+                "steel_utilization": 0.0036003081068269787,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 1
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 5.275123145088112e-16,
+              "case": 1,
+              "independent_gradient_relative_error": 3.617032603105422e-11,
+              "independent_uncertainty": 2.1725308643833726e-05,
+              "independent_weights_relative_error": 3.657383228670184e-13,
+              "lambda_value": 1.1034706884330046,
+              "published": true,
+              "uncertainty": 2.1725308643833733e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 1.9330736624721247e-16,
+              "case": 2,
+              "independent_gradient_relative_error": 3.2820893811605165e-11,
+              "independent_uncertainty": 2.1881155661482296e-05,
+              "independent_weights_relative_error": 5.906938944076149e-13,
+              "lambda_value": 1.1034681809911477,
+              "published": true,
+              "uncertainty": 2.1881155661482303e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 30,
+          "revision_before": 29,
+          "signed_advance": 1.1520766159428362e-08,
+          "stage": 3,
+          "total_steps_with_publications_and_post_commit": 1
+        },
+        {
+          "H_after": 0.00016552071764469196,
+          "H_before": 0.00016551594771969745,
+          "H_full": 0.00016552071764469196,
+          "H_resolution": 1.215212483243614e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.2152189840187983e-06,
+            "norm": 1.147906535502543e-06,
+            "steel_utilization": 0.0036008376792710894,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.2152189840187983e-06,
+            "norm": 1.147906535502543e-06,
+            "steel_utilization": 0.0036008376792710894,
+            "verified": true
+          },
+          "changed_concrete_states": 54,
+          "field_error": 2.281158082324571e-06,
+          "field_length": 2.304173949136927e-08,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 1,
+          "native_field_error": 2.281158082324571e-06,
+          "native_field_length": 2.3041739491369274e-08,
+          "native_lambda_pair_bound": 8.413882753732017e-06,
+          "native_lambda_pair_error": 0.0,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152189840187983e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034807182004318,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 1.147906535502543e-06,
+                "scalar_reconstruction_difference": 2.7755575615628914e-17,
+                "scalar_residual": -1.3999218451132833e-15,
+                "steel_utilization": 0.0036008376792710894,
+                "steps": 1,
+                "verified": true
+              },
+              {
+                "bound": 1.2152157336312062e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034757033167182,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 7.321085053438488e-07,
+                "scalar_reconstruction_difference": 6.2640864717522504e-15,
+                "scalar_residual": -4.952635523913784e-15,
+                "steel_utilization": 0.003600625850293445,
+                "steps": 0,
+                "verified": true
+              }
+            ],
+            "steps": 1
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 5.290093674321053e-16,
+              "case": 1,
+              "independent_gradient_relative_error": 3.9928974914724956e-11,
+              "independent_uncertainty": 2.117824288765367e-05,
+              "independent_weights_relative_error": 2.6090520712512827e-13,
+              "lambda_value": 1.1034807182004318,
+              "published": true,
+              "uncertainty": 2.1178242887653678e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 3.062522353882971e-15,
+              "case": 2,
+              "independent_gradient_relative_error": 1.9904514130979092e-11,
+              "independent_uncertainty": 2.153985124546999e-05,
+              "independent_weights_relative_error": 2.3258316769806947e-13,
+              "lambda_value": 1.1034757033167182,
+              "published": true,
+              "uncertainty": 2.1539851245469978e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 31,
+          "revision_before": 30,
+          "signed_advance": 2.304173911631139e-08,
+          "stage": 4,
+          "total_steps_with_publications_and_post_commit": 1
+        },
+        {
+          "H_after": 0.00016553053624886952,
+          "H_before": 0.00016552071764469196,
+          "H_full": 0.00016553053624886952,
+          "H_resolution": 1.2152189840187981e-10,
+          "accepted": true,
+          "after_commit": {
+            "bound": 1.2152316627088763e-06,
+            "norm": 3.581810511008683e-08,
+            "steel_utilization": 0.003601787843512161,
+            "verified": true
+          },
+          "before_commit": {
+            "bound": 1.2152316627088763e-06,
+            "norm": 3.581810511008683e-08,
+            "steel_utilization": 0.003601787843512161,
+            "verified": true
+          },
+          "changed_concrete_states": 55,
+          "field_error": 0.00012896965156592488,
+          "field_length": 4.8355912420266836e-08,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": true,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "maximum_post_commit_stress_difference": 0.0,
+          "maximum_stress_commit_error": 0.0,
+          "native_acceptance_gate": true,
+          "native_budget_used": 2,
+          "native_field_error": 0.00012896965156592469,
+          "native_field_length": 4.835591242026686e-08,
+          "native_lambda_pair_bound": 8.413922872801727e-06,
+          "native_lambda_pair_error": 2.220446049250313e-16,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152316627088763e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1035002796079805,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 3.581810511008683e-08,
+                "scalar_reconstruction_difference": 2.3141211169530607e-15,
+                "scalar_residual": 9.933807249007387e-13,
+                "steel_utilization": 0.003601787843512161,
+                "steps": 1,
+                "verified": true
+              },
+              {
+                "bound": 1.2152253233638374e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1034904989042063,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 7.833592935773889e-07,
+                "scalar_reconstruction_difference": 2.5500435096859064e-16,
+                "scalar_residual": 2.1736085153989393e-15,
+                "steel_utilization": 0.003601312761391625,
+                "steps": 1,
+                "verified": true
+              }
+            ],
+            "steps": 2
+          },
+          "post_commit_fields_and_lambda_bitexact": true,
+          "post_commit_iterations": 0,
+          "post_commit_native_exact": true,
+          "post_commit_native_solved": true,
+          "publications": [
+            {
+              "adjoint_backward_error": 9.57966078103113e-16,
+              "case": 1,
+              "independent_gradient_relative_error": 3.698365951499986e-11,
+              "independent_uncertainty": 2.0032228254434485e-05,
+              "independent_weights_relative_error": 7.301422232981859e-13,
+              "lambda_value": 1.1035002796079805,
+              "published": true,
+              "uncertainty": 2.003222825443448e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 6.1483667911826184e-15,
+              "case": 2,
+              "independent_gradient_relative_error": 2.1391334457523062e-11,
+              "independent_uncertainty": 2.0808763184644504e-05,
+              "independent_weights_relative_error": 2.7138115188861496e-13,
+              "lambda_value": 1.1034904989042063,
+              "published": true,
+              "uncertainty": 2.0808763184644504e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_after": 32,
+          "revision_before": 31,
+          "signed_advance": 4.8336322706224156e-08,
+          "stage": 5,
+          "total_steps_with_publications_and_post_commit": 2
+        },
+        {
+          "H_before": 0.00016553053624886952,
+          "H_full": 0.00016554919535199188,
+          "H_resolution": 1.215231662708876e-10,
+          "accepted": false,
+          "independent_acceptance_checks": {
+            "equilibria": true,
+            "field_pair_error": false,
+            "field_resolution": true,
+            "forward_direction": true,
+            "lambda_pair_error": true,
+            "remaining_budget": true,
+            "resolved_H_growth": true
+          },
+          "native_acceptance_gate": false,
+          "native_budget_used": 4,
+          "native_field_error": 0.018978667782198897,
+          "native_field_length": 8.91857440310058e-08,
+          "native_lambda_pair_bound": 8.414001118431922e-06,
+          "native_lambda_pair_error": 1.6191845664259574e-07,
+          "pair": {
+            "cases": [
+              {
+                "bound": 1.2152576167484652e-06,
+                "case": 1,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1035403229833465,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 7.012502037395413e-08,
+                "scalar_reconstruction_difference": 6.205105873569039e-15,
+                "scalar_residual": -5.901529265273098e-15,
+                "steel_utilization": 0.0036033670778865975,
+                "steps": 3,
+                "verified": true
+              },
+              {
+                "bound": 1.215244587255097e-06,
+                "case": 2,
+                "independently_equilibrated": true,
+                "lambda_value": 1.1035202203364352,
+                "material_ready": true,
+                "native_solved": true,
+                "norm": 3.6793662745466388e-09,
+                "scalar_reconstruction_difference": 3.7626152193936946e-15,
+                "scalar_residual": 6.515274431073692e-14,
+                "steel_utilization": 0.0036026060295972625,
+                "steps": 1,
+                "verified": true
+              }
+            ],
+            "steps": 4
+          },
+          "publications": [
+            {
+              "adjoint_backward_error": 1.2082758503621934e-15,
+              "case": 1,
+              "independent_gradient_relative_error": 3.744880714747844e-11,
+              "independent_uncertainty": 1.423481864963707e-05,
+              "independent_weights_relative_error": 5.762858800982929e-13,
+              "lambda_value": 1.1035403229833465,
+              "published": true,
+              "uncertainty": 1.4234818649637066e-05,
+              "uncertainty_available": true
+            },
+            {
+              "adjoint_backward_error": 7.685312236131625e-16,
+              "case": 2,
+              "independent_gradient_relative_error": 2.6380045085602747e-11,
+              "independent_uncertainty": 1.4312108466898553e-05,
+              "independent_weights_relative_error": 1.7066634570011838e-13,
+              "lambda_value": 1.1035202203364352,
+              "published": true,
+              "uncertainty": 1.4312108466898555e-05,
+              "uncertainty_available": true
+            }
+          ],
+          "revision_before": 32,
+          "signed_advance": 8.906744081887652e-08,
+          "stage": 6
+        }
+      ],
       "whole_goal_completed": false
     }
   },
@@ -30039,7 +31029,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "976-980 evidence archived, actual books rebuilt and staged bytes verified. Next981 native acceptance of verified loading pair and same-state idempotence, then next updated-history step and automatic controller without future fields. Goal active; physical capacity not certified.",
+  "next_action": "984-985 archived1758 logical raw records;two saved books rebuilt bitexact,negative981-983 preserved. Next bounded retry of985 attempt6 at half size from same accepted5 history; charge prior4 inside30, verify new full/half/H/commit and no future field as proof. No physical ultimate or cold gain.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -30322,7 +31312,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "no progress:status-only answer;revalidated and advanced979-980",
+  "previous_goal_turn_classification": "progress:979-980 loading midpoint pair verified within shared30, checkpoint8b5e723 pushed",
   "previous_goal_turn_revalidation": "Previous acknowledgement only deferred pure-bending CDP/SP comparison; no numerical progress claimed. Revalidated branch, terminal handles, staged926 and exact925 evidence before continuing.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
@@ -32128,6 +33118,7 @@
   "terminal_sessions_this_stage": [
     1055,
     1057,
+    1085,
     1109,
     1195,
     1537,
@@ -32269,6 +33260,7 @@
     19511,
     19677,
     19716,
+    19929,
     20068,
     20401,
     20496,
@@ -32318,6 +33310,7 @@
     30135,
     30205,
     30281,
+    30368,
     30403,
     30485,
     30615,
@@ -32489,9 +33482,11 @@
     55089,
     55319,
     55381,
+    55519,
     55638,
     55897,
     56016,
+    56238,
     56270,
     56295,
     56362,
@@ -32529,6 +33524,7 @@
     62007,
     62433,
     62471,
+    62744,
     62785,
     62797,
     62845,
@@ -32540,6 +33536,7 @@
     63350,
     63362,
     63549,
+    63707,
     63902,
     64100,
     64297,
@@ -32548,6 +33545,7 @@
     64786,
     65220,
     65352,
+    65433,
     65461,
     65489,
     65581,
@@ -32588,6 +33586,7 @@
     70002,
     70006,
     70193,
+    70308,
     70490,
     70629,
     70645,
@@ -32599,6 +33598,7 @@
     71847,
     72043,
     72129,
+    72187,
     72466,
     72480,
     72543,
@@ -32667,11 +33667,13 @@
     83218,
     83264,
     83283,
+    83353,
     83355,
     83472,
     83496,
     83543,
     83669,
+    83892,
     83984,
     84038,
     84068,
@@ -32733,6 +33735,7 @@
     91464,
     91568,
     91793,
+    91826,
     92127,
     92365,
     92582,
@@ -32765,6 +33768,7 @@
     96393,
     96407,
     96656,
+    96781,
     96865,
     97005,
     97029,
@@ -32789,7 +33793,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T17:20:38.230456+03:00",
+  "updated_local": "2026-11-26T17:55:51.180796+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",

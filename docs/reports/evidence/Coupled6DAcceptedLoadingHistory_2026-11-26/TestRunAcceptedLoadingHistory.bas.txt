@@ -1,0 +1,208 @@
+Public Function TestRunAcceptedLoadingHistory() As String
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Принимает только проверенные нагружающие пары и повторяет НДС после обновления истории; следующие прогнозы используют две принятые точки.
+    ' Не определяет предел: выполняет не более трёх шагов по выбранной материальной координате и записывает все отказы, включая несовпадение после commit.
+    Dim savedRoot As String: savedRoot = mPolishRootTest
+    On Error GoTo TestHistoryFailure
+    Dim report As String: report = TestRunMaterialDirectionAudit()
+    Dim handle As Integer: handle = FreeFile
+    Open savedRoot & "\Native\LoadingHistory.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMLOADHIST00001"
+    Put #handle, , magic
+    Dim stage As Long, acceptedCount As Long, inputHandle As Integer, index As Long, point As Long, i As Long
+    Dim meta As Variant, context As Variant, tag As Variant, ignored As Variant, info As Variant, fullInfo As Variant, halfInfo As Variant
+    Dim accepted() As Double, previous() As Double, projection() As Double, full() As Double, half() As Double, doubled() As Double
+    Dim reference As Double, unused As Double, revision As Long, total As Long, pairReady As Boolean, available As Long
+    Dim baseline As Double, coordinate As Double, resolution As Double, length As Double, shapeError As Double, lambdaError As Double
+    Dim noise As Double, advance As Double, oldLength As Double, forward As Boolean, gate As Boolean, tolerance As Double
+    Dim publication As Variant, publicationField() As Double, actual() As Double, factor As Double, target As Double
+    Dim effort As Variant, published As Boolean, postReady As Boolean, postExact As Boolean, postField() As Double, postActual() As Double
+    Dim hAfter As Double, increment As Double, seed() As Double, zero() As Double, values() As Double, matrix() As Double, expected() As Double
+    Dim scalar As ICoupledScalarConstraint, equations As ICoupledEquationSystem, value As Double, gradient() As Double, child As String
+    For stage = 1 To 3
+        mReverseSolverTest.DiscardStep
+        revision = mReverseSolverTest.AcceptedRevision
+        mReverseTraceTest.ReadPoint mReverseTraceTest.Count, unused, reference
+        previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+        If Not mReverseSolverTest.TryEnvelopeControlState(mReverseBaseTest, mReverseDirectionTest, reference, _
+                mReverseOptionsTest(3), mReverseOptionsTest(4), baseline, resolution) Then Err.Raise 5, , "Нет принятой H перед проверкой истории."
+        TestWriteLoadingStateTest savedRoot & "\Native\HistoryStateBefore." & CStr(stage) & ".bin"
+        inputHandle = FreeFile
+        Open mPolishRootTest & "\Native\MaterialMidpointPair.bin" For Binary Access Read As #inputHandle
+        Get #inputHandle, , magic
+        If magic <> "NDMMATPAIR000001" Then Err.Raise 5, , "Неверный формат пары перед принятием."
+        meta = TestReadPolishVector(inputHandle): context = TestReadPolishVector(inputHandle)
+        accepted = TestReadPolishVector(inputHandle): projection = TestReadPolishVector(inputHandle)
+        If context(1) <> reference Or context(2) <> revision Then Err.Raise 5, , "Пара принадлежит другой принятой истории."
+        available = 0: pairReady = True
+        tag = TestReadPolishVector(inputHandle)
+        Do While tag(1) > 0#
+            ignored = TestReadPolishVector(inputHandle): ignored = TestReadPolishVector(inputHandle): info = TestReadPolishVector(inputHandle)
+            pairReady = pairReady And CBool(info(4)) And CBool(info(6))
+            If info(6) Then
+                publicationField = TestReadPolishVector(inputHandle)
+                ignored = TestReadPolishVector(inputHandle): ignored = TestReadPolishVector(inputHandle)
+                For point = 1 To 3 * mReverseOperatorsTest.PointCount
+                    ignored = TestReadPolishVector(inputHandle): ignored = TestReadPolishVector(inputHandle)
+                Next point
+                If tag(1) = 1 Then full = publicationField: fullInfo = info
+                If tag(1) = 2 Then half = publicationField: halfInfo = info
+                available = available + 1
+            End If
+            tag = TestReadPolishVector(inputHandle)
+        Loop
+        If Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Не прочитан хвост пары перед принятием."
+        Close #inputHandle: inputHandle = 0
+        total = CLng(tag(2)): pairReady = pairReady And available = 2
+        gate = False: length = 0#: shapeError = 0#: lambdaError = 0#: coordinate = baseline: advance = 0#: oldLength = 0#
+        noise = 8# * mReverseOptionsTest(4) * (1# + Abs(reference))
+        If pairReady Then
+            ReDim doubled(1 To UBound(full))
+            For i = 1 To UBound(full): doubled(i) = 2# * half(i) - accepted(i): Next i
+            length = mReverseSolverTest.SpatialFieldDistance(accepted, full)
+            If length > 0# Then shapeError = mReverseSolverTest.SpatialFieldDistance(doubled, full) / length
+            lambdaError = Abs(2# * halfInfo(7) - reference - fullInfo(7))
+            tolerance = mReverseSolverTest.ControlledLoadTolerance(mReverseBaseTest, mReverseDirectionTest, fullInfo(7), meta(6), meta(7))
+            If Not mReverseSolverTest.TryEnvelopeCoordinateAt(full, coordinate) Then Err.Raise 5, , "Не прочитана H полного поля."
+            forward = mReverseSolverTest.SpatialIncrementAdvances(previous, accepted, full, advance, oldLength)
+            gate = total < CLng(meta(8)) And length > 16# * tolerance / CDbl(meta(9)) And shapeError <= 0.005 And lambdaError <= noise And _
+                coordinate - baseline > resolution And forward
+        End If
+        TestWriteReverseBinaryVector handle, Array(1#, stage, revision, reference, Abs(CLng(pairReady)), total, length, shapeError, _
+            lambdaError, noise, baseline, coordinate, resolution, advance, oldLength, Abs(CLng(gate)))
+        If Not gate Then Exit For
+        TestWriteReverseBinaryVector handle, accepted: TestWriteReverseBinaryVector handle, full: TestWriteReverseBinaryVector handle, half
+        inputHandle = FreeFile
+        Open mPolishRootTest & "\Native\MaterialPublication.bin" For Binary Access Read As #inputHandle
+        Get #inputHandle, , magic
+        If magic <> "NDMMATPUBLISH001" Then Err.Raise 5, , "Неверный формат публикации полного поля."
+        ignored = TestReadPolishVector(inputHandle): publication = TestReadPolishVector(inputHandle)
+        projection = TestReadPolishVector(inputHandle): publicationField = TestReadPolishVector(inputHandle)
+        Close #inputHandle: inputHandle = 0
+        If publication(1) <> 1 Or Not CBool(publication(2)) Or Not CBool(publication(3)) Or Not CBool(publication(5)) Then _
+            Err.Raise 5, , "Полное поле не имеет подтверждённой публикации и оценки неопределённости."
+        target = 0#
+        For i = 1 To UBound(full)
+            If publicationField(i) <> full(i) Then Err.Raise 5, , "Публикация относится к другому полю."
+            target = target + projection(i) * full(i)
+        Next i
+        published = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target, fullInfo(7), _
+            factor, meta(6), meta(7), CLng(meta(8)) - total, consistentControl:=True, initialField:=full)
+        effort = mReverseSolverTest.ReadPolishEffortTest: total = total + CLng(effort(0))
+        TestWriteReverseBinaryVector handle, Array(2#, stage, Abs(CLng(published)), factor, effort(0), total)
+        If Not published Then Exit For
+        mReverseSolverTest.CopyTrial publicationField, actual
+        If factor <> fullInfo(7) Then Err.Raise 5, , "Повтор публикации изменил множитель перед принятием."
+        For i = 1 To UBound(full)
+            If publicationField(i) <> full(i) Then Err.Raise 5, , "Повтор публикации изменил поле перед принятием."
+        Next i
+        TestWriteReverseBinaryVector handle, actual: TestWriteRecordedYieldStressTest handle, full
+        mReverseSolverTest.AcceptStep: acceptedCount = acceptedCount + 1
+        If mReverseSolverTest.AcceptedRevision <> revision + 1 Then Err.Raise 5, , "Принятие не увеличило ревизию ровно на единицу."
+        mReverseSolverTest.CopyAccepted publicationField
+        For i = 1 To UBound(full)
+            If publicationField(i) <> full(i) Then Err.Raise 5, , "Принятие изменило поле материального корня."
+        Next i
+        If Not mReverseSolverTest.TryReadEnvelopeCoordinate(True, hAfter) Then Err.Raise 5, , "Не прочитана H принятой истории."
+        mReverseFieldsTest.Add full: mReverseTraceTest.Add 1#, factor
+        TestWriteLoadingStateTest savedRoot & "\Native\HistoryStateAfter." & CStr(stage) & ".bin"
+        postReady = mReverseSolverTest.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, target, factor, _
+            factor, meta(6), meta(7), CLng(meta(8)) - total, consistentControl:=True, initialField:=full)
+        effort = mReverseSolverTest.ReadPolishEffortTest: total = total + CLng(effort(0)): postExact = False
+        If postReady Then
+            mReverseSolverTest.CopyTrial postField, postActual: postExact = (factor = CDbl(fullInfo(7)))
+            For i = 1 To UBound(full)
+                If postField(i) <> full(i) Then postExact = False
+            Next i
+        End If
+        TestWriteReverseBinaryVector handle, Array(3#, stage, revision, mReverseSolverTest.AcceptedRevision, coordinate, hAfter, _
+            Abs(CLng(postReady)), factor, effort(0), Abs(CLng(postExact)), total)
+        If postReady Then
+            TestWriteReverseBinaryVector handle, postField: TestWriteReverseBinaryVector handle, postActual
+            TestWriteRecordedYieldStressTest handle, postField
+        End If
+        mReverseSolverTest.DiscardStep
+        If total > CLng(meta(8)) Then Err.Raise 5, , "Пара с принятием и повтором превысила общий бюджет."
+        If Not postReady Or Not postExact Or effort(0) <> 0 Or stage = 3 Then Exit For
+        increment = 2# * (meta(3) - meta(10))
+        ReDim zero(1 To UBound(full) + 1)
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, target, full, factor) Then _
+            Err.Raise 5, , "Не открыт читающий контекст новой принятой точки."
+        Set scalar = mReverseSolverTest.CreateMaterialConstraint(CLng(meta(1)), CLng(meta(2)), 0, 0#)
+        If Not scalar.TryEvaluate(zero, False, value, gradient) Then Err.Raise 5, , "Не прочитана материальная координата обновлённой истории."
+        mReverseSolverTest.EndNewtonLineTest
+        seed = full
+        For i = 1 To UBound(seed): seed(i) = full(i) + (full(i) - accepted(i)): Next i
+        meta(3) = value + increment: meta(10) = value + 0.5 * increment
+        meta(4) = factor + (factor - reference): meta(5) = 0#
+        For i = 1 To UBound(seed): meta(5) = meta(5) + projection(i) * seed(i): Next i
+        If Not mReverseSolverTest.BeginNewtonLineTest(mReverseBaseTest, mReverseDirectionTest, projection, CDbl(meta(5)), seed, CDbl(meta(4))) Then _
+            Err.Raise 5, , "Не открыт прогноз от двух принятых точек."
+        Set equations = mReverseSolverTest
+        If Not equations.TryEvaluate(zero, False, values, matrix) Then Err.Raise 5, , "Прогноз не даёт материального отклика."
+        ReDim expected(1 To UBound(seed))
+        For i = 1 To UBound(seed)
+            expected(i) = values(i)
+            If i > mReverseSolverTest.PhysicalDegreeCount Then expected(i) = expected(i) / CDbl(meta(9))
+        Next i
+        mReverseSolverTest.EndNewtonLineTest: mReverseSolverTest.DiscardStep
+        child = savedRoot & "\Native\History" & Format$(stage + 1, "00")
+        MkDir child: MkDir child & "\Input": MkDir child & "\Native"
+        inputHandle = FreeFile
+        Open child & "\Input\RecordedYieldSeed.bin" For Binary Access Write As #inputHandle
+        TestWriteReverseBinaryVector inputHandle, meta: TestWriteReverseBinaryVector inputHandle, seed
+        TestWriteReverseBinaryVector inputHandle, full: TestWriteReverseBinaryVector inputHandle, expected
+        TestWriteReverseBinaryVector inputHandle, projection
+        Close #inputHandle: inputHandle = 0
+        mPolishRootTest = child: report = TestRunHistoryMaterialPair()
+    Next stage
+    TestWriteReverseBinaryVector handle, Array(0#, acceptedCount, mReverseSolverTest.AcceptedRevision)
+    Close #handle: handle = 0
+    mPolishRootTest = savedRoot: mReverseSolverTest.DiscardStep
+    TestRunAcceptedLoadingHistory = "TOTAL_ACCEPTED_LOADING_HISTORY_TEST: passed=1; failed=0; numerical outcomes recorded; no capacity claim"
+    Exit Function
+TestHistoryFailure:
+    Dim errorNumber As Long, errorSource As String, errorText As String
+    errorNumber = Err.Number: errorSource = Err.Source: errorText = Err.Description
+    On Error Resume Next
+    If inputHandle <> 0 Then Close #inputHandle
+    If handle <> 0 Then Close #handle
+    mPolishRootTest = savedRoot: mReverseSolverTest.EndNewtonLineTest: mReverseSolverTest.DiscardStep
+    Dim failureHandle As Integer: failureHandle = FreeFile
+    Open savedRoot & "\Native\LoadingHistoryFailure.txt" For Output As #failureHandle
+    Print #failureHandle, "Error=" & CStr(errorNumber) & "; Stage=" & CStr(stage)
+    Print #failureHandle, errorSource
+    Print #failureHandle, errorText
+    Close #failureHandle
+    On Error GoTo 0
+    Err.Raise errorNumber, errorSource, errorText
+End Function
+
+Public Sub TestWriteLoadingStateTest(ByVal path As String)
+    ' -------------------- ДЛЯ ТЕСТОВ --------------------
+    ' Сохраняет все принятые бетонные состояния трёх станций и напряжения стали для независимой проверки обновлённой истории.
+    Dim handle As Integer: handle = FreeFile
+    Open path For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMHISTSTATE0001"
+    Put #handle, , magic
+    TestWriteReverseBinaryVector handle, Array(mReverseSolverTest.AcceptedRevision)
+    Dim field() As Double: mReverseSolverTest.CopyAccepted field
+    TestWriteReverseBinaryVector handle, field
+    Dim side As Long, point As Long, material As CCoupledConcreteResponse, steel As CCoupledReinforcedResponse
+    Dim state As Variant, tension As Double, compression As Double, bar As Double, stress(1 To 6) As Double
+    For side = -1 To 1
+        Select Case side
+            Case -1: Set material = mReverseSidesTest(1): Set steel = mReverseSidesTest(2)
+            Case 0: Set material = mReverseConcreteTest: Set steel = mReverseReinforcedTest
+            Case 1: Set material = mReverseSidesTest(3): Set steel = mReverseSidesTest(4)
+        End Select
+        For point = 1 To mReverseOperatorsTest.PointCount
+            state = material.ReadNewtonYieldEventStateTest(point)
+            material.AcceptedPointDamage point, tension, compression: material.CopyAcceptedStress point, stress
+            bar = 0#: If point > mReverseOperatorsTest.ConcretePointCount Then bar = steel.AcceptedSteelStress(point)
+            TestWriteReverseBinaryVector handle, Array(point, side): TestWriteReverseBinaryVector handle, state
+            TestWriteReverseBinaryVector handle, Array(tension, compression, bar): TestWriteReverseBinaryVector handle, stress
+        Next point
+    Next side
+    Close #handle
+End Sub
