@@ -21298,6 +21298,391 @@
     },
     "whole_goal_completed": false
   },
+  "latest_engineering_opensees_control": {
+    "buffer_regions_are_explicit_engineering_assumption": true,
+    "cases": {
+      "993": {
+        "accepted_states": 8,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 117.51606480000191,
+        "approximate_full_run_seconds": 118.042929,
+        "checked_stress_strain_tensors": 0,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 31,
+            "gauss_point": 3,
+            "value": 0.09042553792311558,
+            "z_interval_mm": [
+              0.0,
+              25.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 400.0,
+        "maximum_accepted_lambda": 0.340625,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 2.6426447220728733e-05,
+        "mesh": [
+          6,
+          6,
+          16
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      },
+      "994": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.13894239999353886,
+        "approximate_full_run_seconds": 0.590396,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 400.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.6229201964965543e-16,
+        "maximum_independent_cut_force_error_N": 5.174014303419325e-10,
+        "mesh": [
+          6,
+          6,
+          16
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "995": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.3149253999872599,
+        "approximate_full_run_seconds": 0.503721,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 800.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.171188108830012e-16,
+        "maximum_independent_cut_force_error_N": 1.0048097465187311e-08,
+        "mesh": [
+          6,
+          6,
+          32
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "996": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.605663900001673,
+        "approximate_full_run_seconds": 0.795084,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.8109621289719685e-16,
+        "maximum_independent_cut_force_error_N": 5.5990110720611284e-08,
+        "mesh": [
+          6,
+          6,
+          48
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "997": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.45890339999459684,
+        "approximate_full_run_seconds": 0.774419,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "clamped",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.524747892777558e-16,
+        "maximum_independent_cut_force_error_N": 5.392923614838057e-08,
+        "mesh": [
+          6,
+          6,
+          48
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "998": {
+        "accepted_states": 18,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 201.59577419998823,
+        "approximate_full_run_seconds": 202.182626,
+        "checked_stress_strain_tensors": 10368,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 535,
+            "gauss_point": 4,
+            "value": 0.15467109152485525,
+            "z_interval_mm": [
+              337.5,
+              350.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 800.0,
+        "maximum_accepted_lambda": 0.6990364074707032,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 1.2724558473564684e-07,
+        "mesh": [
+          6,
+          6,
+          34
+        ],
+        "nonlinear_zone_mm": [
+          337.5,
+          462.5
+        ],
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      },
+      "999": {
+        "accepted_states": 18,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 305.5949660000042,
+        "approximate_full_run_seconds": 306.160453,
+        "checked_stress_strain_tensors": 10368,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 823,
+            "gauss_point": 4,
+            "value": 0.1561025115573922,
+            "z_interval_mm": [
+              537.5,
+              550.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 0.6990364074707032,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 2.53869075095281e-07,
+        "mesh": [
+          6,
+          6,
+          50
+        ],
+        "nonlinear_zone_mm": [
+          537.5,
+          662.5
+        ],
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      }
+    },
+    "comparisons": [
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 994,
+        "second": 996,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 1.4482975364397717,
+            "stresses_difference_percent": 1.4482975364397708
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 995,
+        "second": 996,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 0.006670088880834724,
+            "stresses_difference_percent": 0.006670088880841954
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 996,
+        "second": 997,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 0.0001350208225118134,
+            "stresses_difference_percent": 0.00021737477005060084
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": false,
+        "compared_common_load_states": 18,
+        "first": 998,
+        "second": 999,
+        "states": [
+          {
+            "lambda_value": 0.05,
+            "strains_difference_percent": 0.006746011877719234,
+            "stresses_difference_percent": 0.006746018718254338
+          },
+          {
+            "lambda_value": 0.1,
+            "strains_difference_percent": 0.006746012307547751,
+            "stresses_difference_percent": 0.006746015727774146
+          },
+          {
+            "lambda_value": 0.15000000000000002,
+            "strains_difference_percent": 0.0067460124116862814,
+            "stresses_difference_percent": 0.006746014691841497
+          },
+          {
+            "lambda_value": 0.2,
+            "strains_difference_percent": 0.006746014891305802,
+            "stresses_difference_percent": 0.006746016601443156
+          },
+          {
+            "lambda_value": 0.25,
+            "strains_difference_percent": 0.006746014143418587,
+            "stresses_difference_percent": 0.0067460155115167866
+          },
+          {
+            "lambda_value": 0.3,
+            "strains_difference_percent": 0.006746014340988603,
+            "stresses_difference_percent": 0.00674601548108121
+          },
+          {
+            "lambda_value": 0.35,
+            "strains_difference_percent": 0.006746014991687881,
+            "stresses_difference_percent": 0.006746015968893809
+          },
+          {
+            "lambda_value": 0.39999999999999997,
+            "strains_difference_percent": 0.00674601217888128,
+            "stresses_difference_percent": 0.006746013033920492
+          },
+          {
+            "lambda_value": 0.44999999999999996,
+            "strains_difference_percent": 0.006746012617413536,
+            "stresses_difference_percent": 0.006746013377460932
+          },
+          {
+            "lambda_value": 0.49999999999999994,
+            "strains_difference_percent": 0.006746015184912557,
+            "stresses_difference_percent": 0.006746015868942254
+          },
+          {
+            "lambda_value": 0.5499999999999999,
+            "strains_difference_percent": 0.006746014761494743,
+            "stresses_difference_percent": 0.006746015383329895
+          },
+          {
+            "lambda_value": 0.6,
+            "strains_difference_percent": 0.0067460128951214865,
+            "stresses_difference_percent": 0.006746013465160817
+          },
+          {
+            "lambda_value": 0.65,
+            "strains_difference_percent": 0.006746014042053202,
+            "stresses_difference_percent": 0.006746014568265037
+          },
+          {
+            "lambda_value": 0.675,
+            "strains_difference_percent": 0.006720276266271185,
+            "stresses_difference_percent": 0.0067202767710608
+          },
+          {
+            "lambda_value": 0.690625,
+            "strains_difference_percent": 0.006779510640875126,
+            "stresses_difference_percent": 0.006779510107149859
+          },
+          {
+            "lambda_value": 0.6955078125,
+            "strains_difference_percent": 0.006814924929369953,
+            "stresses_difference_percent": 0.007999253665862117
+          },
+          {
+            "lambda_value": 0.6985595703125,
+            "strains_difference_percent": 0.010330050974657033,
+            "stresses_difference_percent": 0.020467240997120623
+          },
+          {
+            "lambda_value": 0.6990364074707032,
+            "strains_difference_percent": 0.010311376696604686,
+            "stresses_difference_percent": 0.020561625735302194
+          }
+        ]
+      }
+    ],
+    "homogeneous_prism_end_failure_not_section_capacity": true,
+    "no_PhysicalFail_from_numerical_stop": true,
+    "physical_capacity_certified": false,
+    "whole_goal_completed": false
+  },
+  "latest_engineering_opensees_evidence": "docs/reports/evidence/Coupled6DEngineeringOpenSees_2026-11-26",
   "latest_event_approach953": {
     "actual_components": 257,
     "all256_other_components_preserved": true,
@@ -31029,7 +31414,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "984-985 archived1758 logical raw records;two saved books rebuilt bitexact,negative981-983 preserved. Next bounded retry of985 attempt6 at half size from same accepted5 history; charge prior4 inside30, verify new full/half/H/commit and no future field as proof. No physical ultimate or cold gain.",
+  "next_action": "Сохранить точные книги и отрицательные силовые контроли 988–991; проверить одинаковый пространственный закон ASD для НДМ и OpenSees. Остановку по сходимости не считать пределом.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -31312,7 +31697,7 @@
     "working_material_unchanged": true
   },
   "previous855_and857_independent_stresses_now_verified": true,
-  "previous_goal_turn_classification": "progress:979-980 loading midpoint pair verified within shared30, checkpoint8b5e723 pushed",
+  "previous_goal_turn_classification": "External engineering control: actual 3D OpenSees runs completed; support-distance sensitivity measured, all six resultants independently checked. Nonlinear stop at lambda0.699 is not certified capacity and ASD spatial law differs from NDM CDP. No production solver change or whole-goal completion.",
   "previous_goal_turn_revalidation": "Previous acknowledgement only deferred pure-bending CDP/SP comparison; no numerical progress claimed. Revalidated branch, terminal handles, staged926 and exact925 evidence before continuing.",
   "primary_arc_metric_review": "literature/Coupled6D/NumericalControl/ArcCurveMetricReview20261126.md",
   "prior_branch_replay": {
@@ -33139,6 +33524,7 @@
     3073,
     3074,
     3133,
+    3136,
     3186,
     3207,
     3209,
@@ -33154,10 +33540,12 @@
     4784,
     4873,
     5036,
+    5109,
     5187,
     5291,
     5539,
     5588,
+    5696,
     6054,
     6079,
     6268,
@@ -33177,6 +33565,7 @@
     8852,
     8869,
     8910,
+    8965,
     8978,
     9088,
     9487,
@@ -33419,6 +33808,7 @@
     44891,
     44935,
     45060,
+    45064,
     45102,
     45120,
     45282,
@@ -33458,6 +33848,7 @@
     51230,
     51267,
     51591,
+    51696,
     51806,
     51817,
     51910,
@@ -33577,6 +33968,7 @@
     68748,
     68966,
     69079,
+    69149,
     69150,
     69179,
     69420,
@@ -33605,6 +33997,7 @@
     72736,
     72955,
     73044,
+    73176,
     73257,
     73415,
     73476,
@@ -33713,6 +34106,7 @@
     88284,
     88306,
     88605,
+    88608,
     88826,
     89093,
     89156,
@@ -33732,6 +34126,7 @@
     91037,
     91139,
     91249,
+    91358,
     91464,
     91568,
     91793,
@@ -33782,6 +34177,7 @@
     98490,
     98751,
     98786,
+    98987,
     98993,
     99214,
     99254,
@@ -33793,7 +34189,7 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T17:55:51.180796+03:00",
+  "updated_local": "2026-11-26T18:59:31.602148+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "80a6ff57d0c0e665b652d1cfd9bb332edebeb714",

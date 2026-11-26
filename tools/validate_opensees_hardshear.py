@@ -102,7 +102,7 @@ def mesh_axis(values, refine):
 
 
 class Prism:
-    def __init__(self,length,h,variant,refine,control,section_target=TARGET,end_condition="clamped"):
+    def __init__(self,length,h,variant,refine,control,section_target=TARGET,end_condition="clamped",nonlinear_length=None):
         if length <= 0 or h <= 0 or not math.isclose(length / h, round(length / h)):
             raise ValueError("Length must be a positive multiple of dz")
         if not 0 < control < length or refine < 1:
@@ -112,6 +112,14 @@ class Prism:
         self.x,self.y = mesh_axis(X,refine),mesh_axis(Y,refine)
         self.nx,self.ny,self.nz = len(self.x)-1,len(self.y)-1,round(length/h)
         self.z = [i*h for i in range(self.nz+1)]
+        self.nonlinear_zone = None
+        if nonlinear_length is not None:
+            lower,upper = control-nonlinear_length/2,control+nonlinear_length/2
+            if not math.isfinite(nonlinear_length) or nonlinear_length<=0 or lower<=0 or upper>=length:
+                raise ValueError("Nonlinear zone must be positive and strictly inside the load-transfer prism")
+            self.nonlinear_zone = [lower,upper]
+            self.z = sorted(set(self.z+[lower,upper]))
+            self.nz = len(self.z)-1
         self.mid = self.z.index(control)
         self.coords = {}
         self.bricks = [[] for _ in range(self.nz)]
@@ -122,6 +130,10 @@ class Prism:
         ops.model("basic","-ndm",3,"-ndf",3)
         reference = concrete(variant)
         steel(variant)
+        self.elastic_bricks = set()
+        if self.nonlinear_zone:
+            ops.nDMaterial("ElasticIsotropic",4,E,NU)
+            ops.uniaxialMaterial("Elastic",4,ES)
         for k,j,i in product(range(self.nz+1),range(self.ny+1),range(self.nx+1)):
             p = self.x[i],self.y[j],self.z[k]
             tag = self.node(i,j,k)
@@ -135,7 +147,11 @@ class Prism:
         self.next = 1
         for k,j,i in product(range(self.nz),range(self.ny),range(self.nx)):
             tags = [self.node(i+dx,j+dy,k+dz) for dz in (0,1) for dx,dy in CORNERS]
-            ops.element("stdBrick",self.next,*tags,1)
+            material = 1
+            if self.nonlinear_zone and not self.nonlinear_zone[0]<(self.z[k]+self.z[k+1])/2<self.nonlinear_zone[1]:
+                material = 4
+                self.elastic_bricks.add(self.next)
+            ops.element("stdBrick",self.next,*tags,material)
             self.bricks[k].append((self.next,tags))
             self.next += 1
         self.installed_adjustment = None
@@ -181,7 +197,11 @@ class Prism:
     def bar(self,a,b,material,diameter):
         tag = self.next
         self.next += 1
-        ops.element("truss",tag,a,b,math.pi*diameter**2/4,material)
+        assigned = material
+        z = (self.coords[a][2]+self.coords[b][2])/2
+        if self.nonlinear_zone and not self.nonlinear_zone[0]<=z<=self.nonlinear_zone[1]:
+            assigned = 4
+        ops.element("truss",tag,a,b,math.pi*diameter**2/4,assigned)
         self.bars[tag] = (a,b,material)
         return tag
 
@@ -242,7 +262,7 @@ class Prism:
             add(total,wrench(self.coords[node],scale(sign,force[3*end:3*end+3]),ref))
         return total
 
-    def field(self,variant):
+    def field(self,variant,capture_cut=False):
         factor = ops.getTime()
         target = scale(factor,self.section_target)
         ops.reactions()
@@ -280,6 +300,8 @@ class Prism:
             damage_max = [{"value": 0.}, {"value": 0.}]
             for layer in range(self.nz):
                 for tag,_ in self.bricks[layer]:
+                    if tag in self.elastic_bricks:
+                        continue
                     for point in range(1,9):
                         values = ops.eleResponse(tag,"material",point,"damage")
                         assert len(values)==2 and all(map(math.isfinite,values))
@@ -289,8 +311,20 @@ class Prism:
                             if value > damage_max[i]["value"]:
                                 damage_max[i] = dict(value=value, element=tag, gauss_point=point,
                                                      z_interval_mm=self.z[layer:layer+2])
+        cut_fields = []
+        if capture_cut:
+            for layer in (self.mid-1,self.mid):
+                for tag,nodes in self.bricks[layer]:
+                    stresses = list(ops.eleResponse(tag,"stresses"))
+                    local_strains = list(ops.eleResponse(tag,"strains"))
+                    if len(stresses)!=48 or len(local_strains)!=48 or not all(map(math.isfinite,stresses+local_strains)):
+                        raise RuntimeError(("incomplete cut tensors",tag,len(stresses),len(local_strains)))
+                    center = [sum(self.coords[node][j] for node in nodes)/8 for j in range(3)]
+                    center[2] -= self.z[self.mid]
+                    cut_fields.append(dict(center_relative_to_cut_mm=center,stresses=stresses,strains=local_strains))
         return dict(factor=factor,equilibrium_error=errors,lower_cut=low,upper_cut=up,lower_reactions_at_cut=reactions,
                     base_at_cut=base,steel=strains,adjacent_damage=damage,prism_damage_max=damage_max,
+                    cut_fields=cut_fields,
                     top_axis_displacement=ops.nodeDisp(self.node(self.x.index(0),self.y.index(0),self.nz)))
 
     def displacements(self):
@@ -307,6 +341,7 @@ def analyze(prism,opts):
     ops.analysis("Static")
     output = dict(opensees=ops.version(),variant=opts.variant,section_target=prism.section_target,end_condition=prism.end_condition,
                   length=opts.length,z_control=opts.cut,mesh=[prism.nx,prism.ny,prism.nz],
+                  nonlinear_zone_mm=prism.nonlinear_zone,elastic_load_transfer_bricks=len(prism.elastic_bricks),
                   hoop_planes=prism.hoop_levels,installed_adjustment=prism.installed_adjustment,
                   cut_check_error_N=CROSS_TOL,applied_at_free_face=prism.resultant(prism.loads,prism.z[-1]),
                   applied_at_lower_face=prism.resultant(prism.lower_loads,prism.z[0]),
@@ -320,7 +355,7 @@ def analyze(prism,opts):
         os.replace(temporary,opts.out)
 
     def accept(mode):
-        row = prism.field(opts.variant)
+        row = prism.field(opts.variant,opts.capture_cut)
         row["mode"] = mode
         row["iterations"] = ops.testIter()
         output["states"].append(row)
@@ -340,7 +375,7 @@ def analyze(prism,opts):
     dt = opts.step
     latest_increment = None
     ceiling = min(opts.maximum,opts.continuation_start)
-    marks = [mark for mark in (1.,1.10263192386604) if mark < ceiling] + [ceiling]
+    marks = sorted({mark for mark in (1.,1.10263192386604,*opts.mark) if 0.<mark<ceiling}) + [ceiling]
     while ops.getTime() < ceiling-1.e-9:
         base = ops.getTime()
         before = prism.displacements()
@@ -432,6 +467,9 @@ def main():
     p.add_argument("--dz",type=float,default=25.)
     p.add_argument("--refine",type=int,default=1)
     p.add_argument("--maximum",type=float,default=3.)
+    p.add_argument("--mark",type=float,action="append",default=[],help="additional exact load-factor checkpoints")
+    p.add_argument("--capture-cut",action="store_true",help="save all stress and strain tensors of the two layers beside the control cut")
+    p.add_argument("--nonlinear-length",type=float,help="test-only central nonlinear zone; surrounding load-transfer regions remain elastic")
     p.add_argument("--step",type=float,default=.05)
     p.add_argument("--minimum",type=float,default=.0003)
     p.add_argument("--iterations",type=int,default=30)
@@ -446,8 +484,10 @@ def main():
     opts=p.parse_args()
     if not math.isfinite(opts.axial_force):
         p.error("--axial-force must be finite")
+    if any(not math.isfinite(mark) or mark<=0. for mark in opts.mark):
+        p.error("--mark must be finite and positive")
     section_target = (opts.axial_force,*TARGET[1:])
-    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target,opts.end_condition),opts)
+    analyze(Prism(opts.length,opts.dz,opts.variant,opts.refine,opts.cut,section_target,opts.end_condition,opts.nonlinear_length),opts)
     print("saved",opts.out,flush=True)
 
 

@@ -1,0 +1,399 @@
+{
+  "all_raw_hashes_read_back": true,
+  "all_started_stages_terminal": true,
+  "archive_bytes": 2185540,
+  "exact_duplicate_hardlinks": 11,
+  "full_acceptance_not_run": true,
+  "physical_capacity_certified": false,
+  "proof": {
+    "buffer_regions_are_explicit_engineering_assumption": true,
+    "cases": {
+      "993": {
+        "accepted_states": 8,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 117.51606480000191,
+        "approximate_full_run_seconds": 118.042929,
+        "checked_stress_strain_tensors": 0,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 31,
+            "gauss_point": 3,
+            "value": 0.09042553792311558,
+            "z_interval_mm": [
+              0.0,
+              25.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 400.0,
+        "maximum_accepted_lambda": 0.340625,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 2.6426447220728733e-05,
+        "mesh": [
+          6,
+          6,
+          16
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      },
+      "994": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.13894239999353886,
+        "approximate_full_run_seconds": 0.590396,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 400.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.6229201964965543e-16,
+        "maximum_independent_cut_force_error_N": 5.174014303419325e-10,
+        "mesh": [
+          6,
+          6,
+          16
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "995": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.3149253999872599,
+        "approximate_full_run_seconds": 0.503721,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 800.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.171188108830012e-16,
+        "maximum_independent_cut_force_error_N": 1.0048097465187311e-08,
+        "mesh": [
+          6,
+          6,
+          32
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "996": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.605663900001673,
+        "approximate_full_run_seconds": 0.795084,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.8109621289719685e-16,
+        "maximum_independent_cut_force_error_N": 5.5990110720611284e-08,
+        "mesh": [
+          6,
+          6,
+          48
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "997": {
+        "accepted_states": 1,
+        "all_requested_force_marks_reached": true,
+        "analysis_seconds": 0.45890339999459684,
+        "approximate_full_run_seconds": 0.774419,
+        "checked_stress_strain_tensors": 576,
+        "end_condition": "clamped",
+        "last_cut_damage": null,
+        "last_prism_damage": null,
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 1.0,
+        "maximum_elastic_constitutive_relative_error": 2.524747892777558e-16,
+        "maximum_independent_cut_force_error_N": 5.392923614838057e-08,
+        "mesh": [
+          6,
+          6,
+          48
+        ],
+        "nonlinear_zone_mm": null,
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 0,
+        "spatial_law_not_identical_NDM_CDP": false,
+        "termination": "elastic calibration",
+        "variant": "elastic"
+      },
+      "998": {
+        "accepted_states": 18,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 201.59577419998823,
+        "approximate_full_run_seconds": 202.182626,
+        "checked_stress_strain_tensors": 10368,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 535,
+            "gauss_point": 4,
+            "value": 0.15467109152485525,
+            "z_interval_mm": [
+              337.5,
+              350.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 800.0,
+        "maximum_accepted_lambda": 0.6990364074707032,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 1.2724558473564684e-07,
+        "mesh": [
+          6,
+          6,
+          34
+        ],
+        "nonlinear_zone_mm": [
+          337.5,
+          462.5
+        ],
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      },
+      "999": {
+        "accepted_states": 18,
+        "all_requested_force_marks_reached": false,
+        "analysis_seconds": 305.5949660000042,
+        "approximate_full_run_seconds": 306.160453,
+        "checked_stress_strain_tensors": 10368,
+        "end_condition": "balanced-tractions",
+        "last_cut_damage": [
+          0.0,
+          0.0
+        ],
+        "last_prism_damage": [
+          {
+            "element": 823,
+            "gauss_point": 4,
+            "value": 0.1561025115573922,
+            "z_interval_mm": [
+              537.5,
+              550.0
+            ]
+          },
+          {
+            "value": 0.0
+          }
+        ],
+        "length_mm": 1200.0,
+        "maximum_accepted_lambda": 0.6990364074707032,
+        "maximum_elastic_constitutive_relative_error": 0.0,
+        "maximum_independent_cut_force_error_N": 2.53869075095281e-07,
+        "mesh": [
+          6,
+          6,
+          50
+        ],
+        "nonlinear_zone_mm": [
+          537.5,
+          662.5
+        ],
+        "numerical_stop_not_physical_capacity": true,
+        "physical_capacity_certified": false,
+        "rejected_trials": 27,
+        "spatial_law_not_identical_NDM_CDP": true,
+        "termination": "load control continuation stopped",
+        "variant": "matched"
+      }
+    },
+    "comparisons": [
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 994,
+        "second": 996,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 1.4482975364397717,
+            "stresses_difference_percent": 1.4482975364397708
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 995,
+        "second": 996,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 0.006670088880834724,
+            "stresses_difference_percent": 0.006670088880841954
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": true,
+        "compared_common_load_states": 1,
+        "first": 996,
+        "second": 997,
+        "states": [
+          {
+            "lambda_value": 1.0,
+            "strains_difference_percent": 0.0001350208225118134,
+            "stresses_difference_percent": 0.00021737477005060084
+          }
+        ]
+      },
+      {
+        "both_runs_reach_requested_maximum": false,
+        "compared_common_load_states": 18,
+        "first": 998,
+        "second": 999,
+        "states": [
+          {
+            "lambda_value": 0.05,
+            "strains_difference_percent": 0.006746011877719234,
+            "stresses_difference_percent": 0.006746018718254338
+          },
+          {
+            "lambda_value": 0.1,
+            "strains_difference_percent": 0.006746012307547751,
+            "stresses_difference_percent": 0.006746015727774146
+          },
+          {
+            "lambda_value": 0.15000000000000002,
+            "strains_difference_percent": 0.0067460124116862814,
+            "stresses_difference_percent": 0.006746014691841497
+          },
+          {
+            "lambda_value": 0.2,
+            "strains_difference_percent": 0.006746014891305802,
+            "stresses_difference_percent": 0.006746016601443156
+          },
+          {
+            "lambda_value": 0.25,
+            "strains_difference_percent": 0.006746014143418587,
+            "stresses_difference_percent": 0.0067460155115167866
+          },
+          {
+            "lambda_value": 0.3,
+            "strains_difference_percent": 0.006746014340988603,
+            "stresses_difference_percent": 0.00674601548108121
+          },
+          {
+            "lambda_value": 0.35,
+            "strains_difference_percent": 0.006746014991687881,
+            "stresses_difference_percent": 0.006746015968893809
+          },
+          {
+            "lambda_value": 0.39999999999999997,
+            "strains_difference_percent": 0.00674601217888128,
+            "stresses_difference_percent": 0.006746013033920492
+          },
+          {
+            "lambda_value": 0.44999999999999996,
+            "strains_difference_percent": 0.006746012617413536,
+            "stresses_difference_percent": 0.006746013377460932
+          },
+          {
+            "lambda_value": 0.49999999999999994,
+            "strains_difference_percent": 0.006746015184912557,
+            "stresses_difference_percent": 0.006746015868942254
+          },
+          {
+            "lambda_value": 0.5499999999999999,
+            "strains_difference_percent": 0.006746014761494743,
+            "stresses_difference_percent": 0.006746015383329895
+          },
+          {
+            "lambda_value": 0.6,
+            "strains_difference_percent": 0.0067460128951214865,
+            "stresses_difference_percent": 0.006746013465160817
+          },
+          {
+            "lambda_value": 0.65,
+            "strains_difference_percent": 0.006746014042053202,
+            "stresses_difference_percent": 0.006746014568265037
+          },
+          {
+            "lambda_value": 0.675,
+            "strains_difference_percent": 0.006720276266271185,
+            "stresses_difference_percent": 0.0067202767710608
+          },
+          {
+            "lambda_value": 0.690625,
+            "strains_difference_percent": 0.006779510640875126,
+            "stresses_difference_percent": 0.006779510107149859
+          },
+          {
+            "lambda_value": 0.6955078125,
+            "strains_difference_percent": 0.006814924929369953,
+            "stresses_difference_percent": 0.007999253665862117
+          },
+          {
+            "lambda_value": 0.6985595703125,
+            "strains_difference_percent": 0.010330050974657033,
+            "stresses_difference_percent": 0.020467240997120623
+          },
+          {
+            "lambda_value": 0.6990364074707032,
+            "strains_difference_percent": 0.010311376696604686,
+            "stresses_difference_percent": 0.020561625735302194
+          }
+        ]
+      }
+    ],
+    "homogeneous_prism_end_failure_not_section_capacity": true,
+    "no_PhysicalFail_from_numerical_stop": true,
+    "physical_capacity_certified": false,
+    "whole_goal_completed": false
+  },
+  "raw_bytes": 10905043,
+  "raw_files": 50,
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "whole_goal_completed": false
+}
