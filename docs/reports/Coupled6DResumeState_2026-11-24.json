@@ -1,14 +1,8 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": 77042,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1052ASDPureNPeakObservation_20261127",
-      "session": 77042,
-      "stage": "Compile read-only peak-refinement observer,2 observation components, numeric expressions unchanged"
-    }
-  ],
+  "active_exec_session": null,
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1986,7 +1980,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": false,
+  "all_started_stages_terminal": true,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -2174,6 +2168,110 @@
     "total_primary_steps": 232
   },
   "automatic_yield_refinement_evidence": "docs/reports/evidence/Coupled6DAutomaticYieldRefinement_2026-11-25",
+  "axial_compression_limit_1051_1058": {
+    "archive_bytes": 91867292,
+    "archive_sha256": "94818DAA983C1F8904C346BCD530C1F7793746DE9A9FF00C12B01D3F672BAFED",
+    "evidence": "docs/reports/evidence/Coupled6DAxialCompressionLimit_2026-11-27",
+    "evidence_pins_sha256": "FA78D8DEF3D3525EB18184DC80CBA44C4EECB5EBCAA1A73FF6DA0A8F41E1D859",
+    "logical_files": 4073,
+    "lost_native_handle_recovered_from_terminal_report": {
+      "case": 1056,
+      "no_duplicate_job_started": true,
+      "own_PID": 18900,
+      "own_process_absent": true,
+      "own_start_ticks": "639313291430481281",
+      "watchdog_exit": 0
+    },
+    "proof": {
+      "CDP_and_planar_N_and_direct_state_checks_pending": true,
+      "cold_repeat_history_bitexact": true,
+      "fine_minus_native_N": 11.69256768329069,
+      "fine_minus_native_percent": 0.0015887831623873083,
+      "full_acceptance_not_run": true,
+      "full_run_10second_target_not_proved": true,
+      "full_tails": {
+        "1056": {
+          "accepted_states": 56,
+          "all_equilibrium_checks_passed": true,
+          "final_concrete_min_strain": -0.017993416203631915,
+          "final_steel_utilization": 0.9996342335350458,
+          "maximum_force_error_N": 0.30208659870550036,
+          "monotonic_axial_strain": true
+        },
+        "1058": {
+          "accepted_states": 26,
+          "all_equilibrium_checks_passed": true,
+          "final_concrete_min_strain": -0.017991257662241137,
+          "final_steel_utilization": 0.999514314292294,
+          "maximum_force_error_N": 0.3754119639052078,
+          "monotonic_axial_strain": true
+        }
+      },
+      "independent_OpenSees_structural_analysis": false,
+      "independent_curves": {
+        "1054": {
+          "all_equilibrium_checks_passed": true,
+          "axial_strain": -0.0020856039911609026,
+          "capacity_N": 735886.0664477774,
+          "elapsed_seconds": 177.89433469998767,
+          "inherited_states": 15,
+          "new_states": 43,
+          "replayed_states": 58
+        },
+        "1057": {
+          "all_equilibrium_checks_passed": true,
+          "axial_strain": -0.0020981039911609047,
+          "capacity_N": 735956.531368192,
+          "elapsed_seconds": 89.24433460002183,
+          "inherited_states": 43,
+          "new_states": 19,
+          "replayed_states": 62
+        }
+      },
+      "native_cases": {
+        "1055": {
+          "capacity_N": 735944.8388005088,
+          "elapsed_seconds": 13.2548828125,
+          "estimated_error_N": 48.11192449139645,
+          "interval_N": [
+            735896.7268760174,
+            735992.9507250001
+          ],
+          "lambda_capacity": 7.359448388005087
+        },
+        "1056": {
+          "capacity_N": 735944.8388005088,
+          "elapsed_seconds": 10.75439453125,
+          "estimated_error_N": 48.11192449139645,
+          "interval_N": [
+            735896.7268760174,
+            735992.9507250001
+          ],
+          "lambda_capacity": 7.359448388005087
+        },
+        "1058": {
+          "capacity_N": 735871.4927887559,
+          "elapsed_seconds": 8.31396484375,
+          "estimated_error_N": 337.72058540172844,
+          "interval_N": [
+            735533.7722033542,
+            736209.2133741577
+          ],
+          "lambda_capacity": 0.735871492788756
+        }
+      },
+      "observation_did_not_change_history": true,
+      "original_equilibrium_and_lambda_tolerances_not_relaxed": true,
+      "overloaded_case_physical_FAIL_confirmed": true,
+      "peak_load_capacity_confirmed_on_followed_branch": true,
+      "public_solver_not_updated": true,
+      "pure_N_stage_complete": false,
+      "scale_intervals_overlap": true,
+      "scope": "Pure compression ASD; chosen materials, discretization and followed strain-controlled branch",
+      "whole_goal_completed": false
+    },
+    "report": "docs/reports/Coupled6DAxialCompressionLimit_2026-11-27.md"
+  },
   "branch": "codex/coupled-6d",
   "cold787_final_summary": {
     "accepted_states": 56,
@@ -6632,6 +6730,7 @@
     "total_primary_steps": 17,
     "whole_goal_completed": false
   },
+  "last_goal_turn_classification": "progress: confirmed full compression branch and physical overload failure;finer independent solve agreed;all raw books and fields archived and read back",
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
   "latest_ASD_stability_checkpoint": {
@@ -37254,7 +37353,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "CurrentNstage.1051 samecompressionlocalpeaklambda7.3590488604,accuracy0.01708595>0.001,55statesallverified,late steel afterdecline,no certifiedpeak. Await1052 compiler13700/start639313273103490042 then sourceaudit(Defo+Testmodule observer-only254others)+native+CheckMain+Replay;assertMainHistorybyteidentical1051;inspectNative/PeakRefinement.Values.csv estimate/replay_failed/completion toseparate sampling,adjointuncertainty,failedreplay andexactfieldverification. Needfixactualcausewithoutlooseningexpectations. Seed1048/49/50 strictcomparisonpassed andarchive49046complete2665raw47.351MB;newreportwritten,commit+pushcheckpointpending. CompressionindependentTRFmaybeneeded. NoM/NMT/Qtests;publicbooknotchanged.",
+  "next_action": "Git checkpoint of1051-1058;actual planar pureN and CDP pureN controls,then direct-NDS versus capacity consistency;do not start newM/T/NMT/Q until N stage requirements",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -39616,6 +39715,7 @@
     14589,
     14635,
     14711,
+    14714,
     14716,
     14848,
     15150,
@@ -39714,6 +39814,7 @@
     29022,
     29563,
     29628,
+    29759,
     29834,
     30044,
     30135,
@@ -39756,6 +39857,7 @@
     34055,
     34645,
     34783,
+    34927,
     34937,
     35024,
     35066,
@@ -39960,6 +40062,7 @@
     60225,
     60275,
     60305,
+    60465,
     60472,
     60761,
     60838,
@@ -39985,6 +40088,8 @@
     63362,
     63490,
     63549,
+    63577,
+    63607,
     63707,
     63902,
     64100,
@@ -40081,6 +40186,7 @@
     75081,
     75181,
     75208,
+    75633,
     75719,
     75856,
     75997,
@@ -40094,6 +40200,7 @@
     76698,
     76702,
     76774,
+    77042,
     77140,
     77326,
     77397,
@@ -40125,6 +40232,7 @@
     81373,
     81541,
     81545,
+    81613,
     81619,
     81704,
     81866,
@@ -40151,6 +40259,7 @@
     84038,
     84068,
     84095,
+    84320,
     84531,
     84646,
     84698,
@@ -40226,6 +40335,7 @@
     91793,
     91826,
     92127,
+    92252,
     92365,
     92582,
     92693,
@@ -40298,7 +40408,7 @@
     "same_history_as1045_and1046": true,
     "steel_event_localization_passed": false
   },
-  "updated_local": "2026-11-27T01:04:54.226608+03:00",
+  "updated_local": "2026-11-27T01:44:47.006456+03:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",

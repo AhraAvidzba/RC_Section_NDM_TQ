@@ -1,0 +1,308 @@
+{
+  "all_eight_saved_books_included": true,
+  "all_raw_files_read_back_and_hashed": true,
+  "archive_bytes": 91867292,
+  "books": {
+    "1051": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1051/docs/regression/Diagnostic.xlsm",
+      "sha256": "254712345DE8AE7CD08BE57195B94FC23106CFE42899D126CDA3A4B7A09EB1ED"
+    },
+    "1052": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1052/docs/regression/Diagnostic.xlsm",
+      "sha256": "3963D120C0DAD4DCC5A96F6DD3F666D8C98762D0503B2FD6133EB0FCF3E09A20"
+    },
+    "1053": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1053/docs/regression/Diagnostic.xlsm",
+      "sha256": "22D089E915A27E71241D3EE25AE38509B57079938534C409921F2A3655B86943"
+    },
+    "1054": {
+      "actual_native_execution": false,
+      "exact_saved_book_included": true,
+      "member": "1054/docs/regression/Diagnostic.xlsm",
+      "sha256": "254712345DE8AE7CD08BE57195B94FC23106CFE42899D126CDA3A4B7A09EB1ED"
+    },
+    "1055": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1055/docs/regression/Diagnostic.xlsm",
+      "sha256": "AAAA9B0F71E2B6CD687F9EF84E18428D8241514E780A6894D17A844764825613"
+    },
+    "1056": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1056/docs/regression/Diagnostic.xlsm",
+      "sha256": "EC44A5268A98590EECFCC8C581C496A5DCDC55CFB18F2836414CF6D931BF0064"
+    },
+    "1057": {
+      "actual_native_execution": false,
+      "exact_saved_book_included": true,
+      "member": "1057/docs/regression/Diagnostic.xlsm",
+      "sha256": "254712345DE8AE7CD08BE57195B94FC23106CFE42899D126CDA3A4B7A09EB1ED"
+    },
+    "1058": {
+      "actual_native_execution": true,
+      "exact_saved_book_included": true,
+      "member": "1058/docs/regression/Diagnostic.xlsm",
+      "sha256": "EC44A5268A98590EECFCC8C581C496A5DCDC55CFB18F2836414CF6D931BF0064"
+    }
+  },
+  "compression_limit_proof": {
+    "CDP_and_planar_N_and_direct_state_checks_pending": true,
+    "cold_repeat_history_bitexact": true,
+    "fine_minus_native_N": 11.69256768329069,
+    "fine_minus_native_percent": 0.0015887831623873083,
+    "full_acceptance_not_run": true,
+    "full_run_10second_target_not_proved": true,
+    "full_tails": {
+      "1056": {
+        "accepted_states": 56,
+        "all_equilibrium_checks_passed": true,
+        "final_concrete_min_strain": -0.017993416203631915,
+        "final_steel_utilization": 0.9996342335350458,
+        "maximum_force_error_N": 0.30208659870550036,
+        "monotonic_axial_strain": true
+      },
+      "1058": {
+        "accepted_states": 26,
+        "all_equilibrium_checks_passed": true,
+        "final_concrete_min_strain": -0.017991257662241137,
+        "final_steel_utilization": 0.999514314292294,
+        "maximum_force_error_N": 0.3754119639052078,
+        "monotonic_axial_strain": true
+      }
+    },
+    "independent_OpenSees_structural_analysis": false,
+    "independent_curves": {
+      "1054": {
+        "all_equilibrium_checks_passed": true,
+        "axial_strain": -0.0020856039911609026,
+        "capacity_N": 735886.0664477774,
+        "elapsed_seconds": 177.89433469998767,
+        "inherited_states": 15,
+        "new_states": 43,
+        "replayed_states": 58
+      },
+      "1057": {
+        "all_equilibrium_checks_passed": true,
+        "axial_strain": -0.0020981039911609047,
+        "capacity_N": 735956.531368192,
+        "elapsed_seconds": 89.24433460002183,
+        "inherited_states": 43,
+        "new_states": 19,
+        "replayed_states": 62
+      }
+    },
+    "native_cases": {
+      "1055": {
+        "capacity_N": 735944.8388005088,
+        "elapsed_seconds": 13.2548828125,
+        "estimated_error_N": 48.11192449139645,
+        "interval_N": [
+          735896.7268760174,
+          735992.9507250001
+        ],
+        "lambda_capacity": 7.359448388005087
+      },
+      "1056": {
+        "capacity_N": 735944.8388005088,
+        "elapsed_seconds": 10.75439453125,
+        "estimated_error_N": 48.11192449139645,
+        "interval_N": [
+          735896.7268760174,
+          735992.9507250001
+        ],
+        "lambda_capacity": 7.359448388005087
+      },
+      "1058": {
+        "capacity_N": 735871.4927887559,
+        "elapsed_seconds": 8.31396484375,
+        "estimated_error_N": 337.72058540172844,
+        "interval_N": [
+          735533.7722033542,
+          736209.2133741577
+        ],
+        "lambda_capacity": 0.735871492788756
+      }
+    },
+    "observation_did_not_change_history": true,
+    "original_equilibrium_and_lambda_tolerances_not_relaxed": true,
+    "overloaded_case_physical_FAIL_confirmed": true,
+    "peak_load_capacity_confirmed_on_followed_branch": true,
+    "public_solver_not_updated": true,
+    "pure_N_stage_complete": false,
+    "scale_intervals_overlap": true,
+    "scope": "Pure compression ASD; chosen materials, discretization and followed strain-controlled branch",
+    "whole_goal_completed": false
+  },
+  "created_local": "2026-11-27T01:43:29.590901+03:00",
+  "full_acceptance_not_run": true,
+  "logical_files": 4073,
+  "output_VBA_dump_sha256": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC",
+  "output_book_sha256": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+  "pure_N_stage_complete": false,
+  "six_native_executions": {
+    "1051": {
+      "confirmed_lower_lambda": 7.3590488603889375,
+      "elapsed_seconds": 9.841064453125,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.3590488603889375,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1052": {
+      "confirmed_lower_lambda": 7.3590488603889375,
+      "elapsed_seconds": 10.7109375,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.3590488603889375,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1053": {
+      "confirmed_lower_lambda": 7.3590488603889375,
+      "elapsed_seconds": 10.12939453125,
+      "has_confirmed_lower_bound": 1.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 0.0,
+      "lambda_capacity": 0.0,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.3590488603889375,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1055": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 13.2548828125,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 1.0,
+      "lambda_capacity": 7.359448388005087,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.359448388005087,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0004811192449139645,
+      "peak_lambda": 7.359448388005087,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1056": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 10.75439453125,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 1.0,
+      "lambda_capacity": 7.359448388005087,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 7.359448388005087,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.0004811192449139645,
+      "peak_lambda": 7.359448388005087,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    },
+    "1058": {
+      "confirmed_lower_lambda": 0.0,
+      "elapsed_seconds": 8.31396484375,
+      "has_confirmed_lower_bound": 0.0,
+      "has_steel_limit": 0.0,
+      "has_ultimate_point": 1.0,
+      "lambda_capacity": 0.735871492788756,
+      "macro_execution_is_not_capacity_acceptance": true,
+      "maximum_saved_lambda": 0.735871492788756,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "peak_accuracy": 0.00033772058540172846,
+      "peak_lambda": 0.735871492788756,
+      "physical_capacity_certified": false,
+      "section_equilibrium_not_independently_rechecked": true,
+      "source_unchanged": true,
+      "steel_limit_lambda": 0.0,
+      "ultimate_Mx_Nmm": 0.0,
+      "whole_goal_completed": false
+    }
+  },
+  "test_harness_corrections": [
+    "First observer audit passed an already header-stripped module into a header parser; corrected to use the same literal-safe body fold.",
+    "First compression certificate read published PeakAccuracy for a rejected peak; that output is zero by contract. The rejected estimate is checked directly in the observed completion CSV."
+  ],
+  "unique_payloads": 797,
+  "whole_goal_completed": false,
+  "working_solver_not_changed": true
+}
