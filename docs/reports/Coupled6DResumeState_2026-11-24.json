@@ -9,9 +9,9 @@
       "stage": "User-authorized CDP5400s comparison"
     },
     {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1029ASDTwoPointStart_20261126",
-      "session": 36906,
-      "stage": "Compile ASD initial two-point handoff for doubled-base regression"
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1035ASDPureTorsion_20261126",
+      "session": 36482,
+      "stage": "Independent ASD pure torsion with original tolerances"
     }
   ],
   "actual_H_derivative748": {
@@ -2324,6 +2324,21 @@
     "status": "not run"
   },
   "deferred_validations": {
+    "ASD-CDF-SETTING": {
+      "apply_only_to_ASD": true,
+      "default_value": 0.0,
+      "do_not_interrupt_current_solver_work": true,
+      "explicit_user_requested": true,
+      "implement_now": false,
+      "nonzero_OpenSees_tensor_comparison_required": true,
+      "parameter": "Cross-Damage-Factor cdf",
+      "plan": "docs/Coupled6DASDCrossDamagePlan.md",
+      "primary_OpenSees_sources_already_saved": true,
+      "requested_local_date": "2026-11-26",
+      "status": "queued_after_main_solver_stabilizes",
+      "user_editable_setting_required": true,
+      "zero_value_regression_required": true
+    },
     "WH2017-CDP-ASD-15": {
       "automatically_revisit_after_prerequisites": true,
       "existing_MVT2_does_not_replace_complete_series": true,
@@ -36271,7 +36286,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Audit/run1029, independently replay full history, then test more base moment scales before promoting.1026 automatic steel event4.65785kNm/12.31s and exact cold repeat passed;1028 doubled base stalled at4.28735kNm with89 correct states. Finish unchanged CDP90 and independently check its terminal prefix. Preserve full concrete criterion and UI pending.",
+  "next_action": "Collect original CDP90 at actual terminal and independently verify completed prefix; do not restart or call timeout physical failure. Collect pureT1035, replay history only if captured.1034 private tolerance1E-5 reached4.63203kNm,33 independently verified states,0.455N and15.491Nmm max resultant errors,steel not located; production tolerances unchanged. Cross-damage cdf setting explicitly queued after core stabilization in ASD-CDF-SETTING,default0.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -36606,6 +36621,18 @@
     "working_material_unchanged": true
   },
   "prior_pause_revoked_by_explicit_resume": true,
+  "private_ASD_two_point_scaling_fix": {
+    "accepted_states": 30,
+    "actual_OpenSees_material_replay": true,
+    "admissible_Mx_kNm": 4.657717364314768,
+    "all56plus4_equations_and_six_resultants_verified": true,
+    "base_Mx_kNm": 2,
+    "concrete_failure_criterion_unresolved": true,
+    "elapsed_seconds": 8.1875,
+    "public_controller_not_changed": true,
+    "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1029ASDTwoPointStart_20261126",
+    "steel_limit_only": true
+  },
   "private_regularized_trust": {
     "actual_VBA_components_per_book": 255,
     "analytic_baseline": {
@@ -38487,6 +38514,7 @@
     8464,
     8852,
     8869,
+    8889,
     8910,
     8965,
     8978,
@@ -38501,6 +38529,7 @@
     10383,
     10530,
     10660,
+    10689,
     11010,
     11035,
     11110,
@@ -38552,6 +38581,7 @@
     16181,
     16382,
     16553,
+    16653,
     16755,
     17127,
     17144,
@@ -38619,6 +38649,7 @@
     27422,
     27747,
     28130,
+    28199,
     28317,
     28422,
     28499,
@@ -38689,6 +38720,7 @@
     36477,
     36682,
     36844,
+    36906,
     36943,
     37102,
     37183,
@@ -38738,6 +38770,7 @@
     43286,
     43419,
     43669,
+    43736,
     43814,
     43829,
     43884,
@@ -38857,6 +38890,7 @@
     59864,
     59912,
     60094,
+    60131,
     60191,
     60225,
     60275,
@@ -39022,6 +39056,7 @@
     81866,
     81919,
     82241,
+    82610,
     82700,
     82738,
     82906,
@@ -39128,6 +39163,7 @@
     94141,
     94176,
     94568,
+    94683,
     94708,
     94733,
     94735,
@@ -39172,12 +39208,12 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T22:59:11.177363+03:00",
+  "updated_local": "2026-11-26T23:23:34.759824+03:00",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
-    "commit": "9cb2b21aae355325730354c9bdf12102f0b02353",
+    "commit": "0aad359700ddfa202ec09f1d8bc43e8a7a5c06c9",
     "remote_branch": "codex/coupled-6d",
-    "scope": "Selectable CDP/native ASD candidate source and evidence, UI acceptance pending, release unchanged, main not merged.",
+    "scope": "Automatic ASD bending steel event, independent53-state proof, exact books; private controller not promoted, release unchanged.",
     "successful_push_verified": true
   },
   "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
