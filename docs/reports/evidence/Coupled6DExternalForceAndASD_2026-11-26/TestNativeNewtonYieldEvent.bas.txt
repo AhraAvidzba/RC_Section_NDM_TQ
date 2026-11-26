@@ -1,0 +1,36 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает действительную нелинейную поверхность конкретного материального перехода вместо линейной меры поля.
+Public Function TestReadNewtonYieldEvent(ByRef field() As Double) As Double
+    Dim middle(1 To 6) As Double, slope(1 To 6) As Double, strain(1 To 6) As Double, unused(1 To 6) As Double
+    mReverseOperatorsTest.PointStrain 25, field, middle
+    mReverseOperatorsTest.AxialGradientAtPoint 25, field, slope
+    Dim component As Long
+    For component = 1 To 6: strain(component) = middle(component) + 0.001 * slope(component): Next component
+    Dim response As CCoupledConcreteResponse: Set response = mReverseSidesTest(3)
+    Dim value As Double
+    If Not response.TryReadTrialYield(25, strain, value, unused, needGradient:=False) Then Err.Raise 5, , "Нет поверхности материального события."
+    TestReadNewtonYieldEvent = value
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проецирует аналитическую производную пробной поверхности на те же геометрические операторы и масштабы, что использует ядро.
+Public Sub TestReadNewtonYieldEventGradient(ByRef field() As Double, ByRef gradient() As Double)
+    Dim middle(1 To 6) As Double, slope(1 To 6) As Double, strain(1 To 6) As Double, materialGradient(1 To 6) As Double
+    mReverseOperatorsTest.PointStrain 25, field, middle
+    mReverseOperatorsTest.AxialGradientAtPoint 25, field, slope
+    Dim component As Long
+    For component = 1 To 6: strain(component) = middle(component) + 0.001 * slope(component): Next component
+    Dim response As CCoupledConcreteResponse: Set response = mReverseSidesTest(3)
+    Dim value As Double
+    If Not response.TryReadTrialYield(25, strain, value, materialGradient) Then Err.Raise 5, , "Нет градиента материального события."
+    Dim unit() As Double: ReDim unit(1 To UBound(field))
+    ReDim gradient(1 To UBound(field))
+    Dim degree As Long
+    For degree = 1 To UBound(field)
+        unit(degree) = 1#
+        mReverseOperatorsTest.PointStrain 25, unit, middle
+        mReverseOperatorsTest.AxialGradientAtPoint 25, unit, slope
+        For component = 1 To 6: gradient(degree) = gradient(degree) + materialGradient(component) * (middle(component) + 0.001 * slope(component)): Next component
+        unit(degree) = 0#
+    Next degree
+End Sub
