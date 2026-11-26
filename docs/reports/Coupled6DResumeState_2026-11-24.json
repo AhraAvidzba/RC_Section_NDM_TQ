@@ -1,14 +1,8 @@
 {
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
-  "active_exec_session": 60761,
-  "active_jobs": [
-    {
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1036ASDTorsionOverload_20261126",
-      "session": 60761,
-      "stage": "ASD pure torsion4kNm hoop failure/status verification"
-    }
-  ],
+  "active_exec_session": null,
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -1986,7 +1980,7 @@
     ]
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
-  "all_started_stages_terminal": false,
+  "all_started_stages_terminal": true,
   "arc_root_witness_evidence": "docs/reports/evidence/Coupled6DArcRootWitness_2026-11-25",
   "arc_yield_split778_event": {
     "accepted_revision_before_event": 35,
@@ -2312,11 +2306,33 @@
     "whole_goal_completed": false
   },
   "current_goal_turn_classification": "progress:984 native acceptance/idempotence and updated-history3 steps verified;985 accepted5 growing steps, isolated attempt6 rejection as half-field accuracy only",
+  "current_load_stage": "N",
   "deferred_CDP_versus_SP_pure_bending_check": {
     "after": "primary coupled convergence and confirmed ultimate problems",
     "plan": "docs/ValidationPlan.md",
     "requested": "2026-11-25",
     "status": "not run"
+  },
+  "deferred_all6_completed_observation": {
+    "accepted_states": 16,
+    "completed_before_user_NMT_priority": true,
+    "elapsed_seconds": 7.9140625,
+    "full_equilibrium_replay_verified": true,
+    "maximum_lambda": 0.9814584915445879,
+    "new_Q_tests_authorized_for_now": false,
+    "physical_capacity_certified": false,
+    "raw_archive_pending": true,
+    "raw_files_sha256": {
+      "EarlySourceProof.json": "B959463BD91D2CD5E7A5D13A2D8C8E6687319DB6D1710BB9B71E5363270678C0",
+      "Input/CapacityLoad.bin": "0A123AF6B21CDAEB399DCEF4F2161E6AD01626E905F7C60B169FDAEFA24869DA",
+      "MainCapacityExecutionProof.json": "AEC61DABCA11C76044ED39D5EBCC56AA3D1BBC9D333A10F5328FEF6142BF8C65",
+      "Native/MainCapacity.Operators.csv": "91BB3EF90DD01276045900046625A1B6FDA4CADC21C19DE4868CBB3798F616D0",
+      "Native/MainCapacity.bin": "B46D72BCD2E779A50996848F420E252E29D0A4DC281E9D1983F0873A20741986",
+      "Native/MainCapacity.txt": "C14F08603DF427B4022D60C5D87B39FFB8E7CC9CCC102B3BCFA81106B0E25C42",
+      "Native/MainCapacityHistory.bin": "BF9B8E3CE2A7B6732D313A76539D69B6A8B63FB67E33AFDEF560E8DA2060633D",
+      "Native/OpenSeesMainCapacityEquilibrium.json": "895E4D55FB3D2DF0875EE368953AAEBEEBB5E96156F081C311CAA8BD1B74E081"
+    },
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1038ASDAllSixCapacity_20261126"
   },
   "deferred_validations": {
     "ASD-CDF-SETTING": {
@@ -6612,6 +6628,23 @@
   },
   "last_verified_working_cold_lower": 1.109225820167928,
   "last_working_cold_status": "DirectOK/CapacityNumFail;682 predates hybrid88fix; not new ultimate",
+  "latest_ASD_stability_checkpoint": {
+    "NMT_accepted_states": 60,
+    "NMT_design_equilibrium_found": true,
+    "NMT_maximum_lambda": 1.6100517762643132,
+    "NMT_physical_capacity_certified": false,
+    "NMT_seconds": 33.9140625,
+    "archive_only_recovery_verified": true,
+    "evidence": "docs/reports/evidence/Coupled6DASDStabilityAndTorsion_2026-11-26",
+    "production_controller_not_promoted": true,
+    "pure_T_overload_reserve": 0.9153525297011029,
+    "pure_T_overload_status": "Fail",
+    "pure_T_steel_event_kNm": [
+      3.661774130223143,
+      3.661410118804412
+    ],
+    "report": "docs/reports/Coupled6DASDStabilityAndTorsion_2026-11-27.md"
+  },
   "latest_CDP90_evidence": "docs/reports/evidence/Coupled6DCDP90_2026-11-26",
   "latest_CDP90_proofs": {
     "1019": {
@@ -37163,6 +37196,7 @@
     "source_base_reread_matches_saved_stress": true,
     "whole_goal_completed": false
   },
+  "load_sequence_plan": "docs/Coupled6DLoadSequencePlan.md",
   "loading_secant_automatic_cold_evidence": "docs/reports/evidence/Coupled6DLoadingSecantAutomaticCold_2026-11-25",
   "loading_secant_local_summary": {
     "all_original_radii_and_pair_criteria_preserved": true,
@@ -37214,7 +37248,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Finish1036 T4kNm and independently replay accepted history; compare hoop mechanism and status with1035 small-base T3.66177kNm event. CDP90 stopped by5400s timeout,29 states verified,max4.131117964kNm; archive ready,write/push report. Archive ASD1030-1036 with failures and1E-5 tolerance study. Keep production solver tolerances unchanged. Investigate direct physical steel-strain active constraint and consistency of direct target/capacity histories; cdf deferred.",
+  "next_action": "User sequence: N then M then T then NMT then Q then NMTQ. Current pure N tension/compression controls1039/1040 complete, all states externally rechecked. Tension stops at91.2028kN before steel criterion; compression passes735.9231kN maximum and reaches steel on declining branch, not certified capacity. Independently solve axial deformation continuation with actual OpenSees ASD plus separate numerical driver to isolate rank/material/history issues, then repair native solver. No new NMT/Q studies yet.",
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
     "budget": "maxIterations minus actual mIterations, combine iteration/evaluation/hybrid counters after nested solve; recursion guard, no auxiliary acceptance.",
@@ -37810,6 +37844,26 @@
     "source_rank": 17,
     "whole_goal_completed": false
   },
+  "pure_N_initial_controls": {
+    "1039": {
+      "accepted_states": 22,
+      "all_saved_equilibria_verified": true,
+      "maximum_lambda": 0.9120281016780255,
+      "physical_capacity_certified": false,
+      "raw_archive_pending": true,
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1039ASDPureNTension_20261127",
+      "seconds": 3.832977294921875
+    },
+    "1040": {
+      "accepted_states": 34,
+      "all_saved_equilibria_verified": true,
+      "maximum_lambda": 7.359230737157219,
+      "physical_capacity_certified": false,
+      "raw_archive_pending": true,
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1040ASDPureNCompression_20261127",
+      "seconds": 5.996002197265625
+    }
+  },
   "recovered_cold_frozen_replay744": {
     "all_exported_fields_match_original_Double_to15digit_CSV_precision": true,
     "independent_force_and_weak_equilibrium": {
@@ -38357,6 +38411,14 @@
     "Actual rebuilt release and complete scoped acceptance incl Excel validation/reopen, CAD and FocusedValidationPlan; separate consent for longest full suites according to AGENTS.md.",
     "End-to-end10s performance still unmet; do not trade physical/equilibrium criteria for speed or PASS.",
     "Git evidence/source checkpoints retained; no merge into main before required checks and user agreement."
+  ],
+  "requested_load_sequence": [
+    "N",
+    "M",
+    "T",
+    "NMT",
+    "Q",
+    "NMTQ"
   ],
   "schema": "Coupled6DRankKernelActive4",
   "section708": {
@@ -39489,6 +39551,7 @@
     12265,
     12388,
     12556,
+    12620,
     12646,
     12697,
     12709,
@@ -39573,6 +39636,7 @@
     24511,
     24703,
     24815,
+    24837,
     25036,
     25042,
     25261,
@@ -39680,6 +39744,7 @@
     39304,
     39349,
     39642,
+    39854,
     39871,
     39874,
     39957,
@@ -39726,6 +39791,7 @@
     45064,
     45102,
     45120,
+    45142,
     45282,
     45411,
     45660,
@@ -39789,6 +39855,7 @@
     53557,
     53566,
     53617,
+    53930,
     54096,
     54111,
     54856,
@@ -39834,6 +39901,7 @@
     60225,
     60275,
     60472,
+    60761,
     60838,
     60851,
     61504,
@@ -39860,6 +39928,7 @@
     63707,
     63902,
     64100,
+    64182,
     64297,
     64610,
     64617,
@@ -39999,6 +40068,7 @@
     82700,
     82738,
     82906,
+    82913,
     82955,
     83158,
     83218,
@@ -40147,7 +40217,9 @@
     99863,
     99944
   ],
-  "updated_local": "2026-11-26T23:35:18.141933+03:00",
+  "updated_local": "2026-11-27T00:09:08.174200+03:00",
+  "user_priority_NMT_before_NMTQ": true,
+  "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
   "verified_git_delivery": {
     "commit": "a353c766df2c7d144a41f9128b5951503fb98f2b",

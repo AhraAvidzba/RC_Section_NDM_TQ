@@ -1,0 +1,130 @@
+Attribute VB_Name = "modTestSelectableMaterialCore"
+Option Explicit
+
+' ==========================================================================
+' ДЛЯ ТЕСТОВ: выбор пространственного закона и общая калибровка в рабочем ядре
+' ==========================================================================
+' Проверяет переключение CDP/ASD, разные наборы характеристик и материальную
+' историю ASD. Малые нагрузки проверяют подключение, а не предельную прочность.
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает фактический выбор из сохранённой книги через штатный reader.
+Public Function TestReadSelectableConcreteLaw() As String
+    Dim reader As New CSystemSettingsReader
+    reader.LoadFromWorkbook ThisWorkbook: reader.LoadCoupledSettings ThisWorkbook
+    TestReadSelectableConcreteLaw = reader.GetString("Coupled.ConcreteLaw", "CDP")
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Выполняет восемь направленных НДС и сохраняет материальные тензоры для внешнего повторения.
+Public Function TestRunSelectableMaterialCore(ByVal folder As String) As String
+    On Error GoTo Failed
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\Native\SelectableCore.bin" For Binary Access Write As #handle
+    Dim magic As String * 16: magic = "NDMLAWSEL0000001": Put #handle, , magic
+    Dim calibration As New CCoupledConcreteCalibration, flow As CCoupledASDFlow
+    calibration.Initialize 30000#, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    Set flow = calibration.CreateASDFlow(0.2, True)
+    If flow.LawIdentifier <> "ASD-NativeStep-Cdf0" Then Err.Raise 5, , "Не выбран однократный ASD."
+    TestWriteVector handle, Array(30000#, 0.2, 16#, 30#, 3#)
+    TestWriteBranch handle, calibration.TensionEnvelope, 0#
+    TestWriteBranch handle, calibration.CompressionEnvelope, 1#
+    Dim concrete As New CCoupledConcreteResponse, response As ICoupledPointResponse
+    concrete.InitializeASD 1, flow: Set response = concrete
+    Dim strain(1 To 6) As Double, stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
+    Dim value As Variant
+    TestWriteVector handle, Array(9#)
+    For Each value In Array(0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.004, 0.01)
+        strain(3) = CDbl(value): strain(1) = -0.2 * strain(3): strain(2) = strain(1)
+        strain(4) = 0.03 * strain(3): strain(5) = 0.1 * strain(3): strain(6) = -0.05 * strain(3)
+        If response.EvaluatePoint(1, strain, stress, tangent, ctmStressOnly) <> sfcNone Then _
+            Err.Raise 5, , "Отказ материальной пробы рабочего ASD."
+        TestWriteVector handle, strain: TestWriteVector handle, stress
+        response.AcceptTrial
+    Next value
+    Dim geometry As CGeometryRegion, mesh As New CFiberMeshBuilder, builder As New CSectionModelBuilder
+    Set geometry = TestFixtureBox(180#, 120#): mesh.BuildMesh geometry, 18#, 12#, cellGeometry:="Contour"
+    Dim section As CSectionModel: Set section = builder.BuildFromGenerated(mesh, Nothing): geometry.BuildContours section.Contours
+    section.AddRebarElement 0#, -30#, 12#, GEOM_PI * 36#, "A400"
+    section.AddRebarElement 0#, 30#, 12#, GEOM_PI * 36#, "A400"
+    Dim layout As New CTransverseRebarLayout: layout.AddContourGroup section, "TestLawHoop", "", 8#, 100#, 10#, "A240"
+    Dim c As New CConcreteMaterialParameters, s As New CSteelMaterialParameters, provider As New CMaterialModelProvider
+    c.Initialize 30#, 3#, 40#, 4#, 30000#, 35000#, rbMc2:=15#
+    s.Initialize 350#, 400#, 350#, 400#, 200000#, 200000#: provider.TestInitializeFromParameters c, s
+    Dim hoop As New CCoupledSteelModel, grades As Object, supplementary As Object
+    hoop.Initialize 200000#, 240#, 240#, 500#, 500#, 0.02, 0.02
+    Set grades = CreateObject("Scripting.Dictionary"): grades.Add "A240", hoop
+    Set supplementary = CreateObject("Scripting.Dictionary"): supplementary.Add "ULS(I)", grades: supplementary.Add "SLS(II)", grades
+    Dim law As Variant, model As Long, caseIndex As Long, analysis As New CCoupledSectionAnalysis
+    Dim spec As New CMaterialModelSpec, loads As New CSectionLoadState, meta As CResultMeta, state As CSectionStateResult
+    Dim field() As Double, actual() As Double, target(1 To 6) As Double, started As Double, elapsed As Double, j As Long
+    TestWriteVector handle, Array(8#)
+    For Each law In Array("CDP", "ASD")
+        model = model + 1
+        analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary, concreteLaw:=CStr(law)
+        For caseIndex = 1 To 4
+            Erase target
+            If caseIndex = 1 Or caseIndex = 4 Then target(2) = 500000#
+            If caseIndex = 2 Then target(4) = 100000#
+            If caseIndex = 3 Then
+                target(1) = 1000#: target(2) = 500000#: target(3) = 100000#
+                target(4) = 100000#: target(5) = 200#: target(6) = -100#
+            End If
+            If caseIndex = 4 Then spec.Initialize "SLS(II)", "ThreeLine", "UseDiagram", "TwoLine" Else spec.Initialize "ULS(I)", "ThreeLine", "UseDiagram", "TwoLine"
+            loads.Initialize target(1), target(2), target(3), 0#, 0#: loads.SetSpatialComponents target(4), target(5), target(6)
+            started = Timer
+            Set meta = analysis.SolveTarget(loads, "Auto", spec, field, actual, True, state)
+            elapsed = Timer - started: If elapsed < 0# Then elapsed = elapsed + 86400#
+            If meta.InternalStatus <> rsSuccess And meta.InternalStatus <> rsSuccessWithWarning Then _
+                Err.Raise 5, , CStr(law) & ", случай " & CStr(caseIndex) & ": " & meta.ResultComment & " " & meta.DiagnosticDetails
+            If state Is Nothing Then Err.Raise 5, , "Не сохранено подтверждённое НДС выбранного закона."
+            If (law = "CDP" And state.CoupledMaterialCurves.ConcreteLawIdentifier <> "Barcelona-CDP") Or _
+                    (law = "ASD" And state.CoupledMaterialCurves.ConcreteLawIdentifier <> "ASD-NativeStep-Cdf0") Then _
+                Err.Raise 5, , "Диаграммы не соответствуют выбранному закону."
+            For j = 1 To 6
+                If Abs(actual(j) - target(j)) > IIf(j >= 2 And j <= 4, 0.1 * 180#, 0.1) Then _
+                    Err.Raise 5, , "Неверная результирующая выбранного закона."
+            Next j
+            TestWriteVector handle, Array(model, caseIndex, elapsed)
+            TestWriteVector handle, target: TestWriteVector handle, actual: TestWriteVector handle, field
+        Next caseIndex
+    Next law
+    Dim invalidNumber As Long
+    On Error Resume Next
+    analysis.Initialize section, layout, provider, 0.2, 0.12, 80#, 125#, 16# / 30#, 0.002, "A400", 30, supplementary, concreteLaw:="UnknownLaw"
+    invalidNumber = Err.Number: Err.Clear
+    On Error GoTo Failed
+    If invalidNumber <> 5 Then Err.Raise 5, , "Не отклонён неизвестный закон бетона."
+    Close #handle: handle = 0
+    TestRunSelectableMaterialCore = "SELECTABLE_CORE: both laws; pure bending, torsion, mild all6 and alternate value set; physical capacity not tested" & vbCrLf & _
+        "TOTAL_SELECTABLE_MATERIAL_CORE: passed=1; failed=0"
+    Exit Function
+Failed:
+    Dim reason As String: reason = Err.Source & " " & Err.Description
+    If handle <> 0 Then Close #handle
+    TestRunSelectableMaterialCore = "RUNTIME ERROR: " & reason
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Снимает полную подготовленную ветвь, включая фактический нижний уровень интерполяции.
+Private Sub TestWriteBranch(ByVal handle As Integer, ByVal envelope As CCoupledConcreteEnvelope, ByVal code As Double)
+    Dim branch As CCoupledConcreteBackbone: Set branch = envelope.PrepareASDBackbone(30000#)
+    Dim strain() As Double, stress() As Double, nominal As Double, effective As Double, i As Long
+    branch.CopyCurve 1#, strain, stress
+    TestWriteVector handle, Array(code, UBound(strain), branch.StressFloor)
+    For i = 1 To UBound(strain)
+        branch.Stresses strain(i), nominal, effective
+        TestWriteVector handle, Array(strain(i), nominal, effective)
+    Next i
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Пишет число и точные Double без форматирования и округления.
+Private Sub TestWriteVector(ByVal handle As Integer, ByVal values As Variant)
+    Dim count As Long: count = UBound(values) - LBound(values) + 1
+    Put #handle, , count
+    Dim i As Long, value As Double
+    For i = LBound(values) To UBound(values)
+        value = CDbl(values(i)): Put #handle, , value
+    Next i
+End Sub
