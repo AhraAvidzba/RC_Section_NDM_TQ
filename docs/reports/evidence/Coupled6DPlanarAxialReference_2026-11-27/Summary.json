@@ -1,0 +1,192 @@
+{
+  "CDP_N_and_direct_state_checks_pending": true,
+  "actual9_planar_classes_exact_current_output": true,
+  "actual_saved_books": {
+    "1059": {
+      "member": "1059/docs/regression/Diagnostic.xlsm",
+      "sha256": "59369D4C82B45FE4012A51D64DAEEA5E10A65465EEFF9020CAAE8CACD46B63E7"
+    },
+    "1060": {
+      "member": "1060/docs/regression/Diagnostic.xlsm",
+      "sha256": "59369D4C82B45FE4012A51D64DAEEA5E10A65465EEFF9020CAAE8CACD46B63E7"
+    }
+  },
+  "all_raw_files_read_back_and_hashed": true,
+  "archive_bytes": 29276628,
+  "created_local": "2026-11-27T01:55:45.123780+03:00",
+  "full_acceptance_not_run": true,
+  "logical_files": 175,
+  "no_numerical_class_changed": true,
+  "proofs": {
+    "1059": {
+      "artificial_diagram_extension": false,
+      "base_N_N": 10000.0,
+      "capacity_N": 90477.86842338604,
+      "concrete_curve": [
+        [
+          -0.0035,
+          -30.0
+        ],
+        [
+          -0.002,
+          -30.0
+        ],
+        [
+          -0.0006,
+          -18.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "concrete_tension_active": false,
+      "coupled_capacity_not_certified": true,
+      "deformation_plane": [
+        0.025,
+        -1.2744683475928519e-20,
+        5.855640154978796e-25
+      ],
+      "elapsed_seconds": 0.2099609375,
+      "independent_limit_N": 90477.86842338604,
+      "independent_limit_epsilon": 0.025,
+      "independently_integrated_N_Nmm": [
+        90477.86842338604,
+        0.0,
+        0.0
+      ],
+      "lambda_capacity": 9.047786842338605,
+      "limit_state": "CONVERGED;True;LoadMultiplier;SteelStrainLimit;\u0427\u0438\u0441\u0442\u0430\u044f \u043e\u0441\u0435\u0432\u0430\u044f \u0442\u0440\u0430\u0435\u043a\u0442\u043e\u0440\u0438\u044f \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043d\u0430 \u0447\u0435\u0440\u0435\u0437 LoadMultiplier \u043a\u0430\u043a \u0443\u0441\u0442\u043e\u0439\u0447\u0438\u0432\u0443\u044e \u043e\u0434\u043d\u043e\u043c\u0435\u0440\u043d\u0443\u044e \u043f\u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0443. \u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043f\u0440\u0435\u0434\u0435\u043b \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d \u0440\u0430\u0432\u043d\u043e\u0432\u0435\u0441\u0438\u0435\u043c \u043f\u0440\u0435\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u043f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u0438 \u043d\u0430 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0442\u0440\u0430\u0435\u043a\u0442\u043e\u0440\u0438\u0438 \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0438.",
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "physical_strain_utilization": 1.0,
+      "planar_reference_physical_limit_verified": true,
+      "replacement_concrete_subtracted_at_bars": true,
+      "returned_resultants_N_Nmm": [
+        90477.86842338604,
+        -2.9103830456733704e-11,
+        0.0
+      ],
+      "solution_method": "stock planar LoadMultiplier via pure axial redirect",
+      "spatial_materials_and_steel_hardening_differ": true,
+      "steel_curve": [
+        [
+          -0.018,
+          -350.0
+        ],
+        [
+          -0.00175,
+          -350.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.002,
+          400.0
+        ],
+        [
+          0.025,
+          400.0
+        ]
+      ],
+      "whole_goal_completed": false
+    },
+    "1060": {
+      "artificial_diagram_extension": false,
+      "base_N_N": -100000.0,
+      "capacity_N": -720382.2947387088,
+      "concrete_curve": [
+        [
+          -0.0035,
+          -30.0
+        ],
+        [
+          -0.002,
+          -30.0
+        ],
+        [
+          -0.0006,
+          -18.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "concrete_tension_active": false,
+      "coupled_capacity_not_certified": true,
+      "deformation_plane": [
+        -0.0034999999999999996,
+        2.397080143025857e-21,
+        7.460939680597686e-23
+      ],
+      "elapsed_seconds": 0.60009765625,
+      "independent_limit_N": -720382.2947387089,
+      "independent_limit_epsilon": -0.0035,
+      "independently_integrated_N_Nmm": [
+        -720382.2947387089,
+        0.0,
+        0.0
+      ],
+      "lambda_capacity": 7.203822947387088,
+      "limit_state": "CONVERGED;True;LoadMultiplier;ConcreteStrainLimit;\u0427\u0438\u0441\u0442\u0430\u044f \u043e\u0441\u0435\u0432\u0430\u044f \u0442\u0440\u0430\u0435\u043a\u0442\u043e\u0440\u0438\u044f \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043d\u0430 \u0447\u0435\u0440\u0435\u0437 LoadMultiplier \u043a\u0430\u043a \u0443\u0441\u0442\u043e\u0439\u0447\u0438\u0432\u0443\u044e \u043e\u0434\u043d\u043e\u043c\u0435\u0440\u043d\u0443\u044e \u043f\u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0443. \u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043f\u0440\u0435\u0434\u0435\u043b \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d \u0440\u0430\u0432\u043d\u043e\u0432\u0435\u0441\u0438\u0435\u043c \u043f\u0440\u0435\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u043f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u0438 \u043d\u0430 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0439 \u0442\u0440\u0430\u0435\u043a\u0442\u043e\u0440\u0438\u0438 \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0438.",
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "physical_strain_utilization": 0.9999999999999999,
+      "planar_reference_physical_limit_verified": true,
+      "replacement_concrete_subtracted_at_bars": true,
+      "returned_resultants_N_Nmm": [
+        -720382.2947387088,
+        7.275957614183426e-11,
+        0.0
+      ],
+      "solution_method": "stock planar LoadMultiplier via pure axial redirect",
+      "spatial_materials_and_steel_hardening_differ": true,
+      "steel_curve": [
+        [
+          -0.018,
+          -350.0
+        ],
+        [
+          -0.00175,
+          -350.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.002,
+          400.0
+        ],
+        [
+          0.025,
+          400.0
+        ]
+      ],
+      "whole_goal_completed": false
+    }
+  },
+  "same_compiled_book_for_both_N_signs": true,
+  "source_audit_test_corrections": [
+    "Source copies contain only previously imported modules; the numerical kernel was therefore compared in actual saved books.",
+    "VBE displays two finite-number guard literals with fewer decimal digits; exact comparison used the same actual literals from the current output workbook, without rounding scientific inputs.",
+    "Unchanged empty worksheet modules require complete-source comparison rather than the Option Explicit body parser.",
+    "Expected insertion retained the exact third newline from the method template."
+  ],
+  "unique_payloads": 105,
+  "whole_goal_completed": false,
+  "working_solver_not_changed": true
+}
