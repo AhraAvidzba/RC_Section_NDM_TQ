@@ -1,0 +1,84 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Прослеживает штатное продолжение от заданного принятого префикса и сохраняет фактическую ветвь.
+Private Function RunProductionContinuationTest(ByVal startCount As Long, ByRef report As String, ByVal tracePath As String, _
+        Optional ByVal forceScale As Double = 75000#) As Boolean
+    Const EC As Double = 30000#, NU As Double = 0.2, TORQUE As Double = 10510000#
+    Const FT As Double = 2.10667357864589, PEAK As Double = 0.0022
+    Const ATOL As Double = 0.0000005, RTOL As Double = 0.0000005
+    Dim section As CSectionModel, transverse As CTransverseRebarLayout, steel As Object
+    Set section = BuildWangMVT2SectionTest(transverse, steel)
+    Dim operators As New CCoupledElasticState, concrete As New CCoupledConcreteResponse
+    Dim response As New CCoupledReinforcedResponse, solver As New CCoupledNewtonSolver
+    operators.PrepareModel section, EC, NU, 2, 2, 5, transverse, steelModels:=steel, useFullSpanGauss5:=True
+    Dim fc As Double: fc = 588000# / (0.3 * 240# * 240#)
+    Dim plusConcrete As CCoupledConcreteResponse, minusConcrete As CCoupledConcreteResponse
+    Dim plusSide As CCoupledReinforcedResponse, minusSide As CCoupledReinforcedResponse
+    InitializeExperimentSolverTest solver, operators, concrete, response, steel, EC, NU, fc, FT, PEAK, 0#, 0#, True, _
+        plusConcrete, minusConcrete, plusSide, minusSide
+    Dim allFields As Collection, history As New Collection, trace As New CCoupledLoadTrace, q() As Double, torqueHistory() As Double
+    ReadControlHistoryTest Environ$("NDM_MVT_FLOW_FOLDER") & "\AcceptedHistory.csv", allFields, q, torqueHistory
+    Dim i As Long, field() As Double, actual() As Double, base(1 To 6) As Double, direction(1 To 6) As Double
+    For i = 1 To startCount
+        field = allFields(i): history.Add field
+        trace.Add torqueHistory(i) / TORQUE, q(i) / forceScale
+    Next i
+    If Not solver.ReplayAcceptedFields(history, history.Count) Then Err.Raise 5, , "Не восстановлен префикс штатного продолжения."
+    base(4) = TORQUE: direction(2) = -396# * forceScale: direction(6) = forceScale
+    Dim initialSeed As Variant, verification() As Double, j As Long
+    field = history(history.Count): initialSeed = field
+    If Not solver.TryStep(0#, -396# * q(startCount), 0#, TORQUE, 0#, q(startCount), ATOL, RTOL, 1, _
+            initialField:=initialSeed) Then Err.Raise 5, , "Исходное принятое поле не подтвердило равновесие."
+    solver.CopyTrial verification, actual
+    For j = 1 To UBound(field): If field(j) <> verification(j) Then Err.Raise 5, , "Исходный префикс потребовал поправки."
+    Next j
+    solver.DiscardStep
+    Dim continuation As New CCoupledDeformationContinuation
+    Dim observer As New CCoupledProgressObserverTest
+    observer.TestInitialize tracePath & ".Checkpoint.csv"
+    continuation.Trace solver, response, base, direction, history, q(startCount - 1) / forceScale, q(startCount) / forceScale, _
+        actual, 2#, 0.006, 32, ATOL, RTOL, trace, observer
+    Dim meta As CResultMeta: Set meta = continuation.ResultMeta
+    AddExperimentTraceTest report, tracePath, "PRODUCTION_CONTINUATION;" & CStr(startCount) & ";" & meta.ResultComment & ";" & meta.DiagnosticDetails
+    Dim accepted As Collection, savedTrace As CCoupledLoadTrace
+    Set accepted = continuation.AcceptedFields: Set savedTrace = continuation.SavedTrace
+    If accepted Is Nothing Or savedTrace Is Nothing Then Err.Raise 5, , "Не сохранена фактическая ветвь продолжения."
+    If accepted.Count <> savedTrace.Count Then Err.Raise 5, , "Длины полей и траектории не совпали."
+    AddExperimentTraceTest report, tracePath, "PRODUCTION_PATH_COUNT;" & CStr(accepted.Count)
+    RecordGaussPointsTest section, operators, report, tracePath: WriteMVT2OperatorsTest operators, tracePath
+    Dim handle As Integer: handle = FreeFile: Open tracePath & ".Tensor.csv" For Output As #handle: Close #handle
+    Dim stations As New Collection
+    stations.Add minusConcrete: stations.Add minusSide: stations.Add concrete: stations.Add response
+    stations.Add plusConcrete: stations.Add plusSide
+    Dim emptyFields As New Collection
+    If Not solver.ReplayAcceptedFields(emptyFields, 0) Then Err.Raise 5, , "Не сброшена история для независимого нативного повтора."
+    Dim fraction As Double, factor As Double, initial As Variant, repeated() As Double, phase As String
+    For i = 1 To accepted.Count
+        field = accepted(i): initial = field: savedTrace.ReadPoint i, fraction, factor
+        If Not solver.TryStep(0#, -396# * forceScale * factor, 0#, TORQUE * fraction, 0#, forceScale * factor, _
+                ATOL, RTOL, 1, initialField:=initial) Then Err.Raise 5, , "Принятое поле не подтвердило исходное равновесие."
+        solver.CopyTrial repeated, actual
+        For j = 1 To UBound(field)
+            If field(j) <> repeated(j) Then Err.Raise 5, , "При повторе сохранённое поле было исправлено."
+        Next j
+        solver.AcceptStep: phase = "Production" & CStr(i)
+        WriteMVT2FullFrameTest operators, field, phase, TORQUE * fraction, forceScale * factor, tracePath, stations
+    Next i
+    If forceScale <> 75000# Then
+        ' Точная цель проверяется от того же исходного префикса; отдельный экспорт не смешивается с поздней историей.
+        Dim designPath As String, designReport As String
+        designPath = tracePath & ".Design"
+        If Not solver.ReplayAcceptedFields(history, startCount) Then Err.Raise 5, , "Не восстановлен префикс точного сочетания."
+        field = history(startCount): initial = field
+        If Not solver.TryStep(0#, -396# * forceScale, 0#, TORQUE, 0#, forceScale, ATOL, RTOL, 32, _
+                initialField:=initial) Then Err.Raise 5, , "Не подтверждено точное lambda = 1 у материального перехода."
+        solver.CopyTrial repeated, actual: solver.AcceptStep
+        RecordGaussPointsTest section, operators, designReport, designPath: WriteMVT2OperatorsTest operators, designPath
+        handle = FreeFile: Open designPath & ".Tensor.csv" For Output As #handle: Close #handle
+        WriteMVT2FullFrameTest operators, repeated, "ExactDesign", TORQUE, forceScale, designPath, stations
+        Dim designVerified As Boolean
+        designVerified = (InStr(meta.DiagnosticDetails, "равновесие при lambda = 1 подтверждено: True") > 0)
+        AddExperimentTraceTest report, tracePath, "PRODUCTION_EXACT_DESIGN;" & ExperimentNumberTest(forceScale) & ";" & CStr(designVerified)
+        If Not designVerified Then Err.Raise 5, , "Продолжение не подтвердило lambda = 1 у материального перехода."
+    End If
+    RunProductionContinuationTest = True
+End Function

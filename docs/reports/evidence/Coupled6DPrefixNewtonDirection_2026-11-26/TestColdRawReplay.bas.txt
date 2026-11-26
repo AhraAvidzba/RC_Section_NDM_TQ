@@ -1,0 +1,119 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет точный холодный H-запрос и два прогноза от его исходной материальной истории; предел не назначает.
+Private Sub TestIntegratedYieldEvent()
+    Dim fields As Collection, trace As CCoupledLoadTrace, previous() As Double, accepted() As Double, unused() As Double
+    Dim projection() As Double, context() As Double, inputHandle As Integer: inputHandle = FreeFile
+    TestReadPolishSnapshot mPolishRootTest & "\Input\Reverse1.bin", fields, trace, previous, accepted, unused, projection, context
+    Open mPolishRootTest & "\Input\ColdHRequest.bin" For Binary Access Read As #inputHandle
+    Dim info As Variant, requestPrevious() As Double, requestSeed() As Double, requestAccepted() As Double
+    info = TestReadPolishVector(inputHandle)
+    TestPolishSameVector TestReadPolishVector(inputHandle), mReverseBaseTest, "постоянные усилия H-запроса"
+    TestPolishSameVector TestReadPolishVector(inputHandle), mReverseDirectionTest, "траектория H-запроса"
+    requestPrevious = TestReadPolishVector(inputHandle): requestSeed = TestReadPolishVector(inputHandle): requestAccepted = TestReadPolishVector(inputHandle)
+    If Seek(inputHandle) <> LOF(inputHandle) + 1 Then Err.Raise 5, , "Лишние байты H-запроса."
+    Close #inputHandle
+    Dim countInput As Variant
+    Open mPolishRootTest & "\Input\ColdHPrefix.bin" For Binary Access Read As #inputHandle
+    countInput = TestReadPolishVector(inputHandle): Close #inputHandle
+    Dim count As Long: count = CLng(countInput(1))
+    Dim prefix As New Collection, i As Long
+    For i = 1 To count: prefix.Add fields(i): Next i
+    TestPolishSameVector requestAccepted, fields(count), "исходное принятое поле H-запроса"
+    Dim fraction As Double, factor As Double
+    trace.ReadPoint count, fraction, factor
+    If factor <> info(3) Then Err.Raise 5, , "Изменился исходный Double множителя H-запроса."
+    Dim originalFields As Collection, originalTrace As CCoupledLoadTrace
+    Set originalFields = mReverseFieldsTest: Set originalTrace = mReverseTraceTest
+    Dim baseline As Double, before As Double, after As Double, pair() As Double, actualH As Double
+    Dim seed() As Double, seedFactor As Double, trialFactor As Double, candidate() As Double, actual() As Double
+    Dim hasPair As Boolean, solved As Boolean, validSeed As Boolean, alpha As Double, calls As Long
+    Dim caseIndex As Long, probes As Long, started As Double, seconds As Double, stats As Variant, handle As Integer
+    Dim forward As Boolean, advance As Double, reference As Double, stem As String, signature As String
+    For caseIndex = 0 To 2
+        If Not mReverseSolverTest.ReplayAcceptedFields(prefix, count) Then Err.Raise 5, , "Не восстановлен точный холодный префикс."
+        If Not mReverseSolverTest.TryReadEnvelopeCoordinate(True, baseline) Then Err.Raise 5, , "Не прочитана принятая H."
+        If baseline <> info(10) Then Err.Raise 5, , "H восстановленного префикса не совпала с исходным Double холодной пробы."
+        mReverseSolverTest.CopyAccepted accepted
+        TestPolishSameVector accepted, requestAccepted, "побитный повтор принятого поля"
+        hasPair = mReverseSolverTest.TryAcceptedEnvelopeSegment(pair, before, after)
+        If Not hasPair Then Err.Raise 5, , "Не восстановлена предыдущая пара H."
+        seed = requestSeed: seedFactor = info(4): calls = 0: alpha = 0#: validSeed = True
+        If caseIndex = 1 Then
+            alpha = 1#
+            If after > before Then alpha = (info(5) - after) / (after - before)
+            seed = accepted
+            For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = accepted(i) + alpha * (accepted(i) - requestPrevious(i)): Next i
+        ElseIf caseIndex = 2 Then
+            validSeed = TestColdRawHSeed(accepted, requestPrevious, info(5), seed, calls, alpha)
+        End If
+        trialFactor = 0#: solved = False: seconds = 0#: actualH = 0#: forward = False
+        If validSeed Then
+            started = Timer
+            solved = mReverseSolverTest.TryEnvelopeStep(mReverseBaseTest, mReverseDirectionTest, requestPrevious, info(3), _
+                seed, seedFactor, info(5), trialFactor, projection, info(6), info(7), CLng(info(8)), probes, CBool(info(11)))
+            seconds = Timer - started: If seconds < 0# Then seconds = seconds + 86400#
+        End If
+        stats = mReverseSolverTest.ReadPolishEffortTest
+        If solved Then
+            mReverseSolverTest.CopyTrial candidate, actual
+            If Not mReverseSolverTest.TryReadEnvelopeCoordinate(False, actualH) Then Err.Raise 5, , "Нет H проверенного кандидата."
+            forward = mReverseSolverTest.SpatialIncrementAdvances(requestPrevious, accepted, candidate, advance, reference)
+        End If
+        stem = mPolishRootTest & "\Native\ColdRawReplay.Case" & CStr(caseIndex)
+        handle = FreeFile: signature = "NDMRAWREPLAY0001"
+        Open stem & ".bin" For Binary Access Write As #handle
+        Put #handle, , signature
+        TestWriteReverseBinaryVector handle, Array(caseIndex, Abs(CLng(solved)), seconds, calls, alpha, trialFactor, info(5), baseline, _
+            before, after, actualH, Abs(CLng(forward)), advance, reference, count, mReverseSolverTest.ResultMeta.InternalStatus, mReverseSolverTest.ResultMeta.ResultCode)
+        TestWriteReverseBinaryVector handle, stats
+        TestWriteReverseBinaryVector handle, seed
+        If solved Then
+            TestWriteReverseBinaryVector handle, candidate: TestWriteReverseBinaryVector handle, actual
+        Else
+            TestWriteReverseBinaryVector handle, Array(0#): TestWriteReverseBinaryVector handle, Array(0#)
+        End If
+        Close #handle
+        handle = FreeFile
+        Open mPolishRootTest & "\Native\ColdRawReplay.csv" For Append As #handle
+        Print #handle, "RESULT;" & CStr(caseIndex) & ";" & CStr(solved) & ";" & CStr(seconds) & ";" & CStr(calls) & ";" & CStr(alpha) & TestHardPreparedVector(stats)
+        Print #handle, "DETAILS;" & CStr(caseIndex) & ";" & mReverseSolverTest.ResultMeta.DiagnosticDetails
+        Close #handle
+        If solved Then
+            Dim sequence As New Collection, sequenceTrace As CCoupledLoadTrace
+            Set sequence = New Collection
+            For i = 1 To count: sequence.Add prefix(i): Next i
+            sequence.Add candidate: Set sequenceTrace = trace.CopyPrefix(count): sequenceTrace.Add 1#, trialFactor
+            Set mReverseFieldsTest = sequence: Set mReverseTraceTest = sequenceTrace
+            mHardPreparedPathTest = stem
+            TestWriteHardPreparedOperators mReverseOperatorsTest, stem & ".Operators.csv"
+            TestExportReverseCandidate 999
+            Set mReverseFieldsTest = originalFields: Set mReverseTraceTest = originalTrace
+        End If
+        mReverseSolverTest.DiscardStep
+    Next caseIndex
+    mPolishExecutedTest = True
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Строит только прогноз H на положительной физической секущей;32 скалярных чтения учитываются отдельно от30 поправок равновесия.
+Private Function TestColdRawHSeed(ByRef accepted() As Double, ByRef previous() As Double, ByVal target As Double, _
+        ByRef seed() As Double, ByRef calls As Long, ByRef alpha As Double) As Boolean
+    Dim low As Double, high As Double, value As Double, attempt As Long, i As Long
+    high = 1#: seed = accepted
+    For attempt = 1 To 16
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = accepted(i) + high * (accepted(i) - previous(i)): Next i
+        calls = calls + 1
+        If Not mReverseSolverTest.TryReadColdHFieldTest(seed, value) Then Exit Function
+        If value >= target Then Exit For
+        low = high: high = 2# * high
+    Next attempt
+    If value < target Then Exit Function
+    For attempt = 1 To 16
+        alpha = 0.5 * (low + high)
+        For i = 1 To mReverseSolverTest.PhysicalDegreeCount: seed(i) = accepted(i) + alpha * (accepted(i) - previous(i)): Next i
+        calls = calls + 1
+        If Not mReverseSolverTest.TryReadColdHFieldTest(seed, value) Then Exit Function
+        If value < target Then low = alpha Else high = alpha
+    Next attempt
+    TestColdRawHSeed = True
+End Function

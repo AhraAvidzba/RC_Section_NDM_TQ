@@ -1,0 +1,61 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' После принятого материального перехода возвращается к штатному управлению полной пространственной мерой, без адаптера исключения.
+Private Sub TestReturnToOrdinaryControl(ByVal solver As CCoupledNewtonSolver, ByVal report As Integer)
+    Dim stepIndex As Long, acceptedCount As Long, previous() As Double, accepted() As Double, movement() As Double
+    Dim projection() As Double, coordinate As Double, spacing As Double, currentFactor As Double, previousFactor As Double, unused As Double
+    Dim seed() As Double, field() As Double, actual() As Double, checked() As Double, factor As Double, seedVariant As Variant
+    Dim degree As Long, solved As Boolean, verified As Boolean, unchanged As Boolean, forward As Boolean
+    Dim advance As Double, reference As Double, steel As Double, started As Double, seconds As Double, load(1 To 6) As Double
+    For stepIndex = 0 To 1
+        accepted = mReverseFieldsTest(mReverseFieldsTest.Count): previous = mReverseFieldsTest(mReverseFieldsTest.Count - 1)
+        mReverseTraceTest.ReadPoint mReverseTraceTest.Count, unused, currentFactor
+        mReverseTraceTest.ReadPoint mReverseTraceTest.Count - 1, unused, previousFactor
+        movement = accepted
+        For degree = 1 To UBound(movement): movement(degree) = accepted(degree) - previous(degree): Next degree
+        If Not solver.SelectSpatialDirectionControl(previous, accepted, movement, projection, coordinate, spacing) Then _
+            Err.Raise 5, , "Не построена пространственная мера возврата к штатному решателю."
+        seed = accepted
+        For degree = 1 To solver.PhysicalDegreeCount: seed(degree) = accepted(degree) + 0.5 * movement(degree): Next degree
+        seedVariant = seed
+        started = Timer
+        solved = solver.TryDeformationStep(mReverseBaseTest, mReverseDirectionTest, projection, coordinate + 0.5 * spacing, _
+            currentFactor + 0.5 * (currentFactor - previousFactor), factor, mReverseOptionsTest(3), mReverseOptionsTest(4), 30, _
+            initialField:=seedVariant, allowSmallCorrection:=True, allowHybridRecovery:=True, conditionHybridRecovery:=True)
+        seconds = Timer - started
+        Print #report, "BRIDGE_RESULT;" & CStr(stepIndex) & ";" & CStr(solved) & ";" & TestOnsetNumber(seconds) & ";" & _
+            TestOnsetNumber(factor) & TestHardPreparedVector(solver.ReadPolishEffortTest)
+        If Not solved Then
+            solver.DiscardStep
+            Print #report, "BRIDGE_STOP;" & CStr(stepIndex) & ";NotPhysicalFailure"
+            Exit For
+        End If
+        solver.CopyTrial field, actual
+        Print #report, "BRIDGE_FINAL;" & CStr(stepIndex) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+        solver.DiscardStep
+        For degree = 1 To 6: load(degree) = mReverseBaseTest(degree) + factor * mReverseDirectionTest(degree): Next degree
+        seedVariant = field
+        verified = solver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mReverseOptionsTest(3), mReverseOptionsTest(4), 1, initialField:=seedVariant)
+        unchanged = False: forward = False: steel = 0#: advance = 0#: reference = 0#
+        If verified Then
+            unchanged = True: solver.CopyTrial checked, actual
+            For degree = 1 To UBound(field): If checked(degree) <> field(degree) Then unchanged = False
+            Next degree
+            forward = solver.SpatialIncrementAdvances(previous, accepted, checked, advance, reference)
+            steel = mReverseReinforcedTest.TrialSteelUtilization
+        End If
+        Print #report, "BRIDGE_NATIVE;" & CStr(stepIndex) & ";" & CStr(verified) & ";" & CStr(unchanged) & ";" & CStr(forward) & ";" & _
+            TestOnsetNumber(advance) & ";" & TestOnsetNumber(reference) & ";" & TestOnsetNumber(steel)
+        If verified And unchanged And forward And steel <= 1# Then
+            solver.AcceptStep
+            mReverseFieldsTest.Add field: mReverseTraceTest.Add 1#, factor
+            acceptedCount = acceptedCount + 1
+            Print #report, "BRIDGE_ACCEPTED;" & CStr(stepIndex) & ";" & TestOnsetNumber(factor) & ";" & CStr(solver.AcceptedRevision)
+        Else
+            solver.DiscardStep
+            Print #report, "BRIDGE_STOP;" & CStr(stepIndex) & ";UnverifiedFieldNotAccepted;NotPhysicalFailure"
+            Exit For
+        End If
+    Next stepIndex
+    Print #report, "BRIDGE_END;" & CStr(acceptedCount) & ";" & CStr(stepIndex) & ";2;PhysicalCapacityOpen"
+    If acceptedCount > 0 Then TestExportReverseCandidate 998
+End Sub

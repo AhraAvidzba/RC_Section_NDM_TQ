@@ -1,0 +1,251 @@
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Удерживает неизменённую принятую историю и точный контекст отказа для независимого численного метода.
+Public Sub TestHoldHardStall(ByVal solver As CCoupledNewtonSolver, ByVal operators As CCoupledElasticState, _
+        ByVal concrete As CCoupledConcreteResponse, ByVal reinforced As CCoupledReinforcedResponse, ByVal sides As Collection, _
+        ByVal history As Collection, ByVal trace As CCoupledLoadTrace, ByVal prefix As Long, ByVal context As Collection, _
+        ByVal calibration As Variant, ByVal options As Variant)
+    Set mStoredSolverTest = solver: Set mStoredOperatorsTest = operators
+    Set mStoredConcreteTest = concrete: Set mStoredReinforcedTest = reinforced: Set mStoredSidesTest = sides
+    Set mStoredFieldsTest = New Collection: Set mStoredTraceTest = trace.CopyPrefix(prefix)
+    Dim index As Long, copy() As Double
+    For index = 1 To prefix: copy = history.Item(index): mStoredFieldsTest.Add copy: Next index
+    mStoredFieldTest = context(1): mStoredBaseTest = context(7): mStoredDirectionTest = context(8)
+    mStoredProjectionTest = context(6): mStoredFactorTest = context(9): mStoredTargetTest = context(10): mStoredArcTest = context(11)
+    mStoredCalibrationTest = calibration: mStoredOptionsTest = options: mStoredModulusTest = calibration(0)
+    operators.LoadEquations mStoredBaseTest(1), mStoredBaseTest(2), mStoredBaseTest(3), mStoredBaseTest(4), _
+        mStoredBaseTest(5), mStoredBaseTest(6), mStoredExternalTest
+    operators.LoadEquations mStoredDirectionTest(1), mStoredDirectionTest(2), mStoredDirectionTest(3), mStoredDirectionTest(4), _
+        mStoredDirectionTest(5), mStoredDirectionTest(6), mStoredDirectionExternalTest
+    If Not solver.ReplayAcceptedFields(history, prefix) Then Err.Raise 5, , "Не восстановлена удерживаемая история."
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Возвращает точное начальное поле с lambda либо масштаб переменных для внешнего численного метода.
+Private Function TestStoredVector(ByVal kind As String) As Variant
+    Dim size As Long: size = mStoredOperatorsTest.DegreeCount
+    Dim result() As Double, unit() As Double, degree As Long, point As Long, component As Long, largest As Double
+    Dim strain(1 To 6) As Double, gradient(1 To 6) As Double
+    ReDim result(1 To size + 1): ReDim unit(1 To size)
+    For degree = 1 To size
+        If kind = "S" Then
+            result(degree) = mStoredFieldTest(degree)
+        ElseIf degree <= mStoredSolverTest.PhysicalDegreeCount Then
+            unit(degree) = 1#: largest = 0#
+            For point = 1 To mStoredOperatorsTest.PointCount
+                mStoredOperatorsTest.PointStrain point, unit, strain: mStoredOperatorsTest.AxialGradientAtPoint point, unit, gradient
+                For component = 1 To 6
+                    largest = GeomMax(largest, Abs(strain(component)) + HARD_PREPARED_HALF_TEST * Abs(gradient(component)))
+                Next component
+            Next point
+            If largest = 0# Then Err.Raise 5, , "Нулевой масштаб механической координаты."
+            result(degree) = 0.00001 / largest: unit(degree) = 0#
+        Else
+            result(degree) = 0.01
+        End If
+    Next degree
+    If kind = "S" Then result(size + 1) = mStoredFactorTest Else result(size + 1) = 0.01
+    TestStoredVector = result
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Читает один внешний вектор и собирает тот же полный остаток либо его матрицу; история не принимается.
+Private Function TestStoredEvaluate(ByVal values As Variant, ByVal withMatrix As Boolean) As Variant
+    Dim size As Long: size = mStoredOperatorsTest.DegreeCount
+    If UBound(values) - LBound(values) + 1 <> size + 1 Then Err.Raise 5, , "Неверный размер внешнего поля."
+    Dim field() As Double, factor As Double, weak() As Double, matrix() As Double, result() As Double
+    Dim degree As Long, row As Long, column As Long, rowScale As Double, position As Long
+    ReDim field(1 To size)
+    For degree = 1 To size: field(degree) = CDbl(values(LBound(values) + degree - 1)): Next degree
+    factor = CDbl(values(UBound(values)))
+    FineOrdinaryCDPTangentTest = True
+    If Not mStoredSolverTest.TestHardStallLinearization(field, withMatrix, 0, weak, matrix) Then Err.Raise 5, , "Нет материального отклика внешней пробы."
+    If withMatrix Then
+        ReDim result(1 To (size + 1) * (size + 1))
+        For row = 1 To size + 1
+            rowScale = 1#
+            If row > mStoredSolverTest.PhysicalDegreeCount And row <= size Then rowScale = mStoredModulusTest
+            For column = 1 To size + 1
+                position = position + 1
+                If row = size + 1 Then
+                    If column <= size Then result(position) = mStoredModulusTest * mStoredProjectionTest(column) Else result(position) = mStoredModulusTest * mStoredArcTest
+                ElseIf column = size + 1 Then
+                    result(position) = -rowScale * mStoredDirectionExternalTest(row)
+                Else
+                    result(position) = rowScale * matrix(column, row)
+                End If
+            Next column
+        Next row
+    Else
+        ReDim result(1 To size + 1)
+        For row = 1 To size
+            result(row) = weak(row) - mStoredExternalTest(row) - factor * mStoredDirectionExternalTest(row)
+            If row > mStoredSolverTest.PhysicalDegreeCount Then result(row) = mStoredModulusTest * result(row)
+        Next row
+        result(size + 1) = mStoredArcTest * factor - mStoredTargetTest
+        For degree = 1 To size: result(size + 1) = result(size + 1) + mStoredProjectionTest(degree) * field(degree): Next degree
+        result(size + 1) = mStoredModulusTest * result(size + 1)
+    End If
+    TestStoredEvaluate = result
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Принимает внешний результат только по штатным силам, связям, стали и направлению; затем сохраняет самостоятельный контрольный путь.
+Private Function TestStoredValidate(ByVal values As Variant) As Variant
+    Dim residual As Variant: residual = TestStoredEvaluate(values, False)
+    Dim size As Long: size = mStoredOperatorsTest.DegreeCount
+    Dim metrics(1 To 8) As Double, field() As Double, checked() As Double, actual() As Double, seed As Variant
+    Dim load(1 To 6) As Double, external() As Double, degree As Long, factor As Double, bound As Double, externalNorm As Double
+    ReDim field(1 To size)
+    For degree = 1 To size: field(degree) = CDbl(values(LBound(values) + degree - 1)): Next degree
+    factor = CDbl(values(UBound(values)))
+    For degree = 1 To 6: load(degree) = mStoredBaseTest(degree) + factor * mStoredDirectionTest(degree): Next degree
+    mStoredOperatorsTest.LoadEquations load(1), load(2), load(3), load(4), load(5), load(6), external
+    For degree = 1 To mStoredSolverTest.PhysicalDegreeCount: externalNorm = GeomMax(externalNorm, Abs(external(degree))): Next degree
+    bound = mStoredOptionsTest(3) + mStoredOptionsTest(4) * externalNorm
+    For degree = LBound(residual) To UBound(residual): metrics(4) = GeomMax(metrics(4), Abs(CDbl(residual(degree)))): Next degree
+    metrics(3) = bound
+    If metrics(4) > bound Or factor <= 0# Or factor > mStoredOptionsTest(6) Then GoTo Finished
+    seed = field
+    If Not mStoredSolverTest.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
+            mStoredOptionsTest(3), mStoredOptionsTest(4), 1, initialField:=seed) Then GoTo Finished
+    metrics(2) = 1#: mStoredSolverTest.CopyTrial checked, actual
+    For degree = 1 To size
+        If checked(degree) <> field(degree) Then metrics(2) = 0#: GoTo Finished
+    Next degree
+    metrics(5) = mStoredReinforcedTest.TrialSteelUtilization
+    If metrics(5) > 1# Then GoTo Finished
+    Dim previous() As Double, origin() As Double, advance As Double, reference As Double, fraction As Double, originFactor As Double
+    previous = mStoredFieldsTest.Item(mStoredFieldsTest.Count - 1): origin = mStoredFieldsTest.Item(mStoredFieldsTest.Count)
+    If Not mStoredSolverTest.SpatialIncrementAdvances(previous, origin, field, advance, reference) Then GoTo Finished
+    metrics(6) = advance
+    mStoredTraceTest.ReadPoint mStoredFieldsTest.Count, fraction, originFactor
+    If factor <= originFactor Then GoTo Finished
+    metrics(7) = factor: metrics(8) = originFactor
+    mStoredFieldsTest.Add field: mStoredTraceTest.Add 1#, factor
+    TestStoredExportCandidate
+    metrics(1) = 1#
+Finished:
+    TestStoredValidate = metrics
+End Function
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Повторяет принятый внешним методом путь, записывает все три станции и не объявляет этот результат физическим пределом.
+Private Sub TestStoredExportCandidate()
+    Dim path As String: path = mHardPreparedPathTest & ".HybridCandidate"
+    TestWriteHardPreparedOperators mStoredOperatorsTest, path & ".Operators.csv"
+    Dim handle As Integer: handle = FreeFile
+    Open path & ".csv" For Output As #handle
+    Print #handle, "MODE;ControlledPointWitness;NotACapacityResult"
+    Print #handle, "DIM;" & CStr(mStoredOperatorsTest.DegreeCount) & ";" & CStr(mStoredSolverTest.PhysicalDegreeCount) & ";" & _
+        CStr(mStoredOperatorsTest.PointCount) & ";" & CStr(mStoredOperatorsTest.ConcretePointCount) & ";" & TestOnsetNumber(HARD_PREPARED_HALF_TEST)
+    Print #handle, "LAW" & TestHardPreparedVector(mStoredCalibrationTest)
+    Print #handle, "OPTIONS;" & CStr(mStoredOptionsTest(0)) & ";" & CStr(mStoredOptionsTest(1)) & ";" & CStr(mStoredOptionsTest(2)) & ";" & _
+        TestOnsetNumber(mStoredOptionsTest(3)) & ";" & TestOnsetNumber(mStoredOptionsTest(4)) & ";" & TestOnsetNumber(mStoredOptionsTest(5))
+    Print #handle, "OFFSET" & TestHardPreparedVector(mStoredBaseTest)
+    Print #handle, "DIRECTION" & TestHardPreparedVector(mStoredDirectionTest)
+    Print #handle, "META;4;0;Подтверждена одна управляемая точка независимого численного метода. Это не предел."
+    Print #handle, "DETAILS;ControlledPointWitness;capacity_certified=False"
+    mStoredSolverTest.ResetHistory
+    Dim index As Long, degree As Long, field() As Double, checked() As Double, actual() As Double, seed As Variant
+    Dim fraction As Double, factor As Double, load(1 To 6) As Double, external() As Double, weak() As Double, matrix() As Double
+    Dim norm As Double, externalNorm As Double, bound As Double
+    For index = 1 To mStoredFieldsTest.Count
+        field = mStoredFieldsTest.Item(index): mStoredTraceTest.ReadPoint index, fraction, factor
+        For degree = 1 To 6: load(degree) = fraction * mStoredBaseTest(degree) + factor * mStoredDirectionTest(degree): Next degree
+        seed = field
+        If Not mStoredSolverTest.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), mStoredOptionsTest(3), mStoredOptionsTest(4), 1, initialField:=seed) Then _
+            Err.Raise 5, , "Контрольный путь внешнего метода не воспроизвёл равновесие."
+        mStoredSolverTest.CopyTrial checked, actual
+        For degree = 1 To UBound(field)
+            If checked(degree) <> field(degree) Then Err.Raise 5, , "Поле внешнего метода изменилось при воспроизведении."
+        Next degree
+        mStoredSolverTest.AcceptStep
+        mStoredOperatorsTest.LoadEquations load(1), load(2), load(3), load(4), load(5), load(6), external
+        If Not mStoredSolverTest.TestEquilibriumLinearization(field, False, True, weak, matrix) Then Err.Raise 5, , "Нет контрольных уравнений."
+        norm = 0#: externalNorm = 0#
+        For degree = 1 To mStoredSolverTest.PhysicalDegreeCount
+            norm = GeomMax(norm, Abs(weak(degree) - external(degree))): externalNorm = GeomMax(externalNorm, Abs(external(degree)))
+        Next degree
+        For degree = mStoredSolverTest.PhysicalDegreeCount + 1 To mStoredOperatorsTest.DegreeCount
+            norm = GeomMax(norm, mStoredModulusTest * Abs(weak(degree) - external(degree)))
+        Next degree
+        bound = mStoredOptionsTest(3) + mStoredOptionsTest(4) * externalNorm
+        Print #handle, "F;" & CStr(index) & ";" & TestOnsetNumber(fraction) & ";" & TestOnsetNumber(factor) & TestHardPreparedVector(field)
+        Print #handle, "R;" & CStr(index) & ";" & TestOnsetNumber(norm) & ";" & TestOnsetNumber(bound) & ";" & TestOnsetNumber(mStoredReinforcedTest.AcceptedSteelUtilization)
+        TestWriteHardPreparedStress handle, index, mStoredOperatorsTest, mStoredConcreteTest, mStoredReinforcedTest, mStoredSidesTest
+        If norm > bound Or mStoredReinforcedTest.AcceptedSteelUtilization > 1# Then Err.Raise 5, , "Контрольная точка недопустима."
+    Next index
+    Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Обслуживает один двоичный ответ; первый индекс механической матрицы VBA является столбцом.
+Private Sub TestStoredServeRequest(ByVal folder As String)
+    Dim handle As Integer: handle = FreeFile
+    Dim line As String, parts As Variant, values As Variant, result As Variant, index As Long, operation As String
+    Open folder & "\request.csv" For Input As #handle
+    Line Input #handle, line
+    Close #handle
+    parts = Split(line, ";"): operation = parts(0)
+    On Error GoTo Failed
+    If operation = "S" Or operation = "C" Then
+        result = TestStoredVector(operation)
+    Else
+        ReDim values(0 To UBound(parts) - 2)
+        For index = 2 To UBound(parts): values(index - 2) = Val(parts(index)): Next index
+        If operation = "V" Then result = TestStoredValidate(values) Else result = TestStoredEvaluate(values, operation = "J")
+    End If
+    Open folder & "\response.tmp" For Binary Access Write As #handle
+    For index = LBound(result) To UBound(result)
+        Dim number As Double: number = CDbl(result(index))
+        Put #handle, , number
+    Next index
+    Close #handle
+    Kill folder & "\request.csv"
+    Name folder & "\response.tmp" As folder & "\response-" & parts(1) & ".bin"
+    Exit Sub
+Failed:
+    Dim errorText As String: errorText = Err.Source & " " & Err.Description
+    On Error Resume Next
+    Close #handle
+    On Error GoTo 0
+    Open folder & "\response-" & parts(1) & ".err" For Output As #handle
+    Print #handle, errorText
+    Close #handle
+    If Len(Dir$(folder & "\request.csv")) > 0 Then Kill folder & "\request.csv"
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Запускает независимый численный метод через файлы в частной папке; вызовы не обращаются к пользовательскому Excel.
+Public Function RunTestHybridStall(ByVal outputRoot As String) As String
+    On Error GoTo Failed
+    HardStoreStallRequestedTest = True
+    Dim setup As String: setup = RunTestHardStallTangent(outputRoot)
+    HardStoreStallRequestedTest = False
+    If mStoredSolverTest Is Nothing Or InStr(setup, "RUNTIME ERROR:") > 0 Then Err.Raise 5, , "Не удержан контекст. " & setup
+    Dim folder As String: folder = outputRoot & "\Native\HybridBridge"
+    MkDir folder
+    Dim command As String, python As String, childPID As Double
+    python = Environ$("NDM_HYBRID_PYTHON")
+    If Len(python) = 0 Then Err.Raise 5, , "Не задан NDM_HYBRID_PYTHON."
+    command = """" & python & """ -B -X utf8 """ & outputRoot & "\TestHybridOptimizer.py"" --bridge """ & folder & """"
+    childPID = Shell(command, vbHide)
+    Dim started As Double: started = Timer
+    Do While Len(Dir$(folder & "\done.txt")) = 0
+        If Len(Dir$(folder & "\request.csv")) > 0 Then TestStoredServeRequest folder
+        DoEvents
+        TestHybridSleep 5
+        If Timer - started > 240# Then Err.Raise 5, , "Истёк лимит независимого численного контроля."
+    Loop
+    Dim handle As Integer: handle = FreeFile
+    Open folder & "\done.txt" For Input As #handle
+    Dim outcome As String: Line Input #handle, outcome
+    Close #handle
+    RunTestHybridStall = setup & vbCrLf & "HYBRID_CONTROL;" & outcome & ";python_pid=" & CStr(childPID) & vbCrLf & _
+        "TOTAL_HYBRID_CONTROL_TEST: passed=1; failed=0; independent_point_requires_native_validation=True"
+    FineOrdinaryCDPTangentTest = False
+    Exit Function
+Failed:
+    HardStoreStallRequestedTest = False: FineOrdinaryCDPTangentTest = False
+    RunTestHybridStall = "RUNTIME ERROR: " & Err.Source & " " & Err.Description
+End Function
