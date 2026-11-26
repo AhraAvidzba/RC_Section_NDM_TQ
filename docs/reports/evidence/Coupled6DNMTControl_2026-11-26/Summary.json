@@ -1,0 +1,1196 @@
+{
+  "actual_NMT_test_book_rebuilt_bitexact": true,
+  "all_logical_raw_hashes_read_back": true,
+  "all_started_stages_terminal": true,
+  "book_reconstruction": {
+    "1003": {
+      "actual_saved_book_sha256": "ADDF058313E2603C146A7C8021D87548BB11871AFE7882A02A776F77924BCFEA",
+      "all_saved_zip_bytes_reconstructed_and_verified": true,
+      "blobs_prefix": "BookSegmentBlobs/",
+      "corrupt_parent_segment_and_final_digest_rejected": true,
+      "manifest_member": "1003/ActualSavedBookSegments.json",
+      "parent_archive": "docs/reports/evidence/Coupled6DDetectedEventApproach_2026-11-26/RawEvidence.tar.xz",
+      "parent_archive_sha256": "638F972398270EDFF02C05C0E93E71B0C1F28D7ECDE065E7AD505E513B6C1E93",
+      "parent_book_member": "954/ActualCompiledWorkbook.xlsm",
+      "parent_book_sha256": "FB807B2694BC0334D24A57B32FD97B0CFED81FD0798FA34E8359C762805406E9",
+      "reconstruction_tool": "Rebuild-TestBookSegments.py",
+      "saved_book_bytes": 15620058
+    }
+  },
+  "exact_duplicate_hardlinks": 2,
+  "full_acceptance_not_run": true,
+  "physical_capacity_certified": false,
+  "proofs": {
+    "1003": {
+      "OpenSees_material_tensor_equivalence_verified": true,
+      "accepted_steps": 24,
+      "all_six_resultants_and56plus4_equations_verified": true,
+      "all_steel_remained_elastic": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "base_lambda": 0.0,
+          "function_evaluations": 4,
+          "iterations": 2,
+          "solved": true,
+          "target_lambda": 0.05
+        },
+        {
+          "attempt": 2,
+          "base_lambda": 0.05,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.1
+        },
+        {
+          "attempt": 3,
+          "base_lambda": 0.1,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.15000000000000002
+        },
+        {
+          "attempt": 4,
+          "base_lambda": 0.15000000000000002,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.2
+        },
+        {
+          "attempt": 5,
+          "base_lambda": 0.2,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.25
+        },
+        {
+          "attempt": 6,
+          "base_lambda": 0.25,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.3
+        },
+        {
+          "attempt": 7,
+          "base_lambda": 0.3,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.35
+        },
+        {
+          "attempt": 8,
+          "base_lambda": 0.35,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.39999999999999997
+        },
+        {
+          "attempt": 9,
+          "base_lambda": 0.39999999999999997,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.44999999999999996
+        },
+        {
+          "attempt": 10,
+          "base_lambda": 0.44999999999999996,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.49999999999999994
+        },
+        {
+          "attempt": 11,
+          "base_lambda": 0.49999999999999994,
+          "function_evaluations": 1,
+          "iterations": 0,
+          "solved": true,
+          "target_lambda": 0.5
+        },
+        {
+          "attempt": 12,
+          "base_lambda": 0.5,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.55
+        },
+        {
+          "attempt": 13,
+          "base_lambda": 0.55,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.6000000000000001
+        },
+        {
+          "attempt": 14,
+          "base_lambda": 0.6000000000000001,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.65
+        },
+        {
+          "attempt": 15,
+          "base_lambda": 0.65,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.699036407470703
+        },
+        {
+          "attempt": 16,
+          "base_lambda": 0.699036407470703,
+          "function_evaluations": 2,
+          "iterations": 1,
+          "solved": true,
+          "target_lambda": 0.749036407470703
+        },
+        {
+          "attempt": 17,
+          "base_lambda": 0.749036407470703,
+          "function_evaluations": 4,
+          "iterations": 2,
+          "solved": true,
+          "target_lambda": 0.799036407470703
+        },
+        {
+          "attempt": 18,
+          "base_lambda": 0.799036407470703,
+          "function_evaluations": 4,
+          "iterations": 2,
+          "solved": true,
+          "target_lambda": 0.8490364074707031
+        },
+        {
+          "attempt": 19,
+          "base_lambda": 0.8490364074707031,
+          "function_evaluations": 6,
+          "iterations": 3,
+          "solved": true,
+          "target_lambda": 0.8990364074707031
+        },
+        {
+          "attempt": 20,
+          "base_lambda": 0.8990364074707031,
+          "function_evaluations": 6,
+          "iterations": 3,
+          "solved": true,
+          "target_lambda": 0.936482644081116
+        },
+        {
+          "attempt": 21,
+          "base_lambda": 0.936482644081116,
+          "function_evaluations": 4,
+          "iterations": 2,
+          "solved": true,
+          "target_lambda": 0.974817657470703
+        },
+        {
+          "attempt": 22,
+          "base_lambda": 0.974817657470703,
+          "function_evaluations": 6,
+          "iterations": 3,
+          "solved": true,
+          "target_lambda": 1.0
+        },
+        {
+          "attempt": 23,
+          "base_lambda": 1.0,
+          "function_evaluations": 30,
+          "iterations": 4,
+          "solved": false,
+          "target_lambda": 1.05
+        },
+        {
+          "attempt": 24,
+          "base_lambda": 1.0,
+          "function_evaluations": 10,
+          "iterations": 5,
+          "solved": true,
+          "target_lambda": 1.025
+        },
+        {
+          "attempt": 25,
+          "base_lambda": 1.025,
+          "function_evaluations": 19,
+          "iterations": 2,
+          "solved": false,
+          "target_lambda": 1.05625
+        },
+        {
+          "attempt": 26,
+          "base_lambda": 1.025,
+          "function_evaluations": 22,
+          "iterations": 3,
+          "solved": false,
+          "target_lambda": 1.040625
+        },
+        {
+          "attempt": 27,
+          "base_lambda": 1.025,
+          "function_evaluations": 28,
+          "iterations": 4,
+          "solved": false,
+          "target_lambda": 1.0328125
+        },
+        {
+          "attempt": 28,
+          "base_lambda": 1.025,
+          "function_evaluations": 6,
+          "iterations": 3,
+          "solved": true,
+          "target_lambda": 1.02890625
+        },
+        {
+          "attempt": 29,
+          "base_lambda": 1.02890625,
+          "function_evaluations": 28,
+          "iterations": 3,
+          "solved": false,
+          "target_lambda": 1.0337890625
+        },
+        {
+          "attempt": 30,
+          "base_lambda": 1.02890625,
+          "function_evaluations": 34,
+          "iterations": 5,
+          "solved": false,
+          "target_lambda": 1.03134765625
+        },
+        {
+          "attempt": 31,
+          "base_lambda": 1.02890625,
+          "function_evaluations": 45,
+          "iterations": 8,
+          "solved": false,
+          "target_lambda": 1.030126953125
+        },
+        {
+          "attempt": 32,
+          "base_lambda": 1.02890625,
+          "function_evaluations": 9,
+          "iterations": 0,
+          "solved": false,
+          "target_lambda": 1.0295166015625
+        },
+        {
+          "attempt": 33,
+          "base_lambda": 1.02890625,
+          "function_evaluations": 9,
+          "iterations": 0,
+          "solved": false,
+          "target_lambda": 1.02921142578125
+        }
+      ],
+      "integration_mode": "native_single_update_test",
+      "kernel_seconds": 6.703125,
+      "material_comparison": {
+        "comparison_tolerance_MPa": 1e-07,
+        "material_tensor_match": true,
+        "maximum_stress_error_MPa": 8.230658006275898e-10,
+        "scalar_comparisons": 18576
+      },
+      "maximum_accepted_lambda": 1.02890625,
+      "maximum_independent_steel_stress_error_MPa": 1.7763568394002505e-15,
+      "maximum_operator_strain_error": 3.8624702394796095e-19,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_ready_equilibrium_input_and_initial_field_zero": true,
+      "numerical_stop": true,
+      "numerical_stop_not_physical_capacity": true,
+      "physical_capacity_certified": false,
+      "rejected_trials": 9,
+      "requested_load_reached": false,
+      "source_unchanged": true,
+      "steps": [
+        {
+          "function_evaluations": 4,
+          "gauge_residual_MPa": 1.7851220514490213e-18,
+          "iterations": 2,
+          "lambda_value": 0.05,
+          "max_concrete_principal_tension_strain": 6.670818244982296e-06,
+          "min_concrete_principal_compression_strain": -4.544779027456119e-06,
+          "original_bound_MPa": 5.324074074074073e-07,
+          "physical_residual_MPa": 1.2779360902825943e-12,
+          "six_force_residual_MPa": 1.2779032153452542e-12,
+          "steel_utilization": 0.00012185746349915053
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 9.545002130572533e-18,
+          "iterations": 1,
+          "lambda_value": 0.1,
+          "max_concrete_principal_tension_strain": 1.3341630309784926e-05,
+          "min_concrete_principal_compression_strain": -9.089547367757338e-06,
+          "original_bound_MPa": 5.648148148148148e-07,
+          "physical_residual_MPa": 2.8033131371785203e-15,
+          "six_force_residual_MPa": 5.9245612531126605e-15,
+          "steel_utilization": 0.00024371494814392507
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 3.1763735522036263e-18,
+          "iterations": 1,
+          "lambda_value": 0.15000000000000002,
+          "max_concrete_principal_tension_strain": 2.0012442374637868e-05,
+          "min_concrete_principal_compression_strain": -1.3634315708109163e-05,
+          "original_bound_MPa": 5.972222222222222e-07,
+          "physical_residual_MPa": 1.432187701766452e-14,
+          "six_force_residual_MPa": 2.2053963593609502e-14,
+          "steel_utilization": 0.0003655724327866019
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 3.970466940254533e-18,
+          "iterations": 1,
+          "lambda_value": 0.2,
+          "max_concrete_principal_tension_strain": 2.668325443948571e-05,
+          "min_concrete_principal_compression_strain": -1.8179084048461347e-05,
+          "original_bound_MPa": 6.296296296296296e-07,
+          "physical_residual_MPa": 1.3128387266192476e-14,
+          "six_force_residual_MPa": 1.3191003791461591e-14,
+          "steel_utilization": 0.0004874299174293155
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 8.18869199299168e-18,
+          "iterations": 1,
+          "lambda_value": 0.25,
+          "max_concrete_principal_tension_strain": 3.3354066504339876e-05,
+          "min_concrete_principal_compression_strain": -2.272385238882003e-05,
+          "original_bound_MPa": 6.62037037037037e-07,
+          "physical_residual_MPa": 1.1463052729254741e-14,
+          "six_force_residual_MPa": 1.1512625575450573e-14,
+          "steel_utilization": 0.0006092874020720165
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 5.238475900855035e-18,
+          "iterations": 1,
+          "lambda_value": 0.3,
+          "max_concrete_principal_tension_strain": 4.0024878569193317e-05,
+          "min_concrete_principal_compression_strain": -2.7268620729164887e-05,
+          "original_bound_MPa": 6.944444444444445e-07,
+          "physical_residual_MPa": 2.631228568361621e-14,
+          "six_force_residual_MPa": 3.476297439209265e-14,
+          "steel_utilization": 0.000731144886714808
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 1.8294641627452095e-17,
+          "iterations": 1,
+          "lambda_value": 0.35,
+          "max_concrete_principal_tension_strain": 4.669569063403382e-05,
+          "min_concrete_principal_compression_strain": -3.1813389069515194e-05,
+          "original_bound_MPa": 7.268518518518518e-07,
+          "physical_residual_MPa": 2.6922908347160046e-14,
+          "six_force_residual_MPa": 2.6906500775426624e-14,
+          "steel_utilization": 0.0008530023713573966
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 4.228388105551291e-18,
+          "iterations": 1,
+          "lambda_value": 0.39999999999999997,
+          "max_concrete_principal_tension_strain": 5.336650269888183e-05,
+          "min_concrete_principal_compression_strain": -3.63581574098668e-05,
+          "original_bound_MPa": 7.592592592592592e-07,
+          "physical_residual_MPa": 5.0737192225369654e-14,
+          "six_force_residual_MPa": 5.094854579376127e-14,
+          "steel_utilization": 0.0009748598559999645
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 2.491166294112465e-17,
+          "iterations": 1,
+          "lambda_value": 0.44999999999999996,
+          "max_concrete_principal_tension_strain": 6.003731476373704e-05,
+          "min_concrete_principal_compression_strain": -4.090292575022974e-05,
+          "original_bound_MPa": 7.916666666666666e-07,
+          "physical_residual_MPa": 5.4067861299245124e-14,
+          "six_force_residual_MPa": 5.406440727205741e-14,
+          "steel_utilization": 0.0010967173406426453
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 9.62822329575875e-18,
+          "iterations": 1,
+          "lambda_value": 0.49999999999999994,
+          "max_concrete_principal_tension_strain": 6.67081268285882e-05,
+          "min_concrete_principal_compression_strain": -4.5447694090579954e-05,
+          "original_bound_MPa": 8.24074074074074e-07,
+          "physical_residual_MPa": 2.0372592501871623e-14,
+          "six_force_residual_MPa": 3.361919796050104e-14,
+          "steel_utilization": 0.0012185748252855444
+        },
+        {
+          "function_evaluations": 1,
+          "gauge_residual_MPa": 9.62822329575875e-18,
+          "iterations": 0,
+          "lambda_value": 0.5,
+          "max_concrete_principal_tension_strain": 6.67081268285882e-05,
+          "min_concrete_principal_compression_strain": -4.5447694090579954e-05,
+          "original_bound_MPa": 8.240740740740741e-07,
+          "physical_residual_MPa": 2.042810365310288e-14,
+          "six_force_residual_MPa": 3.361919796050104e-14,
+          "steel_utilization": 0.0012185748252855444
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 7.940933880509066e-18,
+          "iterations": 1,
+          "lambda_value": 0.55,
+          "max_concrete_principal_tension_strain": 7.33789388934565e-05,
+          "min_concrete_principal_compression_strain": -4.999246243093506e-05,
+          "original_bound_MPa": 8.564814814814815e-07,
+          "physical_residual_MPa": 9.303668946358812e-14,
+          "six_force_residual_MPa": 9.30547819869524e-14,
+          "steel_utilization": 0.0013404323099283975
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 6.3527471044072525e-18,
+          "iterations": 1,
+          "lambda_value": 0.6000000000000001,
+          "max_concrete_principal_tension_strain": 8.004975095829219e-05,
+          "min_concrete_principal_compression_strain": -5.453723077127652e-05,
+          "original_bound_MPa": 8.88888888888889e-07,
+          "physical_residual_MPa": 5.3512749786932545e-14,
+          "six_force_residual_MPa": 5.355913243773912e-14,
+          "steel_utilization": 0.0014622897945709198
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 1.2705494208814505e-17,
+          "iterations": 1,
+          "lambda_value": 0.65,
+          "max_concrete_principal_tension_strain": 8.672056302314801e-05,
+          "min_concrete_principal_compression_strain": -5.9081999111624785e-05,
+          "original_bound_MPa": 9.212962962962962e-07,
+          "physical_residual_MPa": 6.189493362285248e-14,
+          "six_force_residual_MPa": 6.199509535390696e-14,
+          "steel_utilization": 0.0015841472792137712
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 2.6628174541094106e-17,
+          "iterations": 1,
+          "lambda_value": 0.699036407470703,
+          "max_concrete_principal_tension_strain": 9.326281619460136e-05,
+          "min_concrete_principal_compression_strain": -6.353918135557914e-05,
+          "original_bound_MPa": 9.530791529902705e-07,
+          "physical_residual_MPa": 5.5414006716603126e-14,
+          "six_force_residual_MPa": 5.537992496345729e-14,
+          "steel_utilization": 0.0017036563446195271
+        },
+        {
+          "function_evaluations": 2,
+          "gauge_residual_MPa": 5.896365751457283e-17,
+          "iterations": 1,
+          "lambda_value": 0.749036407470703,
+          "max_concrete_principal_tension_strain": 9.99336282594436e-05,
+          "min_concrete_principal_compression_strain": -6.808394969593579e-05,
+          "original_bound_MPa": 9.854865603976778e-07,
+          "physical_residual_MPa": 6.628031457012185e-14,
+          "six_force_residual_MPa": 6.61910408939345e-14,
+          "steel_utilization": 0.0018255138292621357
+        },
+        {
+          "function_evaluations": 4,
+          "gauge_residual_MPa": 6.3527471044072525e-18,
+          "iterations": 2,
+          "lambda_value": 0.799036407470703,
+          "max_concrete_principal_tension_strain": 0.00010698940271871503,
+          "min_concrete_principal_compression_strain": -7.272137473804392e-05,
+          "original_bound_MPa": 1.0178939678050852e-06,
+          "physical_residual_MPa": 2.5888444543653577e-07,
+          "six_force_residual_MPa": 2.588844460694452e-07,
+          "steel_utilization": 0.0019511957099818224
+        },
+        {
+          "function_evaluations": 4,
+          "gauge_residual_MPa": 1.2705494208814505e-17,
+          "iterations": 2,
+          "lambda_value": 0.8490364074707031,
+          "max_concrete_principal_tension_strain": 0.00011658040976740216,
+          "min_concrete_principal_compression_strain": -7.797705392510688e-05,
+          "original_bound_MPa": 1.0503013752124928e-06,
+          "physical_residual_MPa": 4.909895181130933e-07,
+          "six_force_residual_MPa": 3.1528339612610477e-07,
+          "steel_utilization": 0.002102805685496323
+        },
+        {
+          "function_evaluations": 6,
+          "gauge_residual_MPa": 3.176373552203626e-17,
+          "iterations": 3,
+          "lambda_value": 0.8990364074707031,
+          "max_concrete_principal_tension_strain": 0.0001325417429549666,
+          "min_concrete_principal_compression_strain": -8.491112434517851e-05,
+          "original_bound_MPa": 1.0827087826199001e-06,
+          "physical_residual_MPa": 4.119131377544845e-09,
+          "six_force_residual_MPa": 5.9000232663261505e-09,
+          "steel_utilization": 0.002333387042164143
+        },
+        {
+          "function_evaluations": 6,
+          "gauge_residual_MPa": 5.717472393966527e-17,
+          "iterations": 3,
+          "lambda_value": 0.936482644081116,
+          "max_concrete_principal_tension_strain": 0.00014666019724031098,
+          "min_concrete_principal_compression_strain": -9.065513710723083e-05,
+          "original_bound_MPa": 1.1069794915340568e-06,
+          "physical_residual_MPa": 1.2300984032869274e-11,
+          "six_force_residual_MPa": 1.7544554122263505e-11,
+          "steel_utilization": 0.002529323350790388
+        },
+        {
+          "function_evaluations": 4,
+          "gauge_residual_MPa": 7.623296525288703e-17,
+          "iterations": 2,
+          "lambda_value": 0.974817657470703,
+          "max_concrete_principal_tension_strain": 0.00016070991130236076,
+          "min_concrete_principal_compression_strain": -9.644023415486145e-05,
+          "original_bound_MPa": 1.131826259471752e-06,
+          "physical_residual_MPa": 3.675008095937813e-07,
+          "six_force_residual_MPa": 3.0041478602000827e-07,
+          "steel_utilization": 0.002722184186134141
+        },
+        {
+          "function_evaluations": 6,
+          "gauge_residual_MPa": 2.541098841762901e-17,
+          "iterations": 3,
+          "lambda_value": 1.0,
+          "max_concrete_principal_tension_strain": 0.00017070529293909982,
+          "min_concrete_principal_compression_strain": -0.00010049680560222112,
+          "original_bound_MPa": 1.1481481481481482e-06,
+          "physical_residual_MPa": 3.177706986434714e-10,
+          "six_force_residual_MPa": 3.177707118016703e-10,
+          "steel_utilization": 0.002867864901597206
+        },
+        {
+          "function_evaluations": 10,
+          "gauge_residual_MPa": 2.541098841762901e-17,
+          "iterations": 5,
+          "lambda_value": 1.025,
+          "max_concrete_principal_tension_strain": 0.00018910533205639165,
+          "min_concrete_principal_compression_strain": -0.00010640196192845266,
+          "original_bound_MPa": 1.1643518518518519e-06,
+          "physical_residual_MPa": 3.748135135595021e-11,
+          "six_force_residual_MPa": 3.748145563467579e-11,
+          "steel_utilization": 0.0031619514476269516
+        },
+        {
+          "function_evaluations": 6,
+          "gauge_residual_MPa": 8.893845946170154e-17,
+          "iterations": 3,
+          "lambda_value": 1.02890625,
+          "max_concrete_principal_tension_strain": 0.0001999656399970739,
+          "min_concrete_principal_compression_strain": -0.00010906218209907561,
+          "original_bound_MPa": 1.1668836805555557e-06,
+          "physical_residual_MPa": 4.432770145230027e-09,
+          "six_force_residual_MPa": 6.524841795751969e-09,
+          "steel_utilization": 0.003343787557298403
+        }
+      ],
+      "whole_goal_completed": false
+    }
+  },
+  "publication_scope_verification": {
+    "1003": {
+      "all5_sheet_cell_values_formulas_types_and_addresses_exact_public954": true,
+      "no_new_workbook_members": true,
+      "shared_strings_external_links_and_connections_unchanged": true
+    }
+  },
+  "raw_archive_bytes": 28155752,
+  "raw_bytes": 38238344,
+  "raw_files": 129,
+  "release_hashes_unchanged": {
+    "workbook/output/RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+    "workbook/output/VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+  },
+  "volume_proof": {
+    "auxiliary_elastic_regions_not_homogeneous_beam": true,
+    "checked_volume_tensors": 11520,
+    "cubic_NDM_strain_fit_residual_below1e_minus14": true,
+    "first_load_independent_material_error_MPa": 2.7652879985851087e-13,
+    "maximum_accepted_lambda_NDM": 1.02890625,
+    "maximum_accepted_lambda_OpenSees": 0.8921028137207031,
+    "maximum_independent_resultant_error_N": 1.1996157383009631e-06,
+    "moment_gradient_from_Q_absent": true,
+    "nodal_and_gauss_shear_order_explicitly_mapped": true,
+    "numerical_stop_not_physical_capacity": true,
+    "physical_capacity_certified": false,
+    "section_case": 1003,
+    "section_target": [
+      28000.0,
+      510000.0,
+      180000.0,
+      1500000.0,
+      0.0,
+      0.0
+    ],
+    "strain_comparisons": [
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          8.226357435323686e-07,
+          8.278335121197137e-07,
+          4.255560221594706e-06,
+          5.3779155733061185e-08,
+          9.949961699966128e-06,
+          8.585956347457259e-06
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          7.951879254325608e-07,
+          8.062205944450728e-07,
+          4.011819173082228e-06,
+          3.090223795227463e-08,
+          8.39332100555672e-06,
+          6.705346152936572e-06
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          3.5045166265830306e-08,
+          3.963888871089913e-08,
+          2.4397717052163306e-07,
+          4.3085049085408824e-08,
+          1.582000421920785e-06,
+          1.9000603157761557e-06
+        ],
+        "lambda_value": 0.05,
+        "mean_strain_field_difference_percent": 22.637765367465853,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.6452663731331216e-06,
+          1.655665125911616e-06,
+          8.511119654370566e-06,
+          1.075554942761269e-07,
+          1.989990527702422e-05,
+          1.7171895528810357e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.5903731761937818e-06,
+          1.6124390079318893e-06,
+          8.02364047953979e-06,
+          6.179599115624364e-08,
+          1.6786627933318974e-05,
+          1.341067653019632e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          7.008914974809664e-08,
+          7.927901863378387e-08,
+          4.879521966657222e-07,
+          8.617679270555235e-08,
+          3.1639966234035077e-06,
+          3.800118699104874e-06
+        ],
+        "lambda_value": 0.1,
+        "mean_strain_field_difference_percent": 22.63777284038208,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          2.4678970027631975e-06,
+          2.483496739674589e-06,
+          1.2766679087085355e-05,
+          1.6133183282296493e-07,
+          2.9849848854173264e-05,
+          2.575783471028946e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          2.3855584265218395e-06,
+          2.4186574211390445e-06,
+          1.203546178595805e-05,
+          9.268974247115809e-08,
+          2.517993486024455e-05,
+          2.011600690735146e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          1.0513313352160953e-07,
+          1.1891914817855946e-07,
+          7.319272226471836e-07,
+          1.2926853631881058e-07,
+          4.745992825653964e-06,
+          5.7001770829894155e-06
+        ],
+        "lambda_value": 0.15000000000000002,
+        "mean_strain_field_difference_percent": 22.63777533431655,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          3.290527632392136e-06,
+          3.311328353438677e-06,
+          1.7022238519801384e-05,
+          2.1510817137166224e-07,
+          3.979979243132387e-05,
+          3.434377389177103e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          3.180743677120059e-06,
+          3.2248758345320125e-06,
+          1.604728309252974e-05,
+          1.2358349473716644e-07,
+          3.3573241787529545e-05,
+          2.6821337283975454e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          1.4017711711505826e-07,
+          1.5855927788423255e-07,
+          9.759022486917777e-07,
+          1.7236027974078235e-07,
+          6.327989027648478e-06,
+          7.600235467187844e-06
+        ],
+        "lambda_value": 0.2,
+        "mean_strain_field_difference_percent": 22.637776581976894,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          4.113158262022002e-06,
+          4.139159967202661e-06,
+          2.127779795251705e-05,
+          2.6888450991761716e-07,
+          4.974973600848719e-05,
+          4.2929713073265455e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          3.975928927588981e-06,
+          4.031094247863662e-06,
+          2.0059104398454568e-05,
+          1.544772469980477e-07,
+          4.196654871510932e-05,
+          3.3526667661054966e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          1.752211007985597e-07,
+          1.9819940755931124e-07,
+          1.219877274945738e-06,
+          2.1545202339547017e-07,
+          7.909985229338713e-06,
+          9.50029385032204e-06
+        ],
+        "lambda_value": 0.25,
+        "mean_strain_field_difference_percent": 22.63777732787835,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          4.93578889165394e-06,
+          4.966991580965758e-06,
+          2.5533357385234756e-05,
+          3.2266084846539596e-07,
+          5.9699679585622747e-05,
+          5.151565225473561e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          4.771114178159353e-06,
+          4.83731266122866e-06,
+          2.40709257051057e-05,
+          1.8537099920582254e-07,
+          5.035985564305499e-05,
+          4.0231998037679866e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          2.1026508436623703e-07,
+          2.3783953736334434e-07,
+          1.4638523011403417e-06,
+          2.5854376719930277e-07,
+          9.491981430729472e-06,
+          1.1400352234329438e-05
+        ],
+        "lambda_value": 0.3,
+        "mean_strain_field_difference_percent": 22.637777826715503,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          5.758419521279562e-06,
+          5.794823194729066e-06,
+          2.9788916817945845e-05,
+          3.764371870146446e-07,
+          6.964962316277024e-05,
+          6.010159143622217e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          5.566299428595114e-06,
+          5.643531074551891e-06,
+          2.8082747011349232e-05,
+          2.1626475160838023e-07,
+          5.8753162570917175e-05,
+          4.6937328415579916e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          2.4530906804321506e-07,
+          2.7747966706795187e-07,
+          1.7078273275544319e-06,
+          3.016355107077135e-07,
+          1.1073977632690297e-05,
+          1.3300410617866367e-05
+        ],
+        "lambda_value": 0.35,
+        "mean_strain_field_difference_percent": 22.6377781822592,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          6.581050150911114e-06,
+          6.622654808488311e-06,
+          3.4044476250656683e-05,
+          4.3021352556073095e-07,
+          7.959956673992426e-05,
+          6.868753061769863e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          6.361484679137556e-06,
+          6.4497494879000164e-06,
+          3.209456831793479e-05,
+          2.471585039073763e-07,
+          6.714646949865859e-05,
+          5.364265879286829e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          2.8035305161431313e-07,
+          3.1711979674040264e-07,
+          1.9518023536033594e-06,
+          3.4472725430529914e-07,
+          1.2655973834770331e-05,
+          1.5200469000823302e-05
+        ],
+        "lambda_value": 0.39999999999999997,
+        "mean_strain_field_difference_percent": 22.637778448093936,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          7.403680780535301e-06,
+          7.450486422253387e-06,
+          3.8300035683374274e-05,
+          4.839898641096539e-07,
+          8.954951031709702e-05,
+          7.727346979918406e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          7.156669929824877e-06,
+          7.255967901139835e-06,
+          3.610638962509191e-05,
+          2.780522560785415e-07,
+          7.553977642598708e-05,
+          6.034798917048788e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          3.1539703528475037e-07,
+          3.567599264542149e-07,
+          2.1957773796478654e-06,
+          3.8781899788414877e-07,
+          1.423797003563452e-05,
+          1.7100527384988527e-05
+        ],
+        "lambda_value": 0.44999999999999996,
+        "mean_strain_field_difference_percent": 22.63777865657758,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          8.22631141016571e-06,
+          8.278318036019611e-06,
+          4.2555595116096425e-05,
+          5.377662026570153e-07,
+          9.949945389423976e-05,
+          8.585940898066252e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          7.951855180301874e-06,
+          8.062186314584846e-06,
+          4.011821093105611e-05,
+          3.0894600813213856e-07,
+          8.393308335383207e-05,
+          6.705331954680706e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          3.504410189005684e-07,
+          3.9640005630235976e-07,
+          2.43975240504534e-06,
+          4.309107415772486e-07,
+          1.5819966238582084e-05,
+          1.9000585767887362e-05
+        ],
+        "lambda_value": 0.49999999999999994,
+        "mean_strain_field_difference_percent": 22.63777882171639,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          8.22631141016571e-06,
+          8.278318036019611e-06,
+          4.2555595116096425e-05,
+          5.377662026570153e-07,
+          9.949945389423976e-05,
+          8.585940898066252e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          7.951855180301874e-06,
+          8.062186314584846e-06,
+          4.011821093105611e-05,
+          3.0894600813213856e-07,
+          8.393308335383207e-05,
+          6.705331954680706e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          3.504410189005684e-07,
+          3.9640005630235976e-07,
+          2.43975240504534e-06,
+          4.309107415772486e-07,
+          1.5819966238582084e-05,
+          1.9000585767887362e-05
+        ],
+        "lambda_value": 0.5,
+        "mean_strain_field_difference_percent": 22.63777882171639,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          9.048942039797439e-06,
+          9.106149649782884e-06,
+          4.68111545488202e-05,
+          5.915425412050816e-07,
+          0.00010944939747139885,
+          9.444534816216259e-05
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          8.747040430949285e-06,
+          8.868404728060308e-06,
+          4.4130032238140284e-05,
+          3.398397602935307e-07,
+          9.23263902811847e-05,
+          7.375864992351714e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          3.8548500254574795e-07,
+          4.3604018593022356e-07,
+          2.6837274311785134e-06,
+          4.740024850966283e-07,
+          1.7401962439704706e-05,
+          2.0900644152786957e-05
+        ],
+        "lambda_value": 0.55,
+        "mean_strain_field_difference_percent": 22.637778959117743,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          9.871572669430515e-06,
+          9.933981263542206e-06,
+          5.1066713981521e-05,
+          6.453188797512081e-07,
+          0.00011939934104851473,
+          0.00010303128734362776
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          9.542225681482384e-06,
+          9.67462314131688e-06,
+          4.8141853543876026e-05,
+          3.7073351276016984e-07,
+          0.00010071969720527852,
+          8.046398030026148e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          4.2052898624171477e-07,
+          4.7568031563830816e-07,
+          2.9277024571564697e-06,
+          5.17094228261741e-07,
+          1.898395863983199e-05,
+          2.280070253595569e-05
+        ],
+        "lambda_value": 0.6000000000000001,
+        "mean_strain_field_difference_percent": 22.63777907263283,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.0694203299059842e-05,
+          1.0761812877310249e-05,
+          5.532227341424811e-05,
+          6.990952182978213e-07,
+          0.00012934928462565918,
+          0.00011161722652509855
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.0337410931721859e-05,
+          1.0480841554566962e-05,
+          5.215367485003081e-05,
+          4.016272651457581e-07,
+          0.0001091130041372551,
+          8.716931068012982e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          4.555729698682503e-07,
+          5.153204454461309e-07,
+          3.171677483569462e-06,
+          5.601859720334356e-07,
+          2.0565954844279982e-05,
+          2.470076092045988e-05
+        ],
+        "lambda_value": 0.65,
+        "mean_strain_field_difference_percent": 22.63777916827253,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.150098031410838e-05,
+          1.1573690643902612e-05,
+          5.9495820341403076e-05,
+          7.518351872857388e-07,
+          0.00013910747437687564,
+          0.00012003769876954332
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.1117271491124387e-05,
+          1.127152264719927e-05,
+          5.6088180935642014e-05,
+          4.3192563742862385e-07,
+          0.00011734455650857445,
+          9.374541693185454e-05
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          4.899415910273972e-07,
+          5.541966364680067e-07,
+          3.4109506584714886e-06,
+          6.024472580569486e-07,
+          2.211746305050562e-05,
+          2.6564201664048618e-05
+        ],
+        "lambda_value": 0.699036407470703,
+        "mean_strain_field_difference_percent": 22.637779249783566,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.2323610943734102e-05,
+          1.2401522257661087e-05,
+          6.375137977411974e-05,
+          8.056115258350722e-07,
+          0.0001490574179540333,
+          0.00012862363795102343
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.1912456741562791e-05,
+          1.2077741060294312e-05,
+          6.0100002242674366e-05,
+          4.6281938987066174e-07,
+          0.00012573786343074092,
+          0.0001004507473065925
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          5.249855747695341e-07,
+          5.938367662989974e-07,
+          3.654925686652415e-06,
+          6.455390020522991e-07,
+          2.3699459252686164e-05,
+          2.8464260043367445e-05
+        ],
+        "lambda_value": 0.749036407470703,
+        "mean_strain_field_difference_percent": 22.637779318594962,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.3296908036740339e-05,
+          1.323523103591689e-05,
+          6.814364559379144e-05,
+          8.306450401499704e-07,
+          0.00015955790795741946,
+          0.00013734203684764935
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.2736315038965335e-05,
+          1.289737179420301e-05,
+          6.419090237328671e-05,
+          5.015958593052536e-07,
+          0.0001348047217514804,
+          0.00010722130189842197
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          6.320163035639202e-07,
+          6.667118463649415e-07,
+          3.960476338750273e-06,
+          7.221935179615702e-07,
+          2.5870301022892507e-05,
+          3.0436054059183187e-05
+        ],
+        "lambda_value": 0.799036407470703,
+        "mean_strain_field_difference_percent": 22.57788426379727,
+        "regions": 72
+      },
+      {
+        "component_NDM_max_mean_absolute_strain": [
+          1.5127863287887647e-05,
+          1.4285070610263155e-05,
+          7.350944177760433e-05,
+          1.0166246497380025e-06,
+          0.00017370642987830394,
+          0.0001469748205598244
+        ],
+        "component_OpenSees_max_mean_absolute_strain": [
+          1.3676690872280008e-05,
+          1.3784985134697375e-05,
+          6.870165302398828e-05,
+          9.045102610037179e-07,
+          0.00014555976299919474,
+          0.00011439818600668531
+        ],
+        "component_mean_strain_max_absolute_difference": [
+          1.6157632250162043e-06,
+          9.742090551155864e-07,
+          4.8615699747330535e-06,
+          1.0147947676822429e-06,
+          2.9342757369254515e-05,
+          3.2908062565244114e-05
+        ],
+        "lambda_value": 0.8490364074707031,
+        "mean_strain_field_difference_percent": 22.607939094697596,
+        "regions": 72
+      }
+    ],
+    "volume_case": 1004,
+    "volume_last_cut_damage": [
+      0.059065058446079566,
+      0.0
+    ],
+    "volume_last_max_damage": [
+      {
+        "element": 718,
+        "gauss_point": 4,
+        "value": 0.283690155979757,
+        "z_interval_mm": [
+          450.0,
+          462.5
+        ]
+      },
+      {
+        "value": 0.0
+      }
+    ],
+    "volume_solver_seconds": 195.23822649999056,
+    "volume_termination": "load control continuation stopped",
+    "whole_goal_completed": false
+  },
+  "whole_goal_completed": false
+}
