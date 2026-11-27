@@ -1,4 +1,20 @@
 {
+  "ASD_bounded_principal_1165": {
+    "confirmed_lower_bound_lambda": 6.6627811143819375,
+    "elapsed_seconds": 314.59375,
+    "history_SHA256": "0245A16ED20A5F8B6198F75C8FA3CB170DA61693AED7A81E548ADB8C4C3272A0",
+    "history_bitexact_1164": true,
+    "history_states": 69,
+    "independently_verified_all60_equations_and_six_resultants": true,
+    "inside_radius_damping_trials": 17,
+    "physical_capacity_confirmed": false,
+    "positive_lambda_damping_trials": 17,
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1165ASDBoundedPrincipalStep_20261127",
+    "stage": "TERMINAL_NUMFAIL",
+    "unit_cases_passed": 9,
+    "worker_closed": true
+  },
   "ASD_direct_NDS_1065": {
     "all6_expected_statuses_and_target_fields_verified": true,
     "cold_repeat_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1066ASDPureNDirectColdRepeat_20261127",
@@ -535,6 +551,40 @@
     "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1159ASDPlasticSteelMy_20261127",
     "transient_diagnostic_maximum_6_662781_not_independently_verified": true
   },
+  "ASD_principal_1162": {
+    "elapsed_seconds": 317.93359375,
+    "next_inference": "no acceptance-history change; investigate event line-search admissibility rather than loosen force tolerances",
+    "physical_capacity_confirmed": false,
+    "public_book_unchanged": true,
+    "retained77_history_bitexact_1161": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1162ASDEventCriteriaMy_20261127",
+    "stage": "TERMINAL_NUMFAIL"
+  },
+  "ASD_principal_1163": {
+    "elapsed_seconds": 325.42578125,
+    "next_inference": "no acceptance-history change; investigate event line-search admissibility rather than loosen force tolerances",
+    "physical_capacity_confirmed": false,
+    "public_book_unchanged": true,
+    "retained77_history_bitexact_1161": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1163ASDPrincipalDiagnostic_20261127",
+    "stage": "TERMINAL_NUMFAIL"
+  },
+  "ASD_retry_retention_1164": {
+    "confirmed_lower_bound_lambda": 6.6627811143819375,
+    "elapsed_seconds": 340.77734375,
+    "history_SHA256": "0245A16ED20A5F8B6198F75C8FA3CB170DA61693AED7A81E548ADB8C4C3272A0",
+    "history_matches_parent_first_attempt": true,
+    "history_states": 69,
+    "independently_verified_all60_equations_and_six_resultants": true,
+    "inside_radius_damping_trials": 0,
+    "physical_capacity_confirmed": false,
+    "positive_lambda_damping_trials": 17,
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1164ASDCapacityRetryRetention_20261127",
+    "stage": "TERMINAL_NUMFAIL",
+    "unit_cases_passed": 9,
+    "worker_closed": true
+  },
   "ASD_steel_QR_1160": {
     "external_observer_snapshots": 91,
     "missing_final_result": true,
@@ -612,7 +662,7 @@
     "task": "ASD-BSPLINE-SETTING"
   },
   "active_cold_exec_session": null,
-  "active_cold_source_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127",
+  "active_cold_source_root": null,
   "active_exec_session": null,
   "active_jobs": [],
   "actual_H_derivative748": {
@@ -5407,8 +5457,8 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress:proved steel projection432;111+77 final states and49 retained-prefix states independently verified;diagnostic I/O repaired and retried;confirmed cold6.662781 equilibrium but no ultimate capacity",
-  "current_load_stage": "ASD My:111 states verified for plastic-steel control;QR retry77 final states and49-state coarse retained prefix independently verified. Cold retained equilibrium My6.662781kNm exists with material limits satisfied;final search still NumFail at retained6.575170. No physical My capacity.",
+  "current_goal_turn_classification": "progress: fixed lost stronger bound with exact original history and verified69 states; diagnosed17 rejected event trials; bounded initial step admitted all17 but did not improve convergence; physical My capacity remains unconfirmed",
+  "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
     "axial_regression_restored_at_candidate1103": {
@@ -41003,14 +41053,9 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Inspect and test re-selection of the verified plastic-steel projection after generic stalled-field recovery:1161 ended in rejected-correction spatial control, while the one-time mSteelControlSelected flag prevents return to steel control. Preserve all original equilibrium/material/peak-accuracy criteria. Also distinguish local-peak refinement histories from the highest independently verified coarse prefix;do not publish6.662781 as an ultimate load. Do not rerun unchanged1154-1161. Finish ASD M before NMT,Q/NMTQ,CDP,performance and full acceptance.",
+  "next_action": "Test exact nonlinear material-coordinate projection with existing QR hybrid corrector for ASD principal events, within original radius/budget/tolerances. Do not repeat unchanged1162-1165. Promote retry-retention only with production source/book synchronization and touched regressions. Full physical-limit,NMT,Q/NMTQ,CDP,performance and acceptance scope stays pending.",
   "next_actions": [
-    "Keep further formatting deferred",
-    "Do not rerun cold candidates 1154/1155 unchanged; maximum lambda did not improve",
-    "Inspect native single-update ASD consistent material tangent and accepted-history re-equilibration before another long cold My search",
-    "Verify any changed tangent independently on material tensors before section use",
-    "Keep physical/tolerance acceptance unchanged; unverified epsilonSteel=0.025 endpoint is not a limit",
-    "After resolving separate N/M/T, continue NMT then Q then NMTQ; ASD before CDP"
+    "Test exact nonlinear material-coordinate projection with existing QR hybrid corrector for ASD principal events, within original radius/budget/tolerances. Do not repeat unchanged1162-1165. Promote retry-retention only with production source/book synchronization and touched regressions. Full physical-limit,NMT,Q/NMTQ,CDP,performance and acceptance scope stays pending."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -44356,7 +44401,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T10:37:23.975500+00:00",
+  "updated_local": "2026-11-27T11:28:06.083488+00:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",

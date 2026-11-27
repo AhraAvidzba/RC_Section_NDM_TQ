@@ -1,0 +1,106 @@
+{
+  "all_workers_terminal": true,
+  "cases": {
+    "Cold1162ASDEventCriteriaMy_20261127": {
+      "accepted_states": 77,
+      "elapsed_seconds": 317.93359375,
+      "final_history_maximum_lambda": 6.5751697088477625,
+      "final_history_sha256": "680338BB4646F920B972EBE98E99DD728C8EAD7D9A25D4955D65BB7A5FF23F0B",
+      "independent_final_history": {
+        "accepted_states": 77,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyConfigured",
+        "compression_utilization": 0.29141880468205006,
+        "final_lambda": 6.5582260734809115,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          6558226.073480912,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.043644958474033047,
+        "maximum_moment_error_Nmm": 3.0142993750050664,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "maximum_epsilon0": 0.0035407266041153516,
+      "own_worker_closed": true,
+      "workflow_status": "Status=NumFail"
+    },
+    "Cold1163ASDPrincipalDiagnostic_20261127": {
+      "accepted_states": 77,
+      "elapsed_seconds": 325.42578125,
+      "final_history_maximum_lambda": 6.5751697088477625,
+      "final_history_sha256": "680338BB4646F920B972EBE98E99DD728C8EAD7D9A25D4955D65BB7A5FF23F0B",
+      "maximum_epsilon0": 0.0035407266041153516,
+      "own_worker_closed": true,
+      "workflow_status": "Status=NumFail"
+    },
+    "Cold1164ASDCapacityRetryRetention_20261127": {
+      "accepted_states": 69,
+      "elapsed_seconds": 340.77734375,
+      "final_history_maximum_lambda": 6.6627811143819375,
+      "final_history_sha256": "0245A16ED20A5F8B6198F75C8FA3CB170DA61693AED7A81E548ADB8C4C3272A0",
+      "independent_final_history": {
+        "accepted_states": 69,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyConfigured",
+        "compression_utilization": 0.30666237394391793,
+        "final_lambda": 6.558687877320868,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          6558687.877320868,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.007607275533473512,
+        "maximum_moment_error_Nmm": 0.5091620511375368,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "maximum_epsilon0": 0.0035900253405136235,
+      "own_worker_closed": true,
+      "workflow_status": "Status=NumFail"
+    },
+    "Cold1165ASDBoundedPrincipalStep_20261127": {
+      "accepted_states": 69,
+      "elapsed_seconds": 314.59375,
+      "final_history_maximum_lambda": 6.6627811143819375,
+      "final_history_sha256": "0245A16ED20A5F8B6198F75C8FA3CB170DA61693AED7A81E548ADB8C4C3272A0",
+      "independent_final_history": {
+        "accepted_states": 69,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyConfigured",
+        "compression_utilization": 0.30666237394391793,
+        "final_lambda": 6.558687877320868,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          6558687.877320868,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.007607275533473512,
+        "maximum_moment_error_Nmm": 0.5091620511375368,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "maximum_epsilon0": 0.0035900253405136235,
+      "own_worker_closed": true,
+      "workflow_status": "Status=NumFail"
+    }
+  },
+  "public_workbook_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "whole_goal_completed": false
+}
