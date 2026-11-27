@@ -103,7 +103,8 @@ End Property
 Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
         ByVal spec As CMaterialModelSpec, ByRef field() As Double, ByRef resultants() As Double, _
         Optional ByVal captureFields As Boolean = False, Optional ByRef acceptedState As CSectionStateResult = Nothing, _
-        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing) As CResultMeta
+        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing, _
+        Optional ByVal progress As ICoupledContinuationProgress = Nothing) As CResultMeta
     Erase field: Erase resultants
     Set acceptedState = Nothing
     Set acceptedTrace = Nothing
@@ -116,8 +117,10 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
     Set path = BuildPath(loads, loadPath)
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     continuation.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, mMaxIterations, _
-        STRESS_TOLERANCE, RELATIVE_TOLERANCE, captureFields
-    If continuation.Advance(1#, response) Then
+        STRESS_TOLERANCE, RELATIVE_TOLERANCE, (captureFields Or mCalibratedASD Or Not progress Is Nothing)
+    Dim reached As Boolean: reached = continuation.Advance(1#, response)
+    If Not reached And mCalibratedASD Then reached = continuation.TryRecoverDirectByDeformation(progress)
+    If reached Then
         continuation.CopyAccepted field, resultants
         Set meta = continuation.ResultMeta
         Dim uncertain As ECoupledSteelUncertainty: uncertain = continuation.DirectSteelUncertainty
@@ -148,6 +151,7 @@ Friend Function SolveTarget(ByVal loads As CSectionLoadState, ByVal loadPath As 
         Set meta = continuation.ResultMeta
     End If
     Set acceptedTrace = continuation.SavedTrace
+    ReportAcceptedProgress progress, continuation.AcceptedFields, acceptedTrace, meta
     Set SolveTarget = meta
 End Function
 
@@ -156,7 +160,8 @@ End Function
 Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
         ByVal spec As CMaterialModelSpec, ByVal initialLambda As Double, ByVal maximumLambda As Double, _
         ByVal lambdaTolerance As Double, ByVal maxIterations As Long, _
-        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing) As CCapacityResult
+        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing, _
+        Optional ByVal progress As ICoupledContinuationProgress = Nothing) As CCapacityResult
     Dim capacity As New CCapacityResult, meta As CResultMeta, reason As String
     Set SolveCapacity = capacity
     Set acceptedTrace = Nothing
@@ -187,7 +192,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
-    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True
+    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True, preferDeformationAfterInitial:=mCalibratedASD
     Set acceptedTrace = branch.SavedTrace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
@@ -200,7 +205,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         Exit Function
     End If
     If Not hasSteel Then
-        Set controlled = branch.ContinueByDeformation(maximumLambda)
+        Set controlled = branch.ContinueByDeformation(maximumLambda, progress)
         If Not controlled Is Nothing Then
             Set acceptedTrace = controlled.SavedTrace
             Dim forceDetails As String: forceDetails = meta.DiagnosticDetails
@@ -215,6 +220,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
                 capacity.InitializeCoupledPeak peak, accuracy, designVerified, ultimate, loadPath, meta.DiagnosticDetails
                 controlled.CopyLimitState limitHistory, actual
                 SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft
+                ReportAcceptedProgress progress, limitHistory, acceptedTrace, capacity.ResultMeta
                 Exit Function
             End If
         End If
@@ -236,6 +242,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
             End If
             If Not transverseLimit Then criticalPoint = 0
             SaveCapacityFields capacity, solver, spec, limitHistory, response, concrete, models, limitTarget, actual, fc, ft, criticalPoint
+            ReportAcceptedProgress progress, limitHistory, acceptedTrace, capacity.ResultMeta
         End If
     Else
         low = -1#
@@ -668,4 +675,19 @@ Friend Sub TestIntegratedState(ByVal loads As CSectionLoadState, ByVal spec As C
         resultants(5) = resultants(5) + weight * tx
         resultants(6) = resultants(6) + weight * ty
     Next point
+End Sub
+
+' Передаёт наблюдателю независимые копии подтверждённого пути и метаданных.
+' Наблюдение не назначает физический предел; при отсутствии получателя память для снимка не выделяется.
+Private Sub ReportAcceptedProgress(ByVal progress As ICoupledContinuationProgress, ByVal fields As Collection, _
+        ByVal trace As CCoupledLoadTrace, ByVal meta As CResultMeta)
+    If progress Is Nothing Or fields Is Nothing Or trace Is Nothing Then Exit Sub
+    If fields.Count <> trace.Count Then Err.Raise 5, "CCoupledSectionAnalysis", "Поля наблюдаемого пути не совпадают с его нагрузочной историей."
+    Dim snapshot As New Collection, index As Long, field() As Double
+    For index = 1 To fields.Count
+        field = fields.Item(index): snapshot.Add field
+    Next index
+    Dim snapshotTrace As CCoupledLoadTrace, snapshotMeta As CResultMeta
+    Set snapshotTrace = trace.CopyPrefix(trace.Count): Set snapshotMeta = meta.Clone
+    progress.Report snapshot, snapshotTrace, snapshotMeta
 End Sub

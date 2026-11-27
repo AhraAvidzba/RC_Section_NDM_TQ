@@ -1,0 +1,315 @@
+{
+  "COM_save_package_changes_retained_and_rejected": true,
+  "Config_ASD_selector_UI_pending": true,
+  "actual_full_output_and_dump_updated": true,
+  "all121_non_vba_payloads_bitexact": true,
+  "archives": {
+    "RawEvidence01.tar.xz": {
+      "all_objects_read_back_and_hashed": true,
+      "bytes": 47010768,
+      "logical_files": 2722,
+      "sha256": "5E8F9C2CB16B5802ECF1CA7EE7E18D0EEB012CC7EE8E60DDCBF384B49DAED32A"
+    },
+    "RawEvidence02.tar.xz": {
+      "all_objects_read_back_and_hashed": true,
+      "bytes": 66449804,
+      "logical_files": 1734,
+      "sha256": "BF10B6ED3765D198DCB20EC7F867BAF44E4B92C53C6AB7EDEF17032C56E97A1E"
+    }
+  },
+  "checks": {
+    "1067": {
+      "all6_no_observer_results_bitexact_verified_reference": true,
+      "cases": [
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 0.3935546875,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 1,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 12.009765625,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 2,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 90000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 16.7265625,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 3,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 98000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 21.494140625,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 4,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 1.0166015625,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 5,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 29.5986328125,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "full_acceptance_not_run": true,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "no_new_independent_equilibrium_solve_claimed": true,
+      "observer_and_capacity_checks_pending": true,
+      "ordinary_working_call_verified": true,
+      "reference_full_paths_already_independently_verified": true,
+      "source": {
+        "actual_components": 256,
+        "all252_other_components_unchanged": true,
+        "changed_components_exact": true,
+        "default_observer_is_Nothing": true,
+        "four_working_classes_exact_current_worktree": true,
+        "full_equilibrium_acceptance_unchanged": true,
+        "no_CDP_run": true,
+        "no_kernel_test_exports": true,
+        "own_compiler_closed": true,
+        "physical_success_not_assumed": true,
+        "saved_book_sha256": "26B477B3CC59CA8ACEDDF988F2616B2DAF683C0E07FEF5198EDCD77DE26F9BD7"
+      },
+      "whole_goal_completed": false,
+      "working_output_book_not_updated": true
+    },
+    "1068": {
+      "all6_mutating_observer_results_bitexact_verified_reference": true,
+      "cases": [
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 0.4375,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 1,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 50000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 12.3076171875,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 2,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 90000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 16.3662109375,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 3,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": 98000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 21.005859375,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 4,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": 100000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 1.001953125,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 5,
+          "returned_state": true,
+          "status": "OK",
+          "target_N": -700000.0
+        },
+        {
+          "actual_kernel_has_no_test_exports": true,
+          "elapsed_seconds": 31.0185546875,
+          "fields_and_resultants_bitexact_reference": true,
+          "index": 6,
+          "returned_state": false,
+          "status": "FAIL",
+          "target_N": -750000.0
+        }
+      ],
+      "full_acceptance_not_run": true,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 6,
+        "timeout600": false
+      },
+      "no_new_independent_equilibrium_solve_claimed": true,
+      "observer_and_capacity_checks_pending": true,
+      "observer_cannot_change_solver_fields_trace_or_meta": true,
+      "ordinary_working_call_verified": true,
+      "reference_full_paths_already_independently_verified": true,
+      "source": {
+        "actual_components": 256,
+        "all255_other_components_unchanged": true,
+        "changed_components_exact": true,
+        "default_observer_is_Nothing": true,
+        "four_working_classes_exact_current_worktree": true,
+        "full_equilibrium_acceptance_unchanged": true,
+        "no_CDP_run": true,
+        "no_kernel_test_exports": true,
+        "own_compiler_closed": true,
+        "physical_success_not_assumed": true,
+        "saved_book_sha256": "C2AFB43E1BFBE3F5A0FFEE5F3C8D3838DF921E245BA87A1073732F420F95EFDD"
+      },
+      "whole_goal_completed": false,
+      "working_output_book_not_updated": true
+    },
+    "1069": {
+      "all_diagnostics_exact_reference": true,
+      "all_numerical_capacity_outputs_bitexact_reference": true,
+      "elapsed_seconds": 12.208984375,
+      "entire_saved_load_trace_bitexact_reference": true,
+      "full_acceptance_not_run": true,
+      "lambda_capacity": 7.359448388005087,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_kernel_test_exports": true,
+      "no_observer": true,
+      "original_materials_and_tolerances": true,
+      "peak_accuracy": 0.0004811192449139645,
+      "peak_lambda": 7.359448388005087,
+      "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1056ASDPureNFullCompressionBranch_20261127",
+      "saved_book_sha256": "26B477B3CC59CA8ACEDDF988F2616B2DAF683C0E07FEF5198EDCD77DE26F9BD7",
+      "saved_trace_states": 23,
+      "steel_lambda": 0.0,
+      "whole_goal_completed": false
+    },
+    "1070": {
+      "all_diagnostics_exact_reference": false,
+      "all_numerical_capacity_outputs_bitexact_reference": true,
+      "comparison": "Current independently checked direct-overload branch 1066; exact 86 load nodes and steel event",
+      "earlier_baseline_retained": true,
+      "earlier_capacity_delta_percent": 0.00019267685247292832,
+      "earlier_capacity_lambda": 0.9827972466070642,
+      "earlier_saved_trace_states": 77,
+      "elapsed_seconds": 16.4150390625,
+      "entire_saved_load_trace_bitexact_reference": true,
+      "full_acceptance_not_run": true,
+      "lambda_capacity": 0.9827991402298653,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_kernel_test_exports": true,
+      "no_observer": true,
+      "no_tolerance_relaxed": true,
+      "original_materials_and_tolerances": true,
+      "peak_accuracy": 0.0,
+      "peak_lambda": 0.0,
+      "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1049ASDPureNSeedHighLoad_20261127",
+      "reference_current_branch": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1066ASDPureNDirectColdRepeat_20261127\\Case04",
+      "reference_current_branch_sha256": "C08FAE0796D202088A04276741A724B9CC02247FC2E70398AF24D7FC63B7ED9D",
+      "saved_book_sha256": "26B477B3CC59CA8ACEDDF988F2616B2DAF683C0E07FEF5198EDCD77DE26F9BD7",
+      "saved_trace_states": 86,
+      "steel_lambda": 0.9827991402298653,
+      "whole_goal_completed": false
+    },
+    "1074": {
+      "Config_ASD_choice_UI_pending": true,
+      "actual_compiled_vba_sha256": "22FFA47E96CC42D785950DE209281A0EB485DA000FC6F00901D58E29FB115D70",
+      "actual_components": 255,
+      "actual_dump_sha256": "0B46417D15DE59D7E44EBE8EF642D27246F562BB394F79DD3D004F1CC0C912C1",
+      "actual_full_dump_equal_verified_compiled_candidate": true,
+      "all121_non_vba_payloads_bitexact": true,
+      "all_numerical_vba_matches_verified_1067": true,
+      "default_material_law_not_changed": true,
+      "dropdown_UI_not_claimed": true,
+      "names_cells_styles_shapes_validations_and_package_order_preserved": true,
+      "native_foundations": {
+        "failed": 0,
+        "macros": 7,
+        "own_process_closed": true,
+        "passed": 35438,
+        "timeout600": false
+      },
+      "no_full_acceptance_run": true,
+      "no_new_CDP_run": true,
+      "private_diagnostic_module_not_in_output": true,
+      "public_output_unchanged_at_check": true,
+      "saved_candidate_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
+      "saved_reopened_native_compilation": true,
+      "source_display_exceptions": [
+        "CCoupledElasticState author comment transliteration",
+        "CCrackFormationCalculator finite-Double guard displayed with 15 significant digits by VBE"
+      ],
+      "whole_goal_completed": false,
+      "whole_user_run_10_seconds_not_met": true
+    }
+  },
+  "created_local": "2026-11-27T03:37:46.115465+03:00",
+  "default_concrete_law_not_changed": true,
+  "failed_compile_state_gate_retained": true,
+  "failed_four_class_only_compile_retained": true,
+  "logical_files": 4456,
+  "main_not_merged": true,
+  "native_capacity_cases": 2,
+  "native_direct_cases": 12,
+  "native_foundation_suites": 7,
+  "no_full_acceptance_run": true,
+  "no_new_global_OpenSees_equilibrium_solve_claimed": true,
+  "publication": {
+    "Config_ASD_selector_pending": true,
+    "actual_dump_from_reopened_book": true,
+    "after": {
+      "RC_Section_NDM.xlsm": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
+      "VBA_All_Code.txt": "0B46417D15DE59D7E44EBE8EF642D27246F562BB394F79DD3D004F1CC0C912C1"
+    },
+    "before": {
+      "RC_Section_NDM.xlsm": "E47ACB7083D92310F9915FD5EB59DA6A7B6C52F352D5EE274A2DCDC6BA567450",
+      "VBA_All_Code.txt": "DB8023F9384B0059E1D1C51D59FE0E62F9B8CD94AC4D9B329DD0EE810AF676CC"
+    },
+    "default_material_law_not_changed": true,
+    "main_not_merged": true,
+    "no_full_acceptance_claim": true,
+    "source_user_data_preserved_bitexact": true,
+    "whole_goal_completed": false
+  },
+  "ten_seconds_whole_run_not_met": true,
+  "unique_payloads": 787,
+  "whole_goal_completed": false
+}

@@ -1581,25 +1581,14 @@ Private Function PredictedMaterialLevel(ByRef selected As TYieldStation, ByRef p
     PredictedMaterialLevel = True
 End Function
 
-' Разрешает контроллеру запросить полный разностный резерв только для пространственной истории без спектральных границ.
+' Разрешает полный разностный резерв пространственной истории; материальные разрывы остаются в проверяемой системе.
 ' Псевдодуга и действующая мера дополнительно проверяются в самой управляемой пробе.
 Friend Property Get SupportsHybridRecovery() As Boolean
     If Not mUseSpatialHistory Then Exit Property
-    SupportsHybridRecovery = Not (HybridResponseHasPrincipalBoundaries(mResponse) Or _
-        HybridResponseHasPrincipalBoundaries(mPlusResponse) Or HybridResponseHasPrincipalBoundaries(mMinusResponse))
+    SupportsHybridRecovery = True
 End Property
 
-' Проверяет ограничение резерва для отдельной центральной или боковой истории, с арматурой и без неё.
-Private Function HybridResponseHasPrincipalBoundaries(ByVal response As ICoupledPointResponse) As Boolean
-    If response Is Nothing Then Exit Function
-    If TypeOf response Is CCoupledReinforcedResponse Then
-        Dim reinforced As CCoupledReinforcedResponse: Set reinforced = response
-        HybridResponseHasPrincipalBoundaries = reinforced.HasPrincipalBoundaries
-    ElseIf TypeOf response Is CCoupledConcreteResponse Then
-        Dim concrete As CCoupledConcreteResponse: Set concrete = response
-        HybridResponseHasPrincipalBoundaries = concrete.HasPrincipalBoundaries
-    End If
-End Function
+
 
 ' Готовит неизменные масштабы геометрических координат только при первом запросе резерва.
 ' Повторная Initialize сбрасывает подготовку; нагрузка и материальная история в масштабы не входят.

@@ -1,4 +1,4 @@
-VERSION 1.0 CLASS
+﻿VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
@@ -28,6 +28,7 @@ Private mHasOffset As Boolean, mHasDirection As Boolean, mHasAccepted As Boolean
 Private mOffsetFraction As Double, mLambda As Double
 Private mPreviousLambda As Double
 Private mPreferDeformationOnStall As Boolean
+Private mPreferDeformationAfterInitial As Boolean
 Private mExactTargetRecovery As String ' Способ подтверждения точной конечной нагрузки после численного отказа.
 Private mSecantFailure As String ' Причина отказа прогноза для диагностики всей запрошенной ветви.
 Private mTwistGuideDetails As String ' Исход вспомогательной пробы, которая не входит в принятую историю.
@@ -70,7 +71,7 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mInitialSteps = initialSteps: mMaxAttempts = maxAttempts: mMaxIterations = maxIterations
     mAbsoluteTolerance = absoluteTolerance: mRelativeTolerance = relativeTolerance
     mOffsetFraction = 0#: mLambda = 0#: mPreviousLambda = -1#: mHasAccepted = False
-    mPreferDeformationOnStall = False
+    mPreferDeformationOnStall = False: mPreferDeformationAfterInitial = False
     Set mReinforcement = Nothing: Set mDirectSteel = Nothing
     mHasSteelLimit = False: mSteelLimitOnOffset = False
     mSteelLimitPoint = 0
@@ -90,12 +91,12 @@ End Sub
 ' Достигнутая численная или заданная граница отдельно хранится в ResultMeta.
 Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
         ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
-        Optional ByVal preferDeformationOnStall As Boolean = False)
+        Optional ByVal preferDeformationOnStall As Boolean = False, Optional ByVal preferDeformationAfterInitial As Boolean = False)
     If reinforcement Is Nothing Or mHasAccepted Or initialLambda <= 0# Or maximumLambda <= 0# Or lambdaTolerance <= 0# Then _
         Err.Raise 5, "CCoupledLoadContinuation", "Для поиска предела передайте свежую ветвь и положительные настройки Capacity."
     Set mReinforcement = reinforcement
     mLimitTolerance = lambdaTolerance
-    mPreferDeformationOnStall = preferDeformationOnStall
+    mPreferDeformationOnStall = preferDeformationOnStall: mPreferDeformationAfterInitial = preferDeformationAfterInitial
     If Not mHasDirection Then
         If Advance(0#) Then mMeta.SetResult rsNotApplicable, rcNotApplicable, rkCapacity, _
             "Выбранный путь не изменяет усилия. Задайте путь с ненулевой переменной частью."
@@ -115,6 +116,13 @@ Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
             Exit Sub
         End If
         If Not Advance(target) Then Exit Sub
+        If preferDeformationAfterInitial And target < maximumLambda Then
+            If SavedFieldCount >= 2 And PreviousAcceptedLambda < mLambda Then
+                mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
+                    "Начальная силовая точка подтверждена; поиск продолжается при управлении деформацией.", ProgressDetails()
+                Exit Sub
+            End If
+        End If
         If target = maximumLambda Then Exit Do
         If increment < maximumLambda / STEP_GROWTH Then increment = increment * STEP_GROWTH
     Loop
@@ -125,12 +133,14 @@ End Sub
 
 ' Начинает деформационный поиск от конца подтверждённой силовой ветви
 ' после численного отказа. Техническая конечная граница уже является исходом.
-Friend Function ContinueByDeformation(ByVal maximumLambda As Double) As CCoupledDeformationContinuation
+Friend Function ContinueByDeformation(ByVal maximumLambda As Double, _
+        Optional ByVal progress As ICoupledContinuationProgress = Nothing) As CCoupledDeformationContinuation
     If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
     If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
     controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
-        PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, mAcceptedTrace
+        PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, mAcceptedTrace, progress
+    controlled.ReportAcceptedProgress
     Set ContinueByDeformation = controlled
 End Function
 
@@ -289,6 +299,13 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
         End If
         If SolveAndAccept(candidate, offsetStage) Then
             reached = candidate
+            If mPreferDeformationAfterInitial And Not offsetStage Then
+                If SavedFieldCount >= 2 And mPreviousLambda < mLambda Then
+                    mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
+                        "Начальная силовая пара подтверждена; поиск продолжается при управлении деформацией.", ProgressDetails()
+                    Exit Function
+                End If
+            End If
             triedExactTarget = False
             If increment < nominal / STEP_GROWTH Then
                 increment = increment * STEP_GROWTH
@@ -577,4 +594,105 @@ Private Function ProgressDetails() As String
     If Len(mExactTargetRecovery) > 0 Then ProgressDetails = ProgressDetails & " | Равновесие подтверждено " & mExactTargetRecovery
     If Len(mSecantFailure) > 0 Then ProgressDetails = ProgressDetails & " | Секущий прогноз: " & mSecantFailure
     If Len(mTwistGuideDetails) > 0 Then ProgressDetails = ProgressDetails & " | Управление закручиванием: " & mTwistGuideDetails
+End Function
+
+' Восстанавливает точное заданное сочетание по допустимому деформационному пути.
+' Интерполяция задаёт только начальное поле; результат принимается после отдельного решения всех уравнений при lambda = 1.
+' Вызывается для ASD после численного отказа силовых шагов и при полностью приложенной постоянной части.
+Friend Function TryRecoverDirectByDeformation(Optional ByVal progress As ICoupledContinuationProgress = Nothing) As Boolean
+    If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
+    If mDirectSteel Is Nothing Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Then Exit Function
+    If PreviousAcceptedLambda >= mLambda Or mDirectTarget <> 1# Then Exit Function
+    Dim failure As CResultMeta: Set failure = mMeta.Clone
+    Dim history As New Collection, seedTrace As CCoupledLoadTrace, field() As Double, index As Long
+    Dim prefixCount As Long, variablePoints As Long, fraction As Double, factor As Double
+    For index = 1 To mAcceptedTrace.Count
+        mAcceptedTrace.ReadPoint index, fraction, factor
+        If fraction = 1# And factor > 0# Then variablePoints = variablePoints + 1
+        If variablePoints = 2 Then prefixCount = index: Exit For
+    Next index
+    If prefixCount < 2 Then Exit Function
+    For index = 1 To prefixCount
+        field = mAcceptedFields.Item(index): history.Add field
+    Next index
+    Set seedTrace = mAcceptedTrace.CopyPrefix(history.Count) ' Постоянная часть сохраняется полностью, начало переменной ветви не содержит измельчённых отказавших шагов.
+    Dim seedPrevious As Double, seedLambda As Double, seedResultants() As Double, seedInitial As Variant
+    seedTrace.ReadPoint history.Count - 1, fraction, seedPrevious
+    seedTrace.ReadPoint history.Count, fraction, seedLambda
+    seedInitial = history.Item(history.Count)
+    mSolver.DiscardStep
+    If Not mSolver.ReplayAcceptedFields(history, history.Count - 1) Then Set mMeta = failure: Exit Function
+    If Not TryEquilibrium(seedLambda, False, seedInitial) Then
+        mSolver.DiscardStep: Set mMeta = failure: Exit Function
+    End If
+    mSolver.CopyTrial field, seedResultants: mSolver.AcceptStep
+    history.Remove history.Count: history.Add field ' В начальный узел передаются фактические поле и усилия повторно решённой пробы.
+    Dim controlled As New CCoupledDeformationContinuation
+    controlled.Trace mSolver, mDirectSteel, mOffset, mDirection, history, seedPrevious, seedLambda, _
+        seedResultants, 2#, 0.001, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, seedTrace, progress
+    controlled.ReportAcceptedProgress
+    Dim branchFields As Collection, branchTrace As CCoupledLoadTrace, controlMeta As CResultMeta
+    Set branchFields = controlled.AcceptedFields: Set branchTrace = controlled.SavedTrace
+    Set controlMeta = controlled.ResultMeta
+    If Not branchFields Is Nothing And Not branchTrace Is Nothing Then
+        If branchFields.Count <> branchTrace.Count Then Err.Raise 5, "CCoupledLoadContinuation", "Поля восстановленной ветви не совпадают с её нагрузочной историей."
+        Dim leftFraction As Double, rightFraction As Double, leftLambda As Double, rightLambda As Double
+        Dim left() As Double, right() As Double, predicted() As Double, ratio As Double, degree As Long, initial As Variant
+        For index = 2 To branchFields.Count
+            branchTrace.ReadPoint index - 1, leftFraction, leftLambda
+            branchTrace.ReadPoint index, rightFraction, rightLambda
+            If leftFraction = 1# And rightFraction = 1# And leftLambda <= 1# And rightLambda >= 1# And rightLambda > leftLambda Then
+                left = branchFields.Item(index - 1): right = branchFields.Item(index): predicted = left
+                ratio = (1# - leftLambda) / (rightLambda - leftLambda)
+                For degree = LBound(predicted) To UBound(predicted)
+                    predicted(degree) = left(degree) + ratio * (right(degree) - left(degree))
+                Next degree
+                If mSolver.ReplayAcceptedFields(branchFields, index - 1) Then
+                    initial = predicted
+                    Dim exactSolved As Boolean
+                    exactSolved = TryEquilibrium(1#, False)
+                    If Not exactSolved Then
+                        mSolver.DiscardStep
+                        exactSolved = TryEquilibrium(1#, False, initial)
+                    End If
+                    If exactSolved Then
+                        Set mAcceptedFields = New Collection
+                        For degree = 1 To index - 1
+                            field = branchFields.Item(degree): mAcceptedFields.Add field
+                        Next degree
+                        Set mAcceptedTrace = branchTrace.CopyPrefix(index - 1)
+                        mField = left: mLambda = leftLambda: mAccepted = mAcceptedFields.Count
+                        SaveCandidate 1#, False: mLambda = 1#
+                        mMeta.SetResult rsSuccess, rcNone, rkDirectState
+                        mMeta.DiagnosticDetails = "Силовой участок: " & failure.DiagnosticDetails & _
+                            " | Деформационное продолжение: " & controlMeta.DiagnosticDetails & _
+                            " | Точная нагрузка lambda = 1 решена от левого принятого состояния с исходными допусками."
+                        TryRecoverDirectByDeformation = True
+                        Exit Function
+                    End If
+                    mSolver.DiscardStep
+                End If
+            End If
+        Next index
+    End If
+    Dim peak As Double, accuracy As Double, designVerified As Boolean, low As Double, high As Double, criticalPoint As Long
+    Dim mechanism As String
+    If controlled.CopyPeak(peak, accuracy, designVerified) Then
+        If peak + accuracy < 1# Then mechanism = "Заданная нагрузка превышает подтверждённый максимум допустимой ветви. Lambda предела: " & CStr(peak) & "; оценка погрешности: " & CStr(accuracy) & "."
+    ElseIf controlled.CopySteelLimit(low, high, criticalPoint) Then
+        If high < 1# And controlled.BestAdmissibleLambda < 1# Then _
+            mechanism = "На допустимой ветви предел деформации арматуры достигнут раньше заданной нагрузки. Интервал lambda: [" & CStr(low) & "; " & CStr(high) & "]."
+    End If
+    If Len(mechanism) > 0 Then
+        Dim actual() As Double
+        If controlled.CopyLimitState(history, actual) Then
+            Set mAcceptedFields = history: Set mAcceptedTrace = branchTrace.CopyPrefix(history.Count)
+            mField = history.Item(history.Count): mResultants = actual
+            mAcceptedTrace.ReadPoint history.Count, mOffsetFraction, mLambda
+        End If
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkDirectState, mechanism, controlMeta.DiagnosticDetails
+    Else
+        Set mMeta = failure
+        mMeta.DiagnosticDetails = failure.DiagnosticDetails & " | Деформационное восстановление: " & controlMeta.ResultComment & " | " & controlMeta.DiagnosticDetails
+    End If
 End Function

@@ -1,0 +1,15 @@
+
+' Передаёт наблюдателю независимые копии подтверждённого пути и метаданных.
+' Наблюдение не назначает физический предел; при отсутствии получателя память для снимка не выделяется.
+Private Sub ReportAcceptedProgress(ByVal progress As ICoupledContinuationProgress, ByVal fields As Collection, _
+        ByVal trace As CCoupledLoadTrace, ByVal meta As CResultMeta)
+    If progress Is Nothing Or fields Is Nothing Or trace Is Nothing Then Exit Sub
+    If fields.Count <> trace.Count Then Err.Raise 5, "CCoupledSectionAnalysis", "Поля наблюдаемого пути не совпадают с его нагрузочной историей."
+    Dim snapshot As New Collection, index As Long, field() As Double
+    For index = 1 To fields.Count
+        field = fields.Item(index): snapshot.Add field
+    Next index
+    Dim snapshotTrace As CCoupledLoadTrace, snapshotMeta As CResultMeta
+    Set snapshotTrace = trace.CopyPrefix(trace.Count): Set snapshotMeta = meta.Clone
+    progress.Report snapshot, snapshotTrace, snapshotMeta
+End Sub
