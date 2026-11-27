@@ -1,0 +1,118 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1205ASDPhysicalRayResolution_20261128": {
+      "Case02/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": false,
+        "has_physical_capacity": true,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "OK"
+      },
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 179,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.08897067344273525,
+        "final_lambda": 1.0979794221153654,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -109797942.21153654,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMx",
+          "compression_utilization": 0.08897067344273525,
+          "elapsed_seconds": 0.11564370000269264,
+          "fixed_history_states": 179,
+          "function_evaluations": 73,
+          "gauge_residual_MPa": 2.6020852139652106e-14,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 4.004886881991965e-05,
+          "lower_lambda": 1.09797942211537,
+          "original_bound_MPa": 1.8948798943164045e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 1.210052966425036e-14,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 1.7049994009236493e-14,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.000378664117723,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.09801947098419,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.2708588929781399,
+        "maximum_moment_error_Nmm": 50.396654099226,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 137,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08897067344273359,
+        "final_lambda": 1.05271886491537,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          105271886.491537,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.2438781857745198,
+        "maximum_moment_error_Nmm": 45.36582075059414,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "4001A35840E0B5019F80E72304779397077CB5D61AFEBD246EBA77EC1F1E4881"
+    },
+    "Cold1206ASDHybridLoadScale_20261128": {
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "B645EAF7C4F3E97A43A59BC93DFB2DEF40A3992B56E16BC4EEF55FF087D27A00"
+    },
+    "Cold1207ASDHybridLoadScaleActive_20261128": {
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "27111AED41BE4D504350DDCF335A816D457B46ABCEF6B86EB3E66ED279B6A5BD"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
