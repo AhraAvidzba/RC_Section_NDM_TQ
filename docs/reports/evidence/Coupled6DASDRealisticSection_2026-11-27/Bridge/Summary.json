@@ -1,0 +1,240 @@
+{
+  "all_workers_terminal": true,
+  "cases": {
+    "Cold1176ASDSecantFailureCapture_20261127": {
+      "Case03/Native/SecantFailureRootSummary.json": {
+        "OpenSees_solid_element": false,
+        "accepted_history_unchanged": true,
+        "actual_native_OpenSees_material": true,
+        "any_admissible_forward_equilibrium_found": false,
+        "any_equilibrium_found": false,
+        "captured_context": {
+          "exact_target_and_history": true,
+          "lambda_value": 6.558244750292715,
+          "native_errors_MPa": [
+            2.098580781521996e-06,
+            2.9088538337885673e-08,
+            1.0017423324757991e-08,
+            5.204170427930421e-14
+          ],
+          "native_vs_recorded_residual_difference_MPa": 3.899764645057249e-09,
+          "original_VBA_bound_MPa": 2.0594391503259807e-06,
+          "original_VBA_norm_MPa": 2.0986338329712626e-06,
+          "prefix": 76,
+          "recorded_linear_correction_defect_MPa": 2.301978052621223e-15,
+          "scaled_condition_number": 54328499453.857086,
+          "scaled_rank": 61,
+          "target": 0.004832504991903181
+        },
+        "elapsed_seconds": 4.846451700024772,
+        "independent_roots": [
+          {
+            "actual_function_calls": 828,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 491,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 337,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.30666237393953083,
+            "cosine_to_previous": 0.28004045567037084,
+            "epsilon0": 0.0036155013436974578,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              2.0736560464432987e-06,
+              7.923658417222611e-07,
+              6.495153935698664e-07,
+              2.6826803799229193e-07
+            ],
+            "lambda_value": 6.5582354114285275,
+            "original_bound_MPa": 2.0594369297027834e-06,
+            "positive_spatial_advance": true,
+            "seconds": 1.346065699995961,
+            "seed": "captured",
+            "signed_spatial_advance": 1.0677337789317214e-08,
+            "spatial_increment_length": 3.812784036419817e-08,
+            "steel_utilization": 0.14462008457190217
+          },
+          {
+            "actual_function_calls": 813,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 481,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 332,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.30666237393953083,
+            "cosine_to_previous": -0.0161573393207123,
+            "epsilon0": 0.003615490823955742,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              2.972877026736348e-06,
+              3.108738521079165e-07,
+              2.972877010186629e-06,
+              9.956280591638667e-08
+            ],
+            "lambda_value": 6.558208170650519,
+            "original_bound_MPa": 2.059430452308705e-06,
+            "positive_spatial_advance": false,
+            "seconds": 1.582355800026562,
+            "seed": "accepted",
+            "signed_spatial_advance": -1.500031589242067e-08,
+            "spatial_increment_length": 9.283902253133704e-07,
+            "steel_utilization": 0.14461965822941894
+          },
+          {
+            "actual_function_calls": 809,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 470,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 339,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.30666237393953083,
+            "cosine_to_previous": 0.28002761877572047,
+            "epsilon0": 0.003615501343817051,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              2.0736266047822877e-06,
+              7.923636096210385e-07,
+              6.495488289385914e-07,
+              2.682680900339962e-07
+            ],
+            "lambda_value": 6.558235411004303,
+            "original_bound_MPa": 2.0594369296019102e-06,
+            "positive_spatial_advance": true,
+            "seconds": 1.9160936999833211,
+            "seed": "physical_secant",
+            "signed_spatial_advance": 1.0676560261309799e-08,
+            "spatial_increment_length": 3.8126811590898334e-08,
+            "steel_utilization": 0.14462008457762265
+          }
+        ],
+        "independent_section_assembly": true,
+        "physical_capacity_confirmed": false,
+        "whole_goal_completed": false
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1177ASDRotatedMy_20261127": {
+      "Case03/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 53,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyRotatedFromNegativeMx",
+        "compression_utilization": 0.31063902867463833,
+        "final_lambda": 0.4656951003229581,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          4656951.003229581,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "BendingMyRotatedFromNegativeMx",
+          "compression_utilization": 0.3107474219251094,
+          "elapsed_seconds": 0.7569609999773093,
+          "fixed_history_states": 53,
+          "function_evaluations": 539,
+          "gauge_residual_MPa": 1.0556585630386383e-12,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.00012019292719195329,
+          "lower_lambda": 0.465695100322958,
+          "original_bound_MPa": 1.6076296063553283e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 1.6903499666212168e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 2.7385648755458994e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.0008487179480452,
+          "tension_utilization": 0.0,
+          "upper_lambda": 0.46581529325015,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.020405412366017117,
+        "maximum_moment_error_Nmm": 0.9794521173462272,
+        "status": "FAIL",
+        "whole_goal_completed": false
+      },
+      "RotatedCapacitySummary.json": {
+        "actual_operator_geometry_matches_history_header": true,
+        "all_states_independently_verified": true,
+        "independent_capacity_intervals_overlap": true,
+        "operators_sha256": "79D640B97834D10A7CC0CF96A8F347F747A095ACC252227219C14A2361AB83F1",
+        "reference_negative_Mx_abs_lower_Nmm": 4656951.955800081,
+        "reference_negative_Mx_abs_upper_Nmm": 4658153.88464513,
+        "relative_lower_difference": 2.0454806248793034e-07,
+        "rotated_My_lower_Nmm": 4656951.003229581,
+        "rotated_My_upper_Nmm": 4658152.9325015,
+        "rotated_accepted_states": 53,
+        "rotated_call_seconds": 20.171875,
+        "user_primary_realistic_fixture_still_pending": true,
+        "whole_goal_completed": false
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1178ASDFixtureOperators_20261127": {
+      "RunnerGuardAudit.json": {
+        "VBA_unchanged": true,
+        "changed_only_existing_report_guard": true,
+        "current_sha256": "6F1DC9463F6A11ADAAB14F4B7597EC9D29E3534E24F119181A5B2C23753E3DFD",
+        "original_bytes_reconstructed_and_verified": true,
+        "original_preparation_pin": "A0A0D8661221DC9A42F06EEE0B572472745772FE464EC2C101D934815923F04F"
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1179ASDRealisticCapacity_20261127": {
+      "actual_solver_tolerances_unchanged": [
+        5e-07,
+        5e-07
+      ],
+      "all_started_workers_terminal": true,
+      "independent_verification_passed": false,
+      "physical_capacity_not_implied_by_execution": true,
+      "rerun": "Cold1180ASDRealisticCapacity_20261127",
+      "test_header_wrong_tolerances": true
+    }
+  },
+  "public_book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "two_bar_edge_fixture_further_tuning_deferred_by_user": true,
+  "whole_goal_completed": false
+}
