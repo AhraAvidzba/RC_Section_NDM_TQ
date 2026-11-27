@@ -10808,6 +10808,46 @@
     "timing_clean_acceleration_comparison_not_claimed": true,
     "whole_goal_completed": false
   },
+  "early_linear_secant_1215": {
+    "accepted_reference_remains1202": true,
+    "all_started_workers_terminal": true,
+    "cases": [
+      {
+        "all_states_independently_verified": true,
+        "case": 2,
+        "has_physical_capacity": false,
+        "history_SHA256": "8E26723C186709C438427EB1CF42F265113DE624D5534367AA2C6D8EEF02F255",
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.0519689220898543,
+        "maximum_admissible_lambda": 1.0862727933897989,
+        "seconds": 318.5380859375,
+        "states": 169,
+        "status": "NumFail"
+      },
+      {
+        "all_states_independently_verified": true,
+        "case": 7,
+        "has_physical_capacity": false,
+        "history_SHA256": "FD3435730AD72C1C3054F776ACE1D7875D0EAAE97B62DECEB1A56E3AF42CFBF8",
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.051946943346392,
+        "maximum_admissible_lambda": 1.0862727933897662,
+        "seconds": 323.859375,
+        "states": 166,
+        "status": "NumFail"
+      }
+    ],
+    "negative_Mx_physical_capacity_regression": true,
+    "private_candidate_not_promoted": true,
+    "public_book_and_dump_unchanged": true,
+    "source_references": {
+      "AGENTS.md": "2909D50120ED181C0E945E959297997D94641A556F41A5E5F611382C69CB161A",
+      "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+      "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+    },
+    "unconditional_linear_predictor_rejected": true,
+    "whole_goal_completed": false
+  },
   "elastic_principal_arc_evidence": "docs/reports/evidence/Coupled6DElasticPrincipalArc_2026-11-25",
   "elastic_principal_arc_summary": {
     "calls": 95,
@@ -45956,7 +45996,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "All1212/1213/1214 workers terminal; do not poll old session ids. Actual positive137-prefix failure is numerically solvable; native and VBA ordinary physical secant roots pass all original equations/material/orientation gates.1214 late-only secant adds5 states but no maximum-lambda gain; no global progress claimed. Next investigate enabling ordinary secant prediction for original linear curvature/twist earlier in continuation (1202 guard excludes these despite linear CoordinateOf), without nonlinear material-coordinate changes or extra attempts. Need coldMx+- regression, then N/My/NM/NMT/T, no promotion before evidence. Preserve H1500 solely as legacy causal fixture; working steel must useConfig or<=1% boost. Full six-force/source/build/book/UI/physics/performance scope remains active."
+    "All1215 Mx+- workers terminal and independently verified; do not poll69185/34997.1215 unconditional early linear secant loses known negative physical capacity and is rejected. Accepted reference remains1202 (negative109.797942kNm physical; positiveNumFail).1214 late-only secant adds5 tiny states without maximum-load gain. Actual positive137-prefix target is solvable independently and in VBA from ordinary secant. Next inspect initial-predictor selection using actual joint equilibrium merit and spatial direction at same target/history, rather than unconditional secant or another numerical-parameter sweep; capture original predictor context if required. Preserve all gates/history/budgets and regress N/My/NM/NMT/T before promotion. H1500 remains frozen causal-only; working steelConfig/<=1% integration pending. Full six-force/source/build/book/nativeUI/physical/performance scope active; goal not paused or complete."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -49349,7 +49389,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T23:23:33.320514+00:00",
+  "updated_local": "2026-11-27T23:34:21.846884+00:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "user_validation_priority_20261127": {
