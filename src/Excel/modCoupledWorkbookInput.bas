@@ -41,9 +41,12 @@ Public Sub ConfigureWorkbookCoupledAnalysis(ByVal workbook As Object, ByVal sect
     ValidateConcreteMaterial section
     Set supplementary = ReadSupplementarySteel(workbook, section, layout, steelClass, provider.PlateauSlopeFactor)
 
+    Dim limits As CCoupledASDStrainLimits
+    Set limits = ReadWorkbookASDStrainLimits(settings, concreteLaw)
+
     Dim analysis As New CCoupledSectionAnalysis
     analysis.Initialize section, layout, provider, poisson, gt, gc, length, yieldRatio, peak, steelClass, _
-        settings.GetRequiredLong("Solver.MaxIterations"), supplementary, concreteLaw:=concreteLaw
+        settings.GetRequiredLong("Solver.MaxIterations"), supplementary, concreteLaw:=concreteLaw, concreteLimits:=limits
     batch.ConfigureCoupledAnalysis analysis
     Exit Sub
 Failed:
@@ -210,3 +213,37 @@ Private Sub CalibrationError(ByVal settings As CSystemSettingsReader, ByVal key 
     Err.Raise vbObjectError + 4194, "modCoupledWorkbookInput", _
         settings.InputErrorMessage(key, "Значение вне допустимого диапазона.", correction)
 End Sub
+
+' Читает активные явные ограничения ASD через общий reader и возвращает неизменяемый объект ядра.
+' CDP не читает эти поля. Пустое растяжение или ноль отключает только жёсткий предел, сохраняя посттрещинный закон.
+Public Function ReadWorkbookASDStrainLimits(ByVal settings As CSystemSettingsReader, ByVal concreteLaw As String) As CCoupledASDStrainLimits
+    On Error GoTo InvalidLimit
+    Select Case UCase$(Trim$(concreteLaw))
+        Case "CDP": Exit Function
+        Case "ASD"
+        Case Else: CalibrationError settings, "Coupled.ConcreteLaw", "Выберите CDP или ASD."
+    End Select
+    Const COMPRESSION_KEY As String = "Coupled.ASDCompressionLimit"
+    Const TENSION_KEY As String = "Coupled.ASDTensionLimit"
+    Dim compression As Double, tension As Double
+    compression = PositiveCalibrationValue(settings, COMPRESSION_KEY)
+    If compression > 1E+100 Then CalibrationError settings, COMPRESSION_KEY, "Введите положительный конечный предел эквивалентной полной деформации ASD не более 1E+100."
+    If Not settings.HasKey(TENSION_KEY) Then _
+        CalibrationError settings, TENSION_KEY, "Восстановите строку необязательного растянутого ограничения в rngCoupledMaterialSettings."
+    If Len(Trim$(settings.GetRawString(TENSION_KEY))) > 0 Then
+        tension = settings.GetRequiredDouble(TENSION_KEY)
+        If tension < 0# Or tension > 1E+100 Then _
+            CalibrationError settings, TENSION_KEY, "Введите положительный предел эквивалентного растяжения ASD; пустое значение или ноль отключает жёсткое ограничение."
+    End If
+    Dim limits As New CCoupledASDStrainLimits
+    limits.Initialize compression, tension, (tension > 0#)
+    Set ReadWorkbookASDStrainLimits = limits
+    Exit Function
+InvalidLimit:
+    Dim number As Long, source As String, description As String
+    number = Err.Number: source = Err.Source: description = Err.Description
+    If number = 18 Then Err.Raise number, source, description ' Отмена не преобразуется в ошибку ввода.
+    If InStr(1, description, "rngCoupledMaterialSettings", vbTextCompare) = 0 Then _
+        description = description & " Таблица rngCoupledMaterialSettings."
+    Err.Raise number, source, description
+End Function

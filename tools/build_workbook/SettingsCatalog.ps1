@@ -2260,13 +2260,47 @@ function Add-ResultsSheetGuide {
     return $row + 2
 }
 
+# Возвращает единый текст параметров ASD для полной сборки и точечного обновления справки.
+function Get-CoupledConcreteLawGuideEntries {
+    return @(
+        @{ Key='Coupled.ConcreteLaw'; Text='В блоке калибровки Config выберите Coupled.ConcreteLaw: CDP или ASD. По умолчанию используется CDP. Оба закона получают заданные сопротивления, модуль, энергии, характерную длину и параметры пика через общую калибровку огибающих. ASD использует однократное обновление ASDConcrete3D с упрощённой пластичностью; CDP — итерационный возврат на поверхность текучести. Выбор закона не меняет диаграммы плоского NM.' },
+        @{ Key='Coupled.ASDCompressionLimit'; Text='Для ASD явно задайте Coupled.ASDCompressionLimit: положительный предел эквивалентной полной деформации сжатия, в долях единицы. Пустое значение требует заполнения. Этот предел не выводится автоматически из одноосного предела СП; используйте значение, обоснованное для принятой модели бетона.' },
+        @{ Key='Coupled.ASDTensionLimit'; Text='Coupled.ASDTensionLimit задаёт необязательный жёсткий предел эквивалентного растяжения ASD. Положительное значение включает проверку. Пустое значение или 0 отключает только этот порог: посттрещинная диаграмма по Gt и характерной длине продолжает определять напряжения. Для CDP оба поля ограничений ASD неприменимы.' },
+        @{ Key=''; Text='Связанный поиск проверяет деформации продольной и поперечной стали и активные бетонные ограничения в центральном сечении. Пересечение ограничения локализуется между сходящимися равновесиями. Предел ниже заданной нагрузки даёт FAIL. Для OK проверяется также само сочетание при λ = 1; интервал, охватывающий единицу, сохраняет численную неопределённость. Первая трещина ASD сама по себе не означает разрушения армированного сечения.' }
+    )
+}
+
+# Объясняет выбор закона и явные ограничения ASD до формул проверки; ключ Config ведёт к своему абзацу.
+function Add-CoupledConcreteLawGuide {
+    param([object]$Sheet, [int]$StartRow)
+
+    $row = $StartRow
+    $entries = @(Get-CoupledConcreteLawGuideEntries)
+    $inputs = $Sheet.Parent.Names.Item('rngCoupledMaterialSettings').RefersToRange
+    foreach($entry in $entries) {
+        $paragraphRow = $row
+        $row = Add-GuideParagraph $Sheet $row $entry.Text
+        if($entry.Key) {
+            $keyCell = $null
+            for($index=2;$index -le $inputs.Rows.Count;$index++) {
+                if([string]$inputs.Cells.Item($index,1).Value2 -ceq $entry.Key){$keyCell=$inputs.Cells.Item($index,1);break}
+            }
+            if(!$keyCell){throw ('Нет настройки справки: '+$entry.Key)}
+            $fontName=[string]$keyCell.Font.Name;$fontSize=[double]$keyCell.Font.Size
+            $inputs.Worksheet.Hyperlinks.Add($keyCell,'',("'"+$Sheet.Name.Replace("'","''")+"'!A"+$paragraphRow),$entry.Key,$entry.Key)|Out-Null
+            $keyCell.Font.Name=$fontName;$keyCell.Font.Size=$fontSize
+        }
+    }
+    return $row
+}
+
 # Добавляет порядок ввода, смысл запаса и проверенные примеры для шести усилий.
 function Add-CoupledAnalysisGuide {
     param([object]$Sheet, [int]$StartRow)
 
     $row = Add-GuideParagraph $Sheet $StartRow "Режим вычисляет прочность сечения при совместном действии продольной силы N, изгибающих моментов Mx и My, крутящего момента T и поперечных сил Qx и Qy." -Emphasis
     $row = Add-GuideTitle $Sheet $row "1. Ввод и запуск" 13
-    $row = Add-GuideParagraph $Sheet $row "В блоке калибровки Config выберите Coupled.ConcreteLaw: CDP или ASD. По умолчанию используется CDP. Оба закона получают заданные сопротивления, модуль, энергии, характерную длину и параметры пика через общую калибровку огибающих. ASD использует однократное обновление ASDConcrete3D с упрощённой пластичностью; CDP — итерационный возврат на поверхность текучести. Одинаковые одноосные кривые не делают их пространственный отклик одинаковым. Выбор закона не меняет диаграммы обычного плоского NM."
+    $row = Add-CoupledConcreteLawGuide $Sheet $row
     $row = Add-GuideParagraph $Sheet $row "Сформируйте сечение. Добавьте в таблицу сочетаний на Config одну строку для всех усилий, выберите профиль и заполните T, Qx, Qy в единицах INPUT. Пустая ячейка соответствует нулю. Связанный режим включается, когда хотя бы одно из трёх усилий ненулевое и профиль запрашивает НДС прочности или поиск несущей способности."
     $row = Add-GuideParagraph $Sheet $row "Знаки N, Mx, My заданы настройками Sign.N.User, Sign.Mx.User и Sign.My.User. Положительные Qx и Qy направлены вдоль +X и +Y, положительный T действует вокруг продольной оси +Z по правилу правой руки. Все усилия задаются в одной точке. Load.ReferenceOffsetX и Load.ReferenceOffsetY отсчитываются от центра бетона без арматуры. Программа учитывает моменты от переноса сил к расчётному центру."
     $row = Add-GuideParagraph $Sheet $row "На листе «Сечения» заполните блок Transverse выбранного типа. Для импорта используйте блок «AutoCAD — поперечное армирование импортированного сечения». Одна строка описывает группу одинаковых хомутов или ветвей. Для «Контура» задайте диаметр, шаг и защитный слой. Если подходящих контуров несколько, укажите нужный. Для «Ветви» введите диаметр, шаг и координаты оси в формате «x1; y1; x2; y2» в единицах длины INPUT."
@@ -4043,7 +4077,7 @@ function Add-CoupledMaterialSettingsTable {
     $title.Interior.Color = $script:ConfigGroupHeaderColor
     $title.Font.Bold = $true
 
-    $table = $Sheet.Range('H122:M130')
+    $table = $Sheet.Range('H122:M132')
     $rows = @(
         @('Параметр', 'Значение', 'Ед.', 'Комментарий'),
         @('Coupled.Poisson', 0.2, '-', 'Начальный коэффициент Пуассона бетона.'),
@@ -4053,7 +4087,9 @@ function Add-CoupledMaterialSettingsTable {
         @('Coupled.YieldRatio', '', '-', 'Отношение начала пластичности к пику сжатия.'),
         @('Coupled.PeakStrain', '', '-', 'Модуль полной деформации у пика сжатия.'),
         @('Coupled.SteelClass', '', '-', 'Класс стали, для которого заданы параметры Config.'),
-        @('Coupled.ConcreteLaw', 'CDP', '-', 'Пространственный закон бетона: CDP или ASD. Огибающие задаются общей калибровкой.')
+        @('Coupled.ConcreteLaw', 'CDP', '-', 'Пространственный закон бетона: CDP или ASD.'),
+        @('Coupled.ASDCompressionLimit', '', '-', 'ASD: явный предел эквивалентной полной деформации сжатия.'),
+        @('Coupled.ASDTensionLimit', '', '-', 'ASD: жёсткий предел растяжения; пусто или 0 — без ограничения.')
     )
     for ($r = 0; $r -lt $rows.Count; $r++) {
         for ($col = 0; $col -lt 4; $col++) {
@@ -4066,8 +4102,8 @@ function Add-CoupledMaterialSettingsTable {
     $table.Rows.Item(1).Interior.Color = $script:ConfigTableHeaderColor
     for ($r = 1; $r -le $table.Rows.Count; $r++) { $table.Cells.Item($r, 4).Resize(1, 3).Merge() }
     $table.WrapText = $false
-    Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 130 13
-    $lawCell = $table.Cells.Item($table.Rows.Count, 2)
+    Set-WorkbookNameByBounds $Workbook 'rngCoupledMaterialSettings' $Sheet 122 8 132 13
+    $lawCell = $table.Cells.Item(9, 2)
     $lawCell.Validation.Delete()
     $lawList = Get-ConfigValidationListAddress $Sheet @('CDP', 'ASD')
     $lawCell.Validation.Add(3, 1, 1, $lawList)
@@ -4081,17 +4117,17 @@ function Add-CoupledMaterialSettingsTable {
 function Add-CoupledSteelClassesTable {
     param([object]$Workbook, [object]$Sheet)
 
-    $title = $Sheet.Range('H131:N131')
+    $title = $Sheet.Range('H133:N133')
     $title.Merge()
     $title.Cells.Item(1, 1).Value2 = 'Дополнительные классы арматуры для связанного расчёта'
     $title.Interior.Color = $script:ConfigGroupHeaderColor
     $title.Font.Bold = $true
 
-    $table = $Sheet.Range('H132:N140')
+    $table = $Sheet.Range('H134:N142')
     $headers = @('Класс стали', 'Набор', 'Es, МПа', 'Rs, МПа', 'Rsc, МПа', 'εs2', 'εsc2')
     for ($c = 0; $c -lt $headers.Count; $c++) { $table.Cells.Item(1, $c + 1).Value2 = $headers[$c] }
     $table.Rows.Item(1).Font.Bold = $true
     $table.Rows.Item(1).Interior.Color = $script:ConfigTableHeaderColor
     $table.WrapText = $false
-    Set-WorkbookNameByBounds $Workbook 'rngCoupledSteelClasses' $Sheet 132 8 140 14
+    Set-WorkbookNameByBounds $Workbook 'rngCoupledSteelClasses' $Sheet 134 8 142 14
 }

@@ -1,0 +1,30 @@
+{
+  "Config_limit_input_connected": true,
+  "actual_components": 260,
+  "actual_layout_and_guide_synchronized": true,
+  "all116_other_parts_bit_exact": true,
+  "all258_unaffected_components_unchanged": true,
+  "all260_native_dump_components_verified": true,
+  "full_acceptance_not_run": true,
+  "further_formatting_deferred_by_user": true,
+  "manual_native_distinct_options_confirmed": true,
+  "native_invalid_options_rejected": true,
+  "native_unit_tests": {
+    "failed": 0,
+    "macros": 1,
+    "own_process_closed": true,
+    "passed": 42,
+    "timeout600": false
+  },
+  "source_core_and_actual_output_synchronized": true,
+  "source_pins": {
+    "src/Excel/modCoupledWorkbookInput.bas": "54D158509185D2EB28660C0EE4A718D12680A9A38BB482DDDE0880CA266F1FAC",
+    "tests/modTestCoupledASDConfigInput.bas": "E81D31F5C50A1B504ACF6475B6A84507CC7B78A103F87D9909627C7E6E46FB03",
+    "tools/build_workbook/SettingsCatalog.ps1": "5E1692F53F0469DC3BF29C9A3C1A261BC0C1801CFE2180EAC652838B3B10CD84",
+    "tools/build_workbook/WorkbookLayout.json": "1369EFE2DF829994501DC4F5E62DE7608E8BBE1F0EEC74992C593B2BF8AFE35D",
+    "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+    "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+  },
+  "visual_QA_native_PDF_completed": true,
+  "whole_goal_completed": false
+}

@@ -1,0 +1,17 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold1152ASDConfigFinal_20261127\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold1152ASDConfigFinal_20261127\Temp\RC_NDM_ModeSuite_827f88c03dc0463a957ee0f2db93d003\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=40116; startTicks=639313629307875420
+===== modTestCoupledASDConfigInput.RunTestCoupledASDConfigInput =====
+SUITE_STARTED: modTestCoupledASDConfigInput.RunTestCoupledASDConfigInput; 2026-11-27T10:55:38
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=40116; workingSet=145530880; privateBytes=105222144; cpu=6.5
+EXCEL_AFTER_SUITE: pid=45808; workingSet=176848896; privateBytes=120512512; cpu=38.21875
+TOTAL_ASD_CONFIG_INPUT: passed=42; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold1152ASDConfigFinal_20261127\Temp\RC_NDM_ModeSuite_827f88c03dc0463a957ee0f2db93d003\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestCoupledASDConfigInput.RunTestCoupledASDConfigInput; 2026-11-27T10:55:39
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True
