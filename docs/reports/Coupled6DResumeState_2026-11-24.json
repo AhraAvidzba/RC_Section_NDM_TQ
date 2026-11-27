@@ -34955,6 +34955,470 @@
     "total_primary_steps975": 2
   },
   "latest_midpoint_material_pair_report": "docs/reports/Coupled6DMidpointMaterialPair_2026-11-26.md",
+  "latest_mx_scale_study_20261127": {
+    "Mx_negative_10_and100_brackets_overlap": true,
+    "Mx_negative_physical_capacity_confirmed": true,
+    "accepted_private_base_still_1186": true,
+    "all_started_workers_terminal": true,
+    "archive_verification": {
+      "all_direct_and_inherited_payloads_SHA256_verified": true,
+      "distinct_books_CRC_verified": 6,
+      "no_files_modified": true,
+      "parent_manifests_verified": 7,
+      "unique_payloads": 2097
+    },
+    "automatic_100_history_byteexact_manual_scaled_case": true,
+    "automatic_candidate1202_not_promoted_to_public": true,
+    "automatic_optimal_start_not_yet_implemented": true,
+    "broader_native_continuation_new_fields_verified": 27,
+    "cases": [
+      {
+        "accepted_states": 80,
+        "capacity_lambda": null,
+        "case": 2,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMx",
+        "maximum_admissible_lambda": 1.0862371835083255,
+        "maximum_variable_component_physical": 108.62371835083255,
+        "physical_bracket": null,
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 263.578125,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 71,
+        "capacity_lambda": null,
+        "case": 12,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMx_Initial50",
+        "maximum_admissible_lambda": 2.1723884250123304,
+        "maximum_variable_component_physical": 108.61942125061653,
+        "physical_bracket": null,
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 279.625,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 178,
+        "capacity_lambda": 10.97939435864385,
+        "case": 13,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMx_Initial10",
+        "maximum_admissible_lambda": 10.97939435864385,
+        "maximum_variable_component_physical": 109.79394358643849,
+        "physical_bracket": [
+          109.793943586438,
+          109.801953379865
+        ],
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 127.6640625,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 179,
+        "capacity_lambda": 1.0979794221153654,
+        "case": 14,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Mx100_Equivalent10Numerics",
+        "maximum_admissible_lambda": 1.0979794221153654,
+        "maximum_variable_component_physical": 109.79794221153654,
+        "physical_bracket": [
+          109.797942211537,
+          109.80194709841899
+        ],
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 137.0625,
+        "settings_initial_maximum_tolerance_iterations": [
+          0.1,
+          10.0,
+          0.0001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 178,
+        "capacity_lambda": 10.97939435864385,
+        "case": 15,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Mx10_ColdRepeat",
+        "maximum_admissible_lambda": 10.97939435864385,
+        "maximum_variable_component_physical": 109.79394358643849,
+        "physical_bracket": [
+          109.793943586438,
+          109.801953379865
+        ],
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 128.9140625,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 110,
+        "capacity_lambda": null,
+        "case": 16,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Mx100_InitialOnly",
+        "maximum_admissible_lambda": 1.0860785301433231,
+        "maximum_variable_component_physical": 108.6078530143323,
+        "physical_bracket": null,
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 320.90625,
+        "settings_initial_maximum_tolerance_iterations": [
+          0.1,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 87,
+        "capacity_lambda": null,
+        "case": 17,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Mx100_ToleranceOnly",
+        "maximum_admissible_lambda": 1.086274155304282,
+        "maximum_variable_component_physical": 108.6274155304282,
+        "physical_bracket": null,
+        "run": "Cold1186ASDExplicitFieldSecant_20261127",
+        "seconds": 278.765625,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.0001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 75,
+        "capacity_lambda": null,
+        "case": 2,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMx",
+        "maximum_admissible_lambda": 1.0862371835083255,
+        "maximum_variable_component_physical": 108.62371835083255,
+        "physical_bracket": null,
+        "run": "Cold1201ASDMxFineDamping_20261127",
+        "seconds": 217.171875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 65,
+        "capacity_lambda": 0.6410207685695666,
+        "case": 3,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMy",
+        "maximum_admissible_lambda": 0.6410207685695666,
+        "maximum_variable_component_physical": 64.10207685695666,
+        "physical_bracket": [
+          64.1020768569567,
+          64.1319102548574
+        ],
+        "run": "Cold1201ASDMxFineDamping_20261127",
+        "seconds": 30.875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "FAIL",
+        "variable_component_index": 2
+      },
+      {
+        "accepted_states": 52,
+        "capacity_lambda": 1.0919754413526253,
+        "case": 6,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Tension",
+        "maximum_admissible_lambda": 1.0919754413526253,
+        "maximum_variable_component_physical": 545.9877206763126,
+        "physical_bracket": [
+          545.9877206763149,
+          546.06308985143
+        ],
+        "run": "Cold1201ASDMxFineDamping_20261127",
+        "seconds": 19.4453125,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 0
+      },
+      {
+        "accepted_states": 20,
+        "capacity_lambda": 4.9297564338020345,
+        "case": 1,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Compression",
+        "maximum_admissible_lambda": 4.9297564338020345,
+        "maximum_variable_component_physical": 4929.756433802035,
+        "physical_bracket": null,
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 8.875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 0
+      },
+      {
+        "accepted_states": 179,
+        "capacity_lambda": 1.0979794221153654,
+        "case": 2,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMx",
+        "maximum_admissible_lambda": 1.0979794221153654,
+        "maximum_variable_component_physical": 109.79794221153654,
+        "physical_bracket": [
+          109.797942211537,
+          109.80194709841899
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 263.71875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 65,
+        "capacity_lambda": 0.6410207685695666,
+        "case": 3,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMy",
+        "maximum_admissible_lambda": 0.6410207685695666,
+        "maximum_variable_component_physical": 64.10207685695666,
+        "physical_bracket": [
+          64.1020768569567,
+          64.1319102548574
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 30.7421875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "FAIL",
+        "variable_component_index": 2
+      },
+      {
+        "accepted_states": 54,
+        "capacity_lambda": null,
+        "case": 4,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Torsion",
+        "maximum_admissible_lambda": 4.463053508335248,
+        "maximum_variable_component_physical": 44.630535083352484,
+        "physical_bracket": null,
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 281.1015625,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 3
+      },
+      {
+        "accepted_states": 23,
+        "capacity_lambda": 5.323440511612377,
+        "case": 5,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_CombinedNMT",
+        "maximum_admissible_lambda": 5.323440511612377,
+        "maximum_variable_component_physical": 266.1720255806189,
+        "physical_bracket": [
+          266.172025580619,
+          266.19256775131447
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 4.453125,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 71,
+        "capacity_lambda": 1.0917900491995562,
+        "case": 6,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_Tension",
+        "maximum_admissible_lambda": 1.0917900491995562,
+        "maximum_variable_component_physical": 545.8950245997781,
+        "physical_bracket": [
+          545.89502459978,
+          546.0276154567999
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 30.1875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 0
+      },
+      {
+        "accepted_states": 137,
+        "capacity_lambda": null,
+        "case": 7,
+        "has_physical_capacity": false,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMxPositive",
+        "maximum_admissible_lambda": 1.0862727979915605,
+        "maximum_variable_component_physical": 108.62727979915606,
+        "physical_bracket": null,
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 323.53125,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "NumFail",
+        "variable_component_index": 1
+      },
+      {
+        "accepted_states": 65,
+        "capacity_lambda": 0.641020768569567,
+        "case": 8,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_BendingMyNegative",
+        "maximum_admissible_lambda": 0.641020768569567,
+        "maximum_variable_component_physical": 64.1020768569567,
+        "physical_bracket": [
+          64.1020768569567,
+          64.1169935559071
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 33.375,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "FAIL",
+        "variable_component_index": 2
+      },
+      {
+        "accepted_states": 24,
+        "capacity_lambda": 5.3649341697613355,
+        "case": 10,
+        "has_physical_capacity": true,
+        "independent_all_states_verified": true,
+        "label": "Realistic300x500_CombinedNM",
+        "maximum_admissible_lambda": 5.3649341697613355,
+        "maximum_variable_component_physical": 268.24670848806676,
+        "physical_bracket": [
+          268.246708488067,
+          268.276895368161
+        ],
+        "run": "Cold1202ASDRefinedStartRetry_20261127",
+        "seconds": 4.1875,
+        "settings_initial_maximum_tolerance_iterations": [
+          1.0,
+          100.0,
+          0.001,
+          30.0
+        ],
+        "status": "OK",
+        "variable_component_index": 1
+      }
+    ],
+    "cold_states_independently_verified": 1713,
+    "positive_Mx_and_pure_T_still_unresolved": true,
+    "repeated_10_history_byteexact": true,
+    "report": "docs/reports/Coupled6DMxScale_2026-11-27.md",
+    "single_initial_or_single_accuracy_change_did_not_solve_100": true,
+    "source_references": {
+      "AGENTS.md": "2909D50120ED181C0E945E959297997D94641A556F41A5E5F611382C69CB161A",
+      "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+      "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+    },
+    "user_requires_automatic_parameter_selection_without_manual_nominal_load_tuning": true,
+    "whole_goal_completed": false,
+    "working_book_source_and_dump_unchanged": true
+  },
   "latest_native_tangent_pair_proof": {
     "actual_components": 256,
     "all_working_numerical_and_material_methods_exact858": true,
@@ -43579,7 +44043,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Capture exact terminal first-branch My1175 Newton/material-event failure using existing read-only modTestASDPostTransition.TestRunPostTransitionCapture in an identical268-component book, without recompilation or a second independent retry. Expected final first history is76 states, SHA FC371FB9D30FB6DC97065FD7693FBFD4F67925C2F35CCF8C6FC773EFC3A51BAF. New limiting event is point26/station-1/principal3; incoming residual2.10774e-6 and full-hybrid best2.07735e-6 exceed original bound near2.05944e-6. Independently solve captured exact target before changing control, event handling or step growth. Retain original acceptance/budgets; local secant proof does not establish physical capacity. Full original scope remains."
+    "Implement and test physical-response-based automatic initial step and scale-consistent lambda resolution in a private ASD candidate; preserve original force/material gates, all LoadPaths and fixed offsets. Verify Mx signs and pure T, then wider regression and working integration. Fixed factor10 retry1202 solves Mx negative but Mx positive/T remain NumFail; not promoted. Full original six-force goal remains active."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -46972,7 +47436,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T11:28:06.083488+00:00",
+  "updated_local": "2026-11-27T20:45:53.345185+00:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "user_validation_priority_20261127": {

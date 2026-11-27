@@ -1,0 +1,2352 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1197ASDMxJacobiSpectrum_20261127": {
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466973266e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.1796875,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.09375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466973266e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.140625,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466973266e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 11.4140625,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "FA01C3FB66B7F6E5F1C70985ADABFE68672D1494A6492485331034B90CBC718F"
+    },
+    "Cold1201ASDMxFineDamping_20261127": {
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 75,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.08896427525141322,
+        "final_lambda": 1.0522313128420706,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -105223131.28420706,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.06139886770688463,
+        "maximum_moment_error_Nmm": 4.363893449306488,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "Case03/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 65,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMy",
+        "compression_utilization": 0.14823871833986985,
+        "final_lambda": 0.6410207685695666,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          64102076.85695666,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMy",
+          "compression_utilization": 0.14849108746342898,
+          "elapsed_seconds": 0.21258719998877496,
+          "fixed_history_states": 65,
+          "function_evaluations": 134,
+          "gauge_residual_MPa": 1.6263032587282567e-15,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0002983339790070261,
+          "lower_lambda": 0.641020768569567,
+          "original_bound_MPa": 1.3147060645329183e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 2.254836322427503e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 2.043845597654581e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.0020521965773048,
+          "tension_utilization": 0.0,
+          "upper_lambda": 0.641319102548574,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.04636008038869477,
+        "maximum_moment_error_Nmm": 4.188333719968796,
+        "status": "FAIL",
+        "whole_goal_completed": false
+      },
+      "Case06/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 52,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_Tension",
+        "compression_utilization": 0.00011192745583151168,
+        "final_lambda": 1.0919754413526253,
+        "final_target_resultants_N_Nmm": [
+          545987.7206763126,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_Tension",
+          "compression_utilization": 0.00011192745583151168,
+          "elapsed_seconds": 0.011334099981468171,
+          "fixed_history_states": 52,
+          "function_evaluations": 1,
+          "gauge_residual_MPa": 2.2768245622195593e-14,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0001507383502301618,
+          "lower_lambda": 1.09197544135263,
+          "original_bound_MPa": 2.3202102995047677e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 3.6668259539851533e-09,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 3.6668164345125357e-09,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "Independent ordinary secant seed meets every original equation before root iterations",
+          "solver_success": false,
+          "steel_utilization": 1.0011423105190802,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.09212617970286,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.08129138895310462,
+        "maximum_moment_error_Nmm": 3.8880443753441796e-06,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 1,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.2265625,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.09375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 3.953125,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 4.0,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        3,
+        6
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "B33C93365FDB40D2D604C16CE9079C18B20B785E46B405A3FF02FDDC1A5D6BF5"
+    },
+    "Native1198ASDMxPostYield_20261127": {
+      "summary": {
+        "OpenSees_solid_elements": false,
+        "accepted_additional_states": 3,
+        "attempts": [
+          {
+            "best_errors_MPa": [
+              3.027796290128664e-06,
+              9.64743421868336e-11,
+              1.0463291570307082e-06,
+              1.0824674490095276e-11
+            ],
+            "best_lambda": 1.0540502150619664,
+            "best_original_merit": 1.6464155698205634,
+            "found": false,
+            "function_calls": 2970,
+            "original_bound_MPa": 1.8390231152021065e-06,
+            "phases": [
+              {
+                "function_calls": 1363,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1607,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 0.0001,
+            "seconds": 4.86480019998271,
+            "step": 1,
+            "target": 0.013428747782180133
+          },
+          {
+            "best_errors_MPa": [
+              2.055748455502866e-06,
+              3.649790430819422e-11,
+              2.3044799906321438e-07,
+              1.186550857568136e-11
+            ],
+            "best_lambda": 1.0538604828503408,
+            "best_original_merit": 1.117994606334766,
+            "found": false,
+            "function_calls": 3092,
+            "original_bound_MPa": 1.8387820870106273e-06,
+            "phases": [
+              {
+                "function_calls": 1363,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1729,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 5e-05,
+            "seconds": 4.9926591999828815,
+            "step": 2,
+            "target": 0.013378747782180133
+          },
+          {
+            "best_errors_MPa": [
+              1.827975711830073e-06,
+              5.765651628006352e-11,
+              3.972649146865513e-07,
+              1.5508427875232655e-11
+            ],
+            "best_lambda": 1.0537656798807726,
+            "best_original_merit": 0.994188195923687,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1854,
+            "original_bound_MPa": 1.83866165312064e-06,
+            "phases": [
+              {
+                "function_calls": 1119,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 735,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "requested_increment": 2.5e-05,
+            "seconds": 2.983529500022996,
+            "steel_utilization": 0.534149913267016,
+            "step": 3,
+            "target": 0.013353747782180134
+          },
+          {
+            "best_errors_MPa": [
+              2.0840852390183815e-06,
+              3.2140631302246536e-11,
+              1.0807949776106616e-06,
+              3.851086116668512e-12
+            ],
+            "best_lambda": 1.053907917285614,
+            "best_original_merit": 1.1333680909415536,
+            "found": false,
+            "function_calls": 3092,
+            "original_bound_MPa": 1.8388423458146003e-06,
+            "phases": [
+              {
+                "function_calls": 1363,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1729,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 3.7500000000000003e-05,
+            "seconds": 4.947758399997838,
+            "step": 4,
+            "target": 0.01339124778218065
+          },
+          {
+            "best_errors_MPa": [
+              2.0074044805176093e-06,
+              2.6477843355354747e-11,
+              9.586899173616102e-07,
+              3.7990444123892075e-12
+            ],
+            "best_lambda": 1.0538368000169462,
+            "best_original_merit": 1.0917211669166793,
+            "found": false,
+            "function_calls": 3214,
+            "original_bound_MPa": 1.8387520012890025e-06,
+            "phases": [
+              {
+                "function_calls": 1241,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1973,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 1.8750000000000002e-05,
+            "seconds": 5.230595299974084,
+            "step": 5,
+            "target": 0.01337249778218065
+          },
+          {
+            "best_errors_MPa": [
+              1.7551549606143895e-06,
+              2.5534587465292358e-11,
+              7.479605767832354e-07,
+              7.337880303381894e-12
+            ],
+            "best_lambda": 1.0538012399341654,
+            "best_original_merit": 0.9545594407240942,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1240,
+            "original_bound_MPa": 1.8387068271861547e-06,
+            "phases": [
+              {
+                "function_calls": 875,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 365,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "requested_increment": 9.375000000000001e-06,
+            "seconds": 2.0488940000068396,
+            "steel_utilization": 0.5345249130303925,
+            "step": 6,
+            "target": 0.013363122782180652
+          },
+          {
+            "best_errors_MPa": [
+              2.1201753271206975e-06,
+              1.5552896828491952e-06,
+              1.2665285474319302e-06,
+              3.0704605524789486e-12
+            ],
+            "best_lambda": 1.0538545853325525,
+            "best_original_merit": 1.1530371002727005,
+            "found": false,
+            "function_calls": 2116,
+            "original_bound_MPa": 1.8387745950405783e-06,
+            "phases": [
+              {
+                "function_calls": 387,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1729,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 1.4062500000000001e-05,
+            "seconds": 3.3601932000019588,
+            "step": 7,
+            "target": 0.013377185282180896
+          },
+          {
+            "best_errors_MPa": [
+              2.1067267224684162e-06,
+              6.262893849362516e-12,
+              1.0642779632810772e-06,
+              3.434752482434078e-12
+            ],
+            "best_lambda": 1.053827912199424,
+            "best_original_merit": 1.1457443185800669,
+            "found": false,
+            "function_calls": 2848,
+            "original_bound_MPa": 1.838740710562113e-06,
+            "phases": [
+              {
+                "function_calls": 753,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 2095,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 7.031250000000001e-06,
+            "seconds": 4.553161600022577,
+            "step": 8,
+            "target": 0.013370154032180896
+          },
+          {
+            "best_errors_MPa": [
+              1.8986604311330895e-06,
+              1.162208009274383e-06,
+              8.457491822291327e-07,
+              0.0
+            ],
+            "best_lambda": 1.0538145749541874,
+            "best_original_merit": 1.032596883084369,
+            "found": false,
+            "function_calls": 3092,
+            "original_bound_MPa": 1.8387237674607218e-06,
+            "phases": [
+              {
+                "function_calls": 631,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 2461,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 3.5156250000000003e-06,
+            "seconds": 4.902994400006719,
+            "step": 9,
+            "target": 0.013366638407180897
+          },
+          {
+            "best_errors_MPa": [
+              1.8349020404512898e-06,
+              1.5552940153210765e-06,
+              7.932744765489601e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0538079074441764,
+            "best_original_merit": 0.9979261297941563,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 97,
+            "original_bound_MPa": 1.838715297323438e-06,
+            "phases": [
+              {
+                "function_calls": 97,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "requested_increment": 1.7578125000000002e-06,
+            "seconds": 0.1548855999717489,
+            "steel_utilization": 0.5345952254860237,
+            "step": 10,
+            "target": 0.013364880594680896
+          },
+          {
+            "best_errors_MPa": [
+              1.932007591202321e-06,
+              2.5059706913743707e-10,
+              9.12008800923916e-07,
+              4.198204284211471e-10
+            ],
+            "best_lambda": 1.0538179093843787,
+            "best_original_merit": 1.050730498281094,
+            "found": false,
+            "function_calls": 2726,
+            "original_bound_MPa": 1.8387280033870927e-06,
+            "phases": [
+              {
+                "function_calls": 631,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 2095,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 2.63671875e-06,
+            "seconds": 4.367223699984606,
+            "step": 11,
+            "target": 0.013367517313430895
+          },
+          {
+            "best_errors_MPa": [
+              1.8914854165218674e-06,
+              9.170642760805703e-11,
+              8.547131925205966e-07,
+              3.382710778154774e-12
+            ],
+            "best_lambda": 1.0538129089919916,
+            "best_original_merit": 1.028695896087068,
+            "found": false,
+            "function_calls": 2970,
+            "original_bound_MPa": 1.8387216510891703e-06,
+            "phases": [
+              {
+                "function_calls": 753,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 2217,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 1.318359375e-06,
+            "seconds": 4.742517600010615,
+            "step": 12,
+            "target": 0.013366198954055894
+          },
+          {
+            "best_errors_MPa": [
+              1.854396639106907e-06,
+              2.4820802965036526e-10,
+              8.321557703866553e-07,
+              3.507610868425104e-11
+            ],
+            "best_lambda": 1.0538104141436229,
+            "best_original_merit": 1.00852667633941,
+            "found": false,
+            "function_calls": 2848,
+            "original_bound_MPa": 1.838718481733871e-06,
+            "phases": [
+              {
+                "function_calls": 509,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 2339,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 6.591796875e-07,
+            "seconds": 4.52067860000534,
+            "step": 13,
+            "target": 0.013365539774368393
+          }
+        ],
+        "elapsed_seconds": 54.48435929999687,
+        "equilibrated_material_upper": null,
+        "initial_VBA_forward_root_committed": true,
+        "initial_history_states": 80,
+        "last_control_coordinate": 0.013364880594680894,
+        "last_lambda": 1.0538079074441764,
+        "maximum_lambda_in_retained_path": 1.0862371835083255,
+        "native_ASD_with_independent_section_assembly": true,
+        "original_materials_and_equilibrium_criteria_unchanged": true,
+        "physical_capacity_not_claimed_without_full_path_and_upper_verification": true,
+        "status": "NumericalStall",
+        "total_function_calls": 32159,
+        "whole_goal_completed": false
+      },
+      "verification": {
+        "all60_equations_six_forces_and_current_control_checked": true,
+        "all_additional_fields_replayed_in_fresh_native_materials": true,
+        "all_material_limits_checked": true,
+        "new_fields": 4,
+        "physical_material_upper_not_found": true,
+        "records": [
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8164947638612308e-06,
+              4.666067337198709e-12,
+              3.8271465835278616e-08,
+              5.506012312750386e-11
+            ],
+            "history_index": 81,
+            "lambda_value": 1.053670769344105,
+            "original_bound_MPa": 1.8385410825817244e-06,
+            "original_steel_projection_coordinate": 0.013328747782180133,
+            "steel_utilization": 0.5331499113737426
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.827975711830073e-06,
+              5.765651628006352e-11,
+              3.972649146865513e-07,
+              1.5508427875232655e-11
+            ],
+            "history_index": 82,
+            "lambda_value": 1.0537656798807726,
+            "original_bound_MPa": 1.83866165312064e-06,
+            "original_steel_projection_coordinate": 0.013353747782180651,
+            "steel_utilization": 0.534149913267016
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.7551549606143895e-06,
+              2.5534587465292358e-11,
+              7.479605767832354e-07,
+              7.337880303381894e-12
+            ],
+            "history_index": 83,
+            "lambda_value": 1.0538012399341654,
+            "original_bound_MPa": 1.8387068271861547e-06,
+            "original_steel_projection_coordinate": 0.013363122782180896,
+            "steel_utilization": 0.5345249130303925
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8349020404512898e-06,
+              1.5552940153210765e-06,
+              7.932744765489601e-07,
+              5.204170427930421e-14
+            ],
+            "history_index": 84,
+            "lambda_value": 1.0538079074441764,
+            "original_bound_MPa": 1.838715297323438e-06,
+            "original_steel_projection_coordinate": 0.013364880594680894,
+            "steel_utilization": 0.5345952254860237
+          }
+        ],
+        "retained_history80_byteexact": true,
+        "whole_goal_completed": false
+      }
+    },
+    "Native1199ASDMxConstrained_20261127": {
+      "summary": {
+        "OpenSees_solid_elements": false,
+        "accepted_additional_states": 1,
+        "all_original_equilibrium_gates_still_checked": true,
+        "attempts": [
+          {
+            "best_errors_MPa": [
+              7.821058333681627e-05,
+              8.131516293641283e-16,
+              5.7327592589165724e-06,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0540504960407575,
+            "best_original_merit": 42.52832251539347,
+            "found": false,
+            "function_calls": 2954,
+            "original_bound_MPa": 1.8390234721462929e-06,
+            "phases": [
+              {
+                "function_calls": 1701,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1253,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 0.0001,
+            "seconds": 4.927689400035888,
+            "step": 1,
+            "target": 0.013428747782180133
+          },
+          {
+            "best_errors_MPa": [
+              2.191195994443917e-06,
+              1.2197274440461925e-15,
+              5.673880320453228e-07,
+              0.0
+            ],
+            "best_lambda": 1.0538604385520989,
+            "best_original_merit": 1.191656192967557,
+            "found": false,
+            "function_calls": 2058,
+            "original_bound_MPa": 1.8387820307359174e-06,
+            "phases": [
+              {
+                "function_calls": 917,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 5e-05,
+            "seconds": 3.3784324000007473,
+            "step": 2,
+            "target": 0.013378747782180133
+          },
+          {
+            "best_errors_MPa": [
+              1.954515053829924e-06,
+              4.0657581468206416e-16,
+              3.841018744828512e-07,
+              0.0
+            ],
+            "best_lambda": 1.053765553936415,
+            "best_original_merit": 1.0630097280750561,
+            "found": false,
+            "function_calls": 2618,
+            "original_bound_MPa": 1.8386614931259795e-06,
+            "phases": [
+              {
+                "function_calls": 1029,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1589,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 2.5e-05,
+            "seconds": 4.278432800027076,
+            "step": 3,
+            "target": 0.013353747782180134
+          },
+          {
+            "best_errors_MPa": [
+              1.8283267293447935e-06,
+              4.0657581468206416e-16,
+              3.091710719524582e-07,
+              0.0
+            ],
+            "best_lambda": 1.0537182059737544,
+            "best_original_merit": 0.9944117223338748,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1031,
+            "original_bound_MPa": 1.8386013441733452e-06,
+            "phases": [
+              {
+                "function_calls": 805,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 226,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "requested_increment": 1.25e-05,
+            "seconds": 1.6688643000088632,
+            "steel_utilization": 0.5336499134905611,
+            "step": 4,
+            "target": 0.013341247782180134
+          },
+          {
+            "best_errors_MPa": [
+              2.0848358447224182e-06,
+              1.6263032587282567e-15,
+              3.6112989945519647e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0537893813828871,
+            "best_original_merit": 1.133869138469239,
+            "found": false,
+            "function_calls": 3066,
+            "original_bound_MPa": 1.8386917625582577e-06,
+            "phases": [
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1925,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 1.8750000000000002e-05,
+            "seconds": 4.972547499986831,
+            "step": 5,
+            "target": 0.013359997782180133
+          },
+          {
+            "best_errors_MPa": [
+              2.2840205241793228e-06,
+              8.131516293641283e-16,
+              3.6751630291013307e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0537538071638477,
+            "best_original_merit": 1.2422292358022862,
+            "found": false,
+            "function_calls": 2954,
+            "original_bound_MPa": 1.8386465704972738e-06,
+            "phases": [
+              {
+                "function_calls": 1477,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1477,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 9.375000000000001e-06,
+            "seconds": 4.7530167999793775,
+            "step": 6,
+            "target": 0.013350622782180134
+          },
+          {
+            "best_errors_MPa": [
+              2.0112338530414836e-06,
+              3.2526065174565133e-15,
+              3.307797719334836e-07,
+              1.0408340855860843e-13
+            ],
+            "best_lambda": 1.0537359871257093,
+            "best_original_merit": 1.0938799486627313,
+            "found": false,
+            "function_calls": 2618,
+            "original_bound_MPa": 1.8386239326355856e-06,
+            "phases": [
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1477,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 4.6875000000000004e-06,
+            "seconds": 4.2723440999980085,
+            "step": 7,
+            "target": 0.013345935282180133
+          },
+          {
+            "best_errors_MPa": [
+              1.945098084854819e-06,
+              1.6263032587282567e-15,
+              3.2977071427955234e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0537270993259973,
+            "best_original_merit": 1.0579161920760223,
+            "found": false,
+            "function_calls": 1834,
+            "original_bound_MPa": 1.8386126419313217e-06,
+            "phases": [
+              {
+                "function_calls": 469,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1365,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 2.3437500000000002e-06,
+            "seconds": 3.0515248000156134,
+            "step": 8,
+            "target": 0.013343591532180133
+          },
+          {
+            "best_errors_MPa": [
+              1.911421631840035e-06,
+              1.6263032587282567e-15,
+              3.2799053566657596e-07,
+              0.0
+            ],
+            "best_lambda": 1.053722656598614,
+            "best_original_merit": 1.0396031527389327,
+            "found": false,
+            "function_calls": 2506,
+            "original_bound_MPa": 1.8386069980686518e-06,
+            "phases": [
+              {
+                "function_calls": 1029,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1477,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 1.1718750000000001e-06,
+            "seconds": 4.086191300011706,
+            "step": 9,
+            "target": 0.013342419657180134
+          },
+          {
+            "best_errors_MPa": [
+              1.9094967898023365e-06,
+              9.147955830346444e-16,
+              3.3229151892240535e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0537204333497179,
+            "best_original_merit": 1.0385578457137992,
+            "found": false,
+            "function_calls": 2730,
+            "original_bound_MPa": 1.8386041737424289e-06,
+            "phases": [
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1589,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "requested_increment": 5.859375000000001e-07,
+            "seconds": 4.405997399997432,
+            "step": 10,
+            "target": 0.013341833719680134
+          }
+        ],
+        "elapsed_seconds": 40.51610929996241,
+        "equilibrated_material_upper": null,
+        "four_gauges_and_original_control_enforced_exactly": true,
+        "initial_VBA_forward_root_committed": true,
+        "initial_history_states": 80,
+        "last_control_coordinate": 0.013341247782180134,
+        "last_lambda": 1.0537182059737544,
+        "maximum_lambda_in_retained_path": 1.0862371835083255,
+        "native_ASD_with_independent_section_assembly": true,
+        "original_materials_and_equilibrium_criteria_unchanged": true,
+        "physical_capacity_not_claimed_without_full_path_and_upper_verification": true,
+        "status": "NumericalStall",
+        "total_function_calls": 24369,
+        "whole_goal_completed": false
+      },
+      "verification": {
+        "all60_equations_six_forces_and_current_control_checked": true,
+        "all_additional_fields_replayed_in_fresh_native_materials": true,
+        "all_material_limits_checked": true,
+        "new_fields": 2,
+        "physical_material_upper_not_found": true,
+        "records": [
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8164947638612308e-06,
+              4.666067337198709e-12,
+              3.8271465835278616e-08,
+              5.506012312750386e-11
+            ],
+            "history_index": 81,
+            "lambda_value": 1.053670769344105,
+            "original_bound_MPa": 1.8385410825817244e-06,
+            "original_steel_projection_coordinate": 0.013328747782180133,
+            "steel_utilization": 0.5331499113737426
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8283267293447935e-06,
+              4.0657581468206416e-16,
+              3.091710719524582e-07,
+              0.0
+            ],
+            "history_index": 82,
+            "lambda_value": 1.0537182059737544,
+            "original_bound_MPa": 1.8386013441733452e-06,
+            "original_steel_projection_coordinate": 0.013341247782180134,
+            "steel_utilization": 0.5336499134905611
+          }
+        ],
+        "retained_history80_byteexact": true,
+        "whole_goal_completed": false
+      }
+    },
+    "Native1200ASDMxSpatialDirection_20261127": {
+      "summary": {
+        "OpenSees_solid_elements": false,
+        "accepted_additional_states": 20,
+        "all_original_equilibrium_gates_still_checked": true,
+        "attempts": [
+          {
+            "best_errors_MPa": [
+              1.6523281738679221e-06,
+              1.2197274440461925e-15,
+              3.642929910087343e-07,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.0536958918814758,
+            "best_original_merit": 0.8987014256944732,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1475,
+            "original_bound_MPa": 1.838572997245534e-06,
+            "phases": [
+              {
+                "function_calls": 1253,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 222,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 4.980688556315946e-06,
+            "requested_increment_factor": 1.0,
+            "seconds": 2.413808799989056,
+            "steel_utilization": 0.5334138257697204,
+            "step": 1,
+            "target": 0.007032744498750899
+          },
+          {
+            "best_errors_MPa": [
+              1.8421383589032848e-06,
+              1.6263032587282567e-15,
+              3.813174116743444e-07,
+              0.0
+            ],
+            "best_lambda": 1.0537333776533546,
+            "best_original_merit": 1.0019132501849004,
+            "found": false,
+            "function_calls": 3066,
+            "original_bound_MPa": 1.8386206176665724e-06,
+            "phases": [
+              {
+                "function_calls": 1253,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1813,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 5.07450238791102e-06,
+            "requested_increment_factor": 1.5,
+            "seconds": 4.97757599997567,
+            "step": 2,
+            "target": 0.007008847504740192
+          },
+          {
+            "best_errors_MPa": [
+              1.5948311358388503e-06,
+              1.2197274440461925e-15,
+              6.989866476451445e-07,
+              0.0
+            ],
+            "best_lambda": 1.0537153244235753,
+            "best_original_merit": 0.8674171354030389,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 916,
+            "original_bound_MPa": 1.8385976835675767e-06,
+            "phases": [
+              {
+                "function_calls": 581,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 335,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 5.07450238791102e-06,
+            "requested_increment_factor": 0.75,
+            "seconds": 1.4451397000229917,
+            "steel_utilization": 0.5336187256376879,
+            "step": 3,
+            "target": 0.007005041627949259
+          },
+          {
+            "best_errors_MPa": [
+              1.7855683096568076e-06,
+              1.6263032587282567e-15,
+              1.1613525216186348e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537371381841383,
+            "best_original_merit": 0.9711430694993232,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 199,
+            "original_bound_MPa": 1.8386253948940446e-06,
+            "phases": [
+              {
+                "function_calls": 199,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 3.860916187025167e-06,
+            "requested_increment_factor": 1.125,
+            "seconds": 0.3197201000293717,
+            "steel_utilization": 0.533848738387727,
+            "step": 4,
+            "target": 0.007077054626478594
+          },
+          {
+            "best_errors_MPa": [
+              1.8230117929024092e-06,
+              8.131516293641283e-16,
+              1.1616825848856638e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.053773509566049,
+            "best_original_merit": 0.9914830866265442,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 310,
+            "original_bound_MPa": 1.838671599638766e-06,
+            "phases": [
+              {
+                "function_calls": 310,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 4.344512335132878e-06,
+            "requested_increment_factor": 1.6875,
+            "seconds": 0.48323559999698773,
+            "steel_utilization": 0.5342323706774705,
+            "step": 5,
+            "target": 0.0070668128641550865
+          },
+          {
+            "best_errors_MPa": [
+              1.9981389743727166e-06,
+              1.6263032587282567e-15,
+              1.1519004582078203e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.053844335776428,
+            "best_original_merit": 1.0866764904023967,
+            "found": false,
+            "function_calls": 2170,
+            "original_bound_MPa": 1.838761574415588e-06,
+            "phases": [
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1029,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 7.3537593563927575e-06,
+            "requested_increment_factor": 2.0,
+            "seconds": 3.4432463999837637,
+            "step": 6,
+            "target": 0.007008208555007159
+          },
+          {
+            "best_errors_MPa": [
+              1.92175331753062e-06,
+              8.131516293641283e-16,
+              1.1672876896288175e-06,
+              0.0
+            ],
+            "best_lambda": 1.0538090259597246,
+            "best_original_merit": 1.0451600828263214,
+            "found": false,
+            "function_calls": 2618,
+            "original_bound_MPa": 1.838716718240727e-06,
+            "phases": [
+              {
+                "function_calls": 805,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1813,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 7.3537593563927575e-06,
+            "requested_increment_factor": 1.0,
+            "seconds": 4.190964900015388,
+            "step": 7,
+            "target": 0.0070008547956507666
+          },
+          {
+            "best_errors_MPa": [
+              1.8598719493861915e-06,
+              4.0657581468206416e-16,
+              1.167285207120586e-06,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.053791183011548,
+            "best_original_merit": 1.0115179021199643,
+            "found": false,
+            "function_calls": 1722,
+            "original_bound_MPa": 1.8386940512750451e-06,
+            "phases": [
+              {
+                "function_calls": 581,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1141,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 7.3537593563927575e-06,
+            "requested_increment_factor": 0.5,
+            "seconds": 2.777840599999763,
+            "step": 8,
+            "target": 0.006997177915972571
+          },
+          {
+            "best_errors_MPa": [
+              1.8180758760116164e-06,
+              8.131516293641283e-16,
+              1.1616437427195105e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537822308449043,
+            "best_original_merit": 0.9887926269020888,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 428,
+            "original_bound_MPa": 1.8386826788016128e-06,
+            "phases": [
+              {
+                "function_calls": 428,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 7.3537593563927575e-06,
+            "requested_increment_factor": 0.25,
+            "seconds": 0.6797612000373192,
+            "steel_utilization": 0.5343244415685364,
+            "step": 9,
+            "target": 0.006995339476133472
+          },
+          {
+            "best_errors_MPa": [
+              1.8130252353013216e-06,
+              1.2197274440461925e-15,
+              1.168096319500668e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537855272500691,
+            "best_original_merit": 0.986043501158453,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 312,
+            "original_bound_MPa": 1.8386868664225151e-06,
+            "phases": [
+              {
+                "function_calls": 312,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 1.8860345128474326e-06,
+            "requested_increment_factor": 0.375,
+            "seconds": 0.495319300040137,
+            "steel_utilization": 0.5343592116202466,
+            "step": 10,
+            "target": 0.0065773448794598215
+          },
+          {
+            "best_errors_MPa": [
+              1.826788986234636e-06,
+              4.0657581468206416e-16,
+              1.1716143407102215e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537873814779743,
+            "best_original_merit": 0.9935278699725254,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1,
+            "original_bound_MPa": 1.8386892219592725e-06,
+            "phases": [
+              {
+                "function_calls": 1,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 7.074028546291522e-07,
+            "requested_increment_factor": 0.5625,
+            "seconds": 0.0017723999917507172,
+            "steel_utilization": 0.5343787697750985,
+            "step": 11,
+            "target": 0.006622773182086765
+          },
+          {
+            "best_errors_MPa": [
+              1.832677504815043e-06,
+              4.0657581468206416e-16,
+              5.993535701341851e-07,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537889459827694,
+            "best_original_merit": 0.9967293558605801,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 13,
+            "original_bound_MPa": 1.838691209443412e-06,
+            "phases": [
+              {
+                "function_calls": 13,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 3.9791410572851817e-07,
+            "requested_increment_factor": 0.84375,
+            "seconds": 0.020808000001125038,
+            "steel_utilization": 0.5343952699596994,
+            "step": 12,
+            "target": 0.006623108922111713
+          },
+          {
+            "best_errors_MPa": [
+              1.8259582627785194e-06,
+              4.0657581468206416e-16,
+              1.172165932075587e-06,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.053790910766198,
+            "best_original_merit": 0.9930736464646754,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 427,
+            "original_bound_MPa": 1.838693705425472e-06,
+            "phases": [
+              {
+                "function_calls": 427,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 3.357401918424816e-07,
+            "requested_increment_factor": 1.265625,
+            "seconds": 0.7236233000294305,
+            "steel_utilization": 0.534416017883436,
+            "step": 13,
+            "target": 0.006623334775731654
+          },
+          {
+            "best_errors_MPa": [
+              1.8638038143826252e-06,
+              5.082197683525802e-16,
+              1.1227239678555641e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537947406019708,
+            "best_original_merit": 1.0136538114988094,
+            "found": false,
+            "function_calls": 2730,
+            "original_bound_MPa": 1.8386985706952226e-06,
+            "phases": [
+              {
+                "function_calls": 917,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1813,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 4.249937610262506e-07,
+            "requested_increment_factor": 1.8984375,
+            "seconds": 4.420300700003281,
+            "step": 14,
+            "target": 0.006575044317649776
+          },
+          {
+            "best_errors_MPa": [
+              1.8313857112189787e-06,
+              8.131516293641283e-16,
+              1.7788801907833367e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537927757754681,
+            "best_original_merit": 0.9960241588916087,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1,
+            "original_bound_MPa": 1.8386960746584434e-06,
+            "phases": [
+              {
+                "function_calls": 1,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 4.249937610262506e-07,
+            "requested_increment_factor": 0.94921875,
+            "seconds": 0.002053300035186112,
+            "steel_utilization": 0.5344357123232563,
+            "step": 15,
+            "target": 0.006574640905603177
+          },
+          {
+            "best_errors_MPa": [
+              1.86894267404402e-06,
+              8.131516293641283e-16,
+              1.1227150886406895e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537954750691372,
+            "best_original_merit": 1.016448131002249,
+            "found": false,
+            "function_calls": 1834,
+            "original_bound_MPa": 1.8386995037328515e-06,
+            "phases": [
+              {
+                "function_calls": 581,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1253,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 4.0341204660141864e-07,
+            "requested_increment_factor": 1.423828125,
+            "seconds": 2.9547247999580577,
+            "step": 16,
+            "target": 0.0065752152950387084
+          },
+          {
+            "best_errors_MPa": [
+              1.8406653198840215e-06,
+              4.0657581468206416e-16,
+              1.5605262899771341e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537941035017941,
+            "best_original_merit": 1.001070082629494,
+            "found": false,
+            "function_calls": 1610,
+            "original_bound_MPa": 1.8386977613487126e-06,
+            "phases": [
+              {
+                "function_calls": 805,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 805,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 4.0341204660141864e-07,
+            "requested_increment_factor": 0.7119140625,
+            "seconds": 2.6177669999888167,
+            "step": 17,
+            "target": 0.00657492810032975
+          },
+          {
+            "best_errors_MPa": [
+              1.830100614762317e-06,
+              1.2197274440461925e-15,
+              1.344604359231502e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537934396386313,
+            "best_original_merit": 0.9953247850925888,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 7,
+            "original_bound_MPa": 1.8386969180035782e-06,
+            "phases": [
+              {
+                "function_calls": 7,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 4.0341204660141864e-07,
+            "requested_increment_factor": 0.35595703125,
+            "seconds": 0.010620700020808727,
+            "steel_utilization": 0.5344427207899378,
+            "step": 18,
+            "target": 0.006574784502975272
+          },
+          {
+            "best_errors_MPa": [
+              1.8294253321985145e-06,
+              1.2197274440461925e-15,
+              1.1127219423360664e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537937940987723,
+            "best_original_merit": 0.994957279943461,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1,
+            "original_bound_MPa": 1.838697368295524e-06,
+            "phases": [
+              {
+                "function_calls": 1,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 1.435977431969846e-07,
+            "requested_increment_factor": 0.533935546875,
+            "seconds": 0.0016876999870873988,
+            "steel_utilization": 0.5344464628594281,
+            "step": 19,
+            "target": 0.006574110866666088
+          },
+          {
+            "best_errors_MPa": [
+              1.8295211146321601e-06,
+              4.0657581468206416e-16,
+              9.270029833957481e-07,
+              0.0
+            ],
+            "best_lambda": 1.053794077987076,
+            "best_original_merit": 0.9950091773328131,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1,
+            "original_bound_MPa": 1.838697728935838e-06,
+            "phases": [
+              {
+                "function_calls": 1,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 7.667193954291116e-08,
+            "requested_increment_factor": 0.8009033203125,
+            "seconds": 0.0018320000381208956,
+            "steel_utilization": 0.5344494598953077,
+            "step": 20,
+            "target": 0.006574172273432434
+          },
+          {
+            "best_errors_MPa": [
+              1.8308146958881017e-06,
+              2.032879073410321e-15,
+              7.038811375726561e-07,
+              0.0
+            ],
+            "best_lambda": 1.0537944190377035,
+            "best_original_merit": 0.9957124739302659,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 1,
+            "original_bound_MPa": 1.838698162192876e-06,
+            "phases": [
+              {
+                "function_calls": 1,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 6.140681095477562e-08,
+            "requested_increment_factor": 1.20135498046875,
+            "seconds": 0.001713800011202693,
+            "steel_utilization": 0.5344530603992884,
+            "step": 21,
+            "target": 0.006574246044815858
+          },
+          {
+            "best_errors_MPa": [
+              1.8186429099428942e-06,
+              4.0657581468206416e-16,
+              7.702988122656456e-07,
+              0.0
+            ],
+            "best_lambda": 1.0537950336220085,
+            "best_original_merit": 0.989092269253603,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 107,
+            "original_bound_MPa": 1.838698942936126e-06,
+            "phases": [
+              {
+                "function_calls": 107,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 7.37713781776031e-08,
+            "requested_increment_factor": 1.802032470703125,
+            "seconds": 0.17173529998399317,
+            "steel_utilization": 0.5344595486243727,
+            "step": 22,
+            "target": 0.0065743789833418356
+          },
+          {
+            "best_errors_MPa": [
+              1.8685882806322549e-06,
+              2.439454888092385e-15,
+              1.0681176034911586e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537962627906186,
+            "best_original_merit": 1.0162548365749287,
+            "found": false,
+            "function_calls": 1834,
+            "original_bound_MPa": 1.8387005044226262e-06,
+            "phases": [
+              {
+                "function_calls": 805,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1029,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 1.329384188842294e-07,
+            "requested_increment_factor": 2.0,
+            "seconds": 2.927415700047277,
+            "step": 23,
+            "target": 0.006574644860181526
+          },
+          {
+            "best_errors_MPa": [
+              1.8363625009897474e-06,
+              2.846030702774449e-15,
+              1.2780740555541593e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537956482063136,
+            "best_original_merit": 0.9987288720069247,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 2,
+            "original_bound_MPa": 1.8386997236793761e-06,
+            "phases": [
+              {
+                "function_calls": 2,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 1.329384188842294e-07,
+            "requested_increment_factor": 1.0,
+            "seconds": 0.003180300001986325,
+            "steel_utilization": 0.5344660394174183,
+            "step": 24,
+            "target": 0.006574511921762642
+          },
+          {
+            "best_errors_MPa": [
+              1.874622643921068e-06,
+              2.846030702774449e-15,
+              1.1229452403495094e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.0537966180731342,
+            "best_original_merit": 1.0195364493879597,
+            "found": false,
+            "function_calls": 2282,
+            "original_bound_MPa": 1.8387009557592833e-06,
+            "phases": [
+              {
+                "function_calls": 917,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1365,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 1.329387605552977e-07,
+            "requested_increment_factor": 1.5,
+            "seconds": 3.652702799998224,
+            "step": 25,
+            "target": 0.006574867678874187
+          },
+          {
+            "best_errors_MPa": [
+              1.8546493788658906e-06,
+              2.0328790734103208e-16,
+              1.6157621340276547e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.053796115859182,
+            "best_original_merit": 1.0086740949272468,
+            "found": false,
+            "function_calls": 2506,
+            "original_bound_MPa": 1.8387003177668224e-06,
+            "phases": [
+              {
+                "function_calls": 693,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1813,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 1.329387605552977e-07,
+            "requested_increment_factor": 0.75,
+            "seconds": 4.0281336000189185,
+            "step": 26,
+            "target": 0.00657476797480377
+          },
+          {
+            "best_errors_MPa": [
+              1.8428261733958822e-06,
+              4.0657581468206416e-16,
+              1.468486193956428e-06,
+              0.0
+            ],
+            "best_lambda": 1.053795878675428,
+            "best_original_merit": 1.0022440620551771,
+            "found": false,
+            "function_calls": 1834,
+            "original_bound_MPa": 1.8387000164580948e-06,
+            "phases": [
+              {
+                "function_calls": 581,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.0001
+              },
+              {
+                "function_calls": 1253,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "q_difference_step": 0.001
+              }
+            ],
+            "reference_tensor_RMS": 1.329387605552977e-07,
+            "requested_increment_factor": 0.375,
+            "seconds": 2.960164199990686,
+            "step": 27,
+            "target": 0.006574718122768562
+          },
+          {
+            "best_errors_MPa": [
+              1.8371536164319824e-06,
+              1.2197274440461925e-15,
+              1.3732741499154342e-06,
+              0.0
+            ],
+            "best_lambda": 1.0537957634408708,
+            "best_original_merit": 0.9991590505541857,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 110,
+            "original_bound_MPa": 1.8386998700687355e-06,
+            "phases": [
+              {
+                "function_calls": 110,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 1.329387605552977e-07,
+            "requested_increment_factor": 0.1875,
+            "seconds": 0.1720612000208348,
+            "steel_utilization": 0.5344672564411144,
+            "step": 28,
+            "target": 0.006574693196750958
+          },
+          {
+            "best_errors_MPa": [
+              1.8380474343997264e-06,
+              1.6263032587282567e-15,
+              1.4771363608527764e-06,
+              2.6020852139652106e-14
+            ],
+            "best_lambda": 1.05379579585059,
+            "best_original_merit": 0.9996451422893822,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 4,
+            "original_bound_MPa": 1.8386999112407425e-06,
+            "phases": [
+              {
+                "function_calls": 4,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 2.492601760427358e-08,
+            "requested_increment_factor": 0.28125,
+            "seconds": 0.0066436000051908195,
+            "steel_utilization": 0.5344676104036157,
+            "step": 29,
+            "target": 0.006574700207219238
+          },
+          {
+            "best_errors_MPa": [
+              1.83568395100458e-06,
+              1.6263032587282567e-15,
+              1.7436258549462543e-06,
+              5.204170427930421e-14
+            ],
+            "best_lambda": 1.05379580952344,
+            "best_original_merit": 0.9983597227809311,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 2,
+            "original_bound_MPa": 1.838699928610183e-06,
+            "phases": [
+              {
+                "function_calls": 2,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 7.0163535777577585e-09,
+            "requested_increment_factor": 0.421875,
+            "seconds": 0.0033431999618187547,
+            "steel_utilization": 0.5344677624508352,
+            "step": 30,
+            "target": 0.006700790623389634
+          },
+          {
+            "best_errors_MPa": [
+              1.8386253526263768e-06,
+              1.6263032587282567e-15,
+              1.7160079039759572e-06,
+              7.806255641895632e-14
+            ],
+            "best_lambda": 1.0537958181757907,
+            "best_original_merit": 0.9999594349388939,
+            "compression_utilization": 0.08896427525141322,
+            "found": true,
+            "function_calls": 3,
+            "original_bound_MPa": 1.8386999396017824e-06,
+            "phases": [
+              {
+                "function_calls": 3,
+                "message": "Original equilibrium gates satisfied",
+                "q_difference_step": 0.0001
+              }
+            ],
+            "positive_spatial_advance": true,
+            "reference_tensor_RMS": 2.975326599807077e-09,
+            "requested_increment_factor": 0.6328125,
+            "seconds": 0.004753799992613494,
+            "steel_utilization": 0.5344678583309753,
+            "step": 31,
+            "target": 0.006675905778052627
+          }
+        ],
+        "elapsed_seconds": 123.3141956999898,
+        "equilibrated_material_upper": null,
+        "four_gauges_and_current_linear_control_enforced_exactly": true,
+        "initial_VBA_forward_root_committed": true,
+        "initial_history_states": 80,
+        "last_control_coordinate": 0.0066759057780526295,
+        "last_lambda": 1.0537958181757907,
+        "maximum_lambda_in_retained_path": 1.0862371835083255,
+        "native_ASD_with_independent_section_assembly": true,
+        "original_materials_and_equilibrium_criteria_unchanged": true,
+        "original_steel_projection_final_coordinate": 0.013361696455794079,
+        "physical_capacity_not_claimed_without_full_path_and_upper_verification": true,
+        "spatial_tensor_secant_control": true,
+        "status": "GlobalBudget",
+        "total_function_calls": 28526,
+        "whole_goal_completed": false
+      },
+      "verification": {
+        "all60_equations_six_forces_and_current_control_checked": true,
+        "all_additional_fields_replayed_in_fresh_native_materials": true,
+        "all_material_limits_checked": true,
+        "new_fields": 21,
+        "physical_material_upper_not_found": true,
+        "records": [
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8164947638612308e-06,
+              4.666067337198709e-12,
+              3.8271465835278616e-08,
+              5.506012312750386e-11
+            ],
+            "history_index": 81,
+            "lambda_value": 1.053670769344105,
+            "original_bound_MPa": 1.8385410825817244e-06,
+            "original_steel_projection_coordinate": 0.013328747782180133,
+            "steel_utilization": 0.5331499113737426
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.6523281738679221e-06,
+              1.2197274440461925e-15,
+              3.642929910087343e-07,
+              5.204170427930421e-14
+            ],
+            "history_index": 82,
+            "lambda_value": 1.0536958918814758,
+            "original_bound_MPa": 1.838572997245534e-06,
+            "original_steel_projection_coordinate": 0.013335345640164205,
+            "steel_utilization": 0.5334138257697204
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.5948311358388503e-06,
+              1.2197274440461925e-15,
+              6.989866476451445e-07,
+              0.0
+            ],
+            "history_index": 83,
+            "lambda_value": 1.0537153244235753,
+            "original_bound_MPa": 1.8385976835675767e-06,
+            "original_steel_projection_coordinate": 0.01334046813864024,
+            "steel_utilization": 0.5336187256376879
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.7855683096568076e-06,
+              1.6263032587282567e-15,
+              1.1613525216186348e-06,
+              0.0
+            ],
+            "history_index": 84,
+            "lambda_value": 1.0537371381841383,
+            "original_bound_MPa": 1.8386253948940446e-06,
+            "original_steel_projection_coordinate": 0.013346218459524361,
+            "steel_utilization": 0.533848738387727
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8230117929024092e-06,
+              8.131516293641283e-16,
+              1.1616825848856638e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 85,
+            "lambda_value": 1.053773509566049,
+            "original_bound_MPa": 1.838671599638766e-06,
+            "original_steel_projection_coordinate": 0.01335580926693676,
+            "steel_utilization": 0.5342323706774705
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8180758760116164e-06,
+              8.131516293641283e-16,
+              1.1616437427195105e-06,
+              0.0
+            ],
+            "history_index": 86,
+            "lambda_value": 1.0537822308449043,
+            "original_bound_MPa": 1.8386826788016128e-06,
+            "original_steel_projection_coordinate": 0.01335811103921341,
+            "steel_utilization": 0.5343244415685364
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8130252353013216e-06,
+              1.2197274440461925e-15,
+              1.168096319500668e-06,
+              0.0
+            ],
+            "history_index": 87,
+            "lambda_value": 1.0537855272500691,
+            "original_bound_MPa": 1.8386868664225151e-06,
+            "original_steel_projection_coordinate": 0.013358980289920263,
+            "steel_utilization": 0.5343592116202466
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.826788986234636e-06,
+              4.0657581468206416e-16,
+              1.1716143407102215e-06,
+              0.0
+            ],
+            "history_index": 88,
+            "lambda_value": 1.0537873814779743,
+            "original_bound_MPa": 1.8386892219592725e-06,
+            "original_steel_projection_coordinate": 0.013359469243442864,
+            "steel_utilization": 0.5343787697750985
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.832677504815043e-06,
+              4.0657581468206416e-16,
+              5.993535701341851e-07,
+              2.6020852139652106e-14
+            ],
+            "history_index": 89,
+            "lambda_value": 1.0537889459827694,
+            "original_bound_MPa": 1.838691209443412e-06,
+            "original_steel_projection_coordinate": 0.013359881747763785,
+            "steel_utilization": 0.5343952699596994
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8259582627785194e-06,
+              4.0657581468206416e-16,
+              1.172165932075587e-06,
+              5.204170427930421e-14
+            ],
+            "history_index": 90,
+            "lambda_value": 1.053790910766198,
+            "original_bound_MPa": 1.838693705425472e-06,
+            "original_steel_projection_coordinate": 0.013360400445499252,
+            "steel_utilization": 0.534416017883436
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8313857112189787e-06,
+              8.131516293641283e-16,
+              1.7788801907833367e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 91,
+            "lambda_value": 1.0537927757754681,
+            "original_bound_MPa": 1.8386960746584434e-06,
+            "original_steel_projection_coordinate": 0.013360892803115343,
+            "steel_utilization": 0.5344357123232563
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.830100614762317e-06,
+              1.2197274440461925e-15,
+              1.344604359231502e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 92,
+            "lambda_value": 1.0537934396386313,
+            "original_bound_MPa": 1.8386969180035782e-06,
+            "original_steel_projection_coordinate": 0.01336106801354636,
+            "steel_utilization": 0.5344427207899378
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8294253321985145e-06,
+              1.2197274440461925e-15,
+              1.1127219423360664e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 93,
+            "lambda_value": 1.0537937940987723,
+            "original_bound_MPa": 1.838697368295524e-06,
+            "original_steel_projection_coordinate": 0.013361161564623662,
+            "steel_utilization": 0.5344464628594281
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8295211146321601e-06,
+              4.0657581468206416e-16,
+              9.270029833957481e-07,
+              0.0
+            ],
+            "history_index": 94,
+            "lambda_value": 1.053794077987076,
+            "original_bound_MPa": 1.838697728935838e-06,
+            "original_steel_projection_coordinate": 0.013361236489992094,
+            "steel_utilization": 0.5344494598953077
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8308146958881017e-06,
+              2.032879073410321e-15,
+              7.038811375726561e-07,
+              0.0
+            ],
+            "history_index": 95,
+            "lambda_value": 1.0537944190377035,
+            "original_bound_MPa": 1.838698162192876e-06,
+            "original_steel_projection_coordinate": 0.013361326501956624,
+            "steel_utilization": 0.5344530603992884
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8186429099428942e-06,
+              4.0657581468206416e-16,
+              7.702988122656456e-07,
+              0.0
+            ],
+            "history_index": 96,
+            "lambda_value": 1.0537950336220085,
+            "original_bound_MPa": 1.838698942936126e-06,
+            "original_steel_projection_coordinate": 0.013361488706439462,
+            "steel_utilization": 0.5344595486243727
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8363625009897474e-06,
+              2.846030702774449e-15,
+              1.2780740555541593e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 97,
+            "lambda_value": 1.0537956482063136,
+            "original_bound_MPa": 1.8386997236793761e-06,
+            "original_steel_projection_coordinate": 0.013361650975121672,
+            "steel_utilization": 0.5344660394174183
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8371536164319824e-06,
+              1.2197274440461925e-15,
+              1.3732741499154342e-06,
+              0.0
+            ],
+            "history_index": 98,
+            "lambda_value": 1.0537957634408708,
+            "original_bound_MPa": 1.8386998700687355e-06,
+            "original_steel_projection_coordinate": 0.013361681400499585,
+            "steel_utilization": 0.5344672564411144
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8380474343997264e-06,
+              1.6263032587282567e-15,
+              1.4771363608527764e-06,
+              2.6020852139652106e-14
+            ],
+            "history_index": 99,
+            "lambda_value": 1.05379579585059,
+            "original_bound_MPa": 1.8386999112407425e-06,
+            "original_steel_projection_coordinate": 0.013361690257614198,
+            "steel_utilization": 0.5344676104036157
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.83568395100458e-06,
+              1.6263032587282567e-15,
+              1.7436258549462543e-06,
+              5.204170427930421e-14
+            ],
+            "history_index": 100,
+            "lambda_value": 1.05379580952344,
+            "original_bound_MPa": 1.838699928610183e-06,
+            "original_steel_projection_coordinate": 0.0133616940587922,
+            "steel_utilization": 0.5344677624508352
+          },
+          {
+            "compression_utilization": 0.08896427525141322,
+            "errors_MPa": [
+              1.8386253526263768e-06,
+              1.6263032587282567e-15,
+              1.7160079039759572e-06,
+              7.806255641895632e-14
+            ],
+            "history_index": 101,
+            "lambda_value": 1.0537958181757907,
+            "original_bound_MPa": 1.8386999396017824e-06,
+            "original_steel_projection_coordinate": 0.013361696455794079,
+            "steel_utilization": 0.5344678583309753
+          }
+        ],
+        "retained_history80_byteexact": true,
+        "whole_goal_completed": false
+      }
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
