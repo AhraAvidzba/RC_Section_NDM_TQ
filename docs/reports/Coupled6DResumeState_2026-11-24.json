@@ -238,7 +238,8 @@
       "VerifiedNewOwner": true
     },
     "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1212ASDActualPositiveCapture_20261128\\Case07",
-    "stage": "COLD_RUNNING"
+    "stage": "TERMINAL",
+    "terminal": true
   },
   "ASD_bounded_principal_1165": {
     "confirmed_lower_bound_lambda": 6.6627811143819375,
@@ -3194,23 +3195,7 @@
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
   "active_exec_session": null,
-  "active_jobs": [
-    {
-      "exec_session": 19833,
-      "expected_history_states": 137,
-      "first_and_second_attempt_math_unchanged": true,
-      "ownership": {
-        "BeforeWorkbookOpen": true,
-        "PID": 42488,
-        "ProcessName": "EXCEL",
-        "SourceSHA256": "7252271B58E4DEF07C25CB3BAD0B90D95FDAAD96A0E730FD3FF612E18145A804",
-        "StartTicksUTC": "639314171602605628",
-        "VerifiedNewOwner": true
-      },
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1212ASDActualPositiveCapture_20261128\\Case07",
-      "stage": "COLD_RUNNING"
-    }
-  ],
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -5186,6 +5171,213 @@
         "transverse_maximum_abs_stress_MPa": 17.8253505397629
       }
     ]
+  },
+  "actual_positive_recovery_20261128": {
+    "VBA_acceptance": {
+      "VBA_secant_root_found_without_external_candidate": true,
+      "cases": [
+        {
+          "all_equations_passed_original_bounds": true,
+          "case": 2,
+          "compression_utilization": 0.08897067344273359,
+          "forward": true,
+          "lambda_value": 1.0527191629775228,
+          "material_admissible": true,
+          "signed_spatial_advance": 9.769521209501473e-08,
+          "steel_utilization": 0.5231303655665712
+        },
+        {
+          "all_equations_passed_original_bounds": true,
+          "case": 5,
+          "compression_utilization": 0.08897067344273359,
+          "forward": true,
+          "lambda_value": 1.052719162082508,
+          "material_admissible": true,
+          "signed_spatial_advance": 6.616846952840202e-08,
+          "steel_utilization": 0.5231303632828175
+        }
+      ],
+      "original_local_budget30": true,
+      "physical_capacity_confirmed": false,
+      "same137_state_history": true,
+      "whole_goal_completed": false
+    },
+    "capture": {
+      "captured_contexts": 73,
+      "contexts_matching_returned_history": 33,
+      "failure_capture_SHA256": "7E5E404419F2FA644045B7BB51236EE73D02762FE73A75B9A7C179332AD817C7",
+      "history137_bitexact_1202": true,
+      "history_SHA256": "45AE84CB102B61B2750F72AE15C185CE8789A49101E55CADA6DF72A843193DC4",
+      "independent_retry_enabled_as_normal": true,
+      "maximum_matched_prefix": 137,
+      "physical_capacity_confirmed": false,
+      "selected_context_ordinal": 73,
+      "selected_iteration": 4,
+      "selected_lambda": 1.0527181761173166,
+      "selected_norm_MPa": 0.00011027362694597348,
+      "selected_refined_tangent": true,
+      "selected_target": 0.008702515751194684,
+      "selected_tolerance_MPa": 1.8373309463549792e-06
+    },
+    "cold_results": [
+      {
+        "capacity_lambda": 1.0979794221153654,
+        "case": 2,
+        "has_physical_capacity": true,
+        "lower_lambda": 0.0,
+        "seconds": 262.36279296875,
+        "stage": "INDEPENDENTLY_VERIFIED",
+        "status": "OK"
+      },
+      {
+        "capacity_lambda": null,
+        "case": 7,
+        "has_physical_capacity": false,
+        "lower_lambda": 1.0862727979915605,
+        "seconds": 376.876953125,
+        "stage": "INDEPENDENTLY_VERIFIED",
+        "status": "NumFail"
+      }
+    ],
+    "full_acceptance_not_run": true,
+    "independent_root": {
+      "OpenSees_solid_element": false,
+      "accepted_history_unchanged": true,
+      "actual_native_OpenSees_material": true,
+      "any_admissible_forward_equilibrium_found": true,
+      "any_equilibrium_found": true,
+      "captured_context": {
+        "exact_target_and_history": true,
+        "lambda_value": 1.0527181761173166,
+        "native_errors_MPa": [
+          0.00011027362929758725,
+          2.642742795433417e-15,
+          2.0183586648297604e-05,
+          0.0
+        ],
+        "native_vs_recorded_residual_difference_MPa": 2.078159561482492e-11,
+        "original_VBA_bound_MPa": 1.8373309463549792e-06,
+        "original_VBA_norm_MPa": 0.00011027362694597348,
+        "prefix": 137,
+        "recorded_linear_correction_defect_MPa": 3.880166918757102e-16,
+        "scaled_condition_number": 3157462236.552976,
+        "scaled_rank": 61,
+        "target": 0.008702515751194684
+      },
+      "elapsed_seconds": 4.852045600011479,
+      "independent_roots": [
+        {
+          "actual_function_calls": 704,
+          "admissible_forward_equilibrium": false,
+          "attempts": [
+            {
+              "eps": 1e-12,
+              "function_calls": 568,
+              "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+              "solver_success": false
+            },
+            {
+              "eps": 1e-08,
+              "function_calls": 136,
+              "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+              "solver_success": false
+            }
+          ],
+          "compression_utilization": 0.08897067344273359,
+          "cosine_to_previous": -0.004031969494519968,
+          "epsilon0": 0.00637864763570515,
+          "equilibrium_found": false,
+          "errors_MPa": [
+            3.6493029181830825e-06,
+            1.9114425289150448e-06,
+            2.5364980377625424e-06,
+            1.298410857997201e-07
+          ],
+          "lambda_value": 1.0527188648465962,
+          "original_bound_MPa": 1.8373318212890312e-06,
+          "positive_spatial_advance": false,
+          "seconds": 1.4341890000505373,
+          "seed": "captured",
+          "signed_spatial_advance": -8.155977599457733e-08,
+          "spatial_increment_length": 2.022827209021023e-05,
+          "steel_utilization": 0.523130363683539
+        },
+        {
+          "actual_function_calls": 813,
+          "admissible_forward_equilibrium": false,
+          "attempts": [
+            {
+              "eps": 1e-12,
+              "function_calls": 282,
+              "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+              "solver_success": false
+            },
+            {
+              "eps": 1e-08,
+              "function_calls": 531,
+              "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+              "solver_success": false
+            }
+          ],
+          "compression_utilization": 0.08897067344273359,
+          "cosine_to_previous": 0.0964742746290388,
+          "epsilon0": 0.0063786476088176095,
+          "equilibrium_found": false,
+          "errors_MPa": [
+            2.641088962024388e-06,
+            1.343323288594893e-07,
+            7.997747673168006e-08,
+            2.318588029903701e-08
+          ],
+          "lambda_value": 1.052719136510526,
+          "original_bound_MPa": 1.8373321663999912e-06,
+          "positive_spatial_advance": true,
+          "seconds": 1.8138907000538893,
+          "seed": "accepted",
+          "signed_spatial_advance": 6.430728924517002e-08,
+          "spatial_increment_length": 6.665744779366653e-07,
+          "steel_utilization": 0.5231303684999474
+        },
+        {
+          "actual_function_calls": 474,
+          "admissible_forward_equilibrium": true,
+          "attempts": [
+            {
+              "eps": 1e-12,
+              "function_calls": 474,
+              "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+              "solver_success": false
+            }
+          ],
+          "compression_utilization": 0.08897067344273359,
+          "cosine_to_previous": 0.9387475283500678,
+          "epsilon0": 0.006378647610328545,
+          "equilibrium_found": true,
+          "errors_MPa": [
+            1.6098029373479952e-06,
+            5.693959281123043e-07,
+            1.4336674815890052e-07,
+            1.2886931105571264e-08
+          ],
+          "lambda_value": 1.0527191629775228,
+          "original_bound_MPa": 1.8373322000226023e-06,
+          "positive_spatial_advance": true,
+          "seconds": 1.6015221000416204,
+          "seed": "physical_secant",
+          "signed_spatial_advance": 9.769521209501473e-08,
+          "spatial_increment_length": 1.0406974095231201e-07,
+          "steel_utilization": 0.5231303655665712
+        }
+      ],
+      "independent_section_assembly": true,
+      "physical_capacity_confirmed": false,
+      "whole_goal_completed": false
+    },
+    "local_positive_root_not_capacity": true,
+    "only_existing_post_failure_linear_ASD_seed_selection_changed": true,
+    "private_candidates_not_promoted": true,
+    "public_book_and_dump_unchanged": true,
+    "whole_goal_completed": false
   },
   "adaptive_pre_event_evidence": "docs/reports/evidence/Coupled6DAdaptivePreEvent_2026-11-25",
   "all_started_stages_terminal": true,
@@ -45396,6 +45588,311 @@
     "source_base_reread_matches_saved_stress": true,
     "whole_goal_completed": false
   },
+  "linear_recovery_secant_1214": {
+    "all_original_inputs_byteexact1202": true,
+    "all_started_workers_terminal": true,
+    "cases": [
+      {
+        "accepted_states": 20,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 4.9297564338020345,
+        "case": 1,
+        "has_physical_capacity": true,
+        "independent_upper": null,
+        "inputs_byteexact1202": true,
+        "last_lambda": 4.9297564338020345,
+        "maximum_admissible_lambda": 4.9297564338020345,
+        "retained_history_byteexact1202": true,
+        "seconds": 9.6474609375,
+        "status": "OK"
+      },
+      {
+        "accepted_states": 179,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 1.0979794221153654,
+        "case": 2,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMx",
+          "compression_utilization": 0.08897067344273525,
+          "elapsed_seconds": 0.1424931999645196,
+          "fixed_history_states": 179,
+          "function_evaluations": 73,
+          "gauge_residual_MPa": 2.6020852139652106e-14,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 4.004886881991965e-05,
+          "lower_lambda": 1.09797942211537,
+          "original_bound_MPa": 1.8948798943164045e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 1.210052966425036e-14,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 1.7049994009236493e-14,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.000378664117723,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.09801947098419,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.0979794221153654,
+        "maximum_admissible_lambda": 1.0979794221153654,
+        "retained_history_byteexact1202": true,
+        "seconds": 262.36279296875,
+        "status": "OK"
+      },
+      {
+        "accepted_states": 65,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 0.6410207685695666,
+        "case": 3,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMy",
+          "compression_utilization": 0.14849108746342898,
+          "elapsed_seconds": 0.20083940000040457,
+          "fixed_history_states": 65,
+          "function_evaluations": 134,
+          "gauge_residual_MPa": 1.6263032587282567e-15,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0002983339790070261,
+          "lower_lambda": 0.641020768569567,
+          "original_bound_MPa": 1.3147060645329183e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 2.254836322427503e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 2.043845597654581e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.0020521965773048,
+          "tension_utilization": 0.0,
+          "upper_lambda": 0.641319102548574,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 0.6410207685695666,
+        "maximum_admissible_lambda": 0.6410207685695666,
+        "retained_history_byteexact1202": true,
+        "seconds": 31.2119140625,
+        "status": "FAIL"
+      },
+      {
+        "accepted_states": 54,
+        "all_states_independently_verified": true,
+        "capacity_lambda": null,
+        "case": 4,
+        "has_physical_capacity": false,
+        "independent_upper": null,
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.475069447398704,
+        "maximum_admissible_lambda": 4.463053508335248,
+        "retained_history_byteexact1202": true,
+        "seconds": 266.373046875,
+        "status": "NumFail"
+      },
+      {
+        "accepted_states": 23,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 5.323440511612377,
+        "case": 5,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_CombinedNMT",
+          "compression_utilization": 1.0001867202135495,
+          "elapsed_seconds": 0.20229240000480786,
+          "fixed_history_states": 23,
+          "function_evaluations": 138,
+          "gauge_residual_MPa": 4.0657581468206416e-16,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0004108434139098449,
+          "lower_lambda": 5.32344051161238,
+          "original_bound_MPa": 9.373085591710489e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 2,
+          "physical_residual_MPa": 3.552713678800501e-15,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 5.300354498393278e-15,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 0.19039324501339056,
+          "tension_utilization": 0.0,
+          "upper_lambda": 5.32385135502629,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 5.323440511612377,
+        "maximum_admissible_lambda": 5.323440511612377,
+        "retained_history_byteexact1202": true,
+        "seconds": 4.7080078125,
+        "status": "OK"
+      },
+      {
+        "accepted_states": 71,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 1.0917900491995562,
+        "case": 6,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_Tension",
+          "compression_utilization": 0.00011192745583151168,
+          "elapsed_seconds": 0.012257100024726242,
+          "fixed_history_states": 71,
+          "function_evaluations": 1,
+          "gauge_residual_MPa": 2.2768245622195593e-14,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.000265181714039997,
+          "lower_lambda": 1.09179004919956,
+          "original_bound_MPa": 2.3200920515226673e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 5.1131028057145405e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 2.5903961310784023e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "Independent ordinary secant seed meets every original equation before root iterations",
+          "solver_success": false,
+          "steel_utilization": 1.0003895088962662,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.0920552309136,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.0917900491995562,
+        "maximum_admissible_lambda": 1.0917900491995562,
+        "retained_history_byteexact1202": true,
+        "seconds": 28.455078125,
+        "status": "OK"
+      },
+      {
+        "accepted_states": 142,
+        "all_states_independently_verified": true,
+        "capacity_lambda": null,
+        "case": 7,
+        "has_physical_capacity": false,
+        "independent_upper": null,
+        "inputs_byteexact1202": true,
+        "last_lambda": 1.0527200499059144,
+        "maximum_admissible_lambda": 1.0862727979915605,
+        "retained_history_byteexact1202": false,
+        "seconds": 376.876953125,
+        "status": "NumFail"
+      },
+      {
+        "accepted_states": 65,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 0.641020768569567,
+        "case": 8,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMyNegative",
+          "compression_utilization": 0.14836491531789656,
+          "elapsed_seconds": 0.21229049999965355,
+          "fixed_history_states": 65,
+          "function_evaluations": 132,
+          "gauge_residual_MPa": 1.2197274440461925e-15,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.00014916698950395713,
+          "lower_lambda": 0.641020768569567,
+          "original_bound_MPa": 1.3145165687725498e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 2.0989344440395423e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 1.5352744361780015e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.000438824805634,
+          "tension_utilization": 0.0,
+          "upper_lambda": 0.641169935559071,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 0.641020768569567,
+        "maximum_admissible_lambda": 0.641020768569567,
+        "retained_history_byteexact1202": true,
+        "seconds": 27.380859375,
+        "status": "FAIL"
+      },
+      {
+        "accepted_states": 24,
+        "all_states_independently_verified": true,
+        "capacity_lambda": 5.3649341697613355,
+        "case": 10,
+        "has_physical_capacity": true,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_CombinedNM",
+          "compression_utilization": 1.0002447200201305,
+          "elapsed_seconds": 0.1702225999906659,
+          "fixed_history_states": 24,
+          "function_evaluations": 132,
+          "gauge_residual_MPa": 2.0328790734103208e-16,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0006037376018799279,
+          "lower_lambda": 5.36493416976134,
+          "original_bound_MPa": 9.442563178938706e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 2,
+          "physical_residual_MPa": 3.552713678800501e-15,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 8.329128497475151e-15,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 0.19073699577169292,
+          "tension_utilization": 0.0,
+          "upper_lambda": 5.36553790736322,
+          "upper_material_limit_exceeded": true
+        },
+        "inputs_byteexact1202": true,
+        "last_lambda": 5.3649341697613355,
+        "maximum_admissible_lambda": 5.3649341697613355,
+        "retained_history_byteexact1202": true,
+        "seconds": 4.1611328125,
+        "status": "OK"
+      }
+    ],
+    "force_criteria_materials_history_policy_and_budgets_unchanged": true,
+    "full_acceptance_not_run": true,
+    "local_positive_root_does_not_resolve_global_capacity": true,
+    "private_candidate_not_promoted": true,
+    "public_book_and_dump_unchanged": true,
+    "source_references": {
+      "AGENTS.md": "2909D50120ED181C0E945E959297997D94641A556F41A5E5F611382C69CB161A",
+      "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+      "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+    },
+    "whole_goal_completed": false
+  },
   "load_sequence_plan": "docs/Coupled6DLoadSequencePlan.md",
   "loading_secant_automatic_cold_evidence": "docs/reports/evidence/Coupled6DLoadingSecantAutomaticCold_2026-11-25",
   "loading_secant_local_summary": {
@@ -45459,7 +45956,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Read actual positive1212 capture only after closure; require all137 returned fields byteexact1202. Analyze last matching actual positive failure, solve that same target/history independently, then replay in VBA. Early hybrid local root1208/1210/1211 is not a global capacity improvement. Broad1209 is rejected. Preserve negative physical109.8kNm and N/My/NM/NMT regressions. Hpost1500 remains legacy causal fixture; working steel slope must use Config or <=1% boost. Full six-force/source/build/book/native UI/physics/performance scope remains active."
+    "All1212/1213/1214 workers terminal; do not poll old session ids. Actual positive137-prefix failure is numerically solvable; native and VBA ordinary physical secant roots pass all original equations/material/orientation gates.1214 late-only secant adds5 states but no maximum-lambda gain; no global progress claimed. Next investigate enabling ordinary secant prediction for original linear curvature/twist earlier in continuation (1202 guard excludes these despite linear CoordinateOf), without nonlinear material-coordinate changes or extra attempts. Need coldMx+- regression, then N/My/NM/NMT/T, no promotion before evidence. Preserve H1500 solely as legacy causal fixture; working steel must useConfig or<=1% boost. Full six-force/source/build/book/UI/physics/performance scope remains active."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -48852,7 +49349,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T23:03:01.832503+00:00",
+  "updated_local": "2026-11-27T23:23:33.320514+00:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "user_validation_priority_20261127": {

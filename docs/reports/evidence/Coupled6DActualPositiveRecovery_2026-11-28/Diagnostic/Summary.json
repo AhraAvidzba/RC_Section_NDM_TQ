@@ -1,0 +1,203 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1212ASDActualPositiveCapture_20261128": {
+      "Case07/Native/ActualPositiveCaptureSummary.json": {
+        "captured_contexts": 73,
+        "contexts_matching_returned_history": 33,
+        "failure_capture_SHA256": "7E5E404419F2FA644045B7BB51236EE73D02762FE73A75B9A7C179332AD817C7",
+        "history137_bitexact_1202": true,
+        "history_SHA256": "45AE84CB102B61B2750F72AE15C185CE8789A49101E55CADA6DF72A843193DC4",
+        "independent_retry_enabled_as_normal": true,
+        "maximum_matched_prefix": 137,
+        "physical_capacity_confirmed": false,
+        "selected_context_ordinal": 73,
+        "selected_iteration": 4,
+        "selected_lambda": 1.0527181761173166,
+        "selected_norm_MPa": 0.00011027362694597348,
+        "selected_refined_tangent": true,
+        "selected_target": 0.008702515751194684,
+        "selected_tolerance_MPa": 1.8373309463549792e-06
+      },
+      "Case07/Native/ActualPositiveRootSummary.json": {
+        "OpenSees_solid_element": false,
+        "accepted_history_unchanged": true,
+        "actual_native_OpenSees_material": true,
+        "any_admissible_forward_equilibrium_found": true,
+        "any_equilibrium_found": true,
+        "captured_context": {
+          "exact_target_and_history": true,
+          "lambda_value": 1.0527181761173166,
+          "native_errors_MPa": [
+            0.00011027362929758725,
+            2.642742795433417e-15,
+            2.0183586648297604e-05,
+            0.0
+          ],
+          "native_vs_recorded_residual_difference_MPa": 2.078159561482492e-11,
+          "original_VBA_bound_MPa": 1.8373309463549792e-06,
+          "original_VBA_norm_MPa": 0.00011027362694597348,
+          "prefix": 137,
+          "recorded_linear_correction_defect_MPa": 3.880166918757102e-16,
+          "scaled_condition_number": 3157462236.552976,
+          "scaled_rank": 61,
+          "target": 0.008702515751194684
+        },
+        "elapsed_seconds": 4.852045600011479,
+        "independent_roots": [
+          {
+            "actual_function_calls": 704,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 568,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 136,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08897067344273359,
+            "cosine_to_previous": -0.004031969494519968,
+            "epsilon0": 0.00637864763570515,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              3.6493029181830825e-06,
+              1.9114425289150448e-06,
+              2.5364980377625424e-06,
+              1.298410857997201e-07
+            ],
+            "lambda_value": 1.0527188648465962,
+            "original_bound_MPa": 1.8373318212890312e-06,
+            "positive_spatial_advance": false,
+            "seconds": 1.4341890000505373,
+            "seed": "captured",
+            "signed_spatial_advance": -8.155977599457733e-08,
+            "spatial_increment_length": 2.022827209021023e-05,
+            "steel_utilization": 0.523130363683539
+          },
+          {
+            "actual_function_calls": 813,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 282,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 531,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08897067344273359,
+            "cosine_to_previous": 0.0964742746290388,
+            "epsilon0": 0.0063786476088176095,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              2.641088962024388e-06,
+              1.343323288594893e-07,
+              7.997747673168006e-08,
+              2.318588029903701e-08
+            ],
+            "lambda_value": 1.052719136510526,
+            "original_bound_MPa": 1.8373321663999912e-06,
+            "positive_spatial_advance": true,
+            "seconds": 1.8138907000538893,
+            "seed": "accepted",
+            "signed_spatial_advance": 6.430728924517002e-08,
+            "spatial_increment_length": 6.665744779366653e-07,
+            "steel_utilization": 0.5231303684999474
+          },
+          {
+            "actual_function_calls": 474,
+            "admissible_forward_equilibrium": true,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 474,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08897067344273359,
+            "cosine_to_previous": 0.9387475283500678,
+            "epsilon0": 0.006378647610328545,
+            "equilibrium_found": true,
+            "errors_MPa": [
+              1.6098029373479952e-06,
+              5.693959281123043e-07,
+              1.4336674815890052e-07,
+              1.2886931105571264e-08
+            ],
+            "lambda_value": 1.0527191629775228,
+            "original_bound_MPa": 1.8373322000226023e-06,
+            "positive_spatial_advance": true,
+            "seconds": 1.6015221000416204,
+            "seed": "physical_secant",
+            "signed_spatial_advance": 9.769521209501473e-08,
+            "spatial_increment_length": 1.0406974095231201e-07,
+            "steel_utilization": 0.5231303655665712
+          }
+        ],
+        "independent_section_assembly": true,
+        "physical_capacity_confirmed": false,
+        "whole_goal_completed": false
+      },
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 137,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08897067344273359,
+        "final_lambda": 1.05271886491537,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          105271886.491537,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.2438781857745198,
+        "maximum_moment_error_Nmm": 45.36582075059414,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "7252271B58E4DEF07C25CB3BAD0B90D95FDAAD96A0E730FD3FF612E18145A804"
+    },
+    "Cold1213ASDActualPositiveFrozen_20261128": {
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "76F0B30C528BDDC7099C1B6332A8C19AB37F5AB792F51A995CE817D9467CA74D"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
