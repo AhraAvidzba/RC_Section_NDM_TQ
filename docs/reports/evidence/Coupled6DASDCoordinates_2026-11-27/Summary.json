@@ -1,0 +1,79 @@
+{
+  "Config_ASD_selection_pending": true,
+  "all_started_stages_terminal": true,
+  "concrete_criterion_pending": true,
+  "delivery": {
+    "Config_ASD_selection_pending": true,
+    "actual_components": 257,
+    "all121_user_parts_preserved": true,
+    "concrete_criterion_pending": true,
+    "full_acceptance_not_run": true,
+    "full_native_dump_updated": true,
+    "output": {
+      "RC_Section_NDM.xlsm": {
+        "after_sha256": "458801DDC43378DB7BCDD1AA8F93AF583D09B629459E271CD1187ECE2EEA5CD6",
+        "before_sha256": "3D4A4D0D8B587C877851A85D7C7AAEEBD6BF6CD7C6EC7AF148EDFCCC05DCB8D9",
+        "bytes": 14189610
+      },
+      "VBA_All_Code.txt": {
+        "after_sha256": "914FAA50962A5E568195C9F60D8B1ECD25B38EBA5982A31F6E802EFA4A924B88",
+        "before_sha256": "02493DCCB22D5F33DEB505A412770A0024D1B6DB24A210F222780EF3EFC95E99",
+        "bytes": 11539726
+      }
+    },
+    "whole_goal_completed": false,
+    "whole_user_run10s_not_met": true,
+    "working_core_and_output_synchronized": true
+  },
+  "evidence": "docs/reports/evidence/Coupled6DASDCoordinates_2026-11-27",
+  "full_acceptance_not_run": true,
+  "report": "docs/reports/Coupled6DASDCoordinates_2026-11-27.md",
+  "saved_output_verification": {
+    "actual_components": 257,
+    "actual_dump_sha256": "914FAA50962A5E568195C9F60D8B1ECD25B38EBA5982A31F6E802EFA4A924B88",
+    "all121_non_vba_payloads_bitexact": true,
+    "all255_other_existing_components_unchanged": true,
+    "all257_native_dump_components_verified": true,
+    "all_existing_material_executable_unchanged": true,
+    "external_material_control": {
+      "accepted_states": 182,
+      "actual_native_OpenSees": true,
+      "candidate_states": 198,
+      "cpp_source_sha256": "210EADE9C167DA38FB5A7894570C64BA0CA35D9D9307A9818FDE485435EBEA31",
+      "elapsed_seconds": 14.664691799989669,
+      "engine_version": "3.8.0",
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_only_not_global_equilibrium": true,
+      "maximum_coordinate_error": 1.1275702593849246e-17,
+      "maximum_native_closure_iterations": 21,
+      "maximum_stress_error_MPa": 3.694822225952521e-13,
+      "modes": 2,
+      "paths": 8,
+      "physical_failure_threshold_not_assigned": true
+    },
+    "native_directed_test": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 2429,
+      "timeout600": false
+    },
+    "no_UI_claim": true,
+    "no_full_acceptance": true,
+    "no_new_failure_threshold_or_capacity_claim": true,
+    "saved_and_compiled_package_outputs_bitexact": true,
+    "saved_candidate_sha256": "458801DDC43378DB7BCDD1AA8F93AF583D09B629459E271CD1187ECE2EEA5CD6",
+    "saved_reopened_native_compilation": true,
+    "working_sources": {
+      "src/Materials/CCoupledConcreteResponse.cls": "B03629090BFB993A57995D8BA96E6FC77EBA9D4B5D979012EDEF8A646D45190B",
+      "tests/modTestCoupledASDCoordinates.bas": "35B3E7BF53D4BA5118CE34E823BAA318AED62B2AC02A4BE15CCD872DCE23F3A4"
+    }
+  },
+  "whole_goal_completed": false,
+  "whole_user_run10s_not_met": true,
+  "working_core_and_output_synchronized": true,
+  "working_sources": {
+    "src/Materials/CCoupledConcreteResponse.cls": "B03629090BFB993A57995D8BA96E6FC77EBA9D4B5D979012EDEF8A646D45190B",
+    "tests/modTestCoupledASDCoordinates.bas": "35B3E7BF53D4BA5118CE34E823BAA318AED62B2AC02A4BE15CCD872DCE23F3A4"
+  }
+}

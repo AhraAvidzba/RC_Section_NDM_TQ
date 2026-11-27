@@ -12,10 +12,10 @@ Option Explicit
 ' ==========================================================================
 ' Пространственный бетон с пластичностью и раздельным повреждением
 ' ==========================================================================
-' Эффективные напряжения подчиняются поверхности Барселоны и гиперболическому
-' потенциалу. Две пластические координаты хранят историю энергий растяжения
-' и сжатия. Поправка повреждения учитывает частичное закрытие трещин.
-' Истории исходного и замещённого бетона хранятся одинаково.
+' CDP использует поверхность Барселоны, гиперболический потенциал и историю
+' пластических энергий. ASD использует спектральное разложение и полные
+' эквивалентные координаты подготовленных одноосных ветвей. Значения этих
+' координат не взаимозаменяемы. Истории исходного и замещённого бетона едины.
 
 Implements ICoupledPointResponse
 
@@ -24,8 +24,8 @@ Private Type TConcreteHistory
     Stress(1 To 6) As Double ' Напряжения той же принятой точки при точно нулевом приращении.
     Effective(1 To 6) As Double ' Эффективный тензор спектрального закона при той же принятой деформации.
     Plastic(1 To 6) As Double
-    Tension As Double
-    Compression As Double
+    Tension As Double ' Пластическая координата CDP либо полная эквивалентная деформация ASD.
+    Compression As Double ' Положительная мера сжатия в том же контракте выбранного закона.
     ElasticTangentExact As Boolean
     TensionCohesion As Double ' Значения огибающих при тех же Tension и Compression.
     CompressionCohesion As Double
@@ -122,6 +122,32 @@ End Property
 Friend Property Get EnvelopeReferenceStress() As Double
     If mASDFlow Is Nothing And mPointCount > 0 Then EnvelopeReferenceStress = mFt
 End Property
+
+' Читает принятые полные эквивалентные деформации ASD без обновления материала.
+' Обе меры неотрицательны и необратимы; они не являются компонентами тензора.
+' Для CDP возвращает False и нули: его пластические координаты имеют иной смысл.
+Friend Function TryReadAcceptedASDStrains(ByVal point As Long, ByRef tension As Double, ByRef compression As Double) As Boolean
+    tension = 0#: compression = 0#
+    If mASDFlow Is Nothing Then Exit Function
+    If point < 1 Or point > mPointCount Then InvalidInput "Точка эквивалентных деформаций ASD находится вне подготовленного материала."
+    tension = mHistory(point, mCommitted).Tension
+    compression = mHistory(point, mCommitted).Compression
+    TryReadAcceptedASDStrains = True
+End Function
+
+' Вычисляет полные эквивалентные деформации кандидата ASD от принятой истории.
+' Не меняет принятый или пробный буфер, касательную и исходный массив деформаций.
+' Меры относятся к тому же обновлению, что и напряжения; порог разрушения здесь не задаётся.
+Friend Function TryReadASDStrains(ByVal point As Long, ByRef strain() As Double, _
+        ByRef tension As Double, ByRef compression As Double) As Boolean
+    tension = 0#: compression = 0#
+    If mASDFlow Is Nothing Then Exit Function
+    If point < 1 Or point > mPointCount Then InvalidInput "Точка эквивалентных деформаций ASD находится вне подготовленного материала."
+    Dim updated As TConcreteHistory, stress(1 To N_COMPONENTS) As Double, elastic As Boolean, substeps As Long
+    If Not UpdateWithSubsteps(strain, mHistory(point, mCommitted), updated, stress, elastic, substeps) Then Exit Function
+    tension = updated.Tension: compression = updated.Compression
+    TryReadASDStrains = True
+End Function
 
 ' Читает координату огибающих в МПа из принятого либо полностью подготовленного пробного буфера.
 ' Пробный буфер допустим только после успешного расчёта всего кандидата; координата не является критерием разрушения.
