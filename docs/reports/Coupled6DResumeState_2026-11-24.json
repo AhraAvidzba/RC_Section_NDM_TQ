@@ -569,6 +569,29 @@
     "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1163ASDPrincipalDiagnostic_20261127",
     "stage": "TERMINAL_NUMFAIL"
   },
+  "ASD_projected_event_1166": {
+    "actual_components": 263,
+    "compiled_book_sha256": "834B3E073822E84399BAC296A086E2A609153DDC80CC8C36CA1184592F046694",
+    "confirmed_lower_bound_lambda": 6.6627811143819375,
+    "elapsed_seconds": 337.8828125,
+    "history_SHA256": "0245A16ED20A5F8B6198F75C8FA3CB170DA61693AED7A81E548ADB8C4C3272A0",
+    "history_bitexact_1164": true,
+    "history_states": 69,
+    "independently_verified_all60_equations_and_six_resultants": true,
+    "materials_force_acceptance_radius_and_iteration_budget_unchanged": true,
+    "no_gain_in_accepted_load_or_strain": true,
+    "only_numerical_change": "Existing nonlinear coordinate mapping + QR hybrid for ASD principal events",
+    "physical_capacity_confirmed": false,
+    "projected_event_force_residual_MPa": [
+      0.00260103780905681,
+      0.00260046848138839
+    ],
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1166ASDProjectedEvent_20261127",
+    "stage": "TERMINAL_NUMFAIL",
+    "unchanged_parent_components": 262,
+    "worker_closed": true
+  },
   "ASD_retry_retention_1164": {
     "confirmed_lower_bound_lambda": 6.6627811143819375,
     "elapsed_seconds": 340.77734375,
@@ -5457,7 +5480,7 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress: fixed lost stronger bound with exact original history and verified69 states; diagnosed17 rejected event trials; bounded initial step admitted all17 but did not improve convergence; physical My capacity remains unconfirmed",
+  "current_goal_turn_classification": "progress: isolated negative criteria/radius/QR variants and fixed retention of stronger confirmed bound with69 independently verified states; no increase of physical capacity or accepted strains; next focus is actual constitutive/global directional linearization at the failed event",
   "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
@@ -41053,9 +41076,9 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Test exact nonlinear material-coordinate projection with existing QR hybrid corrector for ASD principal events, within original radius/budget/tolerances. Do not repeat unchanged1162-1165. Promote retry-retention only with production source/book synchronization and touched regressions. Full physical-limit,NMT,Q/NMTQ,CDP,performance and acceptance scope stays pending.",
+  "next_action": "Freeze the failed ASD principal-event state and direction at point18/station-1/index3; verify local and assembled directional derivatives against actual ASDConcrete3D and frozen accepted history. Existing nonlinear coordinate QR stalls at0.00260047MPa and admits no new state; do not repeat unchanged1162-1166 or relax force acceptance. Retry-retention fix remains private until synchronized production promotion/regressions. Physical My,NMT,Q/NMTQ,CDP,performance and full acceptance stay pending.",
   "next_actions": [
-    "Test exact nonlinear material-coordinate projection with existing QR hybrid corrector for ASD principal events, within original radius/budget/tolerances. Do not repeat unchanged1162-1165. Promote retry-retention only with production source/book synchronization and touched regressions. Full physical-limit,NMT,Q/NMTQ,CDP,performance and acceptance scope stays pending."
+    "Freeze the failed ASD principal-event state and direction at point18/station-1/index3; verify local and assembled directional derivatives against actual ASDConcrete3D and frozen accepted history. Existing nonlinear coordinate QR stalls at0.00260047MPa and admits no new state; do not repeat unchanged1162-1166 or relax force acceptance. Retry-retention fix remains private until synchronized production promotion/regressions. Physical My,NMT,Q/NMTQ,CDP,performance and full acceptance stay pending."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
