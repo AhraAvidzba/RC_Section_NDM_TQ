@@ -1,4 +1,230 @@
 {
+  "ASD_accepted_peak_replay_1169": {
+    "compiled_book_sha256": "01A283548CCD2C866B64DBB353BF05EFA09AECD06CAE12CD0A895AC977069184",
+    "full_acceptance_passed": false,
+    "results": {
+      "1": {
+        "confirmed_lower_bound": 0.0,
+        "coupled_limit_lambda": 0.0,
+        "elapsed_seconds": 9.8515625,
+        "has_confirmed_lower_bound": false,
+        "has_steel_limit_point": false,
+        "has_ultimate_point": true,
+        "independent": {
+          "accepted_states": 23,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "CompressionConfigured",
+          "compression_utilization": 0.5943223349516518,
+          "final_lambda": 7.359716013731402,
+          "final_target_resultants_N_Nmm": [
+            -735971.6013731402,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": {
+            "actual_native_OpenSees_material": true,
+            "elapsed_seconds": 0.7032072999863885,
+            "fixed_prefix_states": 18,
+            "independent_global_augmented_section_equilibrium": true,
+            "no_OpenSees_solid_element": true,
+            "peak_accuracy": 0.0006651310569585602,
+            "peak_compressive_control": 0.0020999242376015487,
+            "peak_lambda": 7.359716013731402,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "two_admissible_shoulders_below_original_peak": true
+          },
+          "independent_upper": null,
+          "maximum_force_error_N": 0.14340665051713586,
+          "maximum_moment_error_Nmm": 5.6577613577246666e-05,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 7.359716013731402,
+        "stage": "TERMINAL",
+        "status": "OK",
+        "worker_closed": true
+      },
+      "2": {
+        "confirmed_lower_bound": 0.0,
+        "coupled_limit_lambda": 0.46569519558000805,
+        "elapsed_seconds": 18.69140625,
+        "has_confirmed_lower_bound": false,
+        "has_steel_limit_point": true,
+        "has_ultimate_point": true,
+        "independent": {
+          "accepted_states": 53,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "BendingNegativeConfigured",
+          "compression_utilization": 0.3106170135799223,
+          "final_lambda": 0.46569519558000805,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            -4656951.955800081,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "BendingNegativeConfigured",
+            "compression_utilization": 0.3107254100130108,
+            "elapsed_seconds": 0.5926077999756671,
+            "fixed_history_states": 53,
+            "function_evaluations": 424,
+            "gauge_residual_MPa": 1.3660947373317356e-13,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.00012019288450498822,
+            "lower_lambda": 0.465695195580008,
+            "original_bound_MPa": 1.6076298327589029e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 4.535058298556465e-13,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 6.523484739023587e-13,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "The solution converged.",
+            "solver_success": true,
+            "steel_utilization": 1.0008487179979066,
+            "tension_utilization": 0.0,
+            "upper_lambda": 0.465815388464513,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.02042165832972387,
+          "maximum_moment_error_Nmm": 0.9802319901064038,
+          "status": "FAIL",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 0.46569519558000805,
+        "stage": "TERMINAL",
+        "status": "FAIL",
+        "worker_closed": true
+      },
+      "3": {
+        "accepted_states": 104,
+        "confirmed_lower_bound": 6.662781114373294,
+        "confirmed_material_transitions": 1,
+        "coupled_limit_lambda": 0.0,
+        "elapsed_seconds": 417.203125,
+        "has_confirmed_lower_bound": true,
+        "has_steel_limit_point": false,
+        "has_ultimate_point": false,
+        "independent": {
+          "accepted_states": 104,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "BendingMyConfigured",
+          "compression_utilization": 0.30666237393953083,
+          "final_lambda": 6.558239189857917,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            0.0,
+            6558239.189857917,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": null,
+          "maximum_force_error_N": 0.04446839004049252,
+          "maximum_moment_error_Nmm": 3.6488595521077514,
+          "status": "NumFail",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 0.0,
+        "maximum_epsilon0": 0.003615289793115754,
+        "overall_probe_budget_exhausted": true,
+        "stage": "TERMINAL",
+        "status": "NumFail",
+        "worker_closed": true
+      },
+      "4": {
+        "confirmed_lower_bound": 0.0,
+        "coupled_limit_lambda": 3.6607255594051265,
+        "elapsed_seconds": 14.48046875,
+        "has_confirmed_lower_bound": false,
+        "has_steel_limit_point": true,
+        "has_ultimate_point": true,
+        "independent": {
+          "accepted_states": 59,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "TorsionConfigured",
+          "compression_utilization": 0.11417383765472418,
+          "final_lambda": 3.6607255594051265,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            0.0,
+            0.0,
+            3660725.5594051266,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "TorsionConfigured",
+            "compression_utilization": 0.11417383765472418,
+            "elapsed_seconds": 0.24828979995800182,
+            "fixed_history_states": 59,
+            "function_evaluations": 141,
+            "gauge_residual_MPa": 1.0539225747582685e-13,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.00031200719024004897,
+            "lower_lambda": 3.66072555940513,
+            "original_bound_MPa": 1.370532517394714e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 9.499098891097021e-11,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 6.652701106051811e-11,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "The solution converged.",
+            "solver_success": true,
+            "steel_utilization": 1.000708407360503,
+            "tension_utilization": 0.0,
+            "upper_lambda": 3.66103756659537,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.006921704260093975,
+          "maximum_moment_error_Nmm": 1.553267598617822,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 3.6607255594051265,
+        "stage": "TERMINAL",
+        "status": "OK",
+        "worker_closed": true
+      }
+    },
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1169ASDAcceptedPeakReplay_20261127",
+    "source_fix_not_promoted": true,
+    "stage": "TERMINAL_DIRECTED_REGRESSIONS",
+    "zero_trial_comparison": {
+      "after": {
+        "VBA_net_stress_change_from_zero_MPa": 1.27150539584141e-12,
+        "VBA_weak_residual_change_from_zero_MPa": 5.689621217985578e-15,
+        "physical_concrete_zero_difference_MPa": 1.016855571966957e-09,
+        "smallest_positive_fraction": 3.552713678800501e-15,
+        "zero_trial_native_stress_difference_MPa": 1.016855571966957e-09
+      },
+      "before": {
+        "VBA_net_stress_change_from_zero_MPa": 0.036465527025224875,
+        "VBA_weak_residual_change_from_zero_MPa": 3.88590028349671e-05,
+        "physical_concrete_zero_difference_MPa": 2.8479112121532202e-05,
+        "smallest_positive_fraction": 3.552713678800501e-15,
+        "zero_trial_native_stress_difference_MPa": 0.03646552702522121
+      }
+    }
+  },
   "ASD_bounded_principal_1165": {
     "confirmed_lower_bound_lambda": 6.6627811143819375,
     "elapsed_seconds": 314.59375,
@@ -14,6 +240,35 @@
     "stage": "TERMINAL_NUMFAIL",
     "unit_cases_passed": 9,
     "worker_closed": true
+  },
+  "ASD_continuous_zero_trial_1168": {
+    "N_cold_result": "NumFail: local peak7.359716, reached concrete limit later near7.222; peak revalidation uses full accepted prefix then one additional material trial",
+    "N_independent_first_failure": "Auxiliary peak verifier wrongly assumed last returned state is a reported peak even for NumFail. Main all-state loop ran before this failure; fresh separated proof required.",
+    "compiled_book_sha256": "2AA046028C8591D5B61B17EC89FF2FEE15CB9799E27070F3794D490A036D9ADB",
+    "only_change": "ASD trials always evaluate configured update, including zero increment; CDP shortcut preserved",
+    "physical_My_capacity_confirmed": false,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1168ContinuousASDZeroTrial_20261127",
+    "source_fix_not_promoted": true,
+    "stage": "DIRECTED22_VERIFIED_N_PEAK_STATUS_REGRESSED",
+    "summary": {
+      "VBA_zero_probe_bitexact_before_after": true,
+      "frozen_history_states": 69,
+      "initial_correction_matches_original_failure": false,
+      "initial_equilibrium_norm_MPa": 3.9338049116662e-05,
+      "initial_gauge_norm_MPa": 2.1623898111807406e-08,
+      "initial_lambda": 6.558687877320868,
+      "initial_principal_value_MPa": -0.023712121009320856,
+      "lambda_correction": -0.02962879827942426,
+      "maximum_OpenSees_assembled_difference_MPa": 2.3309666469586987e-08,
+      "maximum_OpenSees_net_stress_difference_MPa": 4.041280775985375e-09,
+      "native_zero_probe_before_after_difference_MPa": 0.0,
+      "notes": "Directed stress/derivative experiment; perturbed states are not accepted equilibria or a capacity search.",
+      "operators_byteexact_original": true,
+      "physical_capacity_confirmed": false,
+      "samples": 22,
+      "zero_probe_OpenSees_net_stress_difference_MPa": 1.016855571966957e-09,
+      "zero_probe_physical_concrete_difference_MPa": 1.016855571966957e-09
+    }
   },
   "ASD_direct_NDS_1065": {
     "all6_expected_statuses_and_target_fields_verified": true,
@@ -513,6 +768,28 @@
       "Q",
       "NMTQ"
     ]
+  },
+  "ASD_frozen_principal_1167": {
+    "all_working_methods_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1167FrozenASDPrincipalDirections_20261127",
+    "stage": "TERMINAL_DIRECTED22",
+    "summary": {
+      "VBA_zero_probe_bitexact_before_after": true,
+      "frozen_history_states": 69,
+      "initial_correction_matches_original_failure": true,
+      "initial_equilibrium_norm_MPa": 1.4101151414869229e-06,
+      "initial_gauge_norm_MPa": 2.1623898111807406e-08,
+      "initial_lambda": 6.558687877320868,
+      "initial_principal_value_MPa": -0.023712121009320856,
+      "lambda_correction": -0.029850793144667372,
+      "maximum_OpenSees_assembled_difference_MPa": 3.8858775581669214e-05,
+      "maximum_OpenSees_net_stress_difference_MPa": 0.03646552702522121,
+      "native_zero_probe_before_after_difference_MPa": 0.0,
+      "notes": "Directed stress/derivative experiment; perturbed states are not accepted equilibria or a capacity search.",
+      "operators_byteexact_original": true,
+      "physical_capacity_confirmed": false,
+      "samples": 22
+    }
   },
   "ASD_plastic_steel_control_1159": {
     "archive": "docs/reports/evidence/Coupled6DASDPlasticControl_2026-11-27/Files.json",
@@ -5480,7 +5757,7 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress: isolated negative criteria/radius/QR variants and fixed retention of stronger confirmed bound with69 independently verified states; no increase of physical capacity or accepted strains; next focus is actual constitutive/global directional linearization at the failed event",
+  "current_goal_turn_classification": "progress: removed a proved discontinuity in ASD zero-increment evaluation; exact native22-probe agreement restored; repaired stored-peak revalidation from predecessor history; N/Mx/T physical limits independently reverified; My result recorded without converting numerical failure to collapse",
   "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
@@ -41076,9 +41353,9 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Freeze the failed ASD principal-event state and direction at point18/station-1/index3; verify local and assembled directional derivatives against actual ASDConcrete3D and frozen accepted history. Existing nonlinear coordinate QR stalls at0.00260047MPa and admits no new state; do not repeat unchanged1162-1166 or relax force acceptance. Retry-retention fix remains private until synchronized production promotion/regressions. Physical My,NMT,Q/NMTQ,CDP,performance and full acceptance stay pending.",
+  "next_action": "1169 My now passed one principal material transition and all104 returned states independently verify, but exhausted256 continuation probes at epsilon0max0.00361529 without confirming physical capacity. Freeze the new post-transition tail and actual failed-control context; examine continuation control, guide/return cycling and directional tangent consistency there, rather than repeat the obsolete69-state zero-jump problem or simply raise probe budget. Preserve proven ASD zero-trial/stored-peak fixes. Before production promotion synchronize src/book/VBA_All_Code and run touched native/ASD/CDP verification. Full NMT,Q/NMTQ,CDP,performance,UI/report/literature/acceptance scope remains.",
   "next_actions": [
-    "Freeze the failed ASD principal-event state and direction at point18/station-1/index3; verify local and assembled directional derivatives against actual ASDConcrete3D and frozen accepted history. Existing nonlinear coordinate QR stalls at0.00260047MPa and admits no new state; do not repeat unchanged1162-1166 or relax force acceptance. Retry-retention fix remains private until synchronized production promotion/regressions. Physical My,NMT,Q/NMTQ,CDP,performance and full acceptance stay pending."
+    "1169 My now passed one principal material transition and all104 returned states independently verify, but exhausted256 continuation probes at epsilon0max0.00361529 without confirming physical capacity. Freeze the new post-transition tail and actual failed-control context; examine continuation control, guide/return cycling and directional tangent consistency there, rather than repeat the obsolete69-state zero-jump problem or simply raise probe budget. Preserve proven ASD zero-trial/stored-peak fixes. Before production promotion synchronize src/book/VBA_All_Code and run touched native/ASD/CDP verification. Full NMT,Q/NMTQ,CDP,performance,UI/report/literature/acceptance scope remains."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",

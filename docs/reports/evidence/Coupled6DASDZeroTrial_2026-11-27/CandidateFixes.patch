@@ -1,0 +1,70 @@
+--- a/src/Materials/CCoupledConcreteResponse.cls
++++ b/src/Materials/CCoupledConcreteResponse.cls
+@@ -511,6 +511,7 @@
+ ' При отказе обратного Эйлера делит локальный путь деформации. Все
+ ' попытки начинают от того же материала. Промежуточные подшаги не
+ ' переходят в принятое состояние до приёмки всего сечения.
++' ASD вычисляет выбранное обновление и при нулевом приращении: сохранённое напряжение не заменяет новый пробный отклик.
+ Private Function UpdateWithSubsteps(ByRef strain() As Double, ByRef committed As TConcreteHistory, _
+         ByRef updated As TConcreteHistory, ByRef stress() As Double, ByRef virginElastic As Boolean, _
+         Optional ByRef substeps As Long = 0) As Boolean
+@@ -522,7 +523,7 @@
+             Exit For
+         End If
+     Next i
+-    If Not moved Then
++    If Not moved And mASDFlow Is Nothing Then
+         updated = committed
+         For i = 1 To N_COMPONENTS: stress(i) = committed.Stress(i): Next i
+         virginElastic = committed.ElasticTangentExact
+--- a/src/Solver/CCoupledDeformationContinuation.cls
++++ b/src/Solver/CCoupledDeformationContinuation.cls
+@@ -1667,7 +1667,7 @@
+     Set mVerifiedPeakTrace = mLimitTrace.CopyPrefix(point.HistoryIndex)
+ End Sub
+ 
+-' Возвращает максимум только после локализованного первого предела стали на продолженной допустимой ветви.
++' Возвращает максимум после локализованного первого материального предела на продолженной допустимой ветви.
+ ' Непроверенный спад, больший поздний узел, недостаточная точность или невоспроизводимое поле сохраняют NumFail.
+ Private Function CompleteVerifiedPeak(ByVal history As Collection, ByVal lastBeforeEvent As Long, ByVal eventUpper As Double) As Boolean
+     If mVerifiedPeakFields Is Nothing Or mVerifiedPeakTrace Is Nothing Then Exit Function
+@@ -1677,30 +1677,26 @@
+     If mBestLambda > mVerifiedPeak.Lambda + mVerifiedPeakAccuracy Then Exit Function
+     If eventUpper >= mVerifiedPeak.Lambda - mVerifiedPeakAccuracy Then Exit Function
+     If mProbeCount >= mProbeBudget Then Exit Function
+-    If Not mSolver.ReplayAcceptedFields(mVerifiedPeakFields, mVerifiedPeakFields.Count) Then GoTo RestoreTail
++    If Not mSolver.ReplayAcceptedFields(mVerifiedPeakFields, mVerifiedPeakFields.Count - 1) Then GoTo RestoreTail
+     Dim point As TBranchPoint, field() As Double, checked() As Double, actual() As Double, i As Long
++    Dim load(1 To COMPONENT_COUNT) As Double, seed As Variant
+     field = mVerifiedPeakFields.Item(mVerifiedPeakFields.Count)
+-    If mUsesEnvelopeControl Then
+-        Dim load(1 To COMPONENT_COUNT) As Double, seed As Variant
+-        For i = 1 To COMPONENT_COUNT: load(i) = mOffset(i) + mVerifiedPeak.Lambda * mDirection(i): Next i
+-        seed = field: mProbeCount = mProbeCount + 1: point.Lambda = mVerifiedPeak.Lambda
+-        If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
+-                mAbsTol, mRelTol, 1, initialField:=seed) Then GoTo RestoreTail ' Повтор уже принятого пика не является новым положительным H-шагом.
+-    Else
+-        point.Coordinate = CoordinateOf(field)
+-        If Not Probe(point, mVerifiedPeak.Lambda, keepYieldControl:=True) Then GoTo RestoreTail
+-    End If
++    For i = 1 To COMPONENT_COUNT: load(i) = mOffset(i) + mVerifiedPeak.Lambda * mDirection(i): Next i
++    seed = field: mProbeCount = mProbeCount + 1: point.Lambda = mVerifiedPeak.Lambda
++    If Not mSolver.TryStep(load(1), load(2), load(3), load(4), load(5), load(6), _
++            mAbsTol, mRelTol, 1, initialField:=seed) Then GoTo RestoreTail ' Проверяется исходный пробный шаг пика от его предшествующей истории.
+     If Abs(point.Lambda - mVerifiedPeak.Lambda) > LoadResolution(mVerifiedPeak.Lambda) Or BeyondMaterialLimit() Then GoTo RestoreTail
+     mSolver.CopyTrial checked, actual
+     For i = 1 To UBound(field)
+         If checked(i) <> field(i) Then GoTo RestoreTail ' Равновесие соседнего поля не подтверждает сохранённую точку максимума.
+     Next i
+-    mSolver.DiscardStep ' Проба проверяет уже принятое поле; нового шага истории здесь нет.
++    mSolver.DiscardStep ' Принятое поле проверено как тот же пробный шаг; дополнительное обновление ASD от истории самого пика не выполняется.
++    If Not mSolver.ReplayAcceptedFields(mVerifiedPeakFields, mVerifiedPeakFields.Count) Then GoTo RestoreTail
+     mPeak = mVerifiedPeak: mPeakAccuracy = mVerifiedPeakAccuracy: mHasPeak = True
+     Set mLimitFields = mVerifiedPeakFields: Set mLimitTrace = mVerifiedPeakTrace
+     mLimitResultants = actual: mDesignHistoryIndex = mVerifiedPeakDesignIndex
+     mMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
+-        "Подтверждён максимум нагрузки допустимой ветви, завершённой предельной деформацией арматуры.", Details() & _
++        "Подтверждён максимум нагрузки допустимой ветви, завершённой предельной деформацией материала.", Details() & _
+         " | Определяющий максимум lambda: " & CStr(mPeak.Lambda) & "; оценка погрешности: " & CStr(mPeakAccuracy)
+     CompleteVerifiedPeak = True
+     Exit Function

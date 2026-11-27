@@ -1,0 +1,321 @@
+{
+  "all_workers_terminal": true,
+  "cases": {
+    "Cold1167FrozenASDPrincipalDirections_20261127": {
+      "own_worker_closed": true,
+      "workflow_status": "NO_FINAL_RESULT"
+    },
+    "Cold1168ContinuousASDZeroTrial_20261127": {
+      "own_worker_closed": true,
+      "workflow_status": "NO_FINAL_RESULT"
+    },
+    "Cold1169ASDAcceptedPeakReplay_20261127": {
+      "accepted_states": 104,
+      "elapsed_seconds": 417.203125,
+      "final_history_maximum_lambda": 6.662781114373294,
+      "final_history_sha256": "DD32062C463642562E2EE84934C2C69B3843C79CF1FC71210C6B5B05CCE8AB64",
+      "independent_final_history": {
+        "accepted_states": 104,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyConfigured",
+        "compression_utilization": 0.30666237393953083,
+        "final_lambda": 6.558239189857917,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          6558239.189857917,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.04446839004049252,
+        "maximum_moment_error_Nmm": 3.6488595521077514,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "maximum_epsilon0": 0.003615289793115754,
+      "own_worker_closed": true,
+      "workflow_status": "Status=NumFail"
+    }
+  },
+  "cold_results": {
+    "Cold1168ContinuousASDZeroTrial_20261127/Case01": {
+      "confirmed_lower_bound": 7.359716013731402,
+      "coupled_limit_lambda": 0.0,
+      "elapsed_seconds": 18.88671875,
+      "has_confirmed_lower_bound": true,
+      "has_steel_limit_point": false,
+      "has_ultimate_point": false,
+      "independent": {
+        "accepted_states": 34,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "CompressionConfigured",
+        "compression_utilization": 0.9997737205767202,
+        "final_lambda": 7.222259252098682,
+        "final_target_resultants_N_Nmm": [
+          -722225.9252098681,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.14340665051713586,
+        "maximum_moment_error_Nmm": 0.005482542561367154,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "lambda_capacity": 0.0,
+      "status": "NumFail"
+    },
+    "Cold1169ASDAcceptedPeakReplay_20261127/Case01": {
+      "confirmed_lower_bound": 0.0,
+      "coupled_limit_lambda": 0.0,
+      "elapsed_seconds": 9.8515625,
+      "has_confirmed_lower_bound": false,
+      "has_steel_limit_point": false,
+      "has_ultimate_point": true,
+      "independent": {
+        "accepted_states": 23,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "CompressionConfigured",
+        "compression_utilization": 0.5943223349516518,
+        "final_lambda": 7.359716013731402,
+        "final_target_resultants_N_Nmm": [
+          -735971.6013731402,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": {
+          "actual_native_OpenSees_material": true,
+          "elapsed_seconds": 0.7032072999863885,
+          "fixed_prefix_states": 18,
+          "independent_global_augmented_section_equilibrium": true,
+          "no_OpenSees_solid_element": true,
+          "peak_accuracy": 0.0006651310569585602,
+          "peak_compressive_control": 0.0020999242376015487,
+          "peak_lambda": 7.359716013731402,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "two_admissible_shoulders_below_original_peak": true
+        },
+        "independent_upper": null,
+        "maximum_force_error_N": 0.14340665051713586,
+        "maximum_moment_error_Nmm": 5.6577613577246666e-05,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "lambda_capacity": 7.359716013731402,
+      "status": "OK"
+    },
+    "Cold1169ASDAcceptedPeakReplay_20261127/Case02": {
+      "confirmed_lower_bound": 0.0,
+      "coupled_limit_lambda": 0.46569519558000805,
+      "elapsed_seconds": 18.69140625,
+      "has_confirmed_lower_bound": false,
+      "has_steel_limit_point": true,
+      "has_ultimate_point": true,
+      "independent": {
+        "accepted_states": 53,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingNegativeConfigured",
+        "compression_utilization": 0.3106170135799223,
+        "final_lambda": 0.46569519558000805,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -4656951.955800081,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "BendingNegativeConfigured",
+          "compression_utilization": 0.3107254100130108,
+          "elapsed_seconds": 0.5926077999756671,
+          "fixed_history_states": 53,
+          "function_evaluations": 424,
+          "gauge_residual_MPa": 1.3660947373317356e-13,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.00012019288450498822,
+          "lower_lambda": 0.465695195580008,
+          "original_bound_MPa": 1.6076298327589029e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 4.535058298556465e-13,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 6.523484739023587e-13,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.0008487179979066,
+          "tension_utilization": 0.0,
+          "upper_lambda": 0.465815388464513,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.02042165832972387,
+        "maximum_moment_error_Nmm": 0.9802319901064038,
+        "status": "FAIL",
+        "whole_goal_completed": false
+      },
+      "lambda_capacity": 0.46569519558000805,
+      "status": "FAIL"
+    },
+    "Cold1169ASDAcceptedPeakReplay_20261127/Case03": {
+      "confirmed_lower_bound": 6.662781114373294,
+      "coupled_limit_lambda": 0.0,
+      "elapsed_seconds": 417.203125,
+      "has_confirmed_lower_bound": true,
+      "has_steel_limit_point": false,
+      "has_ultimate_point": false,
+      "independent": {
+        "accepted_states": 104,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "BendingMyConfigured",
+        "compression_utilization": 0.30666237393953083,
+        "final_lambda": 6.558239189857917,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          6558239.189857917,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.04446839004049252,
+        "maximum_moment_error_Nmm": 3.6488595521077514,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "lambda_capacity": 0.0,
+      "status": "NumFail"
+    },
+    "Cold1169ASDAcceptedPeakReplay_20261127/Case04": {
+      "confirmed_lower_bound": 0.0,
+      "coupled_limit_lambda": 3.6607255594051265,
+      "elapsed_seconds": 14.48046875,
+      "has_confirmed_lower_bound": false,
+      "has_steel_limit_point": true,
+      "has_ultimate_point": true,
+      "independent": {
+        "accepted_states": 59,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "TorsionConfigured",
+        "compression_utilization": 0.11417383765472418,
+        "final_lambda": 3.6607255594051265,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          0.0,
+          3660725.5594051266,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "TorsionConfigured",
+          "compression_utilization": 0.11417383765472418,
+          "elapsed_seconds": 0.24828979995800182,
+          "fixed_history_states": 59,
+          "function_evaluations": 141,
+          "gauge_residual_MPa": 1.0539225747582685e-13,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.00031200719024004897,
+          "lower_lambda": 3.66072555940513,
+          "original_bound_MPa": 1.370532517394714e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 9.499098891097021e-11,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 6.652701106051811e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The solution converged.",
+          "solver_success": true,
+          "steel_utilization": 1.000708407360503,
+          "tension_utilization": 0.0,
+          "upper_lambda": 3.66103756659537,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.006921704260093975,
+        "maximum_moment_error_Nmm": 1.553267598617822,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "lambda_capacity": 3.6607255594051265,
+      "status": "OK"
+    }
+  },
+  "frozen_directional": {
+    "Cold1167FrozenASDPrincipalDirections_20261127": {
+      "VBA_zero_probe_bitexact_before_after": true,
+      "frozen_history_states": 69,
+      "initial_correction_matches_original_failure": true,
+      "initial_equilibrium_norm_MPa": 1.4101151414869229e-06,
+      "initial_gauge_norm_MPa": 2.1623898111807406e-08,
+      "initial_lambda": 6.558687877320868,
+      "initial_principal_value_MPa": -0.023712121009320856,
+      "lambda_correction": -0.029850793144667372,
+      "maximum_OpenSees_assembled_difference_MPa": 3.8858775581669214e-05,
+      "maximum_OpenSees_net_stress_difference_MPa": 0.03646552702522121,
+      "native_zero_probe_before_after_difference_MPa": 0.0,
+      "notes": "Directed stress/derivative experiment; perturbed states are not accepted equilibria or a capacity search.",
+      "operators_byteexact_original": true,
+      "physical_capacity_confirmed": false,
+      "samples": 22
+    },
+    "Cold1168ContinuousASDZeroTrial_20261127": {
+      "VBA_zero_probe_bitexact_before_after": true,
+      "frozen_history_states": 69,
+      "initial_correction_matches_original_failure": false,
+      "initial_equilibrium_norm_MPa": 3.9338049116662e-05,
+      "initial_gauge_norm_MPa": 2.1623898111807406e-08,
+      "initial_lambda": 6.558687877320868,
+      "initial_principal_value_MPa": -0.023712121009320856,
+      "lambda_correction": -0.02962879827942426,
+      "maximum_OpenSees_assembled_difference_MPa": 2.3309666469586987e-08,
+      "maximum_OpenSees_net_stress_difference_MPa": 4.041280775985375e-09,
+      "native_zero_probe_before_after_difference_MPa": 0.0,
+      "notes": "Directed stress/derivative experiment; perturbed states are not accepted equilibria or a capacity search.",
+      "operators_byteexact_original": true,
+      "physical_capacity_confirmed": false,
+      "samples": 22,
+      "zero_probe_OpenSees_net_stress_difference_MPa": 1.016855571966957e-09,
+      "zero_probe_physical_concrete_difference_MPa": 1.016855571966957e-09
+    }
+  },
+  "public_workbook_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "whole_goal_completed": false,
+  "zero_trial_comparison": {
+    "after": {
+      "VBA_net_stress_change_from_zero_MPa": 1.27150539584141e-12,
+      "VBA_weak_residual_change_from_zero_MPa": 5.689621217985578e-15,
+      "physical_concrete_zero_difference_MPa": 1.016855571966957e-09,
+      "smallest_positive_fraction": 3.552713678800501e-15,
+      "zero_trial_native_stress_difference_MPa": 1.016855571966957e-09
+    },
+    "before": {
+      "VBA_net_stress_change_from_zero_MPa": 0.036465527025224875,
+      "VBA_weak_residual_change_from_zero_MPa": 3.88590028349671e-05,
+      "physical_concrete_zero_difference_MPa": 2.8479112121532202e-05,
+      "smallest_positive_fraction": 3.552713678800501e-15,
+      "zero_trial_native_stress_difference_MPa": 0.03646552702522121
+    }
+  }
+}
