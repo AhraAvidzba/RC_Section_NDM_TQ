@@ -1,0 +1,287 @@
+{
+  "1156": {
+    "closed_regression_assertions_passed": 274,
+    "full_external_tensor_match": false,
+    "independent_analytic_tangents": 88,
+    "native_assertions_passed": 274,
+    "rotation": {
+      "VBA_rotation_objectivity_verified": true,
+      "full_native_tensor_replay_not_declared_PASS": true,
+      "full_section_capacity_not_proven": true,
+      "interpretation": "Existing difference is in degenerate stress-split history; all 88 available analytic tangents passed native directional comparison",
+      "maximum_OpenSees_rotation_coordinate_error": 0.00021032179109948935,
+      "maximum_OpenSees_rotation_stress_error_MPa": 0.020071555084190465,
+      "maximum_VBA_rotation_coordinate_error": 9.974659986866641e-18,
+      "maximum_VBA_rotation_stress_error_MPa": 6.394884621840902e-14,
+      "native_OpenSees_rotation_difference_reproduced": true,
+      "records": [
+        {
+          "OpenSees_rotation_coordinate_error": 0.0,
+          "OpenSees_rotation_stress_error_MPa": 0.0,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 0.0,
+          "name": "default",
+          "step": 0
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 1.6940658945086007e-21,
+          "OpenSees_rotation_stress_error_MPa": 1.3530843112619095e-16,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.551115123125783e-17,
+          "name": "default",
+          "step": 1
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 1.3552527156068805e-20,
+          "OpenSees_rotation_stress_error_MPa": 1.3461454173580023e-15,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.551115123125783e-16,
+          "name": "default",
+          "step": 2
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 3.2526065174565133e-19,
+          "OpenSees_rotation_stress_error_MPa": 1.5987211554602254e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 2.3092638912203256e-14,
+          "name": "default",
+          "step": 3
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.0,
+          "OpenSees_rotation_stress_error_MPa": 1.0769163338864018e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 6.394884621840902e-14,
+          "name": "default",
+          "step": 4
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 3.469446951953614e-18,
+          "OpenSees_rotation_stress_error_MPa": 1.3500311979441904e-13,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 1.4210854715202004e-14,
+          "name": "default",
+          "step": 5
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 8.673617379884035e-19,
+          "OpenSees_rotation_stress_error_MPa": 4.796163466380676e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 1.7763568394002505e-14,
+          "name": "default",
+          "step": 6
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.938893903907228e-18,
+          "OpenSees_rotation_stress_error_MPa": 7.771561172376096e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.684341886080802e-14,
+          "name": "default",
+          "step": 7
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.938893903907228e-18,
+          "OpenSees_rotation_stress_error_MPa": 1.4349632593280148e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 8.659739592076221e-15,
+          "name": "default",
+          "step": 8
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.938893903907228e-18,
+          "OpenSees_rotation_stress_error_MPa": 3.622102617839573e-15,
+          "VBA_rotation_coordinate_error": 9.974659986866641e-18,
+          "VBA_rotation_stress_error_MPa": 1.474514954580286e-15,
+          "name": "default",
+          "step": 9
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.938893903907228e-18,
+          "OpenSees_rotation_stress_error_MPa": 2.0712598303163077e-15,
+          "VBA_rotation_coordinate_error": 9.974659986866641e-18,
+          "VBA_rotation_stress_error_MPa": 1.4814538484841933e-15,
+          "name": "default",
+          "step": 10
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.938893903907228e-18,
+          "OpenSees_rotation_stress_error_MPa": 5.329070518200751e-15,
+          "VBA_rotation_coordinate_error": 9.974659986866641e-18,
+          "VBA_rotation_stress_error_MPa": 1.5987211554602254e-14,
+          "name": "default",
+          "step": 11
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.0,
+          "OpenSees_rotation_stress_error_MPa": 0.0,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 0.0,
+          "name": "ndm_uniaxial",
+          "step": 0
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 1.6940658945086007e-21,
+          "OpenSees_rotation_stress_error_MPa": 1.3357370765021415e-16,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.551115123125783e-17,
+          "name": "ndm_uniaxial",
+          "step": 1
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.0,
+          "OpenSees_rotation_stress_error_MPa": 1.3739009929736312e-15,
+          "VBA_rotation_coordinate_error": 9.486769009248164e-20,
+          "VBA_rotation_stress_error_MPa": 3.1086244689504383e-15,
+          "name": "ndm_uniaxial",
+          "step": 2
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 3.2526065174565133e-19,
+          "OpenSees_rotation_stress_error_MPa": 1.5987211554602254e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.3290705182007514e-14,
+          "name": "ndm_uniaxial",
+          "step": 3
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 6.505213034913027e-19,
+          "OpenSees_rotation_stress_error_MPa": 1.099120794378905e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 6.394884621840902e-14,
+          "name": "ndm_uniaxial",
+          "step": 4
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 3.903127820947816e-18,
+          "OpenSees_rotation_stress_error_MPa": 1.2079226507921703e-13,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 1.2434497875801753e-14,
+          "name": "ndm_uniaxial",
+          "step": 5
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.0,
+          "OpenSees_rotation_stress_error_MPa": 3.6415315207705135e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 4.263256414560601e-14,
+          "name": "ndm_uniaxial",
+          "step": 6
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.00021032179109948935,
+          "OpenSees_rotation_stress_error_MPa": 2.3092638912203256e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 3.375077994860476e-14,
+          "name": "ndm_uniaxial",
+          "step": 7
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.00014009933847795582,
+          "OpenSees_rotation_stress_error_MPa": 0.020071555084190465,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 6.522560269672795e-16,
+          "name": "ndm_uniaxial",
+          "step": 8
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.0001400993384779608,
+          "OpenSees_rotation_stress_error_MPa": 0.00043859639733792783,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 1.5779478418354032e-15,
+          "name": "ndm_uniaxial",
+          "step": 9
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.00014009933847796037,
+          "OpenSees_rotation_stress_error_MPa": 0.00036252037367564063,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 7.930938891731465e-16,
+          "name": "ndm_uniaxial",
+          "step": 10
+        },
+        {
+          "OpenSees_rotation_coordinate_error": 0.00014009933847796037,
+          "OpenSees_rotation_stress_error_MPa": 2.842170943040401e-14,
+          "VBA_rotation_coordinate_error": 0.0,
+          "VBA_rotation_stress_error_MPa": 5.329070518200751e-15,
+          "name": "ndm_uniaxial",
+          "step": 11
+        }
+      ],
+      "states": 24,
+      "working_stress_code_unchanged": true
+    }
+  },
+  "1157": {
+    "accepted_states": 73,
+    "all60_equations_and_six_resultants_verified": true,
+    "case": "BendingMyConfigured",
+    "compression_utilization": 0.2915628373777296,
+    "final_lambda": 6.557298069430572,
+    "final_target_resultants_N_Nmm": [
+      0.0,
+      0.0,
+      6557298.069430572,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "independent_axial_peak": null,
+    "independent_upper": null,
+    "maximum_force_error_N": 0.03825381406750239,
+    "maximum_moment_error_Nmm": 4.3139441991224885,
+    "status": "NumFail",
+    "whole_goal_completed": false
+  },
+  "1158": {
+    "own_process_closed": true,
+    "partial_states": 50,
+    "physical_limit_confirmed": false,
+    "status": "TIMEOUT_900s"
+  },
+  "1159": {
+    "accepted_states": 111,
+    "all60_equations_and_six_resultants_verified": true,
+    "case": "BendingMyConfigured",
+    "compression_utilization": 0.29141880468205006,
+    "final_lambda": 6.558087443707131,
+    "final_target_resultants_N_Nmm": [
+      0.0,
+      0.0,
+      6558087.443707131,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "independent_axial_peak": null,
+    "independent_upper": null,
+    "maximum_force_error_N": 0.044462777084845584,
+    "maximum_moment_error_Nmm": 4.294531085062772,
+    "status": "NumFail",
+    "whole_goal_completed": false
+  },
+  "1160": {
+    "external_reader_interfered_with_VBA_file_output": true,
+    "not_a_numerical_or_physical_failure": true,
+    "own_excel_closed": true,
+    "preserved_snapshots": 91,
+    "status": "TEST_OBSERVER_IO_FAILURE"
+  },
+  "archive": {
+    "D_roots_retained": [
+      "Cold1156ASDSingleStepTangent_20261127",
+      "Cold1157ASDSingleStepTangentMy_20261127",
+      "Cold1158ASDClosedMy_20261127",
+      "Cold1159ASDPlasticSteelMy_20261127",
+      "Cold1160ASDSteelLinearTrustMy_20261127"
+    ],
+    "all_payloads_read_back_and_SHA256_verified": true,
+    "archive_bytes": 79107854,
+    "archive_sha256": "C12D1E4D3E19C1C4956099FD23BE6F814726D176CB1162C53131E81837EB6D3B",
+    "native_book_packages_CRC_verified": 5,
+    "public_book_unchanged": true,
+    "unique_payloads": 662
+  },
+  "public_kernel_promotion": false,
+  "whole_goal_completed": false
+}

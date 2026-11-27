@@ -498,6 +498,111 @@
       "NMTQ"
     ]
   },
+  "ASD_plastic_steel_control_1159": {
+    "archive": "docs/reports/evidence/Coupled6DASDPlasticControl_2026-11-27/Files.json",
+    "compiled_book_sha256": "0DDA3E00AA96149F768C3170FC93FB7075243D68CF88CB4873ADB8341F59174B",
+    "elapsed_seconds": 313.64453125,
+    "first50_parent_states_bitexact": true,
+    "independent_summary": {
+      "accepted_states": 111,
+      "all60_equations_and_six_resultants_verified": true,
+      "case": "BendingMyConfigured",
+      "compression_utilization": 0.29141880468205006,
+      "final_lambda": 6.558087443707131,
+      "final_target_resultants_N_Nmm": [
+        0.0,
+        0.0,
+        6558087.443707131,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "independent_axial_peak": null,
+      "independent_upper": null,
+      "maximum_force_error_N": 0.044462777084845584,
+      "maximum_moment_error_Nmm": 4.294531085062772,
+      "status": "NumFail",
+      "whole_goal_completed": false
+    },
+    "maximum_epsilon0": 0.003595949877634699,
+    "maximum_projection_error": 2.71050543121376e-20,
+    "maximum_retained_lambda": 6.5751697088477625,
+    "maximum_steel_utilization": 0.14383856173966098,
+    "no_kernel_promotion": true,
+    "physical_capacity_confirmed": false,
+    "projection_assertions_failed": 0,
+    "projection_assertions_passed": 432,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1159ASDPlasticSteelMy_20261127",
+    "transient_diagnostic_maximum_6_662781_not_independently_verified": true
+  },
+  "ASD_steel_QR_1160": {
+    "external_observer_snapshots": 91,
+    "missing_final_result": true,
+    "not_a_numerical_or_physical_failure": true,
+    "numerics_repeated_in_1161_without_external_reader": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1160ASDSteelLinearTrustMy_20261127",
+    "stage": "TEST_OBSERVER_IO_FAILURE",
+    "worker_closed": true
+  },
+  "ASD_steel_QR_retry_1161": {
+    "accepted_history_snapshots": 261,
+    "all262_other_parent_components_unchanged": true,
+    "compiled_book_sha256": "BBA2DC4CC5A39A153C257985387D1BD965A91791242F2F101291BC6E94160E89",
+    "elapsed_seconds": 301.6484375,
+    "final_history": {
+      "accepted_states": 77,
+      "all60_equations_and_six_resultants_verified": true,
+      "case": "BendingMyConfigured",
+      "compression_utilization": 0.29141880468205006,
+      "final_lambda": 6.5582260734809115,
+      "final_target_resultants_N_Nmm": [
+        0.0,
+        0.0,
+        6558226.073480912,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "independent_axial_peak": null,
+      "independent_upper": null,
+      "maximum_force_error_N": 0.043644958474033047,
+      "maximum_moment_error_Nmm": 3.0142993750050664,
+      "status": "NumFail",
+      "whole_goal_completed": false
+    },
+    "final_maximum_epsilon0": 0.0035407266041153516,
+    "final_maximum_lambda": 6.5751697088477625,
+    "final_maximum_steel_utilization": 0.14163533116612875,
+    "independently_verified_retained_peak": {
+      "accepted_prefix_states": 49,
+      "actual_OpenSees_material_replay": true,
+      "all60_equations_and_six_resultants_verified": true,
+      "compression_utilization_all_three_stations": 0.30666237394391793,
+      "does_not_replace_final_workflow_status": true,
+      "external_structural_global_solve": false,
+      "maximum_force_error_N": 0.007607275533473512,
+      "maximum_moment_error_Nmm": 0.5091620511375368,
+      "maximum_retained_lambda": 6.6627811143819375,
+      "maximum_steel_strain_utilization": 0.08029534093763141,
+      "original_force_tolerances_preserved": true,
+      "physical_capacity_confirmed": false,
+      "selection": {
+        "input_history_sha256": "F681ECF2231C0B5B8DB0566C18E932C3142DFECFF957B7F952244D75FC031DC1",
+        "lambda": 6.6627811143819375,
+        "not_a_capacity_certificate": true,
+        "only_count_changed_and_exact_prefix_retained": true,
+        "original_snapshot": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\Case03\\Native\\MainCapacityHistory.bin.Accepted.000099.bin",
+        "original_snapshot_sha256": "AC7D7B5E8DBDE7FAEAD8645B4DB6B2A23B4B3537E4085FB81009D887E7F4F2FC",
+        "selected_point": 49
+      }
+    },
+    "own_excel_closed": true,
+    "physical_capacity_confirmed": false,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127",
+    "stage": "TERMINAL_NUMFAIL",
+    "test_observer_io_failure_fixed": true,
+    "whole_goal_completed": false
+  },
   "BSpline_setting_deferred": {
     "after_stable_ASD": true,
     "default_to_be_measured": true,
@@ -507,7 +612,7 @@
     "task": "ASD-BSPLINE-SETTING"
   },
   "active_cold_exec_session": null,
-  "active_cold_source_root": null,
+  "active_cold_source_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127",
   "active_exec_session": null,
   "active_jobs": [],
   "actual_H_derivative748": {
@@ -5302,8 +5407,8 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress:984 native acceptance/idempotence and updated-history3 steps verified;985 accepted5 growing steps, isolated attempt6 rejection as half-field accuracy only",
-  "current_load_stage": "ASD N, negative Mx and T limits verified; My remains NumFail at 6.57517. Single-step analytic tangent verified locally but no cold load gain; closed fixed-strain My trial timed out at 900s. Heavy project storage moved to D.",
+  "current_goal_turn_classification": "progress:proved steel projection432;111+77 final states and49 retained-prefix states independently verified;diagnostic I/O repaired and retried;confirmed cold6.662781 equilibrium but no ultimate capacity",
+  "current_load_stage": "ASD My:111 states verified for plastic-steel control;QR retry77 final states and49-state coarse retained prefix independently verified. Cold retained equilibrium My6.662781kNm exists with material limits satisfied;final search still NumFail at retained6.575170. No physical My capacity.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
     "axial_regression_restored_at_candidate1103": {
@@ -40898,7 +41003,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Preserve terminal 1156/1157/1158 raw evidence on D and investigate automatic governing-steel strain control using the existing universal steel projection, with unchanged material laws and original equilibrium tolerances. Do not repeat unchanged 1154/1155/1157/1158 trials or declare numerical failure a physical limit. Finish ASD M before NMT, then Q/NMTQ, CDP and final performance/acceptance.",
+  "next_action": "Inspect and test re-selection of the verified plastic-steel projection after generic stalled-field recovery:1161 ended in rejected-correction spatial control, while the one-time mSteelControlSelected flag prevents return to steel control. Preserve all original equilibrium/material/peak-accuracy criteria. Also distinguish local-peak refinement histories from the highest independently verified coarse prefix;do not publish6.662781 as an ultimate load. Do not rerun unchanged1154-1161. Finish ASD M before NMT,Q/NMTQ,CDP,performance and full acceptance.",
   "next_actions": [
     "Keep further formatting deferred",
     "Do not rerun cold candidates 1154/1155 unchanged; maximum lambda did not improve",
@@ -43259,7 +43364,8 @@
     "physical_My_limit_confirmed": false,
     "records": [
       {
-        "book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+        "compiled_book_path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1156ASDSingleStepTangent_20261127\\docs\\regression\\Diagnostic.xlsm",
+        "compiled_book_sha256": "05A4F217ACC812CE1B641A0D5B17CA6B9A1564AEB5DF2CF4442BA570AA3341B4",
         "native_proofs_sha256": {
           "ClosedTangentIndependent.json": "9250EE252CE67C4015D80DB36A6934E9D6FACB970832FE8C7FD688B32A4BF615",
           "ClosedTangentRegression.txt": "4278B0ED5BC36E8A53889B5CA4E310DEC7EF4463BE0429EEA92D7026D7BB22B6",
@@ -43277,10 +43383,12 @@
           "RealColdReplay.txt.memory.json": "F61FB6FE219F6503FDD8B11211BFC897BEB56DBE1851F429828C4933E5010E4A",
           "SingleStepRotationProof.json": "2368CAD7E4E633A00877FB68DD82D874C1710972FDD12A78340F679A25DF1DFF"
         },
-        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1156ASDSingleStepTangent_20261127"
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1156ASDSingleStepTangent_20261127",
+        "staged_input_book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559"
       },
       {
-        "book_sha256": "05A4F217ACC812CE1B641A0D5B17CA6B9A1564AEB5DF2CF4442BA570AA3341B4",
+        "compiled_book_path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1157ASDSingleStepTangentMy_20261127\\docs\\regression\\Diagnostic.xlsm",
+        "compiled_book_sha256": "4231667ACA77F4CAB528C67E9DECDC1FBD509F67D90E5EF2C3F19F90EFB212CB",
         "native_proofs_sha256": {
           "MainCapacity.bin": "760F62F91348576EA41C4D1F58CCA614042D5A048A09CA858321CE670E57D595",
           "MainCapacity.txt": "E0D907E8F7094C2170F6B589E35869AFBF0FE723490248FF72D80E86786E1FD3",
@@ -43295,10 +43403,12 @@
           "RealColdReplay.txt.RunnerCleanup.json": "958F0D52F47DA29E43DF0C82669D3E6D41CB061FD67989489C94C5E0D1282E28",
           "RealColdReplay.txt.memory.json": "ACE6F7FBD7DB67082059D98F1127E5C62F66B5A89EC4D859574818A61CEB4AFC"
         },
-        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1157ASDSingleStepTangentMy_20261127"
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1157ASDSingleStepTangentMy_20261127",
+        "staged_input_book_sha256": "05A4F217ACC812CE1B641A0D5B17CA6B9A1564AEB5DF2CF4442BA570AA3341B4"
       },
       {
-        "book_sha256": "4231667ACA77F4CAB528C67E9DECDC1FBD509F67D90E5EF2C3F19F90EFB212CB",
+        "compiled_book_path": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1158ASDClosedMy_20261127\\docs\\regression\\Diagnostic.xlsm",
+        "compiled_book_sha256": "E09629B8B3F55174D7E1700A6302A1821358808E0E4E3942FC7FD4FF81D6F911",
         "native_proofs_sha256": {
           "MainCapacityHistory.bin": "D571178621C62A6288E3BC8E374919C6D060A2C4285CB51AFF3FF9717140F5B2",
           "RealColdReplay.txt": "B8F7257E1CEB27F0E67650622DBD3EF70C00C9C42084A1E5ECD8756AD7CD376F",
@@ -43306,7 +43416,8 @@
           "RealColdReplay.txt.ProcessClosure.json": "EC418C8241DDB5D35E8BD59B7FA88C45ED3AFDE0EA39501F12CAFCDB2993A438",
           "RealColdReplay.txt.memory.json": "7A4D13D712FD3CE8C165D8BF29CDC6684BCD4517D1AD97683970AEEF659E2F21"
         },
-        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1158ASDClosedMy_20261127"
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1158ASDClosedMy_20261127",
+        "staged_input_book_sha256": "4231667ACA77F4CAB528C67E9DECDC1FBD509F67D90E5EF2C3F19F90EFB212CB"
       }
     ],
     "whole_goal_completed": false,
@@ -44245,7 +44356,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27: перенос тяжёлых данных проекта на D завершён; тестовые книги хранить на D",
+  "updated_local": "2026-11-27T10:37:23.975500+00:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",

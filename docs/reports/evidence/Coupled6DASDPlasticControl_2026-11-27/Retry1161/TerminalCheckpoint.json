@@ -1,0 +1,59 @@
+{
+  "accepted_history_snapshots": 261,
+  "all262_other_parent_components_unchanged": true,
+  "compiled_book_sha256": "BBA2DC4CC5A39A153C257985387D1BD965A91791242F2F101291BC6E94160E89",
+  "elapsed_seconds": 301.6484375,
+  "final_history": {
+    "accepted_states": 77,
+    "all60_equations_and_six_resultants_verified": true,
+    "case": "BendingMyConfigured",
+    "compression_utilization": 0.29141880468205006,
+    "final_lambda": 6.5582260734809115,
+    "final_target_resultants_N_Nmm": [
+      0.0,
+      0.0,
+      6558226.073480912,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "independent_axial_peak": null,
+    "independent_upper": null,
+    "maximum_force_error_N": 0.043644958474033047,
+    "maximum_moment_error_Nmm": 3.0142993750050664,
+    "status": "NumFail",
+    "whole_goal_completed": false
+  },
+  "final_maximum_epsilon0": 0.0035407266041153516,
+  "final_maximum_lambda": 6.5751697088477625,
+  "final_maximum_steel_utilization": 0.14163533116612875,
+  "independently_verified_retained_peak": {
+    "accepted_prefix_states": 49,
+    "actual_OpenSees_material_replay": true,
+    "all60_equations_and_six_resultants_verified": true,
+    "compression_utilization_all_three_stations": 0.30666237394391793,
+    "does_not_replace_final_workflow_status": true,
+    "external_structural_global_solve": false,
+    "maximum_force_error_N": 0.007607275533473512,
+    "maximum_moment_error_Nmm": 0.5091620511375368,
+    "maximum_retained_lambda": 6.6627811143819375,
+    "maximum_steel_strain_utilization": 0.08029534093763141,
+    "original_force_tolerances_preserved": true,
+    "physical_capacity_confirmed": false,
+    "selection": {
+      "input_history_sha256": "F681ECF2231C0B5B8DB0566C18E932C3142DFECFF957B7F952244D75FC031DC1",
+      "lambda": 6.6627811143819375,
+      "not_a_capacity_certificate": true,
+      "only_count_changed_and_exact_prefix_retained": true,
+      "original_snapshot": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\Case03\\Native\\MainCapacityHistory.bin.Accepted.000099.bin",
+      "original_snapshot_sha256": "AC7D7B5E8DBDE7FAEAD8645B4DB6B2A23B4B3537E4085FB81009D887E7F4F2FC",
+      "selected_point": 49
+    }
+  },
+  "own_excel_closed": true,
+  "physical_capacity_confirmed": false,
+  "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127",
+  "stage": "TERMINAL_NUMFAIL",
+  "test_observer_io_failure_fixed": true,
+  "whole_goal_completed": false
+}

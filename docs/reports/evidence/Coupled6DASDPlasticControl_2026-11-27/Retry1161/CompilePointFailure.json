@@ -1,0 +1,5 @@
+﻿{
+    "Message":  "Cannot find path \u0027D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\src\u0027 because it does not exist.",
+    "ScriptStackTrace":  "at \u003cScriptBlock\u003e, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\tools\\build_workbook\\Update-IsolatedOptimizerCode.ps1: line 32\r\nat \u003cScriptBlock\u003e, D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\Compile-TestASDSteelLinearRetry.ps1: line 15",
+    "Position":  "At D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1161ASDSteelLinearRetry_20261127\\tools\\build_workbook\\Update-IsolatedOptimizerCode.ps1:32 char:16\r\n+ ... urceFiles=@(Get-ChildItem -LiteralPath (Join-Path $root \u0027src\u0027),(Join- ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+}
