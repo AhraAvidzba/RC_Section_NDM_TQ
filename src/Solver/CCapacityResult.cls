@@ -35,6 +35,7 @@ Private mMomentUltimate As Double ' Модуль полного предельн
 Private mPureAxialForMethod As Boolean ' Признак выбора осевого численного расчёта после переноса нагрузки к центру приведённого сечения.
 Private mResultMeta As CResultMeta ' Статус, код причины и пояснение результата несущей способности.
 Private mCoupledSearch As Boolean, mIsTransverseLimit As Boolean
+Private mCoupledLimitKind As ECoupledPhysicalLimitKind
 Private mCoupledLimitLambda As Double, mConfirmedLowerLambda As Double, mHasConfirmedLowerBound As Boolean
 Private mPeakLambda As Double, mPeakAccuracy As Double
 Private mTUltimate As Double, mQxUltimate As Double, mQyUltimate As Double
@@ -61,19 +62,21 @@ Friend Sub AttachCoupledState(ByVal state As CSectionStateResult, ByVal warning 
     End If
 End Sub
 
-' Сохраняет подтверждённый арматурный предел. При lambda < 1 критерий
-' достаточен для FAIL. При lambda >= 1 полный запас требует проверки
-' бетонного механизма и число остаётся множителем арматурного предела.
+' Сохраняет подтверждённый материальный предел. При lambda < 1 ограничение достаточно для FAIL.
+' При lambda >= 1 общий запас доступен только при полном наборе активных ограничений
+' бетона и стали и отдельном подтверждении равновесия расчётного сочетания.
 Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Double, _
         ByVal pathKey As String, ByVal mechanism As String, ByVal state As CSectionStateResult, _
-        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False)
+        Optional ByVal details As String = vbNullString, Optional ByVal transverseLimit As Boolean = False, _
+        Optional ByVal limitKind As ECoupledPhysicalLimitKind = cplSteel, Optional ByVal completeMaterialCheck As Boolean = False, _
+        Optional ByVal designVerified As Boolean = True)
     AssertWritable
     If lambda <= 0# Or LBound(ultimate) <> 1 Or UBound(ultimate) <> 6 Then _
-        Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и положительный множитель арматурного предела."
+        Err.Raise 5, "CCapacityResult", "Передайте шесть усилий и положительный множитель материального предела."
 
     ResetNumericSnapshot
     mCoupledSearch = True: mIsTransverseLimit = transverseLimit
-    mCoupledLimitLambda = lambda
+    mCoupledLimitLambda = lambda: mCoupledLimitKind = limitKind
     mPathResolved = pathKey
     mSolutionMethod = "CoupledContinuation"
     mLimitState = mechanism
@@ -84,6 +87,13 @@ Friend Sub InitializeCoupledLimit(ByVal lambda As Double, ByRef ultimate() As Do
         mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
         mResultMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
             mechanism & ". Предел достигнут при множителе " & Format$(lambda, "0.000000") & ".", details
+    ElseIf completeMaterialCheck And designVerified Then
+        mLambdaCapacity = lambda: mUtilCapacity = 1# / lambda
+        mResultMeta.SetResult rsSuccess, rcCheckPassed, rkCapacity, _
+            mechanism & ". Предел достигнут при множителе " & Format$(lambda, "0.000000") & ".", details
+    ElseIf completeMaterialCheck Then
+        mResultMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
+            mechanism & ". Материальная граница определена; равновесие расчётного сочетания (lambda = 1) не подтверждено на этой ветви.", details
     Else
         mResultMeta.SetResult rsNumericalFailure, rcCoupledConcreteLimitUnresolved, rkCapacity, _
             mechanism & ". Определён арматурный предел. Для полного запаса требуется проверка предела бетонной ветви.", details
@@ -295,7 +305,7 @@ Private Sub ResetNumericSnapshot()
     mMyUltimate = 0#
     mMomentUltimate = 0#
     mPureAxialForMethod = False
-    mCoupledSearch = False: mIsTransverseLimit = False
+    mCoupledSearch = False: mIsTransverseLimit = False: mCoupledLimitKind = cplNone
     mCoupledLimitLambda = 0#: mConfirmedLowerLambda = 0#: mHasConfirmedLowerBound = False
     mPeakLambda = 0#: mPeakAccuracy = 0#
     mTUltimate = 0#: mQxUltimate = 0#: mQyUltimate = 0#
@@ -431,7 +441,7 @@ End Function
 
 ' Возвращает НДС общего предела для вывода как CapacityState.
 Public Property Get StateResult() As CSectionStateResult
-    If Not IsSteelLimitOnly Then Set StateResult = mStateResult
+    If Not IsMaterialLimitUnresolved Then Set StateResult = mStateResult
 End Property
 
 ' Возвращает НДС арматурного предела для его самостоятельной диагностики.
@@ -469,19 +479,19 @@ End Property
 
 ' Сообщает, что сохранены подтверждённые предельные усилия.
 Friend Property Get HasUltimatePoint() As Boolean
-    If IsSteelLimitOnly Then Exit Property
+    If IsMaterialLimitUnresolved Then Exit Property
     HasUltimatePoint = (mCoupledLimitLambda > 0# Or mPeakLambda > 0#)
     If Not mSearchResult Is Nothing Then HasUltimatePoint = mSearchResult.HasLimitPoint
 End Property
 
 ' Отличает найденное арматурное событие от подтверждённой общей предельной точки.
-Private Function IsSteelLimitOnly() As Boolean
-    IsSteelLimitOnly = (mResultMeta.ResultCode = rcCoupledConcreteLimitUnresolved)
+Private Function IsMaterialLimitUnresolved() As Boolean
+    IsMaterialLimitUnresolved = (mResultMeta.ResultCode = rcCoupledConcreteLimitUnresolved)
 End Function
 
 ' Подтверждает арматурную точку с положительным множителем переменной нагрузки.
 Friend Property Get HasSteelLimitPoint() As Boolean
-    HasSteelLimitPoint = (mCoupledLimitLambda > 0#)
+    HasSteelLimitPoint = (mCoupledLimitLambda > 0# And mCoupledLimitKind = cplSteel)
 End Property
 
 ' Передаёт шесть усилий арматурной точки в пользовательской точке
@@ -541,17 +551,17 @@ End Property
 
 ' Возвращает предельное кручение в пользовательской точке, Н·мм.
 Friend Property Get TUltimate() As Double
-    If Not IsSteelLimitOnly Then TUltimate = mTUltimate
+    If Not IsMaterialLimitUnresolved Then TUltimate = mTUltimate
 End Property
 
 ' Возвращает предельную поперечную силу X, Н.
 Friend Property Get QxUltimate() As Double
-    If Not IsSteelLimitOnly Then QxUltimate = mQxUltimate
+    If Not IsMaterialLimitUnresolved Then QxUltimate = mQxUltimate
 End Property
 
 ' Возвращает предельную поперечную силу Y, Н.
 Friend Property Get QyUltimate() As Double
-    If Not IsSteelLimitOnly Then QyUltimate = mQyUltimate
+    If Not IsMaterialLimitUnresolved Then QyUltimate = mQyUltimate
 End Property
 
 ' Использование несущей способности.
@@ -561,17 +571,17 @@ End Property
 
 ' Предельная N в точке приложения нагрузки.
 Public Property Get NUltimate() As Double
-    If Not IsSteelLimitOnly Then NUltimate = mNUltimate
+    If Not IsMaterialLimitUnresolved Then NUltimate = mNUltimate
 End Property
 
 ' Предельный Mx в точке приложения нагрузки.
 Public Property Get MxUltimate() As Double
-    If Not IsSteelLimitOnly Then MxUltimate = mMxUltimate
+    If Not IsMaterialLimitUnresolved Then MxUltimate = mMxUltimate
 End Property
 
 ' Предельный My в точке приложения нагрузки.
 Public Property Get MyUltimate() As Double
-    If Not IsSteelLimitOnly Then MyUltimate = mMyUltimate
+    If Not IsMaterialLimitUnresolved Then MyUltimate = mMyUltimate
 End Property
 
 ' Возвращает внутреннюю продольную силу сохранённого предельного НДС.
@@ -594,12 +604,12 @@ End Property
 
 ' Модуль полного предельного момента в точке приложения нагрузки.
 Public Property Get MomentUltimate() As Double
-    If Not IsSteelLimitOnly Then MomentUltimate = mMomentUltimate
+    If Not IsMaterialLimitUnresolved Then MomentUltimate = mMomentUltimate
 End Property
 
 ' Показывает, сохранено ли предельное напряжённо-деформированное состояние CapacityState.
 Public Property Get CapacityStateAvailable() As Boolean
-    CapacityStateAvailable = (Not mStateResult Is Nothing) And Not IsSteelLimitOnly
+    CapacityStateAvailable = (Not mStateResult Is Nothing) And Not IsMaterialLimitUnresolved
 End Property
 
 ' Возвращает деформацию в начале координат сохранённого предельного НДС.
@@ -658,3 +668,13 @@ Friend Sub AppendCoupledSearchDiagnostic(ByVal details As String)
     If Len(details) = 0 Then Exit Sub
     mResultMeta.DiagnosticDetails = mResultMeta.DiagnosticDetails & " | " & details
 End Sub
+
+' Подтверждает материальное событие любого поддержанного вида, отдельно от максимума ветви.
+Friend Property Get HasMaterialLimitPoint() As Boolean
+    HasMaterialLimitPoint = (mCoupledLimitLambda > 0#)
+End Property
+
+' Сообщает материал и ветвь найденного деформационного ограничения.
+Friend Property Get CoupledLimitKind() As ECoupledPhysicalLimitKind
+    CoupledLimitKind = mCoupledLimitKind
+End Property

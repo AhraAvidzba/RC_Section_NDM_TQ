@@ -33,6 +33,10 @@ Private mTrialTransversePoint As Long, mAcceptedTransversePoint As Long
 Private mTrialTransverseUtilization As Double, mAcceptedTransverseUtilization As Double
 Private mTrialLongitudinalUtilization As Double, mAcceptedLongitudinalUtilization As Double
 Private mTrialLongitudinalPoint As Long, mAcceptedLongitudinalPoint As Long
+Private mConcreteLimits As CCoupledASDStrainLimits, mCriterionConcrete As CCoupledConcreteResponse
+Private mTrialConcreteUtilization As Double, mAcceptedConcreteUtilization As Double
+Private mTrialConcretePoint As Long, mAcceptedConcretePoint As Long
+Private mTrialConcreteKind As ECoupledPhysicalLimitKind, mAcceptedConcreteKind As ECoupledPhysicalLimitKind
 
 ' Передаёт масштаб координаты только для бетонного закона с подготовленными энергиями огибающих.
 Friend Property Get EnvelopeReferenceStress() As Double
@@ -59,10 +63,10 @@ End Function
 ' Один раз сопоставляет точкам их диаграммы и проекции.
 ' Models индексируется классом стали, указанным в сформированной геометрии.
 Friend Sub Initialize(ByVal operators As CCoupledElasticState, ByVal concrete As ICoupledPointResponse, _
-        ByVal models As Object)
+        ByVal models As Object, Optional ByVal concreteLimits As CCoupledASDStrainLimits = Nothing)
     If operators Is Nothing Or concrete Is Nothing Then _
         Err.Raise 5, "CCoupledReinforcedResponse", "Для связанного отклика требуется подготовленное сечение и бетон."
-    Set mConcrete = Nothing
+    Set mConcrete = Nothing: Set mCriterionConcrete = Nothing: Set mConcreteLimits = concreteLimits
     Erase mSteel: Erase mDirection
     mFirstSteel = operators.ConcretePointCount + 1
     mLastSteel = operators.PointCount
@@ -86,7 +90,71 @@ Friend Sub Initialize(ByVal operators As CCoupledElasticState, ByVal concrete As
     End If
     Set mConcrete = concrete
     ICoupledPointResponse_ClearHistory
+    If Not mConcreteLimits Is Nothing Then
+        If Not TypeOf concrete Is CCoupledConcreteResponse Then _
+            Err.Raise 5, "CCoupledReinforcedResponse", "Явные ограничения ASD требуют подготовленного спектрального бетона."
+        Set mCriterionConcrete = concrete
+        Dim usage As Double, measure As Double, compression As Boolean
+        If Not mConcreteLimits.TryEvaluateAccepted(mCriterionConcrete, 1, usage, measure, compression) Then _
+            Err.Raise 5, "CCoupledReinforcedResponse", "Явные ограничения ASD неприменимы к выбранному закону бетона."
+    End If
 End Sub
+
+' Показывает, задан ли полный явный контракт ограничений ASD для бетонной составляющей.
+Friend Property Get HasConcreteLimits() As Boolean
+    HasConcreteLimits = Not mConcreteLimits Is Nothing
+End Property
+
+' Показывает наличие хотя бы одного физического ограничения в данном материальном отклике.
+Friend Property Get HasMaterialLimits() As Boolean
+    HasMaterialLimits = HasSteel Or HasConcreteLimits
+End Property
+
+' Суммирует критерии выбором наибольшего использования без изменения отдельных показателей стали.
+Friend Property Get TrialMaterialUtilization() As Double
+    TrialMaterialUtilization = GeomMax(mTrialSteelUtilization, mTrialConcreteUtilization)
+End Property
+
+' Возвращает наибольшее использование принятого состояния, включая явно проверенный бетон.
+Friend Property Get AcceptedMaterialUtilization() As Double
+    AcceptedMaterialUtilization = GeomMax(mAcceptedSteelUtilization, mAcceptedConcreteUtilization)
+End Property
+
+' Возвращает точку определяющего критерия полной пробы; при равенстве сохраняет приоритет стали.
+Friend Property Get TrialMaterialPoint() As Long
+    If mTrialConcreteUtilization > mTrialSteelUtilization Then
+        TrialMaterialPoint = mTrialConcretePoint
+    Else
+        TrialMaterialPoint = mTrialSteelPoint
+    End If
+End Property
+
+' Указывает материал и ветвь определяющего ограничения пробного состояния.
+Friend Property Get TrialMaterialKind() As ECoupledPhysicalLimitKind
+    If mTrialConcreteUtilization > mTrialSteelUtilization Then
+        TrialMaterialKind = mTrialConcreteKind
+    ElseIf mTrialSteelPoint > 0 Then
+        TrialMaterialKind = cplSteel
+    End If
+End Property
+
+' Возвращает точку определяющего критерия принятого состояния.
+Friend Property Get AcceptedMaterialPoint() As Long
+    If mAcceptedConcreteUtilization > mAcceptedSteelUtilization Then
+        AcceptedMaterialPoint = mAcceptedConcretePoint
+    Else
+        AcceptedMaterialPoint = mAcceptedSteelPoint
+    End If
+End Property
+
+' Указывает материал и ветвь определяющего ограничения принятого состояния.
+Friend Property Get AcceptedMaterialKind() As ECoupledPhysicalLimitKind
+    If mAcceptedConcreteUtilization > mAcceptedSteelUtilization Then
+        AcceptedMaterialKind = mAcceptedConcreteKind
+    ElseIf mAcceptedSteelPoint > 0 Then
+        AcceptedMaterialKind = cplSteel
+    End If
+End Property
 
 ' Показывает наличие продольной или поперечной арматуры в балансе сечения.
 Friend Property Get HasSteel() As Boolean
@@ -154,9 +222,16 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
         mTrialSteelUtilization = 0#: mTrialSteelPoint = 0
         mTrialTransverseUtilization = 0#: mTrialTransversePoint = 0
         mTrialLongitudinalUtilization = 0#: mTrialLongitudinalPoint = 0
+        mTrialConcreteUtilization = 0#: mTrialConcretePoint = 0: mTrialConcreteKind = cplNone
     End If
     ICoupledPointResponse_EvaluatePoint = mConcrete.EvaluatePoint(point, strain, stress, tangent, tangentMode, recordTrial)
-    If ICoupledPointResponse_EvaluatePoint <> sfcNone Or point < mFirstSteel Then Exit Function
+    If ICoupledPointResponse_EvaluatePoint <> sfcNone Then Exit Function
+    If point < mFirstSteel Then
+        If recordTrial And Not mConcreteLimits Is Nothing Then
+            If Not RecordConcreteLimit(point) Then ICoupledPointResponse_EvaluatePoint = sfcInvalidConfiguration
+        End If
+        Exit Function
+    End If
     Dim j As Long, k As Long, axialStrain As Double, axialStress As Double, axialTangent As Double
     Dim utilization As Double, plastic As Double, backstress As Double
     ReadSteelTrial point, strain, axialStrain, axialStress, axialTangent, plastic, backstress
@@ -184,6 +259,18 @@ Private Function ICoupledPointResponse_EvaluatePoint(ByVal point As Long, ByRef 
             Next k
         End If
     Next j
+End Function
+
+' Читает готовые координаты только физической бетонной квадратуры.
+' Отрицательные бетонные поправки в точках стали не являются дополнительным физическим бетоном.
+Private Function RecordConcreteLimit(ByVal point As Long) As Boolean
+    Dim usage As Double, measure As Double, compression As Boolean
+    If Not mConcreteLimits.TryEvaluateBuffered(mCriterionConcrete, point, False, usage, measure, compression) Then Exit Function
+    If usage > mTrialConcreteUtilization Then
+        mTrialConcreteUtilization = usage: mTrialConcretePoint = point
+        If compression Then mTrialConcreteKind = cplConcreteCompression Else mTrialConcreteKind = cplConcreteTension
+    End If
+    RecordConcreteLimit = True
 End Function
 
 ' Считывает только бетонный вклад, включая знак вытеснения под стержнем.
@@ -259,6 +346,8 @@ Private Sub ICoupledPointResponse_AcceptTrial()
     mAcceptedSteelPoint = mTrialSteelPoint
     mAcceptedTransversePoint = mTrialTransversePoint
     mAcceptedTransverseUtilization = mTrialTransverseUtilization
+    mAcceptedConcreteUtilization = mTrialConcreteUtilization: mAcceptedConcretePoint = mTrialConcretePoint
+    mAcceptedConcreteKind = mTrialConcreteKind
 End Sub
 
 ' Удаляет историю независимого сочетания в обоих материалах.
@@ -271,6 +360,8 @@ Private Sub ICoupledPointResponse_ClearHistory()
     mTrialSteelPoint = 0: mAcceptedSteelPoint = 0
     mTrialTransversePoint = 0: mAcceptedTransversePoint = 0
     mTrialTransverseUtilization = 0#: mAcceptedTransverseUtilization = 0#
+    mTrialConcreteUtilization = 0#: mAcceptedConcreteUtilization = 0#
+    mTrialConcretePoint = 0: mAcceptedConcretePoint = 0: mTrialConcreteKind = cplNone: mAcceptedConcreteKind = cplNone
     Erase mPlastic: Erase mBackstress: Erase mAxialStress
     If mLastSteel >= mFirstSteel Then
         ReDim mPlastic(mFirstSteel To mLastSteel, 1 To 2)

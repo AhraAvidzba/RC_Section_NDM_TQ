@@ -30,6 +30,7 @@ Private mEb As Double, mCenterX As Double, mCenterY As Double
 Private mSupplementarySteel As Object, mSteelReferences As Object ' Модели по набору характеристик, ссылки применённых классов.
 Private mSteelCache As Object, mOperatorCache As Object ' Неизменяемые модели и операторы по точному набору характеристик в пределах запуска.
 Private mDiagramCache As Object ' Точки фактических диаграмм для публикации одного набора характеристик.
+Private mConcreteLimits As CCoupledASDStrainLimits
 Private mASDFlow As CCoupledASDFlow ' Необязательный неизменяемый закон по явно подготовленным таблицам.
 Private mCalibratedASD As Boolean, mASDFlowCache As Object ' Табличные законы разных наборов характеристик одного запуска не разделяют историю.
 Private mDiscretization As CCoupledDiscretization ' Общая неизменяемая точность всех сочетаний одного запуска.
@@ -41,7 +42,7 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
         ByVal localizationLength As Double, ByVal yieldRatio As Double, ByVal peakStrain As Double, _
         ByVal steelClass As String, ByVal maxIterations As Long, Optional ByVal supplementarySteel As Object = Nothing, _
         Optional ByVal asdFlow As CCoupledASDFlow = Nothing, Optional ByVal discretization As CCoupledDiscretization = Nothing, _
-        Optional ByVal concreteLaw As String = "CDP")
+        Optional ByVal concreteLaw As String = "CDP", Optional ByVal concreteLimits As CCoupledASDStrainLimits = Nothing)
     concreteLaw = UCase$(Trim$(concreteLaw))
     If concreteLaw <> "CDP" And concreteLaw <> "ASD" Then Err.Raise 5, "CCoupledSectionAnalysis", "Выберите закон пространственного бетона CDP или ASD."
     If section Is Nothing Or transverse Is Nothing Or provider Is Nothing Then _
@@ -62,7 +63,7 @@ Friend Sub Initialize(ByVal section As CSectionModel, ByVal transverse As CTrans
     mYieldRatio = yieldRatio: mPeakStrain = peakStrain
     mSteelClass = Trim$(steelClass): mMaxIterations = maxIterations
     Set mSupplementarySteel = supplementarySteel
-    Set mASDFlow = asdFlow
+    Set mASDFlow = asdFlow: Set mConcreteLimits = concreteLimits
     mCalibratedASD = (concreteLaw = "ASD" And asdFlow Is Nothing)
     Set mASDFlowCache = CreateObject("Scripting.Dictionary")
     If discretization Is Nothing Then
@@ -215,26 +216,27 @@ Private Function SolveCapacityAttempt(ByVal loads As CSectionLoadState, ByVal lo
     Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
-    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True, preferDeformationAfterInitial:=mCalibratedASD, normalizeInitialStep:=normalizeInitialStep
+    branch.TraceMaterialLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True, preferDeformationAfterInitial:=mCalibratedASD, normalizeInitialStep:=normalizeInitialStep
     Set acceptedTrace = branch.SavedTrace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long
-    Dim hasSteel As Boolean, controlled As CCoupledDeformationContinuation
+    Dim hasMaterial As Boolean, controlled As CCoupledDeformationContinuation
+    Dim criticalKind As ECoupledPhysicalLimitKind
     Dim limitHistory As Collection, actual() As Double, limitTarget() As Double
-    hasSteel = branch.CopySteelLimit(low, high, onOffset, criticalPoint)
-    If hasSteel And meta.InternalStatus = rsNumericalFailure Then
-        meta.ResultComment = meta.ResultComment & " " & SteelControlDescription(criticalPoint) & "."
+    hasMaterial = branch.CopyMaterialLimit(low, high, onOffset, criticalPoint, criticalKind)
+    If hasMaterial And meta.InternalStatus = rsNumericalFailure Then
+        meta.ResultComment = meta.ResultComment & " " & MaterialControlDescription(criticalPoint, criticalKind) & "."
         capacity.InitializeCoupledUnresolved meta, loadPath, low
         Exit Function
     End If
-    If Not hasSteel Then
+    If Not hasMaterial Then
         Set controlled = branch.ContinueByDeformation(maximumLambda, progress)
         If Not controlled Is Nothing Then
             Set acceptedTrace = controlled.SavedTrace
             Dim forceDetails As String: forceDetails = meta.DiagnosticDetails
             Set meta = controlled.ResultMeta
             If Len(forceDetails) > 0 Then meta.DiagnosticDetails = forceDetails & " | " & meta.DiagnosticDetails
-            hasSteel = controlled.CopySteelLimit(low, high, criticalPoint)
+            hasMaterial = controlled.CopyMaterialLimit(low, high, criticalPoint, criticalKind)
             Dim peak As Double, accuracy As Double, designVerified As Boolean
             If controlled.CopyPeak(peak, accuracy, designVerified) Then
                 path.TargetSix peak, limitTarget
@@ -248,16 +250,19 @@ Private Function SolveCapacityAttempt(ByVal loads As CSectionLoadState, ByVal lo
             End If
         End If
     End If
-    If hasSteel Then
-        reason = SteelLimitComment(criticalPoint)
-        Dim transverseLimit As Boolean: transverseLimit = (mOperators.TransverseGroupAt(criticalPoint) > 0)
+    If hasMaterial Then
+        reason = MaterialLimitComment(criticalPoint, criticalKind)
+        Dim transverseLimit As Boolean
+        If criticalKind = cplSteel Then transverseLimit = (mOperators.TransverseGroupAt(criticalPoint) > 0)
         If onOffset Then
             capacity.InitializeCoupledBaseFail reason, loadPath, meta.DiagnosticDetails, transverseLimit
         Else
             path.TargetSix low, limitTarget
             ultimate = limitTarget
             loads.MoveResultantsToLoadPoint mCenterX, mCenterY, ultimate
-            capacity.InitializeCoupledLimit low, ultimate, loadPath, reason, Nothing, meta.DiagnosticDetails, transverseLimit
+            Dim limitDesignVerified As Boolean: limitDesignVerified = True
+            If Not controlled Is Nothing Then limitDesignVerified = controlled.DesignLoadVerified
+            capacity.InitializeCoupledLimit low, ultimate, loadPath, reason, Nothing, meta.DiagnosticDetails, transverseLimit, criticalKind, response.HasConcreteLimits, limitDesignVerified
             If controlled Is Nothing Then
                 branch.CopyLimitState limitHistory, actual
             Else
@@ -272,8 +277,8 @@ Private Function SolveCapacityAttempt(ByVal loads As CSectionLoadState, ByVal lo
         If branch.HasAcceptedVariableState Then low = branch.AcceptedLambda
         If Not controlled Is Nothing Then
             low = controlled.BestAdmissibleLambda
-            criticalPoint = controlled.SteelEventPoint
-            If criticalPoint > 0 Then meta.ResultComment = meta.ResultComment & " " & SteelControlDescription(criticalPoint) & "."
+            criticalPoint = controlled.MaterialEventPoint: criticalKind = controlled.MaterialEventKind
+            If criticalPoint > 0 Then meta.ResultComment = meta.ResultComment & " " & MaterialControlDescription(criticalPoint, criticalKind) & "."
         End If
         capacity.InitializeCoupledUnresolved meta, loadPath, low
     End If
@@ -397,7 +402,7 @@ End Sub
 Private Sub InitializePointResponse(ByVal concrete As CCoupledConcreteResponse, ByVal response As CCoupledReinforcedResponse, _
         ByVal fc As Double, ByVal ft As Double, ByVal models As Object)
     InitializeConcrete concrete, mOperators.PointCount, fc, ft
-    response.Initialize mOperators, concrete, models
+    response.Initialize mOperators, concrete, models, mConcreteLimits
 End Sub
 
 ' Применяет один и тот же закон к центральной, боковым и выходным историям.
@@ -456,7 +461,7 @@ Private Function CaptureAcceptedState(ByVal stateType As ESectionStateType, ByVa
     Dim residualArea As Double, residualLength As Double
     mOperators.CopyResultantResidualScales residualArea, residualLength
     state.InitializeFromCoupled stateType, mSection, spec, target, resultants, eps0, kx, ky, twist, fields, fieldMeta, _
-        (reinforcement.AcceptedSteelUtilization <= 1# And meta.ResultCode <> rcCoupledSteelLimitUnresolved), residualArea, residualLength
+        (reinforcement.AcceptedMaterialUtilization <= 1# And meta.ResultCode <> rcCoupledSteelLimitUnresolved), residualArea, residualLength
     state.SetCoupledMaterialCurves CalibrationCurves(spec, concrete, models)
     SetTransverseControl state, reinforcement, models, field, governingTransversePoint, transverseMeta
     Set CaptureAcceptedState = state
@@ -714,3 +719,21 @@ Private Sub ReportAcceptedProgress(ByVal progress As ICoupledContinuationProgres
     Set snapshotTrace = trace.CopyPrefix(trace.Count): Set snapshotMeta = meta.Clone
     progress.Report snapshot, snapshotTrace, snapshotMeta
 End Sub
+
+' Называет фактически определившее материальное ограничение, не выдавая бетонную точку за стержень.
+Private Function MaterialLimitComment(ByVal point As Long, ByVal kind As ECoupledPhysicalLimitKind) As String
+    If kind = cplSteel Then MaterialLimitComment = SteelLimitComment(point): Exit Function
+    If mConcreteLimits Is Nothing Then Err.Raise 5, "CCoupledSectionAnalysis", "Не подготовлены явные ограничения бетона."
+    MaterialLimitComment = CoupledPhysicalLimitText("Достигнута предельная деформация арматуры. ", kind) & _
+        MaterialControlDescription(point, kind) & ". Предел эквивалентной полной деформации: " & _
+        CStr(mConcreteLimits.LimitStrain(kind = cplConcreteCompression))
+End Function
+
+' Привязывает бетонное событие к фактической точке квадратуры в осях сечения.
+Private Function MaterialControlDescription(ByVal point As Long, ByVal kind As ECoupledPhysicalLimitKind) As String
+    If kind = cplSteel Then MaterialControlDescription = SteelControlDescription(point): Exit Function
+    Dim x As Double, y As Double, weight As Double
+    mOperators.Point point, x, y, weight
+    MaterialControlDescription = "Бетонная точка квадратуры " & CStr(point) & ", x = " & _
+        Format$(x - mCenterX, "0.00") & " мм, y = " & Format$(y - mCenterY, "0.00") & " мм"
+End Function

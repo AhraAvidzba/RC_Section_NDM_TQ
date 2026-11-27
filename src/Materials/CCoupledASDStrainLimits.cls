@@ -44,6 +44,29 @@ Friend Function TryEvaluateAccepted(ByVal concrete As CCoupledConcreteResponse, 
     TryEvaluateAccepted = True
 End Function
 
+' Проверяет буфер только что вычисленной точки без повторного спектрального обновления.
+' Ответственность за готовность пробного буфера несёт владелец полного вычисления поля.
+Friend Function TryEvaluateBuffered(ByVal concrete As CCoupledConcreteResponse, ByVal point As Long, _
+        ByVal accepted As Boolean, ByRef utilization As Double, ByRef criticalStrain As Double, _
+        ByRef compression As Boolean) As Boolean
+    ValidateResponse concrete
+    utilization = 0#: criticalStrain = 0#: compression = True
+    Dim tension As Double, compressive As Double
+    If Not concrete.TryReadBufferedASDStrains(point, accepted, tension, compressive) Then Exit Function
+    EvaluateMeasures tension, compressive, utilization, criticalStrain, compression
+    TryEvaluateBuffered = True
+End Function
+
+' Возвращает только активный явно заданный предел; у отключённого растяжения возвращает ноль.
+Friend Function LimitStrain(ByVal compression As Boolean) As Double
+    If Not mReady Then InvalidInput "Сначала задайте явные пределы эквивалентных деформаций ASD."
+    If compression Then
+        LimitStrain = mCompression
+    ElseIf mTensionEnabled Then
+        LimitStrain = mTension
+    End If
+End Function
+
 ' Проверяет кандидата от принятой истории; равенство единице относится к допустимой границе.
 Friend Function TryEvaluateTrial(ByVal concrete As CCoupledConcreteResponse, ByVal point As Long, _
         ByRef strain() As Double, ByRef utilization As Double, ByRef criticalStrain As Double, _

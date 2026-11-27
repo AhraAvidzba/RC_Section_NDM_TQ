@@ -44,9 +44,10 @@ Private mDirectSteelDetails As String
 Private mDirectSteelUncertainty As ECoupledSteelUncertainty
 Private mReinforcement As CCoupledReinforcedResponse ' Контроль предельных деформаций включается при поиске.
 Private mLimitTolerance As Double
-Private mHasSteelLimit As Boolean, mSteelLimitOnOffset As Boolean
-Private mSteelLimitLow As Double, mSteelLimitHigh As Double
-Private mSteelLimitPoint As Long ' Материальная точка, определившая численно уточнённую верхнюю границу.
+Private mHasMaterialLimit As Boolean, mMaterialLimitOnOffset As Boolean
+Private mMaterialLimitLow As Double, mMaterialLimitHigh As Double
+Private mMaterialLimitKind As ECoupledPhysicalLimitKind
+Private mMaterialLimitPoint As Long ' Материальная точка, определившая численно уточнённую верхнюю границу.
 Private mLimitFields As Collection
 Private mLimitResultants() As Double
 Private mLimitTrace As CCoupledLoadTrace
@@ -73,8 +74,8 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mOffsetFraction = 0#: mLambda = 0#: mPreviousLambda = -1#: mHasAccepted = False
     mPreferDeformationOnStall = False: mPreferDeformationAfterInitial = False
     Set mReinforcement = Nothing: Set mDirectSteel = Nothing
-    mHasSteelLimit = False: mSteelLimitOnOffset = False
-    mSteelLimitPoint = 0
+    mHasMaterialLimit = False: mMaterialLimitOnOffset = False
+    mMaterialLimitPoint = 0: mMaterialLimitKind = cplNone
     Set mLimitFields = Nothing: Erase mLimitResultants
     Erase mField: Erase mResultants: Erase mPreviousField
     Set mAcceptedFields = Nothing: Set mAcceptedTrace = Nothing: Set mLimitTrace = Nothing
@@ -86,10 +87,10 @@ Friend Sub Initialize(ByVal solver As CCoupledNewtonSolver, ByVal path As CLoadP
     mSolver.ResetHistory
 End Sub
 
-' Ищет первое пересечение принятого ограничения арматуры на свежей
+' Ищет первое пересечение принятого ограничения материала на свежей
 ' траектории. Всегда проверяет расчётное lambda = 1, если оно в диапазоне.
 ' Достигнутая численная или заданная граница отдельно хранится в ResultMeta.
-Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
+Friend Sub TraceMaterialLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
         ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
         Optional ByVal preferDeformationOnStall As Boolean = False, Optional ByVal preferDeformationAfterInitial As Boolean = False, _
         Optional ByVal normalizeInitialStep As Boolean = False)
@@ -138,7 +139,7 @@ End Sub
 Friend Function ContinueByDeformation(ByVal maximumLambda As Double, _
         Optional ByVal progress As ICoupledContinuationProgress = Nothing) As CCoupledDeformationContinuation
     If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
-    If mHasSteelLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
+    If mHasMaterialLimit Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Or PreviousAcceptedLambda >= mLambda Then Exit Function
     Dim controlled As New CCoupledDeformationContinuation
     controlled.Trace mSolver, mReinforcement, mOffset, mDirection, mAcceptedFields, _
         PreviousAcceptedLambda, mLambda, mResultants, maximumLambda, mLimitTolerance, mMaxIterations, mAbsoluteTolerance, mRelativeTolerance, mAcceptedTrace, progress
@@ -146,15 +147,15 @@ Friend Function ContinueByDeformation(ByVal maximumLambda As Double, _
     Set ContinueByDeformation = controlled
 End Function
 
-' Возвращает интервал арматурного события по равновесным пробам.
+' Возвращает интервал материального события по равновесным пробам.
 ' Если он охватывает заданную нагрузку, ResultMeta сообщает NumFail.
 ' Для преднагружения границы относятся к его доле.
-Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef onOffset As Boolean, _
-        Optional ByRef criticalPoint As Long = 0) As Boolean
-    If Not mHasSteelLimit Then Exit Function
-    low = mSteelLimitLow: high = mSteelLimitHigh: onOffset = mSteelLimitOnOffset
-    criticalPoint = mSteelLimitPoint
-    CopySteelLimit = True
+Friend Function CopyMaterialLimit(ByRef low As Double, ByRef high As Double, ByRef onOffset As Boolean, _
+        Optional ByRef criticalPoint As Long = 0, Optional ByRef criticalKind As ECoupledPhysicalLimitKind = cplNone) As Boolean
+    If Not mHasMaterialLimit Then Exit Function
+    low = mMaterialLimitLow: high = mMaterialLimitHigh: onOffset = mMaterialLimitOnOffset
+    criticalPoint = mMaterialLimitPoint: criticalKind = mMaterialLimitKind
+    CopyMaterialLimit = True
 End Function
 
 ' Нижняя граница относится к завершённому преднагружению и принятым пробам.
@@ -183,7 +184,7 @@ Friend Property Get SavedTrace() As CCoupledLoadTrace
     If mLimitTrace Is Nothing Then Set SavedTrace = mAcceptedTrace Else Set SavedTrace = mLimitTrace
 End Property
 
-' Передаёт историю и усилия допустимого плеча стального предела.
+' Передаёт историю и усилия допустимого плеча материального предела.
 ' Пробы бисации используют одну историю, поэтому добавляется только
 ' окончательная допустимая точка, если она отличается от левого поля.
 Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As Double) As Boolean
@@ -199,6 +200,12 @@ End Function
 Friend Function Advance(ByVal targetLambda As Double, Optional ByVal verifyDirectSteel As CCoupledReinforcedResponse = Nothing) As Boolean
     mMeta.Clear
     Set mDirectSteel = verifyDirectSteel: mDirectTarget = targetLambda: mDirectSteelDetails = vbNullString
+    If Not mDirectSteel Is Nothing Then
+        If mDirectSteel.HasConcreteLimits Then
+            Set mReinforcement = mDirectSteel
+            mLimitTolerance = 0.0001 ' Прямой расчёт уточняет пересечение относительно lambda=1, не обходя физическую границу.
+        End If
+    End If
     mDirectSteelUncertainty = csuNone
     mRejected = 0: mAccepted = 0: mAttempts = 0
     mExactTargetRecovery = vbNullString
@@ -315,7 +322,7 @@ Private Function FollowSegment(ByRef reached As Double, ByVal target As Double, 
                 increment = nominal
             End If
         Else
-            If mHasSteelLimit Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
+            If mHasMaterialLimit Or mMeta.InternalStatus <> rsNumericalFailure Then Exit Function
             mRejected = mRejected + 1
             If candidate = target And Not offsetStage Then
                 If TryRecoverTargetFromPrediction(target, triedSecant) Then
@@ -461,9 +468,9 @@ End Function
 Private Function SolveAndAccept(ByVal parameter As Double, ByVal offsetStage As Boolean) As Boolean
     If Not TryEquilibrium(parameter, offsetStage) Then Exit Function
     If Not mReinforcement Is Nothing Then
-        If mReinforcement.TrialSteelUtilization > 1# Then
+        If mReinforcement.TrialMaterialUtilization > 1# Then
             mSolver.DiscardStep
-            RefineSteelLimit parameter, offsetStage
+            RefineMaterialLimit parameter, offsetStage
             Exit Function
         End If
     End If
@@ -519,44 +526,47 @@ End Sub
 
 ' Уточняет пересечение с откатом каждой пробы к одному принятому состоянию.
 ' При численной неудаче внешний шаг делится и подтверждается заново.
-Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
+Private Sub RefineMaterialLimit(ByVal high As Double, ByVal offsetStage As Boolean)
     Dim low As Double, candidate As Double, tolerance As Double
     Dim lowRatio As Double, highRatio As Double, ratio As Double, limitPoint As Long
+    Dim limitKind As ECoupledPhysicalLimitKind
+    Dim resultKind As EResultKind: resultKind = rkCapacity
+    If Not mDirectSteel Is Nothing Then resultKind = rkDirectState
     Dim finalField() As Double, finalResultants() As Double, keepFields As Boolean
     keepFields = (Not offsetStage And Not mAcceptedFields Is Nothing)
     low = mLambda
     If offsetStage Then low = mOffsetFraction
-    lowRatio = mReinforcement.AcceptedSteelUtilization
-    highRatio = mReinforcement.TrialSteelUtilization
-    limitPoint = mReinforcement.TrialSteelCriticalPoint
+    lowRatio = mReinforcement.AcceptedMaterialUtilization
+    highRatio = mReinforcement.TrialMaterialUtilization
+    limitPoint = mReinforcement.TrialMaterialPoint: limitKind = mReinforcement.TrialMaterialKind
     tolerance = mLimitTolerance
     If Not offsetStage And high >= 0.95 And low <= 1.05 Then tolerance = LowerOf(tolerance, 0.0001) ' Уточнение рядом с расчётным множителем.
     Do While high - low > tolerance Or low = 0#
         If mAttempts >= mMaxAttempts Then
-            mMeta.SetSolverFailure sfcNumericalFailure, rkCapacity, _
-                "Исчерпан лимит проб уточнения предельной деформации арматуры.", True
+            mMeta.SetSolverFailure sfcNumericalFailure, resultKind, _
+                CoupledPhysicalLimitText("Исчерпан лимит проб уточнения предельной деформации арматуры.", limitKind), True
             Exit Sub
         End If
         candidate = low + 0.5 * (high - low)
         If candidate = low Or candidate = high Then
-            mMeta.SetSolverFailure sfcNumericalFailure, rkCapacity, _
-                "Машинная точность множителя ограничила уточнение предельной деформации арматуры.", True
+            mMeta.SetSolverFailure sfcNumericalFailure, resultKind, _
+                CoupledPhysicalLimitText("Машинная точность множителя ограничила уточнение предельной деформации арматуры.", limitKind), True
             Exit Sub
         End If
         If Not TryEquilibrium(candidate, offsetStage) Then Exit Sub
-        ratio = mReinforcement.TrialSteelUtilization
+        ratio = mReinforcement.TrialMaterialUtilization
         If ratio > 1# Then
             high = candidate: highRatio = ratio
-            limitPoint = mReinforcement.TrialSteelCriticalPoint
+            limitPoint = mReinforcement.TrialMaterialPoint: limitKind = mReinforcement.TrialMaterialKind
         Else
             low = candidate: lowRatio = ratio
             If keepFields Then mSolver.CopyTrial finalField, finalResultants
         End If
         mSolver.DiscardStep
     Loop
-    mSteelLimitLow = low: mSteelLimitHigh = high: mSteelLimitOnOffset = offsetStage
-    mSteelLimitPoint = limitPoint
-    mHasSteelLimit = True
+    mMaterialLimitLow = low: mMaterialLimitHigh = high: mMaterialLimitOnOffset = offsetStage
+    mMaterialLimitPoint = limitPoint: mMaterialLimitKind = limitKind
+    mHasMaterialLimit = True
     If keepFields And (mHasAccepted Or low > mLambda) Then
         Set mLimitFields = New Collection
         Set mLimitTrace = mAcceptedTrace.CopyPrefix(mAcceptedTrace.Count)
@@ -574,11 +584,11 @@ Private Sub RefineSteelLimit(ByVal high As Double, ByVal offsetStage As Boolean)
     limitDetails = ProgressDetails() & " | Интервал: [" & CStr(low) & ", " & CStr(high) & _
         "], отношения деформаций к пределам: " & CStr(lowRatio) & " и " & CStr(highRatio) & "."
     If Not offsetStage And low < 1# And high >= 1# Then
-        mMeta.SetResult rsNumericalFailure, rcNumericalFailure, rkCapacity, _
-            "Интервал достижения предельной деформации арматуры охватывает расчётную нагрузку (lambda = 1).", limitDetails
+        mMeta.SetResult rsNumericalFailure, rcNumericalFailure, resultKind, _
+            CoupledPhysicalLimitText("Интервал достижения предельной деформации арматуры охватывает расчётную нагрузку (lambda = 1).", limitKind), limitDetails
     Else
-        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-            "На ветви достигнута предельная деформация арматуры.", limitDetails
+        mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, resultKind, _
+            CoupledPhysicalLimitText("На ветви достигнута предельная деформация арматуры.", limitKind), limitDetails
     End If
 End Sub
 
@@ -602,6 +612,7 @@ End Function
 ' Интерполяция задаёт только начальное поле; результат принимается после отдельного решения всех уравнений при lambda = 1.
 ' Вызывается для ASD после численного отказа силовых шагов и при полностью приложенной постоянной части.
 Friend Function TryRecoverDirectByDeformation(Optional ByVal progress As ICoupledContinuationProgress = Nothing) As Boolean
+    If mHasMaterialLimit Then Exit Function ' Наблюдаемая физическая скобка требует уточнения, а не обхода через другой участок ветви.
     If mMeta.InternalStatus <> rsNumericalFailure Or mMeta.ResultCode = rcSearchBoundReached Then Exit Function
     If mDirectSteel Is Nothing Or Not HasAcceptedVariableState Or SavedFieldCount < 2 Then Exit Function
     If PreviousAcceptedLambda >= mLambda Or mDirectTarget <> 1# Then Exit Function
@@ -678,12 +689,12 @@ Friend Function TryRecoverDirectByDeformation(Optional ByVal progress As ICouple
         Next index
     End If
     Dim peak As Double, accuracy As Double, designVerified As Boolean, low As Double, high As Double, criticalPoint As Long
-    Dim mechanism As String
+    Dim mechanism As String, criticalKind As ECoupledPhysicalLimitKind
     If controlled.CopyPeak(peak, accuracy, designVerified) Then
         If peak + accuracy < 1# Then mechanism = "Заданная нагрузка превышает подтверждённый максимум допустимой ветви. Lambda предела: " & CStr(peak) & "; оценка погрешности: " & CStr(accuracy) & "."
-    ElseIf controlled.CopySteelLimit(low, high, criticalPoint) Then
+    ElseIf controlled.CopyMaterialLimit(low, high, criticalPoint, criticalKind) Then
         If high < 1# And controlled.BestAdmissibleLambda < 1# Then _
-            mechanism = "На допустимой ветви предел деформации арматуры достигнут раньше заданной нагрузки. Интервал lambda: [" & CStr(low) & "; " & CStr(high) & "]."
+            mechanism = CoupledPhysicalLimitText("На допустимой ветви предел деформации арматуры достигнут раньше заданной нагрузки. Интервал lambda: [" & CStr(low) & "; " & CStr(high) & "].", criticalKind)
     End If
     If Len(mechanism) > 0 Then
         Dim actual() As Double
@@ -697,4 +708,22 @@ Friend Function TryRecoverDirectByDeformation(Optional ByVal progress As ICouple
         Set mMeta = failure
         mMeta.DiagnosticDetails = failure.DiagnosticDetails & " | Деформационное восстановление: " & controlMeta.ResultComment & " | " & controlMeta.DiagnosticDetails
     End If
+End Function
+
+
+' Трассирует только ограничения стали; явный бетонный контракт требует общего TraceMaterialLimit.
+Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
+        ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
+        Optional ByVal preferDeformationOnStall As Boolean = False, Optional ByVal preferDeformationAfterInitial As Boolean = False, _
+        Optional ByVal normalizeInitialStep As Boolean = False)
+    If reinforcement Is Nothing Then Err.Raise 5, "CCoupledLoadContinuation", "Передайте материальный отклик."
+    If reinforcement.HasConcreteLimits Then Err.Raise 5, "CCoupledLoadContinuation", "Для явных ограничений бетона используйте TraceMaterialLimit."
+    TraceMaterialLimit reinforcement, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall, preferDeformationAfterInitial, normalizeInitialStep
+End Sub
+
+' Возвращает только арматурное событие, не подменяя им бетонный предел.
+Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef onOffset As Boolean, _
+        Optional ByRef criticalPoint As Long = 0) As Boolean
+    If mMaterialLimitKind <> cplSteel Then Exit Function
+    CopySteelLimit = CopyMaterialLimit(low, high, onOffset, criticalPoint)
 End Function

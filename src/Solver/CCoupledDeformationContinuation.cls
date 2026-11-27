@@ -25,12 +25,13 @@ Private Type TBranchPoint
     HistoryIndex As Long
 End Type
 
-Private Type TSteelCrossing
+Private Type TMaterialCrossing
     Admissible As TBranchPoint
     Exceeded As TBranchPoint
     AdmissibleRatio As Double
     ExceededRatio As Double
     CriticalPoint As Long
+    CriticalKind As ECoupledPhysicalLimitKind
 End Type
 
 Private Const COMPONENT_COUNT As Long = 6
@@ -67,8 +68,9 @@ Private mLocalPeak As Double, mLocalPeakAccuracy As Double
 Private mFollowingLocalPeak As Boolean, mRecoveredPeaks As Long
 Private mReusedRightPoints As Long
 Private mShoulderProbes As Long
-Private mSteelLow As Double, mSteelHigh As Double, mSteelPoint As Long
-Private mSteelEventPoint As Long, mSteelEventDetails As String
+Private mMaterialLow As Double, mMaterialHigh As Double, mMaterialPoint As Long
+Private mMaterialEventPoint As Long, mMaterialEventDetails As String
+Private mMaterialKind As ECoupledPhysicalLimitKind, mMaterialEventKind As ECoupledPhysicalLimitKind
 Private mProbeCount As Long
 Private mYieldRecoveryProbes As Long, mYieldRecoveredPoints As Long
 Private mSpatialReversalsRejected As Long
@@ -132,10 +134,11 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mLambdaTolerance = lambdaTolerance: mAbsTol = absoluteTolerance: mRelTol = relativeTolerance
     mBestBeforeCurrent = previousLambda: mBestLambda = currentLambda ' Начальный силовой участок монотонно возрастает.
     mDesignHistoryIndex = 0
-    mHasPeak = False: mSteelPoint = 0: mProbeCount = 0
+    mHasPeak = False: mMaterialPoint = 0: mProbeCount = 0
     Set mVerifiedPeakFields = Nothing: Set mVerifiedPeakTrace = Nothing
     mVerifiedPeakAccuracy = 0#: mVerifiedPeakDesignIndex = 0
-    mSteelEventPoint = 0: mSteelEventDetails = vbNullString
+    mMaterialEventPoint = 0: mMaterialEventDetails = vbNullString
+    mMaterialKind = cplNone: mMaterialEventKind = cplNone
     mYieldRecoveryProbes = 0: mYieldRecoveredPoints = 0: mFixedYieldRecoveryProbes = 0
     mSpatialReversalsRejected = 0
     mPrincipalCornerProbes = 0: mPrincipalCorners = 0: mHasCornerReference = False
@@ -175,6 +178,13 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
     mCurrentResultants = initialResultants
     mProbeDetails = vbNullString
     Set mMeta = New CResultMeta
+    If Not mReinforcement Is Nothing Then
+        If mReinforcement.HasConcreteLimits And mReinforcement.AcceptedMaterialUtilization > 1# Then
+            mBestLambda = -1#: mBestBeforeCurrent = -1#
+            mMeta.SetSolverFailure sfcInvalidInput, rkCapacity, "Исходная история нарушает явно заданные ограничения материала.", False
+            Exit Sub
+        End If
+    End If
     If history Is Nothing Then
         StopSearch "Для продолжения не сохранены принятые поля."
         Exit Sub
@@ -222,7 +232,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
 
     Dim attempt As Long, reinforced As Boolean, probed As Boolean, changedControl As Boolean
     Dim lastProbeFailed As Boolean, lastNoProgress As Boolean, lastLoadUnresolved As Boolean
-    Dim unresolvedSteel As Boolean, hybridRecovery As Boolean, envelopeRecovered As Boolean, departureRecovered As Boolean
+    Dim unresolvedMaterial As Boolean, hybridRecovery As Boolean, envelopeRecovered As Boolean, departureRecovered As Boolean
     Dim targetCoordinate As Double
     Dim smoothTrial As Boolean, smoothSteps As Long, stepCeiling As Double, designAtTrial As Boolean, allowMaterialRecovery As Boolean
     Dim recoveryProjection() As Double
@@ -242,14 +252,14 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         End If
         If increment < minimum Then
             If mUsesEnvelopeControl Then
-                If unresolvedSteel Then Exit For ' Наблюдавшееся пересечение предела стали нельзя обходить сменой численной координаты.
+                If unresolvedMaterial Then Exit For ' Наблюдавшееся пересечение предела материала нельзя обходить сменой численной координаты.
                 If Not TryLeaveEnvelopeControl(history, left, current, nominal, increment, minimum) Then
                     StopSearch "Материальное продолжение потребовало шаг ниже различимого масштаба до подтверждения предела."
                     Exit Sub
                 End If
                 lastProbeFailed = False: lastNoProgress = False: lastLoadUnresolved = False: smoothSteps = 0
             Else
-                If Not (lastProbeFailed Or lastNoProgress Or lastLoadUnresolved) Or unresolvedSteel Then Exit For
+                If Not (lastProbeFailed Or lastNoProgress Or lastLoadUnresolved) Or unresolvedMaterial Then Exit For
                 Dim enteredCorner As Boolean
                 If PrepareHybridRecovery(lastProbeFailed, lastLoadUnresolved, current.Coordinate, increment) Then
                     hybridRecovery = True
@@ -308,7 +318,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
         End If
         If probed And reinforced And Not envelopeRecovered And Not mUsesEnvelopeControl Then
-            If Not BeyondSteelLimit() And IsEnvelopeUnloading(current, trial) Then
+            If Not BeyondMaterialLimit() And IsEnvelopeUnloading(current, trial) Then
                 mSolver.DiscardStep
                 envelopeRecovered = TryEnvelopeRecovery(history, left, current, trial, nominal, increment, minimum)
                 probed = envelopeRecovered: changedControl = envelopeRecovered
@@ -338,7 +348,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
         If Not probed Then
             smoothSteps = 0
             Dim enteredAfterFailure As Boolean
-            If Not unresolvedSteel And Not UsesASDGeometricControl() Then
+            If Not unresolvedMaterial And Not UsesASDGeometricControl() Then
                 If TryCrossPrincipalCorner(history, left, current, nominal, increment, minimum, enteredAfterFailure) Then
                     lastProbeFailed = False: lastNoProgress = False
                 ElseIf enteredAfterFailure Then
@@ -352,16 +362,16 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             End If
         ElseIf Not mUsesEnvelopeControl And (IsMaterialGrowthControl() Or (mFollowingLocalPeak And Len(mPostPeakControlName) > 0)) And _
                 increment > nominal And Not smoothTrial Then
-            If BeyondSteelLimit() Then unresolvedSteel = True ' Уточнение требует меньшей пробы на прослеженной ветви.
+            If BeyondMaterialLimit() Then unresolvedMaterial = True ' Уточнение требует меньшей пробы на прослеженной ветви.
             mSolver.DiscardStep ' На прежнем размере можно пройти изменение наклона без экстраполяции ветви.
             smoothSteps = 0
             increment = increment * 0.5
         ElseIf trial.Lambda > maximumLambda Then
             StopAtSearchBound
             Exit Sub
-        ElseIf BeyondSteelLimit() Then
-            unresolvedSteel = True ' Смена меры не может пропустить наблюдавшееся пересечение предела арматуры.
-            If ResolveSteelCrossing(history, current, trial) Then Exit Sub
+        ElseIf BeyondMaterialLimit() Then
+            unresolvedMaterial = True ' Смена меры не может пропустить наблюдавшееся пересечение предела материала.
+            If ResolveMaterialCrossing(history, current, trial) Then Exit Sub
             smoothSteps = 0
             increment = increment * 0.5
         ElseIf ((changedControl Or mUnverifiedDecline) And Not mUsesEnvelopeControl) Or mFollowingLocalPeak Or _
@@ -380,7 +390,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
             AcceptPoint history, trial
             If hybridRecovery Then mHybridRecoveredPoints = mHybridRecoveredPoints + 1
             If designAtTrial And trial.Lambda >= 1# Then mDesignHistoryIndex = trial.HistoryIndex
-            unresolvedSteel = False
+            unresolvedMaterial = False
             If changedControl And Not departureRecovered Then mYieldRecoveredPoints = mYieldRecoveredPoints + 1
             If departureRecovered Then mDepartureRecoveredPoints = mDepartureRecoveredPoints + 1
             If Len(mPostPeakControlName) > 0 Then
@@ -438,7 +448,7 @@ Friend Sub Trace(ByVal solver As CCoupledNewtonSolver, ByVal reinforcement As CC
                 If reinforced And (mUsesTransverseControl Or mUsesFieldControl Or UsesASDGeometricControl()) Then
                     Dim repeatSeed As Variant: repeatSeed = declinedField
                     If Probe(trial, trial.Lambda, initialField:=repeatSeed, acceptedLambda:=current.Lambda) Then
-                        If UpdateTrialCoordinate(trial, current.Coordinate) And Not BeyondSteelLimit() And trial.Lambda > 0# Then
+                        If UpdateTrialCoordinate(trial, current.Coordinate) And Not BeyondMaterialLimit() And trial.Lambda > 0# Then
                             Dim advances As Boolean: advances = True
                             If Not mUsesEnvelopeControl And (mSolver.HasPrincipalBoundaries Or mFieldControlChanges > 0) Then _
                                 advances = SpatialTrialAdvances(history, current)
@@ -690,7 +700,7 @@ End Sub
 ' Возвращает независимую числовую копию принятого пути; незавершённый путь не становится предельным НДС.
 Friend Property Get AcceptedFields() As Collection
     Dim source As Collection
-    If mHasPeak Or mSteelPoint > 0 Then Set source = mLimitFields Else Set source = mCurrentFields
+    If mHasPeak Or mMaterialPoint > 0 Then Set source = mLimitFields Else Set source = mCurrentFields
     If source Is Nothing Then Exit Property
     Dim result As New Collection, i As Long, field() As Double
     For i = 1 To source.Count: field = source(i): result.Add field: Next i
@@ -904,7 +914,7 @@ End Property
 
 ' Возвращает историю выбранной ветви, исключая отменённые пробы плеч.
 Friend Property Get SavedTrace() As CCoupledLoadTrace
-    If mHasPeak Or mSteelPoint > 0 Then Set SavedTrace = mLimitTrace Else Set SavedTrace = mTrace
+    If mHasPeak Or mMaterialPoint > 0 Then Set SavedTrace = mLimitTrace Else Set SavedTrace = mTrace
 End Property
 
 ' Передаёт подтверждённый максимум: для железобетона только после физического завершения допустимой ветви.
@@ -923,16 +933,16 @@ Friend Function CopyLimitState(ByRef fields As Collection, ByRef resultants() As
     CopyLimitState = True
 End Function
 
-' Передаёт арматурное ограничение, определяющее достигнутую нагрузку.
-Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long) As Boolean
-    If mSteelPoint = 0 Then Exit Function
-    low = mSteelLow: high = mSteelHigh: criticalPoint = mSteelPoint
-    CopySteelLimit = True
+' Передаёт материальное ограничение, определяющее достигнутую нагрузку.
+Friend Function CopyMaterialLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long, Optional ByRef criticalKind As ECoupledPhysicalLimitKind = cplNone) As Boolean
+    If mMaterialPoint = 0 Then Exit Function
+    low = mMaterialLow: high = mMaterialHigh: criticalPoint = mMaterialPoint: criticalKind = mMaterialKind
+    CopyMaterialLimit = True
 End Function
 
-' Возвращает точку установленного арматурного события для пояснения в отчёте.
-Friend Property Get SteelEventPoint() As Long
-    SteelEventPoint = mSteelEventPoint
+' Возвращает точку установленного материального события для пояснения в отчёте.
+Friend Property Get MaterialEventPoint() As Long
+    MaterialEventPoint = mMaterialEventPoint
 End Property
 
 ' Возвращает независимый статус контролируемого участка.
@@ -1077,7 +1087,7 @@ Private Function TryAdoptRecoveredControl(ByVal history As Collection, ByRef cur
     ElseIf Not mFollowingLocalPeak And Not mUnverifiedDecline Then
         If trial.Lambda < current.Lambda - LoadResolution(current.Lambda) Then Exit Function
     End If
-    If BeyondSteelLimit() Then Exit Function
+    If BeyondMaterialLimit() Then Exit Function
     Dim previousField() As Double, acceptedField() As Double, field() As Double, resultants() As Double
     previousField = history(current.HistoryIndex - 1)
     acceptedField = history(current.HistoryIndex)
@@ -1276,9 +1286,9 @@ Private Function RepeatDesignTrial(ByRef current As TBranchPoint, ByRef trial As
             Exit Function
         End If
     End If
-    If BeyondSteelLimit() Then
+    If BeyondMaterialLimit() Then
         mSolver.DiscardStep
-        StopSearch "Повторная проба не подтвердила допустимость арматуры."
+        StopSearch "Повторная проба не подтвердила допустимость материалов."
         Exit Function
     End If
     If designVerified Then designVerified = (designCoordinate >= current.Coordinate And designCoordinate <= trial.Coordinate)
@@ -1323,7 +1333,7 @@ Private Function VerifyDesignLoad(ByVal leftCoordinate As Double, ByVal rightCoo
     Else
         coordinate = CoordinateOf(field)
     End If
-    If Not BeyondSteelLimit() Then VerifyDesignLoad = (coordinate >= leftCoordinate And coordinate <= rightCoordinate)
+    If Not BeyondMaterialLimit() Then VerifyDesignLoad = (coordinate >= leftCoordinate And coordinate <= rightCoordinate)
     mSolver.DiscardStep
 End Function
 
@@ -1518,7 +1528,7 @@ Private Function ReplayShoulders(ByVal history As Collection, ByRef left As TBra
                     allowHybridRecovery:=(probeToleranceScale < 1# And mSolver.SupportsHybridRecovery), _
                     acceptedLambda:=previousLambda, equilibriumScale:=probeToleranceScale) Then Exit Function
             If Not UpdateTrialCoordinate(point, samples(index).Coordinate) Then Exit Function
-            If BeyondSteelLimit() Or point.Lambda > mMaximumLambda Then
+            If BeyondMaterialLimit() Or point.Lambda > mMaximumLambda Then
                 mSolver.DiscardStep
                 Exit Function
             End If
@@ -1655,7 +1665,7 @@ Private Function CompleteVerifiedPeak(ByVal history As Collection, ByVal lastBef
         point.Coordinate = CoordinateOf(field)
         If Not Probe(point, mVerifiedPeak.Lambda, keepYieldControl:=True) Then GoTo RestoreTail
     End If
-    If Abs(point.Lambda - mVerifiedPeak.Lambda) > LoadResolution(mVerifiedPeak.Lambda) Or BeyondSteelLimit() Then GoTo RestoreTail
+    If Abs(point.Lambda - mVerifiedPeak.Lambda) > LoadResolution(mVerifiedPeak.Lambda) Or BeyondMaterialLimit() Then GoTo RestoreTail
     mSolver.CopyTrial checked, actual
     For i = 1 To UBound(field)
         If checked(i) <> field(i) Then GoTo RestoreTail ' Равновесие соседнего поля не подтверждает сохранённую точку максимума.
@@ -1693,17 +1703,17 @@ End Function
 ' Уточняет первое пересечение по возрастающей деформационной координате.
 ' Позднее событие сохраняет как диагностику, если был достигнут больший
 ' допустимый множитель или положение относительно единицы не определено.
-Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As TBranchPoint, _
+Private Function ResolveMaterialCrossing(ByVal history As Collection, ByRef left As TBranchPoint, _
         ByRef right As TBranchPoint) As Boolean
-    Dim eventState As TSteelCrossing, refined As New Collection, multipliers As New Collection
+    Dim eventState As TMaterialCrossing, refined As New Collection, multipliers As New Collection
     Dim actual() As Double: actual = mCurrentResultants
     eventState.Admissible = left: eventState.Exceeded = right
-    If Not RefineSteelCrossing(eventState, refined, multipliers, actual) Then
+    If Not RefineMaterialCrossing(eventState, refined, multipliers, actual) Then
         mSolver.DiscardStep
         If refined.Count = 0 Then Exit Function
         If mSolver.ReplayAcceptedFields(history, left.HistoryIndex) Then Exit Function
-        StopSearch "Не удалось восстановить принятую историю после уточнения предела арматуры."
-        ResolveSteelCrossing = True
+        StopSearch "Не удалось восстановить принятую историю после уточнения материального предела."
+        ResolveMaterialCrossing = True
         Exit Function
     End If
 
@@ -1713,20 +1723,22 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
     Next factor
     Dim low As Double, high As Double, lowerBound As Double, upperBound As Double
     low = eventState.Admissible.Lambda: high = eventState.Exceeded.Lambda
-    mSteelEventPoint = eventState.CriticalPoint
+    mMaterialEventPoint = eventState.CriticalPoint: mMaterialEventKind = eventState.CriticalKind
     lowerBound = GeomMin(low - eventState.Admissible.Uncertainty, high - eventState.Exceeded.Uncertainty)
     upperBound = GeomMax(low + eventState.Admissible.Uncertainty, high + eventState.Exceeded.Uncertainty)
-    mSteelEventDetails = "Арматурное событие: lambda до = " & CStr(low) & ", lambda после = " & CStr(high) & _
+    mMaterialEventDetails = "Арматурное событие: lambda до = " & CStr(low) & ", lambda после = " & CStr(high) & _
         ". Координата деформации: [" & CStr(eventState.Admissible.Coordinate) & ", " & CStr(eventState.Exceeded.Coordinate) & _
         "]. Точка арматуры: " & CStr(eventState.CriticalPoint) & "; отношения деформаций к пределам: " & _
         CStr(eventState.AdmissibleRatio) & " и " & CStr(eventState.ExceededRatio) & _
         "; оценка интервала lambda: [" & CStr(lowerBound) & ", " & CStr(upperBound) & "]"
+    mMaterialEventDetails = CoupledPhysicalLimitText(mMaterialEventDetails, eventState.CriticalKind)
     Dim reason As String
     If high <= low Or mFollowingLocalPeak Or low + LoadResolution(low) < mBestLambda Then
         reason = "Достигнута предельная деформация арматуры после максимума или снижения нагрузки. Определяющий предел требует проверки."
     ElseIf lowerBound <= 1# And upperBound >= 1# Then
         reason = "Достигнута предельная деформация арматуры. Интервал её достижения охватывает расчётную нагрузку (lambda = 1)."
     End If
+    reason = CoupledPhysicalLimitText(reason, eventState.CriticalKind)
     Dim i As Long
     If Len(reason) > 0 Then
         For i = 1 To refined.Count: history.Add refined.Item(i): Next i ' Эти допустимые подшаги уже приняты материалом при уточнении интервала.
@@ -1736,7 +1748,6 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
         Set mCurrentFields = history: mCurrentResultants = actual
         If Not CompleteVerifiedPeak(history, left.HistoryIndex, upperBound) Then StopSearch reason
     Else
-        mSteelLow = low: mSteelHigh = high: mSteelPoint = eventState.CriticalPoint
         Set mLimitFields = New Collection
         For i = 1 To left.HistoryIndex: mLimitFields.Add history.Item(i): Next i
         For i = 1 To refined.Count: mLimitFields.Add refined.Item(i): Next i
@@ -1744,16 +1755,29 @@ Private Function ResolveSteelCrossing(ByVal history As Collection, ByRef left As
             Set mLimitTrace = mTrace.CopyPrefix(left.HistoryIndex)
             For Each factor In multipliers: mLimitTrace.Add 1#, factor: Next factor
         End If
+        If mDesignHistoryIndex = 0 And low > 1# And Not mLimitTrace Is Nothing Then
+            Dim designLeft As Long: designLeft = RefinedDesignLeftIndex(mLimitTrace)
+            If designLeft > 0 And mProbeCount < mProbeBudget Then
+                If Not VerifyRefinedDesign(mLimitFields, designLeft, mDesignHistoryIndex) Then
+                    Set mLimitFields = Nothing: Set mLimitTrace = Nothing
+                    StopSearch "Не удалось восстановить допустимую историю после проверки расчётного сочетания у материального предела."
+                    ResolveMaterialCrossing = True
+                    Exit Function
+                End If
+            End If
+        End If
+        mMaterialLow = low: mMaterialHigh = high: mMaterialPoint = eventState.CriticalPoint
+        mMaterialKind = eventState.CriticalKind
         mLimitResultants = actual
         mMeta.SetResult rsCheckFailed, rcPhysicalLimitExceeded, rkCapacity, _
-            "Достигнута предельная деформация арматуры на возрастающем участке.", Details()
+            CoupledPhysicalLimitText("Достигнута предельная деформация арматуры на возрастающем участке.", eventState.CriticalKind), Details()
     End If
-    ResolveSteelCrossing = True
+    ResolveMaterialCrossing = True
 End Function
 
 ' Сохраняет только допустимые подшаги. После их принятия правое плечо
 ' рассчитывается повторно, поскольку изменилось состояние материалов.
-Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal refined As Collection, _
+Private Function RefineMaterialCrossing(ByRef eventState As TMaterialCrossing, ByVal refined As Collection, _
         ByVal multipliers As Collection, ByRef actual() As Double) As Boolean
     Dim low As TBranchPoint, high As TBranchPoint, point As TBranchPoint
     Dim lowField() As Double, highField() As Double, guess() As Double, probeResultants() As Double
@@ -1762,10 +1786,10 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
     ' Два решённых поля задают только прогноз; равновесие и материал проверяются от текущей принятой истории.
     low = eventState.Admissible: high = eventState.Exceeded
     If low.Lambda <= 0# Or high.Coordinate <= low.Coordinate Then Exit Function
-    eventState.AdmissibleRatio = mReinforcement.AcceptedSteelUtilization
-    If eventState.AdmissibleRatio > 1# Or Not ReadSteelTrialBound(high) Then Exit Function
-    eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
-    eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
+    eventState.AdmissibleRatio = mReinforcement.AcceptedMaterialUtilization
+    If eventState.AdmissibleRatio > 1# Or Not ReadMaterialTrialBound(high) Then Exit Function
+    eventState.ExceededRatio = mReinforcement.TrialMaterialUtilization
+    eventState.CriticalPoint = mReinforcement.TrialMaterialPoint: eventState.CriticalKind = mReinforcement.TrialMaterialKind
     If eventState.ExceededRatio <= 1# Or eventState.CriticalPoint = 0 Then Exit Function
     If useFieldPrediction Then
         mSolver.CopyAccepted lowField: mSolver.CopyTrial highField, probeResultants
@@ -1781,7 +1805,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
     For attempt = 1 To STEP_LIMIT
         If high.Coordinate - low.Coordinate <= coordinateTolerance And Abs(high.Lambda - low.Lambda) <= tolerance Then
             eventState.Admissible = low: eventState.Exceeded = high
-            RefineSteelCrossing = True
+            RefineMaterialCrossing = True
             Exit Function
         End If
         point.Coordinate = low.Coordinate + 0.5 * (high.Coordinate - low.Coordinate)
@@ -1798,15 +1822,15 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
         If Not UpdateTrialCoordinate(point, low.Coordinate) Then Exit Function
         If point.Coordinate >= high.Coordinate Then
             mSolver.DiscardStep
-            mProbeDetails = "Фактическая мера промежуточной пробы вышла за правое плечо предела арматуры."
+            mProbeDetails = "Фактическая мера промежуточной пробы вышла за правое плечо материального предела."
             Exit Function
         End If
-        If Not ReadSteelTrialBound(point) Then Exit Function
-        ratio = mReinforcement.TrialSteelUtilization
+        If Not ReadMaterialTrialBound(point) Then Exit Function
+        ratio = mReinforcement.TrialMaterialUtilization
         If ratio > 1# Then
             high = point: eventState.ExceededRatio = ratio
             If useFieldPrediction Then mSolver.CopyTrial highField, probeResultants
-            eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
+            eventState.CriticalPoint = mReinforcement.TrialMaterialPoint: eventState.CriticalKind = mReinforcement.TrialMaterialKind
         Else
             low = point: eventState.AdmissibleRatio = ratio
             mSolver.CopyTrial field, actual
@@ -1821,9 +1845,9 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
                 If Not Probe(high, low.Lambda, keepYieldControl:=True, acceptedLambda:=low.Lambda) Then Exit Function
             End If
             If Not UpdateTrialCoordinate(high, low.Coordinate) Then Exit Function
-            If Not ReadSteelTrialBound(high) Then Exit Function
-            eventState.ExceededRatio = mReinforcement.TrialSteelUtilization
-            eventState.CriticalPoint = mReinforcement.TrialSteelCriticalPoint
+            If Not ReadMaterialTrialBound(high) Then Exit Function
+            eventState.ExceededRatio = mReinforcement.TrialMaterialUtilization
+            eventState.CriticalPoint = mReinforcement.TrialMaterialPoint: eventState.CriticalKind = mReinforcement.TrialMaterialKind
             If eventState.ExceededRatio <= 1# Then Exit Function
             If useFieldPrediction Then mSolver.CopyTrial highField, probeResultants
         End If
@@ -1832,7 +1856,7 @@ Private Function RefineSteelCrossing(ByRef eventState As TSteelCrossing, ByVal r
 End Function
 
 ' Проверяет область поиска и оценивает влияние невязки около единицы.
-Private Function ReadSteelTrialBound(ByRef point As TBranchPoint) As Boolean
+Private Function ReadMaterialTrialBound(ByRef point As TBranchPoint) As Boolean
     If point.Lambda <= 0# Or point.Lambda > mMaximumLambda Then Exit Function
     point.Uncertainty = LoadResolution(point.Lambda)
     If Abs(point.Lambda - 1#) <= 0.05 Then
@@ -1840,12 +1864,12 @@ Private Function ReadSteelTrialBound(ByRef point As TBranchPoint) As Boolean
         If Not mSolver.TrialLambdaUncertainty(mAbsTol, mRelTol, uncertainty) Then Exit Function
         point.Uncertainty = GeomMax(point.Uncertainty, uncertainty)
     End If
-    ReadSteelTrialBound = True
+    ReadMaterialTrialBound = True
 End Function
 
 ' Определяет превышение по пробной точке до фиксации истории.
-Private Function BeyondSteelLimit() As Boolean
-    If Not mReinforcement Is Nothing Then BeyondSteelLimit = (mReinforcement.TrialSteelUtilization > 1#)
+Private Function BeyondMaterialLimit() As Boolean
+    If Not mReinforcement Is Nothing Then BeyondMaterialLimit = (mReinforcement.TrialMaterialUtilization > 1#)
 End Function
 
 ' Считывает выбранную физическую меру из поля.
@@ -1916,7 +1940,7 @@ Private Function Details() As String
         Details = Details & "; проб при проверке плеч: " & CStr(mShoulderProbes)
     End If
     If mArcRecoveryTried Then Details = Details & "; вспомогательных проб псевдодуги и повтора: " & CStr(mArcRecoveryProbes)
-    If Len(mSteelEventDetails) > 0 Then Details = Details & " | " & mSteelEventDetails
+    If Len(mMaterialEventDetails) > 0 Then Details = Details & " | " & mMaterialEventDetails
     If Len(mProbeDetails) > 0 Then Details = Details & " | Последняя неудачная проба: " & mProbeDetails
 End Function
 
@@ -1945,8 +1969,8 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
         Exit Function
     End If
-    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondSteelLimit() Then
-        mProbeDetails = "Входящая сторона материального перехода вышла за допустимую нагрузку или предел арматуры."
+    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondMaterialLimit() Then
+        mProbeDetails = "Входящая сторона материального перехода вышла за допустимую нагрузку или материальный предел."
         mSolver.DiscardStep
         Exit Function
     End If
@@ -1983,8 +2007,8 @@ Private Function TryCrossPrincipalCorner(ByVal history As Collection, ByRef left
         mProbeDetails = mSolver.ResultMeta.DiagnosticDetails
         Exit Function
     End If
-    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondSteelLimit() Then
-        mProbeDetails = "Исходящая сторона материального перехода вышла за допустимую нагрузку или предел арматуры."
+    If point.Lambda > mMaximumLambda Or point.Lambda <= 0# Or BeyondMaterialLimit() Then
+        mProbeDetails = "Исходящая сторона материального перехода вышла за допустимую нагрузку или материальный предел."
         mSolver.DiscardStep
         Exit Function
     End If
@@ -2065,3 +2089,25 @@ Private Function KeepsASDGradientControl() As Boolean
         If mProjection(component) <> 0# Then KeepsASDGradientControl = True: Exit Function
     Next component
 End Function
+
+
+' Возвращает только арматурный предел; бетонный доступен через общий CopyMaterialLimit.
+Friend Function CopySteelLimit(ByRef low As Double, ByRef high As Double, ByRef criticalPoint As Long) As Boolean
+    If mMaterialKind <> cplSteel Then Exit Function
+    CopySteelLimit = CopyMaterialLimit(low, high, criticalPoint)
+End Function
+
+' Возвращает арматурную точку только при событии стали.
+Friend Property Get SteelEventPoint() As Long
+    If mMaterialEventKind = cplSteel Then SteelEventPoint = mMaterialEventPoint
+End Property
+
+' Указывает вид наблюдавшегося физического события, включая ещё не завершённую локализацию.
+Friend Property Get MaterialEventKind() As ECoupledPhysicalLimitKind
+    MaterialEventKind = mMaterialEventKind
+End Property
+
+' Подтверждает точное расчётное сочетание на допустимом участке этой же истории.
+Friend Property Get DesignLoadVerified() As Boolean
+    DesignLoadVerified = (mDesignHistoryIndex > 0)
+End Property

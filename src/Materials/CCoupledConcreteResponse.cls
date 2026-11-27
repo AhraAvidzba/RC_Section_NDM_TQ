@@ -135,6 +135,19 @@ Friend Function TryReadAcceptedASDStrains(ByVal point As Long, ByRef tension As 
     TryReadAcceptedASDStrains = True
 End Function
 
+' Читает координаты принятого либо уже вычисленного пробного буфера без повторного обновления.
+' Пробное значение читает владелец сразу после успешной оценки данной точки с recordTrial=True.
+Friend Function TryReadBufferedASDStrains(ByVal point As Long, ByVal accepted As Boolean, _
+        ByRef tension As Double, ByRef compression As Double) As Boolean
+    tension = 0#: compression = 0#
+    If mASDFlow Is Nothing Then Exit Function
+    If point < 1 Or point > mPointCount Then InvalidInput "Точка эквивалентных деформаций ASD находится вне подготовленного материала."
+    Dim buffer As Long: buffer = mTrial
+    If accepted Then buffer = mCommitted
+    tension = mHistory(point, buffer).Tension: compression = mHistory(point, buffer).Compression
+    TryReadBufferedASDStrains = True
+End Function
+
 ' Вычисляет полные эквивалентные деформации кандидата ASD от принятой истории.
 ' Не меняет принятый или пробный буфер, касательную и исходный массив деформаций.
 ' Меры относятся к тому же обновлению, что и напряжения; порог разрушения здесь не задаётся.
