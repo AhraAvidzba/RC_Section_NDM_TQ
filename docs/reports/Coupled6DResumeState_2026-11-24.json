@@ -2975,6 +2975,162 @@
       "tests/modTestCoupledASDCoordinates.bas": "35B3E7BF53D4BA5118CE34E823BAA318AED62B2AC02A4BE15CCD872DCE23F3A4"
     }
   },
+  "asd_finite_bounds_20261127": {
+    "Config_ASD_selection_pending": true,
+    "all_started_stages_terminal": true,
+    "compression_limit_source_mapping_pending": true,
+    "delivery": {
+      "Config_ASD_selection_pending": true,
+      "actual_components": 258,
+      "all121_user_parts_preserved": true,
+      "concrete_criterion_pending": true,
+      "full_acceptance_not_run": true,
+      "full_native_dump_updated": true,
+      "output": {
+        "RC_Section_NDM.xlsm": {
+          "after_sha256": "BD7DC8B4A9BE645425D3044597E23F9153919627FA57EA89BD7277F8AEA4F71F",
+          "before_sha256": "458801DDC43378DB7BCDD1AA8F93AF583D09B629459E271CD1187ECE2EEA5CD6",
+          "bytes": 14205862
+        },
+        "VBA_All_Code.txt": {
+          "after_sha256": "CAD0621447DD965D36FA481DFA7C90DC91A1974A02E91AC4663F22D1A78AB5F2",
+          "before_sha256": "914FAA50962A5E568195C9F60D8B1ECD25B38EBA5982A31F6E802EFA4A924B88",
+          "bytes": 11552646
+        }
+      },
+      "whole_goal_completed": false,
+      "whole_user_run10s_not_met": true,
+      "working_core_and_output_synchronized": true
+    },
+    "evidence": "docs/reports/evidence/Coupled6DASDFiniteBounds_2026-11-27",
+    "finite_limit_operator_implemented": true,
+    "full_acceptance_not_run": true,
+    "global_continuation_integration_pending": true,
+    "path_control": {
+      "actual_coordinate_pairs": 10575,
+      "all_children_terminal": true,
+      "candidate_events": {
+        "compression": null,
+        "tension": {
+          "first_upper_index": 11,
+          "last_lower_index": 10,
+          "lower_Mx_kNm": 1.6983264646940122,
+          "lower_measure": 0.00012287134883523417,
+          "quadrature_point": 21,
+          "station": -1,
+          "upper_Mx_kNm": 1.8705560715258627,
+          "upper_measure": 0.00016148430391664612
+        }
+      },
+      "elapsed_seconds": 30.30846900001052,
+      "engine_version": "3.8.0",
+      "final_Mx_kNm": 4.658400762172185,
+      "final_coordinates_match_previous_independent_replay": true,
+      "independent_concrete_histories": 75,
+      "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+      "material_only_not_independent_global_solve": true,
+      "maximum_equivalent_compression": 0.0010609420978073868,
+      "maximum_equivalent_tension": 0.0969364215909222,
+      "maximum_final_reference_error": 0.0,
+      "no_section_failure_policy_adopted": true,
+      "physical_section_capacity_not_certified": true,
+      "states": 141
+    },
+    "planar_Ebt2_not_implicit_global_ASD_failure": true,
+    "postcrack_contract_explicitly_confirmed_by_user": true,
+    "project_rules_sha256": "445F0AAED2D956DAC8E5531DE41AACBD97FDD75E4CDB817130DD374E2A84ED5E",
+    "report": "docs/reports/Coupled6DASDFiniteBounds_2026-11-27.md",
+    "restoration_proof": {
+      "actual_files": 976,
+      "actual_working_output_and_source_verified": true,
+      "all_original_file_hashes_match": true,
+      "all_restored_book_zip_crc_verified": true,
+      "exact_books": [
+        "ASDFiniteBoundsOutputDelivery_20261127/RC_Section_NDM.xlsm",
+        "Cold1129ASDFiniteBounds_20261127/Before/RC_Section_NDM.xlsm",
+        "Cold1129ASDFiniteBounds_20261127/docs/regression/Diagnostic.xlsm",
+        "Cold1129ASDFiniteBounds_20261127/workbook/output/RC_Section_NDM.xlsm",
+        "Cold1130ASDFiniteBoundsOutput_20261127/Before/RC_Section_NDM.xlsm",
+        "Cold1130ASDFiniteBoundsOutput_20261127/docs/regression/Diagnostic.xlsm",
+        "Cold1130ASDFiniteBoundsOutput_20261127/workbook/output/RC_Section_NDM.xlsm",
+        "PublicOutput/RC_Section_NDM.xlsm"
+      ],
+      "mandatory_histories_and_native_suites_present": true,
+      "restored_destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\RestoredASDFiniteBounds_20261127",
+      "whole_goal_completed": false
+    },
+    "saved_output_verification": {
+      "actual_components": 258,
+      "actual_dump_sha256": "CAD0621447DD965D36FA481DFA7C90DC91A1974A02E91AC4663F22D1A78AB5F2",
+      "all121_non_vba_payloads_bitexact": true,
+      "all256_other_existing_components_unchanged": true,
+      "all258_native_dump_components_verified": true,
+      "all_existing_material_executable_unchanged": true,
+      "external_material_control": {
+        "accepted_states": 182,
+        "actual_native_OpenSees": true,
+        "all_explicit_criterion_values_verified": true,
+        "analytical_and_native_boundary_checks": [
+          {
+            "analytical_parameter": 0.150000025,
+            "kind": "T",
+            "lower": 0.150000024586916,
+            "native_utilizations": [
+              0.9999999972461071,
+              1.0000000034549266
+            ],
+            "upper": 0.150000025518239
+          },
+          {
+            "analytical_parameter": 0.350000033333333,
+            "kind": "C",
+            "lower": 0.350000033155084,
+            "native_utilizations": [
+              0.999999999490716,
+              1.0000000021516364
+            ],
+            "upper": 0.350000034086406
+          }
+        ],
+        "candidate_states": 198,
+        "cpp_source_sha256": "210EADE9C167DA38FB5A7894570C64BA0CA35D9D9307A9818FDE485435EBEA31",
+        "elapsed_seconds": 15.089477400004398,
+        "engine_version": "3.8.0",
+        "installed_binary_sha256": "25BA42E1672526137D765D9C3631D1403E091F54F5AFCDB9242F9243C63C3A96",
+        "material_only_not_global_equilibrium": true,
+        "maximum_coordinate_error": 1.1275702593849246e-17,
+        "maximum_native_closure_iterations": 21,
+        "maximum_stress_error_MPa": 3.694822225952521e-13,
+        "modes": 2,
+        "paths": 8,
+        "physical_failure_threshold_not_assigned": true
+      },
+      "native_directed_test": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 3031,
+        "timeout600": false
+      },
+      "no_UI_claim": true,
+      "no_full_acceptance": true,
+      "no_new_failure_threshold_or_capacity_claim": true,
+      "saved_and_compiled_package_outputs_bitexact": true,
+      "saved_candidate_sha256": "BD7DC8B4A9BE645425D3044597E23F9153919627FA57EA89BD7277F8AEA4F71F",
+      "saved_reopened_native_compilation": true,
+      "working_sources": {
+        "src/Materials/CCoupledASDStrainLimits.cls": "B3EB67C692E6026D0F4E19E003687BA4B65B079CF04EC1FF5B4B52DA83156D5E",
+        "tests/modTestCoupledASDCoordinates.bas": "EE7A7EAD56304CE031E03ACCF2F5D139809B0C2979FC8DDB716C5EEA055C84C6"
+      }
+    },
+    "whole_goal_completed": false,
+    "whole_user_run10s_not_met": true,
+    "working_core_and_output_synchronized": true,
+    "working_sources": {
+      "src/Materials/CCoupledASDStrainLimits.cls": "B3EB67C692E6026D0F4E19E003687BA4B65B079CF04EC1FF5B4B52DA83156D5E",
+      "tests/modTestCoupledASDCoordinates.bas": "EE7A7EAD56304CE031E03ACCF2F5D139809B0C2979FC8DDB716C5EEA055C84C6"
+    }
+  },
   "asd_scale_robustness_20261127": {
     "ASD_equivalent_coordinates_at_steel_event": {
       "actual_response_reads_preserved_stresses_and_equilibrium_bitexact": true,
@@ -42839,7 +42995,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T08:18:39.645571+03:00",
+  "updated_local": "2026-11-27T08:47:54.446203+03:00",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",

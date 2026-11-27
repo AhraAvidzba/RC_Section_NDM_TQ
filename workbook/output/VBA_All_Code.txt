@@ -1,6 +1,6 @@
 ﻿VBA PROJECT EXPORT
 Workbook: RC_Section_NDM.xlsm
-Date: 2026-11-27 08:14:24
+Date: 2026-11-27 08:40:31
 ====================================================================================================
 COMPONENT: ЭтаКнига
 TYPE: 100
@@ -172467,7 +172467,7 @@ End Function
 ====================================================================================================
 COMPONENT: modTestCoupledASDCoordinates
 TYPE: 1
-LINES: 154
+LINES: 215
 ====================================================================================================
 Option Explicit
 
@@ -172483,6 +172483,7 @@ Public Function RunTestCoupledASDCoordinates(ByVal folder As String) As String
     On Error GoTo Failed
     Dim report As String, passed As Long, failedCount As Long
     TestUnsupportedCoordinates passed, failedCount, report
+    TestExplicitASDLimits folder, passed, failedCount, report
     TestCoordinateHistory folder, True, passed, failedCount, report
     TestCoordinateHistory folder, False, passed, failedCount, report
     RunTestCoupledASDCoordinates = report & "TOTAL_COUPLED_ASD_COORDINATES_TEST: passed=" & passed & "; failed=" & failedCount
@@ -172537,6 +172538,9 @@ Private Sub TestCoordinateHistory(ByVal folder As String, ByVal nativeStep As Bo
     Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
     Dim oldT As Double, oldC As Double, trialT As Double, trialC As Double, readT As Double, readC As Double
     Dim expectedT As Double, expectedC As Double, i As Long, number As Long, reason As String, ready As Boolean
+    Dim limits As New CCoupledASDStrainLimits, trialUse As Double, acceptedUse As Double
+    Dim critical As Double, compression As Boolean, branch As Long, expectedUse As Double
+    limits.Initialize 0.0035, 0.00015, True
     If nativeStep Then mode = "Native" Else mode = "Closed"
     Set flow = TestCoordinateFlow(nativeStep)
     inputHandle = FreeFile: Open folder & "/History.csv" For Input As #inputHandle
@@ -172579,13 +172583,24 @@ Private Sub TestCoordinateHistory(ByVal folder As String, ByVal nativeStep As Bo
         TestCheck ready, mode & " additional read-only candidate exists", passed, failedCount, report
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = oldT And readC = oldC, mode & " reads leave accepted state unchanged", passed, failedCount, report
+        ready = limits.TryEvaluateTrial(concrete, 1, strain, trialUse, critical, compression)
+        expectedUse = GeomMax(trialC / 0.0035, trialT / 0.00015)
+        TestCheck ready And trialUse = expectedUse, mode & " explicit limits use equivalent total measures", passed, failedCount, report
+        branch = 0: If compression Then branch = 1
+        TestCheck (compression And critical = trialC) Or (Not compression And critical = trialT), _
+            mode & " explicit limits identify critical branch", passed, failedCount, report
         expectedT = oldT: expectedC = oldC
         If CLng(row(8)) = 1 Then
             response.AcceptTrial: expectedT = trialT: expectedC = trialC
         End If
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = expectedT And readC = expectedC, mode & " reads preserve trial buffer and accept/reject", passed, failedCount, report
-        Print #outputHandle, line & ";" & Trim$(Str$(trialT)) & ";" & Trim$(Str$(trialC)) & ";" & Trim$(Str$(readT)) & ";" & Trim$(Str$(readC)) & TestVector(stress)
+        Dim trialCritical As Double: If branch = 1 Then trialCritical = trialC Else trialCritical = trialT
+        ready = limits.TryEvaluateAccepted(concrete, 1, acceptedUse, critical, compression)
+        expectedUse = GeomMax(expectedC / 0.0035, expectedT / 0.00015)
+        TestCheck ready And acceptedUse = expectedUse, mode & " explicit limits respect accept/reject", passed, failedCount, report
+        Print #outputHandle, line & ";" & Trim$(Str$(trialT)) & ";" & Trim$(Str$(trialC)) & ";" & Trim$(Str$(readT)) & ";" & Trim$(Str$(readC)) & TestVector(stress) & _
+            ";" & Trim$(Str$(trialUse)) & ";" & Trim$(Str$(trialCritical)) & ";" & CStr(branch) & ";" & Trim$(Str$(acceptedUse))
         readT = 99#: readC = 98#
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = expectedT And readC = expectedC, mode & " returned scalars do not alias history", passed, failedCount, report
@@ -172605,6 +172620,52 @@ Failed:
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет явные пределы и локализацию материальной границы с известным одноосным ответом.
+Private Sub TestExplicitASDLimits(ByVal folder As String, ByRef passed As Long, ByRef failedCount As Long, ByRef report As String)
+    Dim concrete As New CCoupledConcreteResponse, limits As New CCoupledASDStrainLimits
+    Dim noTension As New CCoupledASDStrainLimits, unprepared As New CCoupledASDStrainLimits
+    Dim lowerStrain(1 To 6) As Double, upperStrain(1 To 6) As Double, lower As Double, upper As Double
+    Dim ratio As Double, critical As Double, compression As Boolean, ok As Boolean, expected As Double
+    Dim number As Long, handle As Integer, output As String
+    concrete.InitializeASD 1, TestCoordinateFlow(True)
+    On Error Resume Next
+    ok = unprepared.TryEvaluateAccepted(concrete, 1, ratio, critical, compression): number = Err.number: Err.Clear
+    On Error GoTo 0
+    TestCheck number = 5, "explicit limits require initialization", passed, failedCount, report
+    limits.Initialize 0.0035, 0.00015, True
+    On Error Resume Next
+    limits.Initialize 0.004, 0.0002, True: number = Err.number: Err.Clear
+    On Error GoTo 0
+    TestCheck number = 5, "explicit limits are immutable", passed, failedCount, report
+    noTension.Initialize 0.0035, -17#, False
+    upperStrain(1) = -0.0002: upperStrain(2) = -0.0002: upperStrain(3) = 0.001
+    ok = limits.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    expected = (0.00015 + 0.00000075 / 30000#) / 0.001
+    TestCheck ok And lower <= expected And upper >= expected And upper - lower <= 0.000000001, _
+        "explicit tensile boundary is localized with declared accuracy", passed, failedCount, report
+    output = "T;" & Trim$(Str$(lower)) & ";" & Trim$(Str$(upper)) & ";" & Trim$(Str$(expected)) & vbCrLf
+    ok = noTension.TryEvaluateTrial(concrete, 1, upperStrain, ratio, critical, compression)
+    TestCheck ok And ratio = 0#, "disabled hard tensile bound is not read or invented", passed, failedCount, report
+    ok = noTension.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    TestCheck Not ok, "no inactive tensile boundary is reported", passed, failedCount, report
+    upperStrain(1) = 0.002: upperStrain(2) = 0.002: upperStrain(3) = -0.01
+    ok = limits.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    expected = (0.0035 + 0.00001 / 30000#) / 0.01
+    TestCheck ok And lower <= expected And upper >= expected And upper - lower <= 0.000000001, _
+        "explicit compression boundary is localized with declared accuracy", passed, failedCount, report
+    output = output & "C;" & Trim$(Str$(lower)) & ";" & Trim$(Str$(upper)) & ";" & Trim$(Str$(expected)) & vbCrLf
+    Dim tension As Double, compressive As Double
+    ok = concrete.TryReadAcceptedASDStrains(1, tension, compressive)
+    TestCheck ok And tension = 0# And compressive = 0#, "boundary localization leaves history unchanged", passed, failedCount, report
+    concrete.Initialize 1, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    ratio = 7#: critical = 9#
+    ok = limits.TryEvaluateTrial(concrete, 1, upperStrain, ratio, critical, compression)
+    TestCheck Not ok And ratio = 0# And critical = 0#, "explicit ASD criterion does not reinterpret CDP", passed, failedCount, report
+    handle = FreeFile: Open folder & "/Intersections.csv" For Output As #handle
+    Print #handle, output;: Close #handle
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
 ' Пишет шесть напряжений с инвариантной десятичной точкой для независимого сопоставления.
 Private Function TestVector(ByRef values() As Double) As String
     Dim i As Long
@@ -172620,6 +172681,115 @@ Private Sub TestCheck(ByVal condition As Boolean, ByVal name As String, ByRef pa
     Else
         failedCount = failedCount + 1: report = report & "FAIL: " & name & vbCrLf
     End If
+End Sub
+
+
+
+====================================================================================================
+COMPONENT: CCoupledASDStrainLimits
+TYPE: 2
+LINES: 103
+====================================================================================================
+Option Explicit
+
+' ==========================================================================
+' Явные конечные ограничения эквивалентных полных деформаций ASD
+' ==========================================================================
+' Положительные пределы задаёт вызывающий слой, без неявного переноса из СП.
+' Неизменяемый объект проверяет материальную точку и локализует пересечение
+' на заданном тензорном отрезке. Это не поиск равновесия или предела сечения.
+
+Private mCompression As Double, mTension As Double
+Private mTensionEnabled As Boolean, mReady As Boolean
+
+' Принимает конечные положительные пределы в долях единицы.
+' Значение отключённого растянутого ограничения не читается и не проверяется.
+Friend Sub Initialize(ByVal compressionLimit As Double, ByVal tensionLimit As Double, ByVal tensionEnabled As Boolean)
+    If mReady Then InvalidInput "Ограничения ASD неизменяемы. Создайте новый набор."
+    If Not (compressionLimit > 0#) Or compressionLimit > 1E+100 Then _
+        InvalidInput "Задайте положительный конечный предел эквивалентного сжатия ASD."
+    If tensionEnabled Then
+        If Not (tensionLimit > 0#) Or tensionLimit > 1E+100 Then _
+            InvalidInput "Задайте положительный конечный предел эквивалентного растяжения ASD."
+        mTension = tensionLimit
+    End If
+    mCompression = compressionLimit: mTensionEnabled = tensionEnabled: mReady = True
+End Sub
+
+' Проверяет принятую точку, не изменяя историю. False означает неприменимость к её закону.
+Friend Function TryEvaluateAccepted(ByVal concrete As CCoupledConcreteResponse, ByVal point As Long, _
+        ByRef utilization As Double, ByRef criticalStrain As Double, ByRef compression As Boolean) As Boolean
+    ValidateResponse concrete
+    utilization = 0#: criticalStrain = 0#: compression = True
+    Dim tension As Double, compressive As Double
+    If Not concrete.TryReadAcceptedASDStrains(point, tension, compressive) Then Exit Function
+    EvaluateMeasures tension, compressive, utilization, criticalStrain, compression
+    TryEvaluateAccepted = True
+End Function
+
+' Проверяет кандидата от принятой истории; равенство единице относится к допустимой границе.
+Friend Function TryEvaluateTrial(ByVal concrete As CCoupledConcreteResponse, ByVal point As Long, _
+        ByRef strain() As Double, ByRef utilization As Double, ByRef criticalStrain As Double, _
+        ByRef compression As Boolean) As Boolean
+    ValidateResponse concrete
+    utilization = 0#: criticalStrain = 0#: compression = True
+    Dim tension As Double, compressive As Double
+    If Not concrete.TryReadASDStrains(point, strain, tension, compressive) Then Exit Function
+    EvaluateMeasures tension, compressive, utilization, criticalStrain, compression
+    TryEvaluateTrial = True
+End Function
+
+' Локализует обнаруженное пересечение на линейном отрезке полных тензоров от неизменной прошлой истории.
+' Возвращает параметры отрезка: нижний допустим, верхний достигает или превышает границу.
+' Отрезок не считается равновесным путём. Первое разрушение всего сечения этим не подтверждается.
+Friend Function TryIntersectTrialSegment(ByVal concrete As CCoupledConcreteResponse, ByVal point As Long, _
+        ByRef lowerStrain() As Double, ByRef upperStrain() As Double, ByVal parameterTolerance As Double, _
+        ByRef lower As Double, ByRef upper As Double) As Boolean
+    ValidateResponse concrete
+    lower = 0#: upper = 0#
+    If Not (parameterTolerance > 0# And parameterTolerance < 1#) Then _
+        InvalidInput "Точность параметра отрезка ASD должна быть больше нуля и меньше единицы."
+    Dim ratio As Double, measure As Double, compression As Boolean
+    If Not TryEvaluateTrial(concrete, point, lowerStrain, ratio, measure, compression) Then Exit Function
+    If ratio > 1# Then Exit Function
+    If ratio = 1# Then TryIntersectTrialSegment = True: Exit Function
+    If Not TryEvaluateTrial(concrete, point, upperStrain, ratio, measure, compression) Then Exit Function
+    If ratio < 1# Then Exit Function
+    upper = 1#
+    If ratio = 1# Then lower = 1#: TryIntersectTrialSegment = True: Exit Function
+    Dim current(1 To 6) As Double, middle As Double, iteration As Long, component As Long
+    For iteration = 1 To 64
+        If upper - lower <= parameterTolerance Then TryIntersectTrialSegment = True: Exit Function
+        middle = lower + (upper - lower) / 2#
+        If middle = lower Or middle = upper Then Exit Function ' Машинная граница точности не выдаётся за достигнутую пользовательскую точность.
+        For component = 1 To 6
+            current(component) = lowerStrain(component) + middle * (upperStrain(component) - lowerStrain(component))
+        Next component
+        If Not TryEvaluateTrial(concrete, point, current, ratio, measure, compression) Then Exit Function
+        If ratio <= 1# Then lower = middle Else upper = middle
+    Next iteration
+    TryIntersectTrialSegment = (upper - lower <= parameterTolerance)
+End Function
+
+' Выбирает наибольшее использование; при равенстве сохраняет сжатие для детерминированного отчёта.
+Private Sub EvaluateMeasures(ByVal tension As Double, ByVal compressive As Double, ByRef utilization As Double, _
+        ByRef criticalStrain As Double, ByRef compression As Boolean)
+    utilization = compressive / mCompression: criticalStrain = compressive: compression = True
+    If mTensionEnabled Then
+        Dim ratio As Double: ratio = tension / mTension
+        If ratio > utilization Then utilization = ratio: criticalStrain = tension: compression = False
+    End If
+End Sub
+
+' Отделяет ошибку неподготовленного контекста от неприменимости данного закона материала.
+Private Sub ValidateResponse(ByVal concrete As CCoupledConcreteResponse)
+    If Not mReady Then InvalidInput "Сначала задайте явные пределы эквивалентных деформаций ASD."
+    If concrete Is Nothing Then InvalidInput "Передайте подготовленный отклик бетона для проверки ограничений ASD."
+End Sub
+
+' Передаёт понятную ошибку ввода вызывающему слою без изменения статусов расчётного состояния.
+Private Sub InvalidInput(ByVal reason As String)
+    Err.Raise 5, "CCoupledASDStrainLimits", reason
 End Sub
 
 

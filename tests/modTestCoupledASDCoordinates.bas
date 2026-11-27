@@ -13,6 +13,7 @@ Public Function RunTestCoupledASDCoordinates(ByVal folder As String) As String
     On Error GoTo Failed
     Dim report As String, passed As Long, failedCount As Long
     TestUnsupportedCoordinates passed, failedCount, report
+    TestExplicitASDLimits folder, passed, failedCount, report
     TestCoordinateHistory folder, True, passed, failedCount, report
     TestCoordinateHistory folder, False, passed, failedCount, report
     RunTestCoupledASDCoordinates = report & "TOTAL_COUPLED_ASD_COORDINATES_TEST: passed=" & passed & "; failed=" & failedCount
@@ -67,6 +68,9 @@ Private Sub TestCoordinateHistory(ByVal folder As String, ByVal nativeStep As Bo
     Dim stress(1 To 6) As Double, tangent(1 To 6, 1 To 6) As Double
     Dim oldT As Double, oldC As Double, trialT As Double, trialC As Double, readT As Double, readC As Double
     Dim expectedT As Double, expectedC As Double, i As Long, number As Long, reason As String, ready As Boolean
+    Dim limits As New CCoupledASDStrainLimits, trialUse As Double, acceptedUse As Double
+    Dim critical As Double, compression As Boolean, branch As Long, expectedUse As Double
+    limits.Initialize 0.0035, 0.00015, True
     If nativeStep Then mode = "Native" Else mode = "Closed"
     Set flow = TestCoordinateFlow(nativeStep)
     inputHandle = FreeFile: Open folder & "/History.csv" For Input As #inputHandle
@@ -109,13 +113,24 @@ Private Sub TestCoordinateHistory(ByVal folder As String, ByVal nativeStep As Bo
         TestCheck ready, mode & " additional read-only candidate exists", passed, failedCount, report
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = oldT And readC = oldC, mode & " reads leave accepted state unchanged", passed, failedCount, report
+        ready = limits.TryEvaluateTrial(concrete, 1, strain, trialUse, critical, compression)
+        expectedUse = GeomMax(trialC / 0.0035, trialT / 0.00015)
+        TestCheck ready And trialUse = expectedUse, mode & " explicit limits use equivalent total measures", passed, failedCount, report
+        branch = 0: If compression Then branch = 1
+        TestCheck (compression And critical = trialC) Or (Not compression And critical = trialT), _
+            mode & " explicit limits identify critical branch", passed, failedCount, report
         expectedT = oldT: expectedC = oldC
         If CLng(row(8)) = 1 Then
             response.AcceptTrial: expectedT = trialT: expectedC = trialC
         End If
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = expectedT And readC = expectedC, mode & " reads preserve trial buffer and accept/reject", passed, failedCount, report
-        Print #outputHandle, line & ";" & Trim$(Str$(trialT)) & ";" & Trim$(Str$(trialC)) & ";" & Trim$(Str$(readT)) & ";" & Trim$(Str$(readC)) & TestVector(stress)
+        Dim trialCritical As Double: If branch = 1 Then trialCritical = trialC Else trialCritical = trialT
+        ready = limits.TryEvaluateAccepted(concrete, 1, acceptedUse, critical, compression)
+        expectedUse = GeomMax(expectedC / 0.0035, expectedT / 0.00015)
+        TestCheck ready And acceptedUse = expectedUse, mode & " explicit limits respect accept/reject", passed, failedCount, report
+        Print #outputHandle, line & ";" & Trim$(Str$(trialT)) & ";" & Trim$(Str$(trialC)) & ";" & Trim$(Str$(readT)) & ";" & Trim$(Str$(readC)) & TestVector(stress) & _
+            ";" & Trim$(Str$(trialUse)) & ";" & Trim$(Str$(trialCritical)) & ";" & CStr(branch) & ";" & Trim$(Str$(acceptedUse))
         readT = 99#: readC = 98#
         ready = concrete.TryReadAcceptedASDStrains(1, readT, readC)
         TestCheck ready And readT = expectedT And readC = expectedC, mode & " returned scalars do not alias history", passed, failedCount, report
@@ -132,6 +147,52 @@ Failed:
     If outputHandle <> 0 Then Close #outputHandle
     On Error GoTo 0
     Err.Raise number, "modTestCoupledASDCoordinates.TestCoordinateHistory", mode & "/" & path & ": " & reason
+End Sub
+
+' -------------------- ДЛЯ ТЕСТОВ --------------------
+' Проверяет явные пределы и локализацию материальной границы с известным одноосным ответом.
+Private Sub TestExplicitASDLimits(ByVal folder As String, ByRef passed As Long, ByRef failedCount As Long, ByRef report As String)
+    Dim concrete As New CCoupledConcreteResponse, limits As New CCoupledASDStrainLimits
+    Dim noTension As New CCoupledASDStrainLimits, unprepared As New CCoupledASDStrainLimits
+    Dim lowerStrain(1 To 6) As Double, upperStrain(1 To 6) As Double, lower As Double, upper As Double
+    Dim ratio As Double, critical As Double, compression As Boolean, ok As Boolean, expected As Double
+    Dim number As Long, handle As Integer, output As String
+    concrete.InitializeASD 1, TestCoordinateFlow(True)
+    On Error Resume Next
+    ok = unprepared.TryEvaluateAccepted(concrete, 1, ratio, critical, compression): number = Err.Number: Err.Clear
+    On Error GoTo 0
+    TestCheck number = 5, "explicit limits require initialization", passed, failedCount, report
+    limits.Initialize 0.0035, 0.00015, True
+    On Error Resume Next
+    limits.Initialize 0.004, 0.0002, True: number = Err.Number: Err.Clear
+    On Error GoTo 0
+    TestCheck number = 5, "explicit limits are immutable", passed, failedCount, report
+    noTension.Initialize 0.0035, -17#, False
+    upperStrain(1) = -0.0002: upperStrain(2) = -0.0002: upperStrain(3) = 0.001
+    ok = limits.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    expected = (0.00015 + 0.00000075 / 30000#) / 0.001
+    TestCheck ok And lower <= expected And upper >= expected And upper - lower <= 0.000000001, _
+        "explicit tensile boundary is localized with declared accuracy", passed, failedCount, report
+    output = "T;" & Trim$(Str$(lower)) & ";" & Trim$(Str$(upper)) & ";" & Trim$(Str$(expected)) & vbCrLf
+    ok = noTension.TryEvaluateTrial(concrete, 1, upperStrain, ratio, critical, compression)
+    TestCheck ok And ratio = 0#, "disabled hard tensile bound is not read or invented", passed, failedCount, report
+    ok = noTension.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    TestCheck Not ok, "no inactive tensile boundary is reported", passed, failedCount, report
+    upperStrain(1) = 0.002: upperStrain(2) = 0.002: upperStrain(3) = -0.01
+    ok = limits.TryIntersectTrialSegment(concrete, 1, lowerStrain, upperStrain, 0.000000001, lower, upper)
+    expected = (0.0035 + 0.00001 / 30000#) / 0.01
+    TestCheck ok And lower <= expected And upper >= expected And upper - lower <= 0.000000001, _
+        "explicit compression boundary is localized with declared accuracy", passed, failedCount, report
+    output = output & "C;" & Trim$(Str$(lower)) & ";" & Trim$(Str$(upper)) & ";" & Trim$(Str$(expected)) & vbCrLf
+    Dim tension As Double, compressive As Double
+    ok = concrete.TryReadAcceptedASDStrains(1, tension, compressive)
+    TestCheck ok And tension = 0# And compressive = 0#, "boundary localization leaves history unchanged", passed, failedCount, report
+    concrete.Initialize 1, 30000#, 0.2, 16#, 30#, 3#, 0.002, 0.12, 80#, 125#
+    ratio = 7#: critical = 9#
+    ok = limits.TryEvaluateTrial(concrete, 1, upperStrain, ratio, critical, compression)
+    TestCheck Not ok And ratio = 0# And critical = 0#, "explicit ASD criterion does not reinterpret CDP", passed, failedCount, report
+    handle = FreeFile: Open folder & "/Intersections.csv" For Output As #handle
+    Print #handle, output;: Close #handle
 End Sub
 
 ' -------------------- ДЛЯ ТЕСТОВ --------------------
