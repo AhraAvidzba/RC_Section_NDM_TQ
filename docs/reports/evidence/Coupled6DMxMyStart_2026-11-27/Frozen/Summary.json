@@ -1,0 +1,537 @@
+{
+  "all_workers_terminal": true,
+  "cases": {
+    "Cold1187ASDRealisticMxFailure_20261127": {
+      "Case02/Native/RealisticMxCaptureSummary.json": {
+        "captured_contexts": 81,
+        "contexts_matching_returned_history": 41,
+        "failure_capture_SHA256": "2A207BC8DFF2C548C1522DF18EA4E85B4762E178ED10E222DD474E5915C4146E",
+        "history80_bitexact_1186": true,
+        "history_SHA256": "E64096115784499E52D635F34D0BE3BE931814CD960CBA475C20306B8B814FF2",
+        "independent_retry_enabled_as_normal": true,
+        "maximum_matched_prefix": 80,
+        "physical_capacity_confirmed": false,
+        "selected_context_ordinal": 81,
+        "selected_iteration": 0,
+        "selected_lambda": 1.0536708151670764,
+        "selected_norm_MPa": 1.0412670751846343e-05,
+        "selected_refined_tangent": false,
+        "selected_target": 0.013328747782181969,
+        "selected_tolerance_MPa": 1.838541140793389e-06
+      },
+      "Case02/Native/RealisticMxRootSummary.json": {
+        "OpenSees_solid_element": false,
+        "accepted_history_unchanged": true,
+        "actual_native_OpenSees_material": true,
+        "any_admissible_forward_equilibrium_found": false,
+        "any_equilibrium_found": false,
+        "captured_context": {
+          "exact_target_and_history": true,
+          "lambda_value": 1.0536708151670764,
+          "native_errors_MPa": [
+            1.0412664194425979e-05,
+            2.888261895275801e-08,
+            2.6232356220880647e-06,
+            0.0
+          ],
+          "native_vs_recorded_residual_difference_MPa": 7.401089388844192e-11,
+          "original_VBA_bound_MPa": 1.838541140793389e-06,
+          "original_VBA_norm_MPa": 1.0412670751846343e-05,
+          "prefix": 80,
+          "recorded_linear_correction_defect_MPa": 4.860566430679031e-15,
+          "scaled_condition_number": 15823859583.939772,
+          "scaled_rank": 61,
+          "target": 0.013328747782181969
+        },
+        "elapsed_seconds": 6.8977257999940775,
+        "independent_roots": [
+          {
+            "actual_function_calls": 1107,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 575,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 532,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08896427525141322,
+            "cosine_to_previous": 0.993841468662047,
+            "epsilon0": 0.006503241436288293,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              2.995045631604854e-06,
+              2.933681458365208e-07,
+              7.588250267025717e-07,
+              3.105432577754641e-09
+            ],
+            "lambda_value": 1.0536707316201894,
+            "original_bound_MPa": 1.838541034658775e-06,
+            "positive_spatial_advance": true,
+            "seconds": 2.059554199979175,
+            "seed": "captured",
+            "signed_spatial_advance": 5.148131870239801e-06,
+            "spatial_increment_length": 5.180033267449024e-06,
+            "steel_utilization": 0.5331499157261811
+          },
+          {
+            "actual_function_calls": 1599,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 1201,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 398,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08896427525141322,
+            "cosine_to_previous": -0.36132839136629724,
+            "epsilon0": 0.006503214015614276,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              0.00012488871037844143,
+              1.5824899355805218e-05,
+              0.00012488871037846886,
+              2.2317172068686553e-06
+            ],
+            "lambda_value": 1.053665889058532,
+            "original_bound_MPa": 1.8385348828626806e-06,
+            "positive_spatial_advance": false,
+            "seconds": 3.0765442000119947,
+            "seed": "accepted",
+            "signed_spatial_advance": -2.0720954561619322e-05,
+            "spatial_increment_length": 5.734659953862696e-05,
+            "steel_utilization": 0.5331499083116559
+          },
+          {
+            "actual_function_calls": 539,
+            "admissible_forward_equilibrium": false,
+            "attempts": [
+              {
+                "eps": 1e-12,
+                "function_calls": 136,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+                "solver_success": false
+              },
+              {
+                "eps": 1e-08,
+                "function_calls": 403,
+                "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+                "solver_success": false
+              }
+            ],
+            "compression_utilization": 0.08896427525141322,
+            "cosine_to_previous": 0.9992663770852914,
+            "epsilon0": 0.006503241278790569,
+            "equilibrium_found": false,
+            "errors_MPa": [
+              4.524943670242363e-06,
+              3.6153240831968006e-07,
+              8.721762263727144e-07,
+              6.206181402124145e-09
+            ],
+            "lambda_value": 1.0536705781514297,
+            "original_bound_MPa": 1.8385408396982184e-06,
+            "positive_spatial_advance": true,
+            "seconds": 1.7591900000115857,
+            "seed": "physical_secant",
+            "signed_spatial_advance": 5.013127697119374e-06,
+            "spatial_increment_length": 5.016808142531432e-06,
+            "steel_utilization": 0.5331499121241721
+          }
+        ],
+        "independent_section_assembly": true,
+        "physical_capacity_confirmed": false,
+        "whole_goal_completed": false
+      },
+      "Case02/Native/RealisticMxTrustRootSummary.json": {
+        "OpenSees_solid_model": false,
+        "any_admissible_forward_equilibrium_found": true,
+        "elapsed_seconds": 8.158786799991503,
+        "fixed_prefix": 80,
+        "independent_section_assembly": true,
+        "native_OpenSees_ASD": true,
+        "original_tolerances_unchanged": true,
+        "physical_capacity_confirmed": false,
+        "same_control_projection_and_target": true,
+        "trials": [
+          {
+            "actual_function_calls": 2231,
+            "admissible_forward_equilibrium": true,
+            "attempts": [
+              {
+                "absolute_q_difference_step": 0.0001,
+                "actual_function_calls": 871,
+                "best_original_merit": 1.165574661252796,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "optimizer_success": false
+              },
+              {
+                "absolute_q_difference_step": 0.001,
+                "actual_function_calls": 1359,
+                "best_original_merit": 0.9873563348529513,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "optimizer_success": false
+              }
+            ],
+            "compression_utilization": 0.08896427525141322,
+            "epsilon0": 0.006503241418070777,
+            "equilibrium_found": true,
+            "errors_MPa": [
+              1.8152952276808838e-06,
+              6.849745380274608e-11,
+              4.2725065482155034e-07,
+              1.842276331487369e-11
+            ],
+            "lambda_value": 1.0536708035516213,
+            "original_bound_MPa": 1.838541126037581e-06,
+            "positive_spatial_advance": true,
+            "seconds": 3.946431100019254,
+            "seed": "captured",
+            "steel_utilization": 0.5331499147842286
+          },
+          {
+            "actual_function_calls": 2231,
+            "admissible_forward_equilibrium": true,
+            "attempts": [
+              {
+                "absolute_q_difference_step": 0.0001,
+                "actual_function_calls": 871,
+                "best_original_merit": 1.08509769854212,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "optimizer_success": false
+              },
+              {
+                "absolute_q_difference_step": 0.001,
+                "actual_function_calls": 1359,
+                "best_original_merit": 0.9411910025365191,
+                "message": "The maximum number of function evaluations is exceeded.",
+                "optimizer_success": false
+              }
+            ],
+            "compression_utilization": 0.08896427525141322,
+            "epsilon0": 0.0065032413520779795,
+            "equilibrium_found": true,
+            "errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "lambda_value": 1.053670869487012,
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "positive_spatial_advance": true,
+            "seconds": 4.210695999965537,
+            "seed": "physical_secant",
+            "steel_utilization": 0.5331499113989568
+          }
+        ],
+        "whole_goal_completed": false
+      },
+      "EarlySourceProof.json": {
+        "actual_components": 269,
+        "all267_other_parent_components_unchanged": true,
+        "changed_components_exact": true,
+        "first_and_second_attempt_math_unchanged": true,
+        "independent_retry_enabled_as_normal": true,
+        "only_capture_policy_and_wire_retry_flag_changed": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "2D4706468C137057B9812E2C869884098AD8EE475E17306E66CFDD1C813E84DD"
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1188ASDRealisticMxFrozen_20261127": {
+      "EarlySourceProof.json": {
+        "actual_components": 269,
+        "all268_parent_components_unchanged": true,
+        "changed_components_exact": true,
+        "only_test_frozen_module_changed": true,
+        "public_book_unchanged": true,
+        "same80_state_history_and_original_force_tolerances": true,
+        "saved_book_sha256": "1C46C460F97F28E1A920BA667F79203496880C990ECA0787DD41E0C3E08B9D90"
+      },
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.1171875,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.0625,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.09375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 8.078125,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1189ASDMxDifferenceStep_20261127": {
+      "EarlySourceProof.json": {
+        "actual_components": 269,
+        "all268_other_parent_components_unchanged": true,
+        "all268_parent_components_unchanged": true,
+        "changed_components_exact": true,
+        "one_difference_scale_changed": true,
+        "original_equilibrium_material_orientation_tolerances_and_budgets_unchanged": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "D5A59D89601FBAD5FBFB0E0AB3816CA65ADD8438AE2DC5C212B074A3BA7918F4"
+      },
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.109375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.09375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.1171875,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 12.0,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1190ASDMxDirectTrust_20261127": {
+      "EarlySourceProof.json": {
+        "actual_components": 269,
+        "all268_other_parent_components_unchanged": true,
+        "all268_parent_components_unchanged": true,
+        "changed_components_exact": true,
+        "one_control_mapping_removed": true,
+        "original_equilibrium_material_orientation_tolerances_and_budgets_unchanged": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "AD2E189C1617A3FA098B2039441025765AB0072A5DA124F34B697585DBBA7954"
+      },
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.0859375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.0859375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.078125,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 11.21875,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    }
+  },
+  "public_book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "two_bar_edge_fixture_further_tuning_deferred_by_user": true,
+  "whole_goal_completed": false
+}

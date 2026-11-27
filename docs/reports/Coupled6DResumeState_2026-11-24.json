@@ -1891,6 +1891,38 @@
     "unchanged_parent_components": 262,
     "worker_closed": true
   },
+  "ASD_realistic_Mx_capture_1187": {
+    "base_git_commit": "d9f351c",
+    "exec_session": 21580,
+    "expected_history_states": 80,
+    "first_and_second_attempt_math_unchanged": true,
+    "history80_bitexact_1186": true,
+    "hybr_same_target_failed": true,
+    "previous_goal_turn_classification": "progress",
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1187ASDRealisticMxFailure_20261127",
+    "stage": "TERMINAL_HISTORY80_BITEXACT_TRF_ROOT_FOUND",
+    "terminal": true,
+    "trust_region_same_target_found": true
+  },
+  "ASD_realistic_Mx_difference_1189": {
+    "exec_session": 10204,
+    "global_difference_scale_only": true,
+    "materials_and_original_force_criteria_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1189ASDMxDifferenceStep_20261127",
+    "stage": "TERMINAL_FROZEN_FAILED_NOT_PROMOTED",
+    "terminal": true
+  },
+  "ASD_realistic_Mx_direct_1190": {
+    "stage": "TERMINAL_FROZEN_FAILED_NOT_PROMOTED",
+    "terminal": true
+  },
+  "ASD_realistic_Mx_frozen_1188": {
+    "default_hybrid30_failed": true,
+    "external_trust_field_accepted_without_change": true,
+    "native_all4_trials_independently_verified": true,
+    "ordinary_Newton_failed": true
+  },
   "ASD_realistic_N_capture_1183": {
     "exec_session": 36028,
     "history118_bitexact_1180": true,
@@ -3093,6 +3125,33 @@
     "plan": "docs/Coupled6DBSplineResolutionPlan.md",
     "pushed": true,
     "task": "ASD-BSPLINE-SETTING"
+  },
+  "Mx_My_start_and_frozen_study_20261127": {
+    "VBA_accepts_external_field_without_change": true,
+    "all18_recorded_initial_iteration_residuals_native_verified": true,
+    "all_started_stages_terminal": true,
+    "evidence": "docs/reports/evidence/Coupled6DMxMyStart_2026-11-27",
+    "exact_Mx_history80_bitexact_1186": true,
+    "external_TRF_same_target_found": true,
+    "initial_cold_cases": 8,
+    "initial_returned_states": 7,
+    "no_new_working_kernel_or_public_output_changes": true,
+    "numerical_variants1189_1190_not_promoted": true,
+    "physical_Mx_capacity_still_unconfirmed": true,
+    "physical_rotation": {
+      "axis_name_alone_does_not_explain_failure": true,
+      "maximum_relative_difference": 6.9501547931434816e-15,
+      "original_accepted_states": 80,
+      "original_final_lambda": 1.0536465578529528,
+      "original_maximum_admissible_lambda": 1.0862371835083255,
+      "physical_capacity_confirmed": false,
+      "rotated_accepted_states": 80,
+      "rotated_call_seconds": 263.4453125,
+      "rotated_final_lambda": 1.0535701537598878,
+      "rotated_maximum_admissible_lambda": 1.086237183508318
+    },
+    "report": "docs/reports/Coupled6DMxMyStart_2026-11-27.md",
+    "summary_file": "D:\\CodexScratch\\RC_Section_NDM_TQ\\MxMyStudySummary_20261127.json"
   },
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
@@ -43485,8 +43544,17 @@
     "original11_history_exact": true,
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
+  "material_slope_user_steering_20261127": {
+    "auxiliary_maximum_relative_stress_increase": 0.01,
+    "check_each_grade_sign_and_configured_limit": true,
+    "existing_flat_NDM_configured_slope_preferred": true,
+    "legacy1500MPa_control_fixture_preserved_for_frozen_reproduction": true,
+    "no_changes_to_current_frozen_materials": true,
+    "priority": "successful remaining physical capacities, current Mx first",
+    "zero_slope_study_deferred": true
+  },
   "ndm_unchanged": true,
-  "next_action": "Realistic primary300x500 four20mm corner bars/8mm A240 hoop150. Capture exact Mx- failure on current1186 candidate, whose80-state history is independently verified; keep both ordinary attempts and compare history byteexact before native frozen root. Existing N secant guard fix confirmed cold physical steel capacity545.895..546.028kN containing flat546.009kN,29.4s instead368s; preserve Ncompression/My+-/NM/NMT regressions. Current candidate Mx+/T+- stillnotrun. Old two-bar My edge deferred. Complete safe public VBA/source/build/dump integration without testhooks, remaining full6D/ASD thenCDP/geometry/loadpath/normative/mesh/experimental/output/performance/acceptance scope. Goalactive, no overallPASS.",
+  "next_action": "User-priority Mx/My comparison completed: no gross initial elastic/axis error; rigidly rotated primary Mx alsoNumFail asMy with same maxlambda1.0862371835083, so problem follows physical nonlinear branch. Eight virgin NDS starts/18 iteration snapshots nativeverified: Mx50kNm solves3iterations, coldMy50fails but incremental capacity branch succeeds. Material moments show Mx softening after first steel yield: concrete49.624->44.261kNm,steel59.000->61.103; My continues increasing. Next inspect first post-yield correction and committed-vs-trial entry equilibrium at exact1187 prefix80: fresh native/VBA zero-increment trial has residual3.6946e-6 aboveoriginaltol1.8385e-6, while retained precommit field wasvalid. Do not restore constitutive zero-step shortcut blindly; distinguish read-only committed state from new trial and verify native material contract. ExternalTRF found same-target forward root and VBA1188 accepts unchanged0iterations; existing trust variants1189(largerFD),1190(no coordinate mapping) still fail and were NOT promoted. Accepted private base1186/d9f351c and N/My/NM/NMT regressions remain. User permits configured original flat slope or separateaux <=1%stressboost byeachgrade/sign; zero-slope studydeferred; immutable1500MPa fixture only for cause. Full original six-force pureVBA/public source-build-book-dump sync/normative/mesh/experimental/performance/acceptance scope remains active.",
   "next_actions": [
     "Capture exact terminal first-branch My1175 Newton/material-event failure using existing read-only modTestASDPostTransition.TestRunPostTransitionCapture in an identical268-component book, without recompilation or a second independent retry. Expected final first history is76 states, SHA FC371FB9D30FB6DC97065FD7693FBFD4F67925C2F35CCF8C6FC773EFC3A51BAF. New limiting event is point26/station-1/principal3; incoming residual2.10774e-6 and full-hybrid best2.07735e-6 exceed original bound near2.05944e-6. Independently solve captured exact target before changing control, event handling or step growth. Retain original acceptance/budgets; local secant proof does not establish physical capacity. Full original scope remains."
   ],
