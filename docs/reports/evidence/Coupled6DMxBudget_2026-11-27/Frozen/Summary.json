@@ -1,0 +1,280 @@
+{
+  "all_workers_terminal": true,
+  "cases": {
+    "Cold1193ASDMxFrozenBudget_20261127": {
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.0859375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.078125,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.1015625,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 60,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 9.75,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1194ASDMxDirectBudget_20261127": {
+      "Native/AcceptedAdvance.json": {
+        "VBA_found_without_external_solution_seed": true,
+        "advance_inner_product": 0.0001443402043238955,
+        "all_original_equilibrium_gates_pass": true,
+        "compression_utilization": 0.08896427525141322,
+        "epsilon0": 0.006503241319604381,
+        "errors_MPa": [
+          1.8164947638612308e-06,
+          4.666067337198709e-12,
+          3.8271465835278616e-08,
+          5.506012312750386e-11
+        ],
+        "global_maximum_not_increased": true,
+        "lambda_value": 1.053670769344105,
+        "local_iterations": 60,
+        "original_bound_MPa": 1.8385410825817244e-06,
+        "physical_capacity_confirmed": false,
+        "positive_spatial_advance": true,
+        "seconds": 24.2890625,
+        "steel_utilization": 0.5331499113737426,
+        "test_local_budget": 60,
+        "whole_goal_completed": false
+      },
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.1015625,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.078125,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.0859375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 4,
+            "epsilon0": 0.006503241319604381,
+            "iterations": 60,
+            "lambda_value": 1.053670769344105,
+            "maximum_native_stress_difference_MPa": 3.022727673152094e-09,
+            "native_errors_MPa": [
+              1.8164947638612308e-06,
+              4.666067337198709e-12,
+              3.8271465835278616e-08,
+              5.506012312750386e-11
+            ],
+            "original_bound_MPa": 1.8385410825817244e-06,
+            "seconds": 24.2890625,
+            "seed_unchanged": false
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    },
+    "Cold1196ASDMxAnalyticBranch_20261127": {
+      "Native/RealisticMxFrozenProof.json": {
+        "all60_equations_and_six_forces_checked": true,
+        "all_accepted_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.0859375,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": true,
+            "case": 2,
+            "epsilon0": 0.0065032413520779795,
+            "iterations": 0,
+            "lambda_value": 1.053670869487012,
+            "maximum_native_stress_difference_MPa": 3.203987816902701e-09,
+            "native_errors_MPa": [
+              1.730418444455667e-06,
+              8.15424388168201e-11,
+              6.809248270730266e-08,
+              1.420738526825005e-11
+            ],
+            "original_bound_MPa": 1.8385412097992566e-06,
+            "seconds": 0.0546875,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 0,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 0.0703125,
+            "seed_unchanged": true
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "epsilon0": 0.006503241186379604,
+            "iterations": 30,
+            "lambda_value": 1.0536708151670764,
+            "maximum_native_stress_difference_MPa": 2.9257269466990206e-09,
+            "native_errors_MPa": [
+              1.0412664194425979e-05,
+              2.888261895275801e-08,
+              2.6232356220880647e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.838541140793389e-06,
+            "seconds": 8.0,
+            "seed_unchanged": true
+          }
+        ],
+        "ordinary_secant_accepted_without_iteration": false,
+        "physical_capacity_confirmed": false,
+        "same80_state_history": true,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_started_workers_terminal": true,
+      "physical_capacity_not_implied_by_execution": true
+    }
+  },
+  "public_book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "public_dump_sha256": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2",
+  "whole_goal_completed": false
+}
