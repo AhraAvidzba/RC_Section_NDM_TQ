@@ -1,0 +1,223 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1203ASDElasticStart_20261127": {
+      "Case02/Native/CapacityStatusContract.json": {
+        "contract_passed": false,
+        "errors": [
+          "\u0424\u0438\u043d\u0430\u043b\u044c\u043d\u044b\u0439 OK/FAIL \u043f\u043e\u0438\u0441\u043a\u0430 \u043f\u0440\u0435\u0434\u0435\u043b\u0430 \u043d\u0435 \u0438\u043c\u0435\u0435\u0442 \u043f\u0440\u0435\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u0442\u043e\u0447\u043a\u0438."
+        ],
+        "has_confirmed_lower_bound": false,
+        "has_physical_capacity": false,
+        "known_invalid_control": true,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "OK"
+      },
+      "Case02/Native/ElasticInitialScale.json": {
+        "first_accepted_lambda": 0.01139545943056499,
+        "first_accepted_physical_resultants": [
+          0.0,
+          -1139545.9430564991,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "four_substeps_ceiling": 0.011395459430564981,
+        "independent_elastic_stiffness_assembled": true,
+        "lambda_tolerance_only_stricter": 4.5581837722259925e-05,
+        "material_and_force_criteria_unchanged": true,
+        "maximum_elastic_unit_strain": 0.00021938562593575494,
+        "optimality_not_claimed": true,
+        "predicted_initial_lambda_cap": 0.045581837722259926
+      },
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 128,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.08896811524860522,
+        "final_lambda": 1.0974679165135846,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -109746791.65135846,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.21871091375214746,
+        "maximum_moment_error_Nmm": 43.22304907441139,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": false,
+        "errors": [
+          "\u0424\u0438\u043d\u0430\u043b\u044c\u043d\u044b\u0439 OK/FAIL \u043f\u043e\u0438\u0441\u043a\u0430 \u043f\u0440\u0435\u0434\u0435\u043b\u0430 \u043d\u0435 \u0438\u043c\u0435\u0435\u0442 \u043f\u0440\u0435\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u0442\u043e\u0447\u043a\u0438."
+        ],
+        "has_confirmed_lower_bound": false,
+        "has_physical_capacity": false,
+        "known_invalid_control": true,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "OK"
+      },
+      "Case07/Native/ElasticInitialScale.json": {
+        "first_accepted_lambda": 0.01139545943056499,
+        "first_accepted_physical_resultants": [
+          0.0,
+          1139545.9430564991,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "four_substeps_ceiling": 0.011395459430564981,
+        "independent_elastic_stiffness_assembled": true,
+        "lambda_tolerance_only_stricter": 4.5581837722259925e-05,
+        "material_and_force_criteria_unchanged": true,
+        "maximum_elastic_unit_strain": 0.00021938562593575494,
+        "optimality_not_claimed": true,
+        "predicted_initial_lambda_cap": 0.045581837722259926
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 116,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08896811524860518,
+        "final_lambda": 1.0871656357689656,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          108716563.57689656,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.2585264484041545,
+        "maximum_moment_error_Nmm": 36.27601829171181,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "0745214D0B6E2D4719F9CA12C092B5BDCED3DEB0B679016FF52D78A5B7848599"
+    },
+    "Cold1204ASDReadOnlyElasticStart_20261127": {
+      "Case02/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case02/Native/ElasticInitialScale.json": {
+        "first_accepted_lambda": 0.01139545943056499,
+        "first_accepted_physical_resultants": [
+          0.0,
+          -1139545.9430564991,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "four_substeps_ceiling": 0.011395459430564981,
+        "independent_elastic_stiffness_assembled": true,
+        "lambda_tolerance_only_stricter": 4.5581837722259925e-05,
+        "material_and_force_criteria_unchanged": true,
+        "maximum_elastic_unit_strain": 0.00021938562593575494,
+        "optimality_not_claimed": true,
+        "predicted_initial_lambda_cap": 0.045581837722259926
+      },
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 128,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.08896811524860522,
+        "final_lambda": 1.0974679165135846,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -109746791.65135846,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.21871091375214746,
+        "maximum_moment_error_Nmm": 43.22304907441139,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case07/Native/ElasticInitialScale.json": {
+        "first_accepted_lambda": 0.01139545943056499,
+        "first_accepted_physical_resultants": [
+          0.0,
+          1139545.9430564991,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "four_substeps_ceiling": 0.011395459430564981,
+        "independent_elastic_stiffness_assembled": true,
+        "lambda_tolerance_only_stricter": 4.5581837722259925e-05,
+        "material_and_force_criteria_unchanged": true,
+        "maximum_elastic_unit_strain": 0.00021938562593575494,
+        "optimality_not_claimed": true,
+        "predicted_initial_lambda_cap": 0.045581837722259926
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 116,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08896811524860518,
+        "final_lambda": 1.0871656357689656,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          108716563.57689656,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.2585264484041545,
+        "maximum_moment_error_Nmm": 36.27601829171181,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "57D115EF58AD79E99C5F58D8E95F974DF3C9415A0457029287A8E3E6E51C1569"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
