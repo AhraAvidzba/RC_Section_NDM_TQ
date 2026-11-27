@@ -1,0 +1,85 @@
+{
+  "actual_help_update_pending": true,
+  "all258_other_existing_components_unchanged": true,
+  "base_commit": "7b23066",
+  "candidate": {
+    "actual_components": 260,
+    "all118_other_parts_bit_exact": true,
+    "all_original_style_records_unchanged": true,
+    "calibration_and_supplementary_values_preserved": true,
+    "changed_parts": [
+      "xl/worksheets/sheet1.xml",
+      "xl/vbaProject.bin",
+      "xl/styles.xml",
+      "xl/workbook.xml"
+    ],
+    "native_dropdown_acceptance_pending": true,
+    "native_reopen_pending": true,
+    "original_media_charts_and_objects_preserved": true,
+    "saved_candidate_sha256": "ED62A0EBBF43F0564F678862A2E0483E27D512BEA3838FB25BA7A1B5EA5F5021",
+    "unrelated_config_cells_checked": 34335,
+    "working_book_unchanged": true
+  },
+  "current_goal_turn_classification": "progress",
+  "factory_and_test_sources_match_actual_saved_VBA": true,
+  "full_native_dump_pending": true,
+  "goal_remains_active": true,
+  "manual_native_confirmation": {
+    "ComputerUse_stopped_by_user_physical_Escape": true,
+    "answer": "\u0414\u0430, \u043e\u0431\u0430 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e \u0438 \u0432\u044b\u0431\u0438\u0440\u0430\u044e\u0442\u0441\u044f",
+    "artifact_render_unavailable": "Trusted RPC service is not configured: artifact_session; MXC unavailable",
+    "date": "2026-11-27",
+    "invalid_and_combined_string_native_engine_check_pending": true,
+    "no_further_ComputerUse_this_turn": true,
+    "question": "CDP \u0438 ASD \u043e\u0442\u043e\u0431\u0440\u0430\u0436\u0430\u044e\u0442\u0441\u044f \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u043c\u0438 \u043f\u0443\u043d\u043a\u0442\u0430\u043c\u0438 \u0441\u043f\u0438\u0441\u043a\u0430 \u0438 \u043e\u0431\u0430 \u0432\u044b\u0431\u0438\u0440\u0430\u044e\u0442\u0441\u044f?",
+    "screenshot_GPU_error": "0x887A0005",
+    "separate_items_and_selection_confirmed": true,
+    "source": "Explicit user reply in this chat"
+  },
+  "no_full_acceptance": true,
+  "previous_goal_turn_classification": "progress",
+  "remaining_before_promotion": [
+    "Native rejection of combined/foreign choices",
+    "Guide update",
+    "Actual WorkbookLayout capture",
+    "Full native dump and final saved package check"
+  ],
+  "runs": [
+    {
+      "native": {
+        "failed": 12,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 23,
+        "timeout600": false
+      },
+      "root": "Cold1147ASDConfigInput_20261127"
+    },
+    {
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 35,
+        "timeout600": false
+      },
+      "root": "Cold1148ASDConfigContext_20261127"
+    },
+    {
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 35,
+        "timeout600": false
+      },
+      "root": "Cold1149ASDConfigPreserved_20261127"
+    }
+  ],
+  "saved_file_reopened_and_35_tests_passed": true,
+  "scope": "Saved isolated Config candidate: ASD/CDP selector and explicit strain limits",
+  "source_catalog_updated_in_candidate": true,
+  "source_layout_capture_pending": true,
+  "whole_goal_completed": false,
+  "working_output_and_sources_unchanged": true
+}
