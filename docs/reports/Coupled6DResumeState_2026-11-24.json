@@ -828,6 +828,135 @@
     "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1159ASDPlasticSteelMy_20261127",
     "transient_diagnostic_maximum_6_662781_not_independently_verified": true
   },
+  "ASD_post_frozen_replay_1171": {
+    "physical_capacity_confirmed": false,
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1171ASDPostFrozenReplay_20261127",
+    "stage": "TERMINAL_ALL265_PARENT_COMPONENTS_UNCHANGED",
+    "summary": {
+      "VBA_accepts_external_candidate_without_changing_field": true,
+      "all265_parent_components_unchanged": true,
+      "all_accepted_candidates_independently_verified": true,
+      "cases": [
+        {
+          "VBA_solved": false,
+          "case": 1,
+          "epsilon0": 0.003615290301897029,
+          "iterations": 0,
+          "lambda": 6.558239045708529,
+          "maximum_native_stress_difference_MPa": 2.8565394533818286e-09,
+          "native_errors_MPa": [
+            2.063446418728375e-06,
+            1.0265145965660563e-15,
+            1.999775359959822e-06,
+            5.204170427930421e-14
+          ],
+          "original_bound_MPa": 2.0594377938728064e-06,
+          "seconds": 0.0703125,
+          "seed_unchanged": true
+        },
+        {
+          "VBA_solved": true,
+          "case": 2,
+          "epsilon0": 0.003615290301897029,
+          "iterations": 0,
+          "lambda": 6.558239045708529,
+          "maximum_native_stress_difference_MPa": 2.856533432564235e-09,
+          "native_errors_MPa": [
+            2.0547556783338506e-06,
+            1.6768105458829508e-08,
+            2.0003716591725746e-06,
+            4.216158672187831e-09
+          ],
+          "original_bound_MPa": 2.0594377938728064e-06,
+          "seconds": 0.046875,
+          "seed_unchanged": true
+        },
+        {
+          "VBA_solved": false,
+          "case": 3,
+          "epsilon0": 0.003615290301897029,
+          "iterations": 1,
+          "lambda": 6.558239045708529,
+          "maximum_native_stress_difference_MPa": 2.8565394533818286e-09,
+          "native_errors_MPa": [
+            2.063446418728375e-06,
+            1.0265145965660563e-15,
+            1.999775359959822e-06,
+            5.204170427930421e-14
+          ],
+          "original_bound_MPa": 2.0594377938728064e-06,
+          "seconds": 0.24609375,
+          "seed_unchanged": true
+        },
+        {
+          "VBA_solved": true,
+          "case": 4,
+          "epsilon0": 0.0036152903015031733,
+          "iterations": 30,
+          "lambda": 6.558239045708529,
+          "maximum_native_stress_difference_MPa": 2.856748570105014e-09,
+          "native_errors_MPa": [
+            2.0500708839099645e-06,
+            2.155899319743887e-08,
+            2.0013599279702966e-06,
+            5.204170427930421e-14
+          ],
+          "original_bound_MPa": 2.0594377938728064e-06,
+          "seconds": 10.0625,
+          "seed_unchanged": false
+        }
+      ],
+      "existing_hybrid30_succeeded": true,
+      "hybrid_iterations": 30,
+      "hybrid_seconds": 10.0625,
+      "ordinary_Newton30_failed": true,
+      "physical_capacity_confirmed": false,
+      "same103_state_history_projection_and_target": true
+    }
+  },
+  "ASD_post_transition_capture_1170": {
+    "independent_root": {
+      "captured_norm_exceeds_bound_by_percent": 0.19441230618544303,
+      "captured_scaled_condition": 429646110699.4401,
+      "captured_target_epsilon0": 0.003615290301897029,
+      "captured_target_equilibrium_found": true,
+      "captured_target_errors_MPa": [
+        2.0547556783338506e-06,
+        1.6768105458829508e-08,
+        2.0003716591725746e-06,
+        4.216158672187831e-09
+      ],
+      "captured_target_lambda": 6.558239045708529,
+      "captured_target_original_bound_MPa": 2.0594377938728064e-06,
+      "captured_target_positive_advance": true,
+      "elapsed_seconds": 0.6522657000459731,
+      "function_calls": 466,
+      "last_saved_state_satisfies_captured_target": false,
+      "physical_capacity_confirmed": false
+    },
+    "no_material_or_first_branch_math_change": true,
+    "public_book_unchanged": true,
+    "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1170ASDPostTransitionCapture_20261127",
+    "stage": "TERMINAL_EXACT_CAPTURE",
+    "summary": {
+      "captured_contexts": 138,
+      "contexts_matching_returned_history": 136,
+      "failure_capture_SHA256": "BA414025CF9968B70E28133027C2A4D661DA6C7AEE7EE3FD9481F4D16424B558",
+      "history104_bitexact_1169": true,
+      "history_SHA256": "DD32062C463642562E2EE84934C2C69B3843C79CF1FC71210C6B5B05CCE8AB64",
+      "independent_retry_skipped_only_in_test": true,
+      "maximum_matched_prefix": 103,
+      "physical_capacity_confirmed": false,
+      "selected_context_ordinal": 138,
+      "selected_iteration": 1,
+      "selected_lambda": 6.558239045708529,
+      "selected_norm_MPa": 2.063441594382328e-06,
+      "selected_refined_tangent": true,
+      "selected_target": 0.004832267485329712,
+      "selected_tolerance_MPa": 2.0594377938728055e-06
+    }
+  },
   "ASD_principal_1162": {
     "elapsed_seconds": 317.93359375,
     "next_inference": "no acceptance-history change; investigate event line-search admissibility rather than loosen force tolerances",
@@ -5757,7 +5886,7 @@
     "source_workbook_unchanged": true,
     "whole_goal_completed": false
   },
-  "current_goal_turn_classification": "progress: removed a proved discontinuity in ASD zero-increment evaluation; exact native22-probe agreement restored; repaired stored-peak revalidation from predecessor history; N/Mx/T physical limits independently reverified; My result recorded without converting numerical failure to collapse",
+  "current_goal_turn_classification": "progress: exact104-state first branch reproduced; captured136 matching failures; independently solved exact103-prefix target and VBA accepted unchanged external field; unchanged working hybrid solver solves same target within30 iterations while ordinary Newton fails; bottleneck narrowed to recovery routing/budget and unnecessarily strict internal stopping effort",
   "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
@@ -41353,9 +41482,9 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "1169 My now passed one principal material transition and all104 returned states independently verify, but exhausted256 continuation probes at epsilon0max0.00361529 without confirming physical capacity. Freeze the new post-transition tail and actual failed-control context; examine continuation control, guide/return cycling and directional tangent consistency there, rather than repeat the obsolete69-state zero-jump problem or simply raise probe budget. Preserve proven ASD zero-trial/stored-peak fixes. Before production promotion synchronize src/book/VBA_All_Code and run touched native/ASD/CDP verification. Full NMT,Q/NMTQ,CDP,performance,UI/report/literature/acceptance scope remains.",
+  "next_action": "Test earlier existing same-control hybrid recovery for every eligible linear ASD field measure after material transition, ahead of guide/return cycles. Current KeepsASDGradientControl excludes post-transition spatial fields; Guide runs before full hybrid and exhausts/shared budgets. Preserve original final force/gauge/material/field-advance acceptance and per-step/global budgets. Use1171 four frozen cases as local gate, then directed N/Mx/T/My cold cases. Investigate internal absolute-vs-relative stopping only with dynamic final-acceptance protection. Do not raise budgets or call My6.6628 a confirmed physical limit. Production source/book/VBA_All_Code synchronization and full original scope remain pending.",
   "next_actions": [
-    "1169 My now passed one principal material transition and all104 returned states independently verify, but exhausted256 continuation probes at epsilon0max0.00361529 without confirming physical capacity. Freeze the new post-transition tail and actual failed-control context; examine continuation control, guide/return cycling and directional tangent consistency there, rather than repeat the obsolete69-state zero-jump problem or simply raise probe budget. Preserve proven ASD zero-trial/stored-peak fixes. Before production promotion synchronize src/book/VBA_All_Code and run touched native/ASD/CDP verification. Full NMT,Q/NMTQ,CDP,performance,UI/report/literature/acceptance scope remains."
+    "Test earlier existing same-control hybrid recovery for every eligible linear ASD field measure after material transition, ahead of guide/return cycles. Current KeepsASDGradientControl excludes post-transition spatial fields; Guide runs before full hybrid and exhausts/shared budgets. Preserve original final force/gauge/material/field-advance acceptance and per-step/global budgets. Use1171 four frozen cases as local gate, then directed N/Mx/T/My cold cases. Investigate internal absolute-vs-relative stopping only with dynamic final-acceptance protection. Do not raise budgets or call My6.6628 a confirmed physical limit. Production source/book/VBA_All_Code synchronization and full original scope remain pending."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
