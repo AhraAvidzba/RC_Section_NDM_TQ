@@ -1,0 +1,17 @@
+﻿SOURCE: D:\CodexScratch\RC_Section_NDM_TQ\Cold1155ASDLinearTrustDifferenceMy_20261127\docs\regression\Diagnostic.xlsm
+SOURCE_SHA256: 357B7CDF991C5F6030E36198B4370FF23C15274FD304F44E1865EA21483C7342
+FIXTURE: D:\CodexScratch\RC_Section_NDM_TQ\Cold1155ASDLinearTrustDifferenceMy_20261127\Temp\RC_NDM_ModeSuite_3e640b4688434d04bd0ae70e350ed703\RC_Section_NDM.xlsm
+GLOBAL_MODE: General.DiagramExtension=No; explicit-On tests retain their setup
+TEST_EXCEL_PROCESS: id=16840; startTicks=639313656819227966
+===== modTestSelectableMaterialCore.TestRunASDSpatialMainCapacity =====
+SUITE_STARTED: modTestSelectableMaterialCore.TestRunASDSpatialMainCapacity; 2026-11-27T11:41:29
+TEST_MACRO_CANCEL_KEY: Disabled; isolated Excel instance only
+TEST_MACRO_DISPLAY_ALERTS: False; isolated Excel instance only
+EXCEL_AFTER_SUITE: pid=16840; workingSet=145141760; privateBytes=108564480; cpu=386.46875
+MAIN_ASD_CAPACITY: seconds=379.8046875; status=NumFail; lambda=0; steel_lambda=0; physical_acceptance_not_implied_by_test_execution=True
+TOTAL_MAIN_ASD_CAPACITY_EXECUTION: passed=1; failed=0
+COM_WORKBOOK_AFTER_SUITE: path=D:\CodexScratch\RC_Section_NDM_TQ\Cold1155ASDLinearTrustDifferenceMy_20261127\Temp\RC_NDM_ModeSuite_3e640b4688434d04bd0ae70e350ed703\RC_Section_NDM.xlsm; readOnly=True; sameProxy=True
+MODE_AFTER_SUITE: No
+SUITE_FINISHED: modTestSelectableMaterialCore.TestRunASDSpatialMainCapacity; 2026-11-27T11:47:50
+SOURCE_UNCHANGED: True
+WATCHDOG_COMPLETED: exit=0; source unchanged=True

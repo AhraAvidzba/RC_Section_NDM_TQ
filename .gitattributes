@@ -25,3 +25,6 @@ literature/Coupled6D/OpenSees-3.8.0-PythonStream.cpp -text -diff
 literature/Coupled6D/NumericalControl/** -text -diff
 # Загруженные первоисточники критериев разрушения сверяются по SHA-256.
 literature/Coupled6D/PhysicalTermination/*.html -text -diff
+# Контрольные SHA новых ASD-проверок относятся к точным сохранённым байтам.
+docs/reports/evidence/Coupled6DASDConfigIntegration_2026-11-27/** -text whitespace=cr-at-eol
+docs/reports/evidence/Coupled6DASDPhysicalDirections_2026-11-27/** -text whitespace=cr-at-eol

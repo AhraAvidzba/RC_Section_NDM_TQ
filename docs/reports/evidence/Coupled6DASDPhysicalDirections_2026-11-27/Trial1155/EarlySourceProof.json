@@ -1,0 +1,19 @@
+{
+  "actual_Config_limit_reader": true,
+  "actual_components": 262,
+  "all259_other_working_components_unchanged": true,
+  "changed_components_exact": true,
+  "changed_kernel_components": [
+    "CCoupledNewtonSolver"
+  ],
+  "imported_components": [
+    "CCoupledMaterialProgressTest",
+    "CCoupledNewtonSolver",
+    "modTestSelectableMaterialCore"
+  ],
+  "native_compilation": true,
+  "original_physical_model_and_tolerances_unchanged": true,
+  "own_compiler_closed": true,
+  "production_output_not_modified": true,
+  "saved_book_sha256": "357B7CDF991C5F6030E36198B4370FF23C15274FD304F44E1865EA21483C7342"
+}
