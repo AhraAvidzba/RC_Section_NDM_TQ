@@ -1,0 +1,328 @@
+{
+  "Config_ASD_selector_pending": true,
+  "actual_components": 256,
+  "all121_user_parts_preserved": true,
+  "all256_actual_native_dump_components_verified": true,
+  "all_started_stages_terminal": true,
+  "base_git_commit": "e43cb24",
+  "capacities_without_observer": {
+    "Compression": {
+      "all_capacity_values_bitexact_reference": true,
+      "all_diagnostics_exact_reference": true,
+      "case": "Compression",
+      "elapsed_seconds": 11.53515625,
+      "entire_load_trace_bitexact_reference": true,
+      "full_acceptance_not_run": true,
+      "has_steel_point": false,
+      "has_ultimate_point": true,
+      "independent_field_replay_not_repeated": true,
+      "lambda_capacity": 7.359448388005087,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_kernel_test_export": true,
+      "ordinary_call_without_observer": true,
+      "original_tolerances_and_materials_unchanged": true,
+      "peak_lambda": 7.359448388005087,
+      "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1114ASDFreshRetryCompression_20261127",
+      "saved_book_sha256": "4F85F8AFD619CB2BC6C032D82A5820F339ACDC06967CBAC5DFAC3AA59B570496",
+      "steel_lambda": 0.0,
+      "trace_count": 23,
+      "whole_goal_completed": false
+    },
+    "M4": {
+      "all_capacity_values_bitexact_reference": true,
+      "all_diagnostics_exact_reference": true,
+      "case": "M4",
+      "elapsed_seconds": 281.396484375,
+      "entire_load_trace_bitexact_reference": true,
+      "full_acceptance_not_run": true,
+      "has_steel_point": true,
+      "has_ultimate_point": false,
+      "independent_field_replay_not_repeated": true,
+      "lambda_capacity": 0.0,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_kernel_test_export": true,
+      "ordinary_call_without_observer": true,
+      "original_tolerances_and_materials_unchanged": true,
+      "peak_lambda": 0.0,
+      "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1113ASDFreshRetryBendingScales_20261127\\Case03",
+      "saved_book_sha256": "4F85F8AFD619CB2BC6C032D82A5820F339ACDC06967CBAC5DFAC3AA59B570496",
+      "steel_lambda": 1.1646001905430463,
+      "trace_count": 141,
+      "whole_goal_completed": false
+    },
+    "Tension": {
+      "all_capacity_values_bitexact_reference": true,
+      "all_diagnostics_exact_reference": true,
+      "case": "Tension",
+      "elapsed_seconds": 16.650390625,
+      "entire_load_trace_bitexact_reference": true,
+      "full_acceptance_not_run": true,
+      "has_steel_point": true,
+      "has_ultimate_point": true,
+      "independent_field_replay_not_repeated": true,
+      "lambda_capacity": 0.9827991402298653,
+      "native": {
+        "failed": 0,
+        "macros": 1,
+        "own_process_closed": true,
+        "passed": 1,
+        "timeout600": false
+      },
+      "no_kernel_test_export": true,
+      "ordinary_call_without_observer": true,
+      "original_tolerances_and_materials_unchanged": true,
+      "peak_lambda": 0.0,
+      "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1115ASDFreshRetryTension_20261127",
+      "saved_book_sha256": "4F85F8AFD619CB2BC6C032D82A5820F339ACDC06967CBAC5DFAC3AA59B570496",
+      "steel_lambda": 0.9827991402298653,
+      "trace_count": 86,
+      "whole_goal_completed": false
+    }
+  },
+  "current_goal_turn_classification": "progress",
+  "current_source_hashes": {
+    "src/Solver/CCapacityResult.cls": "102D8914E322A93EFDFA4171CB7509E7907A4264A365E11A7A7CF7599B8D45A8",
+    "src/Solver/CCoupledDeformationContinuation.cls": "F172941B0DB888EECCB69EB9E461B23E84661AF33C36F6EE81916329600F5A76",
+    "src/Solver/CCoupledLinearConstraint.cls": "22408F0FCAC3FE6F74C53176379FD9BDDB39AAECA55B6E3C9B95EF8EEB4480F6",
+    "src/Solver/CCoupledLoadContinuation.cls": "AE91A6822780339A18492F8907D566A30E8DA7E1FFE25BA77EC9204EECE004F9",
+    "src/Solver/CCoupledNewtonSolver.cls": "A88466FC9CA96788E453D3958213A84D5D3CC41920F0DD36053A18F4EDFDCC8F",
+    "src/Solver/CCoupledSectionAnalysis.cls": "0E7B503B421472A51F9C011020EDAEF882F62871FE3155EF5C0AB91EF124AA4A",
+    "tests/modTestCoupledConstraint.bas": "E6AC51B95E12F68BDB7FC5BC042E56E9E6B155E458BA78B647DD22E292824DF6"
+  },
+  "direct_N_without_observer": {
+    "all6_regressions_verified": true,
+    "all6_statuses_and_state_availability_preserved": true,
+    "cases": [
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 0.39453125,
+        "field_bitexact_reference": true,
+        "index": 1,
+        "physical_verification_pending": false,
+        "reference_trace_count": 4,
+        "resultants_bitexact_reference": true,
+        "returned_state": true,
+        "status": "OK",
+        "target_N": 50000.0,
+        "trace_count": 4
+      },
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 15.0859375,
+        "field_bitexact_reference": true,
+        "index": 2,
+        "physical_verification_pending": false,
+        "reference_trace_count": 29,
+        "resultants_bitexact_reference": true,
+        "returned_state": true,
+        "status": "OK",
+        "target_N": 90000.0,
+        "trace_count": 29
+      },
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 16.626953125,
+        "field_bitexact_reference": true,
+        "index": 3,
+        "physical_verification_pending": false,
+        "reference_trace_count": 41,
+        "resultants_bitexact_reference": true,
+        "returned_state": true,
+        "status": "OK",
+        "target_N": 98000.0,
+        "trace_count": 41
+      },
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 21.11328125,
+        "field_bitexact_reference": true,
+        "index": 4,
+        "physical_verification_pending": false,
+        "reference_trace_count": 86,
+        "resultants_bitexact_reference": true,
+        "returned_state": false,
+        "status": "FAIL",
+        "target_N": 100000.0,
+        "trace_count": 86
+      },
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 1.05078125,
+        "field_bitexact_reference": true,
+        "index": 5,
+        "physical_verification_pending": false,
+        "reference_trace_count": 4,
+        "resultants_bitexact_reference": true,
+        "returned_state": true,
+        "status": "OK",
+        "target_N": -700000.0,
+        "trace_count": 4
+      },
+      {
+        "code_and_output_shape_unchanged": true,
+        "comments_unchanged": true,
+        "elapsed_seconds": 30.154296875,
+        "field_bitexact_reference": true,
+        "index": 6,
+        "physical_verification_pending": false,
+        "reference_trace_count": 12,
+        "resultants_bitexact_reference": true,
+        "returned_state": false,
+        "status": "FAIL",
+        "target_N": -750000.0,
+        "trace_count": 12
+      }
+    ],
+    "changed_cases_requiring_independent_verification": [],
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 6,
+      "timeout600": false
+    },
+    "no_production_changes": true,
+    "original_materials_and_tolerances": true,
+    "whole_goal_completed": false
+  },
+  "evidence": "docs/reports/evidence/Coupled6DWorkingASDRetryIntegration_2026-11-27",
+  "full_acceptance_not_run": true,
+  "general_concrete_failure_policy_pending": true,
+  "main_not_merged": true,
+  "mutating_capacity_observer": {
+    "actual_mutated_snapshot_count": 347,
+    "all_capacity_values_bitexact_reference": true,
+    "all_diagnostics_exact_reference": true,
+    "all_three_mutation_destinations_enabled": true,
+    "case": "M4",
+    "elapsed_seconds": 286.763671875,
+    "entire_load_trace_bitexact_reference": true,
+    "full_acceptance_not_run": true,
+    "has_steel_point": true,
+    "has_ultimate_point": false,
+    "independent_field_replay_not_repeated": true,
+    "lambda_capacity": 0.0,
+    "mutation_did_not_change_capacity_trace_or_status": true,
+    "native": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "no_kernel_test_export": true,
+    "observer_mutates_copies": true,
+    "ordinary_call_without_observer": false,
+    "original_tolerances_and_materials_unchanged": true,
+    "peak_lambda": 0.0,
+    "reference": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1117WorkingASDRetryM4_20261127",
+    "reused_numeric_verifier_sha256": "0BD9393B757350C953F0639E55EF39B4C5297269C5414A7F4167CC05CBE7F1AE",
+    "saved_book_sha256": "4E1435FB1E5DECDE6F9BF3D61891B88000C4B652F3D9CB05750C08FE96930EC9",
+    "steel_lambda": 1.1646001905430463,
+    "trace_count": 141,
+    "whole_goal_completed": false
+  },
+  "native_execution_and_exact_own_process_closure": {
+    "1116": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 6,
+      "timeout600": false
+    },
+    "1117": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "1118": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "1119": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    },
+    "1121": {
+      "failed": 0,
+      "macros": 8,
+      "own_process_closed": true,
+      "passed": 35452,
+      "timeout600": false
+    },
+    "1122": {
+      "failed": 0,
+      "macros": 1,
+      "own_process_closed": true,
+      "passed": 1,
+      "timeout600": false
+    }
+  },
+  "next_action": "Complete ASD concrete deformation/failure policy ONQ-012 using verified material measures and normative inputs; preserve distinction between total tensor strains, ASD equivalent total coordinates and CDP plastic coordinates. Add/check other M directions and user ASD selection on Config; finish separate T before NMT, then Q/NMTQ; only then CDP. Preserve normal cracking/stability contracts, full LoadPath/status/hoop/CAD outputs, whole-run performance, experimental/independent validation, deferred cross damage/B-splines/universal rebar and complete acceptance requirements.",
+  "no_new_CDP_run": true,
+  "previous_goal_turn_classification": "progress",
+  "public_delivery": {
+    "Config_ASD_choice_UI_pending": true,
+    "actual_components": 256,
+    "actual_full_native_dump_published": true,
+    "all121_user_non_VBA_parts_preserved": true,
+    "default_material_law_unchanged": true,
+    "existing_user_data_layout_settings_and_styles_preserved": true,
+    "full_acceptance_not_run": true,
+    "general_concrete_failure_policy_pending": true,
+    "main_not_merged": true,
+    "native_foundations": {
+      "failed": 0,
+      "macros": 8,
+      "own_process_closed": true,
+      "passed": 35452,
+      "timeout600": false
+    },
+    "output": {
+      "RC_Section_NDM.xlsm": {
+        "after_sha256": "3D4A4D0D8B587C877851A85D7C7AAEEBD6BF6CD7C6EC7AF148EDFCCC05DCB8D9",
+        "before_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
+        "bytes": 14183342
+      },
+      "VBA_All_Code.txt": {
+        "after_sha256": "02493DCCB22D5F33DEB505A412770A0024D1B6DB24A210F222780EF3EFC95E99",
+        "before_sha256": "0B46417D15DE59D7E44EBE8EF642D27246F562BB394F79DD3D004F1CC0C912C1",
+        "bytes": 11525962
+      }
+    },
+    "source_verified_candidate": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1121ASDRetryPreservedOutput_20261127",
+    "whole_goal_completed": false,
+    "whole_user_run10s_not_met": true,
+    "working_core_and_output_synchronized": true
+  },
+  "report": "docs/reports/Coupled6DWorkingASDRetryIntegration_2026-11-27.md",
+  "source_encoding_only_repair": "CCapacityResult original byte prefix retained; actual executable VBA unchanged",
+  "whole_goal_completed": false,
+  "whole_user_run10s_not_met": true,
+  "working_core_and_output_synchronized": true
+}

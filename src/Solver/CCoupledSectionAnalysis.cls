@@ -162,8 +162,31 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
         ByVal lambdaTolerance As Double, ByVal maxIterations As Long, _
         Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing, _
         Optional ByVal progress As ICoupledContinuationProgress = Nothing) As CCapacityResult
+    Dim result As CCapacityResult
+    Set result = SolveCapacityAttempt(loads, loadPath, spec, initialLambda, maximumLambda, lambdaTolerance, maxIterations, acceptedTrace, progress)
+    Set SolveCapacity = result
+    If Not mCalibratedASD Or result.HasSteelLimitPoint Or result.HasUltimatePoint Then Exit Function
+    If Not result.HasConfirmedLowerBound Then Exit Function
+    Dim meta As CResultMeta: Set meta = result.ResultMeta
+    If meta.InternalStatus <> rsNumericalFailure Then Exit Function
+    If meta.ResultCode <> rcNumericalFailure And meta.ResultCode <> rcSingularTangent Then Exit Function
+    Dim originalDetails As String: originalDetails = meta.ResultComment & " | " & meta.DiagnosticDetails
+    Set result = SolveCapacityAttempt(loads, loadPath, spec, initialLambda, maximumLambda, lambdaTolerance, maxIterations, acceptedTrace, progress, True)
+    result.AppendCoupledSearchDiagnostic "Независимый повтор ASD с нулевой историей и начальным масштабом внешних уравнений E·10^-5. " & _
+        "Диаграммы, силовые допуски, путь, заданные границы lambda и лимит итераций одного равновесия сохраняются. Первая попытка: " & originalDetails
+    Set SolveCapacity = result
+End Function
+
+' Выполняет одну независимую попытку поиска: новые отклики бетона и стали создаются внутри вызова.
+' Численный начальный шаг меняется только при явном запросе; принятые истории между попытками не передаются.
+Private Function SolveCapacityAttempt(ByVal loads As CSectionLoadState, ByVal loadPath As String, _
+        ByVal spec As CMaterialModelSpec, ByVal initialLambda As Double, ByVal maximumLambda As Double, _
+        ByVal lambdaTolerance As Double, ByVal maxIterations As Long, _
+        Optional ByRef acceptedTrace As CCoupledLoadTrace = Nothing, _
+        Optional ByVal progress As ICoupledContinuationProgress = Nothing, _
+        Optional ByVal normalizeInitialStep As Boolean = False) As CCapacityResult
     Dim capacity As New CCapacityResult, meta As CResultMeta, reason As String
-    Set SolveCapacity = capacity
+    Set SolveCapacityAttempt = capacity
     Set acceptedTrace = Nothing
     If initialLambda <= 0# Then reason = "Capacity.InitialLambda"
     If maximumLambda <= 0# Then reason = "Capacity.MaxLambda"
@@ -192,7 +215,7 @@ Friend Function SolveCapacity(ByVal loads As CSectionLoadState, ByVal loadPath A
     Dim solver As CCoupledNewtonSolver, branch As New CCoupledLoadContinuation
     Set solver = CreateNewtonSolver(response, fc, ft, models)
     branch.Initialize solver, path, INITIAL_STEPS, STEP_ATTEMPTS, maxIterations, STRESS_TOLERANCE, RELATIVE_TOLERANCE, True
-    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True, preferDeformationAfterInitial:=mCalibratedASD
+    branch.TraceSteelLimit response, initialLambda, maximumLambda, lambdaTolerance, preferDeformationOnStall:=True, preferDeformationAfterInitial:=mCalibratedASD, normalizeInitialStep:=normalizeInitialStep
     Set acceptedTrace = branch.SavedTrace
     Set meta = branch.ResultMeta
     Dim low As Double, high As Double, onOffset As Boolean, ultimate() As Double, criticalPoint As Long

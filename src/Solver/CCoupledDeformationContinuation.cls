@@ -36,7 +36,7 @@ End Type
 Private Const COMPONENT_COUNT As Long = 6
 Private Const STEP_LIMIT As Long = 32
 Private Const PROBE_LIMIT As Long = 96 ' Общий бюджет продолжения для закона без спектральных границ.
-Private Const ASD_PROBE_LIMIT As Long = 192 ' Бюджет ASD для прохождения посттрещинной ветви и локализации стали.
+Private Const ASD_PROBE_LIMIT As Long = 256 ' Бюджет ASD для прохождения посттрещинной ветви и локализации стали.
 Private mProbeBudget As Long ' Неизменный на одну прослеживаемую ветвь бюджет выбранного закона.
 Private Const FIXED_YIELD_RECOVERY_LIMIT As Long = 4 ' Проверки перехода без смены меры за одно продолжение.
 Private Const YIELD_RECOVERY_LIMIT As Long = 4 ' Для CDP на весь участок, для знаковых границ ASD на одну ревизию принятой истории; общий бюджет проб сохраняется.
@@ -627,6 +627,7 @@ End Sub
 ' Секущая использует механические координаты; касательная полной системы прогнозирует также вспомогательные множители связей.
 Private Function PrepareSecantSeed(ByVal history As Collection, ByRef left As TBranchPoint, ByRef current As TBranchPoint, _
         ByVal target As Double, ByRef seed As Variant, ByRef factor As Double) As Boolean
+    If KeepsASDGradientControl() Then Exit Function ' Полное ASD-решение начинается от принятого поля; несошедшаяся экстраполяция не задаёт ветвь.
     If Not mUsesEnvelopeControl And mEnvelopeDepartureRevision = mSolver.AcceptedRevision Then Exit Function
     If left.HistoryIndex < 1 Or left.HistoryIndex >= current.HistoryIndex Or current.HistoryIndex <> history.Count Then Exit Function
     Dim previous() As Double, accepted() As Double, field() As Double, oldControl As Double, control As Double, ratio As Double, i As Long
@@ -975,6 +976,10 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
         Exit Function
     End If
     Dim solved As Boolean, recoverSameControl As Boolean, recoveryReference As Double
+    Dim geometricASD As Boolean: geometricASD = KeepsASDGradientControl()
+    If geometricASD Then
+        recoverYieldControl = False: allowHybridRecovery = True ' Полный резерв той же геометрической меры предшествует смене материальной координаты.
+    End If
     Dim guideProbes As Long, guideReturned As Boolean, allowGuide As Boolean
     allowGuide = mFollowingLocalPeak And Not robustDeparture And (mFieldControlChanges > 0 Or mBranchTangentControl) And _
         IsArray(initialField) And mProbeCount + 2 <= mProbeBudget ' Возврат после локального максимума не расходует бюджет ещё не прослеженной восходящей ветви.
@@ -983,7 +988,7 @@ Private Function Probe(ByRef point As TBranchPoint, ByVal initialLambda As Doubl
     solved = mSolver.TryDeformationStep(mOffset, mDirection, mProjection, point.Coordinate, initialLambda, _
         point.Lambda, probeAbs, probeRel, mMaxIterations, recoverYieldControl, (mBranchTangentControl Or robustDeparture), recoverSameControl, _
         initialField:=initialField, allowSmallCorrection:=(mFieldControlChanges > 0), allowHybridRecovery:=allowHybridRecovery, _
-        conditionHybridRecovery:=(robustDeparture Or (mSolver.HasPrincipalBoundaries And keepYieldControl And allowHybridRecovery)), referenceLambda:=recoveryReference, _
+        conditionHybridRecovery:=(robustDeparture Or geometricASD Or (mSolver.HasPrincipalBoundaries And keepYieldControl And allowHybridRecovery)), referenceLambda:=recoveryReference, _
         allowRefinedRestart:=(IsMaterialGrowthControl() Or robustDeparture), allowGuideRecovery:=allowGuide, _
         guideReferenceLambda:=acceptedLambda, guideProbes:=guideProbes, guideReturnSucceeded:=guideReturned)
     mProbeCount = mProbeCount + guideProbes: mGuideRecoveryProbes = mGuideRecoveryProbes + guideProbes
@@ -2050,3 +2055,13 @@ Private Sub ReadSpatialReference(ByVal history As Collection, ByVal index As Lon
     Dim i As Long
     For i = 1 To mSolver.PhysicalDegreeCount: previous(i) = previous(i) - mCornerReferenceIncrement * mCornerDirection(i): Next i
 End Sub
+
+' Сохраняет геометрическое управление кривизной и закручиванием ASD; средняя осевая деформация оставляет материальную стратегию плато.
+' Первые четыре координаты общего поля — средняя продольная деформация, две приведённые кривизны и приведённое закручивание.
+Private Function KeepsASDGradientControl() As Boolean
+    If Not UsesASDGeometricControl() Then Exit Function
+    Dim component As Long
+    For component = 2 To 4
+        If mProjection(component) <> 0# Then KeepsASDGradientControl = True: Exit Function
+    Next component
+End Function

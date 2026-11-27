@@ -1354,7 +1354,7 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     Set equations = Me
     Dim functionLimit As Long: functionLimit = CLng(CDbl(remaining + 1) * (2# * size + 1#) + remaining)
     Dim reserved As Long, ordinarySteps As Long, ordinaryCalls As Long
-    If referenceLambda > 0# And remaining >= 4 Then
+    If referenceLambda > 0# And remaining >= 4 And Not HasASDGradientControl() Then
         If TypeOf mResponse Is CCoupledReinforcedResponse And TypeOf mPlusResponse Is CCoupledReinforcedResponse And _
                 TypeOf mMinusResponse Is CCoupledReinforcedResponse Then reserved = GeomMin(MATERIAL_RECOVERY_RESERVE, remaining \ 2)
     End If
@@ -1363,10 +1363,23 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
     Dim converged As Boolean
     Dim observer As ICoupledDifferenceObserver
     If reserved > 0 Then Set observer = Me
+    Dim mappedControl As CCoupledConstraintEquations
+    If HasASDGradientControl() Then
+        Dim linearControl As New CCoupledLinearConstraint, linearGradient() As Double
+        ReDim linearGradient(1 To size)
+        For i = 1 To mGaugeStart - 1: linearGradient(i) = mControlProjection(i) * mHybridScales(i) * mReferenceModulus: Next i
+        linearControl.Initialize linearGradient, ControlResidual(current)
+        Set mappedControl = New CCoupledConstraintEquations
+        mappedControl.Initialize Me, linearControl, coordinates, 0.000000000001, 2
+        Set equations = mappedControl
+        converged = hybrid.TrySolveLeastSquaresTrust(equations, coordinates, ordinaryCalls, ordinarySteps, _
+            absoluteTolerance, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, initialRadius:=0.2)
+    Else
     converged = hybrid.TrySolve(equations, coordinates, ordinaryCalls, ordinarySteps, absoluteTolerance, _
         0.00000000001, 0.2, solution, relativeDifferenceStep:=HYBRID_DIFFERENCE_STEP, _
         automaticScaling:=conditionRecovery, freshJacobian:=conditionRecovery, captureDifferenceBracket:=(reserved > 0), _
         differenceObserver:=observer, completeNewtonLineSearch:=(reserved > 0))
+    End If
     mHybridActive = False
     mIterations = mIterations + hybrid.Steps
     mHybridSteps = mHybridSteps + hybrid.Steps: mHybridMatrices = mHybridMatrices + hybrid.JacobianCalls
@@ -1379,6 +1392,11 @@ Private Function TryHybridControlledField(ByRef current() As Double, ByVal initi
         Exit Function
     End If
     If Not hybrid.HasBestPoint Then GoTo RestoreFailure
+    If Not mappedControl Is Nothing Then
+        Dim mappedCoordinates() As Double
+        If Not mappedControl.TryMap(solution, mappedCoordinates) Then GoTo RestoreFailure
+        solution = mappedCoordinates
+    End If
     For i = 1 To mDegreeCount: field(i) = mHybridSeed(i) + mHybridScales(i) * solution(i): Next i
     Dim lambda As Double: lambda = mHybridSeed(size) + mHybridScales(size) * solution(size)
     If mAcceptedRevision <> mHybridOriginRevision Then Err.Raise 5, "CCoupledNewtonSolver", "Принятая история изменилась во время гибридного решения."
@@ -4007,4 +4025,30 @@ Private Function TryEnvelopeResultantCorrection(ByVal equations As ICoupledEquat
         End If
         fraction = fraction * 0.5
     Loop
+End Function
+
+' Выбирает точное линейное отображение только для одной канонической кривизны или закручивания ASD.
+' Осевая, материальная и смешанная проекции сохраняют полный исходный резерв, включая пробы материального перехода.
+Private Function HasASDGradientControl() As Boolean
+    If Not HasPrincipalBoundaries Or Not mControlActive Then Exit Function
+    Dim degree As Long, selected As Long
+    For degree = 1 To mGaugeStart - 1
+        If mControlProjection(degree) <> 0# Then
+            If degree < 2 Or degree > 4 Or selected <> 0 Then Exit Function
+            selected = degree
+        End If
+    Next degree
+    HasASDGradientControl = (selected <> 0)
+End Function
+
+' Ограничивает начальный переменный шаг ASD масштабом внешних уравнений E·HYBRID_STRAIN_SCALE, сохраняя выбранный луч нагрузок.
+' Это численный масштаб уравнений, а не фактическая деформация элемента или новый предел материала; заданный начальный шаг остаётся верхней границей.
+Friend Function InitialVariableIncrement(ByRef direction() As Double, ByVal requested As Double) As Double
+    InitialVariableIncrement = requested
+    If Not HasPrincipalBoundaries Or requested <= 0# Then Exit Function
+    If LBound(direction) <> 1 Or UBound(direction) <> COMPONENT_COUNT Then Err.Raise 5, "CCoupledNewtonSolver", "Неверный размер направления начального переменного шага."
+    Dim external() As Double, largest As Double, degree As Long
+    mSection.LoadEquations direction(1), direction(2), direction(3), direction(4), direction(5), direction(6), external
+    For degree = 1 To mGaugeStart - 1: largest = GeomMax(largest, Abs(external(degree))): Next degree
+    If largest > 0# Then InitialVariableIncrement = GeomMin(requested, mReferenceModulus * HYBRID_STRAIN_SCALE / largest)
 End Function

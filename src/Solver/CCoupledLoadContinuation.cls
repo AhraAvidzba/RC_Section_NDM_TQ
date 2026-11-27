@@ -91,7 +91,8 @@ End Sub
 ' Достигнутая численная или заданная граница отдельно хранится в ResultMeta.
 Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
         ByVal initialLambda As Double, ByVal maximumLambda As Double, ByVal lambdaTolerance As Double, _
-        Optional ByVal preferDeformationOnStall As Boolean = False, Optional ByVal preferDeformationAfterInitial As Boolean = False)
+        Optional ByVal preferDeformationOnStall As Boolean = False, Optional ByVal preferDeformationAfterInitial As Boolean = False, _
+        Optional ByVal normalizeInitialStep As Boolean = False)
     If reinforcement Is Nothing Or mHasAccepted Or initialLambda <= 0# Or maximumLambda <= 0# Or lambdaTolerance <= 0# Then _
         Err.Raise 5, "CCoupledLoadContinuation", "Для поиска предела передайте свежую ветвь и положительные настройки Capacity."
     Set mReinforcement = reinforcement
@@ -105,6 +106,7 @@ Friend Sub TraceSteelLimit(ByVal reinforcement As CCoupledReinforcedResponse, _
 
     Dim target As Double, increment As Double, boundary As Double
     increment = LowerOf(initialLambda, 1#)
+    If preferDeformationAfterInitial And normalizeInitialStep Then increment = mSolver.InitialVariableIncrement(mDirection, increment)
     Do
         boundary = maximumLambda
         If mLambda < 1# Then boundary = LowerOf(boundary, 1#)

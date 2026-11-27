@@ -650,3 +650,11 @@ Private Sub AssertWritable()
     If mFrozen Then Err.Raise vbObjectError + 4220, "CCapacityResult", _
         "Опубликованный результат нельзя изменить; для нового расчета нужен новый объект."
 End Sub
+
+' Сохраняет журнал независимых численных попыток, не меняя физический результат, усилия и поля выбранной попытки.
+Friend Sub AppendCoupledSearchDiagnostic(ByVal details As String)
+    AssertWritable
+    If Not mCoupledSearch Then Err.Raise 5, "CCapacityResult", "Дополнительная диагностика требует результата связанного поиска."
+    If Len(details) = 0 Then Exit Sub
+    mResultMeta.DiagnosticDetails = mResultMeta.DiagnosticDetails & " | " & details
+End Sub
