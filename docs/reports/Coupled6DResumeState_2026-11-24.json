@@ -5303,7 +5303,7 @@
     "whole_goal_completed": false
   },
   "current_goal_turn_classification": "progress:984 native acceptance/idempotence and updated-history3 steps verified;985 accepted5 growing steps, isolated attempt6 rejection as half-field accuracy only",
-  "current_load_stage": "N compression, negative Mx and pure T confirmed; My remains open; both linear-QR/step candidates negative and not adopted; endpoint epsilonSteel=0.010 externally verified at My=6.703514 kNm",
+  "current_load_stage": "ASD N, negative Mx and T limits verified; My remains NumFail at 6.57517. Single-step analytic tangent verified locally but no cold load gain; closed fixed-strain My trial timed out at 900s. Heavy project storage moved to D.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
     "axial_regression_restored_at_candidate1103": {
@@ -40898,7 +40898,7 @@
     "proof": "docs/reports/evidence/Coupled6DPostCrackIntegration_2026-11-24/Proof.json"
   },
   "ndm_unchanged": true,
-  "next_action": "Complete ASD concrete deformation/failure policy ONQ-012 using verified material measures and normative inputs; preserve distinction between total tensor strains, ASD equivalent total coordinates and CDP plastic coordinates. Add/check other M directions and user ASD selection on Config; finish separate T before NMT, then Q/NMTQ; only then CDP. Preserve normal cracking/stability contracts, full LoadPath/status/hoop/CAD outputs, whole-run performance, experimental/independent validation, deferred cross damage/B-splines/universal rebar and complete acceptance requirements.",
+  "next_action": "Preserve terminal 1156/1157/1158 raw evidence on D and investigate automatic governing-steel strain control using the existing universal steel projection, with unchanged material laws and original equilibrium tolerances. Do not repeat unchanged 1154/1155/1157/1158 trials or declare numerical failure a physical limit. Finish ASD M before NMT, then Q/NMTQ, CDP and final performance/acceptance.",
   "next_actions": [
     "Keep further formatting deferred",
     "Do not rerun cold candidates 1154/1155 unchanged; maximum lambda did not improve",
@@ -41356,6 +41356,63 @@
     },
     "same_six_other_sources_and_tests_exact": true,
     "working_code_contains_new_LM_candidate": false
+  },
+  "project_storage_20261127": {
+    "completed_utc": "2026-11-27T09:51:41.2952024+00:00",
+    "final_C_free_bytes": 20348084224,
+    "final_D_free_bytes": 108589936640,
+    "full_manifest_sha256": "4621AE912F385D03AA7C8FDF8464C7133439C4E703382A0EF0A23489D8E56AB7",
+    "full_source_and_destination_sha256_match": true,
+    "git_connectivity_exit_code": 0,
+    "git_head_before_documentation": "35d301239a2e036ba74c3ef9a2b4ddd1a30839e1",
+    "git_status_before_documentation": [],
+    "initial_C_free_bytes": 8591060992,
+    "moved_file_bytes": 9887899510,
+    "moved_file_count": 11733,
+    "net_free_space_delta_includes_external_changes": true,
+    "only_project_owned_data_moved": true,
+    "paths": [
+      {
+        "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\GitObjects",
+        "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\GitObjects",
+        "Name": "GitObjects",
+        "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\.git\\objects",
+        "State": "StoredOnD_CCopyRemoved"
+      },
+      {
+        "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\Evidence",
+        "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\Evidence",
+        "Name": "Evidence",
+        "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\docs\\reports\\evidence",
+        "State": "StoredOnD_CCopyRemoved"
+      },
+      {
+        "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\Literature",
+        "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\Literature",
+        "Name": "Literature",
+        "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\literature",
+        "State": "StoredOnD_CCopyRemoved"
+      }
+    ],
+    "public_workbook_sha256_unchanged": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+    "remaining_regular_file_bytes_on_C_by_top_level": {
+      ".git": 2488951,
+      ".gitattributes": 2577,
+      ".gitignore": 403,
+      "AGENTS.md": 36213,
+      "README.md": 5407,
+      "docs": 28805965,
+      "norms": 32103829,
+      "reference": 8262464,
+      "src": 5745008,
+      "tests": 5799572,
+      "tmp": 57810062,
+      "tools": 6403286,
+      "workbook": 26922931,
+      "Типы_сечения.dwg": 642720
+    },
+    "stage": "Complete",
+    "test_books_default_directory": "D:\\CodexScratch\\RC_Section_NDM_TQ"
   },
   "pseudo_time739": {
     "accepted_field_roundtrip_exact": true,
@@ -43159,6 +43216,102 @@
     "subsequent_trust_diagonal_history_not_reconstructed": true,
     "working_code_promoted": false
   },
+  "terminal_ASD_trials_1156_1158_20261127": {
+    "1156_OpenSees_directional_tangents_passed": 88,
+    "1156_closed_tangent_regression_assertions": 274,
+    "1156_external_rotated_unloading_stress_mismatches": 3,
+    "1156_failed_native_assertions": 0,
+    "1156_full_external_tensor_validation_passed": false,
+    "1156_independent_tangent_max_relative_error": 1.3524438e-14,
+    "1156_independent_tangent_states": 88,
+    "1156_native_single_step_tangent_assertions": 274,
+    "1156_rotation_diagnostic": "VBA rotational stress error 6.39488e-14 MPa; OpenSees 0.020071555 MPa; hidden tensile history under degenerate compression differs. Do not change physics to reproduce this external artifact.",
+    "1157_all_accepted_states_independently_verified": {
+      "accepted_states": 73,
+      "all60_equations_and_six_resultants_verified": true,
+      "case": "BendingMyConfigured",
+      "compression_utilization": 0.2915628373777296,
+      "final_lambda": 6.557298069430572,
+      "final_target_resultants_N_Nmm": [
+        0.0,
+        0.0,
+        6557298.069430572,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "independent_axial_peak": null,
+      "independent_upper": null,
+      "maximum_force_error_N": 0.03825381406750239,
+      "maximum_moment_error_Nmm": 4.3139441991224885,
+      "status": "NumFail",
+      "whole_goal_completed": false
+    },
+    "1157_cold_maximum_lambda": 6.57516970884776,
+    "1157_cold_status": "NumFail",
+    "1157_elapsed_seconds": 322.83203125,
+    "1158_closed_fixed_strain_integration_status": "TIMEOUT_900s",
+    "1158_final_result_not_generated": true,
+    "1158_not_a_physical_failure_or_verified_limit": true,
+    "1158_partial_saved_states": 50,
+    "all_trials_terminal_and_own_excel_closed": true,
+    "candidates_promoted": false,
+    "physical_My_limit_confirmed": false,
+    "records": [
+      {
+        "book_sha256": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+        "native_proofs_sha256": {
+          "ClosedTangentIndependent.json": "9250EE252CE67C4015D80DB36A6934E9D6FACB970832FE8C7FD688B32A4BF615",
+          "ClosedTangentRegression.txt": "4278B0ED5BC36E8A53889B5CA4E310DEC7EF4463BE0429EEA92D7026D7BB22B6",
+          "ClosedTangentRegression.txt.Ownership.json": "509C1C3B7DC8F7C5B1DAA6BAC561DEDCEF13C32EBC21B6EABC14460DF7C3AF83",
+          "ClosedTangentRegression.txt.ProcessClosure.json": "6022AF197B9F56B81B3C405EDE72562A5D43329E2FCD2FFDAE98D1E7E96FC6FE",
+          "ClosedTangentRegression.txt.RunnerCleanup.json": "B30576B30A90CEBF44897DAFA09B516F94FA9BF81789A5E9026C3A85C8589FD8",
+          "ClosedTangentRegression.txt.memory.json": "8E37B5083F7DE8E86E0906966FEA1AD0382BA77D5EA7A58E11029BC202400E3F",
+          "IndependentSingleStepTangent.json": "AC34504149DB091542C6A103BE98D06D0ED0CF16DE34C714FF2366200BFCF54E",
+          "OpenSeesSingleStepTangentDiagnostic.json": "8C0D80598B7184CBBBABD107BD5A75BC217198915C0F46384C0571546A481BF6",
+          "OpenSeesSingleStepTangentFailure.txt": "E946246437B254771F459A2F1808654F1B4CF179F417E3C1CB929161752561CC",
+          "RealColdReplay.txt": "3B1BD817B10B9972CE0FA390F5C26ECB83288B8890331DDD1F3EF355B38F5302",
+          "RealColdReplay.txt.Ownership.json": "DDC8C16A0F34E753FCB86290FD23CE045020C47A2867BEE298FE7C0C380983CB",
+          "RealColdReplay.txt.ProcessClosure.json": "B4336B871EFD9E0BD30B16FCA4F2352EE580126BA435E4229BF804DBAF842D97",
+          "RealColdReplay.txt.RunnerCleanup.json": "7FE6D3F815D7D74247A655ED9A814321552FE06E335B45B087C2037AF61904D4",
+          "RealColdReplay.txt.memory.json": "F61FB6FE219F6503FDD8B11211BFC897BEB56DBE1851F429828C4933E5010E4A",
+          "SingleStepRotationProof.json": "2368CAD7E4E633A00877FB68DD82D874C1710972FDD12A78340F679A25DF1DFF"
+        },
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1156ASDSingleStepTangent_20261127"
+      },
+      {
+        "book_sha256": "05A4F217ACC812CE1B641A0D5B17CA6B9A1564AEB5DF2CF4442BA570AA3341B4",
+        "native_proofs_sha256": {
+          "MainCapacity.bin": "760F62F91348576EA41C4D1F58CCA614042D5A048A09CA858321CE670E57D595",
+          "MainCapacity.txt": "E0D907E8F7094C2170F6B589E35869AFBF0FE723490248FF72D80E86786E1FD3",
+          "MainCapacityHistory.bin": "D04F0515258AA99F98B4CBEB29E8344B9647A1F301A6F165425869BDDD3FEC8B",
+          "MaterialLimit.bin": "CC8E6E43805668EC0C0B33FB7CF40113BA88A0277EB9B2E891E52ED6DF394026",
+          "OpenSeesMainCapacityEquilibrium.json": "6DDBB0A8ACC4C1D4D18F40F24386C207B4110B581B80667BDF2753713130A8A8",
+          "PhysicalDirectionSummary.json": "83DAD035B520DAB3CDEA70408B15057C362D0F2AE10E49E0C8C22A3607D8AE17",
+          "PhysicalReplaySubprocess.json": "D82F1687EB334D1AA5A9C3D20C157F901F75988984515EF19ED3C13C5E6F8518",
+          "RealColdReplay.txt": "D0CCC9F8C5FB7845E434128D6D567BC670FB1ACF6253C7CDEB7D78FEC969D181",
+          "RealColdReplay.txt.Ownership.json": "B4B2379681E812FCD1A21CB6E6D014B8892932D92F08DC09EF5573B1025FED90",
+          "RealColdReplay.txt.ProcessClosure.json": "D2DFED073EA1D9674D8418EC98CF3EE59D5DA75950ADEDC9F19204437699F51A",
+          "RealColdReplay.txt.RunnerCleanup.json": "958F0D52F47DA29E43DF0C82669D3E6D41CB061FD67989489C94C5E0D1282E28",
+          "RealColdReplay.txt.memory.json": "ACE6F7FBD7DB67082059D98F1127E5C62F66B5A89EC4D859574818A61CEB4AFC"
+        },
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1157ASDSingleStepTangentMy_20261127"
+      },
+      {
+        "book_sha256": "4231667ACA77F4CAB528C67E9DECDC1FBD509F67D90E5EF2C3F19F90EFB212CB",
+        "native_proofs_sha256": {
+          "MainCapacityHistory.bin": "D571178621C62A6288E3BC8E374919C6D060A2C4285CB51AFF3FF9717140F5B2",
+          "RealColdReplay.txt": "B8F7257E1CEB27F0E67650622DBD3EF70C00C9C42084A1E5ECD8756AD7CD376F",
+          "RealColdReplay.txt.Ownership.json": "4340A8129915CF105EF0E5669D6DC1E62827F2CB81782787DEF9CBEF1BBA0C73",
+          "RealColdReplay.txt.ProcessClosure.json": "EC418C8241DDB5D35E8BD59B7FA88C45ED3AFDE0EA39501F12CAFCDB2993A438",
+          "RealColdReplay.txt.memory.json": "7A4D13D712FD3CE8C165D8BF29CDC6684BCD4517D1AD97683970AEEF659E2F21"
+        },
+        "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1158ASDClosedMy_20261127"
+      }
+    ],
+    "whole_goal_completed": false,
+    "working_source_and_public_book_unchanged": true
+  },
   "terminal_sessions_this_stage": [
     1055,
     1057,
@@ -44092,7 +44245,7 @@
     "task": "UNIVERSAL-REBAR-PATHS",
     "unified_mechanism_now": true
   },
-  "updated_local": "2026-11-27T08:47:54.446203+03:00",
+  "updated_local": "2026-11-27: перенос тяжёлых данных проекта на D завершён; тестовые книги хранить на D",
   "user_priority_NMT_before_NMTQ": true,
   "user_priority_recorded": "2026-11-27",
   "verified_extended_cold_stress_source": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold856ExtendedColdStressReplay_20261125",
@@ -44479,7 +44632,7 @@
     "whole_user_run10s_not_met": true,
     "working_core_and_output_synchronized": true
   },
-  "working_commit": "bfa75ca61c26ff0b4e11e1edf76ad966054b628c",
+  "working_commit": "35d301239a2e036ba74c3ef9a2b4ddd1a30839e1",
   "working_commit_before_pause_documentation": "02622b5a0adea395fc80b53fe871097cdd68197c",
   "working_hybrid_native_assertions": {
     "checkpoint": "02622b5",

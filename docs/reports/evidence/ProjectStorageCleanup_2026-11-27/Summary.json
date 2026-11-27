@@ -1,0 +1,57 @@
+{
+  "stage": "Complete",
+  "completed_utc": "2026-11-27T09:51:41.2952024+00:00",
+  "moved_file_bytes": 9887899510,
+  "moved_file_count": 11733,
+  "initial_C_free_bytes": 8591060992,
+  "final_C_free_bytes": 20348084224,
+  "final_D_free_bytes": 108589936640,
+  "net_free_space_delta_includes_external_changes": true,
+  "full_manifest_sha256": "4621AE912F385D03AA7C8FDF8464C7133439C4E703382A0EF0A23489D8E56AB7",
+  "full_source_and_destination_sha256_match": true,
+  "git_connectivity_exit_code": 0,
+  "git_head_before_documentation": "35d301239a2e036ba74c3ef9a2b4ddd1a30839e1",
+  "git_status_before_documentation": [],
+  "public_workbook_sha256_unchanged": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+  "remaining_regular_file_bytes_on_C_by_top_level": {
+    ".gitattributes": 2577,
+    ".gitignore": 403,
+    "AGENTS.md": 36213,
+    "README.md": 5407,
+    "Типы_сечения.dwg": 642720,
+    "workbook": 26922931,
+    "tools": 6403286,
+    "tmp": 57810062,
+    "tests": 5799572,
+    "src": 5745008,
+    "reference": 8262464,
+    "norms": 32103829,
+    "docs": 28805965,
+    ".git": 2488951
+  },
+  "paths": [
+    {
+      "Name": "GitObjects",
+      "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\.git\\objects",
+      "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\GitObjects",
+      "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\GitObjects",
+      "State": "StoredOnD_CCopyRemoved"
+    },
+    {
+      "Name": "Evidence",
+      "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\docs\\reports\\evidence",
+      "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\Evidence",
+      "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\Evidence",
+      "State": "StoredOnD_CCopyRemoved"
+    },
+    {
+      "Name": "Literature",
+      "Source": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\literature",
+      "Destination": "D:\\CodexScratch\\RC_Section_NDM_TQ\\WorkspaceData_20261127_CDrive\\Literature",
+      "Backup": "C:\\Users\\avidzba\\Desktop\\программы\\В_РАБОТЕ!\\RC_Section_NDM_TQ\\tmp\\disk-cleanup\\20261127-CDrive\\VerifiedCBackups\\Literature",
+      "State": "StoredOnD_CCopyRemoved"
+    }
+  ],
+  "test_books_default_directory": "D:\\CodexScratch\\RC_Section_NDM_TQ",
+  "only_project_owned_data_moved": true
+}
