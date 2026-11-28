@@ -1,0 +1,155 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1217ASDActualControlStartCapture_20261128": {
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case07/Native/ControlStartSummary.json": {
+        "actual_first_iterate_observed": true,
+        "all137_fields_and_failures_byteexact1212": true,
+        "capacity_packet_byteexact_except_elapsed": true,
+        "normal_two_attempts_preserved": true,
+        "operators_byteexact1212": true,
+        "physical_capacity_confirmed": false,
+        "public_book_unchanged": true,
+        "records": [
+          {
+            "facts": {
+              "accepted_revision": 1184.0,
+              "branch_tangent_control": 0.0,
+              "field_control": 0.0,
+              "field_control_changes": 0.0,
+              "following_local_peak": 1.0,
+              "geometric_ASD": 1.0,
+              "hybrid_allowed": 1.0,
+              "initial_field_missing": 1.0,
+              "principal_corners": 0.0,
+              "steel_selected": 0.0,
+              "transverse_control": 0.0,
+              "yield_control": 0.0
+            },
+            "field_SHA256": "08EEB093747C3DC735279EC0536AAEB3B9202429CD83BD365E3BBE52A0033D7F",
+            "field_bitexact_last_accepted": true,
+            "field_bitexact_ordinary_secant": false,
+            "initial_lambda": 1.05271886491537,
+            "kind": "Controller",
+            "max_field_difference_from_accepted": 0.0,
+            "max_field_difference_from_secant": 1.7330166531730543e-07,
+            "ordinal": 1,
+            "target": 0.008702515751194684
+          },
+          {
+            "facts": {
+              "accepted_revision": 1184.0,
+              "consistent_control": 0.0,
+              "hybrid_allowed": 1.0,
+              "hybrid_conditioning": 1.0,
+              "initial_field_missing": 1.0,
+              "load_projection": 0.0,
+              "maximum_iterations": 30.0
+            },
+            "field_SHA256": "08EEB093747C3DC735279EC0536AAEB3B9202429CD83BD365E3BBE52A0033D7F",
+            "field_bitexact_last_accepted": true,
+            "field_bitexact_ordinary_secant": false,
+            "initial_lambda": 1.05271886491537,
+            "kind": "Newton",
+            "max_field_difference_from_accepted": 0.0,
+            "max_field_difference_from_secant": 1.7330166531730543e-07,
+            "ordinal": 2,
+            "target": 0.008702515751194684
+          },
+          {
+            "facts": {
+              "accepted_revision": 1184.0,
+              "branch_tangent_control": 0.0,
+              "field_control": 0.0,
+              "field_control_changes": 0.0,
+              "following_local_peak": 1.0,
+              "geometric_ASD": 1.0,
+              "hybrid_allowed": 1.0,
+              "initial_field_missing": 1.0,
+              "principal_corners": 0.0,
+              "steel_selected": 0.0,
+              "transverse_control": 0.0,
+              "yield_control": 0.0
+            },
+            "field_SHA256": "08EEB093747C3DC735279EC0536AAEB3B9202429CD83BD365E3BBE52A0033D7F",
+            "field_bitexact_last_accepted": true,
+            "field_bitexact_ordinary_secant": false,
+            "initial_lambda": 1.05271886491537,
+            "kind": "Controller",
+            "max_field_difference_from_accepted": 0.0,
+            "max_field_difference_from_secant": 1.7330166531730543e-07,
+            "ordinal": 3,
+            "target": 0.008702515751194684
+          },
+          {
+            "facts": {
+              "accepted_revision": 1184.0,
+              "consistent_control": 0.0,
+              "hybrid_allowed": 1.0,
+              "hybrid_conditioning": 1.0,
+              "initial_field_missing": 1.0,
+              "load_projection": 0.0,
+              "maximum_iterations": 30.0
+            },
+            "field_SHA256": "08EEB093747C3DC735279EC0536AAEB3B9202429CD83BD365E3BBE52A0033D7F",
+            "field_bitexact_last_accepted": true,
+            "field_bitexact_ordinary_secant": false,
+            "initial_lambda": 1.05271886491537,
+            "kind": "Newton",
+            "max_field_difference_from_accepted": 0.0,
+            "max_field_difference_from_secant": 1.7330166531730543e-07,
+            "ordinal": 4,
+            "target": 0.008702515751194684
+          }
+        ],
+        "whole_goal_completed": false
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 137,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08897067344273359,
+        "final_lambda": 1.05271886491537,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          105271886.491537,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.2438781857745198,
+        "maximum_moment_error_Nmm": 45.36582075059414,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "78B1095ACE0A8C6D37A89CD0919C1608C18C03F570B3A4753A8886916D4C31A8"
+    },
+    "Cold1218ASDConsistentControlFrozen_20261128": {
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "63F65CDD88A3720439786F0C77333E02535D9FB0CC728DAE0A7A90D376B6EC5C"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}

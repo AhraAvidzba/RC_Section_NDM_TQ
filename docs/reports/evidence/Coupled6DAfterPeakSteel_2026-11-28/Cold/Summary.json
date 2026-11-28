@@ -1,0 +1,77 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1216ASDAfterPeakSteel_20261128": {
+      "Case02/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 140,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.08897067344273525,
+        "final_lambda": 1.0527295845010247,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -105272958.45010248,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.25232687877723947,
+        "maximum_moment_error_Nmm": 71.97670030593872,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 140,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.08897067344273359,
+        "final_lambda": 1.0527234274497328,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          105272342.74497329,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.25232676965606515,
+        "maximum_moment_error_Nmm": 71.98550823330879,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "A6FDC2C4372D162893D2FE5DFF6225B33ADDCAE6DC91592894989626AE03D9E0"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
