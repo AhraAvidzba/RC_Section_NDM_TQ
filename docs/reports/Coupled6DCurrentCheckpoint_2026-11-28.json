@@ -1,18 +1,18 @@
 {
   "active_jobs": [
     {
-      "kind": "cold My+ with80zero-weight boundary material points",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case03",
-      "session_id": 75317
+      "kind": "native Mx- regression verification",
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case02",
+      "session_id": 98985
     },
     {
-      "kind": "cold My- with80zero-weight boundary material points",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case08",
-      "session_id": 54425
+      "kind": "native Mx+ regression verification",
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case07",
+      "session_id": 17747
     }
   ],
   "benchmark_Hpost1500_only": true,
-  "boundary_candidate_root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128",
+  "boundary_candidate_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128",
   "boundary_candidate_source_proof": {
     "actual_components": 269,
     "all263_parent_components_unchanged": true,
@@ -30,12 +30,11 @@
     "public_book_unchanged": true,
     "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
   },
-  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/Followup",
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryMyN",
   "full_acceptance_not_run": true,
   "goal_status": "active",
-  "main_not_modified": true,
   "next_actions": [
-    "1249 My225 both finished71states physical steel FAIL0.7036980774; all142states+independent original-force upper roots strict gates passed, but1251 boundary Cutil1.144389>1 atlower, so WHOLE My225CAPACITY NOT ACCEPTED. Failed steel-control/refinedFD native attempts preserved; original force/secant succeeded. 1250 Mx400 both52states physicalsteel OKlambda1.194277418373, seconds220.545/216.455; all104states+independent upper strict native replay passed;1253 all3station/fullhistory+64boundary passedCsurface.75025/.75247upper.225to400Mxcapacitydifferenceabout.4975/.4931percent only two densities, not full basis/geometry convergence. Boundary1252 private269 book adds4preparationclasses+2testchanges,263othersunchanged; material/solver/forcegates unchanged. General analytical Outer/Opening line/arc boundary samples are zero-weight concrete material points; supported basis ignoreszero weights. NativeExcel operatorcontract+independentNumPy proof passed: all original225C+20steel operators, G/L bitexact;80boundaryweightsW/Vzero,60DOF; disk+hole geometry exact. Same book capacityMy+/-active75317/54425; wait/poll no restart. Helpers Check/Verify-TestBoundaryMaterial... present. Need native header(60,325,305,.001), boundary physical criterion mayconcrete(kind2), do NOT force steel criterion. Source/book unpromoted. Full6force goal active; Config<=1%steel/CDP/universalrebar/Bspline Config/native fullworkflow10s notdone."
+    "Boundary1252 My+- finished70states each, physicalC compression FAILlambda.69413129738327 (|My|69.413129738kNm). Initial native force/secant upper failed, preserved; central full-force TRF fixed-original-upper lambda.694146168675329 roots pass all60+6forces. Positive residual1.75e-11, negative4.16e-7<original1.38e-6MPa; latter optimizermax60flagFalse preserved. 1255 all305C+320extra5mm boundarypoints x3stations and allsteel/all140fields pass: lowerC.999238720, upperC1.0014, steel<.887. 1254 firstharnessfailed before physics: generic count25 substitution inserted325 and correctly stoppedat11instead8. Fixed new Frozen-TestASDVariablePointContext changes original8 concreteindices before totalpointcount; old225/400 generatedcodebyteexact, originalnegative325guardpreserved. No working physics/tolerances changed. 1252 Ncomp20states,lambda4.93358643127,60.383s; Ntension52states,lambda1.091861841689,110.904s; both native all60+6forces and physicalpeak/upper, statuscontracts passed. Nrelative100pointdiff-.00055%/-.01414%. Overall212 acceptedfields verified forN/My; all3station/densematerialcertificate specificallyMy. Sameprivate269book,4preparationclasses+2tests,263unchanged; public260book/dump unchanged. BothMx+- cold macro runs finished physicalsteel OK, ownExcel closed; independent native verification active98985/17747, pollno restart. Need nativeheader60,325,305; ordinary Replay-TestBoundaryMaterialDirections first, central-force fallback ifneeded; steel-control onlyforkind1. AfterMx regressions proceedT+- (1202cases4/9 needstageinputs into samebook), NMT5 thenQ/NMTQ; actualConfig<=1%steel, CDP, B-spline/quad convergence, fullworkflow10s/source-build-book/native/fullacceptance remain active. No pause, nofullONOFF/hour consent, no mainmerge/publicpromotion yet."
   ],
   "public_book_and_dump_unchanged": true,
   "report": "docs/reports/Coupled6DQuadrature_2026-11-28.md",
