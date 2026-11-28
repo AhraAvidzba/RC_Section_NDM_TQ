@@ -1,0 +1,43 @@
+{
+  "active_jobs": [
+    {
+      "kind": "cold My+ with80zero-weight boundary material points",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case03",
+      "session_id": 75317
+    },
+    {
+      "kind": "cold My- with80zero-weight boundary material points",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case08",
+      "session_id": 54425
+    }
+  ],
+  "benchmark_Hpost1500_only": true,
+  "boundary_candidate_root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128",
+  "boundary_candidate_source_proof": {
+    "actual_components": 269,
+    "all263_parent_components_unchanged": true,
+    "changed_components": [
+      "CCoupledDiscretization",
+      "CCoupledElasticState",
+      "CCoupledSectionAnalysis",
+      "CCoupledSectionQuadrature",
+      "modTestASDFixtureOperators",
+      "modTestSelectableMaterialCore"
+    ],
+    "changed_components_exact": true,
+    "four_geometry_preparation_classes_and_two_test_modules": true,
+    "material_laws_nonlinear_solver_and_force_gates_unchanged": true,
+    "public_book_unchanged": true,
+    "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
+  },
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/Followup",
+  "full_acceptance_not_run": true,
+  "goal_status": "active",
+  "main_not_modified": true,
+  "next_actions": [
+    "1249 My225 both finished71states physical steel FAIL0.7036980774; all142states+independent original-force upper roots strict gates passed, but1251 boundary Cutil1.144389>1 atlower, so WHOLE My225CAPACITY NOT ACCEPTED. Failed steel-control/refinedFD native attempts preserved; original force/secant succeeded. 1250 Mx400 both52states physicalsteel OKlambda1.194277418373, seconds220.545/216.455; all104states+independent upper strict native replay passed;1253 all3station/fullhistory+64boundary passedCsurface.75025/.75247upper.225to400Mxcapacitydifferenceabout.4975/.4931percent only two densities, not full basis/geometry convergence. Boundary1252 private269 book adds4preparationclasses+2testchanges,263othersunchanged; material/solver/forcegates unchanged. General analytical Outer/Opening line/arc boundary samples are zero-weight concrete material points; supported basis ignoreszero weights. NativeExcel operatorcontract+independentNumPy proof passed: all original225C+20steel operators, G/L bitexact;80boundaryweightsW/Vzero,60DOF; disk+hole geometry exact. Same book capacityMy+/-active75317/54425; wait/poll no restart. Helpers Check/Verify-TestBoundaryMaterial... present. Need native header(60,325,305,.001), boundary physical criterion mayconcrete(kind2), do NOT force steel criterion. Source/book unpromoted. Full6force goal active; Config<=1%steel/CDP/universalrebar/Bspline Config/native fullworkflow10s notdone."
+  ],
+  "public_book_and_dump_unchanged": true,
+  "report": "docs/reports/Coupled6DQuadrature_2026-11-28.md",
+  "whole_goal_completed": false
+}
