@@ -3142,6 +3142,606 @@
     "pushed": true,
     "task": "ASD-BSPLINE-SETTING"
   },
+  "Gauss_cold_1236_and_integration_1237": {
+    "all207_states_independently_verified": true,
+    "all267_parent_components_unchanged": true,
+    "all_own_Excel_closed": true,
+    "basis_materials_force_tolerances_and_budgets_unchanged": true,
+    "cases": [
+      {
+        "all60_equations_and_six_resultants_verified": true,
+        "case": 2,
+        "exact_own_Excel_closed": true,
+        "final_compression_utilization": 0.18695456449777487,
+        "last_lambda": 1.1006252285049472,
+        "maximum_Mx_magnitude_kNm": 117.0750796927871,
+        "maximum_lambda": 1.170750796927871,
+        "physical_capacity_confirmed": false,
+        "seconds": 475.083984375,
+        "states": 114,
+        "status": "NumFail"
+      },
+      {
+        "all60_equations_and_six_resultants_verified": true,
+        "case": 7,
+        "exact_own_Excel_closed": true,
+        "final_compression_utilization": 0.19320470927116368,
+        "last_lambda": 1.1307527820067462,
+        "maximum_Mx_magnitude_kNm": 117.52419011973379,
+        "maximum_lambda": 1.1752419011973378,
+        "physical_capacity_confirmed": false,
+        "seconds": 366.44140625,
+        "states": 93,
+        "status": "NumFail"
+      }
+    ],
+    "only_two_test_modules_changed": true,
+    "physical_capacity_not_confirmed": true,
+    "production_promotion": false,
+    "public_book_and_dump_unchanged": true,
+    "quadrature_convergence_not_established": true,
+    "sensitivity": {
+      "cases": [
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -48.040692810654804,
+          "Mx_kNm": -57.18772434823179,
+          "actual_resultants_N_Nmm": [
+            230138.9792501288,
+            -57187724.34823179,
+            0.04460780881345272,
+            3633.3406234748313,
+            4.0451339748447355,
+            -1.0280836982068386e-05
+          ],
+          "all60_and_six_force_errors_MPa": [
+            1.5342598616675303,
+            0.1268225931525511,
+            1.5342598616675263,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.12439894260990289,
+          "concrete_critical": {
+            "equivalent_compression": 0.00043539629913466013,
+            "station": -1,
+            "strain": [
+              4.0158372268942036e-05,
+              9.046677438528423e-05,
+              -3.731553629897138e-05,
+              -0.00010329096144114653,
+              2.697965949951873e-08,
+              -2.1345335875916212e-07
+            ],
+            "x": -120.0,
+            "y": 200.0
+          },
+          "concrete_points": 25,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            -110062522.85049471,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "negative",
+          "lambda_value": 1.1006252285049472,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.8981901441536955e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint5",
+          "seconds": 0.4319291999563575,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 114,
+          "steel_utilization": 0.30686094386497537
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -63.98455308829043,
+          "Mx_kNm": 40.72456679063187,
+          "actual_resultants_N_Nmm": [
+            323619.0197886898,
+            40724566.79063187,
+            -0.16791780851781368,
+            -0.2833920591879074,
+            -0.0038606006779258514,
+            0.00022675751039500898
+          ],
+          "all60_and_six_force_errors_MPa": [
+            2.157460131924604,
+            0.18035604699549962,
+            2.1574601319246,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.128363790266613,
+          "concrete_critical": {
+            "equivalent_compression": 0.0004492732659331455,
+            "station": -1,
+            "strain": [
+              0.0001734613206051007,
+              0.00011203808101067946,
+              0.0002660838290964463,
+              -0.0004917250066986533,
+              -1.4545382605796928e-11,
+              6.822904291915648e-11
+            ],
+            "x": 120.0,
+            "y": -200.0
+          },
+          "concrete_points": 25,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            113075278.20067462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "positive",
+          "lambda_value": 1.1307527820067462,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.9364629797045384e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint5",
+          "seconds": 0.36353229999076575,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 93,
+          "steel_utilization": 0.5520766289662039
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": 5.935522264799431e-05,
+          "Mx_kNm": -110.06258817835021,
+          "actual_resultants_N_Nmm": [
+            -0.28420049067790387,
+            -110062588.17835021,
+            0.0027348026633262634,
+            -0.2680055505459151,
+            0.006537236537970489,
+            -0.0002048862138919194
+          ],
+          "all60_and_six_force_errors_MPa": [
+            1.8980811518541135e-06,
+            6.168720726286783e-11,
+            1.8946699378526936e-06,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.18695456449777487,
+          "concrete_critical": {
+            "equivalent_compression": 0.0006543409757422121,
+            "station": -1,
+            "strain": [
+              0.0001107317877787195,
+              0.00010782151112833442,
+              -0.0005463474713122488,
+              -1.3545058082071006e-06,
+              9.665091088912241e-10,
+              -2.646409274126064e-09
+            ],
+            "x": -135.9269768908,
+            "y": 226.544961484666
+          },
+          "concrete_points": 25,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            -110062522.85049471,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "negative",
+          "lambda_value": 1.1006252285049472,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.8981901441536955e-06,
+          "original_equilibrium_retained": true,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Gauss5",
+          "seconds": 0.4030905999825336,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 114,
+          "steel_utilization": 0.30686094386497537
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -1.6801541491417993e-06,
+          "Mx_kNm": 113.07527630083564,
+          "actual_resultants_N_Nmm": [
+            0.2662369833815319,
+            113075276.30083564,
+            -1.367394970729947,
+            -0.6886209033796591,
+            -0.00751549320227586,
+            1.6185631844568618e-05
+          ],
+          "all60_and_six_force_errors_MPa": [
+            1.7818683575342122e-06,
+            2.032879073410321e-15,
+            1.774913222543547e-06,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.19320470927116368,
+          "concrete_critical": {
+            "equivalent_compression": 0.0006762164824490729,
+            "station": -1,
+            "strain": [
+              0.00012658185530389898,
+              0.00012212094844280398,
+              -0.0006277175053020509,
+              1.911061872868485e-06,
+              -1.8402911493235446e-11,
+              8.477338499810955e-11
+            ],
+            "x": 135.9269768908,
+            "y": -226.544961484666
+          },
+          "concrete_points": 25,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            113075278.20067462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "positive",
+          "lambda_value": 1.1307527820067462,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.9364629797045384e-06,
+          "original_equilibrium_retained": true,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Gauss5",
+          "seconds": 0.3662505999673158,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 93,
+          "steel_utilization": 0.5520766289662039
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -11.51308879316385,
+          "Mx_kNm": -97.390926866721,
+          "actual_resultants_N_Nmm": [
+            53551.16773100294,
+            -97390926.866721,
+            0.005308236926794052,
+            -872.807359273239,
+            -7.714412974621686,
+            0.0009036048012809328
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.3570077848733467,
+            0.038372483446281844,
+            0.3570077848733526,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.17683224394019026,
+          "concrete_critical": {
+            "equivalent_compression": 0.0006189128537906659,
+            "station": -1,
+            "strain": [
+              0.00010140014781091785,
+              0.00010950348917099887,
+              -0.0004634536862679335,
+              -2.5924683410514138e-05,
+              7.140027090032947e-09,
+              -4.7346710311286925e-08
+            ],
+            "x": -133.333333333333,
+            "y": 222.222222222222
+          },
+          "concrete_points": 81,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            -110062522.85049471,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "negative",
+          "lambda_value": 1.1006252285049472,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.8981901441536955e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint9",
+          "seconds": 1.4826870000106283,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 114,
+          "steel_utilization": 0.30686094386497537
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -17.710919040178762,
+          "Mx_kNm": 93.04860722409624,
+          "actual_resultants_N_Nmm": [
+            84671.55864676577,
+            93048607.22409624,
+            -1.2291981745511293,
+            -0.5636816126924247,
+            -0.0065644315356095,
+            -1.1951204965185023e-06
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.564477057645099,
+            0.05425491607433293,
+            0.5644770576451046,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.18246278743328637,
+          "concrete_critical": {
+            "equivalent_compression": 0.0006386197560165023,
+            "station": -1,
+            "strain": [
+              0.00014307278847806184,
+              0.0001308994487521664,
+              -0.0004821655849023554,
+              -0.00010355070998177161,
+              -1.781109906255538e-11,
+              8.190478090768014e-11
+            ],
+            "x": 133.333333333333,
+            "y": -222.222222222222
+          },
+          "concrete_points": 81,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            113075278.20067462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "positive",
+          "lambda_value": 1.1307527820067462,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.9364629797045384e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint9",
+          "seconds": 1.3779392000287771,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 93,
+          "steel_utilization": 0.5520766289662039
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -18.79883032170583,
+          "Mx_kNm": -89.3720559320415,
+          "actual_resultants_N_Nmm": [
+            99390.42441242511,
+            -89372055.93204151,
+            -0.05585610121488571,
+            -3270.7539518998087,
+            -4.586124504261483,
+            -0.010271563710190224
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.6626028294161659,
+            0.01830572272673054,
+            0.6626028294161658,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.19707109706785375,
+          "concrete_critical": {
+            "equivalent_compression": 0.0006897488397374881,
+            "station": -1,
+            "strain": [
+              0.00011516219259266293,
+              0.00013375170581395398,
+              -0.0006273529746082212,
+              6.636114184208064e-13,
+              -3.061428789768419e-09,
+              1.2859350522330327e-11
+            ],
+            "x": -1.77635683940025e-15,
+            "y": 230.769230769231
+          },
+          "concrete_points": 169,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            -110062522.85049471,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "negative",
+          "lambda_value": 1.1006252285049472,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.8981901441536955e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint13",
+          "seconds": 4.915256300009787,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 114,
+          "steel_utilization": 0.30686094386497537
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -12.299656566734418,
+          "Mx_kNm": 99.16740732011213,
+          "actual_resultants_N_Nmm": [
+            66680.55108692724,
+            99167407.32011214,
+            -0.9316080007702112,
+            -0.5427518086759452,
+            -0.005514399784122763,
+            -4.478801547650653e-05
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.4445370072461822,
+            0.02584668031557637,
+            0.4445370072461805,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.2122267871897305,
+          "concrete_critical": {
+            "equivalent_compression": 0.0007427937551640568,
+            "station": 1,
+            "strain": [
+              0.00010116862676584572,
+              0.00017370276644628033,
+              -0.000769953785491986,
+              -8.283274267233479e-12,
+              -4.845208406623132e-11,
+              2.2486755848075226e-14
+            ],
+            "x": -1.77635683940025e-15,
+            "y": -230.769230769231
+          },
+          "concrete_points": 169,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            113075278.20067462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "positive",
+          "lambda_value": 1.1307527820067462,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.9364629797045384e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint13",
+          "seconds": 4.807932999974582,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 93,
+          "steel_utilization": 0.5520766289662039
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -13.57655539194682,
+          "Mx_kNm": -95.11982346992316,
+          "actual_resultants_N_Nmm": [
+            72634.56191658447,
+            -95119823.46992317,
+            -0.07100006937980652,
+            -4013.7802427901775,
+            -2.4481100408605654,
+            -0.04167081480510182
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.48423041277723144,
+            0.00699644662651506,
+            0.4842304127772249,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.21535564280943625,
+          "concrete_critical": {
+            "equivalent_compression": 0.0007537447498330269,
+            "station": -1,
+            "strain": [
+              0.0001291946656781113,
+              0.00017464544409497894,
+              -0.0007678380789901272,
+              2.237461802748371e-12,
+              -1.8107932251033153e-08,
+              3.9261531918749365e-11
+            ],
+            "x": 7.99360577730113e-15,
+            "y": 238.095238095238
+          },
+          "concrete_points": 441,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            -110062522.85049471,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "negative",
+          "lambda_value": 1.1006252285049472,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.8981901441536845e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint21",
+          "seconds": 29.065746999986004,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 114,
+          "steel_utilization": 0.30686094386497537
+        },
+        {
+          "DOF": 60,
+          "Mx_difference_percent": -15.095295193515511,
+          "Mx_kNm": 96.00623116539388,
+          "actual_resultants_N_Nmm": [
+            82959.97502825072,
+            96006231.16539389,
+            -1.2903624679893255,
+            -0.5171507443182523,
+            -0.005680387199724324,
+            -3.285706238157617e-05
+          ],
+          "all60_and_six_force_errors_MPa": [
+            0.5530665001883379,
+            0.00987077283727726,
+            0.5530665001883325,
+            0.0
+          ],
+          "concrete_compression_utilization": 0.2715464206651219,
+          "concrete_critical": {
+            "equivalent_compression": 0.0009504124723279268,
+            "station": 1,
+            "strain": [
+              6.130373541007895e-05,
+              0.00025713478610486616,
+              -0.0010166294153599546,
+              -3.024299959227504e-11,
+              -5.253321639159594e-11,
+              -4.601091123666935e-13
+            ],
+            "x": 7.99360577730113e-15,
+            "y": -238.095238095238
+          },
+          "concrete_points": 441,
+          "expected_resultants_N_Nmm": [
+            0.0,
+            113075278.20067462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "history": "positive",
+          "lambda_value": 1.1307527820067462,
+          "material_characteristic_length_fixed_mm": 125.0,
+          "new_equilibrium_not_solved": true,
+          "original_bound_MPa": 1.9364629797045274e-06,
+          "original_equilibrium_retained": false,
+          "physical_capacity_not_claimed": true,
+          "quadrature": "Midpoint21",
+          "seconds": 28.519061900035013,
+          "source_mesh_and_Bspline_basis_unchanged": true,
+          "states": 93,
+          "steel_utilization": 0.5520766289662039
+        }
+      ],
+      "elapsed_seconds": 73.84771840000758,
+      "full_actual_operators_from_saved_Excel_book": true,
+      "no_new_equilibrium_or_capacity": true,
+      "only_numeric_quadrature_changed": true,
+      "public_book_unchanged": true,
+      "whole_goal_completed": false
+    },
+    "whole_goal_completed": false
+  },
   "Mx_My_start_and_frozen_study_20261127": {
     "VBA_accepts_external_field_without_change": true,
     "all18_recorded_initial_iteration_residuals_native_verified": true,
@@ -3198,17 +3798,19 @@
   "active_jobs": [
     {
       "case": 2,
-      "handle": 12451,
-      "owned_Excel_PID": 10616,
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1236ASDGauss5_20261128\\Case02",
-      "start_ticks_UTC": "639314303116290043"
+      "handle": 80838,
+      "owned_Excel_PID": 52648,
+      "phase": "cold Mx with100 concrete+20steel points;600s watchdog;no VBA change from verifiedN book",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1243ASDCompositeGauss10M_20261128\\Case02",
+      "start_ticks_UTC": "639314324542552899"
     },
     {
       "case": 7,
-      "handle": 20705,
-      "owned_Excel_PID": 51780,
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1236ASDGauss5_20261128\\Case07",
-      "start_ticks_UTC": "639314303123724935"
+      "handle": 42928,
+      "owned_Excel_PID": 5076,
+      "phase": "cold Mx with100 concrete+20steel points;600s watchdog;no VBA change from verifiedN book",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1243ASDCompositeGauss10M_20261128\\Case07",
+      "start_ticks_UTC": "639314324550397348"
     }
   ],
   "actual_H_derivative748": {
@@ -8657,6 +9259,131 @@
     "maximum_accepted_lambda": 1.1058869810286156
   },
   "cold_arc_rejection_evidence": "docs/reports/evidence/Coupled6DColdArcRejection_2026-11-25",
+  "composite_Gauss_1238_1241": {
+    "all60_unknowns_same": true,
+    "compiled_book_sha256": "DCB2528F7E2CA39EF7670393534145ECC17F1D6154259AC2E4BED71CED3306D5",
+    "failed_hole_check_repaired_and_repeated": true,
+    "not_promoted": true,
+    "old_Midpoint5_and_Gauss5_byteexact": true,
+    "physical_capacity_not_confirmed": true,
+    "private_candidate_1240_source_verified": true,
+    "summary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\CompositeGaussSummary_20261128.json",
+    "two_classes_one_test_changed": true
+  },
+  "composite_Gauss_1242_cold_N": {
+    "DOF": 60,
+    "all73_states_independently_verified": true,
+    "benchmark_Hpost1500_not_approved_working_default": true,
+    "cases": [
+      {
+        "N_kN": -4933.6137422941565,
+        "case": 1,
+        "criterion": "independently verified two-sided axial branch maximum",
+        "independent": {
+          "accepted_states": 20,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "Realistic300x500_Compression",
+          "compression_utilization": 0.5786189994712924,
+          "final_lambda": 4.933613742294157,
+          "final_target_resultants_N_Nmm": [
+            -4933613.742294157,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": {
+            "actual_native_OpenSees_material": true,
+            "elapsed_seconds": 1.8707551000406966,
+            "fixed_prefix_states": 14,
+            "independent_global_augmented_section_equilibrium": true,
+            "no_OpenSees_solid_element": true,
+            "peak_accuracy": 0.0006970415507344714,
+            "peak_compressive_control": 0.002030211710196228,
+            "peak_lambda": 4.933613742294157,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "two_admissible_shoulders_below_original_peak": true
+          },
+          "independent_upper": null,
+          "maximum_force_error_N": 0.4911383865401149,
+          "maximum_moment_error_Nmm": 2.526914450339973,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 4.933613742294157,
+        "seconds": 23.224609375,
+        "states": 20
+      },
+      {
+        "N_kN": 546.008101787226,
+        "case": 6,
+        "criterion": "steel strain limit with independently verified inadmissible upper",
+        "independent": {
+          "accepted_states": 53,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "Realistic300x500_Tension",
+          "compression_utilization": 0.0004943264618436316,
+          "final_lambda": 1.092016203574452,
+          "final_target_resultants_N_Nmm": [
+            546008.101787226,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "Realistic300x500_Tension",
+            "compression_utilization": 0.0004943264618436316,
+            "elapsed_seconds": 0.13709860004018992,
+            "fixed_history_states": 53,
+            "function_evaluations": 1,
+            "gauge_residual_MPa": 4.87890977618477e-15,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.0001543559789198845,
+            "lower_lambda": 1.09201620357445,
+            "original_bound_MPa": 2.320284265922284e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 6.303070105129319e-09,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 3.3698355158170056e-11,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "Independent ordinary secant seed meets every original equation before root iterations",
+            "solver_success": false,
+            "steel_utilization": 1.0016131749040234,
+            "tension_utilization": 0.0,
+            "upper_lambda": 1.09217055955337,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.3318234825273976,
+          "maximum_moment_error_Nmm": 0.0006519481503477215,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 1.092016203574452,
+        "seconds": 37.56640625,
+        "states": 53
+      }
+    ],
+    "concrete_points": 100,
+    "public_book_and_dump_unchanged": true,
+    "quadrature_convergence_for_all_loads_not_proven": true,
+    "steel_points": 20,
+    "whole_goal_completed": false
+  },
+  "composite_Gauss_1243_cold_M": {
+    "book_inherited_byteexact": true,
+    "no_compilation_here": true,
+    "no_result_claimed_before_terminal_closure": true,
+    "source_proof": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1243ASDCompositeGauss10M_20261128\\InheritedBookProof.json"
+  },
   "consistent_geometric_secant_1227": {
     "all268_other_parent_components_unchanged": true,
     "all286_states_independently_verified": true,
@@ -10178,7 +10905,7 @@
     "whole_goal_completed": false
   },
   "current_goal_turn_classification": "progress",
-  "current_goal_turn_evidence": "Found major actual quadrature sensitivity with independent native material replay and actual saved-Excel operators. Old25point109.8kNm field reintegrates150.10kNm on441points, not a new equilibrium/capacity. Boundary ASD equivalent compression much higher than sampled center. Reject1227 consistent geometric secant:286 valid states but bothNumFail; negative lost prior discrete steel boundary. Uniform axial subspace mathematically legitimate for zeroQ/history symmetry but native prototypes1229-1231 did not establish capacity;1230 has no exact duplicate curvature values but advances as small as4.12e-18/2.10e-17; stagnation scale audited,1231 strictly advancing. Need quadrature/boundary convergence before more blind step tuning or promotion.",
+  "current_goal_turn_evidence": "Major actual quadrature sensitivity established, not hidden by solver tolerances. Implemented existingGauss5 composite integration at25/100/225/400 points with same60DOF; repaired centroid-in-hole of38mm2nonconvex cutcell through local common geometry refinement. Actual saved1240 VBA+NumPy+analytic rectangle/hole checks PASS; old25midpoint/Gauss5 byteexact.1241 all16 reevaluations complete but not new roots/capacities.1242 cold100pointNcompression/tension independently confirmed: -4933.613742/+546.008102kN,73 valid states plus independent peak shoulders/material upper;23.22/37.57s test time, not fullworkflow.1243 coldMx+- active. H1500 remains causal-only; no production promotion, full6force/Config<=1%steel/book/workflow goal active.",
   "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
@@ -48276,7 +49003,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Poll cold1236Gauss5 cases02/07 live handles12451/20705, validate exact own Office closures before reading final packets; do not restart on missing observation. Native rechecks must use actual Gauss operators, unchanged all60/6force/material gates and fixedLch125, legacyH1500 only as causal benchmark. Compare cold quadrature solutions, then refine quadrature and boundary sampling until capacity/mechanism stable; old25point109.8 is only discrete model bracket, not validated engineering section capacity. Do not call reintegrated150.1 a capacity. Reject1227, no broad regression justified. Full original six-force goal, actual Config/<=1% steel, ASD-first N/M/T thenNMT/Q/NMTQ, public source/build/book/native acceptance and <=10s full workflow remain incomplete and active."
+    "Poll1243coldMx+- live handles80838(Case02)/42928(Case07), verify terminal exact ownOffice closures before final packets; do not restart on missing observation. Sourcebook reused byteexact from verified1242,100concrete+20steel=120points,60DOF. Independent Replay-TestASDCompositeGaussNDirections.py works with these dimensions and generic six loads despiteN in filename; preserve original gates/all60/6forces and require physical upper or independent peak proof for capacity claims. If watchdog occurs, verify saved prefix separately and do not manufacture final NumFail/Fail.1242 Npassed73states, native shoulders+steelupper, archivedColdN. Then quadrature convergence forMx signs,My,T,NMT,Q,NMTQ before working default.1240 local contour refinement+compositeGauss source candidate retained only private; final public source/build/book synchronization and native output/fullworkflow acceptance remain. H1500 legacy benchmark only, switch to actualConfig or <=1% working steel for final validation. Both109.8 and117kNm olderMx are discrete model values without engineering quadrature convergence. Do not label re-integrated133.8/135.7 a capacity. No full acceptance authorization, watcher unchanged."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -49015,6 +49742,40 @@
     },
     "two_base_load_steel_event_localization_verified": true,
     "whole_goal_completed": false
+  },
+  "quadrature_archives_verified": {
+    "ColdN": {
+      "all_direct_and_inherited_SHA256_verified": true,
+      "distinct_books_CRC_verified": 2,
+      "parent_manifests_verified": 11,
+      "path": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/ColdN/Files.json",
+      "sha256": "8F279D1EA9F64C70CAFD2DDA92B0493B3241658B29B38232B07FBEAB364846A7",
+      "unique_payloads": 561
+    },
+    "Composite": {
+      "all_direct_and_inherited_SHA256_verified": true,
+      "distinct_books_CRC_verified": 4,
+      "parent_manifests_verified": 10,
+      "path": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/Composite/Files.json",
+      "sha256": "849F30D9D0A22C4171369E1AAA823A5225D62532BDD2A7EB1E2350C7C716AE87",
+      "unique_payloads": 555
+    },
+    "GaussCold": {
+      "all_direct_and_inherited_SHA256_verified": true,
+      "distinct_books_CRC_verified": 2,
+      "parent_manifests_verified": 9,
+      "path": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/GaussCold/Files.json",
+      "sha256": "50E06F71BA7DE11284327688D33BC5564E9473C5B1E6A438D5659449C944FAC8",
+      "unique_payloads": 907
+    },
+    "Investigation": {
+      "all_direct_and_inherited_SHA256_verified": true,
+      "distinct_books_CRC_verified": 4,
+      "parent_manifests_verified": 13,
+      "path": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/Investigation/Files.json",
+      "sha256": "0B247A704029BD5AF0124684FFAFE6611BC61AE762D41F3B89012747383CB2AD",
+      "unique_payloads": 1020
+    }
   },
   "quadrature_boundary_audit_1228_1235": {
     "concrete_boundary_strain_not_universal_normative_failure": true,

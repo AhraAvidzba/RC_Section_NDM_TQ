@@ -1,0 +1,115 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1242ASDCompositeGauss10N_20261128": {
+      "Case01/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": false,
+        "has_physical_capacity": true,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "OK"
+      },
+      "Case01/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 20,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_Compression",
+        "compression_utilization": 0.5786189994712924,
+        "final_lambda": 4.933613742294157,
+        "final_target_resultants_N_Nmm": [
+          -4933613.742294157,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": {
+          "actual_native_OpenSees_material": true,
+          "elapsed_seconds": 1.8707551000406966,
+          "fixed_prefix_states": 14,
+          "independent_global_augmented_section_equilibrium": true,
+          "no_OpenSees_solid_element": true,
+          "peak_accuracy": 0.0006970415507344714,
+          "peak_compressive_control": 0.002030211710196228,
+          "peak_lambda": 4.933613742294157,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "two_admissible_shoulders_below_original_peak": true
+        },
+        "independent_upper": null,
+        "maximum_force_error_N": 0.4911383865401149,
+        "maximum_moment_error_Nmm": 2.526914450339973,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "Case06/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": false,
+        "has_physical_capacity": true,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "OK"
+      },
+      "Case06/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 53,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_Tension",
+        "compression_utilization": 0.0004943264618436316,
+        "final_lambda": 1.092016203574452,
+        "final_target_resultants_N_Nmm": [
+          546008.101787226,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_Tension",
+          "compression_utilization": 0.0004943264618436316,
+          "elapsed_seconds": 0.13709860004018992,
+          "fixed_history_states": 53,
+          "function_evaluations": 1,
+          "gauge_residual_MPa": 4.87890977618477e-15,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.0001543559789198845,
+          "lower_lambda": 1.09201620357445,
+          "original_bound_MPa": 2.320284265922284e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 6.303070105129319e-09,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 3.3698355158170056e-11,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "Independent ordinary secant seed meets every original equation before root iterations",
+          "solver_success": false,
+          "steel_utilization": 1.0016131749040234,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.09217055955337,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.3318234825273976,
+        "maximum_moment_error_Nmm": 0.0006519481503477215,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        1,
+        6
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "94F222B75D51B97D5837C51791B87384B4CE484E393CAC1811AC1B3D76EC394E"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
