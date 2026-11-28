@@ -1,5 +1,11 @@
 {
-  "active_jobs": [],
+  "active_jobs": [
+    {
+      "kind": "cold T with400force points and same independent64-span boundary; poll existing live handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case400",
+      "session_id": 67564
+    }
+  ],
   "benchmark_Hpost1500_only": true,
   "boundary_candidate_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128",
   "boundary_candidate_source_proof": {
@@ -19,7 +25,77 @@
     "public_book_unchanged": true,
     "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
   },
-  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryTorsion",
+  "boundary_response_and_resolution": {
+    "active_job": {
+      "kind": "cold T; force225 plus independent boundary64 resolution; poll same handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case225",
+      "session_id": 62195
+    },
+    "full_acceptance_not_run": true,
+    "goal_active": true,
+    "next_boundary_sampling_source": {
+      "actual_components": 269,
+      "all268_other_components_unchanged": true,
+      "boundary_resolution_per_minimum_Bspline_span": 64,
+      "changed_components_exact": true,
+      "force_quadrature_and_Newton_solver_unchanged": true,
+      "only_boundary_sampling_method_changed": true,
+      "public_book_unchanged": true,
+      "saved_book_sha256": "65700ED28E176110D9B87F07FD76ADF8CAA6F89866CDD2024E0333698B45E58D"
+    },
+    "old_T_boundary_audit_summary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\OldTorsionBoundaryAuditSummary_20261128.json",
+    "public260_book_and_dump_SHA256_unchanged": true,
+    "whole_goal_completed": false,
+    "zero_weight_response_comparison": {
+      "accepted_states": 56,
+      "all_exact": true,
+      "candidate_solver_seconds": 82.9296875,
+      "capacity_T_kNm": 5.229797443540355,
+      "dense_boundary_lower_utilization": 0.9985944746042975,
+      "dense_parent_sha256": "370EF26658C9B217FD8097C3CD6D72123A49709D6EB83E149B6F8C1D7EF3E484",
+      "exact_byte_checks": {
+        "Input/CapacityLoad.bin": true,
+        "Input/CapacitySettings.bin": true,
+        "Input/CaptureProgress.flag": true,
+        "Input/FixtureQuadrature.bin": true,
+        "Input/MaterialContract.json": true,
+        "Input/PhysicalLimits.bin": true,
+        "Input/ReplayHeader.bin": true,
+        "Native/MainCapacity.Operators.csv": true,
+        "Native/MainCapacityHistory.bin": true,
+        "Native/MaterialLimit.bin": true,
+        "capacity_packet_all_numeric_results_except_seconds": true
+      },
+      "independent_parent_sha256": "641974557E770F4785F28B836780EE0D57BCBE8BDE182DB31E9172575C76806B",
+      "inherited_native_all_equations_and_dense_history_valid_by_exact_bytes": true,
+      "parent_solver_seconds": 106.078125,
+      "public_book_unchanged": true,
+      "solver_time_change_percent": -21.822065105317424,
+      "source": {
+        "actual_components": 269,
+        "all268_other_components_unchanged": true,
+        "all_three_boundary_stress_histories_and_physical_limits_preserved": true,
+        "changed_components_exact": true,
+        "only_Newton_Evaluate_changed": true,
+        "principal_transition_and_material_integration_unchanged": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "55DCD8F250E5C3A12FC7D58FB64545ABBDDAA69A6279256AF548EB0357CD9C76",
+        "zero_weight_tangent_not_computed": true
+      },
+      "timing_is_one_run_not_general_benchmark": true,
+      "whole_goal_completed": false
+    }
+  },
+  "checkpoint_utc": "2026-11-28T08:04:57.945974+00:00",
+  "closed_torsion_prefix_and_AB": {
+    "all_started_handles_terminal": true,
+    "closed55states_verified": true,
+    "large300x500_T_not_confirmed": true,
+    "previous_T_old180x120_still_found": 3.6607255594051265,
+    "same_old_geometry_refined_found": 5.229797443540355,
+    "summary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\ClosedTorsionTimeoutAndABSummary_20261128.json"
+  },
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/ClosedTorsionBoundaryAudit",
   "evidence_verification": {
     "all_direct_and_inherited_payloads_SHA256_verified": true,
     "archive_parts": [
@@ -46,11 +122,239 @@
   },
   "full_acceptance_not_run": true,
   "goal_status": "active",
-  "next_actions": [
-    "All previous T/native sessions terminal. SeparateN/Mx/My bothsigns prior339acceptedstates physical/native verified, Hpost1500 benchmarkonly. Original T+ NumFail, T- watchdog1200 no final packet, no physical Tcapacity accepted. Eight saved prefixes both signs native verified. 50.0563kNm belongs to replaced coarse prefixes in BOTH signs, not accepted capacity. Four frozen-peak VBA/native probes disprove force-tolerance dominance: actual nonlinear correction -1.46e-10; old uncertainty4.74e-5 << total0.04013. Original third shoulder refinement solved all4points but all descending: peak moved left outside fixed bracket. Private1263 reselects bracket using only solved fields, strict gates retained; source269/267unchanged. 14rebrackets/143probes/32passes gives peak4.754062503,error0.0091805304, still FAILS requested0.001. No blind budget increase or tolerance relaxation. Next control step accuracy of material history BEFORE peak, e.g. full-versus-two-half-step diagnostic from same prefix before tension damage; compare uniform/coarse histories and native-equilibrium independently. Candidate needs retained-field capture/native proof before promotion; end-of-peak test stop not final material event or capacity. Then coldT+- through physical event, NM/NMT,Q,NMTQ. No public260 promotion yet. Configsteel<=1%, CDP,basis/integration/geometry convergence, universalbars/scientific/nativebook/fullworkflow10s/full authorizedacceptance remain. Goal active, no pause/main merge/full long acceptance."
+  "new_verified_archives": [
+    {
+      "archive_parts": [
+        {
+          "bytes": 31776338,
+          "file": "RawArchive.zip",
+          "sha256": "611E064ACB9AFEA4A0BDF7FDE3005A4BEBCB2E33BFB62D86CC95EB1A4B9FD8C5"
+        },
+        {
+          "bytes": 15531377,
+          "file": "RawArchive002.zip",
+          "sha256": "9EB4097357FD812D20A12463B5EDB620557FE21DD6B0AE2BB54ADD9E5F925B48"
+        }
+      ],
+      "files": 1363,
+      "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/TorsionStepHistory/Files.json",
+      "manifest_sha256": "DE7C6AC49BBCBF05384F5F3991D8A94163C751725B6E9341B240FA8FFD6A9C16",
+      "new_payloads": 110,
+      "total_archive_bytes": 47307715
+    },
+    {
+      "archive_parts": [
+        {
+          "bytes": 35641150,
+          "file": "RawArchive.zip",
+          "sha256": "513C22FE5CA805F4936A2679DD9FCFF1EE8F770003C2A118F4FD2E255302FBEC"
+        },
+        {
+          "bytes": 20720094,
+          "file": "RawArchive002.zip",
+          "sha256": "04078E9FB9B09585EB34FA850CF0C27C6BA1AE0A3DA497262312D307FED2DB32"
+        }
+      ],
+      "files": 2364,
+      "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/ClosedTorsionBoundaryAudit/Files.json",
+      "manifest_sha256": "E93B3F3DAB4167380E2F4E9084D9C3EE9B07580F837A8AFA57BB3EAF1D731C3F",
+      "new_payloads": 476,
+      "total_archive_bytes": 56361244
+    }
   ],
+  "next_actions": [
+    "Poll67564 existing400 case;225 resolved64span boundary finishedOK5.2297974, all60+6 native and300perimeter/3station/allhistorypassed, uppermaterialexceeded;225runtime evidence retainedD and must archive next with400 result. Poll62195; do not restart due quiet files. Actual269book65700ED28E176110D9B87F07FD76ADF8CAA6F89866CDD2024E0333698B45E58D;1273 boundary spacing64/minimum spline span, same225force rule; full3-station materialhistory/limits preserved. If225 terminal verify all60+6 and denseboundary; run400 samecompiledbook only after resource guard. Case400 preparednotstarted.1272zeroWstress-only fixed core redundancies: full56-state history,operators,materialpacket/results exactparent, all268othercomponents exactactualbook55DCD8...; inherited independent proof byexactbytes, solver106.078->82.930s(-21.82%) inONEcase only. No principalcontrolchange. Old25T3.66 NOTwhole-sectionvalid: denseC24.77, firstdenseexceedance atT1.012716.225boundaryT5.229797 passes300perimeter2mm/3stations/allhistory withuppermaterialexceedance.225noBoundaryT5.239024 invaliddenseC1.22232.400boundaryT5.225131 close(-.08924%) BUT invaliddenseC1.009465 near(-90,-58); needindependent boundaryresolution, no tolerancewaiver.207000native boundary stress checks passed all histories. Closed300x500T600s nofinalcapacity; verified55-stateprefix maximum48.602655,last26.917901kNm,steel.405,C.361; modelmaterialclosure needswork. ThenTminus/N/Mregressions ofchosenintegration,NM/NMT updatedquad, thenQ/NMTQ. Hpost1500 testonly; Config<=1%steel/CDP/arbitrarygeometry/universalbars/Bsplines/experiments/source-build-bookdump/nativeExcel/UI/AutoCAD/fullworkflow10s/authorizedfullacceptance remainoriginalscope. Goalactive,no pause/mainmerge/publicpromotion."
+  ],
+  "old_torsion_dense_boundary_audit": {
+    "Hpost1500_test_benchmark_only": true,
+    "T225_with_boundary_passed_selected_dense_material_check": true,
+    "T225_without_boundary_failed_selected_dense_material_check": true,
+    "T400_vs_T225_discrete_capacity_change_percent": -0.08923523116945997,
+    "T400_with_boundary_failed_selected_dense_material_check": true,
+    "cases": [
+      {
+        "accepted_states": 59,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseOld25",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            90.0,
+            -60.0
+          ],
+          "lambda_value": 1.0127155070334486,
+          "maximum_compression_history_utilization": 1.0106766399447322,
+          "state": 36,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 24.76997603722688,
+        "dense_boundary_upper_utilization": 24.824972784714674,
+        "discrete_capacity_T_kNm": 3.6607255594051265,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 54000,
+        "native_maximum_coordinate_error": 9.746370377428093e-14,
+        "native_maximum_stress_error_MPa": 4.677288778509592e-09,
+        "physical_limit_kind": 1,
+        "solver_seconds": 15.87109375
+      },
+      {
+        "accepted_states": 56,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseRefined",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            -90.0,
+            0.0
+          ],
+          "lambda_value": 5.23016302289228,
+          "maximum_compression_history_utilization": 1.002725586286448,
+          "state": 57,
+          "upper": true
+        },
+        "dense_boundary_lower_passed": true,
+        "dense_boundary_lower_utilization": 0.9985944746042975,
+        "dense_boundary_upper_utilization": 1.002725586286448,
+        "discrete_capacity_T_kNm": 5.229797443540355,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 51300,
+        "native_maximum_coordinate_error": 8.2649165289439e-14,
+        "native_maximum_stress_error_MPa": 4.175949031015591e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 106.078125
+      },
+      {
+        "accepted_states": 55,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseGauss225NoBoundary",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            90.0,
+            0.0
+          ],
+          "lambda_value": 5.236201429858992,
+          "maximum_compression_history_utilization": 1.1693354387327717,
+          "state": 54,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 1.2223202318824242,
+        "dense_boundary_upper_utilization": 1.2289675997219787,
+        "discrete_capacity_T_kNm": 5.239024156326975,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 50400,
+        "native_maximum_coordinate_error": 8.264222639553509e-14,
+        "native_maximum_stress_error_MPa": 4.175949031015591e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 79.40625
+      },
+      {
+        "accepted_states": 56,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseRefined400",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            -90.0,
+            -58.0
+          ],
+          "lambda_value": 5.2247021358874255,
+          "maximum_compression_history_utilization": 1.0066076852978174,
+          "state": 55,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 1.0094650126964622,
+        "dense_boundary_upper_utilization": 1.0123199213680567,
+        "discrete_capacity_T_kNm": 5.2251306217019176,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 51300,
+        "native_maximum_coordinate_error": 5.542788450441094e-14,
+        "native_maximum_stress_error_MPa": 4.964977429189332e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 166.51171875
+      }
+    ],
+    "continuous_boundary_certificate": false,
+    "dense_perimeter_points": 300,
+    "geometry_mm": [
+      180,
+      120
+    ],
+    "hoop": "phi8 A240/100 cover10",
+    "initial_linear_rigidity_change_percent": 10.726668700347863,
+    "large300x500_T_not_confirmed": true,
+    "longitudinal_bars": "2phi12 A400 (0,+/-30)",
+    "native_nominal_boundary_point_checks": 207000,
+    "no_material_force_stress_or_capacity_gate_relaxed": true,
+    "old_rule_first_dense_compression_exceedance_T_kNm": 1.0127155070334486,
+    "previous_3_66_T_not_accepted_as_whole_section_capacity": true,
+    "previous_discrete_material_proof_retained_but_insufficient_for_boundary": true,
+    "public_book_and_dump_unchanged": true,
+    "small_first_state_ASD_departure_not_evidence_of_cracking": true,
+    "station_count": 3,
+    "step_mm": 2,
+    "whole_goal_completed": false
+  },
+  "previous_goal_turn_classification": "no progress: the previous turn answered status only. This continuation independently checked207000 boundary stress states, invalidated old whole-section T, separated quadrature/boundary effects, and compiled an isolated zero-weight tangent fix.",
   "public_book_and_dump_unchanged": true,
   "report": "docs/reports/Coupled6DQuadrature_2026-11-28.md",
+  "resolved_boundary_followup": {
+    "active_job": {
+      "kind": "cold T with400force points and same independent64-span boundary; poll existing live handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case400",
+      "session_id": 67564
+    },
+    "archives": [
+      {
+        "archive_parts": [
+          {
+            "bytes": 31776338,
+            "file": "RawArchive.zip",
+            "sha256": "611E064ACB9AFEA4A0BDF7FDE3005A4BEBCB2E33BFB62D86CC95EB1A4B9FD8C5"
+          },
+          {
+            "bytes": 15531377,
+            "file": "RawArchive002.zip",
+            "sha256": "9EB4097357FD812D20A12463B5EDB620557FE21DD6B0AE2BB54ADD9E5F925B48"
+          }
+        ],
+        "files": 1363,
+        "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/TorsionStepHistory/Files.json",
+        "manifest_sha256": "DE7C6AC49BBCBF05384F5F3991D8A94163C751725B6E9341B240FA8FFD6A9C16",
+        "new_payloads": 110,
+        "total_archive_bytes": 47307715
+      },
+      {
+        "archive_parts": [
+          {
+            "bytes": 35641150,
+            "file": "RawArchive.zip",
+            "sha256": "513C22FE5CA805F4936A2679DD9FCFF1EE8F770003C2A118F4FD2E255302FBEC"
+          },
+          {
+            "bytes": 20720094,
+            "file": "RawArchive002.zip",
+            "sha256": "04078E9FB9B09585EB34FA850CF0C27C6BA1AE0A3DA497262312D307FED2DB32"
+          }
+        ],
+        "files": 2364,
+        "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/ClosedTorsionBoundaryAudit/Files.json",
+        "manifest_sha256": "E93B3F3DAB4167380E2F4E9084D9C3EE9B07580F837A8AFA57BB3EAF1D731C3F",
+        "new_payloads": 476,
+        "total_archive_bytes": 56361244
+      }
+    ],
+    "full_goal_completed": false,
+    "resolved225_T_kNm": 5.229797443540355,
+    "resolved225_dense_lower": 0.9985944746042975,
+    "resolved225_dense_upper": 1.002725586286448,
+    "resolved225_full_force_and_dense_history_passed": true,
+    "resolved225_native_boundary_stress_checks": 51300,
+    "resolved225_results_pending_next_archive": true
+  },
   "torsion_current_facts": {
     "case04": "Terminal macro execution PASS, solver NumFail; material event on descending branch reached hoop strain. All161 final history states independently verified; no physical capacity accepted because peak accuracy0.0401300 exceeds0.001.",
     "case09": "Terminal watchdog1200s, own Excel exact identity closed, no final capacity packet. Timeout is neither NumFail nor physical Fail. Eight selected prefixes of both signs independently verified, including most complete ordinary/retry histories and replaced coarse prefixes.",
@@ -80,6 +384,198 @@
       "physical_capacity_not_claimed": true,
       "saved_book_sha256": "714403946A3C3A685E53097666DBF657B32C66FE4B4855615F1307ED0850D3A7"
     }
+  },
+  "torsion_step_accuracy_1264": {
+    "actual269_components": "Only test module changed; all268 working components unchanged, source/saved book verified.",
+    "all70_equilibrium_steps_independently_verified": true,
+    "elastic_lambda_difference": 4.440892098500626e-16,
+    "initial_damage_zero": "All305C points at all3 stations in exact shared prefix7 checked once in native OpenSees; same prefix reused for six series.",
+    "interpretation": "Material-history step error, not Newton force residual. Final-twist loads are not capacities; peak sampling separately recorded. First native output-only attempt incomplete; corrected subprocess suppresses nativeXML, saves exceptions, passes all equations in under10s.",
+    "nine_series_completed": true,
+    "same_final_twist_lambda_by_steps": {
+      "1": 5.015203405970188,
+      "16": 4.836339231037674,
+      "2": 5.000849943939569,
+      "32": 4.800487639767237,
+      "4": 4.948936303395281,
+      "8": 4.887608475352267
+    }
+  },
+  "torsion_step_history_summary": {
+    "Hpost1500_frozen_benchmark_only": true,
+    "all22_closed_equilibria_independently_verified": true,
+    "all262_native_single_update_equilibria_independently_verified": true,
+    "all_same_final_control": 0.0006825601769718545,
+    "closed8_vs_native128_final_load_difference_percent": 0.16013391831306567,
+    "closed_at_fixed_strain": [
+      {
+        "final_lambda": 4.793675196086501,
+        "final_torque_kNm": 47.93675196086501,
+        "maximum_sampled_lambda": 4.793675196086501,
+        "maximum_sampled_torque_kNm": 47.93675196086501,
+        "seconds_summing_solver_steps": 1.4921875,
+        "subdivisions": 1
+      },
+      {
+        "final_lambda": 4.791197361934151,
+        "final_torque_kNm": 47.91197361934151,
+        "maximum_sampled_lambda": 4.791197361934151,
+        "maximum_sampled_torque_kNm": 47.91197361934151,
+        "seconds_summing_solver_steps": 4.38671875,
+        "subdivisions": 2
+      },
+      {
+        "final_lambda": 4.784816020633867,
+        "final_torque_kNm": 47.848160206338676,
+        "maximum_sampled_lambda": 4.838654130515856,
+        "maximum_sampled_torque_kNm": 48.38654130515856,
+        "seconds_summing_solver_steps": 8.19140625,
+        "subdivisions": 4
+      },
+      {
+        "final_lambda": 4.7748463204865,
+        "final_torque_kNm": 47.748463204865,
+        "maximum_sampled_lambda": 4.863489747942453,
+        "maximum_sampled_torque_kNm": 48.63489747942453,
+        "seconds_summing_solver_steps": 15.28125,
+        "subdivisions": 8
+      }
+    ],
+    "elastic_final_lambda_difference": 4.440892098500626e-16,
+    "identical_initial_prefix7_native_damage_zero": true,
+    "native_closed_point_checks": {
+      "accepted_point_checks": 531,
+      "maximum_coordinate_error": 1.431146867680866e-17,
+      "maximum_effective_error_MPa": 7.600246543226774e-10,
+      "maximum_stress_error_MPa": 5.191402585591476e-10,
+      "maximum_zero_step_change_MPa": 1.3625168701625334e-11,
+      "native_next_zero_step_stationarity_checked": true,
+      "not_all_material_points_checked_natively": true,
+      "repeated_native_update_counts_from_stricter_kernel_closure": true,
+      "selected_station_point_zero_based": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          112
+        ],
+        [
+          2,
+          224
+        ],
+        [
+          0,
+          225
+        ],
+        [
+          1,
+          245
+        ],
+        [
+          2,
+          304
+        ],
+        [
+          0,
+          305
+        ],
+        [
+          1,
+          308
+        ],
+        [
+          2,
+          324
+        ]
+      ]
+    },
+    "native_single_update": [
+      {
+        "final_lambda": 5.015203405970188,
+        "final_torque_kNm": 50.152034059701876,
+        "maximum_sampled_lambda": 5.015203405970188,
+        "maximum_sampled_torque_kNm": 50.152034059701876,
+        "seconds_summing_solver_steps": 1.01953125,
+        "subdivisions": 1
+      },
+      {
+        "final_lambda": 5.000849943939569,
+        "final_lambda_change_from_previous": -0.014353462030618935,
+        "final_torque_kNm": 50.00849943939569,
+        "maximum_sampled_lambda": 5.000849943939569,
+        "maximum_sampled_torque_kNm": 50.00849943939569,
+        "seconds_summing_solver_steps": 2.8671875,
+        "subdivisions": 2
+      },
+      {
+        "final_lambda": 4.948936303395281,
+        "final_lambda_change_from_previous": -0.05191364054428771,
+        "final_torque_kNm": 49.48936303395281,
+        "maximum_sampled_lambda": 4.97883521731595,
+        "maximum_sampled_torque_kNm": 49.7883521731595,
+        "seconds_summing_solver_steps": 5.8828125,
+        "subdivisions": 4
+      },
+      {
+        "final_lambda": 4.887608475352267,
+        "final_lambda_change_from_previous": -0.061327828043014065,
+        "final_torque_kNm": 48.87608475352267,
+        "maximum_sampled_lambda": 4.969219346706357,
+        "maximum_sampled_torque_kNm": 49.69219346706357,
+        "seconds_summing_solver_steps": 11.41796875,
+        "subdivisions": 8
+      },
+      {
+        "final_lambda": 4.836339231037674,
+        "final_lambda_change_from_previous": -0.05126924431459301,
+        "final_torque_kNm": 48.36339231037674,
+        "maximum_sampled_lambda": 4.922277311537416,
+        "maximum_sampled_torque_kNm": 49.22277311537415,
+        "seconds_summing_solver_steps": 21.41015625,
+        "subdivisions": 16
+      },
+      {
+        "final_lambda": 4.800487639767237,
+        "final_lambda_change_from_previous": -0.03585159127043713,
+        "final_torque_kNm": 48.00487639767237,
+        "maximum_sampled_lambda": 4.890191353599647,
+        "maximum_sampled_torque_kNm": 48.90191353599647,
+        "seconds_summing_solver_steps": 43.4921875,
+        "subdivisions": 32
+      },
+      {
+        "final_lambda": 4.7790094841297615,
+        "final_lambda_change_from_previous": -0.02147815563747546,
+        "final_torque_kNm": 47.790094841297616,
+        "maximum_sampled_lambda": 4.870796558616566,
+        "maximum_sampled_torque_kNm": 48.707965586165656,
+        "seconds_summing_solver_steps": 83.63671875,
+        "subdivisions": 64
+      },
+      {
+        "final_lambda": 4.767212396481708,
+        "final_lambda_change_from_previous": -0.011797087648053761,
+        "final_torque_kNm": 47.672123964817075,
+        "maximum_sampled_lambda": 4.86003945519186,
+        "maximum_sampled_torque_kNm": 48.6003945519186,
+        "seconds_summing_solver_steps": 178.31640625,
+        "subdivisions": 128
+      }
+    ],
+    "no_physical_ultimate_or_10s_workflow_claim": true,
+    "no_single_update_and_closed_equivalence_claim": true,
+    "no_working_default_material_switch": true,
+    "solver_only_timings_not_full_user_workflow": true,
+    "source_only_test_module_in_each_study": true,
+    "test_macro_elapsed_seconds": {
+      "Closed7Series": 35.0,
+      "Initial9Series": 92.0,
+      "Steps064": 85.0,
+      "Steps128": 180.0
+    },
+    "whole_goal_completed": false
   },
   "whole_goal_completed": false
 }

@@ -3795,7 +3795,13 @@
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
   "active_exec_session": null,
-  "active_jobs": [],
+  "active_jobs": [
+    {
+      "kind": "cold T with400force points and same independent64-span boundary; poll existing live handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case400",
+      "session_id": 67564
+    }
+  ],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -9517,6 +9523,67 @@
     "whole_user10s_not_met": true,
     "zero_weight_boundary_material_points": 80
   },
+  "boundary_response_and_resolution_1272_1273": {
+    "active_job": {
+      "kind": "cold T; force225 plus independent boundary64 resolution; poll same handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case225",
+      "session_id": 62195
+    },
+    "full_acceptance_not_run": true,
+    "goal_active": true,
+    "next_boundary_sampling_source": {
+      "actual_components": 269,
+      "all268_other_components_unchanged": true,
+      "boundary_resolution_per_minimum_Bspline_span": 64,
+      "changed_components_exact": true,
+      "force_quadrature_and_Newton_solver_unchanged": true,
+      "only_boundary_sampling_method_changed": true,
+      "public_book_unchanged": true,
+      "saved_book_sha256": "65700ED28E176110D9B87F07FD76ADF8CAA6F89866CDD2024E0333698B45E58D"
+    },
+    "old_T_boundary_audit_summary": "D:\\CodexScratch\\RC_Section_NDM_TQ\\OldTorsionBoundaryAuditSummary_20261128.json",
+    "public260_book_and_dump_SHA256_unchanged": true,
+    "whole_goal_completed": false,
+    "zero_weight_response_comparison": {
+      "accepted_states": 56,
+      "all_exact": true,
+      "candidate_solver_seconds": 82.9296875,
+      "capacity_T_kNm": 5.229797443540355,
+      "dense_boundary_lower_utilization": 0.9985944746042975,
+      "dense_parent_sha256": "370EF26658C9B217FD8097C3CD6D72123A49709D6EB83E149B6F8C1D7EF3E484",
+      "exact_byte_checks": {
+        "Input/CapacityLoad.bin": true,
+        "Input/CapacitySettings.bin": true,
+        "Input/CaptureProgress.flag": true,
+        "Input/FixtureQuadrature.bin": true,
+        "Input/MaterialContract.json": true,
+        "Input/PhysicalLimits.bin": true,
+        "Input/ReplayHeader.bin": true,
+        "Native/MainCapacity.Operators.csv": true,
+        "Native/MainCapacityHistory.bin": true,
+        "Native/MaterialLimit.bin": true,
+        "capacity_packet_all_numeric_results_except_seconds": true
+      },
+      "independent_parent_sha256": "641974557E770F4785F28B836780EE0D57BCBE8BDE182DB31E9172575C76806B",
+      "inherited_native_all_equations_and_dense_history_valid_by_exact_bytes": true,
+      "parent_solver_seconds": 106.078125,
+      "public_book_unchanged": true,
+      "solver_time_change_percent": -21.822065105317424,
+      "source": {
+        "actual_components": 269,
+        "all268_other_components_unchanged": true,
+        "all_three_boundary_stress_histories_and_physical_limits_preserved": true,
+        "changed_components_exact": true,
+        "only_Newton_Evaluate_changed": true,
+        "principal_transition_and_material_integration_unchanged": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "55DCD8F250E5C3A12FC7D58FB64545ABBDDAA69A6279256AF548EB0357CD9C76",
+        "zero_weight_tangent_not_computed": true
+      },
+      "timing_is_one_run_not_general_benchmark": true,
+      "whole_goal_completed": false
+    }
+  },
   "boundary_separate_basics_1252_1256": {
     "DOF": 60,
     "all127_fields_and_steel_upper_brackets_independently_verified": true,
@@ -9731,6 +9798,1303 @@
     "remove_all_direct_test_module_calls": true,
     "reuse_observer": "ICoupledContinuationProgress.Report already takes cloned fields,trace,metadata;propagate optional observer instead of kernel file IO",
     "tests": "Repeat directed directNDS and capacity controls in actual cleaned/compiled code,including no-observer state;same default materials and original tolerances"
+  },
+  "closed_torsion_prefix_and_old_AB_1266_1268": {
+    "AB": [
+      {
+        "accepted_states": 59,
+        "capacity_torque_kNm": 3.6607255594051265,
+        "case": "CaseOld25",
+        "independent": {
+          "accepted_states": 59,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "TorsionConfigured",
+          "compression_utilization": 0.11417383765472418,
+          "final_lambda": 3.6607255594051265,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            0.0,
+            0.0,
+            3660725.5594051266,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "TorsionConfigured",
+            "compression_utilization": 0.11417383765472418,
+            "elapsed_seconds": 0.3387726999935694,
+            "fixed_history_states": 59,
+            "function_evaluations": 207,
+            "gauge_residual_MPa": 1.2114267951666783e-13,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.00031200719024004897,
+            "lower_lambda": 3.66072555940513,
+            "original_bound_MPa": 1.370532517394714e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 3.6567345351916704e-11,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 3.5783679558571075e-11,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "The solution converged.",
+            "solver_success": true,
+            "steel_utilization": 1.0007084073027024,
+            "tension_utilization": 0.0,
+            "upper_lambda": 3.66103756659537,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.006921704260093975,
+          "maximum_moment_error_Nmm": 1.553267598617822,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "physical_limit_kind": 1,
+        "seconds": 15.87109375
+      },
+      {
+        "accepted_states": 56,
+        "capacity_torque_kNm": 5.229797443540355,
+        "case": "CaseRefined",
+        "independent": {
+          "accepted_states": 56,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "TorsionConfigured",
+          "compression_utilization": 0.9977002084496477,
+          "final_lambda": 5.229797443540355,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            0.0,
+            0.0,
+            5229797.443540355,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "TorsionConfigured",
+            "compression_utilization": 1.001820366554007,
+            "elapsed_seconds": 5.934597300016321,
+            "fixed_history_states": 56,
+            "function_evaluations": 396,
+            "gauge_residual_MPa": 1.7655148176753954e-11,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.00036557935192060853,
+            "lower_lambda": 5.22979744354036,
+            "original_bound_MPa": 1.743643885068708e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 2,
+            "physical_residual_MPa": 8.010388660737209e-11,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 8.010290107218967e-11,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "The solution converged.",
+            "solver_success": true,
+            "steel_utilization": 0.6529230441587068,
+            "tension_utilization": 0.0,
+            "upper_lambda": 5.23016302289228,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.008570170915163544,
+          "maximum_moment_error_Nmm": 0.6212582783773541,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "physical_limit_kind": 2,
+        "seconds": 106.078125
+      }
+    ],
+    "AB_only_quadrature_and_boundary_flag_differ": true,
+    "AB_same_180x120_geometry_materials_load_settings_book": true,
+    "both_searches_found_discrete_material_limits": true,
+    "closed600s_no_final_capacity": true,
+    "closed_prefix_last_compression_utilization": 0.3605951589906966,
+    "closed_prefix_last_steel_utilization": 0.4054332573523422,
+    "closed_prefix_verified": {
+      "accepted_states": 55,
+      "all60_equations_and_six_forces_verified": true,
+      "last_lambda": 2.6917900917557107,
+      "maximum_compression_history_utilization": 0.3605951589906966,
+      "maximum_lambda": 4.860265459087737,
+      "maximum_residual_MPa": 7.639651644915376e-07,
+      "maximum_steel_utilization": 0.4054332573523422,
+      "native_selected_point_validation": {
+        "coordinate_point_checks": 27,
+        "maximum_coordinate_error": 5.0119196987052916e-14,
+        "maximum_effective_error_MPa": 1.077268052540603e-09,
+        "maximum_shadow_copy_difference_MPa": 0.0,
+        "maximum_stress_error_MPa": 2.028457402047934e-09,
+        "maximum_uncommitted_probe_coordinate_change": 0.0,
+        "maximum_zero_step_change_MPa": 8.586881206085195e-11,
+        "nominal_point_checks": 495,
+        "not_all_material_points_checked_natively": true,
+        "selected_station_point_zero_based": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            112
+          ],
+          [
+            2,
+            224
+          ],
+          [
+            0,
+            225
+          ],
+          [
+            1,
+            245
+          ],
+          [
+            2,
+            304
+          ],
+          [
+            0,
+            305
+          ],
+          [
+            1,
+            308
+          ],
+          [
+            2,
+            324
+          ]
+        ],
+        "uncommitted_hydrostatic_elastic_probe": true,
+        "zero_step_on_exact_shadow_history": true
+      },
+      "physical_capacity_not_confirmed_by_this_replay": true,
+      "physical_upper_or_peak_shoulders_still_required": true,
+      "records": [
+        {
+          "actual_resultants_N_Nmm": [
+            9.184118960128829e-09,
+            -5.628337063448043e-10,
+            -1.6549049620500885e-10,
+            2499999.9999991204,
+            -1.3891110484109959e-12,
+            -3.1810110101559985e-12
+          ],
+          "compression_utilization": 0.002319380409683173,
+          "gauge": 1.5881867761018131e-18,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 0.25,
+          "original_bound": 5.317589972486127e-07,
+          "six_forces": 6.122745973419223e-14,
+          "state": 1,
+          "steel_utilization": 2.43612062108414e-10,
+          "weak": 6.122745971701574e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -7.802608004012701e-10,
+            -3.0417079966359954e-08,
+            -4.483511538467703e-08,
+            4999999.999999853,
+            -3.154845273911633e-10,
+            -4.5088111022550947e-10
+          ],
+          "compression_utilization": 0.004638760672823415,
+          "gauge": 1.1738250269688656e-23,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 0.5,
+          "original_bound": 5.635179944972254e-07,
+          "six_forces": 5.201738669341804e-15,
+          "state": 2,
+          "steel_utilization": 2.4361210448250063e-10,
+          "weak": 5.201738693459875e-15
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -4.990926519721911e-11,
+            -2.6955065818507276e-08,
+            -1.370819329588464e-08,
+            6250000.000000235,
+            1.311573072371175e-10,
+            -3.1608760053813967e-10
+          ],
+          "compression_utilization": 0.0057984508043931625,
+          "gauge": 1.5881867761018131e-18,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 0.625000000000043,
+          "original_bound": 5.793974931215373e-07,
+          "six_forces": 4.945420045375872e-15,
+          "state": 3,
+          "steel_utilization": 2.4361209339930023e-10,
+          "weak": 5.051514762044462e-15
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -1.6737506986939585e-09,
+            5.936298071122369e-08,
+            3.9550285819269307e-08,
+            7812500.000000334,
+            -2.148459188333618e-10,
+            -3.6281111448488446e-10
+          ],
+          "compression_utilization": 0.0072480634688559895,
+          "gauge": 1.7470054537119944e-17,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 0.7812500000000501,
+          "original_bound": 5.992468664019211e-07,
+          "six_forces": 1.1158337991293062e-14,
+          "state": 4,
+          "steel_utilization": 2.4361211485270794e-10,
+          "weak": 1.1158338007596449e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -1.2607777532348602e-09,
+            1.357589841384483e-07,
+            -7.517782264765405e-08,
+            9765625.000000559,
+            -3.970734852032365e-10,
+            -2.184119551884578e-10
+          ],
+          "compression_utilization": 0.009060079299434276,
+          "gauge": 1.588186776101813e-17,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 0.9765625000001037,
+          "original_bound": 6.240585830024067e-07,
+          "six_forces": 1.216242059006315e-14,
+          "state": 5,
+          "steel_utilization": 2.4361212226054956e-10,
+          "weak": 1.1934897514720433e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -1.9284615235677345e-09,
+            -2.0696020817117134e-07,
+            2.2368098236859985e-07,
+            12207031.250001805,
+            -1.826365725321466e-10,
+            -1.449887321314236e-09
+          ],
+          "compression_utilization": 0.011325099087656082,
+          "gauge": 4.922492048579114e-24,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 1.2207031250003333,
+          "original_bound": 6.550732287530343e-07,
+          "six_forces": 3.8806166863236507e-14,
+          "state": 6,
+          "steel_utilization": 2.4361215410590046e-10,
+          "weak": 3.8968828164342995e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -3.637163315713403e-09,
+            -3.4696518496989777e-07,
+            9.330069907265734e-08,
+            15258789.06250171,
+            1.605194199783e-09,
+            1.5040804157706589e-09
+          ],
+          "compression_utilization": 0.014156373822934755,
+          "gauge": 2.2234614865425384e-17,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 1.5258789062502918,
+          "original_bound": 6.938415359412769e-07,
+          "six_forces": 3.066633674070397e-14,
+          "state": 7,
+          "steel_utilization": 2.43612166099431e-10,
+          "weak": 3.0753177782116836e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -2.086241539535328e-09,
+            -5.6287492969289e-07,
+            -7.284199386425522e-07,
+            19073486.32812792,
+            2.6241568917839686e-09,
+            2.9344029428557405e-09
+          ],
+          "compression_utilization": 0.017695467242033417,
+          "gauge": 1.5146129380243427e-23,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 1.9073486328129214,
+          "original_bound": 7.423019199266034e-07,
+          "six_forces": 3.284326805254407e-14,
+          "state": 8,
+          "steel_utilization": 2.436122511337911e-10,
+          "weak": 3.2862601528904634e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            6.240328387087076e-10,
+            3.5174679560206676e-07,
+            5.917385304149051e-07,
+            23841857.910158314,
+            1.4136993797819741e-09,
+            -8.75058248084315e-10
+          ],
+          "compression_utilization": 0.022119334015907686,
+          "gauge": 7.623296525288703e-17,
+          "independent_kernel_maximum_closure_updates": 2,
+          "independent_kernel_total_closure_updates": 1950,
+          "lambda_value": 2.3841857910160735,
+          "original_bound": 8.028773999082442e-07,
+          "six_forces": 6.152197185635056e-14,
+          "state": 9,
+          "steel_utilization": 2.4361218932477364e-10,
+          "weak": 6.084022174945858e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -8.636399309285415e-09,
+            -4.907310012899668e-07,
+            5.913687435837986e-07,
+            29802322.387698546,
+            -1.0766765257130828e-09,
+            3.3250984188271104e-09
+          ],
+          "compression_utilization": 0.027649167483246848,
+          "gauge": 1.9058241313221758e-17,
+          "independent_kernel_maximum_closure_updates": 10,
+          "independent_kernel_total_closure_updates": 2226,
+          "lambda_value": 2.980232238770122,
+          "original_bound": 8.785967498853092e-07,
+          "six_forces": 6.786346741692824e-14,
+          "state": 10,
+          "steel_utilization": 2.436122895580183e-10,
+          "weak": 6.861178292183467e-14
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.0008556652848383806,
+            1.306602825934533e-09,
+            -5.3809969813300995e-09,
+            36442271.85812102,
+            -2.666311615939776e-12,
+            -1.20579102258489e-11
+          ],
+          "compression_utilization": 0.03437445478734218,
+          "gauge": 1.2705494208814505e-17,
+          "independent_kernel_maximum_closure_updates": 12,
+          "independent_kernel_total_closure_updates": 3612,
+          "lambda_value": 3.644227179648284,
+          "original_bound": 9.629480038870784e-07,
+          "six_forces": 5.704435232255874e-09,
+          "state": 11,
+          "steel_utilization": 7.812725912256299e-05,
+          "weak": 5.7044352322508216e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.018332445558341348,
+            2.9135662771295756e-09,
+            -6.451841727539431e-09,
+            42267721.00564678,
+            -3.722178121279285e-11,
+            -5.5493387662863825e-12
+          ],
+          "compression_utilization": 0.042123877701400365,
+          "gauge": 7.623296525288703e-17,
+          "independent_kernel_maximum_closure_updates": 13,
+          "independent_kernel_total_closure_updates": 5298,
+          "lambda_value": 4.226771980799318,
+          "original_bound": 1.0369521588348758e-06,
+          "six_forces": 1.2221630372227572e-07,
+          "state": 12,
+          "steel_utilization": 0.0003685146482784663,
+          "weak": 1.22216303749214e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.07249097877200228,
+            4.432877176441252e-09,
+            -4.458343028090894e-09,
+            46411249.01366748,
+            -5.170619488126249e-11,
+            2.4293456135637825e-11
+          ],
+          "compression_utilization": 0.050758498713132795,
+          "gauge": 1.2705494208814505e-17,
+          "independent_kernel_maximum_closure_updates": 14,
+          "independent_kernel_total_closure_updates": 6966,
+          "lambda_value": 4.641124186336066,
+          "original_bound": 1.0895898010572686e-06,
+          "six_forces": 4.832731918133488e-07,
+          "state": 13,
+          "steel_utilization": 0.0009801778541226143,
+          "weak": 7.639651644915376e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.06543993133425374,
+            1.7917045624926686e-09,
+            -2.1314008336048573e-09,
+            47792479.859426074,
+            -1.3315570868144277e-11,
+            2.822275746439118e-11
+          ],
+          "compression_utilization": 0.055644071185592295,
+          "gauge": 2.795208725939191e-16,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 7566,
+          "lambda_value": 4.779247577813276,
+          "original_bound": 1.1071364426968439e-06,
+          "six_forces": 4.362662088950252e-07,
+          "state": 14,
+          "steel_utilization": 0.0014425324858961517,
+          "weak": 4.3626620900502893e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.007357217495901125,
+            4.7584762796759605e-09,
+            -8.596998668508604e-10,
+            48386517.67556918,
+            -3.289812866569264e-11,
+            4.6497916628140956e-11
+          ],
+          "compression_utilization": 0.06015371393756157,
+          "gauge": 1.2705494208814505e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 8574,
+          "lambda_value": 4.8386516480851185,
+          "original_bound": 1.1146828975141234e-06,
+          "six_forces": 4.904811663934086e-08,
+          "state": 15,
+          "steel_utilization": 0.001967218575353223,
+          "weak": 2.753565221928969e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.0016841724937535218,
+            9.266841516364366e-09,
+            2.166189005947672e-09,
+            48540205.064481616,
+            -5.53015411242086e-11,
+            1.8637535958987428e-11
+          ],
+          "compression_utilization": 0.06279298039894947,
+          "gauge": 2.286988957586611e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 8898,
+          "lambda_value": 4.854020505148177,
+          "original_bound": 1.1166352954708432e-06,
+          "six_forces": 1.1227816625023485e-08,
+          "state": 16,
+          "steel_utilization": 0.0023180124831750568,
+          "weak": 6.453037993959431e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.00013413171100751242,
+            6.63885657559149e-09,
+            5.063839125796221e-09,
+            48586420.433256626,
+            -1.8530954548623413e-11,
+            -1.524114168205415e-11
+          ],
+          "compression_utilization": 0.06407124895223819,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 8826,
+          "lambda_value": 4.858642042652186,
+          "original_bound": 1.11722239705834e-06,
+          "six_forces": 8.9421140671675e-10,
+          "state": 17,
+          "steel_utilization": 0.0024950584230397544,
+          "weak": 5.629205213366351e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -1.684635884657837e-05,
+            -4.151388566242531e-09,
+            -6.486970960395411e-10,
+            48598145.23663828,
+            -6.408029662452464e-11,
+            1.6356693777197506e-11
+          ],
+          "compression_utilization": 0.06469876219881804,
+          "gauge": 5.082197683525802e-17,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 8652,
+          "lambda_value": 4.859814523729428,
+          "original_bound": 1.1173713443515647e-06,
+          "six_forces": 1.1230905897718919e-10,
+          "state": 18,
+          "steel_utilization": 0.0025843892430913447,
+          "weak": 3.6451190982517056e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -2.4925733725922328e-06,
+            -1.6202648112084717e-09,
+            -2.255546860396862e-09,
+            48602654.59065792,
+            -3.604583298510988e-11,
+            4.047961965625291e-11
+          ],
+          "compression_utilization": 0.06501004713990109,
+          "gauge": 3.334918421548032e-17,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 8508,
+          "lambda_value": 4.860265459087737,
+          "original_bound": 1.1174286293707799e-06,
+          "six_forces": 1.661715581728156e-11,
+          "state": 19,
+          "steel_utilization": 0.002628822402276346,
+          "weak": 2.90281431941449e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -2.0547112740132434e-06,
+            -2.5715962692629546e-09,
+            -3.744617060874589e-09,
+            48598941.880715355,
+            -3.099032142017677e-11,
+            1.2505552149377763e-12
+          ],
+          "compression_utilization": 0.06531654482003259,
+          "gauge": 1.5246593050577406e-16,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 8520,
+          "lambda_value": 4.859894188091991,
+          "original_bound": 1.1173814645926505e-06,
+          "six_forces": 1.3698075160088297e-11,
+          "state": 20,
+          "steel_utilization": 0.002674960844667786,
+          "weak": 3.41279505553352e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -2.238745253180241e-06,
+            -8.487404556944966e-09,
+            -8.354618330486119e-09,
+            48589845.298133105,
+            -7.701572712903726e-11,
+            4.8551385134487646e-11
+          ],
+          "compression_utilization": 0.06561853768041508,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 8592,
+          "lambda_value": 4.8589845298337515,
+          "original_bound": 1.117265905256168e-06,
+          "six_forces": 1.492496835453495e-11,
+          "state": 21,
+          "steel_utilization": 0.0027209765453827537,
+          "weak": 3.6262340529027574e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.002372866090553316,
+            -8.86120687937364e-09,
+            -3.8980942917987704e-09,
+            48573903.48978556,
+            -5.17559328727657e-11,
+            -8.697043085703626e-12
+          ],
+          "compression_utilization": 0.06591609357716374,
+          "gauge": 6.988021814847978e-17,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 8766,
+          "lambda_value": 4.85739035790313,
+          "original_bound": 1.1170633880483343e-06,
+          "six_forces": 1.581910727035545e-08,
+          "state": 22,
+          "steel_utilization": 0.002768320356171113,
+          "weak": 1.5819107362956882e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            7.707130009748653e-07,
+            -1.3708813639823347e-08,
+            -3.066816134378314e-09,
+            48547170.37564653,
+            -3.796074565798335e-11,
+            3.979039320256561e-12
+          ],
+          "compression_utilization": 0.06623820050039783,
+          "gauge": 2.541098841762901e-17,
+          "independent_kernel_maximum_closure_updates": 15,
+          "independent_kernel_total_closure_updates": 8772,
+          "lambda_value": 4.854717037557819,
+          "original_bound": 1.1167237801543687e-06,
+          "six_forces": 5.1380866731657715e-12,
+          "state": 23,
+          "steel_utilization": 0.0028230241356558953,
+          "weak": 7.162797353617959e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.0015963523195807738,
+            -6.859863788122311e-09,
+            -1.2164264262537472e-08,
+            48483149.42532036,
+            -6.467004709520552e-11,
+            6.519940143334679e-11
+          ],
+          "compression_utilization": 0.0666196215695908,
+          "gauge": 4.491803779923332e-17,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 9084,
+          "lambda_value": 4.848314997516326,
+          "original_bound": 1.1159104906661155e-06,
+          "six_forces": 1.3969967357434594e-08,
+          "state": 24,
+          "steel_utilization": 0.0028873038016014123,
+          "weak": 1.3969966516924615e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -9.450137952171644e-07,
+            -9.140194379142486e-09,
+            -1.1657675713649951e-08,
+            48388371.72787569,
+            -7.969092052917404e-11,
+            5.4505733260157285e-11
+          ],
+          "compression_utilization": 0.06708258057871873,
+          "gauge": 3.049318610115481e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 9186,
+          "lambda_value": 4.838837172762331,
+          "original_bound": 1.114706465824976e-06,
+          "six_forces": 6.4121038544312695e-12,
+          "state": 25,
+          "steel_utilization": 0.002964693213766665,
+          "weak": 1.9778571264788878e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            7.2690988019985525e-06,
+            -3.1880063033895567e-09,
+            -1.2493728718254715e-08,
+            48254317.59579769,
+            -4.737898962048348e-11,
+            3.510791657390655e-11
+          ],
+          "compression_utilization": 0.06764724839091019,
+          "gauge": 9.529120656610879e-17,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 9270,
+          "lambda_value": 4.825431759466615,
+          "original_bound": 1.1130034958890753e-06,
+          "six_forces": 4.846065867999038e-11,
+          "state": 26,
+          "steel_utilization": 0.0030644623994578583,
+          "weak": 5.836120067700853e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            5.548515855480218e-05,
+            -3.4599452192196622e-09,
+            -1.7920001482707448e-08,
+            48074828.69711138,
+            -4.262545871824841e-11,
+            6.334488489301293e-11
+          ],
+          "compression_utilization": 0.06833699998840694,
+          "gauge": 1.5246593050577406e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 9432,
+          "lambda_value": 4.807482869204177,
+          "original_bound": 1.1107233408632335e-06,
+          "six_forces": 3.6990105703201475e-10,
+          "state": 27,
+          "steel_utilization": 0.0031915768248347055,
+          "weak": 1.7041146701644813e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            1.2443170476217347e-06,
+            5.6197677622549236e-09,
+            -3.7737208913313225e-09,
+            47809538.596207045,
+            -2.8531843554446823e-11,
+            2.998490344907623e-11
+          ],
+          "compression_utilization": 0.06914311557604344,
+          "gauge": 7.623296525288703e-17,
+          "independent_kernel_maximum_closure_updates": 17,
+          "independent_kernel_total_closure_updates": 9582,
+          "lambda_value": 4.780953858642066,
+          "original_bound": 1.1073532017694313e-06,
+          "six_forces": 2.486445512773772e-10,
+          "state": 28,
+          "steel_utilization": 0.0033512627242697165,
+          "weak": 2.871368652602015e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.00019578140484100004,
+            3.336253939778544e-09,
+            4.032926881336607e-09,
+            47431439.76369068,
+            -4.0614622776047327e-11,
+            -3.644373691713554e-11
+          ],
+          "compression_utilization": 0.07008999661447463,
+          "gauge": 5.082197683525802e-17,
+          "independent_kernel_maximum_closure_updates": 17,
+          "independent_kernel_total_closure_updates": 9708,
+          "lambda_value": 4.7431439732410805,
+          "original_bound": 1.1025499855837503e-06,
+          "six_forces": 1.3052093656066678e-09,
+          "state": 29,
+          "steel_utilization": 0.00355496058711403,
+          "weak": 1.137594319295139e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            7.278355087692034e-05,
+            7.041762728476897e-10,
+            5.939455149928108e-09,
+            46946642.79612273,
+            -5.588063345385308e-11,
+            -6.600942015211331e-11
+          ],
+          "compression_utilization": 0.07121961194097241,
+          "gauge": 1.2705494208814505e-16,
+          "independent_kernel_maximum_closure_updates": 17,
+          "independent_kernel_total_closure_updates": 9822,
+          "lambda_value": 4.69466427743936,
+          "original_bound": 1.0963913194814287e-06,
+          "six_forces": 5.520764061257715e-10,
+          "state": 30,
+          "steel_utilization": 0.003811054533569215,
+          "weak": 1.8001263992977695e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -3.7464207025550422e-06,
+            1.7012098396662623e-09,
+            -2.901288098655641e-10,
+            46366663.32293242,
+            -4.874323167314287e-11,
+            -3.8617997688561445e-11
+          ],
+          "compression_utilization": 0.07257993941241733,
+          "gauge": 1.5246593050577406e-16,
+          "independent_kernel_maximum_closure_updates": 18,
+          "independent_kernel_total_closure_updates": 10020,
+          "lambda_value": 4.636666331439112,
+          "original_bound": 1.0890234930516403e-06,
+          "six_forces": 2.1701071054234156e-10,
+          "state": 31,
+          "steel_utilization": 0.004129852549349649,
+          "weak": 4.2286400685429385e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.00022503729138634299,
+            -5.278934622765519e-09,
+            -4.201183401164599e-09,
+            45650534.98617911,
+            -4.709832523985824e-11,
+            -3.26210169987462e-11
+          ],
+          "compression_utilization": 0.07417798598239156,
+          "gauge": 7.623296525288703e-17,
+          "independent_kernel_maximum_closure_updates": 18,
+          "independent_kernel_total_closure_updates": 10050,
+          "lambda_value": 4.565053498887745,
+          "original_bound": 1.0799260860437836e-06,
+          "six_forces": 1.5002486092422875e-09,
+          "state": 32,
+          "steel_utilization": 0.004533166389039616,
+          "weak": 1.5002488944752162e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -1.938503260134894e-07,
+            1.5638761396985501e-09,
+            -1.5226078176056035e-09,
+            44216295.17985172,
+            2.4229507289419416e-12,
+            -5.898215249544592e-11
+          ],
+          "compression_utilization": 0.07563641563905299,
+          "gauge": 3.049318610115481e-16,
+          "independent_kernel_maximum_closure_updates": 18,
+          "independent_kernel_total_closure_updates": 10254,
+          "lambda_value": 4.421629518006991,
+          "original_bound": 1.0617060787870759e-06,
+          "six_forces": 5.543792208569485e-12,
+          "state": 33,
+          "steel_utilization": 0.005138377200687578,
+          "weak": 5.5428994727435565e-12
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            2.4645467817663302e-06,
+            -1.5170371625572443e-09,
+            -3.5164475775673054e-09,
+            42265221.077008024,
+            -3.537437009981659e-11,
+            -3.7125857943465235e-11
+          ],
+          "compression_utilization": 0.07706888161877808,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 10158,
+          "lambda_value": 4.226522107729945,
+          "original_bound": 1.036920415962385e-06,
+          "six_forces": 1.643031187844221e-11,
+          "state": 34,
+          "steel_utilization": 0.005944111964107839,
+          "weak": 1.6430741831127346e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            8.231284567727926e-06,
+            -1.8026184989139438e-09,
+            -5.028937266615685e-09,
+            39912940.11945312,
+            -3.950439975142217e-11,
+            -3.4575009522086475e-11
+          ],
+          "compression_utilization": 0.07846098226427921,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 10038,
+          "lambda_value": 3.9912940120064606,
+          "original_bound": 1.0070379821828708e-06,
+          "six_forces": 5.487523045151954e-11,
+          "state": 35,
+          "steel_utilization": 0.006974147682659313,
+          "weak": 5.487557686766542e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            1.1470829065274302e-05,
+            1.2485088518587872e-09,
+            -3.4658569347811863e-09,
+            37062558.261221886,
+            -4.3373304947635916e-11,
+            -3.349498456373112e-11
+          ],
+          "compression_utilization": 0.0794940664358674,
+          "gauge": 4.573977915173222e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 10068,
+          "lambda_value": 3.7062558262232987,
+          "original_bound": 9.708278743507229e-07,
+          "six_forces": 7.647219376849539e-11,
+          "state": 36,
+          "steel_utilization": 0.008295485363705387,
+          "weak": 7.647274432893026e-11
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            3.893275504651683e-06,
+            7.427161108353175e-09,
+            6.229015525605064e-09,
+            33881175.62118462,
+            1.9166890297128703e-11,
+            -6.772893357265275e-11
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 20,
+          "independent_kernel_total_closure_updates": 9864,
+          "lambda_value": 3.38811756248519,
+          "original_bound": 9.304128653797746e-07,
+          "six_forces": 9.317531032400534e-11,
+          "state": 37,
+          "steel_utilization": 0.009944399179899423,
+          "weak": 1.5272870270712986e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.005134804277361127,
+            1.6199123820115346e-08,
+            7.914763955341186e-09,
+            30300233.901611906,
+            2.5641710976742615e-11,
+            -8.769518444751156e-11
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 1.5246593050577406e-16,
+          "independent_kernel_maximum_closure_updates": 20,
+          "independent_kernel_total_closure_updates": 9528,
+          "lambda_value": 3.030023379522368,
+          "original_bound": 8.849220166939326e-07,
+          "six_forces": 3.4232028515740866e-08,
+          "state": 38,
+          "steel_utilization": 0.012067642484144103,
+          "weak": 3.423202923581107e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.0005186568056938512,
+            1.908586000354262e-08,
+            1.221059164890903e-08,
+            26517551.034783043,
+            5.616218601289802e-11,
+            -1.4206591458787443e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 20,
+          "independent_kernel_total_closure_updates": 9300,
+          "lambda_value": 2.6517551085010918,
+          "original_bound": 8.368683327795239e-07,
+          "six_forces": 3.45771203795901e-09,
+          "state": 39,
+          "steel_utilization": 0.014742181760382205,
+          "weak": 4.9105880449281995e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.01589385443101321,
+            6.586276413145242e-09,
+            1.8417267710901797e-08,
+            23108940.750032306,
+            8.857803379669349e-12,
+            -1.4850698448753974e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 2.541098841762901e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 9138,
+          "lambda_value": 2.3108940745555673,
+          "original_bound": 7.93566714222583e-07,
+          "six_forces": 1.0595902954008813e-07,
+          "state": 40,
+          "steel_utilization": 0.017823847781712462,
+          "weak": 1.0595903056029806e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.10068525974767795,
+            2.674403276614612e-08,
+            1.9879678347933805e-08,
+            20275578.574040823,
+            1.1646150710475922e-10,
+            -1.2788170522526343e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 4.0657581468206416e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 8904,
+          "lambda_value": 2.0275577765819226,
+          "original_bound": 7.575728073914746e-07,
+          "six_forces": 6.7123506498452e-07,
+          "state": 41,
+          "steel_utilization": 0.021180993809175864,
+          "weak": 7.452229144938495e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            4.768806158494954e-05,
+            2.7567580218601506e-08,
+            2.0560605662467424e-08,
+            18086940.620165005,
+            7.863709683419984e-11,
+            -1.497078017109743e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 6.098637220230962e-16,
+          "independent_kernel_maximum_closure_updates": 19,
+          "independent_kernel_total_closure_updates": 8679,
+          "lambda_value": 1.8086940608860327,
+          "original_bound": 7.297692388130468e-07,
+          "six_forces": 3.1792041056633044e-10,
+          "state": 42,
+          "steel_utilization": 0.02433394190546713,
+          "weak": 2.915456002519469e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.003099100762668172,
+            2.5870008357742336e-08,
+            1.2654339798245928e-08,
+            16202260.161485936,
+            1.0053835541867784e-10,
+            -2.1920931736474358e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 2.0328790734103208e-16,
+          "independent_kernel_maximum_closure_updates": 17,
+          "independent_kernel_total_closure_updates": 8736,
+          "lambda_value": 1.6202255721604202,
+          "original_bound": 7.058269579534992e-07,
+          "six_forces": 1.1280495343339154e-07,
+          "state": 43,
+          "steel_utilization": 0.027501554585956944,
+          "weak": 1.1280495337828711e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.00023471985707601561,
+            4.162332345458708e-08,
+            2.2838634095023735e-08,
+            14607636.61619882,
+            1.2827916506807924e-10,
+            -1.6744283737324395e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 9.147955830346444e-16,
+          "independent_kernel_maximum_closure_updates": 16,
+          "independent_kernel_total_closure_updates": 9072,
+          "lambda_value": 1.4607636568257412,
+          "original_bound": 6.855695558320089e-07,
+          "six_forces": 1.5647990471734384e-09,
+          "state": 44,
+          "steel_utilization": 0.03062805811635183,
+          "weak": 1.5647974357088835e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.004697385060765669,
+            3.42626940152968e-08,
+            2.570535073687097e-08,
+            14181798.232268794,
+            1.2258646875373813e-10,
+            -2.12335871108138e-10
+          ],
+          "compression_utilization": 0.08022123403914562,
+          "gauge": 1.6263032587282567e-15,
+          "independent_kernel_maximum_closure_updates": 18,
+          "independent_kernel_total_closure_updates": 9012,
+          "lambda_value": 1.4181796298009772,
+          "original_bound": 6.801598518435514e-07,
+          "six_forces": 4.914410155746944e-08,
+          "state": 45,
+          "steel_utilization": 0.0341678818395823,
+          "weak": 4.9144102010068025e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            6.864255695404609e-05,
+            5.686140625016378e-08,
+            2.69744653280668e-08,
+            15340154.961335756,
+            1.6211584158432046e-10,
+            -1.7809888286368647e-10
+          ],
+          "compression_utilization": 0.08313678173213596,
+          "gauge": 2.032879073410321e-15,
+          "independent_kernel_maximum_closure_updates": 21,
+          "independent_kernel_total_closure_updates": 8934,
+          "lambda_value": 1.5340154953929468,
+          "original_bound": 6.948751755900556e-07,
+          "six_forces": 4.576170463603075e-10,
+          "state": 46,
+          "steel_utilization": 0.03915507344347866,
+          "weak": 4.5761799880587597e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            8.87148897845691e-05,
+            3.552095106940101e-08,
+            2.915360364230679e-08,
+            17659033.365286216,
+            1.0008328020505441e-10,
+            -2.2621512042048098e-10
+          ],
+          "compression_utilization": 0.09765024037727964,
+          "gauge": 1.6263032587282567e-15,
+          "independent_kernel_maximum_closure_updates": 23,
+          "independent_kernel_total_closure_updates": 9432,
+          "lambda_value": 1.7659033347885404,
+          "original_bound": 7.243332766034613e-07,
+          "six_forces": 5.914325985637943e-10,
+          "state": 47,
+          "steel_utilization": 0.04858966345447924,
+          "weak": 5.914342177417846e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            0.016884352940905956,
+            3.0839365408597e-08,
+            1.4737528947206258e-08,
+            20922667.995919608,
+            7.89822921691899e-11,
+            -1.2428970548074292e-10
+          ],
+          "compression_utilization": 0.10715361395983822,
+          "gauge": 2.846030702774449e-15,
+          "independent_kernel_maximum_closure_updates": 25,
+          "independent_kernel_total_closure_updates": 10524,
+          "lambda_value": 2.0922665027543457,
+          "original_bound": 7.657931444173594e-07,
+          "six_forces": 1.125623529393731e-07,
+          "state": 48,
+          "steel_utilization": 0.06292088258102556,
+          "weak": 1.1256235534570921e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -5.784477048109693e-05,
+            0.0019153352934947509,
+            -0.0018916984319569067,
+            22913747.76967883,
+            6.624157143880871e-06,
+            3.6002171841703463e-06
+          ],
+          "compression_utilization": 0.12796245636322368,
+          "gauge": 4.472333961502706e-15,
+          "independent_kernel_maximum_closure_updates": 31,
+          "independent_kernel_total_closure_updates": 11364,
+          "lambda_value": 2.2913747763113523,
+          "original_bound": 7.910870608656516e-07,
+          "six_forces": 3.856318032073131e-10,
+          "state": 49,
+          "steel_utilization": 0.08348157695616316,
+          "weak": 3.856294112777632e-10
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.0006796948912324297,
+            -0.023530553673626338,
+            0.002575118915004969,
+            23910854.899048,
+            0.00017023267465541468,
+            -0.00019756250099645608
+          ],
+          "compression_utilization": 0.15113536017833756,
+          "gauge": 3.2526065174565133e-15,
+          "independent_kernel_maximum_closure_updates": 38,
+          "independent_kernel_total_closure_updates": 12030,
+          "lambda_value": 2.391085484452342,
+          "original_bound": 8.037539092876792e-07,
+          "six_forces": 4.531299274882867e-09,
+          "state": 50,
+          "steel_utilization": 0.11080374468288305,
+          "weak": 4.5312964825895624e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.015816917130905495,
+            -0.30683260850666594,
+            0.1836662819508786,
+            24738154.67303823,
+            0.0003496792507613263,
+            -0.004632516063063901
+          ],
+          "compression_utilization": 0.17453975158704452,
+          "gauge": 9.75781955236954e-15,
+          "independent_kernel_maximum_closure_updates": 43,
+          "independent_kernel_total_closure_updates": 12684,
+          "lambda_value": 2.4738153456355274,
+          "original_bound": 8.142635790224588e-07,
+          "six_forces": 1.054461142060367e-07,
+          "state": 51,
+          "steel_utilization": 0.1458301486810235,
+          "weak": 1.0544611144217262e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.0004352675086920499,
+            0.010537149463165751,
+            0.008962632410021858,
+            25423737.495459504,
+            2.9614603117121015e-05,
+            -7.51440474123585e-05
+          ],
+          "compression_utilization": 0.2028444155309156,
+          "gauge": 6.5052130349130266e-15,
+          "independent_kernel_maximum_closure_updates": 49,
+          "independent_kernel_total_closure_updates": 13440,
+          "lambda_value": 2.542373744290901,
+          "original_bound": 8.2297296299952e-07,
+          "six_forces": 2.9017833912803344e-09,
+          "state": 52,
+          "steel_utilization": 0.19027272192186445,
+          "weak": 2.9017811792080405e-09
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.10560394194271794,
+            1.4471701311919576,
+            1.9837087051440538,
+            26000540.93998922,
+            -0.00046997596701140246,
+            0.004761679311597016
+          ],
+          "compression_utilization": 0.24310972597498665,
+          "gauge": 5.692061405548898e-15,
+          "independent_kernel_maximum_closure_updates": 61,
+          "independent_kernel_total_closure_updates": 14112,
+          "lambda_value": 2.600052995649858,
+          "original_bound": 8.303003037403647e-07,
+          "six_forces": 7.0402627961812e-07,
+          "state": 53,
+          "steel_utilization": 0.24629527764938275,
+          "weak": 7.040262770905719e-07
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.005770681307694758,
+            0.11742745880294131,
+            -0.05757171726868446,
+            26478351.13483594,
+            0.0005646219769003368,
+            0.0006930512715219361
+          ],
+          "compression_utilization": 0.2948604457569355,
+          "gauge": 1.3010426069826053e-14,
+          "independent_kernel_maximum_closure_updates": 87,
+          "independent_kernel_total_closure_updates": 15294,
+          "lambda_value": 2.6478350446456482,
+          "original_bound": 8.363703435907261e-07,
+          "six_forces": 3.847120871796508e-08,
+          "state": 54,
+          "steel_utilization": 0.3169923253224688,
+          "weak": 3.847120630142e-08
+        },
+        {
+          "actual_resultants_N_Nmm": [
+            -0.00011072490451624617,
+            0.0001100127034971421,
+            -3.4828237873929524e-05,
+            26917900.93253355,
+            5.669473437892652e-07,
+            4.0417516295018947e-07
+          ],
+          "compression_utilization": 0.3605951589906966,
+          "gauge": 1.951563910473908e-14,
+          "independent_kernel_maximum_closure_updates": 173,
+          "independent_kernel_total_closure_updates": 17448,
+          "lambda_value": 2.6917900917557107,
+          "original_bound": 8.419542164716507e-07,
+          "six_forces": 7.381660301083082e-10,
+          "state": 55,
+          "steel_utilization": 0.4054332573523422,
+          "weak": 7.381636594712534e-10
+        }
+      ],
+      "whole_goal_completed": false
+    },
+    "independent_kernel_last_maximum_closure_updates": 173,
+    "independent_kernel_last_total_closure_updates": 17448,
+    "native_effective_state_measured_by_uncommitted_elastic_probe": true,
+    "no_force_stress_coordinate_or_stationarity_tolerance_relaxed": true,
+    "no_general_solver_acceptance_or_physical300x500T_limit_claim": true,
+    "no_regression_of_search_established_for_this_AB_case": true,
+    "old_rule_change_vs_yesterday_percent": -0.03344847105469784,
+    "python_reference_tail_error_fixed": true,
+    "refined_capacity_dense_boundary_and_quadrature_convergence_still_required": true,
+    "refined_vs_old_capacity_difference_percent": 42.86231946844454,
+    "whole_goal_completed": false,
+    "working_VBA_tail_already_correct": true
   },
   "cold787_final_summary": {
     "accepted_states": 56,
@@ -50212,7 +51576,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "All previous T/native sessions terminal. SeparateN/Mx/My bothsigns prior339acceptedstates physical/native verified, Hpost1500 benchmarkonly. Original T+ NumFail, T- watchdog1200 no final packet, no physical Tcapacity accepted. Eight saved prefixes both signs native verified. 50.0563kNm belongs to replaced coarse prefixes in BOTH signs, not accepted capacity. Four frozen-peak VBA/native probes disprove force-tolerance dominance: actual nonlinear correction -1.46e-10; old uncertainty4.74e-5 << total0.04013. Original third shoulder refinement solved all4points but all descending: peak moved left outside fixed bracket. Private1263 reselects bracket using only solved fields, strict gates retained; source269/267unchanged. 14rebrackets/143probes/32passes gives peak4.754062503,error0.0091805304, still FAILS requested0.001. No blind budget increase or tolerance relaxation. Next control step accuracy of material history BEFORE peak, e.g. full-versus-two-half-step diagnostic from same prefix before tension damage; compare uniform/coarse histories and native-equilibrium independently. Candidate needs retained-field capture/native proof before promotion; end-of-peak test stop not final material event or capacity. Then coldT+- through physical event, NM/NMT,Q,NMTQ. No public260 promotion yet. Configsteel<=1%, CDP,basis/integration/geometry convergence, universalbars/scientific/nativebook/fullworkflow10s/full authorizedacceptance remain. Goal active, no pause/main merge/full long acceptance."
+    "Poll67564 existing400 case;225 resolved64span boundary finishedOK5.2297974, all60+6 native and300perimeter/3station/allhistorypassed, uppermaterialexceeded;225runtime evidence retainedD and must archive next with400 result. Poll62195; do not restart due quiet files. Actual269book65700ED28E176110D9B87F07FD76ADF8CAA6F89866CDD2024E0333698B45E58D;1273 boundary spacing64/minimum spline span, same225force rule; full3-station materialhistory/limits preserved. If225 terminal verify all60+6 and denseboundary; run400 samecompiledbook only after resource guard. Case400 preparednotstarted.1272zeroWstress-only fixed core redundancies: full56-state history,operators,materialpacket/results exactparent, all268othercomponents exactactualbook55DCD8...; inherited independent proof byexactbytes, solver106.078->82.930s(-21.82%) inONEcase only. No principalcontrolchange. Old25T3.66 NOTwhole-sectionvalid: denseC24.77, firstdenseexceedance atT1.012716.225boundaryT5.229797 passes300perimeter2mm/3stations/allhistory withuppermaterialexceedance.225noBoundaryT5.239024 invaliddenseC1.22232.400boundaryT5.225131 close(-.08924%) BUT invaliddenseC1.009465 near(-90,-58); needindependent boundaryresolution, no tolerancewaiver.207000native boundary stress checks passed all histories. Closed300x500T600s nofinalcapacity; verified55-stateprefix maximum48.602655,last26.917901kNm,steel.405,C.361; modelmaterialclosure needswork. ThenTminus/N/Mregressions ofchosenintegration,NM/NMT updatedquad, thenQ/NMTQ. Hpost1500 testonly; Config<=1%steel/CDP/arbitrarygeometry/universalbars/Bsplines/experiments/source-build-bookdump/nativeExcel/UI/AutoCAD/fullworkflow10s/authorizedfullacceptance remainoriginalscope. Goalactive,no pause/mainmerge/publicpromotion."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -50237,6 +51601,139 @@
     ]
   },
   "no_new_experiments_added_after_pause_request": false,
+  "old_torsion_dense_boundary_audit_1268_1271": {
+    "Hpost1500_test_benchmark_only": true,
+    "T225_with_boundary_passed_selected_dense_material_check": true,
+    "T225_without_boundary_failed_selected_dense_material_check": true,
+    "T400_vs_T225_discrete_capacity_change_percent": -0.08923523116945997,
+    "T400_with_boundary_failed_selected_dense_material_check": true,
+    "cases": [
+      {
+        "accepted_states": 59,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseOld25",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            90.0,
+            -60.0
+          ],
+          "lambda_value": 1.0127155070334486,
+          "maximum_compression_history_utilization": 1.0106766399447322,
+          "state": 36,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 24.76997603722688,
+        "dense_boundary_upper_utilization": 24.824972784714674,
+        "discrete_capacity_T_kNm": 3.6607255594051265,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 54000,
+        "native_maximum_coordinate_error": 9.746370377428093e-14,
+        "native_maximum_stress_error_MPa": 4.677288778509592e-09,
+        "physical_limit_kind": 1,
+        "solver_seconds": 15.87109375
+      },
+      {
+        "accepted_states": 56,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseRefined",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            -90.0,
+            0.0
+          ],
+          "lambda_value": 5.23016302289228,
+          "maximum_compression_history_utilization": 1.002725586286448,
+          "state": 57,
+          "upper": true
+        },
+        "dense_boundary_lower_passed": true,
+        "dense_boundary_lower_utilization": 0.9985944746042975,
+        "dense_boundary_upper_utilization": 1.002725586286448,
+        "discrete_capacity_T_kNm": 5.229797443540355,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 51300,
+        "native_maximum_coordinate_error": 8.2649165289439e-14,
+        "native_maximum_stress_error_MPa": 4.175949031015591e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 106.078125
+      },
+      {
+        "accepted_states": 55,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseGauss225NoBoundary",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            90.0,
+            0.0
+          ],
+          "lambda_value": 5.236201429858992,
+          "maximum_compression_history_utilization": 1.1693354387327717,
+          "state": 54,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 1.2223202318824242,
+        "dense_boundary_upper_utilization": 1.2289675997219787,
+        "discrete_capacity_T_kNm": 5.239024156326975,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 50400,
+        "native_maximum_coordinate_error": 8.264222639553509e-14,
+        "native_maximum_stress_error_MPa": 4.175949031015591e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 79.40625
+      },
+      {
+        "accepted_states": 56,
+        "all60_equations_and_six_forces_independently_verified": true,
+        "case": "CaseRefined400",
+        "dense_boundary_first_exceedance": {
+          "critical_station": -1,
+          "critical_xy_mm": [
+            -90.0,
+            -58.0
+          ],
+          "lambda_value": 5.2247021358874255,
+          "maximum_compression_history_utilization": 1.0066076852978174,
+          "state": 55,
+          "upper": false
+        },
+        "dense_boundary_lower_passed": false,
+        "dense_boundary_lower_utilization": 1.0094650126964622,
+        "dense_boundary_upper_utilization": 1.0123199213680567,
+        "discrete_capacity_T_kNm": 5.2251306217019176,
+        "independent_upper_equilibrium_and_material_exceedance": true,
+        "native_all_history_boundary_stress_checks": 51300,
+        "native_maximum_coordinate_error": 5.542788450441094e-14,
+        "native_maximum_stress_error_MPa": 4.964977429189332e-09,
+        "physical_limit_kind": 2,
+        "solver_seconds": 166.51171875
+      }
+    ],
+    "continuous_boundary_certificate": false,
+    "dense_perimeter_points": 300,
+    "geometry_mm": [
+      180,
+      120
+    ],
+    "hoop": "phi8 A240/100 cover10",
+    "initial_linear_rigidity_change_percent": 10.726668700347863,
+    "large300x500_T_not_confirmed": true,
+    "longitudinal_bars": "2phi12 A400 (0,+/-30)",
+    "native_nominal_boundary_point_checks": 207000,
+    "no_material_force_stress_or_capacity_gate_relaxed": true,
+    "old_rule_first_dense_compression_exceedance_T_kNm": 1.0127155070334486,
+    "previous_3_66_T_not_accepted_as_whole_section_capacity": true,
+    "previous_discrete_material_proof_retained_but_insufficient_for_boundary": true,
+    "public_book_and_dump_unchanged": true,
+    "small_first_state_ASD_departure_not_evidence_of_cracking": true,
+    "station_count": 3,
+    "step_mm": 2,
+    "whole_goal_completed": false
+  },
   "operational_arc_controller_evidence": "docs/reports/evidence/Coupled6DOperationalArcController_2026-11-25",
   "operational_cold785_summary": {
     "accepted_states": 60,
@@ -54340,6 +55837,236 @@
     99863,
     99944
   ],
+  "torsion_evidence_checkpoint_20261128": {
+    "active_job": {
+      "kind": "cold T with400force points and same independent64-span boundary; poll existing live handle",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Audit1273ASDTorsionBoundaryResolution_20261128\\Case400",
+      "session_id": 67564
+    },
+    "archives": [
+      {
+        "archive_parts": [
+          {
+            "bytes": 31776338,
+            "file": "RawArchive.zip",
+            "sha256": "611E064ACB9AFEA4A0BDF7FDE3005A4BEBCB2E33BFB62D86CC95EB1A4B9FD8C5"
+          },
+          {
+            "bytes": 15531377,
+            "file": "RawArchive002.zip",
+            "sha256": "9EB4097357FD812D20A12463B5EDB620557FE21DD6B0AE2BB54ADD9E5F925B48"
+          }
+        ],
+        "files": 1363,
+        "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/TorsionStepHistory/Files.json",
+        "manifest_sha256": "DE7C6AC49BBCBF05384F5F3991D8A94163C751725B6E9341B240FA8FFD6A9C16",
+        "new_payloads": 110,
+        "total_archive_bytes": 47307715
+      },
+      {
+        "archive_parts": [
+          {
+            "bytes": 35641150,
+            "file": "RawArchive.zip",
+            "sha256": "513C22FE5CA805F4936A2679DD9FCFF1EE8F770003C2A118F4FD2E255302FBEC"
+          },
+          {
+            "bytes": 20720094,
+            "file": "RawArchive002.zip",
+            "sha256": "04078E9FB9B09585EB34FA850CF0C27C6BA1AE0A3DA497262312D307FED2DB32"
+          }
+        ],
+        "files": 2364,
+        "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/ClosedTorsionBoundaryAudit/Files.json",
+        "manifest_sha256": "E93B3F3DAB4167380E2F4E9084D9C3EE9B07580F837A8AFA57BB3EAF1D731C3F",
+        "new_payloads": 476,
+        "total_archive_bytes": 56361244
+      }
+    ],
+    "full_goal_completed": false,
+    "resolved225_T_kNm": 5.229797443540355,
+    "resolved225_dense_lower": 0.9985944746042975,
+    "resolved225_dense_upper": 1.002725586286448,
+    "resolved225_full_force_and_dense_history_passed": true,
+    "resolved225_native_boundary_stress_checks": 51300,
+    "resolved225_results_pending_next_archive": true
+  },
+  "torsion_step_history_1264_1265": {
+    "Hpost1500_frozen_benchmark_only": true,
+    "all22_closed_equilibria_independently_verified": true,
+    "all262_native_single_update_equilibria_independently_verified": true,
+    "all_same_final_control": 0.0006825601769718545,
+    "closed8_vs_native128_final_load_difference_percent": 0.16013391831306567,
+    "closed_at_fixed_strain": [
+      {
+        "final_lambda": 4.793675196086501,
+        "final_torque_kNm": 47.93675196086501,
+        "maximum_sampled_lambda": 4.793675196086501,
+        "maximum_sampled_torque_kNm": 47.93675196086501,
+        "seconds_summing_solver_steps": 1.4921875,
+        "subdivisions": 1
+      },
+      {
+        "final_lambda": 4.791197361934151,
+        "final_torque_kNm": 47.91197361934151,
+        "maximum_sampled_lambda": 4.791197361934151,
+        "maximum_sampled_torque_kNm": 47.91197361934151,
+        "seconds_summing_solver_steps": 4.38671875,
+        "subdivisions": 2
+      },
+      {
+        "final_lambda": 4.784816020633867,
+        "final_torque_kNm": 47.848160206338676,
+        "maximum_sampled_lambda": 4.838654130515856,
+        "maximum_sampled_torque_kNm": 48.38654130515856,
+        "seconds_summing_solver_steps": 8.19140625,
+        "subdivisions": 4
+      },
+      {
+        "final_lambda": 4.7748463204865,
+        "final_torque_kNm": 47.748463204865,
+        "maximum_sampled_lambda": 4.863489747942453,
+        "maximum_sampled_torque_kNm": 48.63489747942453,
+        "seconds_summing_solver_steps": 15.28125,
+        "subdivisions": 8
+      }
+    ],
+    "elastic_final_lambda_difference": 4.440892098500626e-16,
+    "identical_initial_prefix7_native_damage_zero": true,
+    "native_closed_point_checks": {
+      "accepted_point_checks": 531,
+      "maximum_coordinate_error": 1.431146867680866e-17,
+      "maximum_effective_error_MPa": 7.600246543226774e-10,
+      "maximum_stress_error_MPa": 5.191402585591476e-10,
+      "maximum_zero_step_change_MPa": 1.3625168701625334e-11,
+      "native_next_zero_step_stationarity_checked": true,
+      "not_all_material_points_checked_natively": true,
+      "repeated_native_update_counts_from_stricter_kernel_closure": true,
+      "selected_station_point_zero_based": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          112
+        ],
+        [
+          2,
+          224
+        ],
+        [
+          0,
+          225
+        ],
+        [
+          1,
+          245
+        ],
+        [
+          2,
+          304
+        ],
+        [
+          0,
+          305
+        ],
+        [
+          1,
+          308
+        ],
+        [
+          2,
+          324
+        ]
+      ]
+    },
+    "native_single_update": [
+      {
+        "final_lambda": 5.015203405970188,
+        "final_torque_kNm": 50.152034059701876,
+        "maximum_sampled_lambda": 5.015203405970188,
+        "maximum_sampled_torque_kNm": 50.152034059701876,
+        "seconds_summing_solver_steps": 1.01953125,
+        "subdivisions": 1
+      },
+      {
+        "final_lambda": 5.000849943939569,
+        "final_lambda_change_from_previous": -0.014353462030618935,
+        "final_torque_kNm": 50.00849943939569,
+        "maximum_sampled_lambda": 5.000849943939569,
+        "maximum_sampled_torque_kNm": 50.00849943939569,
+        "seconds_summing_solver_steps": 2.8671875,
+        "subdivisions": 2
+      },
+      {
+        "final_lambda": 4.948936303395281,
+        "final_lambda_change_from_previous": -0.05191364054428771,
+        "final_torque_kNm": 49.48936303395281,
+        "maximum_sampled_lambda": 4.97883521731595,
+        "maximum_sampled_torque_kNm": 49.7883521731595,
+        "seconds_summing_solver_steps": 5.8828125,
+        "subdivisions": 4
+      },
+      {
+        "final_lambda": 4.887608475352267,
+        "final_lambda_change_from_previous": -0.061327828043014065,
+        "final_torque_kNm": 48.87608475352267,
+        "maximum_sampled_lambda": 4.969219346706357,
+        "maximum_sampled_torque_kNm": 49.69219346706357,
+        "seconds_summing_solver_steps": 11.41796875,
+        "subdivisions": 8
+      },
+      {
+        "final_lambda": 4.836339231037674,
+        "final_lambda_change_from_previous": -0.05126924431459301,
+        "final_torque_kNm": 48.36339231037674,
+        "maximum_sampled_lambda": 4.922277311537416,
+        "maximum_sampled_torque_kNm": 49.22277311537415,
+        "seconds_summing_solver_steps": 21.41015625,
+        "subdivisions": 16
+      },
+      {
+        "final_lambda": 4.800487639767237,
+        "final_lambda_change_from_previous": -0.03585159127043713,
+        "final_torque_kNm": 48.00487639767237,
+        "maximum_sampled_lambda": 4.890191353599647,
+        "maximum_sampled_torque_kNm": 48.90191353599647,
+        "seconds_summing_solver_steps": 43.4921875,
+        "subdivisions": 32
+      },
+      {
+        "final_lambda": 4.7790094841297615,
+        "final_lambda_change_from_previous": -0.02147815563747546,
+        "final_torque_kNm": 47.790094841297616,
+        "maximum_sampled_lambda": 4.870796558616566,
+        "maximum_sampled_torque_kNm": 48.707965586165656,
+        "seconds_summing_solver_steps": 83.63671875,
+        "subdivisions": 64
+      },
+      {
+        "final_lambda": 4.767212396481708,
+        "final_lambda_change_from_previous": -0.011797087648053761,
+        "final_torque_kNm": 47.672123964817075,
+        "maximum_sampled_lambda": 4.86003945519186,
+        "maximum_sampled_torque_kNm": 48.6003945519186,
+        "seconds_summing_solver_steps": 178.31640625,
+        "subdivisions": 128
+      }
+    ],
+    "no_physical_ultimate_or_10s_workflow_claim": true,
+    "no_single_update_and_closed_equivalence_claim": true,
+    "no_working_default_material_switch": true,
+    "solver_only_timings_not_full_user_workflow": true,
+    "source_only_test_module_in_each_study": true,
+    "test_macro_elapsed_seconds": {
+      "Closed7Series": 35.0,
+      "Initial9Series": 92.0,
+      "Steps064": 85.0,
+      "Steps128": 180.0
+    },
+    "whole_goal_completed": false
+  },
   "unarchived_N1047": {
     "accepted_states": 64,
     "archive": "docs/reports/evidence/Coupled6DAxialEventPredictor_2026-11-27",

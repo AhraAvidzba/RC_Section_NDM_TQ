@@ -1,0 +1,53 @@
+{
+  "all_completed_study_workers_terminal": true,
+  "all_workers_terminal": false,
+  "cases": {
+    "Audit1268OldTorsionQuadratureAB_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Audit1272ASDBoundaryStressOnly_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Audit1273ASDTorsionBoundaryResolution_20261128": {
+      "Case400_not_started": true,
+      "active_session": 62195,
+      "no_active_results_captured": true,
+      "source": {
+        "actual_components": 269,
+        "all268_other_components_unchanged": true,
+        "boundary_resolution_per_minimum_Bspline_span": 64,
+        "changed_components_exact": true,
+        "force_quadrature_and_Newton_solver_unchanged": true,
+        "only_boundary_sampling_method_changed": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "65700ED28E176110D9B87F07FD76ADF8CAA6F89866CDD2024E0333698B45E58D"
+      },
+      "static_inputs_and_saved_book_only": true
+    },
+    "Cold1266ASDClosedTorsionCapacity_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Materials1269OldTorsionDenseBoundary_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Materials1270OldTorsion225NoBoundary_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Materials1271OldTorsion400Boundary_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    },
+    "Verify1267ASDClosedTimeoutPrefix_20261128": {
+      "all_started_workers_terminal": true,
+      "whole_section_capacity_not_inferred_from_process_success": true
+    }
+  },
+  "has_active_followup": true,
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}

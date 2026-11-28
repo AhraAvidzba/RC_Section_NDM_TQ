@@ -1,0 +1,47 @@
+{
+  "all_completed_study_workers_terminal": true,
+  "all_workers_terminal": false,
+  "cases": {
+    "Audit1264ASDTorsionStepAccuracy_20261128": {
+      "all_selected_Office_workers_terminal": true,
+      "physical_capacity_not_claimed": true,
+      "source": {
+        "actual_components": 269,
+        "all268_working_components_unchanged": true,
+        "only_test_module_changed": true,
+        "physical_capacity_not_claimed": true,
+        "saved_book_sha256": "8387E711BF4FBC3C4BB836B954188AF2BC83946EC68E3C3D09F5DC4C58236704",
+        "source_and_saved_book_match": true
+      }
+    },
+    "Audit1265ASDTorsionClosed_20261128": {
+      "all_selected_Office_workers_terminal": true,
+      "physical_capacity_not_claimed": true,
+      "source": {
+        "actual_components": 269,
+        "all268_working_components_unchanged": true,
+        "only_test_module_changed": true,
+        "physical_capacity_not_claimed": true,
+        "saved_book_sha256": "DF928C724D991F614D2196161D1A175CFEA95AB3C8B8C6357CCAF2B4811CB25F",
+        "source_and_saved_book_match": true
+      }
+    },
+    "Cold1266ASDClosedTorsionCapacity_20261128": {
+      "Case04_active_session": 66868,
+      "Case09_not_started": true,
+      "no_active_capacity_results_captured": true,
+      "source": {
+        "actual_components": 269,
+        "all268_other_components_unchanged": true,
+        "continuation_Newton_force_limits_and_peak_accuracy_unchanged": true,
+        "only_one_integration_boolean_changed": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "5697D0B809388D8AA14945AF4159797AA7EC074F31A9AAADE0800B629339AE3B"
+      },
+      "static_inputs_only": true
+    }
+  },
+  "has_active_followup": true,
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
