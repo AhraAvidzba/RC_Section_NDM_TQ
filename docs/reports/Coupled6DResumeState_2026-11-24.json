@@ -3198,14 +3198,14 @@
   "active_jobs": [
     {
       "case": 2,
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1225ASDLastAcceptedScale_20261128/Case02",
-      "session_id": 86595,
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1227ASDConsistentGeometricSecant_20261128/Case02",
+      "session_id": 41686,
       "status": "running"
     },
     {
       "case": 7,
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1225ASDLastAcceptedScale_20261128/Case07",
-      "session_id": 62307,
+      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Cold1227ASDConsistentGeometricSecant_20261128/Case07",
+      "session_id": 79164,
       "status": "running"
     }
   ],
@@ -8655,6 +8655,15 @@
     "maximum_accepted_lambda": 1.1058869810286156
   },
   "cold_arc_rejection_evidence": "docs/reports/evidence/Coupled6DColdArcRejection_2026-11-25",
+  "consistent_geometric_secant_1227": {
+    "all268_other_parent_components_unchanged": true,
+    "changes": "Existing consistentControl is enabled for geometricASD; no new numerical attempts, budgets or physical gates",
+    "no_external_future_field_used_by_working_search": true,
+    "parent": "1215 early geometric secant",
+    "private_candidate": true,
+    "promoted": false,
+    "reason": "Local1218 same-history137: secant+consistent solved2iterations; accepted+consistent failed. Early secant alone1215 failed both coldMx signs."
+  },
   "controller_decisions_1224": {
     "all316_states_independently_verified": true,
     "both_final_attempts_keep_geometric_control_through_initial_step_divergence": true,
@@ -10144,6 +10153,7 @@
     "whole_goal_completed": false
   },
   "current_goal_turn_classification": "progress",
+  "current_goal_turn_evidence": "1224 proves actual controller behavior with316 byteexact/independently verified states; rejects early-steel attribution.1225 actual accepted scale worsens negative(101states NumFail) and positive(timeout600,125states), all226 verified; do not promote.1226 mirrored final fields do not satisfy actual positive137/167 history even after independent root attempts, so mirror proof cannot bypass history.",
   "current_load_stage": "1162 separated event/force criteria negative:77 states bitexact1161,independently verified.1163 gradient/linear-system diagnostic: same77 fields, no diagnostic tag,so inspect line-search radius/lambda admissibility.1164 running: nine selection tests passed;retain stronger first lower bound with its exact fields and trace;more event damping diagnostics.",
   "curvature_steel_event_20261127": {
     "actual_public_book_sha256": "1BF23742F465C0551454166C6BE3DCB51E169219475EAF635AC55B92BB802D07",
@@ -16157,15 +16167,171 @@
     "whole_goal_completed": false
   },
   "last_accepted_scale_1225": {
-    "cold_cases": [
-      2,
-      7
-    ],
-    "one_class_changed": true,
-    "parent": "1202",
-    "private_candidate": true,
-    "promoted": false,
-    "scope": "Postpeak ASD geometric nominal and next increment use actual accepted increment, minimum=nominal*(1/64)^2; all physical gates and budgets unchanged"
+    "all226_saved_states_independently_verified": true,
+    "all_own_Excel_closed": true,
+    "candidate_rejected": true,
+    "negative": {
+      "last_lambda": 1.0505949554829248,
+      "maximum_lambda": 1.086272797991568,
+      "physical_capacity_confirmed": false,
+      "seconds": 532.228515625,
+      "states": 101,
+      "status": "NumFail"
+    },
+    "no_broader_regression_justified": true,
+    "positive": {
+      "accepted_states": 125,
+      "all60_equations_and_six_resultants_verified": true,
+      "exact_own_Excel_closed": true,
+      "final_solver_result_missing": true,
+      "history_sha256": "840CAC928F18732D7869BD5A88F94362820539EE51D8D2D91105C9F9FB0A7B15",
+      "last_lambda": 1.0475944206043935,
+      "last_steel_utilization": 0.4689941520103903,
+      "maximum_lambda": 1.0862727979915505,
+      "no_NumFail_or_physical_Fail_assigned_to_timeout": true,
+      "physical_capacity_confirmed": false,
+      "watchdog_seconds": 600,
+      "whole_goal_completed": false,
+      "whole_run_passed": false
+    },
+    "positive_full_run_not_completed": true,
+    "previous_negative_physical_capacity_lost": true,
+    "public_book_source_and_dump_unchanged": true,
+    "same_positive_history_endpoint_diagnostic": {
+      "PID": 50220,
+      "actual_positive_history_replayed_for_each_pair": true,
+      "cases": [
+        {
+          "Mx_kNm": 109.79657098688155,
+          "actual_evaluations": 136,
+          "compression_utilization": 1.0187955145804553,
+          "endpoint": "lower",
+          "equilibrium_verified": false,
+          "final_errors_MPa": [
+            1.813560504404716,
+            3.915665615968761e-05,
+            4.205651485948089e-05,
+            0.0
+          ],
+          "known_reference_field_used_as_diagnostic_seed": true,
+          "lambda_value": 1.0979794221153654,
+          "material_admissible": false,
+          "nfev": 133,
+          "original_bound_MPa": 1.8948290178398122e-06,
+          "original_candidate_already_equilibrium": false,
+          "original_candidate_errors_MPa": [
+            1.813602228960099,
+            4.553649124439119e-13,
+            4.202577860426878e-05,
+            0.0
+          ],
+          "prefix": 137,
+          "seconds": 0.2887390000396408,
+          "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+          "solver_success": false,
+          "steel_utilization": 0.9999566340554391
+        },
+        {
+          "Mx_kNm": 109.80057039948143,
+          "actual_evaluations": 136,
+          "compression_utilization": 1.0187946364334466,
+          "endpoint": "upper",
+          "equilibrium_verified": false,
+          "final_errors_MPa": [
+            1.8133405484638176,
+            3.917803710357798e-05,
+            4.2225406120390616e-05,
+            0.0
+          ],
+          "known_reference_field_used_as_diagnostic_seed": true,
+          "lambda_value": 1.09801947098419,
+          "material_admissible": false,
+          "nfev": 133,
+          "original_bound_MPa": 1.8948798943164045e-06,
+          "original_candidate_already_equilibrium": false,
+          "original_candidate_errors_MPa": [
+            1.813382296223099,
+            4.2934406030425976e-13,
+            4.219465310112964e-05,
+            0.0
+          ],
+          "prefix": 137,
+          "seconds": 0.4156803000369109,
+          "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+          "solver_success": false,
+          "steel_utilization": 1.000378664117723
+        },
+        {
+          "Mx_kNm": 110.04757414583484,
+          "actual_evaluations": 136,
+          "compression_utilization": 4.850868969415442,
+          "endpoint": "lower",
+          "equilibrium_verified": false,
+          "final_errors_MPa": [
+            1.645227380126606,
+            0.16962467018590172,
+            0.019193865630409333,
+            0.0
+          ],
+          "known_reference_field_used_as_diagnostic_seed": true,
+          "lambda_value": 1.0979794221153654,
+          "material_admissible": false,
+          "nfev": 133,
+          "original_bound_MPa": 1.8948290178398122e-06,
+          "original_candidate_already_equilibrium": false,
+          "original_candidate_errors_MPa": [
+            1.8138133510093326,
+            4.553649124439119e-13,
+            4.194357421055128e-05,
+            0.0
+          ],
+          "prefix": 167,
+          "seconds": 0.5071705000009388,
+          "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+          "solver_success": false,
+          "steel_utilization": 0.9639628581333556
+        },
+        {
+          "Mx_kNm": 109.54968912920823,
+          "actual_evaluations": 614,
+          "compression_utilization": 0.126217925757506,
+          "endpoint": "upper",
+          "equilibrium_verified": false,
+          "final_errors_MPa": [
+            0.08807439058063525,
+            0.029180544506023674,
+            0.014006089172624187,
+            0.0
+          ],
+          "known_reference_field_used_as_diagnostic_seed": true,
+          "lambda_value": 1.09801947098419,
+          "material_admissible": false,
+          "nfev": 611,
+          "original_bound_MPa": 1.8948798943164045e-06,
+          "original_candidate_already_equilibrium": false,
+          "original_candidate_errors_MPa": [
+            1.8135934155760804,
+            4.2934406030425976e-13,
+            4.2112456738395876e-05,
+            0.0
+          ],
+          "prefix": 167,
+          "seconds": 1.5219341999618337,
+          "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+          "solver_success": false,
+          "steel_utilization": 1.003823999819428
+        }
+      ],
+      "elapsed_seconds": 3.270721000037156,
+      "no_trials_committed": true,
+      "parent_PID": 35416,
+      "physical_capacity_not_automatically_claimed_from_known_endpoint_seed": true,
+      "public_book_unchanged": true,
+      "references_are_not_a_cold_search_algorithm": true,
+      "scipy_version": "1.18.1",
+      "whole_goal_completed": false
+    },
+    "whole_goal_completed": false
   },
   "last_goal_turn_classification": "progress",
   "last_verified_working_cold_lower": 1.109225820167928,
@@ -48085,7 +48251,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "1224 readonly controller971/820 records, original179/137 histories and all force packet values except time byteexact1202; all316 states independently verified. Second attempts both stay geometric through divergence: negative unaccepted large probe at88 then half accepted89 and resets increment to original6.66265e-6; positive grows to92 then half accepted93 and same reset. Negative selects steel only174 after recovering peak; positive never. Do not repeat blanket early-steel adoption.1225 coldMx+- running: actual accepted step becomes postpeak ASD geometric nominal/current increment, minimum uses existing material ratio squared; same30/256 budgets and original gates. Poll current handles, do not restart on observation timeout; verify actual capacity/upper and all states, negative regression, then other directions only if justified. Public book/source/dump unchanged; H1500 causal-only; full goal still active."
+    "1227 coldMx+- active: poll saved live handles; inspect terminal closures before final packets. Pair ordinary geometric secant from1215 with existing consistent corrector. No new guesses from outside history. Require original60-equation/6-force/material gates and independent upper before claiming capacity; negative regression against1202 physical109.797942kNm. Broader N/My/T/NM/NMT only after bothMx results justify it.1225 rejected(no negative capacity,positive600s timeout,all226 states verified);1226 mirrored endpoints do not satisfy actualpositive137/167 history. Keep all evidence. Pending physics check: high transverse strains/cracked modes, tangent conditioning and25-point quadrature. No blanket step-scale increase, softened gates or geometry-specific reflection shortcut. Full original six-force goal, Config/<=1% steel and source/build/book/native/full-workflow acceptance remain active."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
@@ -49498,6 +49664,140 @@
     },
     "steel_control_corrected_driver_root": "Cold1016PureBendingSteelLimitFixed_20261126",
     "steel_control_failed_driver_root": "Cold1015PureBendingSteelLimit_20261126"
+  },
+  "shared_endpoint_1226": {
+    "PID": 50220,
+    "actual_positive_history_replayed_for_each_pair": true,
+    "cases": [
+      {
+        "Mx_kNm": 109.79657098688155,
+        "actual_evaluations": 136,
+        "compression_utilization": 1.0187955145804553,
+        "endpoint": "lower",
+        "equilibrium_verified": false,
+        "final_errors_MPa": [
+          1.813560504404716,
+          3.915665615968761e-05,
+          4.205651485948089e-05,
+          0.0
+        ],
+        "known_reference_field_used_as_diagnostic_seed": true,
+        "lambda_value": 1.0979794221153654,
+        "material_admissible": false,
+        "nfev": 133,
+        "original_bound_MPa": 1.8948290178398122e-06,
+        "original_candidate_already_equilibrium": false,
+        "original_candidate_errors_MPa": [
+          1.813602228960099,
+          4.553649124439119e-13,
+          4.202577860426878e-05,
+          0.0
+        ],
+        "prefix": 137,
+        "seconds": 0.2887390000396408,
+        "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+        "solver_success": false,
+        "steel_utilization": 0.9999566340554391
+      },
+      {
+        "Mx_kNm": 109.80057039948143,
+        "actual_evaluations": 136,
+        "compression_utilization": 1.0187946364334466,
+        "endpoint": "upper",
+        "equilibrium_verified": false,
+        "final_errors_MPa": [
+          1.8133405484638176,
+          3.917803710357798e-05,
+          4.2225406120390616e-05,
+          0.0
+        ],
+        "known_reference_field_used_as_diagnostic_seed": true,
+        "lambda_value": 1.09801947098419,
+        "material_admissible": false,
+        "nfev": 133,
+        "original_bound_MPa": 1.8948798943164045e-06,
+        "original_candidate_already_equilibrium": false,
+        "original_candidate_errors_MPa": [
+          1.813382296223099,
+          4.2934406030425976e-13,
+          4.219465310112964e-05,
+          0.0
+        ],
+        "prefix": 137,
+        "seconds": 0.4156803000369109,
+        "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+        "solver_success": false,
+        "steel_utilization": 1.000378664117723
+      },
+      {
+        "Mx_kNm": 110.04757414583484,
+        "actual_evaluations": 136,
+        "compression_utilization": 4.850868969415442,
+        "endpoint": "lower",
+        "equilibrium_verified": false,
+        "final_errors_MPa": [
+          1.645227380126606,
+          0.16962467018590172,
+          0.019193865630409333,
+          0.0
+        ],
+        "known_reference_field_used_as_diagnostic_seed": true,
+        "lambda_value": 1.0979794221153654,
+        "material_admissible": false,
+        "nfev": 133,
+        "original_bound_MPa": 1.8948290178398122e-06,
+        "original_candidate_already_equilibrium": false,
+        "original_candidate_errors_MPa": [
+          1.8138133510093326,
+          4.553649124439119e-13,
+          4.194357421055128e-05,
+          0.0
+        ],
+        "prefix": 167,
+        "seconds": 0.5071705000009388,
+        "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+        "solver_success": false,
+        "steel_utilization": 0.9639628581333556
+      },
+      {
+        "Mx_kNm": 109.54968912920823,
+        "actual_evaluations": 614,
+        "compression_utilization": 0.126217925757506,
+        "endpoint": "upper",
+        "equilibrium_verified": false,
+        "final_errors_MPa": [
+          0.08807439058063525,
+          0.029180544506023674,
+          0.014006089172624187,
+          0.0
+        ],
+        "known_reference_field_used_as_diagnostic_seed": true,
+        "lambda_value": 1.09801947098419,
+        "material_admissible": false,
+        "nfev": 611,
+        "original_bound_MPa": 1.8948798943164045e-06,
+        "original_candidate_already_equilibrium": false,
+        "original_candidate_errors_MPa": [
+          1.8135934155760804,
+          4.2934406030425976e-13,
+          4.2112456738395876e-05,
+          0.0
+        ],
+        "prefix": 167,
+        "seconds": 1.5219341999618337,
+        "solver_message": "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+        "solver_success": false,
+        "steel_utilization": 1.003823999819428
+      }
+    ],
+    "elapsed_seconds": 3.270721000037156,
+    "no_trials_committed": true,
+    "parent_PID": 35416,
+    "physical_capacity_not_automatically_claimed_from_known_endpoint_seed": true,
+    "public_book_unchanged": true,
+    "references_are_not_a_cold_search_algorithm": true,
+    "scipy_version": "1.18.1",
+    "whole_goal_completed": false
   },
   "shoulder717": {
     "analytical_reference_misses": [

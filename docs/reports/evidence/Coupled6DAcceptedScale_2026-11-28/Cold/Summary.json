@@ -1,0 +1,62 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1225ASDLastAcceptedScale_20261128": {
+      "Case02/Native/CapacityStatusContract.json": {
+        "contract_passed": true,
+        "errors": [],
+        "has_confirmed_lower_bound": true,
+        "has_physical_capacity": false,
+        "known_invalid_control": false,
+        "solver_success_not_implied_by_equilibrium_replay": true,
+        "status": "NumFail"
+      },
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 101,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.0889706734427339,
+        "final_lambda": 1.0505949554829248,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -105059495.54829249,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.030766775116717326,
+        "maximum_moment_error_Nmm": 4.272204823791981,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/TimeoutPrefixSummary.json": {
+        "accepted_states": 125,
+        "all60_equations_and_six_resultants_verified": true,
+        "exact_own_Excel_closed": true,
+        "final_solver_result_missing": true,
+        "history_sha256": "840CAC928F18732D7869BD5A88F94362820539EE51D8D2D91105C9F9FB0A7B15",
+        "last_lambda": 1.0475944206043935,
+        "last_steel_utilization": 0.4689941520103903,
+        "maximum_lambda": 1.0862727979915505,
+        "no_NumFail_or_physical_Fail_assigned_to_timeout": true,
+        "physical_capacity_confirmed": false,
+        "watchdog_seconds": 600,
+        "whole_goal_completed": false,
+        "whole_run_passed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "4BA0084EB16B941E8FF7722957477BE0AE1D7983A91458ADF583322C413381F1"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
