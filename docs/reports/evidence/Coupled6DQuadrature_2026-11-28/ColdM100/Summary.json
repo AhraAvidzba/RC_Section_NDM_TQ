@@ -1,0 +1,3538 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1243ASDCompositeGauss10M_20261128": {
+      "Case02/Native/TimeoutPrefixSummary.json": {
+        "all60_equations_and_six_resultants_verified": true,
+        "exact_own_Excel_closed": true,
+        "final_solver_result_missing": true,
+        "incomplete_or_invalid_files_not_used": [],
+        "no_NumFail_or_physical_Fail_assigned_to_timeout": true,
+        "physical_material_capacity_not_confirmed": true,
+        "quadrature_convergence_not_established": true,
+        "source_histories_scanned": [
+          {
+            "last_lambda": 1.1896700093844388,
+            "maximum_lambda": 1.1896700093844388,
+            "path": "MainCapacityHistory.bin",
+            "sha256": "186699547C533345D9395B50C0950E1923E7247C47C3DF2A25161BF589263827",
+            "states": 76
+          },
+          {
+            "last_lambda": 0.5,
+            "maximum_lambda": 0.5,
+            "path": "MainCapacityHistory.bin.Accepted.000001.bin",
+            "sha256": "A0C817B4C6DA24E2BD9EB2A2E5C3D8BAE0D9AD46FF4022BD6CA427D85912548C",
+            "states": 2
+          },
+          {
+            "last_lambda": 0.5621324266234019,
+            "maximum_lambda": 0.5621324266234019,
+            "path": "MainCapacityHistory.bin.Accepted.000002.bin",
+            "sha256": "97322B5AF35E45642ADB62C920688BB883A9D62ED84F1FBF6164FC15A4EA173F",
+            "states": 3
+          },
+          {
+            "last_lambda": 0.605952266973916,
+            "maximum_lambda": 0.605952266973916,
+            "path": "MainCapacityHistory.bin.Accepted.000003.bin",
+            "sha256": "775B044574D84CB74DE77FD429C7B3F88AF0E233F41656C6A31F3BACC14BE9E3",
+            "states": 4
+          },
+          {
+            "last_lambda": 0.6390215698016726,
+            "maximum_lambda": 0.6390215698016726,
+            "path": "MainCapacityHistory.bin.Accepted.000004.bin",
+            "sha256": "BF7010941051E86F8A4169476A3B3BCFF6C8CB9734A94B49231299CCFE27B1F0",
+            "states": 5
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000005.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000006.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000007.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000008.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000009.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000010.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000011.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000012.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347605,
+            "maximum_lambda": 0.6424668758347605,
+            "path": "MainCapacityHistory.bin.Accepted.000013.bin",
+            "sha256": "5F426EED3E1BEA3BE300A37DC5D18665982D0446609D81C497A1E1B2CD949020",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6422887106161809,
+            "maximum_lambda": 0.642657516097644,
+            "path": "MainCapacityHistory.bin.Accepted.000014.bin",
+            "sha256": "CED2EEA0AF431F45D3ADCD19CC00387850090B7B57FBE364D2AAAD59CAD27B8E",
+            "states": 10
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000015.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000016.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000017.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000018.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000019.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000020.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000021.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000022.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595829,
+            "maximum_lambda": 0.6432048410595829,
+            "path": "MainCapacityHistory.bin.Accepted.000023.bin",
+            "sha256": "42B04A2DC3F5B245520F1674BDDED5094B39385CA5CAC8CA007BE1D68E42E6F8",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6421068176201707,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000024.bin",
+            "sha256": "5C6F690A49FC8B23D989F303359B89D1B4DC1F27486611E9F357ACF1B04626A8",
+            "states": 15
+          },
+          {
+            "last_lambda": 0.6396687603595791,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000025.bin",
+            "sha256": "5464D03B7E3DB2128D70B8B9D792E950ED2366F61B0E44B7C40A85AAE2F90CEA",
+            "states": 16
+          },
+          {
+            "last_lambda": 0.6383304087697291,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000026.bin",
+            "sha256": "79EECC244C1767F77794C9BE70549FEF0D54DF3C40F273D812F8882178767E38",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6390251211923689,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000027.bin",
+            "sha256": "945AC8C4E46D3DE6286605365943D6361F72C058363300B9DFB9608FF3F2E596",
+            "states": 18
+          },
+          {
+            "last_lambda": 0.6430651194157098,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000028.bin",
+            "sha256": "9159F6CA5AFA0B51C84BF7BC140E3F2E552EDF7E30355BAAD8DEC5922C1B558E",
+            "states": 19
+          },
+          {
+            "last_lambda": 0.65229075697807,
+            "maximum_lambda": 0.65229075697807,
+            "path": "MainCapacityHistory.bin.Accepted.000029.bin",
+            "sha256": "CE98404BE0DBCA4674944A0E7D52858089175A11AD7A66263FB5CD26EBE1925C",
+            "states": 20
+          },
+          {
+            "last_lambda": 0.657643182281176,
+            "maximum_lambda": 0.657643182281176,
+            "path": "MainCapacityHistory.bin.Accepted.000030.bin",
+            "sha256": "79C28A6B0CFA8CBE4F3BF5E71234D11D40883FB7CC2A11FEC19B7F566E17D0CC",
+            "states": 21
+          },
+          {
+            "last_lambda": 0.6653653338346431,
+            "maximum_lambda": 0.6653653338346431,
+            "path": "MainCapacityHistory.bin.Accepted.000031.bin",
+            "sha256": "B1DD1CA075CC90F28D6FD3C3455D24E885ED9E3FEB5F4924976EA87490E940F4",
+            "states": 22
+          },
+          {
+            "last_lambda": 0.6876905133289533,
+            "maximum_lambda": 0.6876905133289533,
+            "path": "MainCapacityHistory.bin.Accepted.000032.bin",
+            "sha256": "5FD86B2CE6D772618B943A34217FBF74A1FF176DCDACECFBC9BCAC10E76EEC41",
+            "states": 23
+          },
+          {
+            "last_lambda": 0.7287942608978422,
+            "maximum_lambda": 0.7287942608978422,
+            "path": "MainCapacityHistory.bin.Accepted.000033.bin",
+            "sha256": "7BFF21E372D363B9BFBC4FAE37BA19DAB4A2C8073B0F9E0D311F91C16979CE33",
+            "states": 24
+          },
+          {
+            "last_lambda": 0.7934823038905015,
+            "maximum_lambda": 0.7934823038905015,
+            "path": "MainCapacityHistory.bin.Accepted.000034.bin",
+            "sha256": "AEF970E0271AFA2FF844178737936351F85390CC9BE3CDE9B69A7B431F23442D",
+            "states": 25
+          },
+          {
+            "last_lambda": 0.887233145313492,
+            "maximum_lambda": 0.887233145313492,
+            "path": "MainCapacityHistory.bin.Accepted.000035.bin",
+            "sha256": "9D65B10D82E1A3D6C009F5320E1F16B24F6723BC053378C5FD1713B490DB01CA",
+            "states": 26
+          },
+          {
+            "last_lambda": 0.887233145313492,
+            "maximum_lambda": 0.887233145313492,
+            "path": "MainCapacityHistory.bin.Accepted.000036.bin",
+            "sha256": "9D65B10D82E1A3D6C009F5320E1F16B24F6723BC053378C5FD1713B490DB01CA",
+            "states": 26
+          },
+          {
+            "last_lambda": 1.0160565674723083,
+            "maximum_lambda": 1.0160565674723083,
+            "path": "MainCapacityHistory.bin.Accepted.000037.bin",
+            "sha256": "B4014FF8E809E98E476DBDE1B2E477D25461183D396D8D3CADCDB22894554A78",
+            "states": 27
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000038.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000039.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000040.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000041.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000042.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000043.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000044.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000045.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000046.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000047.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000048.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000049.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000050.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000051.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000052.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000053.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000054.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000055.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000056.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000057.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000058.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000059.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000060.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000061.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000062.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000063.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000064.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000065.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526027,
+            "maximum_lambda": 1.1323320828526027,
+            "path": "MainCapacityHistory.bin.Accepted.000066.bin",
+            "sha256": "A89F657B0AD1185BA564F07F0BFE0F7AF38C35A807366DF75E739BCFB577C7DC",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.141102553940357,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000067.bin",
+            "sha256": "DDA89A7AB33205EE3A210212CC03FDA43B5002B74B842EFB887D6FFBD0D98CAE",
+            "states": 35
+          },
+          {
+            "last_lambda": 1.132789461033721,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000068.bin",
+            "sha256": "1048A488C9E554C1BE341AB6E12CA5D0AE73080B34FAC1B568B7F8B035C95411",
+            "states": 36
+          },
+          {
+            "last_lambda": 1.1241048168575112,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000069.bin",
+            "sha256": "F4CDBF59B0FA7F7144790C52E28007651F0CECF654D94FF72B488E506523709D",
+            "states": 37
+          },
+          {
+            "last_lambda": 1.1154332019880366,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000070.bin",
+            "sha256": "E52C2E7F082D862C52B8DF0CAF8A3D637ADA3F8DAF86F6E9D1DF792BEB1A2CDC",
+            "states": 38
+          },
+          {
+            "last_lambda": 1.1072068590629855,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000071.bin",
+            "sha256": "24DB7EF8A5C6CA1342E3159B9D15A04729644427246435F0561773E6352EB01E",
+            "states": 39
+          },
+          {
+            "last_lambda": 1.0996717730858319,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000072.bin",
+            "sha256": "8404B28DE9B977C22A9A9CBCD84226EC9AC1F2C68401113E57452096CBE24756",
+            "states": 40
+          },
+          {
+            "last_lambda": 1.0933010725406058,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000073.bin",
+            "sha256": "0C745C8D1BD40B001CF48E8AB9839C7400F5F43E03AE829E3CFABC5E0D8091E2",
+            "states": 41
+          },
+          {
+            "last_lambda": 1.0884669361554253,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000074.bin",
+            "sha256": "93BD14F8CEBC20566EC2BCC19A43AF7D983ADC6B1704E74624A4BB6E0CC81E54",
+            "states": 42
+          },
+          {
+            "last_lambda": 1.0854693760794587,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000075.bin",
+            "sha256": "A67630A20E2190806974BE8987973F985D278BDF970A54DA3E0A1DF60D4EC21E",
+            "states": 43
+          },
+          {
+            "last_lambda": 1.0845689036188453,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000076.bin",
+            "sha256": "43DE5E4123C632187F8D6E46F7D04855479446524F942F35FDE6D1C664A4BB24",
+            "states": 44
+          },
+          {
+            "last_lambda": 1.0859392577871,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000077.bin",
+            "sha256": "25771A7918D7DF027AC5F1828C0B7170568FFAF10988A2E16A9AEA2D286F0B79",
+            "states": 45
+          },
+          {
+            "last_lambda": 1.089800341415088,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000078.bin",
+            "sha256": "86A5EEA0D7106E04C31E65F9EBFAF9034A02871FC86682B6FE8B7D667399AF76",
+            "states": 46
+          },
+          {
+            "last_lambda": 1.0962945462662748,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000079.bin",
+            "sha256": "A1DE59DF7A6D9C3544652399EB63824B9DA4276385EBCDF9A970F8FF0C8212CD",
+            "states": 47
+          },
+          {
+            "last_lambda": 1.1055637877301243,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000080.bin",
+            "sha256": "1A869611F3A12A802387D71D55EDCC5CE2E9298F1BF3E2431564B04C506F54C1",
+            "states": 48
+          },
+          {
+            "last_lambda": 1.117837816391145,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000081.bin",
+            "sha256": "A7E4D12AC6EF9D301D4B567870CFCCDDDC8FF4265F3CFB8069BB0279CC83EAC6",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1334680818321716,
+            "maximum_lambda": 1.1414387568790112,
+            "path": "MainCapacityHistory.bin.Accepted.000082.bin",
+            "sha256": "22E97985334BDB8DC7DCDA8B46D2B7C025AA92D0C635B0B3A06DDAD03A2F1D3D",
+            "states": 50
+          },
+          {
+            "last_lambda": 1.1529597430172867,
+            "maximum_lambda": 1.1529597430172867,
+            "path": "MainCapacityHistory.bin.Accepted.000083.bin",
+            "sha256": "A4B26860BC630FCB0D136A4D1CF3853B81554C04EA3D42CAC1AFFA0149D70079",
+            "states": 51
+          },
+          {
+            "last_lambda": 1.1770123054681139,
+            "maximum_lambda": 1.1770123054681139,
+            "path": "MainCapacityHistory.bin.Accepted.000084.bin",
+            "sha256": "B4545B6812A7723A504392D5BCFF973AA3ED989A69FAA8061224B5AD2747CCCC",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.1770123054681139,
+            "maximum_lambda": 1.1770123054681139,
+            "path": "MainCapacityHistory.bin.Accepted.000085.bin",
+            "sha256": "B4545B6812A7723A504392D5BCFF973AA3ED989A69FAA8061224B5AD2747CCCC",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.1770123054681139,
+            "maximum_lambda": 1.1770123054681139,
+            "path": "MainCapacityHistory.bin.Accepted.000086.bin",
+            "sha256": "B4545B6812A7723A504392D5BCFF973AA3ED989A69FAA8061224B5AD2747CCCC",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.183896713649881,
+            "maximum_lambda": 1.183896713649881,
+            "path": "MainCapacityHistory.bin.Accepted.000087.bin",
+            "sha256": "8AA6798071E2B203E453581B7E27547DA3875CF8E26DE8F7D031958A18497331",
+            "states": 53
+          },
+          {
+            "last_lambda": 1.1857819549703232,
+            "maximum_lambda": 1.1857819549703232,
+            "path": "MainCapacityHistory.bin.Accepted.000088.bin",
+            "sha256": "1E8344B62ECD1DA9CCF1DD9AA6802821D1CFCB352CE25BD9DF544BC1F662D773",
+            "states": 54
+          },
+          {
+            "last_lambda": 1.187952053646254,
+            "maximum_lambda": 1.187952053646254,
+            "path": "MainCapacityHistory.bin.Accepted.000089.bin",
+            "sha256": "20DE75491C4601C7304522ABEB0B0031F52BDFC9379D432263E3889C0B93BBCA",
+            "states": 55
+          },
+          {
+            "last_lambda": 1.187952053646254,
+            "maximum_lambda": 1.187952053646254,
+            "path": "MainCapacityHistory.bin.Accepted.000090.bin",
+            "sha256": "20DE75491C4601C7304522ABEB0B0031F52BDFC9379D432263E3889C0B93BBCA",
+            "states": 55
+          },
+          {
+            "last_lambda": 1.1890771875319825,
+            "maximum_lambda": 1.1890771875319825,
+            "path": "MainCapacityHistory.bin.Accepted.000091.bin",
+            "sha256": "0F796B53B28833C05629659081DBAA3F5A6A776338EC24B3757E6450E4BDD981",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.1890771875319825,
+            "maximum_lambda": 1.1890771875319825,
+            "path": "MainCapacityHistory.bin.Accepted.000092.bin",
+            "sha256": "0F796B53B28833C05629659081DBAA3F5A6A776338EC24B3757E6450E4BDD981",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.189744826423561,
+            "maximum_lambda": 1.189744826423561,
+            "path": "MainCapacityHistory.bin.Accepted.000093.bin",
+            "sha256": "9535D768C31D16D18234820C0F30B1FBD324CF877B013D90D879D7EE15557466",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.189744826423561,
+            "maximum_lambda": 1.189744826423561,
+            "path": "MainCapacityHistory.bin.Accepted.000094.bin",
+            "sha256": "9535D768C31D16D18234820C0F30B1FBD324CF877B013D90D879D7EE15557466",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.189744826423561,
+            "maximum_lambda": 1.189744826423561,
+            "path": "MainCapacityHistory.bin.Accepted.000095.bin",
+            "sha256": "9535D768C31D16D18234820C0F30B1FBD324CF877B013D90D879D7EE15557466",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.189905853529967,
+            "maximum_lambda": 1.189905853529967,
+            "path": "MainCapacityHistory.bin.Accepted.000096.bin",
+            "sha256": "AC20D6E5BEA54342E8E381B06E94D1996F24107B2F656939AC302D0FB41CC81C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529967,
+            "maximum_lambda": 1.189905853529967,
+            "path": "MainCapacityHistory.bin.Accepted.000097.bin",
+            "sha256": "AC20D6E5BEA54342E8E381B06E94D1996F24107B2F656939AC302D0FB41CC81C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529967,
+            "maximum_lambda": 1.189905853529967,
+            "path": "MainCapacityHistory.bin.Accepted.000098.bin",
+            "sha256": "AC20D6E5BEA54342E8E381B06E94D1996F24107B2F656939AC302D0FB41CC81C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529967,
+            "maximum_lambda": 1.189905853529967,
+            "path": "MainCapacityHistory.bin.Accepted.000099.bin",
+            "sha256": "AC20D6E5BEA54342E8E381B06E94D1996F24107B2F656939AC302D0FB41CC81C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189928038316814,
+            "maximum_lambda": 1.189928038316814,
+            "path": "MainCapacityHistory.bin.Accepted.000100.bin",
+            "sha256": "988C4CE946D2AEE5A62B44A851E99B2922C59BB54496429628A76D8A1B3E96A2",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.189928038316814,
+            "maximum_lambda": 1.189928038316814,
+            "path": "MainCapacityHistory.bin.Accepted.000101.bin",
+            "sha256": "988C4CE946D2AEE5A62B44A851E99B2922C59BB54496429628A76D8A1B3E96A2",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000102.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000103.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000104.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000105.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000106.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000107.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000108.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000109.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000110.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000111.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000112.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000113.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000114.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000115.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000116.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000117.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000118.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000119.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000120.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000121.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000122.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.1899443325573105,
+            "maximum_lambda": 1.1899443325573105,
+            "path": "MainCapacityHistory.bin.Accepted.000123.bin",
+            "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+            "states": 60
+          },
+          {
+            "last_lambda": 0.05,
+            "maximum_lambda": 0.05,
+            "path": "MainCapacityHistory.bin.Accepted.000124.bin",
+            "sha256": "82DDDBB3B8C62853BBB1C8C58B824B57CB29E73A1BC4F58DAAB4B233071BCB52",
+            "states": 2
+          },
+          {
+            "last_lambda": 0.06249997390999962,
+            "maximum_lambda": 0.06249997390999962,
+            "path": "MainCapacityHistory.bin.Accepted.000125.bin",
+            "sha256": "6AC4C8D29ADA7B7179DCA5531C317B960B9C9C3FAD06C22A92E868A4F7F22C63",
+            "states": 3
+          },
+          {
+            "last_lambda": 0.07812503663503947,
+            "maximum_lambda": 0.07812503663503947,
+            "path": "MainCapacityHistory.bin.Accepted.000126.bin",
+            "sha256": "C22153D2C558250084761A4D3050C7AC54B29941CDC785F08B69DF4E80468EED",
+            "states": 4
+          },
+          {
+            "last_lambda": 0.09765627181863161,
+            "maximum_lambda": 0.09765627181863161,
+            "path": "MainCapacityHistory.bin.Accepted.000127.bin",
+            "sha256": "85756CDD78546A172A1C353D13EDBA49CB4A0F2CDDE45CCFB9C59D2671D06708",
+            "states": 5
+          },
+          {
+            "last_lambda": 0.12207035608377617,
+            "maximum_lambda": 0.12207035608377617,
+            "path": "MainCapacityHistory.bin.Accepted.000128.bin",
+            "sha256": "D8AF31907B0DADE5AC79FBCEA245B55DA1A8F81D9FC68F8AF05F4DA9897787EF",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.1525880161728715,
+            "maximum_lambda": 0.1525880161728715,
+            "path": "MainCapacityHistory.bin.Accepted.000129.bin",
+            "sha256": "DEBA25B9A6F3D43D4733CD035DAF3016414A813C7292F220B0F95829149668A2",
+            "states": 7
+          },
+          {
+            "last_lambda": 0.19073502822855895,
+            "maximum_lambda": 0.19073502822855895,
+            "path": "MainCapacityHistory.bin.Accepted.000130.bin",
+            "sha256": "4FB5039DCC02867A3E049D5080EB0B9C8E02703A38D48483A7ABE94EB4893FD8",
+            "states": 8
+          },
+          {
+            "last_lambda": 0.2384187937229887,
+            "maximum_lambda": 0.2384187937229887,
+            "path": "MainCapacityHistory.bin.Accepted.000131.bin",
+            "sha256": "9E3B45199A37FF2D92D0558E1957D94376A54E279F85F5099F5188DAF0642023",
+            "states": 9
+          },
+          {
+            "last_lambda": 0.2980235003549798,
+            "maximum_lambda": 0.2980235003549798,
+            "path": "MainCapacityHistory.bin.Accepted.000132.bin",
+            "sha256": "FE4E6E1F12B61AFA7CF3B78E36C11F2B334325F2E1A2958F1035BB8C7ACF2E6B",
+            "states": 10
+          },
+          {
+            "last_lambda": 0.3725293836448235,
+            "maximum_lambda": 0.3725293836448235,
+            "path": "MainCapacityHistory.bin.Accepted.000133.bin",
+            "sha256": "C08DA3B89F4CC69040FF760DA4A4C32637FCDD1816CB1AEEF5CD7B6BE842307C",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.45792278810806625,
+            "maximum_lambda": 0.45792278810806625,
+            "path": "MainCapacityHistory.bin.Accepted.000134.bin",
+            "sha256": "8CA12D9C3F42986F121CEBCBAB920DC27558DD50FCC95ECD04A538384B0944EA",
+            "states": 12
+          },
+          {
+            "last_lambda": 0.5299133230406279,
+            "maximum_lambda": 0.5299133230406279,
+            "path": "MainCapacityHistory.bin.Accepted.000135.bin",
+            "sha256": "9D980C812DDA52EA3CC37DA5D40F23632A49F7C177FB614B2EF409965AAB462C",
+            "states": 13
+          },
+          {
+            "last_lambda": 0.5930720923966634,
+            "maximum_lambda": 0.5930720923966634,
+            "path": "MainCapacityHistory.bin.Accepted.000136.bin",
+            "sha256": "303302E48AB5367595C09DAE884C2DCC286C6D37B3A76C5AE76C30777FACFE96",
+            "states": 14
+          },
+          {
+            "last_lambda": 0.6202628380550972,
+            "maximum_lambda": 0.6202628380550972,
+            "path": "MainCapacityHistory.bin.Accepted.000137.bin",
+            "sha256": "2B8D934D48997A0F5EAA457F453155CE413179F136CD5D3C632D06BA423B4334",
+            "states": 15
+          },
+          {
+            "last_lambda": 0.6380137193933614,
+            "maximum_lambda": 0.6380137193933614,
+            "path": "MainCapacityHistory.bin.Accepted.000138.bin",
+            "sha256": "9A9BD982464D64E940A71709BEA6397193676ED063BA8DA96772844EDE4F41F9",
+            "states": 16
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000139.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000140.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000141.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000142.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000143.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000144.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000145.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000146.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000147.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000148.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000149.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000150.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000151.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000152.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000153.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000154.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000155.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000156.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000157.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000158.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000159.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000160.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000161.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000162.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000163.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000164.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000165.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000166.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000167.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000168.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000169.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000170.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027948,
+            "maximum_lambda": 0.6420980589027948,
+            "path": "MainCapacityHistory.bin.Accepted.000171.bin",
+            "sha256": "BC7A39D3EE40E7611E7E03814323C44E5EFA8BCC664B23325E93A5236B4B566F",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6438628798882379,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000172.bin",
+            "sha256": "239C4766A147279443C6E1837287FF6AB1FD672F832DC3E6865CAE72C1E18B58",
+            "states": 25
+          },
+          {
+            "last_lambda": 0.6436707177561791,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000173.bin",
+            "sha256": "6C2DE992B30A6E7EB86E38FA7A7DCDEEFD2E21FF6AC6639ABD83DB865686186F",
+            "states": 26
+          },
+          {
+            "last_lambda": 0.6434302078373406,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000174.bin",
+            "sha256": "9BB014D3528F043929C6BABCE7E54CD3F1F209DC611A27B3FF5D002CCCE1CA09",
+            "states": 27
+          },
+          {
+            "last_lambda": 0.6431886543613294,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000175.bin",
+            "sha256": "B49C48E50DF81B5AECE29EB41246A088D6D9A3468DD5D1098529ABA752F1BAE7",
+            "states": 28
+          },
+          {
+            "last_lambda": 0.6429382551650967,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000176.bin",
+            "sha256": "610444765E0B286EBCABD69DCB384A695C14080B095EDA29A3C160BA3B3E7DC6",
+            "states": 29
+          },
+          {
+            "last_lambda": 0.642652422787556,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000177.bin",
+            "sha256": "3FF5C1F8728A1B3BF227C2DE09BA765E6D2BA7C70E9B73EB4C048E9FD41C1C44",
+            "states": 30
+          },
+          {
+            "last_lambda": 0.6424077207956321,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000178.bin",
+            "sha256": "81CB613C2907776418B30EF834EC5EC151B44639FF53AB9563D7D83902942FC0",
+            "states": 31
+          },
+          {
+            "last_lambda": 0.6421903057083513,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000179.bin",
+            "sha256": "911007D1B1EB9D9002AAACF80DD278B2F272EB09C6A2868FCB59E82D0FB45719",
+            "states": 32
+          },
+          {
+            "last_lambda": 0.6422385995364129,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000180.bin",
+            "sha256": "FA85E46201B9772AAFA7C8D77C5F20770DEE202A1E2A2BBFEE2F74DB68910D0F",
+            "states": 33
+          },
+          {
+            "last_lambda": 0.6425049933990352,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000181.bin",
+            "sha256": "A7F046405372876804C82EFF923599AA3265784F0A53E2BF3491AFE2ED48E418",
+            "states": 34
+          },
+          {
+            "last_lambda": 0.6434065229688761,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000182.bin",
+            "sha256": "8C191A03A1F9034E27A22FBF3D36B4FEBEFEB889F6635D26E4CD15CBDB3BAAB7",
+            "states": 35
+          },
+          {
+            "last_lambda": 0.6410593151226882,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000183.bin",
+            "sha256": "11B3CA0B53920BB76ADE2FB67BF92E17CE5AC5DB92C57520008832DB1B46D539",
+            "states": 36
+          },
+          {
+            "last_lambda": 0.6389779863384946,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000184.bin",
+            "sha256": "0084CC13DF32A948A7E78004C2324192EC846C88B47B9A97DA12577E596E5358",
+            "states": 37
+          },
+          {
+            "last_lambda": 0.6382899964901037,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000185.bin",
+            "sha256": "12049C417868B6AB10A5F5BDE7EAE8BB11C4714DE96E679D5B6AEA2A94C9C079",
+            "states": 38
+          },
+          {
+            "last_lambda": 0.6400522381806332,
+            "maximum_lambda": 0.6438969961308052,
+            "path": "MainCapacityHistory.bin.Accepted.000186.bin",
+            "sha256": "0C49E024BB884341885F716AC0C3CC8F3944F2332A58EE2B6BB4ECECD4B79C06",
+            "states": 39
+          },
+          {
+            "last_lambda": 0.6458017510491045,
+            "maximum_lambda": 0.6458017510491045,
+            "path": "MainCapacityHistory.bin.Accepted.000187.bin",
+            "sha256": "7786CE8F450A3D24B953F181C52E66F8A18718DFA9D2902EE6330D58AC9C4010",
+            "states": 40
+          },
+          {
+            "last_lambda": 0.6575275130076752,
+            "maximum_lambda": 0.6575275130076752,
+            "path": "MainCapacityHistory.bin.Accepted.000188.bin",
+            "sha256": "382D04131D9D8D602C05E3A58C1D8EDDF8EC09DCA808406F8228701FCF3D510E",
+            "states": 41
+          },
+          {
+            "last_lambda": 0.6590145396523553,
+            "maximum_lambda": 0.6590145396523553,
+            "path": "MainCapacityHistory.bin.Accepted.000189.bin",
+            "sha256": "B3C183A7D5D2D9EFAB03642CEAB2A57B077B86B46057278B2AB45694FD070FDD",
+            "states": 42
+          },
+          {
+            "last_lambda": 0.6717070463772501,
+            "maximum_lambda": 0.6717070463772501,
+            "path": "MainCapacityHistory.bin.Accepted.000190.bin",
+            "sha256": "41B43BD2230E5E222C2472E4057D60F6E02CECF71965D0F36F5FE717F7A4DB62",
+            "states": 43
+          },
+          {
+            "last_lambda": 0.7004210736057802,
+            "maximum_lambda": 0.7004210736057802,
+            "path": "MainCapacityHistory.bin.Accepted.000191.bin",
+            "sha256": "D879B7C65C0A79CC852F9B1AED987F5A3649EB21F165B0EAF199728A96F528D3",
+            "states": 44
+          },
+          {
+            "last_lambda": 0.7495566476322638,
+            "maximum_lambda": 0.7495566476322638,
+            "path": "MainCapacityHistory.bin.Accepted.000192.bin",
+            "sha256": "69E1796584349B5DB08EA34C5DB29A6928B3A00653944A9798805F03692460E4",
+            "states": 45
+          },
+          {
+            "last_lambda": 0.8241889226076053,
+            "maximum_lambda": 0.8241889226076053,
+            "path": "MainCapacityHistory.bin.Accepted.000193.bin",
+            "sha256": "16717F0F980CC5BDF84523FF2269E0299850FF11C26C76B21A763EEFBE3FA586",
+            "states": 46
+          },
+          {
+            "last_lambda": 0.9299906877898648,
+            "maximum_lambda": 0.9299906877898648,
+            "path": "MainCapacityHistory.bin.Accepted.000194.bin",
+            "sha256": "8F7316C2AD4FD5065ABBB204D48952C52D6CF90090A5492EE47EFA112FA9CF8E",
+            "states": 47
+          },
+          {
+            "last_lambda": 0.9299906877898648,
+            "maximum_lambda": 0.9299906877898648,
+            "path": "MainCapacityHistory.bin.Accepted.000195.bin",
+            "sha256": "8F7316C2AD4FD5065ABBB204D48952C52D6CF90090A5492EE47EFA112FA9CF8E",
+            "states": 47
+          },
+          {
+            "last_lambda": 1.0731926284948325,
+            "maximum_lambda": 1.0731926284948325,
+            "path": "MainCapacityHistory.bin.Accepted.000196.bin",
+            "sha256": "B209F00E5D2CC0BEB2E0BDE88D8A79480B4D72FE5E05A8A998FA268616890478",
+            "states": 48
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000197.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000198.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000199.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000200.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000201.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000202.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000203.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000204.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000205.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000206.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000207.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000208.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000209.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000210.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000211.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000212.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000213.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000214.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000215.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000216.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000217.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000218.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000219.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000220.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000221.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000222.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000223.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000224.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000225.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000226.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000227.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000228.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394693,
+            "maximum_lambda": 1.1193338383394693,
+            "path": "MainCapacityHistory.bin.Accepted.000229.bin",
+            "sha256": "573B4306BE9B3804C1ADACC566F5BB85A8AF8A75A785AFA45AEF25A27FFB21E4",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1413272042715987,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000230.bin",
+            "sha256": "FA8BA37B0C811E9352937B32E7DB3767F9C4C07D5AAA24CF3E29E18E01AF69C7",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.1315871705782397,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000231.bin",
+            "sha256": "9C0EE5324B5656D074987EECAFC7C2DA2A6381331E40F6BA0CEEB7CA4863FA8D",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.1217551485544954,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000232.bin",
+            "sha256": "B8866E65CD6B81222EC657FC28FCBCC5CEA66F454C5CBF3AD87911B1327216A2",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.1123311433729093,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000233.bin",
+            "sha256": "843918E3148CFEFC27BA279E5325A74058F653D0675C426A5E36B04140BAB5E2",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.103715595656076,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000234.bin",
+            "sha256": "8A403794FCC24D85D92E69110D3E3D317E599A1085733153B526A90EAC3651B2",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.0962562380296408,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000235.bin",
+            "sha256": "566A314085C01165A44102F3C56465FD7CA7210263AB212E390B881409586CDD",
+            "states": 61
+          },
+          {
+            "last_lambda": 1.0903814114264498,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000236.bin",
+            "sha256": "5BB7BC67464C8EF140915B641754A0858F654CECB469BF6FA180E72883B0CCDB",
+            "states": 62
+          },
+          {
+            "last_lambda": 1.0864359863552022,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000237.bin",
+            "sha256": "597FF3B164AA5C320689C32B326B19663A49F07518866E28822F64B2BCAF1F48",
+            "states": 63
+          },
+          {
+            "last_lambda": 1.0846460913203648,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000238.bin",
+            "sha256": "116D2AA93F6127E86F71F22ED3AAD2E59E7AF067AD23251F089D6F80C9DC9ECB",
+            "states": 64
+          },
+          {
+            "last_lambda": 1.0851968153453166,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000239.bin",
+            "sha256": "8CE3E64C1F8FDFD23BEA18E18EE5F860287CEAD2EC3EF70BD1CD00A271791311",
+            "states": 65
+          },
+          {
+            "last_lambda": 1.0882553904363126,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000240.bin",
+            "sha256": "2FEA92BD7DBE6D6F9A03167CCF6B45DD3777910E4CECC631B04075D1B0ADF4B4",
+            "states": 66
+          },
+          {
+            "last_lambda": 1.0939834972432496,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000241.bin",
+            "sha256": "CE43EE8E52FA1BD9AC9BE1D2BCCAF2F22569831CADE51B339096DF5AC84DF514",
+            "states": 67
+          },
+          {
+            "last_lambda": 1.1024909944364556,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000242.bin",
+            "sha256": "80A10F5FE7F13CB458C58BD5160EBD3E8E1BDE4B216D51A0F5669476D6688D62",
+            "states": 68
+          },
+          {
+            "last_lambda": 1.113964192699026,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000243.bin",
+            "sha256": "D3EFA573669B1EDC7A87FAE61662D798CFA0AF6A1BB36C82121241108168BFA3",
+            "states": 69
+          },
+          {
+            "last_lambda": 1.1287118120696977,
+            "maximum_lambda": 1.1414383215289676,
+            "path": "MainCapacityHistory.bin.Accepted.000244.bin",
+            "sha256": "1547941A977F0471F3A83C1F27562A9D87760DA59A0897C41B62C54078DE2E84",
+            "states": 70
+          },
+          {
+            "last_lambda": 1.147185748875661,
+            "maximum_lambda": 1.147185748875661,
+            "path": "MainCapacityHistory.bin.Accepted.000245.bin",
+            "sha256": "3CBE780D0D98A00979890C243C9ED7A77C5FE5624DC47FFC68984FAABDEAA0BD",
+            "states": 71
+          },
+          {
+            "last_lambda": 1.1700321630878558,
+            "maximum_lambda": 1.1700321630878558,
+            "path": "MainCapacityHistory.bin.Accepted.000246.bin",
+            "sha256": "C0191C58F577FFE65BA600353400125EA9AF6AA27762F0A161142720691D85D2",
+            "states": 72
+          },
+          {
+            "last_lambda": 1.1700321630878558,
+            "maximum_lambda": 1.1700321630878558,
+            "path": "MainCapacityHistory.bin.Accepted.000247.bin",
+            "sha256": "C0191C58F577FFE65BA600353400125EA9AF6AA27762F0A161142720691D85D2",
+            "states": 72
+          },
+          {
+            "last_lambda": 1.1836401277364126,
+            "maximum_lambda": 1.1836401277364126,
+            "path": "MainCapacityHistory.bin.Accepted.000248.bin",
+            "sha256": "786FDB525CCA3E88B5170CF8C4F5C4009691A0E4C475C8A4CF34FE1395EA90E5",
+            "states": 73
+          },
+          {
+            "last_lambda": 1.185893456266756,
+            "maximum_lambda": 1.185893456266756,
+            "path": "MainCapacityHistory.bin.Accepted.000249.bin",
+            "sha256": "4FFBF0DBA726273F3182F9573CD69FEFD1270E16B781F6BD7D60E6438CEDCE17",
+            "states": 74
+          },
+          {
+            "last_lambda": 1.1883845996171472,
+            "maximum_lambda": 1.1883845996171472,
+            "path": "MainCapacityHistory.bin.Accepted.000250.bin",
+            "sha256": "79319CE7F6AEF9F9B41B7B806EBE48CDA57E59E27576B18FBEBA2BF7DD90161F",
+            "states": 75
+          },
+          {
+            "last_lambda": 1.1883845996171472,
+            "maximum_lambda": 1.1883845996171472,
+            "path": "MainCapacityHistory.bin.Accepted.000251.bin",
+            "sha256": "79319CE7F6AEF9F9B41B7B806EBE48CDA57E59E27576B18FBEBA2BF7DD90161F",
+            "states": 75
+          },
+          {
+            "last_lambda": 1.1896700093844388,
+            "maximum_lambda": 1.1896700093844388,
+            "path": "MainCapacityHistory.bin.Accepted.000252.bin",
+            "sha256": "186699547C533345D9395B50C0950E1923E7247C47C3DF2A25161BF589263827",
+            "states": 76
+          },
+          {
+            "last_lambda": 1.1896700093844388,
+            "maximum_lambda": 1.1896700093844388,
+            "path": "MainCapacityHistory.bin.Accepted.000253.bin",
+            "sha256": "186699547C533345D9395B50C0950E1923E7247C47C3DF2A25161BF589263827",
+            "states": 76
+          }
+        ],
+        "verified_saved_prefix": {
+          "last_lambda": 1.1899443325573105,
+          "maximum_lambda": 1.1899443325573105,
+          "path": "MainCapacityHistory.bin.Accepted.000102.bin",
+          "sha256": "7D5C7BDF8577EDC2C3FC47BB432370A1CA01BF63BCDF364E0B5D553DC6DDCF70",
+          "states": 60
+        },
+        "watchdog_seconds": 600,
+        "whole_goal_completed": false,
+        "whole_run_passed": false
+      },
+      "Case07/Native/TimeoutPrefixSummary.json": {
+        "all60_equations_and_six_resultants_verified": true,
+        "exact_own_Excel_closed": true,
+        "final_solver_result_missing": true,
+        "incomplete_or_invalid_files_not_used": [],
+        "no_NumFail_or_physical_Fail_assigned_to_timeout": true,
+        "physical_material_capacity_not_confirmed": true,
+        "quadrature_convergence_not_established": true,
+        "source_histories_scanned": [
+          {
+            "last_lambda": 1.189950842864542,
+            "maximum_lambda": 1.189950842864542,
+            "path": "MainCapacityHistory.bin",
+            "sha256": "AF37AAA8B79ED88FAF75AC8B9D08E48D0B924F419571C41636D75A493C47A9DF",
+            "states": 78
+          },
+          {
+            "last_lambda": 0.5,
+            "maximum_lambda": 0.5,
+            "path": "MainCapacityHistory.bin.Accepted.000001.bin",
+            "sha256": "027470ED73DF0B794C6DD0DECFDF7DDFC431EDE14C046F5BB9E6EBAFE4E60EC2",
+            "states": 2
+          },
+          {
+            "last_lambda": 0.562132426623402,
+            "maximum_lambda": 0.562132426623402,
+            "path": "MainCapacityHistory.bin.Accepted.000002.bin",
+            "sha256": "B29957587D720D8C1DCEBF05CE9995E8A174D6D0DC476F211A04ED4D1ABEC574",
+            "states": 3
+          },
+          {
+            "last_lambda": 0.605952266973916,
+            "maximum_lambda": 0.605952266973916,
+            "path": "MainCapacityHistory.bin.Accepted.000003.bin",
+            "sha256": "3C9D212B2EE3FD708741153F438FA8941E25395CD78E8A05C12B8A5145691F1A",
+            "states": 4
+          },
+          {
+            "last_lambda": 0.6390215698016721,
+            "maximum_lambda": 0.6390215698016721,
+            "path": "MainCapacityHistory.bin.Accepted.000004.bin",
+            "sha256": "FFA7C3F5E4B7C8E577FE3319E8AAABD1CF528463868E3633961303EBFF21B54F",
+            "states": 5
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000005.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000006.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000007.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000008.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000009.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000010.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000011.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000012.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6424668758347608,
+            "maximum_lambda": 0.6424668758347608,
+            "path": "MainCapacityHistory.bin.Accepted.000013.bin",
+            "sha256": "AE1C9E139D17B63C431ED12CA8BB4251F0527507553AFE71460C597B563CA1E8",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.6422887106161803,
+            "maximum_lambda": 0.6426575160976441,
+            "path": "MainCapacityHistory.bin.Accepted.000014.bin",
+            "sha256": "FA0755BD8286A618862BAB82BEDEFA28437EAED0A4DE20F5974E2C7218A1A2D0",
+            "states": 10
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000015.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000016.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000017.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000018.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000019.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000020.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000021.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000022.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6432048410595825,
+            "maximum_lambda": 0.6432048410595825,
+            "path": "MainCapacityHistory.bin.Accepted.000023.bin",
+            "sha256": "543A9E7CEE7EE1F6DA58EB09EB4ED7F7165EB25085ECDFD0E147C8646193BA37",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.6421068176201705,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000024.bin",
+            "sha256": "ADF051CD62F8142EE3E221DD1D813F1253D62E6CC95A6BFDE34514D90B120139",
+            "states": 15
+          },
+          {
+            "last_lambda": 0.6396687603595785,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000025.bin",
+            "sha256": "D1D6FC5C36B5EEB221C5BC45AFB617CDC1BBE3B85379E43796FA13B4054DBA42",
+            "states": 16
+          },
+          {
+            "last_lambda": 0.6383304087697287,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000026.bin",
+            "sha256": "540B24603370549F2EC364FA85148C1E2AD67741BE2B9599B637E107C7F0B784",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6390251211923683,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000027.bin",
+            "sha256": "A455A36ED367419114A56039076E2DE063E5458E4764A76108F5C7729D1664D3",
+            "states": 18
+          },
+          {
+            "last_lambda": 0.6430651194157097,
+            "maximum_lambda": 0.643207903554429,
+            "path": "MainCapacityHistory.bin.Accepted.000028.bin",
+            "sha256": "73B3EE299987B879E0D445837CA4D6CD9E8F5C86E6BB2BED32459A9E4551E657",
+            "states": 19
+          },
+          {
+            "last_lambda": 0.6522907569780702,
+            "maximum_lambda": 0.6522907569780702,
+            "path": "MainCapacityHistory.bin.Accepted.000029.bin",
+            "sha256": "4AEB7455B105FD24EC9A676EC401ECF2FDB90EDD39F4F53A46E15D7BB36CF351",
+            "states": 20
+          },
+          {
+            "last_lambda": 0.6576431822811759,
+            "maximum_lambda": 0.6576431822811759,
+            "path": "MainCapacityHistory.bin.Accepted.000030.bin",
+            "sha256": "2519492FB2C4661B362F3038DD376BD32768AEAE324D600E34843735CC842A67",
+            "states": 21
+          },
+          {
+            "last_lambda": 0.6653653338346439,
+            "maximum_lambda": 0.6653653338346439,
+            "path": "MainCapacityHistory.bin.Accepted.000031.bin",
+            "sha256": "1FF6D7B709E71B815BC34F245A9C7847C3108FF0FD3926A4813B76CC48DE5E74",
+            "states": 22
+          },
+          {
+            "last_lambda": 0.6876905133289537,
+            "maximum_lambda": 0.6876905133289537,
+            "path": "MainCapacityHistory.bin.Accepted.000032.bin",
+            "sha256": "DD4745BD1AF6A0C80CD5149974BB644F9BB532F7F44581AEB1CECC937296C21E",
+            "states": 23
+          },
+          {
+            "last_lambda": 0.7287942608978428,
+            "maximum_lambda": 0.7287942608978428,
+            "path": "MainCapacityHistory.bin.Accepted.000033.bin",
+            "sha256": "4B157B2B7173CA1D85D82A61138D1F18DC435B6BD434EF22E6FA4C99942C043F",
+            "states": 24
+          },
+          {
+            "last_lambda": 0.7934823038905027,
+            "maximum_lambda": 0.7934823038905027,
+            "path": "MainCapacityHistory.bin.Accepted.000034.bin",
+            "sha256": "3DB0091880D44BD6A890C2745949AA68E3C43FA2AD77B17D39A32275CCEB8A06",
+            "states": 25
+          },
+          {
+            "last_lambda": 0.8872331453134925,
+            "maximum_lambda": 0.8872331453134925,
+            "path": "MainCapacityHistory.bin.Accepted.000035.bin",
+            "sha256": "6861004E283D780C01338236710164B96E345F83EFF7749BE5072E65AEB663A8",
+            "states": 26
+          },
+          {
+            "last_lambda": 0.8872331453134925,
+            "maximum_lambda": 0.8872331453134925,
+            "path": "MainCapacityHistory.bin.Accepted.000036.bin",
+            "sha256": "6861004E283D780C01338236710164B96E345F83EFF7749BE5072E65AEB663A8",
+            "states": 26
+          },
+          {
+            "last_lambda": 1.016056567472309,
+            "maximum_lambda": 1.016056567472309,
+            "path": "MainCapacityHistory.bin.Accepted.000037.bin",
+            "sha256": "2DA709F7A94639CD47CA84DA42A4BA450C5043A3F1B0BDBCA40EDD3D4DCACA5A",
+            "states": 27
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000038.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000039.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000040.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000041.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000042.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000043.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000044.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000045.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000046.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000047.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000048.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000049.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000050.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000051.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000052.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000053.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000054.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000055.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000056.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000057.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000058.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000059.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000060.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000061.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000062.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000063.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000064.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000065.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.1323320828526007,
+            "maximum_lambda": 1.1323320828526007,
+            "path": "MainCapacityHistory.bin.Accepted.000066.bin",
+            "sha256": "1822BA2C8266460B194505E3F1292026028C4AC0FE795F7D36822EC9EAD7B86F",
+            "states": 28
+          },
+          {
+            "last_lambda": 1.14110255394035,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000067.bin",
+            "sha256": "91BEC8A98E57309046F5AA699A1E798C3D5B7BD28C9E8DF182EA1244E1FB1E08",
+            "states": 35
+          },
+          {
+            "last_lambda": 1.1327894610337357,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000068.bin",
+            "sha256": "D547656B528D67EF3BBE992D5C6B09DDACF511DFD0C9A1081B452D9231E5ADBF",
+            "states": 36
+          },
+          {
+            "last_lambda": 1.1241048168575034,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000069.bin",
+            "sha256": "710781DEFE8708B46498CBB8760EDF3AF3F86399FC9591333DD9DE70D8DD4232",
+            "states": 37
+          },
+          {
+            "last_lambda": 1.115433201988025,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000070.bin",
+            "sha256": "38E481F8BDD07EFF5D929835EBC47F2AA3E3304BA7FEC8D309A217596A9F6217",
+            "states": 38
+          },
+          {
+            "last_lambda": 1.1072068590629889,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000071.bin",
+            "sha256": "6D1AB4C03ADD9C9EBDD79E3FB70F25537D8A0C4B1B5DCB84F1F09B700422FC59",
+            "states": 39
+          },
+          {
+            "last_lambda": 1.0996717730858319,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000072.bin",
+            "sha256": "6C6A5A71D69C158A8ADA746BE736CFC6A22E18D4043471C3092733BCEA9E72F4",
+            "states": 40
+          },
+          {
+            "last_lambda": 1.0933010725406056,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000073.bin",
+            "sha256": "5F837DB597BA1DAEE78161E850CDAD7E0FCE5815D298B930CCAB2883A674479D",
+            "states": 41
+          },
+          {
+            "last_lambda": 1.0884669361554238,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000074.bin",
+            "sha256": "F60DEFED83D3BCAC28D85BE11B3357A75BE54CEF911A38711D538FC467A8307E",
+            "states": 42
+          },
+          {
+            "last_lambda": 1.0854693760794603,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000075.bin",
+            "sha256": "583D2765135FB860278C8DD01D2E8DA1CD4A429FA40B41AB29C728F2705246B1",
+            "states": 43
+          },
+          {
+            "last_lambda": 1.0845689036188462,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000076.bin",
+            "sha256": "EEAB5FFC17275ED04AE4666E8F0B0C08CF28A57F21B8105D4B04BAB538AFECD5",
+            "states": 44
+          },
+          {
+            "last_lambda": 1.0859392577871003,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000077.bin",
+            "sha256": "AC07FB69A112BD2CEF6E9E502D67028ACA796F63BFD64B66AE0E6769DF981A82",
+            "states": 45
+          },
+          {
+            "last_lambda": 1.0898003414150872,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000078.bin",
+            "sha256": "ECBC886DF5A2585A59ADD02B30CD460BAC4B02B4597A00C8E26917730805057C",
+            "states": 46
+          },
+          {
+            "last_lambda": 1.0962945462662763,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000079.bin",
+            "sha256": "46EB93F225E3000900FD307887BC98785F4CE04C8DB874C5F3453C99410F8AA0",
+            "states": 47
+          },
+          {
+            "last_lambda": 1.105563787730125,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000080.bin",
+            "sha256": "3A596E76EC4F968FFDC59013D1A98E1E76274AF48FB37E13AB8A4B598615936D",
+            "states": 48
+          },
+          {
+            "last_lambda": 1.1178378163911444,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000081.bin",
+            "sha256": "8E816070F29911CAF4270765E6C487B82D6E5C0068824CAF8259BBDFD868BBED",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1334680818321714,
+            "maximum_lambda": 1.1414387568790123,
+            "path": "MainCapacityHistory.bin.Accepted.000082.bin",
+            "sha256": "55E4377EAEC0D07EB32A39BEFE3F3E5234505335AE847D5A83AA0F1D14AFD54A",
+            "states": 50
+          },
+          {
+            "last_lambda": 1.1529597430172853,
+            "maximum_lambda": 1.1529597430172853,
+            "path": "MainCapacityHistory.bin.Accepted.000083.bin",
+            "sha256": "D6E372D4D60851BE07E57BF1AB99E2C429ECAD573B31E609AF37BAADD80EC2FA",
+            "states": 51
+          },
+          {
+            "last_lambda": 1.1770123054681136,
+            "maximum_lambda": 1.1770123054681136,
+            "path": "MainCapacityHistory.bin.Accepted.000084.bin",
+            "sha256": "EB740CD3D19EC090A9E895B64AE49067B7EC8521AD404C336C6F05FAC906146B",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.1770123054681136,
+            "maximum_lambda": 1.1770123054681136,
+            "path": "MainCapacityHistory.bin.Accepted.000085.bin",
+            "sha256": "EB740CD3D19EC090A9E895B64AE49067B7EC8521AD404C336C6F05FAC906146B",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.1770123054681136,
+            "maximum_lambda": 1.1770123054681136,
+            "path": "MainCapacityHistory.bin.Accepted.000086.bin",
+            "sha256": "EB740CD3D19EC090A9E895B64AE49067B7EC8521AD404C336C6F05FAC906146B",
+            "states": 52
+          },
+          {
+            "last_lambda": 1.1838967136498808,
+            "maximum_lambda": 1.1838967136498808,
+            "path": "MainCapacityHistory.bin.Accepted.000087.bin",
+            "sha256": "5C409552B20284BBB71635E43457BB670D99D93D692128BFF188B04C32D9510D",
+            "states": 53
+          },
+          {
+            "last_lambda": 1.185781954970322,
+            "maximum_lambda": 1.185781954970322,
+            "path": "MainCapacityHistory.bin.Accepted.000088.bin",
+            "sha256": "B7DE500C44DA1C15976041ADF79D7C79F4C5C5DC9B230D7DA137867ABA70BC8A",
+            "states": 54
+          },
+          {
+            "last_lambda": 1.1879520536462524,
+            "maximum_lambda": 1.1879520536462524,
+            "path": "MainCapacityHistory.bin.Accepted.000089.bin",
+            "sha256": "95F1B81FA5B2927EA238E88FB868232F869FF970889DD5E67FCEB462697660B6",
+            "states": 55
+          },
+          {
+            "last_lambda": 1.1879520536462524,
+            "maximum_lambda": 1.1879520536462524,
+            "path": "MainCapacityHistory.bin.Accepted.000090.bin",
+            "sha256": "95F1B81FA5B2927EA238E88FB868232F869FF970889DD5E67FCEB462697660B6",
+            "states": 55
+          },
+          {
+            "last_lambda": 1.1890771875319839,
+            "maximum_lambda": 1.1890771875319839,
+            "path": "MainCapacityHistory.bin.Accepted.000091.bin",
+            "sha256": "5DD378CEBC5E18E4E3760436EF45C4C813F65A6B835E656CC54693797C55D9D5",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.1890771875319839,
+            "maximum_lambda": 1.1890771875319839,
+            "path": "MainCapacityHistory.bin.Accepted.000092.bin",
+            "sha256": "5DD378CEBC5E18E4E3760436EF45C4C813F65A6B835E656CC54693797C55D9D5",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.1897448264235622,
+            "maximum_lambda": 1.1897448264235622,
+            "path": "MainCapacityHistory.bin.Accepted.000093.bin",
+            "sha256": "562CAAFCBA978C41AC4D47761117B5BA1DCE77791FA87C7A2737B3A59EC390C3",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.1897448264235622,
+            "maximum_lambda": 1.1897448264235622,
+            "path": "MainCapacityHistory.bin.Accepted.000094.bin",
+            "sha256": "562CAAFCBA978C41AC4D47761117B5BA1DCE77791FA87C7A2737B3A59EC390C3",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.1897448264235622,
+            "maximum_lambda": 1.1897448264235622,
+            "path": "MainCapacityHistory.bin.Accepted.000095.bin",
+            "sha256": "562CAAFCBA978C41AC4D47761117B5BA1DCE77791FA87C7A2737B3A59EC390C3",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.189905853529968,
+            "maximum_lambda": 1.189905853529968,
+            "path": "MainCapacityHistory.bin.Accepted.000096.bin",
+            "sha256": "2AA8F405EBC246205F46982FA5CB6F7470BF7AD7399475FE8736AA5723FF988C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529968,
+            "maximum_lambda": 1.189905853529968,
+            "path": "MainCapacityHistory.bin.Accepted.000097.bin",
+            "sha256": "2AA8F405EBC246205F46982FA5CB6F7470BF7AD7399475FE8736AA5723FF988C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529968,
+            "maximum_lambda": 1.189905853529968,
+            "path": "MainCapacityHistory.bin.Accepted.000098.bin",
+            "sha256": "2AA8F405EBC246205F46982FA5CB6F7470BF7AD7399475FE8736AA5723FF988C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.189905853529968,
+            "maximum_lambda": 1.189905853529968,
+            "path": "MainCapacityHistory.bin.Accepted.000099.bin",
+            "sha256": "2AA8F405EBC246205F46982FA5CB6F7470BF7AD7399475FE8736AA5723FF988C",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000100.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000101.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000102.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000103.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000104.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1899280866414503,
+            "maximum_lambda": 1.1899280866414503,
+            "path": "MainCapacityHistory.bin.Accepted.000105.bin",
+            "sha256": "4896D47A06C13A231821B5EB23C87E32ACAD67F24B62E2821901E9321DC05F99",
+            "states": 59
+          },
+          {
+            "last_lambda": 0.05,
+            "maximum_lambda": 0.05,
+            "path": "MainCapacityHistory.bin.Accepted.000106.bin",
+            "sha256": "A3F870C027353F17F9F7BC89C342350F832F2592E6B3FCDE1E590C6DEAAE9AD6",
+            "states": 2
+          },
+          {
+            "last_lambda": 0.06249997390999926,
+            "maximum_lambda": 0.06249997390999926,
+            "path": "MainCapacityHistory.bin.Accepted.000107.bin",
+            "sha256": "8C0CAEBF9F03B9FCF26382CE25CF00EB416F24710336FE2EFCD9D4A7BC5022E4",
+            "states": 3
+          },
+          {
+            "last_lambda": 0.07812503663503943,
+            "maximum_lambda": 0.07812503663503943,
+            "path": "MainCapacityHistory.bin.Accepted.000108.bin",
+            "sha256": "94F92D6278FE3FEB2C47171807F501AEF48CE27E2485A1FCB7CD36F2D533DEF6",
+            "states": 4
+          },
+          {
+            "last_lambda": 0.09765627181863237,
+            "maximum_lambda": 0.09765627181863237,
+            "path": "MainCapacityHistory.bin.Accepted.000109.bin",
+            "sha256": "3357BFAE7DBA8D3CC3D5AE3A67F5A3B3B3A58A478505EB63FF6FEC6DC9C2A475",
+            "states": 5
+          },
+          {
+            "last_lambda": 0.12207035608377527,
+            "maximum_lambda": 0.12207035608377527,
+            "path": "MainCapacityHistory.bin.Accepted.000110.bin",
+            "sha256": "771A402F8840CB77655C1414D7FBD6734393176D2A6E33FBE9D24AD431E10586",
+            "states": 6
+          },
+          {
+            "last_lambda": 0.1525880161728715,
+            "maximum_lambda": 0.1525880161728715,
+            "path": "MainCapacityHistory.bin.Accepted.000111.bin",
+            "sha256": "7A2B78F42B2AEBAD9F7926117106F111F47A7EEE676BD65B85B36FAF19030BCE",
+            "states": 7
+          },
+          {
+            "last_lambda": 0.19073502822855473,
+            "maximum_lambda": 0.19073502822855473,
+            "path": "MainCapacityHistory.bin.Accepted.000112.bin",
+            "sha256": "A67F965E73F42970710BB92CEF31069840F82C6E128EDE20D883344E987C3D51",
+            "states": 8
+          },
+          {
+            "last_lambda": 0.23841879372299826,
+            "maximum_lambda": 0.23841879372299826,
+            "path": "MainCapacityHistory.bin.Accepted.000113.bin",
+            "sha256": "7A1BD559F8A1286E969FC9A779C21A6295E52A3A29630DE505C897E3472270CB",
+            "states": 9
+          },
+          {
+            "last_lambda": 0.2980235003549778,
+            "maximum_lambda": 0.2980235003549778,
+            "path": "MainCapacityHistory.bin.Accepted.000114.bin",
+            "sha256": "376BBFC9DFF7A21DD92F4C28CBA6408EC4447A7D1AA7D2591EA1782C5488CED4",
+            "states": 10
+          },
+          {
+            "last_lambda": 0.37252938364481897,
+            "maximum_lambda": 0.37252938364481897,
+            "path": "MainCapacityHistory.bin.Accepted.000115.bin",
+            "sha256": "9D6A324416EA869900080876C36A897CC93231EE3CC3CC4694CFB067125C6ACA",
+            "states": 11
+          },
+          {
+            "last_lambda": 0.45792278810806647,
+            "maximum_lambda": 0.45792278810806647,
+            "path": "MainCapacityHistory.bin.Accepted.000116.bin",
+            "sha256": "7DE61C27D1D5DBAAA17C990947A85365DE435EBE6235B47A19561E5750E1CB37",
+            "states": 12
+          },
+          {
+            "last_lambda": 0.5299133230406278,
+            "maximum_lambda": 0.5299133230406278,
+            "path": "MainCapacityHistory.bin.Accepted.000117.bin",
+            "sha256": "7E58D1EAFA3FAE573AD550FBB11CA1579C5E2F2E16EB76A382EFCCB48CD3F4DE",
+            "states": 13
+          },
+          {
+            "last_lambda": 0.5930720923966638,
+            "maximum_lambda": 0.5930720923966638,
+            "path": "MainCapacityHistory.bin.Accepted.000118.bin",
+            "sha256": "1690F1478B5E62D9C5EC0C96EE05E7E1E5647F44656BDDBEBE1F6082ECA384F2",
+            "states": 14
+          },
+          {
+            "last_lambda": 0.6202628380550966,
+            "maximum_lambda": 0.6202628380550966,
+            "path": "MainCapacityHistory.bin.Accepted.000119.bin",
+            "sha256": "0AC314ADE0156263056CAA385279A75FDAFD694E3027F6E487A951DA03C3B0D8",
+            "states": 15
+          },
+          {
+            "last_lambda": 0.6380137193933613,
+            "maximum_lambda": 0.6380137193933613,
+            "path": "MainCapacityHistory.bin.Accepted.000120.bin",
+            "sha256": "105CDBB3FBE6AC72499E37BB7B074B1861BE3A55C2A4F030689393FA3F3E6594",
+            "states": 16
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000121.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000122.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000123.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000124.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000125.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000126.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000127.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000128.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000129.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000130.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000131.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000132.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000133.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000134.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000135.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000136.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000137.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000138.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000139.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000140.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000141.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000142.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000143.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000144.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000145.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000146.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000147.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000148.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000149.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000150.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000151.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000152.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6420980589027949,
+            "maximum_lambda": 0.6420980589027949,
+            "path": "MainCapacityHistory.bin.Accepted.000153.bin",
+            "sha256": "E27F5FE28E4A0E947C44AD83E587C5F3881ED4C17F76A8E9DE5BF786586D2653",
+            "states": 17
+          },
+          {
+            "last_lambda": 0.6438628798882376,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000154.bin",
+            "sha256": "14905B8D8E4D0D42349FCE414C0C6775B5C616D0E7A17A7AD9F8E75980FA557C",
+            "states": 25
+          },
+          {
+            "last_lambda": 0.6436707177561793,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000155.bin",
+            "sha256": "23E4BC4B14F6B1A9205237C15CC5B36BE2650765BE58E9C794335A89E5C3A2C5",
+            "states": 26
+          },
+          {
+            "last_lambda": 0.6434302078373414,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000156.bin",
+            "sha256": "747C8401B62D16F0CB59F3A7BF23B051252C2BF13033983B0DB71C2B95AC965D",
+            "states": 27
+          },
+          {
+            "last_lambda": 0.643188654361329,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000157.bin",
+            "sha256": "7332F28CBAD4DB482F61CCC7ED3A8161E1D49F16F1D489D2B1BB82CBA14858BC",
+            "states": 28
+          },
+          {
+            "last_lambda": 0.6429382551650962,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000158.bin",
+            "sha256": "41841B6D94F3019A09C2C0B9EE6288A9789F09E6460ECCC88904B4DB961E3C55",
+            "states": 29
+          },
+          {
+            "last_lambda": 0.6426524227875555,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000159.bin",
+            "sha256": "CB987AE9D63B0385928813E42F099896649E155DFC140837B7E42A08403EFFF7",
+            "states": 30
+          },
+          {
+            "last_lambda": 0.6424077207956319,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000160.bin",
+            "sha256": "4CA0DA97E4B9C92742365F63BED98E1CC20825E24C7283A407FF8E7C8440EA99",
+            "states": 31
+          },
+          {
+            "last_lambda": 0.6421903057083512,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000161.bin",
+            "sha256": "CAB95F6BEFC4AA1783F90AB8381229E1AA1FAED2B12D15CF4D8AB385ED8AEF7D",
+            "states": 32
+          },
+          {
+            "last_lambda": 0.6422385995364136,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000162.bin",
+            "sha256": "FB57DE9A19D57FC03682242CA38B4A89BE1BD19B8961236966AA10A4C6D59175",
+            "states": 33
+          },
+          {
+            "last_lambda": 0.6425049933990351,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000163.bin",
+            "sha256": "5884CB9D5C1ED2CC78EBE90C783B89330AE6A3BB532894ADDADD028DD2D8246B",
+            "states": 34
+          },
+          {
+            "last_lambda": 0.6434065229688758,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000164.bin",
+            "sha256": "ECE651FB2F32AA3388EA13B78FF8D458FC75FA129813331B71CAA7DEC6A2E2C6",
+            "states": 35
+          },
+          {
+            "last_lambda": 0.6410593151226884,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000165.bin",
+            "sha256": "D7E0D3879D43E655B6F775F059482F94BEBC9B1C7F8D30622B26CEDF39389181",
+            "states": 36
+          },
+          {
+            "last_lambda": 0.638977986338494,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000166.bin",
+            "sha256": "A46CB879EC20E2EB38918CB84234E4B9464274A7D87EACBE86A32B0B7F69AF9B",
+            "states": 37
+          },
+          {
+            "last_lambda": 0.638289996490104,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000167.bin",
+            "sha256": "82240BF69BCAFE68D274E66A4CDE4F0C1EC12A45D25F15B4070CFCE93A021256",
+            "states": 38
+          },
+          {
+            "last_lambda": 0.6400522381806331,
+            "maximum_lambda": 0.6438969961308049,
+            "path": "MainCapacityHistory.bin.Accepted.000168.bin",
+            "sha256": "3206276D8B45585F67F9030A02B3F90811E9CCD0B5B198F051756134E4996D2C",
+            "states": 39
+          },
+          {
+            "last_lambda": 0.6458017510491043,
+            "maximum_lambda": 0.6458017510491043,
+            "path": "MainCapacityHistory.bin.Accepted.000169.bin",
+            "sha256": "4F2E640D0A1078E1CFF4D958FEAF0F42E8FF832980ACD9771E08631F28F58AD7",
+            "states": 40
+          },
+          {
+            "last_lambda": 0.657527513007675,
+            "maximum_lambda": 0.657527513007675,
+            "path": "MainCapacityHistory.bin.Accepted.000170.bin",
+            "sha256": "93914FD179AC4E647F09AEB7E4423FC61D53E04A24EA062B0DF021E5AB1CCE2F",
+            "states": 41
+          },
+          {
+            "last_lambda": 0.6590145396523548,
+            "maximum_lambda": 0.6590145396523548,
+            "path": "MainCapacityHistory.bin.Accepted.000171.bin",
+            "sha256": "C9E7DCE10FBA79567475437176A0488CFC9AFC270910C4FAAEFCEC3F1D4A0285",
+            "states": 42
+          },
+          {
+            "last_lambda": 0.6717070463772493,
+            "maximum_lambda": 0.6717070463772493,
+            "path": "MainCapacityHistory.bin.Accepted.000172.bin",
+            "sha256": "9D92A98706E703557F8FD93A1CB917E7C8707837B0F48C37C0F391370C7BB036",
+            "states": 43
+          },
+          {
+            "last_lambda": 0.7004210736057802,
+            "maximum_lambda": 0.7004210736057802,
+            "path": "MainCapacityHistory.bin.Accepted.000173.bin",
+            "sha256": "B317BA9792D931C09915167B74811A6A0F29DB2B209EBD6CD416AB4C07A119FF",
+            "states": 44
+          },
+          {
+            "last_lambda": 0.7495566476322637,
+            "maximum_lambda": 0.7495566476322637,
+            "path": "MainCapacityHistory.bin.Accepted.000174.bin",
+            "sha256": "00FA2F1BD58D08B48AE043F712B6C35C3530837E0720D44CF950826FBB304406",
+            "states": 45
+          },
+          {
+            "last_lambda": 0.8241889226076042,
+            "maximum_lambda": 0.8241889226076042,
+            "path": "MainCapacityHistory.bin.Accepted.000175.bin",
+            "sha256": "EBE64BD2AC3DC0E2081D188D9AFBC10E218887AF756BEDC5A272DDC550CC697F",
+            "states": 46
+          },
+          {
+            "last_lambda": 0.9299906877898657,
+            "maximum_lambda": 0.9299906877898657,
+            "path": "MainCapacityHistory.bin.Accepted.000176.bin",
+            "sha256": "167D218DAC8DB55A7C36BD1E92AB7BAB1D50043C8222B7D52C5EA94BCBBDED58",
+            "states": 47
+          },
+          {
+            "last_lambda": 0.9299906877898657,
+            "maximum_lambda": 0.9299906877898657,
+            "path": "MainCapacityHistory.bin.Accepted.000177.bin",
+            "sha256": "167D218DAC8DB55A7C36BD1E92AB7BAB1D50043C8222B7D52C5EA94BCBBDED58",
+            "states": 47
+          },
+          {
+            "last_lambda": 1.0731926284948325,
+            "maximum_lambda": 1.0731926284948325,
+            "path": "MainCapacityHistory.bin.Accepted.000178.bin",
+            "sha256": "27812DD58623973160C0EC16A30D14D463FDE1232448383A21B33264D6260E2B",
+            "states": 48
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000179.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000180.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000181.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000182.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000183.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000184.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000185.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000186.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000187.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000188.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000189.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000190.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000191.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000192.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000193.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000194.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000195.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000196.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000197.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000198.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000199.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000200.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000201.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000202.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000203.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000204.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000205.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000206.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000207.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000208.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000209.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000210.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1193338383394689,
+            "maximum_lambda": 1.1193338383394689,
+            "path": "MainCapacityHistory.bin.Accepted.000211.bin",
+            "sha256": "B4702BA999530C6D03165C93A7C131C1C30ACA99A208DF90FD439F4BE14E1D82",
+            "states": 49
+          },
+          {
+            "last_lambda": 1.1413272005437896,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000212.bin",
+            "sha256": "95AB2714A9AEBC5DB81F02604278E659DE70689C4F5D96E77F1FE87FF56F2CD1",
+            "states": 56
+          },
+          {
+            "last_lambda": 1.131587170574755,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000213.bin",
+            "sha256": "BA322ED05F488A0AD2E78545451198E6712F6852C0773F68DAE9E207012EF535",
+            "states": 57
+          },
+          {
+            "last_lambda": 1.121755148541761,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000214.bin",
+            "sha256": "F5D26D506A349A40389D9E419C41DC0727E36B85B514EF6341971F7CA6FEE7FD",
+            "states": 58
+          },
+          {
+            "last_lambda": 1.1123311433586023,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000215.bin",
+            "sha256": "88DAA4A1BD154F08BB2D9731BABB9FAA9EDB6A338860189DC984338E03544C5E",
+            "states": 59
+          },
+          {
+            "last_lambda": 1.1037155956552012,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000216.bin",
+            "sha256": "543534D2CBF47887A191C6D53F57E76714F7AFBB4BA6EDD1A9F937A7D3819CA6",
+            "states": 60
+          },
+          {
+            "last_lambda": 1.0962562380291363,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000217.bin",
+            "sha256": "19148174137845259DDD02E418D81B607743FD11EDDC60C2690D84223B19DCDB",
+            "states": 61
+          },
+          {
+            "last_lambda": 1.090381411426173,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000218.bin",
+            "sha256": "372264484911ECF9822D3B59E5A6D7CE6C86D6F3BEC6A6FE6FACC36CFDBA0A64",
+            "states": 62
+          },
+          {
+            "last_lambda": 1.0864359863549458,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000219.bin",
+            "sha256": "4FB1A5778EB58A67C080DA1514599AF0F0D9F99A2ADD164CAB98758925051C57",
+            "states": 63
+          },
+          {
+            "last_lambda": 1.0846460913201024,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000220.bin",
+            "sha256": "FDA5B851ADC123EC8F22ED8DCB2A35CF6D8539721F22AED57A670FB6915FBC61",
+            "states": 64
+          },
+          {
+            "last_lambda": 1.085196815345188,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000221.bin",
+            "sha256": "E262D9743826128667489CE8E907704E2F34871A92CF38B9A6186F6EB2DF32BF",
+            "states": 65
+          },
+          {
+            "last_lambda": 1.0882553904362213,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000222.bin",
+            "sha256": "F63688F66ABC8BE557B07F0A5FEC766FDC555D001CEF7097E56BF4E60A910648",
+            "states": 66
+          },
+          {
+            "last_lambda": 1.0939834972431033,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000223.bin",
+            "sha256": "E89550A36AA498D3B7B5C65AD3ACB68E26852A6E4E6881906DC67C3F06A5C5D2",
+            "states": 67
+          },
+          {
+            "last_lambda": 1.1024909944363268,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000224.bin",
+            "sha256": "1BC1A8EC894E35C72EBB73403419606FBAA36963DF0C209C3106F2A8D7DFE595",
+            "states": 68
+          },
+          {
+            "last_lambda": 1.1139641926989228,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000225.bin",
+            "sha256": "EC22368EB7BBB346AE3D3BA2026C33CB4DD5F054E53513BBC7B7EF42BF4D3C2B",
+            "states": 69
+          },
+          {
+            "last_lambda": 1.1287118120696111,
+            "maximum_lambda": 1.141438321528967,
+            "path": "MainCapacityHistory.bin.Accepted.000226.bin",
+            "sha256": "B686FCA1197DE7D9BB258400F1034AA6083C8BE5B2DDBAC394F2199A8C7BB971",
+            "states": 70
+          },
+          {
+            "last_lambda": 1.1471857488755892,
+            "maximum_lambda": 1.1471857488755892,
+            "path": "MainCapacityHistory.bin.Accepted.000227.bin",
+            "sha256": "366F9A98478581F5C3A33933A7B9725070776369F4349CE741F9CEFDE6C70D82",
+            "states": 71
+          },
+          {
+            "last_lambda": 1.1700321630877974,
+            "maximum_lambda": 1.1700321630877974,
+            "path": "MainCapacityHistory.bin.Accepted.000228.bin",
+            "sha256": "E9CC914F4EA6A41E4D75BEE5AEB00E32E75084F3E99926B13762027F96AF33F3",
+            "states": 72
+          },
+          {
+            "last_lambda": 1.1700321630877974,
+            "maximum_lambda": 1.1700321630877974,
+            "path": "MainCapacityHistory.bin.Accepted.000229.bin",
+            "sha256": "E9CC914F4EA6A41E4D75BEE5AEB00E32E75084F3E99926B13762027F96AF33F3",
+            "states": 72
+          },
+          {
+            "last_lambda": 1.1836401277363806,
+            "maximum_lambda": 1.1836401277363806,
+            "path": "MainCapacityHistory.bin.Accepted.000230.bin",
+            "sha256": "3DFB0A5AC12EFF350CDD019CB7B4B32964C35E9761F4213B38178CCB93381935",
+            "states": 73
+          },
+          {
+            "last_lambda": 1.1858934562667296,
+            "maximum_lambda": 1.1858934562667296,
+            "path": "MainCapacityHistory.bin.Accepted.000231.bin",
+            "sha256": "88DFE6B71CA0964872AB15910EFDAEA18CC35B1B6983BF275221BB369EF3FA22",
+            "states": 74
+          },
+          {
+            "last_lambda": 1.1883845996171236,
+            "maximum_lambda": 1.1883845996171236,
+            "path": "MainCapacityHistory.bin.Accepted.000232.bin",
+            "sha256": "366C9488AE7ADBB2943A7A816C612217674573B4DA2714D1E18B694D9BA6D6F0",
+            "states": 75
+          },
+          {
+            "last_lambda": 1.1883845996171236,
+            "maximum_lambda": 1.1883845996171236,
+            "path": "MainCapacityHistory.bin.Accepted.000233.bin",
+            "sha256": "366C9488AE7ADBB2943A7A816C612217674573B4DA2714D1E18B694D9BA6D6F0",
+            "states": 75
+          },
+          {
+            "last_lambda": 1.1896700093843688,
+            "maximum_lambda": 1.1896700093843688,
+            "path": "MainCapacityHistory.bin.Accepted.000234.bin",
+            "sha256": "D0928C393872BE00C82CBFF501B72AEBBBB844A6B51C321B50828D6DF44BE032",
+            "states": 76
+          },
+          {
+            "last_lambda": 1.1896700093843688,
+            "maximum_lambda": 1.1896700093843688,
+            "path": "MainCapacityHistory.bin.Accepted.000235.bin",
+            "sha256": "D0928C393872BE00C82CBFF501B72AEBBBB844A6B51C321B50828D6DF44BE032",
+            "states": 76
+          },
+          {
+            "last_lambda": 1.1896700093843688,
+            "maximum_lambda": 1.1896700093843688,
+            "path": "MainCapacityHistory.bin.Accepted.000236.bin",
+            "sha256": "D0928C393872BE00C82CBFF501B72AEBBBB844A6B51C321B50828D6DF44BE032",
+            "states": 76
+          },
+          {
+            "last_lambda": 1.1896700093843688,
+            "maximum_lambda": 1.1896700093843688,
+            "path": "MainCapacityHistory.bin.Accepted.000237.bin",
+            "sha256": "D0928C393872BE00C82CBFF501B72AEBBBB844A6B51C321B50828D6DF44BE032",
+            "states": 76
+          },
+          {
+            "last_lambda": 1.1898513759048295,
+            "maximum_lambda": 1.1898513759048295,
+            "path": "MainCapacityHistory.bin.Accepted.000238.bin",
+            "sha256": "F7D39F2D1A6D35982AAB8629FF054F5409656E2E979F73AE36D8AFD2939916FD",
+            "states": 77
+          },
+          {
+            "last_lambda": 1.1898513759048295,
+            "maximum_lambda": 1.1898513759048295,
+            "path": "MainCapacityHistory.bin.Accepted.000239.bin",
+            "sha256": "F7D39F2D1A6D35982AAB8629FF054F5409656E2E979F73AE36D8AFD2939916FD",
+            "states": 77
+          },
+          {
+            "last_lambda": 1.189950842864542,
+            "maximum_lambda": 1.189950842864542,
+            "path": "MainCapacityHistory.bin.Accepted.000240.bin",
+            "sha256": "AF37AAA8B79ED88FAF75AC8B9D08E48D0B924F419571C41636D75A493C47A9DF",
+            "states": 78
+          },
+          {
+            "last_lambda": 1.189950842864542,
+            "maximum_lambda": 1.189950842864542,
+            "path": "MainCapacityHistory.bin.Accepted.000241.bin",
+            "sha256": "AF37AAA8B79ED88FAF75AC8B9D08E48D0B924F419571C41636D75A493C47A9DF",
+            "states": 78
+          },
+          {
+            "last_lambda": 1.189950842864542,
+            "maximum_lambda": 1.189950842864542,
+            "path": "MainCapacityHistory.bin.Accepted.000242.bin",
+            "sha256": "AF37AAA8B79ED88FAF75AC8B9D08E48D0B924F419571C41636D75A493C47A9DF",
+            "states": 78
+          }
+        ],
+        "verified_saved_prefix": {
+          "last_lambda": 1.189950842864542,
+          "maximum_lambda": 1.189950842864542,
+          "path": "MainCapacityHistory.bin",
+          "sha256": "AF37AAA8B79ED88FAF75AC8B9D08E48D0B924F419571C41636D75A493C47A9DF",
+          "states": 78
+        },
+        "watchdog_seconds": 600,
+        "whole_goal_completed": false,
+        "whole_run_passed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "94F222B75D51B97D5837C51791B87384B4CE484E393CAC1811AC1B3D76EC394E"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}

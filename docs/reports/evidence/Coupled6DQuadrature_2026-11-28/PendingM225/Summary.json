@@ -1,0 +1,23 @@
+{
+  "all_selected_workers_terminal": false,
+  "cases": {
+    "Cold1244ASDCompositeGauss15M_20261128": {
+      "DOF": 60,
+      "active_cases": [
+        2,
+        7
+      ],
+      "all267_parent_components_unchanged": true,
+      "compiled_source_verified": true,
+      "concrete_points": 225,
+      "no_capacity_claim": true,
+      "no_solver_results_captured": true,
+      "nonlinear_solver_budgets_and_materials_unchanged": true,
+      "only_two_test_modules_changed": true,
+      "outer_watchdog_seconds": 1200,
+      "steel_points": 20
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
