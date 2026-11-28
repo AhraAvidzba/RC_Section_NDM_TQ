@@ -80,7 +80,7 @@
       "whole_goal_completed": false
     }
   },
-  "checkpoint_utc": "2026-11-28T10:07:04.573739+00:00",
+  "checkpoint_utc": "2026-11-28T11:27:28.771018+00:00",
   "closed_torsion_prefix_and_AB": {
     "all_started_handles_terminal": true,
     "closed55states_verified": true,
@@ -2818,7 +2818,876 @@
     },
     "whole_goal_completed": false
   },
-  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/CoaxialASD",
+  "engineering_precision_phase": {
+    "absolute_lambda_point1_is2percent_only_near_lambda5": true,
+    "all_started_jobs_terminal": true,
+    "capacity_difference_not_a_force_residual_tolerance": true,
+    "capacity_lambda_tolerance_experiments": [
+      0.01,
+      0.1
+    ],
+    "checkpoint_utc": "2026-11-28T11:27:28.771018+00:00",
+    "closed_vs_native_single_are_distinct_integration_modes": true,
+    "coarse_material_point01_strict_reference_FAILED": true,
+    "coarse_material_strict_failure": {
+      "closure_update_budget": 8192,
+      "lambda_value": 2.718417451292339,
+      "material_tolerance_MPa": 1e-09,
+      "maximum_residual_MPa": 0.0021201490284228353,
+      "physical_failure_not_inferred": true,
+      "point": 226,
+      "side": 0,
+      "state": 51,
+      "xy_mm": [
+        -145.3125,
+        -250.0
+      ],
+      "zero_weight": true
+    },
+    "cold_tests": [
+      {
+        "VBA_has_ultimate": false,
+        "closure": {
+          "After": {
+            "ObservedUTC": "2026-11-28T10:21:43.3469930+00:00",
+            "PID": 31776,
+            "Reason": "Explicit NoProcessFoundForGivenId",
+            "StartTicksUTC": "639314579243851850",
+            "State": "Absent"
+          },
+          "Before": {
+            "ObservedUTC": "2026-11-28T10:21:43.2746969+00:00",
+            "PID": 31776,
+            "Reason": "Exact own Excel is still alive",
+            "StartTicksUTC": "639314579243851850",
+            "State": "Live"
+          },
+          "ChildStopError": null,
+          "ExactOwnExcelStopRequestedOnlyByExplicitTimeout": true,
+          "ExcelStopError": null,
+          "ExcelStopRequested": true,
+          "Identity": {
+            "PID": 31776,
+            "Reason": "Primary TEST_EXCEL_PROCESS",
+            "Ticks": 639314579243851850,
+            "Valid": true
+          },
+          "Passed": false,
+          "Stage": "TIMEOUT"
+        },
+        "history_sha256": "A202B84215FA61A10236B642A49D722F3DB0A93395944329B4E472861A94BFC7",
+        "material_upper_field_not_exported": true,
+        "root": "Cold1292ASDMaterialTolerance_20261128",
+        "selected_history": "MainCapacityHistory.bin.Accepted.000065.bin",
+        "selected_last_T_kNm": 25.42373746458583,
+        "selected_maximum_T_kNm": 48.602654643628334,
+        "states": 52,
+        "status": "TIMEOUT180",
+        "terminal": true,
+        "timeout": true
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T10:29:30.5851924+00:00",
+              "PID": 5044,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314584109336344",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 5044,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314584109336344,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T10:29:30.5851924+00:00",
+                "PID": 5044,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314584109336344",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T13:29:28.7879519+03:00",
+            "OwnerVerified": true,
+            "PID": 5044,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314584109336344"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 4.860682813516418,
+        "history_sha256": "BDF40109EA0A3DD44398FF4C22530EC6F5A92754012275D7C4A36CB2E6AB5511",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1295ASDEngineeringTolerance_20261128",
+        "seconds": 150.015625,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 27.157677757417616,
+        "selected_maximum_T_kNm": 48.606828135164186,
+        "states": 51,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T10:40:36.0024786+00:00",
+              "PID": 14968,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314590764363183",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 14968,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314590764363183,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T10:40:34.7423630+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:34.9680266+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:35.1698382+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:35.3712168+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:35.5863445+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:35.7879065+00:00",
+                "PID": 14968,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T10:40:36.0024786+00:00",
+                "PID": 14968,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314590764363183",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T13:40:34.2311979+03:00",
+            "OwnerVerified": true,
+            "PID": 14968,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314590764363183"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 4.860682813516418,
+        "history_sha256": "BDF40109EA0A3DD44398FF4C22530EC6F5A92754012275D7C4A36CB2E6AB5511",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1297ASDEventTolerance_20261128",
+        "seconds": 149.90234375,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 27.157677757417616,
+        "selected_maximum_T_kNm": 48.606828135164186,
+        "states": 51,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T10:50:56.2597563+00:00",
+              "PID": 48380,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314597094276476",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 48380,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314597094276476,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T10:50:56.2597563+00:00",
+                "PID": 48380,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314597094276476",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T13:50:54.5754767+03:00",
+            "OwnerVerified": true,
+            "PID": 48380,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314597094276476"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 4.861204332666561,
+        "history_sha256": "F54488F788F79606FD66D75F5B4EC3132DDD6168AED0F2688D8284A923349432",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1299ASDCoarseClosure_20261128",
+        "seconds": 137.2578125,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 27.19219274547388,
+        "selected_maximum_T_kNm": 48.61204332666561,
+        "states": 53,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T10:56:49.0368415+00:00",
+              "PID": 56540,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314600934901343",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 56540,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314600934901343,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T10:56:49.0368415+00:00",
+                "PID": 56540,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314600934901343",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T13:56:47.278415+03:00",
+            "OwnerVerified": true,
+            "PID": 56540,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314600934901343"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 5.014084031005055,
+        "history_sha256": "F9F61D87C73976377C7B4D731A14761D27CC4D24AED5B07E8CE5915A341BBA4E",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1301ASDNativeEngineering_20261128",
+        "seconds": 105.9609375,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 28.96338218569591,
+        "selected_maximum_T_kNm": 50.14084031005055,
+        "states": 55,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T11:10:40.4685468+00:00",
+              "PID": 5960,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314609250508119",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 5960,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314609250508119,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T11:10:39.1483863+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:39.3814951+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:39.6005697+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:39.8173090+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:40.0330674+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:40.2504176+00:00",
+                "PID": 5960,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:10:40.4685468+00:00",
+                "PID": 5960,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314609250508119",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T11:10:38.6417234+00:00",
+            "OwnerVerified": true,
+            "PID": 5960,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314609250508119"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 5.014084031005055,
+        "history_sha256": "F9F61D87C73976377C7B4D731A14761D27CC4D24AED5B07E8CE5915A341BBA4E",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1304ASDPeakEngineeringAccuracy_20261128",
+        "seconds": 105.515625,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 28.96338218569591,
+        "selected_maximum_T_kNm": 50.14084031005055,
+        "states": 55,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": false,
+        "VBA_peak_accuracy": 0.0,
+        "VBA_peak_lambda": 0.0,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T11:18:16.6386009+00:00",
+              "PID": 15460,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314613829145499",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 15460,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314613829145499,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T11:18:16.6386009+00:00",
+                "PID": 15460,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314613829145499",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T11:18:15.0201952+00:00",
+            "OwnerVerified": true,
+            "PID": 15460,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314613829145499"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 5.014084031005055,
+        "history_sha256": "F9F61D87C73976377C7B4D731A14761D27CC4D24AED5B07E8CE5915A341BBA4E",
+        "lambda_capacity": 0.0,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1305ASDPeakFailureDiagnostic_20261128",
+        "seconds": 104.15234375,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 28.96338218569591,
+        "selected_maximum_T_kNm": 50.14084031005055,
+        "states": 55,
+        "status": "NumFail",
+        "terminal": true,
+        "timeout": false
+      },
+      {
+        "VBA_has_ultimate": true,
+        "VBA_peak_accuracy": 0.07863734635214283,
+        "VBA_peak_lambda": 4.922774201161174,
+        "closure": {
+          "ChildExitCode": 0,
+          "ChildHasExited": true,
+          "Closure": {
+            "FinalState": {
+              "ObservedUTC": "2026-11-28T11:23:28.9669899+00:00",
+              "PID": 21428,
+              "Reason": "Explicit NoProcessFoundForGivenId",
+              "StartTicksUTC": "639314616363866550",
+              "State": "Absent"
+            },
+            "GraceMilliseconds": 3000,
+            "Identity": {
+              "PID": 21428,
+              "Reason": "Primary TEST_EXCEL_PROCESS",
+              "Ticks": 639314616363866550,
+              "Valid": true
+            },
+            "Observations": [
+              {
+                "ObservedUTC": "2026-11-28T11:23:27.6547511+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:27.8821673+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:28.0999014+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:28.3158847+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:28.5326371+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:28.7491681+00:00",
+                "PID": 21428,
+                "Reason": "Exact own Excel is still alive",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Live"
+              },
+              {
+                "ObservedUTC": "2026-11-28T11:23:28.9669899+00:00",
+                "PID": 21428,
+                "Reason": "Explicit NoProcessFoundForGivenId",
+                "StartTicksUTC": "639314616363866550",
+                "State": "Absent"
+              }
+            ],
+            "OrdinaryPathKilledAnything": false,
+            "Passed": true
+          },
+          "OrdinaryPathKilledAnything": false,
+          "Passed": true,
+          "RunnerCleanup": {
+            "CloseRequested": false,
+            "CloseSucceeded": false,
+            "Errors": [],
+            "Failed": false,
+            "FinalClosureAuthority": "Run-Audit03Watchdog after actual child exit",
+            "FinalExitNotAsserted": true,
+            "ObservedUTC": "2026-11-28T11:23:27.1594926+00:00",
+            "OwnerVerified": true,
+            "PID": 21428,
+            "QuitRequested": true,
+            "QuitSucceeded": true,
+            "Stage": "CLOSE_QUIT_REQUESTS_CHILD_NOT_EXITED",
+            "StartTicksUTC": "639314616363866550"
+          },
+          "RunnerCleanupReadError": null,
+          "RunnerCleanupValid": true,
+          "Stage": "AFTER_CHILD_EXIT"
+        },
+        "confirmed_lower_lambda": 0.0,
+        "history_sha256": "FD8FF349E6A16A2806B40B7F7BD49F6151BB524D2A07ED8837D48AB39B1F6179",
+        "lambda_capacity": 4.922774201161174,
+        "material_upper_field_not_exported": true,
+        "root": "Cold1306ASDPeakPrecisionRecovery_20261128",
+        "seconds": 162.94921875,
+        "selected_history": "MainCapacityHistory.bin",
+        "selected_last_T_kNm": 49.227742011611745,
+        "selected_maximum_T_kNm": 49.227742011611745,
+        "states": 15,
+        "status": "OK",
+        "terminal": true,
+        "timeout": false
+      }
+    ],
+    "current_capacity_reported_by_VBA": true,
+    "current_capacity_status": "OK",
+    "engineering_closed1e_minus5": {
+      "all60_equations_and_six_forces_independently_reassembled": true,
+      "cases": [
+        {
+          "all_material_limits_respected": true,
+          "all_states_within_declared_global_force_gates": true,
+          "label": "Matched",
+          "material_closure_tolerance_MPa": 1e-05,
+          "maximum_closure_updates": 1024,
+          "maximum_compression_utilization": 0.4237582771124153,
+          "maximum_residual_MPa": 0.0010134051670998092,
+          "maximum_steel_utilization": 0.4564165781143767,
+          "states": 51,
+          "states_within_componentwise_relative_and_abs_floor": 38,
+          "states_within_original_strict_force_gates": 21
+        },
+        {
+          "all_material_limits_respected": true,
+          "all_states_within_declared_global_force_gates": true,
+          "label": "StrictMaterialReference",
+          "material_closure_tolerance_MPa": 1e-09,
+          "maximum_closure_updates": 8192,
+          "maximum_compression_utilization": 0.42375827817964057,
+          "maximum_residual_MPa": 0.0010134737546353008,
+          "maximum_steel_utilization": 0.4564165781143767,
+          "states": 51,
+          "states_within_componentwise_relative_and_abs_floor": 38,
+          "states_within_original_strict_force_gates": 21
+        }
+      ],
+      "header_absolute_tolerance_MPa": 0.0001,
+      "header_relative_tolerance": 0.001,
+      "native_selected_material_check_not_run": true,
+      "not_a_structural_OpenSees_solve": true,
+      "physical_capacity_not_confirmed_by_this_replay": true,
+      "strict_material_reference_maximum_force_difference_N": 0.019293119420751736,
+      "strict_material_reference_maximum_moment_difference_Nmm": 2.6846189200878143,
+      "whole_goal_completed": false
+    },
+    "exact_equivalence": {
+      "comparison_tolerances_not_relaxed": true,
+      "comparisons": [
+        {
+          "all_equal": true,
+          "candidate": "Cold1297ASDEventTolerance_20261128",
+          "candidate_seconds": 149.90234375,
+          "checks": {
+            "MainCapacity.Operators.csv": true,
+            "MainCapacityHistory.bin": true,
+            "MaterialLimit.bin": true,
+            "all_capacity_values_except_elapsed_seconds": true,
+            "capacity_trace_exact": true
+          },
+          "history_sha256": "BDF40109EA0A3DD44398FF4C22530EC6F5A92754012275D7C4A36CB2E6AB5511",
+          "parent": "Cold1295ASDEngineeringTolerance_20261128",
+          "parent_independent_verification": "Verify1296ASDEngineeringTolerance_20261128",
+          "parent_seconds": 150.015625,
+          "physical_capacity_confirmed": false,
+          "verification_inherited_only_if_all_equal": true
+        },
+        {
+          "all_equal": true,
+          "candidate": "Cold1304ASDPeakEngineeringAccuracy_20261128",
+          "candidate_seconds": 105.515625,
+          "checks": {
+            "MainCapacity.Operators.csv": true,
+            "MainCapacityHistory.bin": true,
+            "MaterialLimit.bin": true,
+            "all_capacity_values_except_elapsed_seconds": true,
+            "capacity_trace_exact": true
+          },
+          "history_sha256": "F9F61D87C73976377C7B4D731A14761D27CC4D24AED5B07E8CE5915A341BBA4E",
+          "parent": "Cold1301ASDNativeEngineering_20261128",
+          "parent_independent_verification": "Verify1302ASDNativeEngineering_20261128",
+          "parent_seconds": 105.9609375,
+          "physical_capacity_confirmed": false,
+          "verification_inherited_only_if_all_equal": true
+        },
+        {
+          "all_equal": true,
+          "candidate": "Cold1305ASDPeakFailureDiagnostic_20261128",
+          "candidate_seconds": 104.15234375,
+          "checks": {
+            "MainCapacity.Operators.csv": true,
+            "MainCapacityHistory.bin": true,
+            "MaterialLimit.bin": true,
+            "all_capacity_values_except_elapsed_seconds": true,
+            "capacity_trace_exact": true
+          },
+          "history_sha256": "F9F61D87C73976377C7B4D731A14761D27CC4D24AED5B07E8CE5915A341BBA4E",
+          "parent": "Cold1304ASDPeakEngineeringAccuracy_20261128",
+          "parent_independent_verification": "Verify1302ASDNativeEngineering_20261128",
+          "parent_seconds": 105.515625,
+          "physical_capacity_confirmed": false,
+          "verification_inherited_only_if_all_equal": true
+        }
+      ],
+      "whole_goal_completed": false
+    },
+    "force_engineering_absolute_MPa": 0.0001,
+    "force_engineering_relative": 0.001,
+    "full_acceptance_not_run": true,
+    "full_structural_OpenSees_solve_not_done_in_this_phase": true,
+    "global_force_gate_and_peak_separation_checks_not_relaxed_by_recovery": true,
+    "goal_active": true,
+    "inactive_tension_coordinate_diagnosis": {
+      "no_new_section_equilibrium_or_capacity_solved": true,
+      "physical_failure_not_inferred": true,
+      "production_material_law_not_changed": true,
+      "same_saved_failure_input": true,
+      "zero_weight_concrete_boundary_point": true
+    },
+    "independent_whole_postpeak_101_states": {
+      "accepted_states": 101,
+      "all567_concrete_points_all3_stations_whole_history_limits_checked_by_native_maximum": true,
+      "all60_equations_and_six_forces_native_verified": true,
+      "last_lambda": 2.8960549276963965,
+      "maximum_compression_history_utilization": 0.846987597903244,
+      "maximum_lambda": 4.922774201161174,
+      "maximum_residual_MPa": 0.0008453028257494211,
+      "maximum_steel_utilization": 0.9999777751271538,
+      "native_single_update_not_closed": true,
+      "physical_upper_or_peak_verification_still_required": true,
+      "whole_goal_completed": false
+    },
+    "latest_native_proof": {
+      "accepted_states": 15,
+      "all567_concrete_points_all3_stations_whole_history_limits_checked_by_native_maximum": true,
+      "all60_equations_and_six_forces_native_verified": true,
+      "last_lambda": 4.922774201161174,
+      "maximum_compression_history_utilization": 0.06055299980996179,
+      "maximum_lambda": 4.922774201161174,
+      "maximum_residual_MPa": 0.0002653145999335798,
+      "maximum_steel_utilization": 0.0018802215013749098,
+      "native_single_update_not_closed": true,
+      "physical_upper_or_peak_verification_still_required": true,
+      "whole_goal_completed": false
+    },
+    "local_peak_precision_retries_maximum": 2,
+    "material_only1e_minus7": {
+      "accepted_states": 52,
+      "all_saved_states_independent60_equations_six_forces_and_materials_verified": true,
+      "independent_closure_tolerance_MPa": 1e-07,
+      "maximum_compression_utilization": 0.22292076746255843,
+      "maximum_local_update_budget": 1024,
+      "maximum_residual_MPa": 7.639408571916847e-07,
+      "maximum_steel_utilization": 0.19027277007218915,
+      "native_CPP_selected_point_check_not_run": true,
+      "no_physical_capacity_confirmation_from_this_replay": true,
+      "whole_goal_completed": false
+    },
+    "native_whole55_proof": {
+      "accepted_states": 55,
+      "all567_concrete_points_all3_stations_whole_history_limits_checked_by_native_maximum": true,
+      "all60_equations_and_six_forces_native_verified": true,
+      "last_lambda": 2.896338218569591,
+      "maximum_compression_history_utilization": 0.8368670139527695,
+      "maximum_lambda": 5.014084031005055,
+      "maximum_residual_MPa": 0.0009641456665579629,
+      "maximum_steel_utilization": 0.9992637886737151,
+      "native_single_update_not_closed": true,
+      "physical_upper_or_peak_verification_still_required": true,
+      "whole_goal_completed": false
+    },
+    "native_whole55_replay_verified": true,
+    "peak_relative_accuracy": 0.015974193237137304,
+    "physical_geometry_curves_grade_limits_and_strain_limits_unchanged": true,
+    "preparation_failures_retained": [
+      "VBE comment whitespace and CRCRLF preflight failures1292",
+      "PowerShell7 PSHOME lacks powershell.exe; no child started1304",
+      "VBE historyIndex capitalization preflight; no book created1305",
+      "missing empty tests folder; no Excel started1305",
+      "WindowsPowerShell UTF8 BOM parse failure; no Excel started1305"
+    ],
+    "private_experiments_not_production_defaults": true,
+    "scalar_force_gate_not_a_per_component_relative_guarantee": true,
+    "unverified_neighbor_peak_diagnosis": {
+      "adjacent_left_lambda": 4.95115654117796,
+      "adjacent_uncertainty": 0.0579648250651542,
+      "all_four_shoulders_solved": true,
+      "no_separated_peak_detected": true,
+      "peak_uncertainty": 0.0573619037468426,
+      "refined_maximum_lambda": 4.95725371017033,
+      "relaxing_lambda_tolerance_alone_did_not_change_fields": true
+    },
+    "user_capacity_difference_acceptance_relative": 0.02,
+    "whole_goal_completed": false,
+    "working_public_book_not_changed": true
+  },
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/EngineeringPrecision",
   "evidence_verification": {
     "all_direct_and_inherited_payloads_SHA256_verified": true,
     "archive_parts": [
@@ -2848,26 +3717,36 @@
   "latest_archive": {
     "archive_parts": [
       {
-        "bytes": 45063495,
+        "bytes": 41054953,
         "file": "RawArchive.zip",
-        "sha256": "E2BAFC14D16E98F9E9853039772C81D39283EBFC2EC16DD4F07FF47CEACD8A55"
+        "sha256": "752A59D1EB932413FA824E14450B59E89CBE432F3126805931DA8842290C751E"
       },
       {
-        "bytes": 15336649,
+        "bytes": 45768702,
         "file": "RawArchive002.zip",
-        "sha256": "B691F5CD1F4B041C81BE7B37E534D0CE1B8133203D8044EC4DF1D3F913D9FEC7"
+        "sha256": "54CB86EA8CB68BEDF7CA62DF6CA5AE0E19322FAEE1151C44DEC580E330C847D2"
+      },
+      {
+        "bytes": 32260196,
+        "file": "RawArchive003.zip",
+        "sha256": "C2D786FA8A97F7B5D964650328E277DA48FE2B86CC2E3536D8BF821B4780DB33"
+      },
+      {
+        "bytes": 22420525,
+        "file": "RawArchive004.zip",
+        "sha256": "56BE0F62318CAEFCDED144B4BECD403ADA48D0E9E712F6C5B42662EBC58463F3"
       }
     ],
-    "files": 1049,
-    "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/CoaxialASD/Files.json",
-    "manifest_sha256": "A4C78236C6BF2DF1FCB85AFD21862078A8123DEFA4D0C4189E94797FAF4C0DF1",
-    "new_payloads": 188,
+    "files": 4506,
+    "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/EngineeringPrecision/Files.json",
+    "manifest_sha256": "D728E1850DDDD5A06C2650DC58448EE8E286DE62313F8266BAE9692731C1ECF8",
+    "new_payloads": 625,
     "verification": {
       "all_direct_and_inherited_payloads_SHA256_verified": true,
-      "distinct_books_CRC_verified": 5,
+      "distinct_books_CRC_verified": 9,
       "no_files_modified": true,
-      "parent_manifests_verified": 3,
-      "unique_payloads": 601
+      "parent_manifests_verified": 4,
+      "unique_payloads": 1054
     }
   },
   "main_stagnation_audit": {
@@ -3648,13 +4527,14 @@
     }
   ],
   "next_actions": [
-    "Цель активна и не завершена. При разработке каждый поиск предела≤180 с без продления;10 с остаётся целью полного рабочего цикла. Старые600/900-секундные команды не запускать. Все текущие собственные расчёты закончены; см. cold_main_T.",
-    "В частной книге273 проверена коаксиальная рекурсия закрытого ASD: главные направления нулевого приращения сохраняются, последующие1024 обновления истории и1e-9 МПа критерий остаются исходными. Изменён только TryStep и новый TryCloseFixedStrain. Все270 прочих компонентов, SingleStep, касательная и решатель сохранены.140 материальных проверок VBA и независимый расчёт прошли,70 NativeSingle результатов побайтово равны. На одной критической точке32 повтора дали ускорение≈21%; это не ускорение всего расчёта и не подтверждение предела.",
-    "Первое нарушение сравнения с NumPy было вызвано эталоном1e-10 вместо рабочего1e-9; исходные7 несовпадений координат1.019e-12…1.491e-12 сохранены. При одинаковом1e-9 максимальная ошибка координат1.76e-13, допуск1e-12 не менялся. Не переносить это исправление автоматически на старое nativeCPP-нарушение1.431e-12 в125-точечной истории: оно ещё не перепроверено.",
-    "Основной холодныйT1288 использует закрытую интеграцию, прежние входы1276, проверенную коаксиальную рекурсию и монитор1284.180с TIMEOUT;51 сохранённое состояние независимо проверено по60 уравнениям/6 усилиям и всем567 бетонным точкам на3 станциях. OpenSees проверил612 номинальных откликов и36 полных материальных/нулевых проб в12 выбранных парах станция-точка, включая самые медленные. Это не полный структурный OpenSees и не физический предел. Новый180-секундный повтор без изменения алгоритма не запускать.",
-    "Новое явное предложение пользователя — проверить, не чрезмерно ли строги рабочие допуски. Проба1290 на одной фиксированной материальной точке:1e-9→1e-7 МПа уменьшило975→723 обновления; удвоенный шаг при1e-9/1e-8 превысил1024, при1e-7 сошёлся за878. Номинальная ошибка к эталону1e-11≤1.54e-12 МПа, но это нулевая по силовому весу точка и не доказательство общей сходимости. Следующий шаг — отдельно варьировать рабочий допуск материала и общий силовой допуск, сначала на сохранённой истории, затем по одному холодномуT≤180с. Сравнивать силы, историю и предельный множитель; не ослаблять пороги сравнения тождественных реализаций ради PASS. Рабочий VBA пока1e-9, force5e-7/5e-7, lambda.001. Общую настройку поменять только по проверенной чувствительности, с инженерным обоснованием.",
-    "Если рабочие допуски не снимают застой, разбирать управление ветвью и шагом после локального максимума: почему при растущей пластической деформации уменьшается шаг и переключается мера. Для более широкого применения коаксиальной рекурсии нужны вращения, разгрузки, кратные главные значения и другие силовые регрессии. Одноточечные140 проверок и одна историяT не заменяют полную верификацию.",
-    "Сохраняются ASD сначала и последовательность N,M,T→NM/NMT→Q/NMTQ,Config-сталь≤1%,CDP,произвольная геометрия/универсальная арматура/B-сплайны,эксперименты,source-build-book-dump,Excel/AutoCAD,целевые10с и отдельно разрешённая полная приёмка. Публичные книга/дамп не изменены, main не сливать без согласования."
+    "Цель активна, не завершена и не на паузе. Текущих процессов этой серии нет. Каждый новый поиск предела≤180с; локальные материальные пробы≤10с; проверка сохранённой истории≤30с.10с остаётся целью полного пользовательского цикла.",
+    "Пользователь разрешил инженерное отличие несущих усилий1–2%. Это допуск сравнения результата, не2% на любую невязку и не разрешение изменять физические εu/прочность/Gt/Gc. В частных тестах force1e-4МПа/.001relative; λtol.01 и.1 абсолютные, последнее≈2% только приλ≈5. Перед переносом в общее ядро нужен масштабно независимый относительный контракт и проверки всех шести компонент.",
+    "Материальный допуск1e-7 при строгих силах дал180с timeout; инженерный закрытый ASD1e-5 завершился NumFail≈150с, maxT48.607кНм, обе силовые истории51 проверены независимым NumPy при рабочем и1e-9 материальном допуске. Смягчение локальных численных событий и сохранение λtol при уточняющем повторе дали побайтово те же поля. Только38/51 удовлетворяют отдельной более строгой покомпонентной норме; не считать скалярную норму гарантией0.1% каждой компоненты.",
+    "Закрытый ASD.01 завершился137с NumFail. Независимая строгая материальная проверка FAILED на состоянии51,zeroW-точка227: после8192 повторов невязка координаты.00212МПа. Номинальные напряжения почти постоянны, но неактивная растянутая координата дрейфует на плоском хвосте. Не скрывать отказ увеличением допуска эталона. Физический предел из этого не следует. NativeSingle и Closed не тождественны как интеграция истории.",
+    "Однократный ASD с инженерными силами дошёл до εsw=.02 за≈106с, но первоначально статусNumFail: нет различимого соседнего максимума при повторе плеч. OpenSees3.8.0 независимо проверил все55 состояний,60 уравнений/6 усилий и ограничения всех567 бетонных точек на3 станциях и всей стали. Это воспроизведение материальной истории, не самостоятельное решение полной конструкции OpenSees.",
+    "Увеличение только λtol.01→.1 дало побайтово те же55 полей и выходы. Диагностика1305 доказала: все4 плечевые пробы сходятся, но разность соседних λ≈.006 меньше суммарной неопределённости≈.115. В1306 разрешены только2 повтора этих же плеч с силовым масштабом.1; неудачные пробы не принимаются, физические и топологические проверки пика сохранены. Фактический итог: OK; см.latest_native_proof. До дальнейших правок перечитать последний отчёт и его SHA-доказательства.",
+    "Для основного300x500 впервые получен подтверждённый максимум T49.227742кНм, оценка±1.5974%,162.949с. OpenSees независимо проверил101 состояние полной ветви с точным15-точечным пиковым префиксом: maxC.84699,maxSteel.999978,последнийT28.96055кНм. Это максимум прослеженной ветви данной модели, не полная нормативная приёмка. Следующий шаг — относительный масштабно независимый допуск и повтор при перенормировке исходногоT, затем текущие регрессии N,Mx,My,NM,NMT передQ/NMTQ. Верхнее поле материального события пока не экспортировано. Сохранить универсальность геометрии, поперечной стали иLoadPath. Согласованный рабочий наклон стали≤1%/Config ещё не перенесён в этотH1500 benchmark.",
+    "Сохраняются ASD сначала, затемCDP,автоматические B-сплайны/Config,универсальная арматура,опыты/литература,source-build-book-dump,Excel/AutoCAD,пользовательские статусы/диаграммы и10с. Публичные260-компонентная книга/дамп не изменены; не импортировать273-компонентный частный проект целиком. main не сливать до согласования. Полная приёмка отдельно не запускалась; ndm не переключался."
   ],
   "old_torsion_dense_boundary_audit": {
     "Hpost1500_test_benchmark_only": true,

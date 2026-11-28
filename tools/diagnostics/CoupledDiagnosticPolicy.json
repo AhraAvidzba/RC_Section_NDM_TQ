@@ -7,5 +7,8 @@
   "archived_long_tests_do_not_authorize_rerun": true,
   "timeout_or_stagnation_is_not_physical_failure": true,
   "source": "Explicit user clarification of 2026-11-28: target10s; development capacity search maximum180s; no900s runs",
-  "scope": "Development capacity searches may use at most180s; short local material diagnostics use10s; saved-history verification without equilibrium solve uses30s including Excel startup and shutdown; compilation and inspection of saved evidence are separate operations"
+  "scope": "Development capacity searches may use at most180s; short local material diagnostics use10s; saved-history verification without equilibrium solve uses30s including Excel startup and shutdown; compilation and inspection of saved evidence are separate operations",
+  "user_accepts_capacity_difference_up_to_relative": 0.02,
+  "capacity_difference_is_not_an_equilibrium_tolerance": true,
+  "capacity_accuracy_source": "Explicit user clarification 2026-11-28: 1–2% capacity differences acceptable; physical criteria unchanged"
 }
