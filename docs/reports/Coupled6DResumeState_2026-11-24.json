@@ -3795,13 +3795,7 @@
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
   "active_exec_session": null,
-  "active_jobs": [
-    {
-      "kind": "one cold main300x500 closed ASD T+; same force/material/peak gates; watchdog900s",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Cold1276ASDMainTorsionBoundary_20261128\\Case04",
-      "session_id": 32307
-    }
-  ],
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -51547,6 +51541,417 @@
     "original_full_step_root_found": true,
     "proof": "docs/reports/evidence/Coupled6DLocalDilationRoot_2026-11-24/Proof.json"
   },
+  "main_stagnation_archive": {
+    "archive_integrity_not_numerical_acceptance": true,
+    "archive_parts": [
+      {
+        "bytes": 33591735,
+        "file": "RawArchive.zip",
+        "sha256": "FEE925CF3F01FE6B9AF3028413F68B79E910FE7DC2A65E32C240FD1A402F97C7"
+      },
+      {
+        "bytes": 1830484,
+        "file": "RawArchive002.zip",
+        "sha256": "48E5D14F390BAD67A06E5A45D0F695E0318CDC16B189AAF9734FB122F3430ED8"
+      }
+    ],
+    "files": 1839,
+    "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/MainStagnation/Files.json",
+    "manifest_sha256": "816DC267F62D0F93064DA5EAAA574DBE4920FD0DC81E82A56DF37FE761A13A54",
+    "new_payloads": 317,
+    "original_public_book_dump_SHA256_unchanged": true,
+    "verification": {
+      "all_direct_and_inherited_payloads_SHA256_verified": true,
+      "distinct_books_CRC_verified": 4,
+      "no_files_modified": true,
+      "parent_manifests_verified": 3,
+      "unique_payloads": 776
+    }
+  },
+  "main_stagnation_audit_1276_1283": {
+    "accepted_states_force_and_material_limits_independently_checked": 125,
+    "active_event_filter_full125_history_byteexact_and_not_a_fix": true,
+    "active_event_filter_not_promoted": true,
+    "closed1276_and_event1279_both_timeout900s": true,
+    "exact_own_Excel_closures": [
+      {
+        "After": {
+          "ObservedUTC": "2026-11-28T08:28:45.3374434+00:00",
+          "PID": 35348,
+          "Reason": "Explicit NoProcessFoundForGivenId",
+          "StartTicksUTC": "639314504264252500",
+          "State": "Absent"
+        },
+        "Before": {
+          "ObservedUTC": "2026-11-28T08:28:45.2689987+00:00",
+          "PID": 35348,
+          "Reason": "Exact own Excel is still alive",
+          "StartTicksUTC": "639314504264252500",
+          "State": "Live"
+        },
+        "ChildStopError": null,
+        "ExactOwnExcelStopRequestedOnlyByExplicitTimeout": true,
+        "ExcelStopError": null,
+        "ExcelStopRequested": true,
+        "Identity": {
+          "PID": 35348,
+          "Reason": "Primary TEST_EXCEL_PROCESS",
+          "Ticks": 639314504264252500,
+          "Valid": true
+        },
+        "Passed": false,
+        "Stage": "TIMEOUT"
+      },
+      {
+        "After": {
+          "ObservedUTC": "2026-11-28T08:44:19.9354645+00:00",
+          "PID": 47956,
+          "Reason": "Explicit NoProcessFoundForGivenId",
+          "StartTicksUTC": "639314513609964608",
+          "State": "Absent"
+        },
+        "Before": {
+          "ObservedUTC": "2026-11-28T08:44:19.8635869+00:00",
+          "PID": 47956,
+          "Reason": "Exact own Excel is still alive",
+          "StartTicksUTC": "639314513609964608",
+          "State": "Live"
+        },
+        "ChildStopError": null,
+        "ExactOwnExcelStopRequestedOnlyByExplicitTimeout": true,
+        "ExcelStopError": null,
+        "ExcelStopRequested": true,
+        "Identity": {
+          "PID": 47956,
+          "Reason": "Primary TEST_EXCEL_PROCESS",
+          "Ticks": 639314513609964608,
+          "Valid": true
+        },
+        "Passed": false,
+        "Stage": "TIMEOUT"
+      }
+    ],
+    "exploration_stagnation_analysis": {
+      "first_suspect_window": {
+        "all_three_below_requested_relative_resolution": true,
+        "from_state": 69,
+        "maximum_material_utilization_advance": 0.0004627281712055731,
+        "relative_load_advance": 7.622505989105544e-05,
+        "relative_tensor_field_advance": 0.0009817146371112566,
+        "state": 77,
+        "window_steps": 8
+      },
+      "history_sha256": "0541773E700BD20D0B0B0FD5C38ABEE620DB59382A825B9BB780D8B6C3BD0CC3",
+      "last_window": {
+        "all_three_below_requested_relative_resolution": true,
+        "from_state": 117,
+        "maximum_material_utilization_advance": 6.677189134984829e-05,
+        "relative_load_advance": 1.096883179357284e-05,
+        "relative_tensor_field_advance": 0.00014145369290239205,
+        "state": 125,
+        "window_steps": 8
+      },
+      "no_new_NDS_or_Excel_process_started": true,
+      "no_plateau_or_numerical_stop_is_physical_failure": true,
+      "not_yet_a_working_solver_stop_rule": true,
+      "offline_diagnostic_only": true,
+      "requested_relative_capacity_resolution": 0.001,
+      "states": 125,
+      "suspect_window_count": 49,
+      "targeted_peak_and_material_boundary_refinement_must_be_exempt_from_exploration_stagnation": true,
+      "window_steps": 8
+    },
+    "external_frozen_root_not_a_cold_VBA_or_structural_OpenSees_run": true,
+    "first_reference1024_failure": {
+      "actual_VBA_unchanged": true,
+      "failure_points": [
+        {
+          "point": 226,
+          "side": 0,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 288,
+          "side": 0,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 397,
+          "side": 0,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 459,
+          "side": 0,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 226,
+          "side": 1,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 288,
+          "side": 1,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 397,
+          "side": 1,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 459,
+          "side": 1,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 226,
+          "side": 2,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 288,
+          "side": 2,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": -250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 397,
+          "side": 2,
+          "steel_correction": false,
+          "x": 145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        },
+        {
+          "point": 459,
+          "side": 2,
+          "steel_correction": false,
+          "x": -145.3125,
+          "y": 250.0,
+          "zero_weight": true
+        }
+      ],
+      "failure_state": 67,
+      "global_equilibrium_not_checked_in_this_probe": true,
+      "history_sha256": "0541773E700BD20D0B0B0FD5C38ABEE620DB59382A825B9BB780D8B6C3BD0CC3",
+      "independent_tolerance_MPa": 1e-10,
+      "lambda_value": 2.7099892854773127,
+      "local_updates": 1025,
+      "maximum_residual_MPa": 3.95516952522712e-10,
+      "physical_failure_not_claimed": true,
+      "prior_states": 66,
+      "selected_flat_index": 226,
+      "selected_point": 226,
+      "selected_side": 0
+    },
+    "full_acceptance_not_run": true,
+    "future_single_case_time_policy": {
+      "archived_long_tests_do_not_authorize_rerun": true,
+      "automatic_budget_increase_allowed": false,
+      "scope": "Further single-case coupled calculation diagnostics; compilation and inspection of saved evidence are separate operations",
+      "single_case_diagnostic_max_wall_seconds": 10,
+      "source": "Explicit user instruction of 2026-11-28 rejecting 900-second single-case calculations",
+      "target_full_workflow_seconds_per_combination": 10,
+      "timeout_or_stagnation_is_not_physical_failure": true
+    },
+    "independent_frozen_load_probe": {
+      "algorithm": "SciPy root hybr; independent NumPy closed ASD plus separate steel and60-equation assembly",
+      "baseline_native_coordinate_gate_still_failed1_43e_minus12_vs1e_minus12": true,
+      "cases": [
+        {
+          "best_merit_MPa": 9.417817636858678e-15,
+          "calls": 149,
+          "committed_history_exactly_unchanged": true,
+          "concrete_compression_utilization": 0.4208484640509157,
+          "delta_lambda": 0.001,
+          "elapsed_seconds": 91.76108450000174,
+          "errors_MPa": [
+            7.549516567451064e-15,
+            8.131516293641283e-15,
+            9.417817636858678e-15,
+            0.0
+          ],
+          "independent_root_equilibrium_found": true,
+          "material_failure": null,
+          "optimizer_message": "The solution converged.",
+          "optimizer_success": true,
+          "original_bound_MPa": 8.444956819624001e-07,
+          "steel_utilization": 0.4490583335250804,
+          "target_T_kNm": 27.1179596183132,
+          "target_lambda": 2.71179596183132,
+          "within_explicit_material_limits": true
+        },
+        {
+          "best_merit_MPa": 0.00047924345883575294,
+          "calls": 68,
+          "committed_history_exactly_unchanged": true,
+          "delta_lambda": 0.01,
+          "elapsed_seconds": 22.7734018000192,
+          "errors_MPa": [
+            0.00047924345883575294,
+            0.0001694814446336762,
+            0.00022525104143453065,
+            0.0
+          ],
+          "independent_root_equilibrium_found": false,
+          "material_failure": "Independent active ASD closure exceeded 8192 updates; remaining=9; maximum residual=0.0005882483143301864",
+          "optimizer_message": "Independent active ASD closure exceeded 8192 updates; remaining=9; maximum residual=0.0005882483143301864",
+          "optimizer_success": false,
+          "original_bound_MPa": 8.456390058633501e-07,
+          "target_T_kNm": 27.207959618313197,
+          "target_lambda": 2.7207959618313198
+        }
+      ],
+      "frozen_committed_history": true,
+      "history_replay_seconds": 52.60675199999241,
+      "not_a_cold_VBA_run": true,
+      "not_an_OpenSees_structural_element_solution": true,
+      "physical_capacity_not_claimed": true,
+      "scipy_version": "1.18.1",
+      "source_history_sha256": "0541773E700BD20D0B0B0FD5C38ABEE620DB59382A825B9BB780D8B6C3BD0CC3",
+      "source_history_states": 125,
+      "whole_goal_completed": false
+    },
+    "last_T_kNm": 27.1079596183132,
+    "maximum_concrete_utilization": 0.4192143645916511,
+    "maximum_external_closure_updates": 1169,
+    "maximum_selected_T_kNm": 48.602654590877364,
+    "maximum_steel_utilization": 0.44679977324125686,
+    "native1283_stopped_by_explicit_user_instruction": {
+      "OnlyVerifiedOwnProcessStopped": true,
+      "OwnExcelAbsent": true,
+      "PID": 38848,
+      "StartTicksUTC": "639314524826470156",
+      "StopReason": "Explicit user instruction",
+      "UTC": "2026-11-28T08:52:48.8803261+00:00"
+    },
+    "native_coordinate_gate_failed": true,
+    "native_selected_point_partial_verification": {
+      "coordinate_point_checks": 60,
+      "maximum_coordinate_error": 1.4310289064844994e-12,
+      "maximum_effective_error_MPa": 1.033516383586175e-09,
+      "maximum_shadow_copy_difference_MPa": 0.0,
+      "maximum_stress_error_MPa": 1.896196977213549e-09,
+      "maximum_uncommitted_probe_coordinate_change": 0.0,
+      "maximum_zero_step_change_MPa": 9.825473767932635e-11,
+      "nominal_point_checks": 1500,
+      "not_all_material_points_checked_natively": true,
+      "selected_station_point_zero_based": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          112
+        ],
+        [
+          2,
+          224
+        ],
+        [
+          0,
+          225
+        ],
+        [
+          1,
+          400
+        ],
+        [
+          2,
+          566
+        ],
+        [
+          0,
+          567
+        ],
+        [
+          1,
+          570
+        ],
+        [
+          2,
+          586
+        ],
+        [
+          0,
+          226
+        ],
+        [
+          1,
+          226
+        ],
+        [
+          2,
+          226
+        ]
+      ],
+      "uncommitted_hydrostatic_elastic_probe": true,
+      "zero_step_on_exact_shadow_history": true
+    },
+    "no_runtime_failure_from_forced_RPC_disconnect_interpreted_as_physical_or_numerical_failure": true,
+    "old1024_reference_failure_retained": true,
+    "overall_native_verification_PASS": false,
+    "production10s_goal_not_yet_met": true,
+    "public_book_dump_not_promoted": true,
+    "reference_active_kernel_equivalence": {
+      "actual_VBA_material_budget_and1e_minus9_tolerance_unchanged": true,
+      "all_compared_stress_effective_history_and_counts_byteexact": true,
+      "cases": [
+        {
+          "all_outputs_and_counts_byteexact": true,
+          "label": "Full587Early14",
+          "material_points_per_field": 1761,
+          "old1024_budget_failure": null,
+          "states_checked": 14
+        },
+        {
+          "all_outputs_and_counts_byteexact": true,
+          "label": "Selected27Full125",
+          "material_points_per_field": 27,
+          "old1024_budget_failure": null,
+          "states_checked": 125
+        }
+      ],
+      "no_physical_capacity_claim": true,
+      "only_external_budget_may_be8192": true,
+      "previous_independent125_failure_retained": true,
+      "unchanged_tolerance_MPa": 1e-10
+    },
+    "whole_goal_completed": false,
+    "working_core_stagnation_guard_not_yet_implemented": true
+  },
   "main_torsion_boundary_start_1276_1277": {
     "Case09_prepared_not_started": true,
     "active_job": {
@@ -51929,7 +52334,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Poll32307 first. Late immutable1278 prefix56states independently passed all60+6 andallmateriallimits; maxT48.60265459,lastT27.04575356,C.409270,steel.433065; native504points/27coordinates passed. Include1278in next terminal-main archive (currentlyonlyD), notcapacity. Poll32307 existing live main300x500 T+ cold1276; never restart because filesquiet. Actual269bookA402080284F3345405C68282F41010BF5B512594672C6CC1F123F482494549A3; two methods only Newton.Evaluate zeroWstress-only and boundaryspacing64/minBsplinespan;267othersincludingClosedASD flag/control/material/force/peakgates unchanged. Same225force,567C(342boundary),20steel,587points,60DOF; sameallInputbytes1266; outerwatchdog900s only changes wallbudget. OwnExcel35348 UTCticks639314504264252500 monitored bywatchdog; neverkillotherExcel. Main1277 immutable prefix14states maxT48.41290985kNm nativeindependent full60+6 allC/steel limits passed, selected126nativepointstates/18coordinates; notcapacity. Need finished1276 report and independent entirehistory; iftimeout capturemostcompleteimmutableprefix and retainTIMEOUT status; ifmaterial/peakcap confirmindependent upper or bothpeakshoulders plusdensefullhistory. 1273 smallold180x120 complete:225/400+same320boundary coords capacities5.22979744/5.22346536,113acceptednativeforces+103500dense stress checks passed, delta-.1211% notuniversalquadcertificate.1272zeroWfull56history/results exact, timingonecase106.078->82.930s(-21.82%). Old3.66T whole-section proof revoked dueunseenboundary. ArchiveMainStartstatic+1277prefix andResolvedruntime; verifyallSHA/CRC/Gitblobs; checkpoint+push onlycodexbranch. ThenTminus andN/Mregression chosenintegration,NM/NMT currentquad,thenQ/NMTQ. Hpost1500 benchmarkonly; realConfigsteel<=1%,CDP/arbitrarygeometry/basis/universalbars/experiments/buildbookdump/nativeExcelUI/AutoCAD/fullworkflow10s/authorizedfullacceptance remainoriginalscope. Goalactive,no pause/mainmerge/publicpromotion."
+    "User explicitly rejected900s single-case runs. ALL long own calculations stopped/terminal; do NOT restart archived600/900s scripts or increase budgets. New policy tools/diagnostics/CoupledDiagnosticPolicy.json and Run-TestCoupledBounded.ps1 enforce10s per new single-case diagnostic (syntax+negative entry gate checked, no new run). GoalACTIVE notpaused. Next inspect saved failures/local fixed-point/continuation and design meaningful exploration-stagnation stop, excluding deliberate peak/material-boundary refinement. Offline125 history first8-step insignificant window ends atstate77 (load7.62e-5,field9.82e-4,material4.63e-4 vsrequested.001);49suchwindows, lastallsmaller. This is diagnostic, coreguardnotyetimplemented. Closed1276 andzeroWevent1279 BOTH900s TIMEOUT, both ownPIDsAbsent; full125 fields/factors/operators byteexact, soeventfilter NOTfix andnotpromoted.125NumpyClosed60+6/material checks passed, peakselectedT48.602655,last27.107960,C.419214,steel.446800. Native1500selected stress/effective/stationarity gates passed BUT coordinateerror1.431e-12 exceeds1e-12; overallnativeverificationnotPASS, keep failure. Externalactivekernel matchesoriginal byteexact (14full587+125selected27);reference1e-10 budget1024 failsstate67 on12zeroWcorner points;8192workbudget completesforcechecks; notVBA budget/tolerancechange. Native1283 onlyoneintegrationbool changed (book359BBFB...); ownExcel38848 ticks639314524826470156 explicitlystoppeduser08:52:48Z, UserRequestedStopClosureTrue; COM/RPCerrors expected interruption, notNumFail/physicalfailure. Preservealldata. IndependentSciPy frozen125history findsλ2.71179596/T27.1179596 atfull60+6~9.4e-15,C.42085,steel.44906; NOTcoldVBA orstructuralOpenSees; nextΔ.01trialmaterialclosure8192failed, notnonexistence. Need understand materialclosure/controlledNewton cause withshort local probes, not morelongruns. Archivecompleted1276/78/79/80/81/82/interrupted1283+allhelpers andnewpolicy, verifySHA/CRC/Gitcheckpointpush. Keep originalN/M/T->NM/NMT->Q/NMTQ plan, Configsteel<=1%,CDP,arbitrarygeometry/universalbars/Bsplines/experiments/source-build-bookdump/nativeExcelUI/AutoCAD/wholeworkflow10s/authorizedfullacceptance scope; no mainmerge/publicpromotion."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
