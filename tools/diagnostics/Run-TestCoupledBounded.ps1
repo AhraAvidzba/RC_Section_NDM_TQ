@@ -28,7 +28,8 @@ if (!$taskCase.StartsWith($taskAllowedRoot,[StringComparison]::OrdinalIgnoreCase
 if ($Macro -notmatch '^[A-Za-z_][A-Za-z0-9_]*\.Test[A-Za-z0-9_]+$') {
     throw 'Для диагностики укажите явную тестовую точку входа VBA.'
 }
-if ($Kind -eq 'Verification' -and $Macro -cne 'modTestCoupledProgressGuard.TestRunProgressGuard') {
+$taskVerificationMacros=@('modTestCoupledProgressGuard.TestRunProgressGuard','modTestASDCoaxialFlow.TestRunCoaxialFlow')
+if ($Kind -eq 'Verification' -and !($taskVerificationMacros -ccontains $Macro)) {
     throw 'Режим проверки сохранённой истории допускает только проверенную точку входа без решения НДС.'
 }
 $taskBookRoot=Split-Path -Parent $taskCase
