@@ -1,0 +1,71 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Audit1257ASDBoundaryTorsion_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": false
+    },
+    "Audit1258ASDTorsionUncertainty_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": true
+    },
+    "Audit1259ASDTorsionUncertainty_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": false
+    },
+    "Audit1260ASDTorsionPeakRefinement_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": false
+    },
+    "Audit1261ASDTorsionPeakSamples_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": false
+    },
+    "Audit1262ASDTorsionPeakRebracket_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": true
+    },
+    "Audit1263ASDTorsionPeakRebracket_20261128": {
+      "physical_capacity_not_confirmed": true,
+      "preparation_failed_before_Office": false
+    },
+    "Boundary1252ASDMaterialPoints_20261128": {
+      "Case04/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 161,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_Torsion",
+        "compression_utilization": 0.8344728115861014,
+        "final_lambda": 2.8980468679818356,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          0.0,
+          0.0,
+          28980468.679818355,
+          0.0,
+          0.0
+        ],
+        "independent_torsion_peak": null,
+        "independent_upper": null,
+        "maximum_force_error_N": 0.1307197832379643,
+        "maximum_moment_error_Nmm": 27.82946039363742,
+        "status": "NumFail",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        4
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
+    },
+    "Case09Timeout": {
+      "exact_own_Excel_closed": true,
+      "no_NumFail_or_physical_Fail_assigned": true,
+      "no_final_solver_result": true,
+      "watchdog_seconds": 1200
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}

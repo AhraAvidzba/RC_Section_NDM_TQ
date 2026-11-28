@@ -1,16 +1,5 @@
 {
-  "active_jobs": [
-    {
-      "kind": "cold pure T+",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case04",
-      "session_id": 19429
-    },
-    {
-      "kind": "cold pure T-",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case09",
-      "session_id": 67172
-    }
-  ],
+  "active_jobs": [],
   "benchmark_Hpost1500_only": true,
   "boundary_candidate_root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128",
   "boundary_candidate_source_proof": {
@@ -30,13 +19,67 @@
     "public_book_unchanged": true,
     "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
   },
-  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryMx",
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryTorsion",
+  "evidence_verification": {
+    "all_direct_and_inherited_payloads_SHA256_verified": true,
+    "archive_parts": [
+      {
+        "bytes": 87726875,
+        "file": "RawArchive.zip",
+        "sha256": "4DD997E26DA3190FF54364AAAB41FD095F374042690E3CB1B9958F8259D669F5"
+      },
+      {
+        "bytes": 57326942,
+        "file": "RawArchive002.zip",
+        "sha256": "E7C7C0483ED9ACF45704892A97E1967D4EDFBDB4977D28656D839C52AB0534D1"
+      }
+    ],
+    "distinct_books_CRC_verified": 6,
+    "files": 4105,
+    "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryTorsion/Files.json",
+    "manifest_sha256": "D7055615ED58643CDD023E41138283B7D45D3235D9FD1014A8818AB0380BDC23",
+    "new_payloads": 918,
+    "no_files_modified": true,
+    "parent_manifests_verified": 18,
+    "total_archive_bytes": 145053817,
+    "unique_payloads": 1408
+  },
   "full_acceptance_not_run": true,
   "goal_status": "active",
   "next_actions": [
-    "Boundary1252 separateN/Mx/My bothsigns completed physical criteria and strict independent native proof, all339acceptedstates. My concreteC limit |My|69.413129738, upper69.414616868kNm; dense320point5mm all3station history passedC lower.99923872 upper1.0014,steel<.887. Ncomplambda4.93358643127; Ntension1.091861841689. Mx boundaryregression127states, |Mx|118.841268553/118.836516640kNm; changevs225no-boundary<.0041%, all3stations+320extra boundary/fullhistory passedC<.77 andsteelupper>1. Native force/secant/centralTRF strict gates passed; optimizerFlags retained honestly. Sourcebook269,4preparationclasses+2testhelpers,263unchanged; no material/nonlinearforce algorithm change. Full book/source/dump public260 unchanged and not promoted; legacyHpost1500 not approved working default. PureT+- firstcold checks active19429/67172, samebook noVBAchange andsame materials/tolerances/local30global256/1200s watchdog. Cases04/09 inputs prepared from1202, source/operator refs archived. Pollsession or closure, do not restart. For verification header(60,325,305,.001), Replay-TestBoundaryMaterialDirections ordinary first, CentralForce fallback; criterion maysteel(anylong/hoop)orconcrete. Wholematerialcertificate genericbasedonVerify-TestBoundaryMy/MxHistoryEnvelope needsadapttoactualcriterion. NewFrozen-TestASDVariablePointContext fixes325 substring issue before insertingtotal, retainsoriginal8guard andbitexact225/400. NoNumFail/timeout treatedphysicalfailure. NextT thenNM10/NMT5 thenQ thenNMTQ; Configsteel<=1%, CDP, B-spline/integration settings andbasis/geometryconvergence, universal transverse bars, scientificexperiments, source-build-book/output/native/fullworkflow10s andauthorizedfullacceptance remain. No pause/fullONOFF-hour run/main merge."
+    "All previous T/native sessions terminal. SeparateN/Mx/My bothsigns prior339acceptedstates physical/native verified, Hpost1500 benchmarkonly. Original T+ NumFail, T- watchdog1200 no final packet, no physical Tcapacity accepted. Eight saved prefixes both signs native verified. 50.0563kNm belongs to replaced coarse prefixes in BOTH signs, not accepted capacity. Four frozen-peak VBA/native probes disprove force-tolerance dominance: actual nonlinear correction -1.46e-10; old uncertainty4.74e-5 << total0.04013. Original third shoulder refinement solved all4points but all descending: peak moved left outside fixed bracket. Private1263 reselects bracket using only solved fields, strict gates retained; source269/267unchanged. 14rebrackets/143probes/32passes gives peak4.754062503,error0.0091805304, still FAILS requested0.001. No blind budget increase or tolerance relaxation. Next control step accuracy of material history BEFORE peak, e.g. full-versus-two-half-step diagnostic from same prefix before tension damage; compare uniform/coarse histories and native-equilibrium independently. Candidate needs retained-field capture/native proof before promotion; end-of-peak test stop not final material event or capacity. Then coldT+- through physical event, NM/NMT,Q,NMTQ. No public260 promotion yet. Configsteel<=1%, CDP,basis/integration/geometry convergence, universalbars/scientific/nativebook/fullworkflow10s/full authorizedacceptance remain. Goal active, no pause/main merge/full long acceptance."
   ],
   "public_book_and_dump_unchanged": true,
   "report": "docs/reports/Coupled6DQuadrature_2026-11-28.md",
+  "torsion_current_facts": {
+    "case04": "Terminal macro execution PASS, solver NumFail; material event on descending branch reached hoop strain. All161 final history states independently verified; no physical capacity accepted because peak accuracy0.0401300 exceeds0.001.",
+    "case09": "Terminal watchdog1200s, own Excel exact identity closed, no final capacity packet. Timeout is neither NumFail nor physical Fail. Eight selected prefixes of both signs independently verified, including most complete ordinary/retry histories and replaced coarse prefixes.",
+    "coarse_prefix_warning": "50.0563kNm occurs in a coarse prefix later replaced by refinement, in BOTH T signs. It is an admissible history-dependent equilibrium, not an accepted refined capacity or improvement over49.2493kNm.",
+    "peak1260": "Expected diagnostic stop at third replay refinement; all four shoulder probes completed, but local peak was not identified. First refined accuracy0.081475 dominated bysampling; second0.040130 dominated byfirst-second peak difference. Next capture all shoulder samples to distinguish rebracketing from numerical failure.",
+    "uncertainty1259": "Four actualVBA frozen-peak probes, source269/267unchanged, all60+6 native verified. Tightening force tolerance moves lambda by-1.46115e-10, equal to adjoint actual-residual prediction. Old estimate4.7423e-5 is too small to explain total peak error0.04013. No change to production uncertainty estimator justified."
+  },
+  "torsion_rebracket_candidate": {
+    "expected_test_stop_not_final_solver_result": true,
+    "full_material_event_and_capacity_not_yet_checked": true,
+    "peak_accuracy": 0.00918053044784095,
+    "peak_accuracy_gate_passed": false,
+    "peak_lambda": 4.75406250347219,
+    "probes": 143,
+    "rebrackets": 14,
+    "requested_lambda_tolerance": 0.001,
+    "source": {
+      "actual_components": 269,
+      "all267_other_components_unchanged": true,
+      "changed_components": [
+        "CCoupledDeformationContinuation",
+        "modTestSelectableMaterialCore"
+      ],
+      "continuation_interval_selection_changed": true,
+      "intentional_diagnostic_stop_not_a_solver_result": true,
+      "material_laws_and_Newton_solver_unchanged": true,
+      "physical_capacity_not_claimed": true,
+      "saved_book_sha256": "714403946A3C3A685E53097666DBF657B32C66FE4B4855615F1307ED0850D3A7"
+    }
+  },
   "whole_goal_completed": false
 }

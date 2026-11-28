@@ -3795,18 +3795,7 @@
   "active_cold_exec_session": null,
   "active_cold_source_root": null,
   "active_exec_session": null,
-  "active_jobs": [
-    {
-      "kind": "cold pure T+",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case04",
-      "session_id": 19429
-    },
-    {
-      "kind": "cold pure T-",
-      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case09",
-      "session_id": 67172
-    }
-  ],
+  "active_jobs": [],
   "actual_H_derivative748": {
     "accepted_tensor_output_exact_verified744": true,
     "assembled": {
@@ -9704,6 +9693,30 @@
     "steel_points": 20,
     "whole_goal_completed": false,
     "working_Config_materials_not_yet_accepted": true
+  },
+  "boundary_torsion_archive_verified": {
+    "all_direct_and_inherited_payloads_SHA256_verified": true,
+    "archive_parts": [
+      {
+        "bytes": 87726875,
+        "file": "RawArchive.zip",
+        "sha256": "4DD997E26DA3190FF54364AAAB41FD095F374042690E3CB1B9958F8259D669F5"
+      },
+      {
+        "bytes": 57326942,
+        "file": "RawArchive002.zip",
+        "sha256": "E7C7C0483ED9ACF45704892A97E1967D4EDFBDB4977D28656D839C52AB0534D1"
+      }
+    ],
+    "distinct_books_CRC_verified": 6,
+    "files": 4105,
+    "manifest": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryTorsion/Files.json",
+    "manifest_sha256": "D7055615ED58643CDD023E41138283B7D45D3235D9FD1014A8818AB0380BDC23",
+    "new_payloads": 918,
+    "no_files_modified": true,
+    "parent_manifests_verified": 18,
+    "total_archive_bytes": 145053817,
+    "unique_payloads": 1408
   },
   "branch": "codex/coupled-6d",
   "clean_ASD_promotion_plan": {
@@ -28496,6 +28509,345 @@
       "target_strain": 0.025,
       "whole_goal_completed": false
     }
+  },
+  "latest_boundary_torsion_audit": {
+    "Hpost1500_frozen_benchmark_only": true,
+    "candidate": {
+      "expected_test_stop_not_final_solver_result": true,
+      "full_material_event_and_capacity_not_yet_checked": true,
+      "peak_accuracy": 0.00918053044784095,
+      "peak_accuracy_gate_passed": false,
+      "peak_lambda": 4.75406250347219,
+      "probes": 143,
+      "rebrackets": 14,
+      "requested_lambda_tolerance": 0.001,
+      "source": {
+        "actual_components": 269,
+        "all267_other_components_unchanged": true,
+        "changed_components": [
+          "CCoupledDeformationContinuation",
+          "modTestSelectableMaterialCore"
+        ],
+        "continuation_interval_selection_changed": true,
+        "intentional_diagnostic_stop_not_a_solver_result": true,
+        "material_laws_and_Newton_solver_unchanged": true,
+        "physical_capacity_not_claimed": true,
+        "saved_book_sha256": "714403946A3C3A685E53097666DBF657B32C66FE4B4855615F1307ED0850D3A7"
+      }
+    },
+    "case04_final161_states_verified": true,
+    "case04_final_status": "NumFail",
+    "case09_exact_own_Excel_closed": true,
+    "case09_no_final_solver_result": true,
+    "case09_watchdog_seconds": 1200,
+    "frozen_actual_uncertainty": {
+      "actual_residual_estimate_is_local_linearization_not_rigorous_bound": true,
+      "cases": [
+        {
+          "actual_maximum_residual_MPa": 3.1465548376456964e-11,
+          "actual_plus_roundoff_estimate": 1.859848247195237e-10,
+          "actual_weighted_absolute_residual": 1.7398219245362603e-10,
+          "adjoint_norm1": 42.12963951916335,
+          "adjoint_residual_max": 4.5669024117955814e-12,
+          "case": 1,
+          "equilibrium_tolerance": 1.125643899281302e-06,
+          "estimated_floating_floor_MPa": 8.548717289882696e-14,
+          "lambda_value": 4.924934298017157,
+          "old_uncertainty": 4.7422983553535235e-05,
+          "reproduced_old_uncertainty": 4.742298355353526e-05,
+          "signed_linear_lambda_correction": 1.4611529328238623e-10
+        },
+        {
+          "actual_maximum_residual_MPa": 3.1465548376456964e-11,
+          "actual_plus_roundoff_estimate": 1.859848247195237e-10,
+          "actual_weighted_absolute_residual": 1.7398219245362603e-10,
+          "adjoint_norm1": 42.12963951916335,
+          "adjoint_residual_max": 4.5669024117955814e-12,
+          "case": 2,
+          "equilibrium_tolerance": 2.251287798562604e-09,
+          "estimated_floating_floor_MPa": 8.548717289882696e-14,
+          "lambda_value": 4.924934298017157,
+          "old_uncertainty": 9.485779327592931e-08,
+          "reproduced_old_uncertainty": 9.485779327592937e-08,
+          "signed_linear_lambda_correction": 1.4611529328238623e-10
+        },
+        {
+          "actual_maximum_residual_MPa": 2.6427970055420413e-15,
+          "actual_plus_roundoff_estimate": 1.5451412373472725e-11,
+          "actual_weighted_absolute_residual": 1.2485103129488067e-14,
+          "adjoint_norm1": 42.12963952037973,
+          "adjoint_residual_max": 3.637978807091713e-12,
+          "case": 3,
+          "equilibrium_tolerance": 2.25128779852548e-11,
+          "estimated_floating_floor_MPa": 8.548717289613728e-14,
+          "lambda_value": 4.924934297871042,
+          "old_uncertainty": 9.603093026808193e-10,
+          "reproduced_old_uncertainty": 9.603093026808197e-10,
+          "signed_linear_lambda_correction": -1.1557465118068849e-14
+        },
+        {
+          "actual_maximum_residual_MPa": 3.1465548376456964e-11,
+          "actual_plus_roundoff_estimate": 1.859848247195237e-10,
+          "actual_weighted_absolute_residual": 1.7398219245362603e-10,
+          "adjoint_norm1": 42.12963951916335,
+          "adjoint_residual_max": 4.5669024117955814e-12,
+          "case": 4,
+          "equilibrium_tolerance": 1.125643899281302e-06,
+          "estimated_floating_floor_MPa": 8.548717289882696e-14,
+          "lambda_value": 4.924934298017157,
+          "old_uncertainty": 4.7422983553535235e-05,
+          "reproduced_old_uncertainty": 4.742298355353526e-05,
+          "signed_linear_lambda_correction": 1.4611529328238623e-10
+        }
+      ],
+      "nonlinear_polishing_and_independent_force_check_still_required": true,
+      "original_force_tolerances_unchanged": true,
+      "physical_capacity_not_confirmed": true
+    },
+    "frozen_independent_nonlinear_verification": {
+      "actual_nonlinear_lambda_correction": -1.461151200032873e-10,
+      "all60_equations_and_six_forces_independently_verified": true,
+      "cases": [
+        {
+          "case": 1,
+          "control_residual": 0.0,
+          "exact_seed": true,
+          "gauge_residual": 1.2705494208814505e-16,
+          "lambda_value": 4.924934298017157,
+          "native_actual_resultants": [
+            7.495357863263052e-07,
+            4.085450200363994e-09,
+            -5.85941961617209e-10,
+            49249342.97994581,
+            -5.019273885409348e-11,
+            6.971134780542343e-11
+          ],
+          "optimizer_iterations": 0,
+          "original_bound": 1.1256438992813017e-06,
+          "six_force_residual": 5.735930059136241e-12,
+          "weak_residual": 2.977783845937101e-11
+        },
+        {
+          "case": 2,
+          "control_residual": 0.0,
+          "exact_seed": true,
+          "gauge_residual": 1.2705494208814505e-16,
+          "lambda_value": 4.924934298017157,
+          "native_actual_resultants": [
+            7.495357863263052e-07,
+            4.085450200363994e-09,
+            -5.85941961617209e-10,
+            49249342.97994581,
+            -5.019273885409348e-11,
+            6.971134780542343e-11
+          ],
+          "optimizer_iterations": 0,
+          "original_bound": 1.1256438992813017e-06,
+          "six_force_residual": 5.735930059136241e-12,
+          "weak_residual": 2.977783845937101e-11
+        },
+        {
+          "case": 3,
+          "control_residual": 0.0,
+          "exact_seed": false,
+          "gauge_residual": 5.082197683525802e-17,
+          "lambda_value": 4.924934297871042,
+          "native_actual_resultants": [
+            -2.8669990115304245e-07,
+            1.9945218809880316e-09,
+            -6.639311322942376e-10,
+            49249342.97859843,
+            -8.589040589868091e-11,
+            3.6408209780347534e-11
+          ],
+          "optimizer_iterations": 1,
+          "original_bound": 1.1256438992627398e-06,
+          "six_force_residual": 2.845343873762478e-12,
+          "weak_residual": 2.845279567509351e-12
+        },
+        {
+          "case": 4,
+          "control_residual": 0.0,
+          "exact_seed": true,
+          "gauge_residual": 1.2705494208814505e-16,
+          "lambda_value": 4.924934298017157,
+          "native_actual_resultants": [
+            7.495357863263052e-07,
+            4.085450200363994e-09,
+            -5.85941961617209e-10,
+            49249342.97994581,
+            -5.019273885409348e-11,
+            6.971134780542343e-11
+          ],
+          "optimizer_iterations": 0,
+          "original_bound": 1.1256438992813017e-06,
+          "six_force_residual": 5.735930059136241e-12,
+          "weak_residual": 2.977783845937101e-11
+        }
+      ],
+      "correction_difference": 1.732790989229403e-16,
+      "no_change_to_production_estimator_justified_by_this_probe": true,
+      "old_uncertainty_too_small_to_explain_total_peak_accuracy_004": true,
+      "physical_capacity_not_confirmed": true,
+      "predicted_local_adjoint_lambda_correction": -1.4611529328238623e-10
+    },
+    "original_third_refinement_samples": [
+      [
+        12.0,
+        2.0,
+        0.0,
+        0.00058017615410224,
+        4.91926477015863,
+        9.78445992463251e-06,
+        16.0
+      ],
+      [
+        12.0,
+        2.0,
+        1.0,
+        0.000597240157913842,
+        4.89935306653704,
+        9.65013702253154e-06,
+        17.0
+      ],
+      [
+        12.0,
+        2.0,
+        2.0,
+        0.000614304161725445,
+        4.89770259287966,
+        9.678605635368e-06,
+        18.0
+      ],
+      [
+        12.0,
+        2.0,
+        3.0,
+        0.000631368165537047,
+        4.88868823561954,
+        9.45913921608221e-06,
+        19.0
+      ],
+      [
+        12.0,
+        2.0,
+        4.0,
+        0.000648432169348649,
+        4.86638664856041,
+        9.61150155539384e-06,
+        20.0
+      ]
+    ],
+    "physical_torsion_capacity_not_yet_confirmed": true,
+    "public_book_and_dump_sha256_unchanged": {
+      "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+      "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+    },
+    "saved_prefixes": {
+      "cases": [
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 4,
+          "first_positive_lambda": 0.025,
+          "last_lambda": 2.806148809810822,
+          "maximum_lambda": 4.9208292641686855,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix01.Equilibrium.json",
+          "sha256": "21F6E17B0746763C1826FB39043E8637105EEB7D1CDB2B0F44ECFD64B33B0909",
+          "source": "MainCapacityHistory.bin.Accepted.000437.bin",
+          "states": 244
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 4,
+          "first_positive_lambda": 0.025,
+          "last_lambda": 5.005627676031221,
+          "maximum_lambda": 5.005627676031221,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix02.Equilibrium.json",
+          "sha256": "6519901336B09E490C88A81FA31D8E440A139DCEA75EC431248866FF3F8A78BC",
+          "source": "MainCapacityHistory.bin.Accepted.000206.bin",
+          "states": 25
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 4,
+          "first_positive_lambda": 0.25,
+          "last_lambda": 2.8980468679818356,
+          "maximum_lambda": 4.924934298017157,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix03.Equilibrium.json",
+          "sha256": "BFE5544ABEC37FDF53F1E55C8ED805E50781654B516058B21219BE0AAC5ED348",
+          "source": "MainCapacityHistory.bin.Accepted.000180.bin",
+          "states": 161
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 4,
+          "first_positive_lambda": 0.25,
+          "last_lambda": 4.966382820023864,
+          "maximum_lambda": 4.966382820023864,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix04.Equilibrium.json",
+          "sha256": "B736A1ECB6D3DB6F07C5FF816E236D6BA4BBB7703F434176FEC0D8BB656B88C1",
+          "source": "MainCapacityHistory.bin.Accepted.000014.bin",
+          "states": 14
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 9,
+          "first_positive_lambda": 0.025,
+          "last_lambda": 2.797957118829053,
+          "maximum_lambda": 4.9208292641686855,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix01.Equilibrium.json",
+          "sha256": "0C5C7C0A5E2AB7A16412D23255B9B120D0058A2E3952CF675CEE6D62D9A72B52",
+          "source": "MainCapacityHistory.bin.Accepted.000424.bin",
+          "states": 206
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 9,
+          "first_positive_lambda": 0.025,
+          "last_lambda": 5.005627676031221,
+          "maximum_lambda": 5.005627676031221,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix02.Equilibrium.json",
+          "sha256": "CD1078463601114E1B78CDB3DBD99908F2FED54C09C789A9ACA41BCE3F3BB446",
+          "source": "MainCapacityHistory.bin.Accepted.000231.bin",
+          "states": 25
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 9,
+          "first_positive_lambda": 0.25,
+          "last_lambda": 2.8982430270406616,
+          "maximum_lambda": 4.924934298017157,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix03.Equilibrium.json",
+          "sha256": "AFE14E9742BE2E687A19ECA29164232945C8F76E5F22F2C6ABC5492542DB055B",
+          "source": "MainCapacityHistory.bin.Accepted.000205.bin",
+          "states": 188
+        },
+        {
+          "all60_equations_and_six_forces_verified": true,
+          "case": 9,
+          "first_positive_lambda": 0.25,
+          "last_lambda": 4.966382820023864,
+          "maximum_lambda": 4.966382820023864,
+          "maximum_not_accepted_as_capacity": true,
+          "proof": "Native/TorsionSavedPrefix04.Equilibrium.json",
+          "sha256": "DD511F593C9597CA1A904DBF93EE61381E4EE79CE55B202D8D823CCC650A6640",
+          "source": "MainCapacityHistory.bin.Accepted.000014.bin",
+          "states": 14
+        }
+      ],
+      "coarse_prefix_may_have_been_replaced_by_refined_history": true,
+      "material_history_step_convergence_not_established": true,
+      "physical_capacity_not_confirmed": true
+    },
+    "third_original_refinement_all_four_steps_solved_but_entire_interval_descends": true,
+    "whole_goal_completed": false
   },
   "latest_bounded_branch927": {
     "accepted_history_unchanged_by_native_guard": true,
@@ -49860,7 +50212,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Boundary1252 separateN/Mx/My bothsigns completed physical criteria and strict independent native proof, all339acceptedstates. My concreteC limit |My|69.413129738, upper69.414616868kNm; dense320point5mm all3station history passedC lower.99923872 upper1.0014,steel<.887. Ncomplambda4.93358643127; Ntension1.091861841689. Mx boundaryregression127states, |Mx|118.841268553/118.836516640kNm; changevs225no-boundary<.0041%, all3stations+320extra boundary/fullhistory passedC<.77 andsteelupper>1. Native force/secant/centralTRF strict gates passed; optimizerFlags retained honestly. Sourcebook269,4preparationclasses+2testhelpers,263unchanged; no material/nonlinearforce algorithm change. Full book/source/dump public260 unchanged and not promoted; legacyHpost1500 not approved working default. PureT+- firstcold checks active19429/67172, samebook noVBAchange andsame materials/tolerances/local30global256/1200s watchdog. Cases04/09 inputs prepared from1202, source/operator refs archived. Pollsession or closure, do not restart. For verification header(60,325,305,.001), Replay-TestBoundaryMaterialDirections ordinary first, CentralForce fallback; criterion maysteel(anylong/hoop)orconcrete. Wholematerialcertificate genericbasedonVerify-TestBoundaryMy/MxHistoryEnvelope needsadapttoactualcriterion. NewFrozen-TestASDVariablePointContext fixes325 substring issue before insertingtotal, retainsoriginal8guard andbitexact225/400. NoNumFail/timeout treatedphysicalfailure. NextT thenNM10/NMT5 thenQ thenNMTQ; Configsteel<=1%, CDP, B-spline/integration settings andbasis/geometryconvergence, universal transverse bars, scientificexperiments, source-build-book/output/native/fullworkflow10s andauthorizedfullacceptance remain. No pause/fullONOFF-hour run/main merge."
+    "All previous T/native sessions terminal. SeparateN/Mx/My bothsigns prior339acceptedstates physical/native verified, Hpost1500 benchmarkonly. Original T+ NumFail, T- watchdog1200 no final packet, no physical Tcapacity accepted. Eight saved prefixes both signs native verified. 50.0563kNm belongs to replaced coarse prefixes in BOTH signs, not accepted capacity. Four frozen-peak VBA/native probes disprove force-tolerance dominance: actual nonlinear correction -1.46e-10; old uncertainty4.74e-5 << total0.04013. Original third shoulder refinement solved all4points but all descending: peak moved left outside fixed bracket. Private1263 reselects bracket using only solved fields, strict gates retained; source269/267unchanged. 14rebrackets/143probes/32passes gives peak4.754062503,error0.0091805304, still FAILS requested0.001. No blind budget increase or tolerance relaxation. Next control step accuracy of material history BEFORE peak, e.g. full-versus-two-half-step diagnostic from same prefix before tension damage; compare uniform/coarse histories and native-equilibrium independently. Candidate needs retained-field capture/native proof before promotion; end-of-peak test stop not final material event or capacity. Then coldT+- through physical event, NM/NMT,Q,NMTQ. No public260 promotion yet. Configsteel<=1%, CDP,basis/integration/geometry convergence, universalbars/scientific/nativebook/fullworkflow10s/full authorizedacceptance remain. Goal active, no pause/main merge/full long acceptance."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
