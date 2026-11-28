@@ -1,0 +1,31 @@
+{
+  "all_completed_verification_workers_terminal": true,
+  "all_workers_terminal": false,
+  "cases": {
+    "Cold1276ASDMainTorsionBoundary_20261128": {
+      "Case09_not_started": true,
+      "active_session": 32307,
+      "no_active_capacity_results_captured": true,
+      "source": {
+        "actual_components": 269,
+        "all267_other_components_unchanged": true,
+        "changed_components_exact": true,
+        "closed_material_integration_unchanged": true,
+        "force_and_material_and_peak_gates_unchanged": true,
+        "only_Newton_Evaluate_and_boundary_sampling_changed": true,
+        "public_book_unchanged": true,
+        "saved_book_sha256": "A402080284F3345405C68282F41010BF5B512594672C6CC1F123F482494549A3"
+      },
+      "static_inputs_and_saved_book_only": true
+    },
+    "Verify1277ASDMainBoundaryPrefix_20261128": {
+      "all60_and_six_forces_and_material_limits_independently_verified": true,
+      "all_verification_workers_terminal": true,
+      "immutable_prefix_states": 14,
+      "not_a_capacity_or_final_status": true
+    }
+  },
+  "has_active_main_capacity": true,
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
