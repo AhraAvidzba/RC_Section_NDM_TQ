@@ -1,0 +1,163 @@
+{
+  "all_selected_workers_terminal": true,
+  "all_workers_terminal": false,
+  "cases": {
+    "ActivePureT": {
+      "cases": [
+        4,
+        9
+      ],
+      "no_active_results_captured": true,
+      "no_capacity_claim": true,
+      "same_compiled_book": true
+    },
+    "Boundary1252ASDMaterialPoints_20261128": {
+      "Case02/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 64,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMx",
+        "compression_utilization": 0.7690446154718754,
+        "final_lambda": 1.1884126855324164,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          -118841268.55324164,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMx",
+          "compression_utilization": 0.7698248470795627,
+          "elapsed_seconds": 69.87244900001679,
+          "fixed_history_states": 64,
+          "function_evaluations": 60,
+          "gauge_residual_MPa": 9.261797058457422e-13,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 6.46697771500282e-05,
+          "lower_lambda": 1.18841268553242,
+          "original_bound_MPa": 2.0097939622926072e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 1.0097200882608088e-08,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 5.0368704689074e-09,
+          "solver": "scipy.optimize.least_squares(method=trf,jac=central_scaled,step=1e-05)",
+          "solver_message": "The maximum number of function evaluations is exceeded.",
+          "solver_success": false,
+          "steel_utilization": 1.0003812623766069,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.18847735530957,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.0405768614505746,
+        "maximum_moment_error_Nmm": 9.337491929531097,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "Case07/Native/PhysicalDirectionSummary.json": {
+        "accepted_states": 63,
+        "all60_equations_and_six_resultants_verified": true,
+        "case": "Realistic300x500_BendingMxPositive",
+        "compression_utilization": 0.7681730837543062,
+        "final_lambda": 1.1883651664031996,
+        "final_target_resultants_N_Nmm": [
+          0.0,
+          118836516.64031996,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "independent_axial_peak": null,
+        "independent_upper": {
+          "OpenSees_native_constitutive_updates_used": true,
+          "OpenSees_structural_element_not_used": true,
+          "case": "Realistic300x500_BendingMxPositive",
+          "compression_utilization": 0.7696894148474426,
+          "elapsed_seconds": 8.16928370000096,
+          "fixed_history_states": 63,
+          "function_evaluations": 616,
+          "gauge_residual_MPa": 1.0516788636818811e-08,
+          "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+          "independent_global_section_equilibrium_found": true,
+          "lambda_bracket_width": 0.00013650180258006905,
+          "lower_lambda": 1.1883651664032,
+          "original_bound_MPa": 2.0098248484207612e-06,
+          "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+          "physical_limit_kind": 1,
+          "physical_residual_MPa": 3.6676457009557e-08,
+          "required": true,
+          "scipy_version": "1.18.1",
+          "six_resultants_residual_MPa": 1.2600220765749307e-08,
+          "solver": "scipy.optimize.root(method=hybr)",
+          "solver_message": "The number of calls to function has reached maxfev = 600.",
+          "solver_success": false,
+          "steel_utilization": 1.0003806423386397,
+          "tension_utilization": 0.0,
+          "upper_lambda": 1.18850166820578,
+          "upper_material_limit_exceeded": true
+        },
+        "maximum_force_error_N": 0.04057686056859211,
+        "maximum_moment_error_Nmm": 9.337487608194351,
+        "status": "OK",
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [
+        2,
+        7
+      ],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
+    },
+    "Materials1256ASDBoundaryMxHistory_20261128": {
+      "boundary_points": 320,
+      "boundary_points_have_zero_equilibrium_weight": true,
+      "cases": [
+        {
+          "accepted_states": 64,
+          "all_concrete_points_all3_stations_whole_history_checked_by_monotonic_maximum": true,
+          "all_endpoint_equations_and_forces_verified": true,
+          "all_steel_points_all3_stations_all_accepted_fields_checked": true,
+          "boundary_compression_history_utilization": 0.7691777013025602,
+          "case": 2,
+          "core_compression_history_utilization": 0.7690446154719881,
+          "maximum_lower_steel_utilization": 0.9994952562362586,
+          "upper_boundary_compression_history_utilization": 0.7699434494349889,
+          "upper_core_compression_history_utilization": 0.7698248470803399,
+          "upper_steel_utilization": 1.0003812623766069
+        },
+        {
+          "accepted_states": 63,
+          "all_concrete_points_all3_stations_whole_history_checked_by_monotonic_maximum": true,
+          "all_endpoint_equations_and_forces_verified": true,
+          "all_steel_points_all3_stations_all_accepted_fields_checked": true,
+          "boundary_compression_history_utilization": 0.768310495354456,
+          "case": 7,
+          "core_compression_history_utilization": 0.7681730837544782,
+          "maximum_lower_steel_utilization": 0.998609885230754,
+          "upper_boundary_compression_history_utilization": 0.7698229332345287,
+          "upper_core_compression_history_utilization": 0.7696894148750564,
+          "upper_steel_utilization": 1.0003806423386397
+        }
+      ],
+      "direct_stepwise_comparison_for_this_history_not_repeated": true,
+      "full_geometry_quadrature_convergence_not_yet_proven": true,
+      "inherited_shared_material_direct_comparison_prefix": 42,
+      "inherited_shared_material_monotonicity_validation": true,
+      "monotonic_source_and_runtime_proof": true,
+      "public_book_unchanged": true,
+      "whole_goal_completed": false
+    }
+  },
+  "has_active_followup": true,
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}

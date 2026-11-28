@@ -1,14 +1,14 @@
 {
   "active_jobs": [
     {
-      "kind": "native Mx- regression verification",
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case02",
-      "session_id": 98985
+      "kind": "cold pure T+",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case04",
+      "session_id": 19429
     },
     {
-      "kind": "native Mx+ regression verification",
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case07",
-      "session_id": 17747
+      "kind": "cold pure T-",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case09",
+      "session_id": 67172
     }
   ],
   "benchmark_Hpost1500_only": true,
@@ -30,11 +30,11 @@
     "public_book_unchanged": true,
     "saved_book_sha256": "E60CF098DA03CB5DF59924F279EAD25B897CF1535CFD33F0A1392119F3B6C74F"
   },
-  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryMyN",
+  "evidence": "docs/reports/evidence/Coupled6DQuadrature_2026-11-28/BoundaryMx",
   "full_acceptance_not_run": true,
   "goal_status": "active",
   "next_actions": [
-    "Boundary1252 My+- finished70states each, physicalC compression FAILlambda.69413129738327 (|My|69.413129738kNm). Initial native force/secant upper failed, preserved; central full-force TRF fixed-original-upper lambda.694146168675329 roots pass all60+6forces. Positive residual1.75e-11, negative4.16e-7<original1.38e-6MPa; latter optimizermax60flagFalse preserved. 1255 all305C+320extra5mm boundarypoints x3stations and allsteel/all140fields pass: lowerC.999238720, upperC1.0014, steel<.887. 1254 firstharnessfailed before physics: generic count25 substitution inserted325 and correctly stoppedat11instead8. Fixed new Frozen-TestASDVariablePointContext changes original8 concreteindices before totalpointcount; old225/400 generatedcodebyteexact, originalnegative325guardpreserved. No working physics/tolerances changed. 1252 Ncomp20states,lambda4.93358643127,60.383s; Ntension52states,lambda1.091861841689,110.904s; both native all60+6forces and physicalpeak/upper, statuscontracts passed. Nrelative100pointdiff-.00055%/-.01414%. Overall212 acceptedfields verified forN/My; all3station/densematerialcertificate specificallyMy. Sameprivate269book,4preparationclasses+2tests,263unchanged; public260book/dump unchanged. BothMx+- cold macro runs finished physicalsteel OK, ownExcel closed; independent native verification active98985/17747, pollno restart. Need nativeheader60,325,305; ordinary Replay-TestBoundaryMaterialDirections first, central-force fallback ifneeded; steel-control onlyforkind1. AfterMx regressions proceedT+- (1202cases4/9 needstageinputs into samebook), NMT5 thenQ/NMTQ; actualConfig<=1%steel, CDP, B-spline/quad convergence, fullworkflow10s/source-build-book/native/fullacceptance remain active. No pause, nofullONOFF/hour consent, no mainmerge/publicpromotion yet."
+    "Boundary1252 separateN/Mx/My bothsigns completed physical criteria and strict independent native proof, all339acceptedstates. My concreteC limit |My|69.413129738, upper69.414616868kNm; dense320point5mm all3station history passedC lower.99923872 upper1.0014,steel<.887. Ncomplambda4.93358643127; Ntension1.091861841689. Mx boundaryregression127states, |Mx|118.841268553/118.836516640kNm; changevs225no-boundary<.0041%, all3stations+320extra boundary/fullhistory passedC<.77 andsteelupper>1. Native force/secant/centralTRF strict gates passed; optimizerFlags retained honestly. Sourcebook269,4preparationclasses+2testhelpers,263unchanged; no material/nonlinearforce algorithm change. Full book/source/dump public260 unchanged and not promoted; legacyHpost1500 not approved working default. PureT+- firstcold checks active19429/67172, samebook noVBAchange andsame materials/tolerances/local30global256/1200s watchdog. Cases04/09 inputs prepared from1202, source/operator refs archived. Pollsession or closure, do not restart. For verification header(60,325,305,.001), Replay-TestBoundaryMaterialDirections ordinary first, CentralForce fallback; criterion maysteel(anylong/hoop)orconcrete. Wholematerialcertificate genericbasedonVerify-TestBoundaryMy/MxHistoryEnvelope needsadapttoactualcriterion. NewFrozen-TestASDVariablePointContext fixes325 substring issue before insertingtotal, retainsoriginal8guard andbitexact225/400. NoNumFail/timeout treatedphysicalfailure. NextT thenNM10/NMT5 thenQ thenNMTQ; Configsteel<=1%, CDP, B-spline/integration settings andbasis/geometryconvergence, universal transverse bars, scientificexperiments, source-build-book/output/native/fullworkflow10s andauthorizedfullacceptance remain. No pause/fullONOFF-hour run/main merge."
   ],
   "public_book_and_dump_unchanged": true,
   "report": "docs/reports/Coupled6DQuadrature_2026-11-28.md",

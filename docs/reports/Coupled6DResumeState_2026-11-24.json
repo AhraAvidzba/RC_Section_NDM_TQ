@@ -3797,14 +3797,14 @@
   "active_exec_session": null,
   "active_jobs": [
     {
-      "kind": "native Mx- regression verification",
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case02",
-      "session_id": 98985
+      "kind": "cold pure T+",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case04",
+      "session_id": 19429
     },
     {
-      "kind": "native Mx+ regression verification",
-      "root": "D:/CodexScratch/RC_Section_NDM_TQ/Boundary1252ASDMaterialPoints_20261128/Case07",
-      "session_id": 17747
+      "kind": "cold pure T-",
+      "root": "D:\\CodexScratch\\RC_Section_NDM_TQ\\Boundary1252ASDMaterialPoints_20261128\\Case09",
+      "session_id": 67172
     }
   ],
   "actual_H_derivative748": {
@@ -9527,6 +9527,183 @@
     "whole_goal_completed": false,
     "whole_user10s_not_met": true,
     "zero_weight_boundary_material_points": 80
+  },
+  "boundary_separate_basics_1252_1256": {
+    "DOF": 60,
+    "all127_fields_and_steel_upper_brackets_independently_verified": true,
+    "all339_separate_basic_fields_independently_verified": true,
+    "all3_stations_full_material_history_and320_extra_boundary_points_verified": true,
+    "boundary_material_points": 80,
+    "cases": [
+      {
+        "Mx_kNm": -118.84126855324163,
+        "case": 2,
+        "independent": {
+          "accepted_states": 64,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "Realistic300x500_BendingMx",
+          "compression_utilization": 0.7690446154718754,
+          "final_lambda": 1.1884126855324164,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            -118841268.55324164,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "Realistic300x500_BendingMx",
+            "compression_utilization": 0.7698248470795627,
+            "elapsed_seconds": 69.87244900001679,
+            "fixed_history_states": 64,
+            "function_evaluations": 60,
+            "gauge_residual_MPa": 9.261797058457422e-13,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 6.46697771500282e-05,
+            "lower_lambda": 1.18841268553242,
+            "original_bound_MPa": 2.0097939622926072e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 1.0097200882608088e-08,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 5.0368704689074e-09,
+            "solver": "scipy.optimize.least_squares(method=trf,jac=central_scaled,step=1e-05)",
+            "solver_message": "The maximum number of function evaluations is exceeded.",
+            "solver_success": false,
+            "steel_utilization": 1.0003812623766069,
+            "tension_utilization": 0.0,
+            "upper_lambda": 1.18847735530957,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.0405768614505746,
+          "maximum_moment_error_Nmm": 9.337491929531097,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 1.1884126855324164,
+        "seconds": 340.140625,
+        "states": 64
+      },
+      {
+        "Mx_kNm": 118.83651664031996,
+        "case": 7,
+        "independent": {
+          "accepted_states": 63,
+          "all60_equations_and_six_resultants_verified": true,
+          "case": "Realistic300x500_BendingMxPositive",
+          "compression_utilization": 0.7681730837543062,
+          "final_lambda": 1.1883651664031996,
+          "final_target_resultants_N_Nmm": [
+            0.0,
+            118836516.64031996,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "independent_axial_peak": null,
+          "independent_upper": {
+            "OpenSees_native_constitutive_updates_used": true,
+            "OpenSees_structural_element_not_used": true,
+            "case": "Realistic300x500_BendingMxPositive",
+            "compression_utilization": 0.7696894148474426,
+            "elapsed_seconds": 8.16928370000096,
+            "fixed_history_states": 63,
+            "function_evaluations": 616,
+            "gauge_residual_MPa": 1.0516788636818811e-08,
+            "history_context": "All final admissible states; upper was recomputed after each accepted refinement",
+            "independent_global_section_equilibrium_found": true,
+            "lambda_bracket_width": 0.00013650180258006905,
+            "lower_lambda": 1.1883651664032,
+            "original_bound_MPa": 2.0098248484207612e-06,
+            "physical_criterion_is_explicit_test_input_not_normative_calibration": true,
+            "physical_limit_kind": 1,
+            "physical_residual_MPa": 3.6676457009557e-08,
+            "required": true,
+            "scipy_version": "1.18.1",
+            "six_resultants_residual_MPa": 1.2600220765749307e-08,
+            "solver": "scipy.optimize.root(method=hybr)",
+            "solver_message": "The number of calls to function has reached maxfev = 600.",
+            "solver_success": false,
+            "steel_utilization": 1.0003806423386397,
+            "tension_utilization": 0.0,
+            "upper_lambda": 1.18850166820578,
+            "upper_material_limit_exceeded": true
+          },
+          "maximum_force_error_N": 0.04057686056859211,
+          "maximum_moment_error_Nmm": 9.337487608194351,
+          "status": "OK",
+          "whole_goal_completed": false
+        },
+        "lambda_capacity": 1.1883651664031996,
+        "seconds": 331.658203125,
+        "states": 63
+      }
+    ],
+    "combined_NM_not_repeated_on_this_revision": true,
+    "comparison_without_boundary_points": [
+      {
+        "case": 2,
+        "relative_capacity_difference_percent": 0.0039986976098083105
+      },
+      {
+        "case": 7,
+        "relative_capacity_difference_percent": -0.003998538043903377
+      }
+    ],
+    "concrete_integration_points": 225,
+    "frozen_Hpost1500_benchmark_only": true,
+    "full_user_workflow10s_not_met": true,
+    "material_history": {
+      "boundary_points": 320,
+      "boundary_points_have_zero_equilibrium_weight": true,
+      "cases": [
+        {
+          "accepted_states": 64,
+          "all_concrete_points_all3_stations_whole_history_checked_by_monotonic_maximum": true,
+          "all_endpoint_equations_and_forces_verified": true,
+          "all_steel_points_all3_stations_all_accepted_fields_checked": true,
+          "boundary_compression_history_utilization": 0.7691777013025602,
+          "case": 2,
+          "core_compression_history_utilization": 0.7690446154719881,
+          "maximum_lower_steel_utilization": 0.9994952562362586,
+          "upper_boundary_compression_history_utilization": 0.7699434494349889,
+          "upper_core_compression_history_utilization": 0.7698248470803399,
+          "upper_steel_utilization": 1.0003812623766069
+        },
+        {
+          "accepted_states": 63,
+          "all_concrete_points_all3_stations_whole_history_checked_by_monotonic_maximum": true,
+          "all_endpoint_equations_and_forces_verified": true,
+          "all_steel_points_all3_stations_all_accepted_fields_checked": true,
+          "boundary_compression_history_utilization": 0.768310495354456,
+          "case": 7,
+          "core_compression_history_utilization": 0.7681730837544782,
+          "maximum_lower_steel_utilization": 0.998609885230754,
+          "upper_boundary_compression_history_utilization": 0.7698229332345287,
+          "upper_core_compression_history_utilization": 0.7696894148750564,
+          "upper_steel_utilization": 1.0003806423386397
+        }
+      ],
+      "direct_stepwise_comparison_for_this_history_not_repeated": true,
+      "full_geometry_quadrature_convergence_not_yet_proven": true,
+      "inherited_shared_material_direct_comparison_prefix": 42,
+      "inherited_shared_material_monotonicity_validation": true,
+      "monotonic_source_and_runtime_proof": true,
+      "public_book_unchanged": true,
+      "whole_goal_completed": false
+    },
+    "public_source_build_book_promotion_not_done": true,
+    "separate_N_Mx_My_both_signs_control_fixture_verified": true,
+    "steel_points": 20,
+    "whole_goal_completed": false,
+    "working_Config_materials_not_yet_accepted": true
   },
   "branch": "codex/coupled-6d",
   "clean_ASD_promotion_plan": {
@@ -49683,7 +49860,7 @@
   "ndm_unchanged": true,
   "next_action": "Mx/My initial comparison15e4059 followed by exact frozen/cold budget study:1194 direct61 trust with FD strain1e-8 and local60 budget finds admissible forward root from raw captured field, no externalsolutionseed,24.289s; all nativegates+advance+steel/C limits verified. BUT cold1195 Case02(capacitybudget30)82states286.961s NumFail, correctedCase12(capacityinput60)80states378.414s NumFail; same maxlambda1.0862371835083255, last epsilon0.00632626 for60 vs.00650011 for30. First test had raised analysis.Initialize NDS limit only; separate CapacitySettings.bin fourth entry audited30->60 forCase12. N/My cold controls nativeverified; Myhistorybyteexact1186, Nphysicalbracketsoverlap. No new numerical variant promoted; acceptedprivate1186, publicbook/source/dump unchanged. Original mappedtrust60stillstalls and analyticbranch1196didnotimprove, donotrepeatblindly. Next inspect numerical precision of the true tangent at spectraltransition and first Newton corrections. Native centralJ atstrain1e-9 differs scaledFrobenius2.77e-5 and up6.12%inacolumn; with condition1.58e10 recordedNewtondirection has nativeJlinear defect8.29e-6 vsown7.4e-11. Need localize strain/stress tensor reconstruction and branch selection, not further increasebudgets. Existing modCoupledConcreteTensor has trig roots plusStablePrincipal Jacobi fallback nearrepeatedroots; inspect actual private component before new precisionexperiment; do not assume missingJacobi or derivative uniqueness on nonsmoothpoint. Native13state committed-vs-newzero changes occurbefore/afteryield inbothaxes, no evidence ofVBA-onlytransferbug; do notsubstitutecommittedstress orrestorezero-stepconstitutivebypass. Preservematerialsforcause; workingsteelcontractConfig/oraux<=1% byeachgrade/sign stillpending; horizontalplateaustudydeferred. Full pureVBA sixforce originalscope,reverseMx/T,Q/NMTQ/CDP,source-build-book-dump sync,physical/normative/experimental/mesh/performance/nativeExcelacceptance remains active.",
   "next_actions": [
-    "Boundary1252 My+- finished70states each, physicalC compression FAILlambda.69413129738327 (|My|69.413129738kNm). Initial native force/secant upper failed, preserved; central full-force TRF fixed-original-upper lambda.694146168675329 roots pass all60+6forces. Positive residual1.75e-11, negative4.16e-7<original1.38e-6MPa; latter optimizermax60flagFalse preserved. 1255 all305C+320extra5mm boundarypoints x3stations and allsteel/all140fields pass: lowerC.999238720, upperC1.0014, steel<.887. 1254 firstharnessfailed before physics: generic count25 substitution inserted325 and correctly stoppedat11instead8. Fixed new Frozen-TestASDVariablePointContext changes original8 concreteindices before totalpointcount; old225/400 generatedcodebyteexact, originalnegative325guardpreserved. No working physics/tolerances changed. 1252 Ncomp20states,lambda4.93358643127,60.383s; Ntension52states,lambda1.091861841689,110.904s; both native all60+6forces and physicalpeak/upper, statuscontracts passed. Nrelative100pointdiff-.00055%/-.01414%. Overall212 acceptedfields verified forN/My; all3station/densematerialcertificate specificallyMy. Sameprivate269book,4preparationclasses+2tests,263unchanged; public260book/dump unchanged. BothMx+- cold macro runs finished physicalsteel OK, ownExcel closed; independent native verification active98985/17747, pollno restart. Need nativeheader60,325,305; ordinary Replay-TestBoundaryMaterialDirections first, central-force fallback ifneeded; steel-control onlyforkind1. AfterMx regressions proceedT+- (1202cases4/9 needstageinputs into samebook), NMT5 thenQ/NMTQ; actualConfig<=1%steel, CDP, B-spline/quad convergence, fullworkflow10s/source-build-book/native/fullacceptance remain active. No pause, nofullONOFF/hour consent, no mainmerge/publicpromotion yet."
+    "Boundary1252 separateN/Mx/My bothsigns completed physical criteria and strict independent native proof, all339acceptedstates. My concreteC limit |My|69.413129738, upper69.414616868kNm; dense320point5mm all3station history passedC lower.99923872 upper1.0014,steel<.887. Ncomplambda4.93358643127; Ntension1.091861841689. Mx boundaryregression127states, |Mx|118.841268553/118.836516640kNm; changevs225no-boundary<.0041%, all3stations+320extra boundary/fullhistory passedC<.77 andsteelupper>1. Native force/secant/centralTRF strict gates passed; optimizerFlags retained honestly. Sourcebook269,4preparationclasses+2testhelpers,263unchanged; no material/nonlinearforce algorithm change. Full book/source/dump public260 unchanged and not promoted; legacyHpost1500 not approved working default. PureT+- firstcold checks active19429/67172, samebook noVBAchange andsame materials/tolerances/local30global256/1200s watchdog. Cases04/09 inputs prepared from1202, source/operator refs archived. Pollsession or closure, do not restart. For verification header(60,325,305,.001), Replay-TestBoundaryMaterialDirections ordinary first, CentralForce fallback; criterion maysteel(anylong/hoop)orconcrete. Wholematerialcertificate genericbasedonVerify-TestBoundaryMy/MxHistoryEnvelope needsadapttoactualcriterion. NewFrozen-TestASDVariablePointContext fixes325 substring issue before insertingtotal, retainsoriginal8guard andbitexact225/400. NoNumFail/timeout treatedphysicalfailure. NextT thenNM10/NMT5 thenQ thenNMTQ; Configsteel<=1%, CDP, B-spline/integration settings andbasis/geometryconvergence, universal transverse bars, scientificexperiments, source-build-book/output/native/fullworkflow10s andauthorizedfullacceptance remain. No pause/fullONOFF-hour run/main merge."
   ],
   "next_solver_integration": {
     "action": "Try original saved projection/target from auxiliary root only as initialField, on unchanged accepted history; keep same material and final physical/force/gauge checks.",
