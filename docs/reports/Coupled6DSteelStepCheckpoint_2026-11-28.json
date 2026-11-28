@@ -1,0 +1,55 @@
+{
+  "all18_native_workers_exited": true,
+  "all_native_final_payloads_SHA256_verified": true,
+  "archives": {
+    "Cold": {
+      "archive_bytes": 17480887,
+      "archive_sha256": "9AAEF7E5EC14C5C1F954B4AD4CDF6BA6B24EA6841AF25762F02B91E9EDF673C8",
+      "files": 1238,
+      "new_payloads": 77
+    },
+    "Frozen": {
+      "archive_bytes": 15843670,
+      "archive_sha256": "73572639A7F9677EB98DE24573B3B1C74CB878D0BD338D4228B9EF08C9CEC7AE",
+      "files": 561,
+      "new_payloads": 76
+    }
+  },
+  "cold1220_states_independently_verified": 346,
+  "full_acceptance_not_run": true,
+  "goal_remains_active": true,
+  "local1221_solved": 0,
+  "local1221_trials": 6,
+  "negative_history_byteexact1219": true,
+  "positive_cold_capacity_not_confirmed": true,
+  "public_book_and_dump_SHA256": {
+    "workbook/output/RC_Section_NDM.xlsm": "1E6443C2CFDD0058FE5EA559D1D45A8E94CC5199A3ADE69149A06CD4265D8559",
+    "workbook/output/VBA_All_Code.txt": "00A1EA20420C1D01CFADB2CB9C090C1D5FC2F00239109987C0DCD5FBF63827A2"
+  },
+  "public_source_unchanged": true,
+  "resource_guards_before_each_worker_passed": true,
+  "rotation1223": {
+    "OpenSees_native_constitutive_materials_not_structural_solid_elements": true,
+    "all179_mirrored_admissible_states_verified": true,
+    "all180_full_material_checks_retained": true,
+    "cold_positive_capacity_search_not_fixed": true,
+    "diagnostic_uses_known_negative_branch": true,
+    "elapsed_seconds": 164.44888740003807,
+    "exact_equations_checked": 60,
+    "lower_Mx_kNm": 109.79794221153671,
+    "lower_lambda": 1.0979794221153654,
+    "maximum_rotated_strain_error": 8.326672684688674e-17,
+    "maximum_rotated_stress_error_MPa": 9.50350909079134e-12,
+    "not_a_universal_geometry_recovery_algorithm": true,
+    "operator_covariance_error": 4.718447854656915e-15,
+    "public_book_unchanged": true,
+    "sequential_native_workers": 18,
+    "six_resultants_checked": true,
+    "transform_rank": 56,
+    "upper_Mx_kNm": 109.80194709841767,
+    "upper_lambda": 1.09801947098419,
+    "upper_mirrored_steel_limit_exceeded": true,
+    "whole_goal_completed": false
+  },
+  "whole_goal_completed": false
+}

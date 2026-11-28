@@ -1,0 +1,169 @@
+{
+  "all_selected_workers_terminal": true,
+  "cases": {
+    "Cold1221ASDSteelStepFrozen_20261128": {
+      "Native/SteelStepFrozenProof.json": {
+        "all60_equations_and_six_resultants_checked": true,
+        "all_solved_candidates_independently_verified": true,
+        "cases": [
+          {
+            "VBA_solved": false,
+            "case": 1,
+            "coordinate_before": 0.013081339367998815,
+            "finite_step": false,
+            "increment": 3.628333242720177e-08,
+            "iterations": 30,
+            "lambda_value": 1.0527301709752455,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 1.4391561276028142e-09,
+            "measure": "single_26_minus1",
+            "native_errors_MPa": [
+              2.8610987513829993e-06,
+              2.642742795433417e-15,
+              2.7059274130927726e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.8373461841413778e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.256666485440354e-08,
+            "seconds": 6.9541015625,
+            "start": "ordinary_secant"
+          },
+          {
+            "VBA_solved": false,
+            "case": 2,
+            "coordinate_before": 0.013081339367998815,
+            "finite_step": true,
+            "increment": 5.109898190624537e-05,
+            "iterations": 30,
+            "lambda_value": 1.0524398869577334,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 4.275472143108256e-09,
+            "measure": "single_26_minus1",
+            "native_errors_MPa": [
+              0.06518609714662556,
+              1.1099519740820352e-12,
+              0.0016197456919444094,
+              5.204170427930421e-14
+            ],
+            "original_bound_MPa": 1.8369774189688384e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.256666485440354e-08,
+            "seconds": 7.5673828125,
+            "start": "ordinary_secant"
+          },
+          {
+            "VBA_solved": false,
+            "case": 3,
+            "coordinate_before": 0.013081339367998815,
+            "finite_step": true,
+            "increment": 5.109898190624537e-05,
+            "iterations": 30,
+            "lambda_value": 1.0527303772407153,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 1.0916949774730789e-09,
+            "measure": "single_26_minus1",
+            "native_errors_MPa": [
+              1.728784484672875e-06,
+              1.6263032587282567e-15,
+              1.6813427176651993e-06,
+              1.5329694571873491
+            ],
+            "original_bound_MPa": 1.8373464461727573e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.256666485440354e-08,
+            "seconds": 9.4248046875,
+            "start": "accepted"
+          },
+          {
+            "VBA_solved": false,
+            "case": 4,
+            "coordinate_before": 0.013081256824241043,
+            "finite_step": false,
+            "increment": 3.6323061178011495e-08,
+            "iterations": 30,
+            "lambda_value": 1.0527301709752455,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 1.4391561276028142e-09,
+            "measure": "averaged_plastically_loading",
+            "native_errors_MPa": [
+              2.8610987513829993e-06,
+              2.642742795433417e-15,
+              2.7059274130927726e-06,
+              0.0
+            ],
+            "original_bound_MPa": 1.8373461841413778e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.264612235602299e-08,
+            "seconds": 6.69921875,
+            "start": "ordinary_secant"
+          },
+          {
+            "VBA_solved": false,
+            "case": 5,
+            "coordinate_before": 0.013081256824241043,
+            "finite_step": true,
+            "increment": 5.1098659469691574e-05,
+            "iterations": 30,
+            "lambda_value": 1.0524402065157006,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 4.263310910352761e-09,
+            "measure": "averaged_plastically_loading",
+            "native_errors_MPa": [
+              0.06509400483949228,
+              1.1081223829159659e-12,
+              0.0016179633612920356,
+              0.0
+            ],
+            "original_bound_MPa": 1.8369778249224625e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.264612235602299e-08,
+            "seconds": 7.591796875,
+            "start": "ordinary_secant"
+          },
+          {
+            "VBA_solved": false,
+            "case": 6,
+            "coordinate_before": 0.013081256824241043,
+            "finite_step": true,
+            "increment": 5.1098659469691574e-05,
+            "iterations": 30,
+            "lambda_value": 1.0527303772407153,
+            "material_usage": null,
+            "maximum_native_stress_difference_MPa": 1.0916949774730789e-09,
+            "measure": "averaged_plastically_loading",
+            "native_errors_MPa": [
+              1.728784484672875e-06,
+              1.6263032587282567e-15,
+              1.6813427176651993e-06,
+              1.5329597840907545
+            ],
+            "original_bound_MPa": 1.8373464461727573e-06,
+            "physical_capacity_confirmed": false,
+            "physical_field_secant_dot": null,
+            "previous_spacing": 7.264612235602299e-08,
+            "seconds": 10.23828125,
+            "start": "accepted"
+          }
+        ],
+        "collective_measure_is_numerical_not_new_constitutive_law": true,
+        "original167_history_and30_local_budget": true,
+        "physical_capacity_confirmed": false,
+        "selected_plastic_stations": 6,
+        "whole_goal_completed": false
+      },
+      "actual_components": 269,
+      "all_selected_workers_terminal": true,
+      "checked_cases": [],
+      "physical_capacity_not_implied_by_execution": true,
+      "saved_book_sha256": "F5FBC3956CA06A6AD40CD97D1C3BE0ACF2E605DE82A04538A9BDC0DC2F5B801F"
+    }
+  },
+  "public_book_unchanged": true,
+  "whole_goal_completed": false
+}
